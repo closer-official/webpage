@@ -1,0 +1,154 @@
+/** ページコンテンツ（見出し・本文ブロックの配列） */
+export interface PageSection {
+  id: string;
+  title: string;
+  content: string;
+}
+
+/** ページ全体のデータ */
+export interface PageContent {
+  siteName: string;
+  title: string;
+  headline: string;
+  subheadline: string;
+  sections: PageSection[];
+  footerText: string;
+}
+
+/** SEO用データ */
+export interface SEOData {
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string;
+  ogImageUrl: string;
+  canonicalUrl: string;
+}
+
+/** 業界カテゴリ */
+export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
+
+/** デザインスタイル */
+export type StyleId = 'minimal' | 'corporate' | 'warm' | 'bold' | 'elegant' | 'modern';
+
+/** テンプレート定義（業界×スタイルの組み合わせでCSS・雰囲気を決定） */
+export interface TemplateOption {
+  id: string;
+  industryId: IndustryId;
+  styleId: StyleId;
+  name: string;
+  description: string;
+  css: string; // そのテンプレート用のCSS
+}
+
+export const INDUSTRIES: { id: IndustryId; name: string }[] = [
+  { id: 'general', name: '一般・その他' },
+  { id: 'restaurant', name: '飲食店' },
+  { id: 'medical', name: '医療・クリニック' },
+  { id: 'salon', name: 'サロン・美容' },
+  { id: 'tech', name: 'IT・テック' },
+  { id: 'realestate', name: '不動産' },
+  { id: 'education', name: '教育' },
+  { id: 'retail', name: '小売・EC' },
+];
+
+export const STYLES: { id: StyleId; name: string }[] = [
+  { id: 'minimal', name: 'ミニマル' },
+  { id: 'corporate', name: 'コーポレート' },
+  { id: 'warm', name: '温かみ' },
+  { id: 'bold', name: '大胆・インパクト' },
+  { id: 'elegant', name: 'エレガント' },
+  { id: 'modern', name: 'モダン' },
+];
+
+// --- ターゲット収集・キュー・検閲用 ---
+
+export type TargetSource = 'google_maps' | 'manual';
+
+/** 実在確認用シグナル（Google Maps 由来の項目） */
+export interface VerificationSignals {
+  placeId: string | null;
+  mapsUrl: string | null;
+  rating: number | null;
+  userRatingsTotal: number | null;
+  hasOpeningHours: boolean;
+  hasPhoto: boolean;
+  /** 信頼度の目安: レビュー数などから「要確認」を出す */
+  needsVerification: boolean;
+}
+
+/** キューに入っているターゲット（Webサイトなしの店舗候補） */
+export interface QueueTarget {
+  id: string;
+  source: TargetSource;
+  name: string;
+  address: string;
+  /** Google Place ID（手動の場合は null） */
+  placeId: string | null;
+  /** 手動追加時のメモ（Instagram URL など） */
+  notes: string;
+  /** 収集時のシグナル（手動の場合は空に近い） */
+  signals: VerificationSignals;
+  /** 業種・カテゴリ（Maps の types や手動入力） */
+  category: string;
+  createdAt: string; // ISO
+}
+
+/** 調査済みデータ（AIは使わず、Maps取得＋手動入力） */
+export interface ResearchedShop {
+  queueId: string;
+  name: string;
+  address: string;
+  concept: string;
+  strengths: string;
+  /** テンプレートの styleId をそのままイメージカラーとして使用 */
+  imageColorStyleId: StyleId;
+  category: string;
+  notes: string;
+  signals: VerificationSignals;
+}
+
+/** 検閲ダッシュボード用の1件（調査済み＋LP生成済み） */
+export interface DashboardItem {
+  id: string;
+  researched: ResearchedShop;
+  content: PageContent;
+  seo: SEOData;
+  templateId: string;
+  /** DM文面（手動入力または後でAIで生成する用のプレースホルダ） */
+  dmBody: string;
+  status: 'pending' | 'approved' | 'rejected' | 'email_sent';
+  createdAt: string;
+}
+
+/** AI利用上限（将来AI組み込み時に、上限に達したら処理を止める用） */
+export interface AIBudgetSettings {
+  /** 月額上限（円）。0 は「上限なし」 */
+  monthlyLimitYen: number;
+  /** 今月の利用額（円）。現状AI未使用のため常に0。将来サーバー側で集計する想定 */
+  spentThisMonth: number;
+  /** 集計対象の月 YYYY-MM */
+  monthKey: string;
+}
+
+/** 生成オプション（フルオート用・スイッチでオンオフ） */
+export interface GenerationOptions {
+  /** 多言語対応 */
+  multiLanguage: boolean;
+  /** 問い合わせフォームを設置 */
+  contactForm: boolean;
+  /** Instagram・LINE などのリンクを埋め込む */
+  instagramLine: boolean;
+  /** 「Presented by」表記を表示 */
+  presentedBy: boolean;
+  /** QRコードを発行して掲載 */
+  qrCode: boolean;
+}
+
+/** ダッシュボード1件（API返却・3案入り） */
+export interface DashboardItemWithVariants extends Omit<DashboardItem, 'content' | 'seo' | 'templateId'> {
+  content: PageContent;
+  seo: SEOData;
+  templateId: string;
+  /** 上位3テンプレの完成HTML */
+  contentVariants?: { templateId: string; html: string }[];
+}

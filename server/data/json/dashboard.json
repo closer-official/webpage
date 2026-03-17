@@ -1,0 +1,83 @@
+[
+  {
+    "id": "d-1773704270619-5kydhlo",
+    "researched": {
+      "queueId": "q-1773704022148-f4a59fx",
+      "name": "ベッカライ・ブロートツァイト",
+      "address": "日本、〒305-0005 茨城県つくば市天久保２丁目１０−２０",
+      "concept": "2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。",
+      "strengths": "高品質で個性的なパンの種類の豊富さ（チャバタ、全粒粉100%パン、カシューナッツと塩漬けコショウなど）\n特にサンドイッチは具材の美味しさ、ボリューム、食感が非常に高く評価されている\nつくば屈指の人気店であり、昼時には売り切れ必至の希少性\nスタッフによる親切なパンの説明\nパンだけでなく、野菜や飲み物も販売している",
+      "imageColorStyleId": "modern",
+      "category": "bakery",
+      "notes": "",
+      "signals": {
+        "placeId": "ChIJieGW3nIMImARph5_DOJqCZ4",
+        "mapsUrl": "https://www.google.com/maps/place/?q=place_id:ChIJieGW3nIMImARph5_DOJqCZ4",
+        "rating": 4.3,
+        "userRatingsTotal": 405,
+        "hasOpeningHours": true,
+        "hasPhoto": true,
+        "needsVerification": false
+      }
+    },
+    "content": {
+      "siteName": "ベッカライ・ブロートツァイト",
+      "title": "ベッカライ・ブロートツァイト",
+      "headline": "ベッカライ・ブロートツァイト",
+      "subheadline": "2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。",
+      "sections": [
+        {
+          "id": "concept",
+          "title": "コンセプト",
+          "content": "2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。"
+        },
+        {
+          "id": "strengths",
+          "title": "私たちの強み",
+          "content": "高品質で個性的なパンの種類の豊富さ（チャバタ、全粒粉100%パン、カシューナッツと塩漬けコショウなど）\n特にサンドイッチは具材の美味しさ、ボリューム、食感が非常に高く評価されている\nつくば屈指の人気店であり、昼時には売り切れ必至の希少性\nスタッフによる親切なパンの説明\nパンだけでなく、野菜や飲み物も販売している"
+        },
+        {
+          "id": "atmosphere",
+          "title": "雰囲気",
+          "content": "活気があり人気が高く、早めの来店が推奨される本格的なドイツパン専門店です。"
+        },
+        {
+          "id": "target",
+          "title": "お客様",
+          "content": "健康志向で素材にこだわる人、ハード系やドイツパンを好む人、食事パンやサンドイッチを求める幅広い層、そして遠方からも足を運ぶ価値を見出す美食家。"
+        },
+        {
+          "id": "access",
+          "title": "アクセス",
+          "content": "日本、〒305-0005 茨城県つくば市天久保２丁目１０−２０"
+        }
+      ],
+      "footerText": "© 2026 ベッカライ・ブロートツァイト. All rights reserved."
+    },
+    "seo": {
+      "metaTitle": "ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト",
+      "metaDescription": "2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。",
+      "keywords": "ベッカライ・ブロートツァイト, ベッカライ・ブロートツァイト",
+      "ogImageUrl": "",
+      "canonicalUrl": ""
+    },
+    "templateId": "modern",
+    "contentVariants": [
+      {
+        "templateId": "modern",
+        "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト</title>\n    <meta name=\"description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <meta name=\"keywords\" content=\"ベッカライ・ブロートツァイト, ベッカライ・ブロートツァイト\">\n    <meta property=\"og:type\" content=\"website\">\n    <meta property=\"og:title\" content=\"ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト\">\n    <meta property=\"og:description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <style>\n  .page-wrapper.template-modern {   --tp-font: \"Inter\", sans-serif;\n  --tp-text: #334155;\n  --tp-heading: #0f172a;\n  --tp-bg: linear-gradient(180deg, #f0f9ff 0%, #fff 60%);\n  --tp-border: #e2e8f0;\n  --tp-accent: #0ea5e9; }\n  .page-wrapper { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--tp-font); color: var(--tp-text); background: var(--tp-bg); line-height: 1.7; }\n  .page-wrapper * { box-sizing: border-box; }\n  .page-wrapper .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }\n  .page-wrapper header { padding: 24px 0; border-bottom: 1px solid var(--tp-border); }\n  .page-wrapper .logo { font-size: 1.25rem; font-weight: 700; color: var(--tp-heading); text-decoration: none; }\n  .page-wrapper .hero { padding: 64px 0; text-align: center; }\n  .page-wrapper .hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .hero .subheadline { font-size: 1.125rem; opacity: 0.9; }\n  .page-wrapper main { padding: 48px 0 64px; }\n  .page-wrapper .section { margin-bottom: 48px; }\n  .page-wrapper .section h2 { font-size: 1.5rem; font-weight: 600; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .section p { margin: 0 0 12px; }\n  .page-wrapper footer { padding: 32px 0; border-top: 1px solid var(--tp-border); text-align: center; font-size: 0.875rem; opacity: 0.8; }\n  .page-wrapper .sns-links { margin-top: 24px; }\n  .page-wrapper .sns-links a { margin-right: 12px; color: var(--tp-accent); }\n  .page-wrapper .presented-by { font-size: 0.75rem; opacity: 0.7; margin-top: 8px; }\n  .page-wrapper .qr-block { margin-top: 24px; text-align: center; }\n  .page-wrapper .qr-block img { max-width: 120px; }\n</style>\n</head>\n<body class=\"page-wrapper template-modern\">\n  <header>\n    <div class=\"container\">\n      <a href=\"#\" class=\"logo\">ベッカライ・ブロートツァイト</a>\n    </div>\n  </header>\n  <main>\n    <section class=\"hero\">\n      <div class=\"container\">\n        <h1>ベッカライ・ブロートツァイト</h1>\n        <p class=\"subheadline\">2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n      </div>\n    </section>\n    <div class=\"container\">\n    <section class=\"section\" aria-labelledby=\"concept-title\">\n      <h2 id=\"concept-title\">コンセプト</h2>\n      <p>2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"strengths-title\">\n      <h2 id=\"strengths-title\">私たちの強み</h2>\n      <p>高品質で個性的なパンの種類の豊富さ（チャバタ、全粒粉100%パン、カシューナッツと塩漬けコショウなど）<br>特にサンドイッチは具材の美味しさ、ボリューム、食感が非常に高く評価されている<br>つくば屈指の人気店であり、昼時には売り切れ必至の希少性<br>スタッフによる親切なパンの説明<br>パンだけでなく、野菜や飲み物も販売している</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"atmosphere-title\">\n      <h2 id=\"atmosphere-title\">雰囲気</h2>\n      <p>活気があり人気が高く、早めの来店が推奨される本格的なドイツパン専門店です。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"target-title\">\n      <h2 id=\"target-title\">お客様</h2>\n      <p>健康志向で素材にこだわる人、ハード系やドイツパンを好む人、食事パンやサンドイッチを求める幅広い層、そして遠方からも足を運ぶ価値を見出す美食家。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"access-title\">\n      <h2 id=\"access-title\">アクセス</h2>\n      <p>日本、〒305-0005 茨城県つくば市天久保２丁目１０−２０</p>\n    </section>\n\n    </div>\n  </main>\n  <footer>\n    <div class=\"container\">\n      © 2026 ベッカライ・ブロートツァイト. All rights reserved.\n      <p class=\"presented-by\">Presented by ウェブページ作成ツール</p>\n    </div>\n  </footer>\n</body>\n</html>"
+      },
+      {
+        "templateId": "minimal",
+        "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト</title>\n    <meta name=\"description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <meta name=\"keywords\" content=\"ベッカライ・ブロートツァイト, ベッカライ・ブロートツァイト\">\n    <meta property=\"og:type\" content=\"website\">\n    <meta property=\"og:title\" content=\"ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト\">\n    <meta property=\"og:description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <style>\n  .page-wrapper.template-minimal {   --tp-font: \"Helvetica Neue\", Arial, sans-serif;\n  --tp-text: #333;\n  --tp-heading: #111;\n  --tp-bg: #fff;\n  --tp-border: #eee;\n  --tp-accent: #333; }\n  .page-wrapper { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--tp-font); color: var(--tp-text); background: var(--tp-bg); line-height: 1.7; }\n  .page-wrapper * { box-sizing: border-box; }\n  .page-wrapper .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }\n  .page-wrapper header { padding: 24px 0; border-bottom: 1px solid var(--tp-border); }\n  .page-wrapper .logo { font-size: 1.25rem; font-weight: 700; color: var(--tp-heading); text-decoration: none; }\n  .page-wrapper .hero { padding: 64px 0; text-align: center; }\n  .page-wrapper .hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .hero .subheadline { font-size: 1.125rem; opacity: 0.9; }\n  .page-wrapper main { padding: 48px 0 64px; }\n  .page-wrapper .section { margin-bottom: 48px; }\n  .page-wrapper .section h2 { font-size: 1.5rem; font-weight: 600; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .section p { margin: 0 0 12px; }\n  .page-wrapper footer { padding: 32px 0; border-top: 1px solid var(--tp-border); text-align: center; font-size: 0.875rem; opacity: 0.8; }\n  .page-wrapper .sns-links { margin-top: 24px; }\n  .page-wrapper .sns-links a { margin-right: 12px; color: var(--tp-accent); }\n  .page-wrapper .presented-by { font-size: 0.75rem; opacity: 0.7; margin-top: 8px; }\n  .page-wrapper .qr-block { margin-top: 24px; text-align: center; }\n  .page-wrapper .qr-block img { max-width: 120px; }\n</style>\n</head>\n<body class=\"page-wrapper template-minimal\">\n  <header>\n    <div class=\"container\">\n      <a href=\"#\" class=\"logo\">ベッカライ・ブロートツァイト</a>\n    </div>\n  </header>\n  <main>\n    <section class=\"hero\">\n      <div class=\"container\">\n        <h1>ベッカライ・ブロートツァイト</h1>\n        <p class=\"subheadline\">2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n      </div>\n    </section>\n    <div class=\"container\">\n    <section class=\"section\" aria-labelledby=\"concept-title\">\n      <h2 id=\"concept-title\">コンセプト</h2>\n      <p>2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"strengths-title\">\n      <h2 id=\"strengths-title\">私たちの強み</h2>\n      <p>高品質で個性的なパンの種類の豊富さ（チャバタ、全粒粉100%パン、カシューナッツと塩漬けコショウなど）<br>特にサンドイッチは具材の美味しさ、ボリューム、食感が非常に高く評価されている<br>つくば屈指の人気店であり、昼時には売り切れ必至の希少性<br>スタッフによる親切なパンの説明<br>パンだけでなく、野菜や飲み物も販売している</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"atmosphere-title\">\n      <h2 id=\"atmosphere-title\">雰囲気</h2>\n      <p>活気があり人気が高く、早めの来店が推奨される本格的なドイツパン専門店です。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"target-title\">\n      <h2 id=\"target-title\">お客様</h2>\n      <p>健康志向で素材にこだわる人、ハード系やドイツパンを好む人、食事パンやサンドイッチを求める幅広い層、そして遠方からも足を運ぶ価値を見出す美食家。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"access-title\">\n      <h2 id=\"access-title\">アクセス</h2>\n      <p>日本、〒305-0005 茨城県つくば市天久保２丁目１０−２０</p>\n    </section>\n\n    </div>\n  </main>\n  <footer>\n    <div class=\"container\">\n      © 2026 ベッカライ・ブロートツァイト. All rights reserved.\n      <p class=\"presented-by\">Presented by ウェブページ作成ツール</p>\n    </div>\n  </footer>\n</body>\n</html>"
+      },
+      {
+        "templateId": "bold",
+        "html": "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト</title>\n    <meta name=\"description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <meta name=\"keywords\" content=\"ベッカライ・ブロートツァイト, ベッカライ・ブロートツァイト\">\n    <meta property=\"og:type\" content=\"website\">\n    <meta property=\"og:title\" content=\"ベッカライ・ブロートツァイト | ベッカライ・ブロートツァイト\">\n    <meta property=\"og:description\" content=\"2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。 2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。\">\n    <style>\n  .page-wrapper.template-bold {   --tp-font: \"Noto Sans JP\", sans-serif;\n  --tp-text: #e5e5e5;\n  --tp-heading: #fff;\n  --tp-bg: #0f0f0f;\n  --tp-border: #333;\n  --tp-accent: #facc15; }\n  .page-wrapper { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--tp-font); color: var(--tp-text); background: var(--tp-bg); line-height: 1.7; }\n  .page-wrapper * { box-sizing: border-box; }\n  .page-wrapper .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }\n  .page-wrapper header { padding: 24px 0; border-bottom: 1px solid var(--tp-border); }\n  .page-wrapper .logo { font-size: 1.25rem; font-weight: 700; color: var(--tp-heading); text-decoration: none; }\n  .page-wrapper .hero { padding: 64px 0; text-align: center; }\n  .page-wrapper .hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .hero .subheadline { font-size: 1.125rem; opacity: 0.9; }\n  .page-wrapper main { padding: 48px 0 64px; }\n  .page-wrapper .section { margin-bottom: 48px; }\n  .page-wrapper .section h2 { font-size: 1.5rem; font-weight: 600; color: var(--tp-heading); margin: 0 0 16px; }\n  .page-wrapper .section p { margin: 0 0 12px; }\n  .page-wrapper footer { padding: 32px 0; border-top: 1px solid var(--tp-border); text-align: center; font-size: 0.875rem; opacity: 0.8; }\n  .page-wrapper .sns-links { margin-top: 24px; }\n  .page-wrapper .sns-links a { margin-right: 12px; color: var(--tp-accent); }\n  .page-wrapper .presented-by { font-size: 0.75rem; opacity: 0.7; margin-top: 8px; }\n  .page-wrapper .qr-block { margin-top: 24px; text-align: center; }\n  .page-wrapper .qr-block img { max-width: 120px; }\n</style>\n</head>\n<body class=\"page-wrapper template-bold\">\n  <header>\n    <div class=\"container\">\n      <a href=\"#\" class=\"logo\">ベッカライ・ブロートツァイト</a>\n    </div>\n  </header>\n  <main>\n    <section class=\"hero\">\n      <div class=\"container\">\n        <h1>ベッカライ・ブロートツァイト</h1>\n        <p class=\"subheadline\">2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n      </div>\n    </section>\n    <div class=\"container\">\n    <section class=\"section\" aria-labelledby=\"concept-title\">\n      <h2 id=\"concept-title\">コンセプト</h2>\n      <p>2006年創業のドイツパン専門店として、お食事系のパンを中心に、質の高い素材と具材の組み合わせを重視した本格的なパンを提供しています。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"strengths-title\">\n      <h2 id=\"strengths-title\">私たちの強み</h2>\n      <p>高品質で個性的なパンの種類の豊富さ（チャバタ、全粒粉100%パン、カシューナッツと塩漬けコショウなど）<br>特にサンドイッチは具材の美味しさ、ボリューム、食感が非常に高く評価されている<br>つくば屈指の人気店であり、昼時には売り切れ必至の希少性<br>スタッフによる親切なパンの説明<br>パンだけでなく、野菜や飲み物も販売している</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"atmosphere-title\">\n      <h2 id=\"atmosphere-title\">雰囲気</h2>\n      <p>活気があり人気が高く、早めの来店が推奨される本格的なドイツパン専門店です。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"target-title\">\n      <h2 id=\"target-title\">お客様</h2>\n      <p>健康志向で素材にこだわる人、ハード系やドイツパンを好む人、食事パンやサンドイッチを求める幅広い層、そして遠方からも足を運ぶ価値を見出す美食家。</p>\n    </section>\n    <section class=\"section\" aria-labelledby=\"access-title\">\n      <h2 id=\"access-title\">アクセス</h2>\n      <p>日本、〒305-0005 茨城県つくば市天久保２丁目１０−２０</p>\n    </section>\n\n    </div>\n  </main>\n  <footer>\n    <div class=\"container\">\n      © 2026 ベッカライ・ブロートツァイト. All rights reserved.\n      <p class=\"presented-by\">Presented by ウェブページ作成ツール</p>\n    </div>\n  </footer>\n</body>\n</html>"
+      }
+    ],
+    "dmBody": "ベッカライ・ブロートツァイトです。\n質の高い素材と具材にこだわるドイツパン専門店として、チャバタや全粒粉パンなど本格的な食事パンを豊富にご用意しております。\n\n特に人気のサンドイッチは、具材の美味しさ、ボリューム、食感全てが自慢。つくば屈指の人気を誇り、昼時には売り切れ必至です。\n\nパンだけでなく新鮮な野菜や飲み物も販売中。ぜひ一度、こだわりの味をご賞味ください。皆様のご来店を心よりお待ちしております。",
+    "status": "pending",
+    "createdAt": "2026-03-16T23:37:50.619Z"
+  }
+]
