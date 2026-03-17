@@ -40,11 +40,12 @@ function buildCss(templateId) {
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
  * templateId: minimal | corporate | warm | bold | elegant | modern
- * genOptions: { contactForm, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl? }
+ * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
   const {
     contactForm = false,
+    formActionUrl = '',
     instagramLine = true,
     presentedBy = true,
     qrCode = false,
@@ -86,10 +87,11 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     </section>`;
   }
   if (contactForm) {
+    const formAction = formActionUrl.trim() || '#';
     extraSections += `
     <section class="section">
       <h2>お問い合わせ</h2>
-      <form action="#" method="post">
+      <form action="${escapeHtml(formAction)}" method="post">
         <p><label>お名前 <input type="text" name="name" required></label></p>
         <p><label>メール <input type="email" name="email" required></label></p>
         <p><label>内容 <textarea name="body" rows="4"></textarea></label></p>

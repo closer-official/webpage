@@ -603,12 +603,21 @@ button.danger:hover { background: #fee2e2; }
 .option-list { list-style: none; padding: 0; margin: 0; }
 .option-item {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #e2e8f0;
 }
 .option-label { flex: 1; }
+.option-url {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 8px;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider {

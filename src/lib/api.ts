@@ -7,6 +7,8 @@ const BASE =
 export type GenerationOptions = {
   multiLanguage: boolean;
   contactForm: boolean;
+  formActionUrl?: string;
+  qrCodeTargetUrl?: string;
   instagramLine: boolean;
   presentedBy: boolean;
   qrCode: boolean;

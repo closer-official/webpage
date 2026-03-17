@@ -95,6 +95,22 @@ export function GenerationOptions() {
             />
             <span className="slider" />
           </label>
+          {opts.contactForm && (
+            <input
+              type="url"
+              className="option-url"
+              placeholder="フォーム送信先URL（未入力は #）"
+              value={opts.formActionUrl ?? ''}
+              onChange={(e) => {
+                const next = { ...opts, formActionUrl: e.target.value };
+                setOpts(next);
+                if (isApiAvailable()) {
+                  setSaving(true);
+                  api.setOptions(next).then(() => setSaving(false)).catch(() => setSaving(false));
+                }
+              }}
+            />
+          )}
         </li>
         <li className="option-item">
           <span className="option-label">Instagram・LINE などのリンクを埋め込む</span>
@@ -128,6 +144,22 @@ export function GenerationOptions() {
             />
             <span className="slider" />
           </label>
+          {opts.qrCode && (
+            <input
+              type="url"
+              className="option-url"
+              placeholder="QRに載せるURL（未入力なら非表示）"
+              value={opts.qrCodeTargetUrl ?? ''}
+              onChange={(e) => {
+                const next = { ...opts, qrCodeTargetUrl: e.target.value };
+                setOpts(next);
+                if (isApiAvailable()) {
+                  setSaving(true);
+                  api.setOptions(next).then(() => setSaving(false)).catch(() => setSaving(false));
+                }
+              }}
+            />
+          )}
         </li>
       </ul>
     </div>

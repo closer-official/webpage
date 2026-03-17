@@ -20,6 +20,13 @@ async function setProgress(phase, current, total) {
 export async function runLearningJob(industry, maxResults) {
   const job = await store.getLearningJob();
   if (job.status === 'running') return;
+  if (!process.env.GOOGLE_MAPS_API_KEY) {
+    job.status = 'failed';
+    job.error = 'GOOGLE_MAPS_API_KEY が設定されていません。Vercel の環境変数にサーバー用の Google Maps API キーを追加してください。';
+    job.completedAt = new Date().toISOString();
+    await store.setLearningJob(job);
+    return;
+  }
   job.status = 'running';
   job.industry = industry;
   job.maxResults = maxResults;

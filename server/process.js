@@ -1,6 +1,7 @@
 import { analyzePlace, generateDmBody } from './gemini.js';
 import { CONCEPT_TEMPLATES } from './conceptTemplates.js';
 import { buildHtml } from './buildHtml.js';
+import QRCode from 'qrcode';
 
 function makeId() {
   return `d-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -52,12 +53,26 @@ export async function processOne(queueItem, genOptions) {
   const conceptId = analysis.conceptId || 'general';
   const templateIds = CONCEPT_TEMPLATES[conceptId] || CONCEPT_TEMPLATES.general;
   const top3 = templateIds.slice(0, 3);
+
+  let qrCodeDataUrl = '';
+  if (genOptions.qrCode) {
+    const urlToEncode = seo.canonicalUrl || genOptions.qrCodeTargetUrl || '';
+    if (urlToEncode) {
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(urlToEncode, { width: 120, margin: 1 });
+      } catch (_) {
+        qrCodeDataUrl = '';
+      }
+    }
+  }
+
   const contentVariants = top3.map((templateId) => ({
     templateId,
     html: buildHtml(content, seo, templateId, {
       ...genOptions,
       instagramUrl: queueItem.instagramUrl || '',
       lineUrl: queueItem.lineUrl || '',
+      qrCodeDataUrl,
     }),
   }));
 

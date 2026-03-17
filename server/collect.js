@@ -20,7 +20,11 @@ export async function collectPlaces(query, options = {}) {
     const searchRes = await fetch(url);
     const searchData = await searchRes.json();
     if (searchData.status !== 'OK' && searchData.status !== 'ZERO_RESULTS') {
-      throw new Error(searchData.error_message || searchData.status);
+      const msg = searchData.error_message || searchData.status;
+      const hint = (searchData.status === 'INVALID_REQUEST' || searchData.status === 'REQUEST_DENIED')
+        ? ' APIキー・請求の有効化・Places API（Text Search）の有効化を確認してください。'
+        : '';
+      throw new Error(`Google Maps API: ${msg}${hint}`);
     }
     const pageResults = searchData.results || [];
     allResults = allResults.concat(pageResults);

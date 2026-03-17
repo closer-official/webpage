@@ -15,7 +15,7 @@ function getDefault(name) {
   if (name === 'queue' || name === 'dashboard' || name === 'referenceSites') return [];
   if (name === 'designInsights') return { summary: '', byIndustry: {}, designSummary: '', byIndustryDesign: {}, updatedAt: null };
   if (name === 'learningJob') return { status: 'idle', industry: null, maxResults: null, phase: '', current: 0, total: 0, result: null, error: null, startedAt: null, completedAt: null };
-  if (name === 'options') return { multiLanguage: false, contactForm: false, instagramLine: true, presentedBy: true, qrCode: false };
+  if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
   if (name === 'billing') return { plan: 'normal' };
   if (name === 'autoProcessEnabled') return false;
   return {};
