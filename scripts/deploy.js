@@ -41,9 +41,36 @@ if (hasChanges) {
   console.log('コミットする変更がありません。');
 }
 
-// 3. push（Vercel 連携ならここで本番デプロイが走る）
-if (!run('git push')) {
-  console.error('git push に失敗しました。リモートとブランチを確認してください。');
+// 3. リモートが設定されているか確認
+let hasRemote = false;
+try {
+  const out = execSync('git remote', { encoding: 'utf8' });
+  hasRemote = out.trim().length > 0;
+} catch {
+  // ignore
+}
+if (!hasRemote) {
+  console.error('');
+  console.error('リモートが設定されていません。先に GitHub などにリポジトリを作り、次を実行してください:');
+  console.error('  git remote add origin <リポジトリのURL>');
+  console.error('例: git remote add origin https://github.com/あなたのID/webpage.git');
+  console.error('');
+  process.exit(1);
+}
+
+// 4. push（Vercel 連携ならここで本番デプロイが走る）
+let branch = 'master';
+try {
+  branch = execSync('git branch --show-current', { encoding: 'utf8' }).trim() || branch;
+} catch {
+  // use default
+}
+if (!run(`git push -u origin ${branch}`)) {
+  console.error('');
+  console.error('git push に失敗しました。');
+  console.error('  - リモートの URL が正しいか: git remote -v');
+  console.error('  - 初回は手動で: git push -u origin ' + branch);
+  console.error('');
   process.exit(1);
 }
 
