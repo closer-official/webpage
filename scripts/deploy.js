@@ -75,3 +75,28 @@ if (!run(`git push -u origin ${branch}`)) {
 }
 
 console.log('プッシュ完了。Vercel で本番デプロイが開始されます。');
+console.log('');
+
+// 本番URLを表示（Vercel CLI で取得を試みる）
+function showProductionUrl() {
+  try {
+    const result = spawnSync('npx', ['vercel', 'ls', '--limit', '1'], {
+      encoding: 'utf8',
+      timeout: 15000,
+      cwd: process.cwd(),
+    });
+    const out = (result.stdout || '') + (result.stderr || '');
+    const match = out.match(/https:\/\/[^\s"')\]]+\.vercel\.app/);
+    if (match) {
+      const url = match[0].replace(/[)\],].*$/, '').trim();
+      console.log('本番URL: ' + url);
+      return;
+    }
+  } catch {
+    // CLI 未リンク or エラー → ダッシュボード案内
+  }
+  console.log('本番URLは Vercel ダッシュボードで確認できます:');
+  console.log('  https://vercel.com/dashboard');
+}
+
+showProductionUrl();
