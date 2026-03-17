@@ -425,6 +425,22 @@
   margin-top: auto;
 }
 
+.design-check-panel .design-card-action {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.design-check-panel .design-card-preview-only:hover {
+  border-color: #1d4ed8;
+}
+
+.design-check-panel .design-card-preview-only:hover .design-card-action {
+  text-decoration: underline;
+}
+
 /* フィールド共通 */
 .field {
   margin-bottom: 16px;

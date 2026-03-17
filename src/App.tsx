@@ -15,6 +15,7 @@ import { GenerationOptions } from './components/GenerationOptions';
 import { StripePayment } from './components/StripePayment';
 import { QueueAuto } from './components/QueueAuto';
 import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
+import { DesignCheckPanel } from './components/DesignCheckPanel';
 import type { PageContent, SEOData, QueueTarget } from './types';
 import type { TemplateOption } from './types';
 import { isApiAvailable, api } from './lib/api';
@@ -145,16 +146,7 @@ function App() {
       <div className="app-steps">
         {tab === 'design' && (
           <section className="tab-content">
-            <p className="tab-hint">
-              LPで使える6パターンのデザインです。キュー・ダッシュボードやPDFから作成で、ここで選んだデザイン（または各画面で選んだデザイン）が反映されます。
-            </p>
-            <ThemePicker
-              selectedIndustryId={industryId}
-              selectedStyleId={styleId}
-              onSelect={setTemplate}
-              onIndustryChange={setIndustryId}
-              onStyleChange={setStyleId}
-            />
+            <DesignCheckPanel />
           </section>
         )}
 
