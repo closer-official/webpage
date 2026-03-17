@@ -43,19 +43,37 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'minimal_luxury',
     'Minimal Luxury',
-    '静寂と品格（A-1）',
+    '超高級ホテル・エステ向け（A-1）',
     `
-  .page-wrapper.template-minimal_luxury { font-family: "Yu Mincho", "Times New Roman", serif; color: #111111; background: #FAFAFA; }
-  .page-wrapper.template-minimal_luxury .container { padding: 0 3rem; }
-  .page-wrapper.template-minimal_luxury .hero { padding: 4rem 3rem; text-align: center; }
-  .page-wrapper.template-minimal_luxury .hero h1 { font-size: 3rem; font-weight: 600; color: #111111; margin: 0 0 1rem; letter-spacing: -0.03em; }
-  .page-wrapper.template-minimal_luxury .hero .subheadline { font-size: 1.125rem; color: #333; }
-  .page-wrapper.template-minimal_luxury .section h2 { color: #111111; }
-  .page-wrapper.template-minimal_luxury .section p { color: #111111; }
-  .page-wrapper.template-minimal_luxury .hero-img-wrap { aspect-ratio: 3/4; overflow: hidden; margin: 1rem 0; }
-  .page-wrapper.template-minimal_luxury .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ${EASE_PRO}; }
-  .page-wrapper.template-minimal_luxury .hero-img-wrap:hover img { transform: scale(1.05); }
-  .page-wrapper.template-minimal_luxury footer { color: #111111; }
+  /* A-1: 一字一句遵守 — Skeleton */
+  .page-wrapper.template-minimal_luxury { background: #F9F9F7; color: #1A1A1A; }
+  .page-wrapper.template-minimal_luxury .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+  @media (min-width: 1024px) {
+    .page-wrapper.template-minimal_luxury .container { padding: 0 6rem; }
+  }
+  .page-wrapper.template-minimal_luxury main .section { padding: 8rem 0; }
+  .page-wrapper.template-minimal_luxury header { padding: 2rem 0; border-bottom: 1px solid rgba(26,26,26,0.08); }
+  .page-wrapper.template-minimal_luxury footer { padding: 8rem 0 4rem; border-top: 1px solid rgba(26,26,26,0.08); color: #1A1A1A; }
+  .page-wrapper.template-minimal_luxury .logo { color: #1A1A1A; font-family: "Playfair Display", "Yu Mincho", serif; }
+  /* Typography */
+  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.15em; color: #1A1A1A; margin: 0 0 1rem; line-height: 1.15; }
+  .page-wrapper.template-minimal_luxury .hero .subheadline { font-family: system-ui, -apple-system, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3em; color: #1A1A1A; opacity: 0.85; }
+  .page-wrapper.template-minimal_luxury .section h2 { font-family: "Playfair Display", serif; color: #1A1A1A; font-size: 1.5rem; letter-spacing: 0.08em; }
+  .page-wrapper.template-minimal_luxury .section p { color: #1A1A1A; line-height: 1.75; }
+  /* Hero: 画像は右に w-2/3、タイトルを半分被せる z-10、角丸禁止 */
+  .page-wrapper.template-minimal_luxury .hero { display: grid; grid-template-columns: 1fr 2fr; gap: 0; min-height: 70vh; align-items: center; padding: 0; }
+  .page-wrapper.template-minimal_luxury .hero .hero-a1-text { position: relative; z-index: 10; padding: 2rem 2rem 2rem 0; }
+  @media (min-width: 1024px) { .page-wrapper.template-minimal_luxury .hero .hero-a1-text { padding: 2rem 6rem 2rem 0; } }
+  .page-wrapper.template-minimal_luxury .hero .hero-a1-img { width: 100%; height: 100%; min-height: 400px; object-fit: cover; border-radius: 0; }
+  @media (max-width: 768px) {
+    .page-wrapper.template-minimal_luxury .hero { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .page-wrapper.template-minimal_luxury .hero .hero-a1-text { order: 1; padding: 2rem 0; }
+    .page-wrapper.template-minimal_luxury .hero h1 { font-size: 2.25rem; letter-spacing: 0.1em; }
+  }
+  .page-wrapper.template-minimal_luxury * { border-radius: 0; }
+  /* Animation: initial opacity 0 y 40 → animate 1 0, duration 1.2, ease [0.22,1,0.36,1], viewport once */
+  .page-wrapper.template-minimal_luxury [data-a1-animate] { opacity: 0; transform: translateY(40px); transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+  .page-wrapper.template-minimal_luxury [data-a1-animate].a1-visible { opacity: 1; transform: translateY(0); }
   `
   ),
   makeTemplate(

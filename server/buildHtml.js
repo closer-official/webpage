@@ -76,12 +76,23 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     </section>`
             )
             .join('\n')
-        : sectionsDefault;
+        : tid === 'minimal_luxury'
+          ? sections
+              .map(
+                (s) =>
+                  `    <section class="section" aria-labelledby="${s.id}-title" data-a1-animate>
+      <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+    </section>`
+              )
+              .join('\n')
+          : sectionsDefault;
 
+  const a1SectionAttr = tid === 'minimal_luxury' ? ' data-a1-animate' : '';
   let extraSections = '';
   if (instagramLine && (instagramUrl || lineUrl)) {
     extraSections += `
-    <section class="section sns-links">
+    <section class="section sns-links"${a1SectionAttr}>
       <h2>フォロー・お問い合わせ</h2>
       ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener">Instagram</a>` : ''}
       ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener">LINE</a>` : ''}
@@ -90,7 +101,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   if (contactForm) {
     const formAction = formActionUrl.trim() || '#';
     extraSections += `
-    <section class="section">
+    <section class="section"${a1SectionAttr}>
       <h2>お問い合わせ</h2>
       <form action="${escapeHtml(formAction)}" method="post">
         <p><label>お名前 <input type="text" name="name" required></label></p>
@@ -102,7 +113,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   }
   if (qrCode && qrCodeDataUrl) {
     extraSections += `
-    <section class="section qr-block">
+    <section class="section qr-block"${a1SectionAttr}>
       <h2>QRコード</h2>
       <img src="${escapeHtml(qrCodeDataUrl)}" alt="QRコード" width="120" height="120">
     </section>`;
@@ -111,6 +122,10 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const footerExtra = presentedBy ? '<p class="presented-by">Presented by ウェブページ作成ツール</p>' : '';
 
   const heroBgStyle = tid === 'dark_edge' && seo.ogImageUrl ? ` style="background-image: url(${escapeHtml(seo.ogImageUrl)})"` : '';
+  const a1HeroImage =
+    tid === 'minimal_luxury'
+      ? (seo.ogImageUrl && seo.ogImageUrl.trim()) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200'
+      : '';
 
   const heroSection =
     tid === 'dark_edge'
@@ -118,7 +133,12 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <div class="hero-bg"${heroBgStyle}></div>
       <div class="hero-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
     </section>`
-      : `<section class="hero">
+      : tid === 'minimal_luxury'
+        ? `<section class="hero" data-a1-animate>
+      <div class="hero-a1-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
+      <div><img src="${escapeHtml(a1HeroImage)}" alt="" class="hero-a1-img" loading="eager"></div>
+    </section>`
+        : `<section class="hero">
       <div class="container">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
@@ -132,11 +152,22 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       : '';
 
   const css = getTemplateFullCss(tid);
+  const googleFonts =
+    tid === 'minimal_luxury'
+      ? '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">'
+      : '';
+  const a1Script =
+    tid === 'minimal_luxury'
+      ? `<script>
+(function(){var el=document.querySelectorAll('[data-a1-animate]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('a1-visible');io.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});el.forEach(function(e){io.observe(e);});})();
+</script>`
+      : '';
 
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     ${metaTags}
+    ${googleFonts}
     <style>${css}</style>
 </head>
 <body class="page-wrapper template-${tid}">
@@ -159,6 +190,7 @@ ${extraSections}
       ${footerExtra}
     </div>
   </footer>
+  ${a1Script}
 </body>
 </html>`;
 }

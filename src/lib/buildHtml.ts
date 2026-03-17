@@ -75,13 +75,24 @@ export function buildHtml(
       ? ` style="background-image: url(${escapeHtml(seo.ogImageUrl)})"`
       : '';
 
+  const a1HeroImage =
+    tid === 'minimal_luxury'
+      ? seo.ogImageUrl?.trim() ||
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200'
+      : '';
+
   const heroSection =
     tid === 'dark_edge'
       ? `<section class="hero">
       <div class="hero-bg"${heroBgStyle}></div>
       <div class="hero-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
     </section>`
-      : `<section class="hero">
+      : tid === 'minimal_luxury'
+        ? `<section class="hero" data-a1-animate>
+      <div class="hero-a1-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
+      <div><img src="${escapeHtml(a1HeroImage)}" alt="" class="hero-a1-img" loading="eager"></div>
+    </section>`
+        : `<section class="hero">
       <div class="container">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
@@ -95,11 +106,38 @@ export function buildHtml(
       : '';
 
   const css = options?.inlineCss !== false ? template.css : '';
+  const googleFonts =
+    tid === 'minimal_luxury'
+      ? '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">'
+      : '';
+
+  const sectionsWithA1 =
+    tid === 'minimal_luxury'
+      ? content.sections
+          .map(
+            (s) =>
+              `    <section class="section" aria-labelledby="${s.id}-title" data-a1-animate>
+      <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+    </section>`
+          )
+          .join('\n')
+      : null;
+
+  const a1Script =
+    tid === 'minimal_luxury'
+      ? `<script>
+(function(){var el=document.querySelectorAll('[data-a1-animate]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('a1-visible');io.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});el.forEach(function(e){io.observe(e);});})();
+</script>`
+      : '';
+
+  const mainSectionsHtml = tid === 'minimal_luxury' ? sectionsWithA1! : sectionsHtml;
 
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     ${metaTags}
+    ${googleFonts}
     <script type="application/ld+json">${jsonLd}</script>
     <style>${css}</style>
 </head>
@@ -113,7 +151,7 @@ export function buildHtml(
   <main>
     ${heroSection}
     <div class="container">
-${sectionsHtml}
+${mainSectionsHtml}
     </div>
   </main>
   <footer>
@@ -121,6 +159,7 @@ ${sectionsHtml}
       ${escapeHtml(content.footerText)}
     </div>
   </footer>
+  ${a1Script}
 </body>
 </html>`;
 }
