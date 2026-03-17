@@ -1,3 +1,18 @@
+/** 標準セクションID（フォームを埋める枠の順序） */
+export const STANDARD_SECTION_IDS = [
+  'concept',
+  'menu',
+  'hours',
+  'access',
+  'price',
+  'staff',
+  'faq',
+  'gallery',
+  'contact',
+] as const;
+
+export type StandardSectionId = (typeof STANDARD_SECTION_IDS)[number];
+
 /** ページコンテンツ（見出し・本文ブロックの配列） */
 export interface PageSection {
   id: string;
@@ -163,12 +178,29 @@ export interface GenerationOptions {
   multiLanguage: boolean;
   /** 問い合わせフォームを設置 */
   contactForm: boolean;
+  /** フォーム送信先URL */
+  formActionUrl?: string;
   /** Instagram・LINE などのリンクを埋め込む */
   instagramLine: boolean;
   /** 「Presented by」表記を表示 */
   presentedBy: boolean;
   /** QRコードを発行して掲載 */
   qrCode: boolean;
+  /** QRコードでエンコードするURL */
+  qrCodeTargetUrl?: string;
+}
+
+/** buildHtml に渡すオプション用（SNS URL・QR画像など） */
+export interface BuildHtmlGenOptions {
+  contactForm?: boolean;
+  formActionUrl?: string;
+  instagramLine?: boolean;
+  instagramUrl?: string;
+  lineUrl?: string;
+  qrCode?: boolean;
+  qrCodeDataUrl?: string;
+  qrCodeTargetUrl?: string;
+  presentedBy?: boolean;
 }
 
 /** ダッシュボード1件（API返却・3案入り） */

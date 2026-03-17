@@ -36,6 +36,7 @@ const commonBase = `
   .page-wrapper .presented-by { font-size: 0.75rem; opacity: 0.7; margin-top: 0.5rem; }
   .page-wrapper .qr-block { margin-top: 1.5rem; text-align: center; }
   .page-wrapper .qr-block img { max-width: 120px; }
+  .page-wrapper .qr-placeholder { font-size: 0.875rem; color: var(--tp-text, #666); margin: 0.5rem 0; }
   .quote-block { margin: 2rem 0; padding: 1.5rem; font-size: 1.125rem; font-style: italic; text-align: center; }
   .stats-block { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; text-align: center; }
   .stat-value { display: block; font-size: 2rem; font-weight: 800; }

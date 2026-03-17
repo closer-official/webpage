@@ -1,4 +1,4 @@
-import type { PageContent, SEOData, TemplateOption } from '../types';
+import type { PageContent, SEOData, TemplateOption, BuildHtmlGenOptions } from '../types';
 import type { NavItem } from '../types';
 import { buildJsonLd } from './seo';
 
@@ -13,35 +13,39 @@ function escapeHtml(s: string): string {
 
 const DEFAULT_NAV: Record<string, NavItem[]> = {
   minimal_luxury: [
-    { label: '宿泊', href: '#accommodation' },
-    { label: 'エステ', href: '#experience' },
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
-    { label: '予約', href: '#reserve' },
+    { label: '予約', href: '#contact' },
   ],
   dark_edge: [
-    { label: 'RESERVE', href: '#reserve' },
+    { label: 'CONCEPT', href: '#concept' },
+    { label: 'RESERVE', href: '#contact' },
     { label: 'ACCESS', href: '#access' },
   ],
   corporate_trust: [
-    { label: 'サービス', href: '#service' },
-    { label: '実績', href: '#stats' },
-    { label: '会社概要', href: '#about' },
+    { label: 'サービス', href: '#menu' },
+    { label: '実績', href: '#price' },
+    { label: '会社概要', href: '#concept' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
   warm_organic: [
     { label: 'こだわり', href: '#concept' },
     { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
   ],
   pop_friendly: [
     { label: 'あそび場', href: '#concept' },
-    { label: '利用案内', href: '#info' },
+    { label: '利用案内', href: '#menu' },
     { label: 'アクセス', href: '#access' },
+    { label: '予約', href: '#contact' },
   ],
   high_energy: [
-    { label: 'プログラム', href: '#program' },
+    { label: 'プログラム', href: '#menu' },
     { label: '料金', href: '#price' },
     { label: 'アクセス', href: '#access' },
+    { label: '無料体験', href: '#contact' },
   ],
 };
 
@@ -59,7 +63,7 @@ export function buildHtml(
   content: PageContent,
   seo: SEOData,
   template: TemplateOption,
-  options?: { inlineCss?: boolean }
+  options?: { inlineCss?: boolean; genOptions?: BuildHtmlGenOptions }
 ): string {
   const jsonLd = buildJsonLd(content, seo, seo.canonicalUrl || '');
 
@@ -301,6 +305,44 @@ ${content.sections
   const mainSectionsHtml = tid === 'minimal_luxury' ? sectionsWithA1! : sectionsHtml;
   const ctaAfterHero = tid === 'minimal_luxury' ? ctaBlockHtml : '';
 
+  const genOpts = options?.genOptions;
+  const a1SectionAttr = tid === 'minimal_luxury' ? ' data-a1-animate' : '';
+  let extraSectionsHtml = '';
+  if (genOpts) {
+    const { contactForm, formActionUrl, instagramLine, instagramUrl, lineUrl, qrCode, qrCodeDataUrl } = genOpts;
+    if (instagramLine && (instagramUrl || lineUrl)) {
+      extraSectionsHtml += `
+    <section class="section sns-links"${a1SectionAttr} id="sns">
+      <h2 id="sns-title">フォロー・お問い合わせ</h2>
+      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener">Instagram</a>` : ''}
+      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener">LINE</a>` : ''}
+    </section>`;
+    }
+    if (contactForm) {
+      const formAction = (formActionUrl ?? '').trim() || '#';
+      extraSectionsHtml += `
+    <section class="section"${a1SectionAttr}>
+      <h2>お問い合わせフォーム</h2>
+      <form action="${escapeHtml(formAction)}" method="post">
+        <p><label>お名前 <input type="text" name="name" required></label></p>
+        <p><label>メール <input type="email" name="email" required></label></p>
+        <p><label>内容 <textarea name="body" rows="4"></textarea></label></p>
+        <p><button type="submit">送信</button></p>
+      </form>
+    </section>`;
+    }
+    if (qrCode) {
+      const qrImg = qrCodeDataUrl
+        ? `<img src="${escapeHtml(qrCodeDataUrl)}" alt="QRコード" width="120" height="120">`
+        : '<p class="qr-placeholder">QRコード（実際のLPではここに表示）</p>';
+      extraSectionsHtml += `
+    <section class="section qr-block"${a1SectionAttr}>
+      <h2>QRコード</h2>
+      ${qrImg}
+    </section>`;
+    }
+  }
+
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -319,6 +361,7 @@ ${content.sections
     <div class="container">
 ${quoteBlockHtml}
 ${mainSectionsHtml}
+${extraSectionsHtml}
     </div>
   </main>
   ${footerHtml}

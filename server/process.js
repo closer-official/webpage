@@ -7,15 +7,40 @@ function makeId() {
   return `d-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+/** 標準9セクションの枠（順序固定・実際に作るときに埋める） */
+const STANDARD_SECTIONS = [
+  { id: 'concept', title: 'コンセプト' },
+  { id: 'menu', title: 'メニュー・サービス' },
+  { id: 'hours', title: '営業時間' },
+  { id: 'access', title: 'アクセス' },
+  { id: 'price', title: '料金・プラン' },
+  { id: 'staff', title: 'スタッフ・私たち' },
+  { id: 'faq', title: 'よくある質問' },
+  { id: 'gallery', title: 'ギャラリー' },
+  { id: 'contact', title: 'お問い合わせ' },
+];
+
 function analysisToContent(name, address, analysis) {
-  const sections = [
-    analysis.concept && { id: 'concept', title: 'コンセプト', content: analysis.concept },
-    analysis.strengths && { id: 'strengths', title: '私たちの強み', content: analysis.strengths },
-    analysis.atmosphere && { id: 'atmosphere', title: '雰囲気', content: analysis.atmosphere },
-    analysis.targetAudience && { id: 'target', title: 'お客様', content: analysis.targetAudience },
-    address && { id: 'access', title: 'アクセス', content: address },
-  ].filter(Boolean);
-  if (sections.length === 0) sections.push({ id: 'about', title: 'ごあいさつ', content: analysis.concept || name });
+  const getContent = (id) => {
+    if (id === 'concept' && analysis.concept) return analysis.concept;
+    if (id === 'menu' && analysis.strengths) return analysis.strengths;
+    if (id === 'hours') return '営業時間はお問い合わせください。';
+    if (id === 'access' && address) return address;
+    if (id === 'price') return '料金の詳細はお問い合わせください。';
+    if (id === 'staff') return 'スタッフ紹介は準備中です。';
+    if (id === 'faq') return 'よくある質問は準備中です。';
+    if (id === 'gallery' && analysis.atmosphere) return analysis.atmosphere;
+    if (id === 'contact') return analysis.targetAudience ? `お客様：${analysis.targetAudience}\n\nお気軽にお問い合わせください。` : 'お気軽にお問い合わせください。';
+    return '（記載予定）';
+  };
+
+  const sections = STANDARD_SECTIONS.map((s) => ({
+    id: s.id,
+    title: s.title,
+    content: getContent(s.id) || '（記載予定）',
+  }));
+  if (sections.every((s) => !s.content || s.content === '（記載予定）')) sections[0].content = analysis.concept || name;
+
   return {
     siteName: name,
     title: name,
