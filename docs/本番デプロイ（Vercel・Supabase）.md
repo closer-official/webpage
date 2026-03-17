@@ -143,8 +143,9 @@ git remote add origin https://github.com/あなたのID/リポジトリ名.git
 ## 5. 自動処理（キュー全件）について
 
 - **ローカル**: 「キューを自動で全件処理（開始）」で、サーバー内のタイマーが約20秒ごとに1件処理する。
-- **本番（Supabase 利用時）**: タイマーは動かない。代わりに **Vercel Cron** が毎分 `/api/auto-process/tick` を呼ぶ。  
-  「開始」を押すと「自動処理が有効」な状態が Supabase に保存され、Cron が 1 分ごとに 1 件ずつ処理する。  
+- **本番（Supabase 利用時）**: タイマーは動かない。代わりに **Vercel Cron** が `/api/auto-process/tick` を呼ぶ。  
+  「開始」を押すと「自動処理が有効」な状態が Supabase に保存され、Cron が動いたタイミングでキューを 1 件ずつ処理する。  
+  **Vercel Hobby（無料）プランでは Cron は「1日1回まで」のため、現在は毎日1回（UTC 0:00）に設定している。** 毎分実行したい場合は Pro プランへアップグレードし、`vercel.json` の `crons[].schedule` を `* * * * *` に変更する。  
   `CRON_SECRET` を設定している場合は、Vercel Cron の設定で同じ値を `x-cron-secret` として送る必要がある（Vercel が自動で付与する場合を除く）。
 
 ---
