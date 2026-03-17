@@ -1,6 +1,7 @@
 import { analyzePlace, generateDmBody } from './gemini.js';
 import { CONCEPT_TEMPLATES } from './conceptTemplates.js';
 import { buildHtml } from './buildHtml.js';
+import { getPlacePhotoUrls } from './placePhotos.js';
 import QRCode from 'qrcode';
 
 function makeId() {
@@ -74,7 +75,20 @@ export async function processOne(queueItem, genOptions) {
     reviewsText
   );
   const content = analysisToContent(queueItem.name, queueItem.address, analysis);
-  const seo = contentToSeo(content);
+  let seo = contentToSeo(content);
+
+  // placeId がある場合は Google Maps の写真を自動取得して hero・OG・セクションに割り当て
+  if (queueItem.placeId) {
+    const photoUrls = await getPlacePhotoUrls(queueItem.placeId, 6);
+    if (photoUrls.length > 0) {
+      seo = { ...seo, ogImageUrl: photoUrls[0] };
+      content.heroSlides = photoUrls;
+      for (let i = 0; i < content.sections.length && i + 1 < photoUrls.length; i++) {
+        content.sections[i].imageUrl = photoUrls[i + 1];
+      }
+    }
+  }
+
   const conceptId = analysis.conceptId || 'general';
   const templateIds = CONCEPT_TEMPLATES[conceptId] || CONCEPT_TEMPLATES.general;
   const top3 = templateIds.slice(0, 3);

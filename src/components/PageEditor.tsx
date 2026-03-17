@@ -91,6 +91,15 @@ export function PageEditor({ content, onChange }: PageEditorProps) {
               onChange={(e) => updateSection(sec.id, { title: e.target.value })}
               placeholder="見出し"
             />
+            <div className="field">
+              <label>画像URL（任意）</label>
+              <input
+                type="url"
+                value={sec.imageUrl ?? ''}
+                onChange={(e) => updateSection(sec.id, { imageUrl: e.target.value || undefined })}
+                placeholder="https://..."
+              />
+            </div>
             <textarea
               value={sec.content}
               onChange={(e) => updateSection(sec.id, { content: e.target.value })}
