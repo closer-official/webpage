@@ -3,6 +3,14 @@ export interface PageSection {
   id: string;
   title: string;
   content: string;
+  /** セクション用画像（未指定時はテンプレートのデフォルト or 非表示） */
+  imageUrl?: string;
+}
+
+/** ナビ項目（オプション） */
+export interface NavItem {
+  label: string;
+  href: string;
 }
 
 /** ページ全体のデータ */
@@ -13,6 +21,19 @@ export interface PageContent {
   subheadline: string;
   sections: PageSection[];
   footerText: string;
+  /** 引用ブロック用（A-1 等） */
+  quote?: string;
+  /** 数字ブロック用（A-3: 実績、B-3: 成果など） */
+  stats?: { value: string; label: string }[];
+  /** ナビ項目（未指定時はテンプレートのデフォルト表示） */
+  navItems?: NavItem[];
+  /** プライマリCTA */
+  ctaLabel?: string;
+  ctaHref?: string;
+  /** フッター用 */
+  footerAddress?: string;
+  footerPhone?: string;
+  footerEmail?: string;
 }
 
 /** SEO用データ */

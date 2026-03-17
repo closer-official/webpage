@@ -14,18 +14,21 @@ const SAMPLE_BY_TEMPLATE: Record<
       title: 'LA RÉSERVE',
       headline: 'LA RÉSERVE',
       subheadline: 'Tokyo — Hotel & Spa',
+      quote: '時間を、手放す。',
       sections: [
         {
           id: 'concept',
           title: '静寂と再生',
           content:
             '都心の一画に佇む、全28室の隠れ家ホテル。時間を手放し、五感だけを残す。当館のエステティックサロンでは、フランス由来のトリートメントと独自のオーガニックオイルで、肌と心を解きほぐします。',
+          imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800',
         },
         {
           id: 'experience',
           title: '体験',
           content:
             'アロマトリートメント／フェイシャル／ボディケア／フットリフレクソロジー。ご予約は専用ラインまたは電話にて承ります。',
+          imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800',
         },
         {
           id: 'access',
@@ -34,6 +37,11 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 LA RÉSERVE. All rights reserved.',
+      ctaLabel: 'ご予約はこちら',
+      ctaHref: '#reserve',
+      footerAddress: '東京都港区南青山 5-8-12',
+      footerPhone: '03-XXXX-XXXX',
+      footerEmail: 'reserve@example.com',
     },
     seo: {
       metaTitle: 'LA RÉSERVE — Hotel & Spa | 東京・南青山',
@@ -55,6 +63,7 @@ const SAMPLE_BY_TEMPLATE: Record<
           title: 'CONCEPT',
           content:
             '光を消した先にある、もう一つの時間。都心の地下に潜るようにして辿り着く、28席だけのバー。厳選したスピリッツと、その夜だけの音で、境界を溶かす。',
+          imageUrl: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800',
         },
         {
           id: 'reserve',
@@ -68,6 +77,10 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 VOID. All rights reserved.',
+      ctaLabel: 'RESERVE',
+      ctaHref: '#reserve',
+      footerAddress: '東京都渋谷区道玄坂 2-XX-X B1F',
+      footerPhone: '03-XXXX-XXXX',
     },
     seo: {
       metaTitle: 'VOID — Night Bar & Lounge | 渋谷',
@@ -83,18 +96,25 @@ const SAMPLE_BY_TEMPLATE: Record<
       title: '山田コンサルティング',
       headline: '山田コンサルティング',
       subheadline: '経営戦略・組織人事のパートナー',
+      stats: [
+        { value: '25年', label: '創業' },
+        { value: '300社+', label: '支援実績' },
+        { value: '98%', label: '継続率' },
+      ],
       sections: [
         {
           id: 'concept',
           title: '私たちの強み',
           content:
-            '創業25年、上場企業から中堅・中小企業まで、経営戦略の策定と実行支援、組織・人事制度の設計を一貫してサポートしています。データに基づく分析と、現場を知り尽くした実務経験の両輪で、持続可能な成長をお手伝いします。',
+            '創業25年、上場企業から中堅・中小企業まで、経営戦略の策定と実行支援、組織・人事制度の設計を一貫してサポートしています。',
+          imageUrl: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800',
         },
         {
           id: 'service',
           title: 'サービス',
           content:
             '経営戦略策定／M&Aアドバイザリー／組織設計・人事制度構築／リーダーシップ研修。まずはお気軽にご相談ください。',
+          imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800',
         },
         {
           id: 'access',
@@ -103,6 +123,11 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 山田コンサルティング. All rights reserved.',
+      ctaLabel: '無料相談',
+      ctaHref: '#contact',
+      footerAddress: '東京都千代田区丸の内 1-XX-X',
+      footerPhone: '03-XXXX-XXXX',
+      footerEmail: 'info@example.com',
     },
     seo: {
       metaTitle: '山田コンサルティング | 経営戦略・組織人事',
@@ -118,18 +143,21 @@ const SAMPLE_BY_TEMPLATE: Record<
       title: 'café ことの葉',
       headline: 'café ことの葉',
       subheadline: '自家焙煎と、季節のあんこ',
+      quote: 'ちょっとだけ、甘い休憩を。',
       sections: [
         {
           id: 'concept',
           title: 'こだわり',
           content:
-            '町の焙煎所がはじめた、ちょっとだけ甘い休憩場所。豆は自家焙煎で、あんこは旬の小豆を炊いて毎日つくっています。角を丸めたテーブルと、窓から差し込む光のなかで、一息ついてみませんか。',
+            '町の焙煎所がはじめた、ちょっとだけ甘い休憩場所。豆は自家焙煎で、あんこは旬の小豆を炊いて毎日つくっています。',
+          imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800',
         },
         {
           id: 'menu',
           title: 'メニュー',
           content:
             'ブレンドコーヒー／単品豆／あんこトースト／季節のあんみつ／ケーキ各種。テイクアウトもご用意しています。',
+          imageUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800',
         },
         {
           id: 'access',
@@ -138,6 +166,10 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 café ことの葉. All rights reserved.',
+      ctaLabel: '予約する',
+      ctaHref: '#reserve',
+      footerAddress: '東京都世田谷区奥沢 5-XX-X',
+      footerPhone: '03-XXXX-XXXX',
     },
     seo: {
       metaTitle: 'café ことの葉 | 奥沢の自家焙煎カフェ',
@@ -158,13 +190,15 @@ const SAMPLE_BY_TEMPLATE: Record<
           id: 'concept',
           title: 'あそび場について',
           content:
-            '雨の日も晴れの日も、思いっきり体を動かせる室内あそび場。ボールプール、トランポリン、工作コーナーに、お誕生日会もできるパーティルーム。ママ同士の交流イベントも毎月開催しています。',
+            '雨の日も晴れの日も、思いっきり体を動かせる室内あそび場。ボールプール、トランポリン、工作コーナーに、お誕生日会もできるパーティルーム。',
+          imageUrl: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800',
         },
         {
           id: 'info',
           title: '利用案内',
           content:
             '対象：0歳〜小学生。入場料は1時間〜。予約優先・当日も空きがあればご利用可能。オムツ替えスペース・授乳室あり。',
+          imageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800',
         },
         {
           id: 'access',
@@ -173,6 +207,10 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 POP KIDS. All rights reserved.',
+      ctaLabel: '予約はこちら',
+      ctaHref: '#reserve',
+      footerAddress: '東京都練馬区大泉学園 3-XX-X',
+      footerPhone: '03-XXXX-XXXX',
     },
     seo: {
       metaTitle: 'POP KIDS | キッズあそび場 練馬・大泉学園',
@@ -188,18 +226,25 @@ const SAMPLE_BY_TEMPLATE: Record<
       title: 'FIRE GYM',
       headline: 'FIRE GYM',
       subheadline: '結果にコミットする、パーソナルジム',
+      stats: [
+        { value: '3ヶ月', label: 'で結果' },
+        { value: '90分', label: '集中トレーニング' },
+        { value: '1on1', label: '専属トレーナー' },
+      ],
       sections: [
         {
           id: 'concept',
           title: 'フィアの考え方',
           content:
-            '週2回・90分の集中トレーニングと、食事管理で、3ヶ月でカラダを変える。専属トレーナーがマンツーマンで、あなたの目標と体質に合わせたプログラムを組み、最後まで伴走します。無料カウンセリング・体験実施中。',
+            '週2回・90分の集中トレーニングと、食事管理で、3ヶ月でカラダを変える。専属トレーナーがマンツーマンで伴走します。',
+          imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800',
         },
         {
           id: 'program',
           title: 'プログラム',
           content:
             'ボディメイク／ダイエット／姿勢改善／競技者向け強化。入会金・月額はプログラムにより異なります。まずは体験から。',
+          imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800',
         },
         {
           id: 'access',
@@ -208,6 +253,10 @@ const SAMPLE_BY_TEMPLATE: Record<
         },
       ],
       footerText: '© 2025 FIRE GYM. All rights reserved.',
+      ctaLabel: '無料体験',
+      ctaHref: '#trial',
+      footerAddress: '東京都新宿区西新宿 7-XX-X',
+      footerPhone: '03-XXXX-XXXX',
     },
     seo: {
       metaTitle: 'FIRE GYM | パーソナルジム 新宿',
