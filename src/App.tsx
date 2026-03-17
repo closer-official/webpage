@@ -38,7 +38,7 @@ const defaultSEO: SEOData = {
   canonicalUrl: '',
 };
 
-type TabId = 'queue' | 'dashboard' | 'page' | 'settings';
+type TabId = 'queue' | 'dashboard' | 'page' | 'settings' | 'learning';
 
 function App() {
   const [tab, setTab] = useState<TabId>('queue');
