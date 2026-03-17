@@ -79,16 +79,11 @@ console.log('');
 console.log('本番デプロイを実行して URL を表示します...');
 console.log('');
 
-// vercel --prod を実行すると、Inspect / Production の URL がそのまま出る
-const vercelResult = spawnSync('npx', ['vercel', '--prod', '--yes'], {
-  stdio: 'inherit',
-  cwd: process.cwd(),
-});
-
-if (vercelResult.status !== 0) {
-  // CLI 未リンクなどで失敗した場合は案内だけ表示
+// execSync で実行するとターミナルに Inspect / Production の URL がそのまま出る（Windows でも表示される）
+try {
+  execSync('npx vercel --prod --yes', { stdio: 'inherit', cwd: process.cwd() });
+} catch (err) {
   console.log('');
   console.log('本番URLは Vercel ダッシュボードで確認できます: https://vercel.com/dashboard');
-  console.log('（初回はプロジェクトフォルダで npx vercel link を実行して Vercel と紐付けてください）');
-  process.exit(1);
+  // Git プッシュは成功しているので exit 0 のまま（デプロイは Vercel 側で進行中）
 }
