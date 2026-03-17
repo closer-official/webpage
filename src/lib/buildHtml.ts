@@ -143,11 +143,22 @@ export function buildHtml(
     </div>
   </footer>`;
 
+  /** セクション位置に応じた余白リズムクラス（賞・高級感用） */
+  const getSectionRhythmClass = (i: number, total: number): string => {
+    if (total <= 0) return 'section-rhythm-default';
+    if (i === 0) return 'section-rhythm-after-hero';
+    if (i === total - 1) return 'section-rhythm-before-footer';
+    const mid = Math.floor(total / 2);
+    if (i === mid) return 'section-rhythm-breath';
+    return 'section-rhythm-default';
+  };
+
   const scrollInAttr = (tid === 'dark_edge' || tid === 'corporate_trust') ? ' data-scroll-in' : '';
   const sectionsDefault = content.sections
-    .map((s) => {
+    .map((s, i) => {
+      const rhythm = getSectionRhythmClass(i, content.sections.length);
       const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-      return `    <section class="section" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${img}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
@@ -172,26 +183,30 @@ export function buildHtml(
       ? `    ${statsBlockHtml}
     <div class="section-grid">${content.sections
           .map(
-            (s) =>
-              `<div class="section-card" aria-labelledby="${s.id}-title" data-scroll-in>
+            (s, i) => {
+              const rhythm = getSectionRhythmClass(i, content.sections.length);
+              return `<div class="section-card ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
         ${s.imageUrl ? `<div class="section-card-img"><img src="${escapeHtml(s.imageUrl)}" alt="" loading="lazy"></div>` : ''}
         <div class="section-card-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
         <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
-      </div>`
+      </div>`;
+            }
           )
           .join('')}</div>`
       : tid === 'high_energy'
         ? `    ${statsBlockHtml}
 ${content.sections
             .map(
-              (s) =>
-                `    <section class="section" aria-labelledby="${s.id}-title" data-scroll-in>
+              (s, i) => {
+                const rhythm = getSectionRhythmClass(i, content.sections.length);
+                return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
       <div class="section-inner">
         ${s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : ''}
         <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
         <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
       </div>
-    </section>`
+    </section>`;
+              }
             )
             .join('\n')}`
         : sectionsDefault;
@@ -291,9 +306,10 @@ ${content.sections
     tid === 'minimal_luxury'
       ? content.sections
           .map(
-            (s) => {
+            (s, i) => {
+              const rhythm = getSectionRhythmClass(i, content.sections.length);
               const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-              return `    <section class="section" aria-labelledby="${s.id}-title" data-a1-animate>
+              return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-a1-animate>
       ${img}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>

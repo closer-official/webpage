@@ -154,15 +154,27 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const sections = content.sections || [];
 
+  function getSectionRhythmClass(i, total) {
+    if (total <= 0) return 'section-rhythm-default';
+    if (i === 0) return 'section-rhythm-after-hero';
+    if (i === total - 1) return 'section-rhythm-before-footer';
+    const mid = Math.floor(total / 2);
+    if (i === mid) return 'section-rhythm-breath';
+    return 'section-rhythm-default';
+  }
+
   const scrollInAttr = (tid === 'dark_edge' || tid === 'corporate_trust') ? ' data-scroll-in' : '';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
   const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
 
   const sectionsDefault = sections
-    .map((s) => `    <section class="section" aria-labelledby="${s.id}-title"${scrollInAttr}>
+    .map((s, i) => {
+      const rhythm = getSectionRhythmClass(i, sections.length);
+      return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       ${sectionBody(s)}
-    </section>`)
+    </section>`;
+    })
     .join('\n');
 
   const quoteBlockHtml = content.quote && (tid === 'minimal_luxury' || tid === 'warm_organic')
@@ -181,32 +193,41 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       ? `    ${statsBlockHtml}
     <div class="section-grid">${sections
           .map(
-            (s) => `<div class="section-card" aria-labelledby="${s.id}-title" data-scroll-in>
+            (s, i) => {
+              const rhythm = getSectionRhythmClass(i, sections.length);
+              return `<div class="section-card ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
         ${s.imageUrl ? `<div class="section-card-img"><img src="${escapeHtml(s.imageUrl)}" alt="" loading="lazy"></div>` : ''}
         <div class="section-card-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
-      </div>`
+      </div>`;
+            }
           )
           .join('')}</div>`
       : tid === 'high_energy'
         ? `    ${statsBlockHtml}
 ${sections
             .map(
-              (s) => `    <section class="section" aria-labelledby="${s.id}-title" data-scroll-in>
+              (s, i) => {
+                const rhythm = getSectionRhythmClass(i, sections.length);
+                return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
       <div class="section-inner">
         ${sectionImg(s)}
         <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
         <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
       </div>
-    </section>`
+    </section>`;
+              }
             )
             .join('\n')}`
         : tid === 'minimal_luxury'
           ? sections
               .map(
-                (s) => `    <section class="section" aria-labelledby="${s.id}-title" data-a1-animate>
+                (s, i) => {
+                  const rhythm = getSectionRhythmClass(i, sections.length);
+                  return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-a1-animate>
       ${sectionImg(s)}
       ${sectionBody(s)}
-    </section>`
+    </section>`;
+                }
               )
               .join('\n')
           : sectionsDefault;
