@@ -1,4 +1,8 @@
-const BASE = import.meta.env.VITE_API_URL || '';
+// 本番（Vercel 等）では同じオリジンへ。開発時のみ VITE_API_URL（例: http://localhost:3001）を使用
+const BASE =
+  typeof window !== 'undefined' && !/localhost|127\.0\.0\.1/.test(window.location.origin)
+    ? ''
+    : (import.meta.env.VITE_API_URL || '');
 
 export type GenerationOptions = {
   multiLanguage: boolean;
@@ -9,6 +13,9 @@ export type GenerationOptions = {
 };
 
 export function isApiAvailable(): boolean {
+  // 本番（Vercel 等）では同じオリジンに API があるので true
+  if (typeof window !== 'undefined' && !/localhost|127\.0\.0\.1/.test(window.location.origin))
+    return true;
   return !!BASE.trim();
 }
 
