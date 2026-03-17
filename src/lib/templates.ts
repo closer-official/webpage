@@ -117,31 +117,38 @@ export const TEMPLATES: TemplateOption[] = [
     'Minimal Luxury',
     '超高級ホテル・エステ向け（A-1）',
     `
-  /* A-1: 100万円レベル — 色変数・スクロールヘッダー・高級感 */
-  .page-wrapper.template-minimal_luxury { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #1A1A1A; --tp-accent: #1A1A1A; --tp-border: rgba(26,26,26,0.08); --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-minimal_luxury .container { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-lg); }
+  /* A-1: オーバーホール命令書 — デザイントークン・角丸禁止・余白128px最小 */
+  .page-wrapper.template-minimal_luxury { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #1A1A1A; --tp-accent: #666666; --tp-border: rgba(26,26,26,0.08); --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-minimal_luxury .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
   @media (min-width: 1024px) {
-    .page-wrapper.template-minimal_luxury .container { padding: 0 var(--space-3xl); }
+    .page-wrapper.template-minimal_luxury .container { padding: 0 96px; }
   }
-  .page-wrapper.template-minimal_luxury .section-rhythm-after-hero { padding-top: var(--space-4xl); padding-bottom: var(--space-3xl); }
-  .page-wrapper.template-minimal_luxury .section-rhythm-default { padding-top: var(--space-3xl); padding-bottom: var(--space-3xl); }
-  .page-wrapper.template-minimal_luxury .section-rhythm-breath { padding-top: var(--space-4xl); padding-bottom: var(--space-4xl); }
-  .page-wrapper.template-minimal_luxury .section-rhythm-before-footer { padding-top: var(--space-3xl); padding-bottom: var(--space-4xl); }
-  .page-wrapper.template-minimal_luxury header { padding: var(--space-lg) 0; border-bottom: 1px solid var(--tp-border); background: transparent; }
+  .page-wrapper.template-minimal_luxury .section-rhythm-after-hero { padding-top: 128px; padding-bottom: 128px; }
+  .page-wrapper.template-minimal_luxury .section-rhythm-default { padding-top: 128px; padding-bottom: 128px; }
+  .page-wrapper.template-minimal_luxury .section-rhythm-breath { padding-top: 128px; padding-bottom: 128px; }
+  .page-wrapper.template-minimal_luxury .section-rhythm-before-footer { padding-top: 128px; padding-bottom: 128px; }
+  .page-wrapper.template-minimal_luxury header { padding: 32px 0; border-bottom: 1px solid var(--tp-border); background: transparent; }
   .page-wrapper.template-minimal_luxury header.scrolled { background: rgba(249,249,247,0.96); backdrop-filter: saturate(180%) blur(8px); }
-  .page-wrapper.template-minimal_luxury footer { padding: var(--space-4xl) 0 var(--space-3xl); border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); color: var(--tp-heading); }
-  .page-wrapper.template-minimal_luxury .logo { color: var(--tp-heading); font-family: "Playfair Display", "Yu Mincho", serif; }
-  .page-wrapper.template-minimal_luxury .section h2 { margin-bottom: var(--space-lg); }
-  .page-wrapper.template-minimal_luxury .section p { margin-bottom: var(--space-sm); }
+  .page-wrapper.template-minimal_luxury footer { padding: 128px 0 96px; border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); color: var(--tp-heading); }
+  .page-wrapper.template-minimal_luxury .section h2 { margin-bottom: 32px; }
+  .page-wrapper.template-minimal_luxury .section p { margin-bottom: 16px; }
+  /* Header A-1: ロゴ中央・serif text-6xl tracking 0.3em uppercase / ナビ極小 10px tracking 0.2em hover opacity-50 */
+  .page-wrapper.template-minimal_luxury .header-a1-inner { display: flex; flex-direction: column; align-items: center; gap: 32px; }
+  .page-wrapper.template-minimal_luxury .logo-a1 { font-family: "Playfair Display", "Yu Mincho", Georgia, serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: #1A1A1A; }
+  .page-wrapper.template-minimal_luxury .nav-a1 { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; }
+  .page-wrapper.template-minimal_luxury .nav-a1 .nav-link { font-size: 10px; letter-spacing: 0.2em; opacity: 1; transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .page-wrapper.template-minimal_luxury .nav-a1 .nav-link::after { display: none; }
+  .page-wrapper.template-minimal_luxury .nav-a1 .nav-link:hover { opacity: 0.5; }
   /* Typography */
-  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.15em; color: #1A1A1A; margin: 0 0 var(--space-sm); line-height: 1.15; }
+  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.15em; color: #1A1A1A; margin: 0 0 16px; line-height: 1.15; }
   .page-wrapper.template-minimal_luxury .hero .subheadline { font-family: system-ui, -apple-system, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3em; color: #1A1A1A; opacity: 0.85; }
   .page-wrapper.template-minimal_luxury .section h2 { font-family: "Playfair Display", serif; color: #1A1A1A; font-size: 1.5rem; letter-spacing: 0.08em; }
   .page-wrapper.template-minimal_luxury .section p { color: #1A1A1A; line-height: 1.75; }
-  /* Hero: 画像は右に w-2/3、タイトルを半分被せる z-10、角丸禁止 */
-  .page-wrapper.template-minimal_luxury .hero { display: grid; grid-template-columns: 1fr 2fr; gap: 0; min-height: var(--hero-min-h); align-items: center; padding: 0; }
-  .page-wrapper.template-minimal_luxury .hero .hero-a1-text { position: relative; z-index: 10; padding: var(--space-lg) var(--space-lg) var(--space-lg) 0; }
-  @media (min-width: 1024px) { .page-wrapper.template-minimal_luxury .hero .hero-a1-text { padding: var(--space-lg) var(--space-3xl) var(--space-lg) 0; } }
+  /* Hero: grid-cols-12 非対称・垂直中央揃え禁止 */
+  .page-wrapper.template-minimal_luxury .hero { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0; min-height: var(--hero-min-h); align-items: stretch; padding: 0; }
+  .page-wrapper.template-minimal_luxury .hero .hero-a1-text { grid-column: 1 / 5; position: relative; z-index: 10; padding: 32px 32px 32px 0; display: flex; flex-direction: column; justify-content: center; }
+  .page-wrapper.template-minimal_luxury .hero .hero-a1-img-wrap { grid-column: 4 / -1; }
+  @media (min-width: 1024px) { .page-wrapper.template-minimal_luxury .hero .hero-a1-text { padding: 32px 96px 32px 0; } }
   .page-wrapper.template-minimal_luxury .hero .hero-a1-img-wrap { position: relative; width: 100%; height: 100%; min-height: 400px; overflow: hidden; }
   .page-wrapper.template-minimal_luxury .hero .hero-a1-img, .page-wrapper.template-minimal_luxury .hero .hero-ken-burns { width: 100%; height: 100%; min-height: 400px; object-fit: cover; border-radius: 0; }
   @keyframes a1-ken-burns { 0% { transform: scale(1.06); } 100% { transform: scale(1); } }
@@ -156,19 +163,27 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-minimal_luxury .section-img-wrap:hover .section-img { transform: scale(1.04); }
   @media (max-width: 768px) {
     .page-wrapper.template-minimal_luxury .hero { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-    .page-wrapper.template-minimal_luxury .hero .hero-a1-text { order: 1; padding: var(--space-lg) 0; }
+    .page-wrapper.template-minimal_luxury .hero .hero-a1-text { grid-column: 1 / -1; order: 1; padding: 32px 0; }
+    .page-wrapper.template-minimal_luxury .hero .hero-a1-img-wrap { grid-column: 1 / -1; }
     .page-wrapper.template-minimal_luxury .hero h1 { font-size: 2.25rem; letter-spacing: 0.1em; }
   }
   .page-wrapper.template-minimal_luxury * { border-radius: 0; }
-  /* Animation: initial opacity 0 y 40 → animate 1 0, duration 1.2, ease [0.22,1,0.36,1], viewport once */
+  /* 登場アニメ: y:40→0, duration 1.2, ease [0.22,1,0.36,1], viewport once */
   .page-wrapper.template-minimal_luxury [data-a1-animate] { opacity: 0; transform: translateY(40px); transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
   .page-wrapper.template-minimal_luxury [data-a1-animate].a1-visible { opacity: 1; transform: translateY(0); }
   .page-wrapper.template-minimal_luxury .nav-link { color: #1A1A1A; }
-  .page-wrapper.template-minimal_luxury .nav-link:hover { text-decoration: none; opacity: 0.7; }
-  .page-wrapper.template-minimal_luxury .cta-btn { border: 1px solid #1A1A1A; color: #1A1A1A; background: transparent; }
-  .page-wrapper.template-minimal_luxury .cta-btn:hover { background: rgba(26,26,26,0.06); }
-  .page-wrapper.template-minimal_luxury .cta-block { padding: var(--space-3xl) 0 var(--space-2xl); }
-  .page-wrapper.template-minimal_luxury .quote-block { font-family: "Playfair Display", serif; letter-spacing: 0.05em; color: #1A1A1A; margin: var(--space-3xl) 0; padding: var(--space-xl); }
+  .page-wrapper.template-minimal_luxury .cta-btn,
+  .page-wrapper.template-minimal_luxury .cta-btn-a1,
+  .page-wrapper.template-minimal_luxury .cta-btn-primary { border: 1px solid #1A1A1A; color: #1A1A1A; background: transparent; padding: 16px 48px; border-radius: 0; }
+  .page-wrapper.template-minimal_luxury .cta-btn:hover,
+  .page-wrapper.template-minimal_luxury .cta-btn-a1:hover,
+  .page-wrapper.template-minimal_luxury .cta-btn-primary:hover { background: transparent; opacity: 0.7; }
+  .page-wrapper.template-minimal_luxury .cta-block { padding: 96px 0 64px; }
+  .page-wrapper.template-minimal_luxury .quote-block { font-family: "Playfair Display", serif; letter-spacing: 0.05em; color: #1A1A1A; margin: 96px 0; padding: 48px; }
+  .page-wrapper.template-minimal_luxury input,
+  .page-wrapper.template-minimal_luxury textarea { border: none; border-bottom: 1px solid #1A1A1A; border-radius: 0; background: transparent; padding: 8px 0; }
+  .page-wrapper.template-minimal_luxury input:focus,
+  .page-wrapper.template-minimal_luxury textarea:focus { outline: none; border-bottom-color: #666666; }
   .page-wrapper.template-minimal_luxury .section-img-wrap { aspect-ratio: 3/4; overflow: hidden; }
   .page-wrapper.template-minimal_luxury .section-img { max-height: none; height: 100%; }
   .page-wrapper.template-minimal_luxury .footer-cols { grid-template-columns: 1fr 1fr; }

@@ -107,7 +107,17 @@ export function buildHtml(
       </nav>
     </div>
   </header>`
-      : `<header>
+      : tid === 'minimal_luxury'
+        ? `<header class="header-a1">
+    <div class="container header-inner header-a1-inner">
+      <a href="#" class="logo logo-a1">${escapeHtml(content.siteName)}</a>
+      <nav class="nav nav-a1" aria-label="メインメニュー">
+        ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-link">${escapeHtml(n.label)}</a>`).join('')}
+      </nav>
+      <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-a1">${escapeHtml(cta.label)}</a>
+    </div>
+  </header>`
+        : `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">
