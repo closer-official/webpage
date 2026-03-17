@@ -213,8 +213,7 @@ function App() {
               </section>
             )}
             {content && step >= 2 && (
-              <section className="step">
-                <h3>ステップ 2: デザインを選ぶ</h3>
+              <section className="step step-design">
                 <ThemePicker
                   selectedIndustryId={industryId}
                   selectedStyleId={styleId}

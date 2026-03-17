@@ -35,36 +35,36 @@ export function ThemePicker({
   onStyleChange,
 }: ThemePickerProps) {
   return (
-    <div className="panel theme-picker">
-      <h2>6パターンからデザインを選ぶ</h2>
-      <p className="hint">
-        共通ルール（字間詰め・行間広め・余白4/8/16/32/64・transition 0.8s）を適用したテンプレートです。
-      </p>
-      <div className="template-grid template-grid-six">
-        {TEMPLATES.map((tpl) => (
-          <button
-            key={tpl.id}
-            type="button"
-            className={`template-card ${selectedStyleId === tpl.id ? 'selected' : ''}`}
-            onClick={() => {
-              onStyleChange(tpl.styleId);
-              onSelect(tpl);
-            }}
-          >
-            <span className="template-name">{tpl.name}</span>
-            <span className="template-desc">{tpl.description}</span>
-            <div
-              className="template-preview"
-              style={{
-                background: PREVIEW_BG[tpl.id] ?? '#fff',
-                color: PREVIEW_COLOR[tpl.id] ?? '#333',
+    <div className="panel theme-picker theme-picker-design">
+      <h2 className="design-step-label">⓪ デザイン</h2>
+      <p className="design-step-desc">6パターンから1つ選んでください。</p>
+      <ul className="design-list" aria-label="デザインパターン一覧">
+        {TEMPLATES.map((tpl, i) => (
+          <li key={tpl.id}>
+            <button
+              type="button"
+              className={`design-card ${selectedStyleId === tpl.id ? 'selected' : ''}`}
+              onClick={() => {
+                onStyleChange(tpl.styleId);
+                onSelect(tpl);
               }}
             >
-              Aa
-            </div>
-          </button>
+              <span className="design-card-index">{i + 1}</span>
+              <span className="design-card-name">{tpl.name}</span>
+              <span className="design-card-desc">{tpl.description}</span>
+              <div
+                className="design-card-preview"
+                style={{
+                  background: PREVIEW_BG[tpl.id] ?? '#fff',
+                  color: PREVIEW_COLOR[tpl.id] ?? '#333',
+                }}
+              >
+                Aa
+              </div>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
