@@ -14,7 +14,7 @@ interface ResearchFormProps {
 export function ResearchForm({ target, onClose, onDone }: ResearchFormProps) {
   const [concept, setConcept] = useState('');
   const [strengths, setStrengths] = useState('');
-  const [imageColorStyleId, setImageColorStyleId] = useState<StyleId>('warm');
+  const [imageColorStyleId, setImageColorStyleId] = useState<StyleId>('warm_organic');
 
   const handleCreate = useCallback(() => {
     const researched: ResearchedShop = {

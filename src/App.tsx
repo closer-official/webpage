@@ -15,7 +15,6 @@ import { GenerationOptions } from './components/GenerationOptions';
 import { StripePayment } from './components/StripePayment';
 import { QueueAuto } from './components/QueueAuto';
 import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
-import { LearningPanel } from './components/LearningPanel';
 import type { PageContent, SEOData, QueueTarget } from './types';
 import type { TemplateOption } from './types';
 import { isApiAvailable, api } from './lib/api';
@@ -38,7 +37,7 @@ const defaultSEO: SEOData = {
   canonicalUrl: '',
 };
 
-type TabId = 'queue' | 'dashboard' | 'page' | 'settings' | 'learning';
+type TabId = 'queue' | 'dashboard' | 'page' | 'settings';
 
 function App() {
   const [tab, setTab] = useState<TabId>('queue');
@@ -83,7 +82,7 @@ function App() {
   const [seo, setSeo] = useState<SEOData>(defaultSEO);
   const [template, setTemplate] = useState<TemplateOption | null>(null);
   const [industryId, setIndustryId] = useState('general');
-  const [styleId, setStyleId] = useState('minimal');
+  const [styleId, setStyleId] = useState('minimal_luxury');
 
   const handleContentReady = useCallback((c: PageContent) => {
     setContent(c);
@@ -109,87 +108,104 @@ function App() {
     }));
   }, [content]);
 
+  const flowSteps = [
+    { id: 'queue' as const, label: '① キュー' },
+    { id: 'dashboard' as const, label: '② ダッシュボード' },
+    { id: 'page' as const, label: '③ PDFから作成' },
+    { id: 'settings' as const, label: '設定' },
+  ];
+
   return (
     <div className="app">
       <header className="app-header">
         <h1>ウェブページ作成ツール</h1>
-        <p>キュー（Maps／手動）→ 調査 → 検閲ダッシュボード ／ PDFから直接作成</p>
-        <nav className="app-tabs" aria-label="メイン">
-          <button
-            type="button"
-            className={tab === 'learning' ? 'active' : ''}
-            onClick={() => setTab('learning')}
-          >
-            学習
-          </button>
-          <button
-            type="button"
-            className={tab === 'queue' ? 'active' : ''}
-            onClick={() => setTab('queue')}
-          >
-            キュー
-          </button>
-          <button
-            type="button"
-            className={tab === 'dashboard' ? 'active' : ''}
-            onClick={() => setTab('dashboard')}
-          >
-            検閲ダッシュボード
-          </button>
-          <button
-            type="button"
-            className={tab === 'page' ? 'active' : ''}
-            onClick={() => setTab('page')}
-          >
-            PDF・テキストから作成
-          </button>
-          <button
-            type="button"
-            className={tab === 'settings' ? 'active' : ''}
-            onClick={() => setTab('settings')}
-          >
-            設定
-          </button>
+        <p className="app-flow-desc">
+          <span className="flow-main">① キューで候補を集める</span>
+          <span className="flow-arrow" aria-hidden>→</span>
+          <span className="flow-main">② ダッシュボードで確認・送信</span>
+          <span className="flow-sub">　または PDF・テキストから直接作成</span>
+        </p>
+        <nav className="app-tabs" aria-label="メインメニュー">
+          {flowSteps.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={tab === id ? 'active' : ''}
+              onClick={() => setTab(id)}
+            >
+              {label}
+            </button>
+          ))}
         </nav>
       </header>
 
       <div className="app-steps">
-        {tab === 'learning' && (
-          <LearningPanel />
-        )}
         {tab === 'queue' && (
-          <>
-            <QueueAuto onCollectDone={refreshQueue} onProcessDone={refreshDashboard} />
-            <ReferenceSitesPanel />
-            <MapsCollect />
-            <ManualAddTarget onAdded={refreshQueue} />
-            <QueueList
-              queue={queue}
-              onRefresh={refreshQueue}
-              onResearch={(t) => setResearchTarget(t)}
-              useApi={isApiAvailable()}
-            />
-          </>
+          <section className="tab-content queue-tab">
+            <p className="tab-hint">
+              店舗候補をキューに登録し、各項目の「調査」でLP作成へ進むか、下の「フルオート」で一括処理。確認・送信は「② ダッシュボード」で行います。
+            </p>
+            <div className="queue-section queue-section-list">
+              <QueueList
+                queue={queue}
+                onRefresh={refreshQueue}
+                onResearch={(t) => setResearchTarget(t)}
+                useApi={isApiAvailable()}
+              />
+            </div>
+            <div className="queue-section">
+              <h3 className="queue-section-title">候補を追加する</h3>
+              <MapsCollect />
+              <ManualAddTarget onAdded={refreshQueue} />
+            </div>
+            <div className="queue-section">
+              <QueueAuto onCollectDone={refreshQueue} onProcessDone={refreshDashboard} />
+            </div>
+            <div className="queue-section">
+              <ReferenceSitesPanel />
+            </div>
+          </section>
         )}
 
         {tab === 'dashboard' && (
-          <ReviewDashboard
-            items={dashboardItems}
-            onRefresh={refreshDashboard}
-            useApi={isApiAvailable()}
-          />
+          <section className="tab-content">
+            <p className="tab-hint">
+              処理済みのLPを確認し、承認・DM文の編集・メール送信を行います。キューで「調査」した結果やフルオート処理の結果がここに並びます。
+            </p>
+            <ReviewDashboard
+              items={dashboardItems}
+              onRefresh={refreshDashboard}
+              useApi={isApiAvailable()}
+            />
+          </section>
         )}
 
         {tab === 'settings' && (
-          <>
-            <GenerationOptions />
-            <StripePayment />
-            <AIBudgetSettings />
-          </>
+          <section className="tab-content settings-tab">
+            <p className="tab-hint">
+              生成するLPのオプション・決済・AI利用の予算を設定します。
+            </p>
+            <div className="settings-block">
+              <h3 className="settings-block-title">LP生成オプション</h3>
+              <GenerationOptions />
+            </div>
+            <div className="settings-block">
+              <h3 className="settings-block-title">決済・料金</h3>
+              <StripePayment />
+            </div>
+            <div className="settings-block">
+              <h3 className="settings-block-title">AI予算</h3>
+              <AIBudgetSettings />
+            </div>
+          </section>
         )}
 
         {tab === 'page' && (
-          <>
+          <section className="tab-content">
+            <p className="tab-hint">
+              PDFやテキストから店舗情報を取り込み、テーマを選んでLPを編集・出力します。キューを使わない単発作成用です。
+            </p>
+            <>
             {step >= 1 && (
               <section className="step">
                 <h3>ステップ 1: コンテンツの取り込み</h3>
@@ -224,7 +240,8 @@ function App() {
                 </div>
               </section>
             )}
-          </>
+            </>
+          </section>
         )}
       </div>
 

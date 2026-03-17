@@ -35,7 +35,9 @@ export function buildHtml(
     .join('\n    ');
 
   const bodyClass = `page-wrapper template-${template.id}`;
-  const sectionsHtml = content.sections
+  const tid = template.id;
+
+  const sectionsDefault = content.sections
     .map(
       (s) =>
         `    <section class="section" aria-labelledby="${s.id}-title">
@@ -44,6 +46,53 @@ export function buildHtml(
     </section>`
     )
     .join('\n');
+
+  const sectionsHtml =
+    tid === 'corporate_trust'
+      ? `    <div class="section-grid">${content.sections
+          .map(
+            (s) =>
+              `<div class="section-card" aria-labelledby="${s.id}-title">
+        <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+        <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+      </div>`
+          )
+          .join('')}</div>`
+      : tid === 'high_energy'
+        ? content.sections
+            .map(
+              (s) =>
+                `    <section class="section" aria-labelledby="${s.id}-title">
+      <div class="section-inner"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
+    </section>`
+            )
+            .join('\n')
+        : sectionsDefault;
+
+  const heroBgStyle =
+    tid === 'dark_edge' && seo.ogImageUrl
+      ? ` style="background-image: url(${escapeHtml(seo.ogImageUrl)})"`
+      : '';
+
+  const heroSection =
+    tid === 'dark_edge'
+      ? `<section class="hero">
+      <div class="hero-bg"${heroBgStyle}></div>
+      <div class="hero-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
+    </section>`
+      : `<section class="hero">
+      <div class="container">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+      </div>
+    </section>`;
+
+  const marqueeText = `${escapeHtml(content.headline)}  ·  ${escapeHtml(content.siteName)}  ·  `;
+  const marqueeBar =
+    tid === 'high_energy'
+      ? `<div class="marquee-bar" aria-hidden="true"><span class="marquee-inner">${marqueeText}${marqueeText}</span></div>`
+      : '';
 
   const css = options?.inlineCss !== false ? template.css : '';
 
@@ -55,18 +104,14 @@ export function buildHtml(
     <style>${css}</style>
 </head>
 <body class="${bodyClass}">
+  ${marqueeBar}
   <header>
     <div class="container">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
     </div>
   </header>
   <main>
-    <section class="hero">
-      <div class="container">
-        <h1>${escapeHtml(content.headline)}</h1>
-        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-      </div>
-    </section>
+    ${heroSection}
     <div class="container">
 ${sectionsHtml}
     </div>

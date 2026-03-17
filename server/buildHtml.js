@@ -1,4 +1,4 @@
-import { CONCEPT_TEMPLATES, TEMPLATE_CSS } from './conceptTemplates.js';
+import { getTemplateFullCss } from './conceptTemplates.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -10,36 +10,10 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-function buildCss(templateId) {
-  const vars = TEMPLATE_CSS[templateId] || TEMPLATE_CSS.general_minimal;
-  const varLines = Object.entries(vars).map(([k, v]) => `  --tp-${k}: ${v};`).join('\n');
-  return `
-  .page-wrapper.template-${templateId} { ${varLines} }
-  .page-wrapper { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--tp-font); color: var(--tp-text); background: var(--tp-bg); line-height: 1.7; }
-  .page-wrapper * { box-sizing: border-box; }
-  .page-wrapper .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper header { padding: 24px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper .logo { font-size: 1.25rem; font-weight: 700; color: var(--tp-heading); text-decoration: none; }
-  .page-wrapper .hero { padding: 64px 0; text-align: center; }
-  .page-wrapper .hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700; color: var(--tp-heading); margin: 0 0 16px; }
-  .page-wrapper .hero .subheadline { font-size: 1.125rem; opacity: 0.9; }
-  .page-wrapper main { padding: 48px 0 64px; }
-  .page-wrapper .section { margin-bottom: 48px; }
-  .page-wrapper .section h2 { font-size: 1.5rem; font-weight: 600; color: var(--tp-heading); margin: 0 0 16px; }
-  .page-wrapper .section p { margin: 0 0 12px; }
-  .page-wrapper footer { padding: 32px 0; border-top: 1px solid var(--tp-border); text-align: center; font-size: 0.875rem; opacity: 0.8; }
-  .page-wrapper .sns-links { margin-top: 24px; }
-  .page-wrapper .sns-links a { margin-right: 12px; color: var(--tp-accent); }
-  .page-wrapper .presented-by { font-size: 0.75rem; opacity: 0.7; margin-top: 8px; }
-  .page-wrapper .qr-block { margin-top: 24px; text-align: center; }
-  .page-wrapper .qr-block img { max-width: 120px; }
-`;
-}
-
 /**
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
- * templateId: minimal | corporate | warm | bold | elegant | modern
+ * templateId: minimal_luxury | dark_edge | corporate_trust | warm_organic | pop_friendly | high_energy
  * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
@@ -54,6 +28,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     qrCodeDataUrl = '',
   } = genOptions;
 
+  const tid = templateId;
+
   const metaTags = [
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
@@ -67,7 +43,9 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     seo.canonicalUrl ? `<link rel="canonical" href="${escapeHtml(seo.canonicalUrl)}">` : '',
   ].filter(Boolean).join('\n    ');
 
-  const sectionsHtml = (content.sections || [])
+  const sections = content.sections || [];
+
+  const sectionsDefault = sections
     .map(
       (s) =>
         `    <section class="section" aria-labelledby="${s.id}-title">
@@ -76,6 +54,29 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     </section>`
     )
     .join('\n');
+
+  const sectionsHtml =
+    tid === 'corporate_trust'
+      ? `    <div class="section-grid">${sections
+          .map(
+            (s) =>
+              `<div class="section-card" aria-labelledby="${s.id}-title">
+        <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+        <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+      </div>`
+          )
+          .join('')}</div>`
+      : tid === 'high_energy'
+        ? sections
+            .map(
+              (s) =>
+                `    <section class="section" aria-labelledby="${s.id}-title">
+      <div class="section-inner"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
+    </section>`
+            )
+            .join('\n')
+        : sectionsDefault;
 
   let extraSections = '';
   if (instagramLine && (instagramUrl || lineUrl)) {
@@ -109,26 +110,44 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const footerExtra = presentedBy ? '<p class="presented-by">Presented by ウェブページ作成ツール</p>' : '';
 
-  const css = buildCss(templateId);
+  const heroBgStyle = tid === 'dark_edge' && seo.ogImageUrl ? ` style="background-image: url(${escapeHtml(seo.ogImageUrl)})"` : '';
+
+  const heroSection =
+    tid === 'dark_edge'
+      ? `<section class="hero">
+      <div class="hero-bg"${heroBgStyle}></div>
+      <div class="hero-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
+    </section>`
+      : `<section class="hero">
+      <div class="container">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+      </div>
+    </section>`;
+
+  const marqueeText = `${escapeHtml(content.headline)}  ·  ${escapeHtml(content.siteName)}  ·  `;
+  const marqueeBar =
+    tid === 'high_energy'
+      ? `<div class="marquee-bar" aria-hidden="true"><span class="marquee-inner">${marqueeText}${marqueeText}</span></div>`
+      : '';
+
+  const css = getTemplateFullCss(tid);
+
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     ${metaTags}
     <style>${css}</style>
 </head>
-<body class="page-wrapper template-${templateId}">
+<body class="page-wrapper template-${tid}">
+  ${marqueeBar}
   <header>
     <div class="container">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
     </div>
   </header>
   <main>
-    <section class="hero">
-      <div class="container">
-        <h1>${escapeHtml(content.headline)}</h1>
-        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-      </div>
-    </section>
+    ${heroSection}
     <div class="container">
 ${sectionsHtml}
 ${extraSections}

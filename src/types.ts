@@ -27,17 +27,23 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** デザインスタイル */
-export type StyleId = 'minimal' | 'corporate' | 'warm' | 'bold' | 'elegant' | 'modern';
+/** 6パターンテンプレートID（絶対ルール準拠） */
+export type StyleId =
+  | 'minimal_luxury'   // A-1
+  | 'dark_edge'        // A-2
+  | 'corporate_trust'  // A-3
+  | 'warm_organic'     // B-1
+  | 'pop_friendly'     // B-2
+  | 'high_energy';     // B-3
 
-/** テンプレート定義（業界×スタイルの組み合わせでCSS・雰囲気を決定） */
+/** テンプレート定義 */
 export interface TemplateOption {
   id: string;
   industryId: IndustryId;
   styleId: StyleId;
   name: string;
   description: string;
-  css: string; // そのテンプレート用のCSS
+  css: string;
 }
 
 export const INDUSTRIES: { id: IndustryId; name: string }[] = [
@@ -52,12 +58,12 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
 ];
 
 export const STYLES: { id: StyleId; name: string }[] = [
-  { id: 'minimal', name: 'ミニマル' },
-  { id: 'corporate', name: 'コーポレート' },
-  { id: 'warm', name: '温かみ' },
-  { id: 'bold', name: '大胆・インパクト' },
-  { id: 'elegant', name: 'エレガント' },
-  { id: 'modern', name: 'モダン' },
+  { id: 'minimal_luxury', name: 'Minimal Luxury' },
+  { id: 'dark_edge', name: 'Dark Edge' },
+  { id: 'corporate_trust', name: 'Corporate Trust' },
+  { id: 'warm_organic', name: 'Warm Organic' },
+  { id: 'pop_friendly', name: 'Pop & Friendly' },
+  { id: 'high_energy', name: 'High Energy' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---
