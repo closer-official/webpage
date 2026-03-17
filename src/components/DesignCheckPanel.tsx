@@ -43,6 +43,11 @@ const SAMPLE_BY_TEMPLATE: Record<
       footerAddress: '東京都港区南青山 5-8-12',
       footerPhone: '03-XXXX-XXXX',
       footerEmail: 'reserve@example.com',
+      heroSlides: [
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200',
+      ],
     },
     seo: {
       metaTitle: 'LA RÉSERVE — Hotel & Spa | 東京・南青山',

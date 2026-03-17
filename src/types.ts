@@ -49,6 +49,8 @@ export interface PageContent {
   footerAddress?: string;
   footerPhone?: string;
   footerEmail?: string;
+  /** ヒーロー複数画像（2枚以上でスライドショー、1枚なら Ken Burns） */
+  heroSlides?: string[];
 }
 
 /** SEO用データ */

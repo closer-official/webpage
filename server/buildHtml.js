@@ -154,11 +154,12 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const sections = content.sections || [];
 
+  const scrollInAttr = (tid === 'dark_edge' || tid === 'corporate_trust') ? ' data-scroll-in' : '';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
   const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
 
   const sectionsDefault = sections
-    .map((s) => `    <section class="section" aria-labelledby="${s.id}-title">
+    .map((s) => `    <section class="section" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       ${sectionBody(s)}
     </section>`)
@@ -180,7 +181,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       ? `    ${statsBlockHtml}
     <div class="section-grid">${sections
           .map(
-            (s) => `<div class="section-card" aria-labelledby="${s.id}-title">
+            (s) => `<div class="section-card" aria-labelledby="${s.id}-title" data-scroll-in>
         ${s.imageUrl ? `<div class="section-card-img"><img src="${escapeHtml(s.imageUrl)}" alt="" loading="lazy"></div>` : ''}
         <div class="section-card-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
       </div>`
@@ -190,7 +191,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
         ? `    ${statsBlockHtml}
 ${sections
             .map(
-              (s) => `    <section class="section" aria-labelledby="${s.id}-title">
+              (s) => `    <section class="section" aria-labelledby="${s.id}-title" data-scroll-in>
       <div class="section-inner">
         ${sectionImg(s)}
         <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
@@ -241,13 +242,20 @@ ${sections
     </section>`;
   }
 
+  const a1HeroSlides = (tid === 'minimal_luxury' && content.heroSlides && content.heroSlides.length) ? content.heroSlides : [heroImageUrl];
+  const a1UseSlideshow = a1HeroSlides.length >= 2;
+  const a1HeroHtml = tid === 'minimal_luxury'
+    ? a1UseSlideshow
+      ? `<div class="hero-a1-slides">${a1HeroSlides.map((url, i) => `<img src="${escapeHtml(url)}" alt="" class="hero-a1-slide" data-slide="${i}" loading="eager">`).join('')}</div>`
+      : `<img src="${escapeHtml(a1HeroSlides[0] || heroImageUrl)}" alt="" class="hero-a1-img hero-ken-burns" loading="eager">`
+    : '';
+
   const heroBgStyle = tid === 'dark_edge' ? ` style="background-image: url(${escapeHtml(heroImageUrl)})"` : '';
-  const a1HeroImage = tid === 'minimal_luxury' ? heroImageUrl : '';
 
   const heroSection =
     tid === 'dark_edge'
       ? `<section class="hero">
-      <div class="hero-bg"${heroBgStyle}></div>
+      <div class="hero-bg hero-bg-ken-burns"${heroBgStyle}></div>
       <div class="hero-text">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
@@ -260,10 +268,11 @@ ${sections
       : tid === 'minimal_luxury'
         ? `<section class="hero" data-a1-animate>
       <div class="hero-a1-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
-      <div><img src="${escapeHtml(a1HeroImage)}" alt="" class="hero-a1-img" loading="eager"></div>
+      <div class="hero-a1-img-wrap">${a1HeroHtml}</div>
     </section>`
         : tid === 'corporate_trust'
-          ? `<section class="hero hero-with-bg" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+          ? `<section class="hero hero-with-bg">
+      <div class="hero-bg-layer" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})"></div>
       <div class="hero-bg-overlay"></div>
       <div class="container hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -315,6 +324,12 @@ ${sections
 (function(){var el=document.querySelectorAll('[data-a1-animate]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('a1-visible');io.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});el.forEach(function(e){io.observe(e);});})();
 </script>`
       : '';
+  const scrollInScript =
+    tid === 'dark_edge' || tid === 'corporate_trust'
+      ? `<script>
+(function(){var el=document.querySelectorAll('[data-scroll-in]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});el.forEach(function(e){io.observe(e);});})();
+</script>`
+      : '';
 
   const ctaAfterHero = tid === 'minimal_luxury' ? ctaBlockHtml : '';
 
@@ -340,6 +355,7 @@ ${extraSections}
   </main>
   ${footerHtml}
   ${a1Script}
+  ${scrollInScript}
 </body>
 </html>`;
 }
