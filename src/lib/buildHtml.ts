@@ -123,6 +123,7 @@ export function buildHtml(
   </div>`;
 
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
+  const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
   const footerHtml = hasFooterCols
     ? `<footer>
     <div class="container footer-cols">
@@ -136,11 +137,13 @@ export function buildHtml(
         <p>${escapeHtml(content.footerText)}</p>
       </div>
     </div>
+    ${footerLegal}
   </footer>`
     : `<footer>
     <div class="container">
       ${escapeHtml(content.footerText)}
     </div>
+    ${footerLegal}
   </footer>`;
 
   /** セクション位置に応じた余白リズムクラス（賞・高級感用） */
@@ -157,8 +160,9 @@ export function buildHtml(
   const sectionsDefault = content.sections
     .map((s, i) => {
       const rhythm = getSectionRhythmClass(i, content.sections.length);
+      const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
       const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-      return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${img}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
@@ -166,10 +170,9 @@ export function buildHtml(
     })
     .join('\n');
 
-  const quoteBlockHtml =
-    content.quote && (tid === 'minimal_luxury' || tid === 'warm_organic')
-      ? `    <blockquote class="quote-block"${tid === 'minimal_luxury' ? ' data-a1-animate' : ''}>${escapeHtml(content.quote)}</blockquote>`
-      : '';
+  const quoteBlockHtml = content.quote
+    ? `    <blockquote class="quote-block"${tid === 'minimal_luxury' ? ' data-a1-animate' : ''}>${escapeHtml(content.quote)}</blockquote>`
+    : '';
 
   const statsBlockHtml =
     content.stats && content.stats.length > 0 && (tid === 'corporate_trust' || tid === 'high_energy')
@@ -273,9 +276,9 @@ ${content.sections
       </div>
     </section>`
             : tid === 'warm_organic' || tid === 'pop_friendly'
-              ? `<section class="hero">
-      <div class="container">
-        <div class="hero-img-wrap-hero"><img src="${escapeHtml(heroImageUrl)}" alt="" class="hero-sample-img" loading="eager"></div>
+              ? `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
@@ -308,8 +311,9 @@ ${content.sections
           .map(
             (s, i) => {
               const rhythm = getSectionRhythmClass(i, content.sections.length);
+              const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
               const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-              return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-a1-animate>
+              return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title" data-a1-animate>
       ${img}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
@@ -397,6 +401,9 @@ ${extraSectionsHtml}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}
+  <script>
+(function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
+</script>
 </body>
 </html>`;
 }

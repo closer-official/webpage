@@ -115,7 +115,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
   </div>`;
 
-  const footerExtra = presentedBy ? '<p class="presented-by">Presented by ウェブページ作成ツール</p>' : '';
+  const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
   const footerHtml = hasFooterCols
     ? `<footer>
@@ -128,15 +128,15 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       </div>
       <div class="footer-col">
         <p>${escapeHtml(content.footerText)}</p>
-        ${footerExtra}
       </div>
     </div>
+    ${footerLegal}
   </footer>`
     : `<footer>
     <div class="container">
       ${escapeHtml(content.footerText)}
-      ${footerExtra}
     </div>
+    ${footerLegal}
   </footer>`;
 
   const metaTags = [
@@ -170,14 +170,15 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const sectionsDefault = sections
     .map((s, i) => {
       const rhythm = getSectionRhythmClass(i, sections.length);
-      return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
+      return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       ${sectionBody(s)}
     </section>`;
     })
     .join('\n');
 
-  const quoteBlockHtml = content.quote && (tid === 'minimal_luxury' || tid === 'warm_organic')
+  const quoteBlockHtml = content.quote
     ? `    <blockquote class="quote-block"${tid === 'minimal_luxury' ? ' data-a1-animate' : ''}>${escapeHtml(content.quote)}</blockquote>`
     : '';
 
@@ -223,7 +224,8 @@ ${sections
               .map(
                 (s, i) => {
                   const rhythm = getSectionRhythmClass(i, sections.length);
-                  return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-a1-animate>
+                  const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
+                  return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title" data-a1-animate>
       ${sectionImg(s)}
       ${sectionBody(s)}
     </section>`;
@@ -311,9 +313,9 @@ ${sections
       </div>
     </section>`
             : tid === 'warm_organic' || tid === 'pop_friendly'
-              ? `<section class="hero">
-      <div class="container">
-        <div class="hero-img-wrap-hero"><img src="${escapeHtml(heroImageUrl)}" alt="" class="hero-sample-img" loading="eager"></div>
+              ? `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
@@ -377,6 +379,9 @@ ${extraSections}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}
+  <script>
+(function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
+</script>
 </body>
 </html>`;
 }
