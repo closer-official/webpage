@@ -74,29 +74,21 @@ if (!run(`git push -u origin ${branch}`)) {
   process.exit(1);
 }
 
-console.log('プッシュ完了。Vercel で本番デプロイが開始されます。');
+console.log('プッシュ完了。');
+console.log('');
+console.log('本番デプロイを実行して URL を表示します...');
 console.log('');
 
-// 本番URLを表示（Vercel CLI で取得を試みる）
-function showProductionUrl() {
-  try {
-    const result = spawnSync('npx', ['vercel', 'ls', '--limit', '1'], {
-      encoding: 'utf8',
-      timeout: 15000,
-      cwd: process.cwd(),
-    });
-    const out = (result.stdout || '') + (result.stderr || '');
-    const match = out.match(/https:\/\/[^\s"')\]]+\.vercel\.app/);
-    if (match) {
-      const url = match[0].replace(/[)\],].*$/, '').trim();
-      console.log('本番URL: ' + url);
-      return;
-    }
-  } catch {
-    // CLI 未リンク or エラー → ダッシュボード案内
-  }
-  console.log('本番URLは Vercel ダッシュボードで確認できます:');
-  console.log('  https://vercel.com/dashboard');
-}
+// vercel --prod を実行すると、Inspect / Production の URL がそのまま出る
+const vercelResult = spawnSync('npx', ['vercel', '--prod', '--yes'], {
+  stdio: 'inherit',
+  cwd: process.cwd(),
+});
 
-showProductionUrl();
+if (vercelResult.status !== 0) {
+  // CLI 未リンクなどで失敗した場合は案内だけ表示
+  console.log('');
+  console.log('本番URLは Vercel ダッシュボードで確認できます: https://vercel.com/dashboard');
+  console.log('（初回はプロジェクトフォルダで npx vercel link を実行して Vercel と紐付けてください）');
+  process.exit(1);
+}

@@ -126,6 +126,8 @@ git remote add origin https://github.com/あなたのID/リポジトリ名.git
 
 プッシュ後、Vercel がリポジトリの変更を検知して本番デプロイを開始します。
 
+**本番URLをターミナルに毎回表示したい場合:** プロジェクトの直下に `.vercel-project-url` というファイルを作り、本番URLを1行で書いて保存する（例: `https://webpage-xxx.vercel.app`）。次回以降の `npm run deploy` の最後にそのURLが表示される。
+
 ---
 
 ## 4. デプロイ後の動き
