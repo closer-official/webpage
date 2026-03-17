@@ -37,7 +37,7 @@ const defaultSEO: SEOData = {
   canonicalUrl: '',
 };
 
-type TabId = 'queue' | 'dashboard' | 'page' | 'settings';
+type TabId = 'design' | 'queue' | 'dashboard' | 'page' | 'settings';
 
 function App() {
   const [tab, setTab] = useState<TabId>('queue');
@@ -109,6 +109,7 @@ function App() {
   }, [content]);
 
   const flowSteps = [
+    { id: 'design' as const, label: '⓪ デザイン' },
     { id: 'queue' as const, label: '① キュー' },
     { id: 'dashboard' as const, label: '② ダッシュボード' },
     { id: 'page' as const, label: '③ PDFから作成' },
@@ -120,10 +121,12 @@ function App() {
       <header className="app-header">
         <h1>ウェブページ作成ツール</h1>
         <p className="app-flow-desc">
-          <span className="flow-main">① キューで候補を集める</span>
+          <span className="flow-main">⓪ デザイン</span>
           <span className="flow-arrow" aria-hidden>→</span>
-          <span className="flow-main">② ダッシュボードで確認・送信</span>
-          <span className="flow-sub">　または PDF・テキストから直接作成</span>
+          <span className="flow-main">① キュー</span>
+          <span className="flow-arrow" aria-hidden>→</span>
+          <span className="flow-main">② ダッシュボード</span>
+          <span className="flow-sub">　③ PDFから作成　・　設定</span>
         </p>
         <nav className="app-tabs" aria-label="メインメニュー">
           {flowSteps.map(({ id, label }) => (
@@ -140,6 +143,21 @@ function App() {
       </header>
 
       <div className="app-steps">
+        {tab === 'design' && (
+          <section className="tab-content">
+            <p className="tab-hint">
+              LPで使える6パターンのデザインです。キュー・ダッシュボードやPDFから作成で、ここで選んだデザイン（または各画面で選んだデザイン）が反映されます。
+            </p>
+            <ThemePicker
+              selectedIndustryId={industryId}
+              selectedStyleId={styleId}
+              onSelect={setTemplate}
+              onIndustryChange={setIndustryId}
+              onStyleChange={setStyleId}
+            />
+          </section>
+        )}
+
         {tab === 'queue' && (
           <section className="tab-content queue-tab">
             <p className="tab-hint">
