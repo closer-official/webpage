@@ -442,7 +442,7 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
-const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-builder, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
+const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
 
 /** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
 const GENERIC_CSS = `
@@ -476,11 +476,52 @@ const SALON_BARBER_CSS = `
   .page-wrapper.template-salon_barber footer { padding: 48px 0 32px; border-top: 1px solid var(--tp-border); }
 `;
 
+/** 6. 工務店・リノベ用（SUPPOSE DESIGN OFFICE 参照・洗練されたミニマリズム・白黒・ハンバーガーメニュー） */
+const BUILDER_CSS = `
+  .page-wrapper.template-builder { --tp-bg: #fff; --tp-heading: #0a0a0a; --tp-text: #1a1a1a; --tp-accent: #0a0a0a; --tp-border: #e5e5e5; --tp-bg-footer: #fff; --hero-min-h: 85vh; background: var(--tp-bg); color: var(--tp-heading); font-family: "Hiragino Sans", "Noto Sans JP", "Helvetica Neue", sans-serif; }
+  .page-wrapper.template-builder .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 1024px) { .page-wrapper.template-builder .container { padding: 0 48px; } }
+  .page-wrapper.template-builder header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-builder header.scrolled { background: rgba(255,255,255,0.98); backdrop-filter: saturate(180%) blur(10px); }
+  .page-wrapper.template-builder .logo { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tp-heading); text-decoration: none; line-height: 1.4; }
+  .page-wrapper.template-builder .builder-menu-btn { background: none; border: none; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tp-heading); cursor: pointer; padding: 8px 0; }
+  .page-wrapper.template-builder .builder-nav-cb { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .page-wrapper.template-builder .builder-nav-overlay { position: fixed; inset: 0; z-index: 200; background: #0a0a0a; color: #fff; display: flex; flex-direction: column; padding: 32px 24px 48px; opacity: 0; visibility: hidden; transition: opacity 0.35s ${EASE.outExpo}, visibility 0.35s ${EASE.outExpo}; overflow-y: auto; }
+  .page-wrapper.template-builder .builder-nav-cb:checked ~ .builder-nav-overlay { opacity: 1; visibility: visible; }
+  .page-wrapper.template-builder .builder-nav-overlay .builder-nav-close { align-self: flex-end; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; background: none; border: none; cursor: pointer; padding: 8px 0; }
+  .page-wrapper.template-builder .builder-nav-primary { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+  .page-wrapper.template-builder .builder-nav-primary a { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; text-decoration: none; }
+  .page-wrapper.template-builder .builder-nav-primary a:hover { opacity: 0.85; }
+  .page-wrapper.template-builder .builder-nav-secondary { margin-top: 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .page-wrapper.template-builder .builder-nav-secondary a { font-size: 0.8125rem; font-weight: 400; letter-spacing: 0.02em; color: rgba(255,255,255,0.85); text-decoration: none; text-transform: lowercase; }
+  .page-wrapper.template-builder .builder-nav-secondary a:hover { color: #fff; }
+  .page-wrapper.template-builder .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-builder .hero-inner h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 600; letter-spacing: 0.06em; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+  .page-wrapper.template-builder .hero-inner .subheadline { font-size: 0.9375rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.95); margin-top: 0.5rem; }
+  .page-wrapper.template-builder .section h2 { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 1rem; }
+  .page-wrapper.template-builder .section p { font-size: 0.9375rem; line-height: 1.85; letter-spacing: 0.02em; color: var(--tp-text); }
+  .page-wrapper.template-builder .section-rhythm-after-hero { padding-top: 64px; padding-bottom: 64px; }
+  .page-wrapper.template-builder .section-rhythm-default { padding-top: 48px; padding-bottom: 48px; }
+  .page-wrapper.template-builder .section-rhythm-before-footer { padding-top: 48px; padding-bottom: 80px; }
+  .page-wrapper.template-builder .section-img-wrap { margin-bottom: 1.25rem; overflow: hidden; }
+  .page-wrapper.template-builder .section-img { width: 100%; height: auto; max-height: 420px; object-fit: cover; display: block; transition: transform 0.6s ${EASE.outExpo}; }
+  .page-wrapper.template-builder .section-img-wrap:hover .section-img { transform: scale(1.02); }
+  .page-wrapper.template-builder footer { padding: 64px 0 48px; border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); color: var(--tp-heading); }
+  .page-wrapper.template-builder .footer-brand { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+  .page-wrapper.template-builder .cta-btn { background: #0a0a0a; color: #fff; border: none; padding: 14px 32px; font-size: 0.8125rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 0; }
+  .page-wrapper.template-builder .cta-btn:hover { background: #333; color: #fff; }
+  .page-wrapper.template-builder [data-scroll-in] { opacity: 0; transform: translateY(28px); transition: opacity 1s ${EASE.outExpo}, transform 1s ${EASE.outExpo}; }
+  .page-wrapper.template-builder [data-scroll-in].in-view { opacity: 1; transform: translateY(0); }
+`;
+
 /** 2. カフェ・喫茶用（旧 warm_organic と同一） */
 const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
 
 export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
-  const css = key === 'salon_barber' ? SALON_BARBER_CSS : key === 'cafe_tea' ? CAFE_TEA_CSS : GENERIC_CSS;
+  const css = key === 'salon_barber' ? SALON_BARBER_CSS
+    : key === 'cafe_tea' ? CAFE_TEA_CSS
+    : key === 'builder' ? BUILDER_CSS
+    : GENERIC_CSS;
   return COMMON_BASE + css;
 }

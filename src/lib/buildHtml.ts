@@ -44,9 +44,10 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: '無料体験', href: '#contact' },
   ],
   builder: [
-    { label: '施工事例', href: '#gallery' },
-    { label: '会社概要', href: '#concept' },
-    { label: 'お問い合わせ', href: '#contact' },
+    { label: 'WORKS', href: '#gallery' },
+    { label: 'IDEAS', href: '#concept' },
+    { label: 'PEOPLE', href: '#staff' },
+    { label: 'ABOUT', href: '#about' },
   ],
   professional: [
     { label: 'サービス', href: '#menu' },
@@ -119,10 +120,34 @@ export function buildHtml(
   const skipLink =
     '<a href="#main-content" class="skip-link">メインコンテンツへ</a>';
 
+  const builderNavOverlay = tid === 'builder'
+    ? `
+<input type="checkbox" id="builder-nav-cb" class="builder-nav-cb" aria-hidden="true">
+<div class="builder-nav-overlay" aria-label="メニュー" id="builder-nav-overlay">
+  <label for="builder-nav-cb" class="builder-nav-close" aria-label="閉じる">CLOSE</label>
+  <nav class="builder-nav-primary" aria-label="主要ナビゲーション">
+    ${navItems.map((n) => `<a href="${escapeHtml(n.href)}">${escapeHtml(n.label)}</a>`).join('')}
+  </nav>
+  <nav class="builder-nav-secondary" aria-label="サブナビゲーション">
+    <a href="#concept">news</a>
+    <a href="#contact">contact</a>
+    <a href="#access">access</a>
+  </nav>
+</div>`
+    : '';
+
   const headerHtml =
     tid === 'cafe_tea'
       ? ''
-      : `<header>
+      : tid === 'builder'
+        ? `<header>
+    <div class="container header-inner" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
+      <label for="builder-nav-cb" class="builder-menu-btn" aria-label="メニューを開く">MENU</label>
+      <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
+    </div>
+  </header>${builderNavOverlay}`
+        : `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">

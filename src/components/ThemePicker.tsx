@@ -15,7 +15,7 @@ const PREVIEW_BG: Record<string, string> = {
   bakery: '#FAFAFA',
   clinic_chiropractic: '#FAFAFA',
   gym_yoga: '#FAFAFA',
-  builder: '#FAFAFA',
+  builder: '#fff',
   professional: '#FAFAFA',
   cram_school: '#FAFAFA',
   izakaya: '#FAFAFA',

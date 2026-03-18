@@ -158,13 +158,33 @@ function makeTemplate(
   };
 }
 
-/** テンプレ3〜10用の共通CSS（プレビュー用） */
+/** テンプレ3〜10用の共通CSS（プレビュー用・builder 除く） */
 const GENERIC_TEMPLATE_CSS = `
-  .page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-builder, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-bakery .container, .page-wrapper.template-clinic_chiropractic .container, .page-wrapper.template-gym_yoga .container, .page-wrapper.template-builder .container, .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-bakery header, .page-wrapper.template-clinic_chiropractic header, .page-wrapper.template-gym_yoga header, .page-wrapper.template-builder header, .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-bakery .cta-btn, .page-wrapper.template-clinic_chiropractic .cta-btn, .page-wrapper.template-gym_yoga .cta-btn, .page-wrapper.template-builder .cta-btn, .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
-  .page-wrapper.template-bakery .hero-full-img, .page-wrapper.template-clinic_chiropractic .hero-full-img, .page-wrapper.template-gym_yoga .hero-full-img, .page-wrapper.template-builder .hero-full-img, .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-bakery .container, .page-wrapper.template-clinic_chiropractic .container, .page-wrapper.template-gym_yoga .container, .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-bakery header, .page-wrapper.template-clinic_chiropractic header, .page-wrapper.template-gym_yoga header, .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-bakery .cta-btn, .page-wrapper.template-clinic_chiropractic .cta-btn, .page-wrapper.template-gym_yoga .cta-btn, .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-bakery .hero-full-img, .page-wrapper.template-clinic_chiropractic .hero-full-img, .page-wrapper.template-gym_yoga .hero-full-img, .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img { min-height: var(--hero-min-h); }
+`;
+
+/** 工務店・リノベ用（SUPPOSE 参照・洗練されたミニマリズム・白黒・ハンバーガーメニュー） */
+const BUILDER_TEMPLATE_CSS = `
+  .page-wrapper.template-builder { --tp-bg: #fff; --tp-heading: #0a0a0a; --tp-text: #1a1a1a; --tp-border: #e5e5e5; --tp-bg-footer: #fff; --hero-min-h: 85vh; background: var(--tp-bg); color: var(--tp-heading); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-builder .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-builder header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-builder .logo { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tp-heading); text-decoration: none; }
+  .page-wrapper.template-builder .builder-menu-btn { background: none; border: none; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tp-heading); cursor: pointer; padding: 8px 0; }
+  .page-wrapper.template-builder .builder-nav-cb { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .page-wrapper.template-builder .builder-nav-overlay { position: fixed; inset: 0; z-index: 200; background: #0a0a0a; color: #fff; display: flex; flex-direction: column; padding: 32px 24px 48px; opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease; overflow-y: auto; }
+  .page-wrapper.template-builder .builder-nav-cb:checked ~ .builder-nav-overlay { opacity: 1; visibility: visible; }
+  .page-wrapper.template-builder .builder-nav-overlay .builder-nav-close { align-self: flex-end; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; background: none; border: none; cursor: pointer; }
+  .page-wrapper.template-builder .builder-nav-primary { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+  .page-wrapper.template-builder .builder-nav-primary a { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; text-decoration: none; }
+  .page-wrapper.template-builder .builder-nav-secondary { margin-top: 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .page-wrapper.template-builder .builder-nav-secondary a { font-size: 0.8125rem; color: rgba(255,255,255,0.85); text-decoration: none; text-transform: lowercase; }
+  .page-wrapper.template-builder .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-builder .section h2 { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #888; }
+  .page-wrapper.template-builder .cta-btn { background: #0a0a0a; color: #fff; border: none; padding: 14px 32px; font-size: 0.8125rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 0; }
 `;
 
 export const TEMPLATES: TemplateOption[] = [
@@ -216,8 +236,8 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'builder',
     '工務店・リノベ',
-    '施工事例ギャラリー・職人のこだわり',
-    GENERIC_TEMPLATE_CSS
+    '洗練されたミニマリズム・白黒・ハンバーガーメニュー（SUPPOSE参照）',
+    BUILDER_TEMPLATE_CSS
   ),
   makeTemplate(
     'professional',

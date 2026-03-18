@@ -48,7 +48,7 @@ const PREVIEW_BG: Record<string, string> = {
   bakery: '#F9F9F7',
   clinic_chiropractic: '#F9F9F7',
   gym_yoga: '#F9F9F7',
-  builder: '#F9F9F7',
+  builder: '#fff',
   professional: '#F9F9F7',
   cram_school: '#F9F9F7',
   izakaya: '#F9F9F7',
