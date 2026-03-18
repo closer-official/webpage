@@ -120,33 +120,11 @@ export function buildHtml(
   const skipLink =
     '<a href="#main-content" class="skip-link">メインコンテンツへ</a>';
 
-  const builderNavOverlay = tid === 'builder'
-    ? `
-<input type="checkbox" id="builder-nav-cb" class="builder-nav-cb" aria-hidden="true">
-<div class="builder-nav-overlay" aria-label="メニュー" id="builder-nav-overlay">
-  <label for="builder-nav-cb" class="builder-nav-close" aria-label="閉じる">CLOSE</label>
-  <nav class="builder-nav-primary" aria-label="主要ナビゲーション">
-    ${navItems.map((n) => `<a href="${escapeHtml(n.href)}">${escapeHtml(n.label)}</a>`).join('')}
-  </nav>
-  <nav class="builder-nav-secondary" aria-label="サブナビゲーション">
-    <a href="#concept">news</a>
-    <a href="#contact">contact</a>
-    <a href="#access">access</a>
-  </nav>
-</div>`
-    : '';
-
   const headerHtml =
     tid === 'cafe_tea'
       ? ''
       : tid === 'builder'
-        ? `<header>
-    <div class="container header-inner" style="display: flex; justify-content: space-between; align-items: center;">
-      <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
-      <label for="builder-nav-cb" class="builder-menu-btn" aria-label="メニューを開く">MENU</label>
-      <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
-    </div>
-  </header>${builderNavOverlay}`
+        ? ''
         : `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
@@ -485,16 +463,92 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
 
   const a1Script = '';
 
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-    ${metaTags}
-    ${googleFonts}
-    <script type="application/ld+json">${jsonLd}</script>
-    <style>${css}</style>
-</head>
-<body class="${bodyClass}">
-  ${skipLink}
+  const sections = content.sections ?? [];
+  const sectionImg = (s: { imageUrl?: string }) =>
+    s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
+  const sectionBody = (s: { id: string; title: string; content: string }) =>
+    `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
+
+  const builderViewIdToSectionId: Record<string, string> = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
+  const getSectionForView = (viewId: string) => {
+    if (viewId === 'ideas') return sections.find((s) => s.id === 'concept');
+    const sid = builderViewIdToSectionId[viewId];
+    return sections.find((s) => s.id === sid);
+  };
+
+  let builderViewsHtml = '';
+  let builderViewScript = '';
+  if (tid === 'builder') {
+    const heroBg = `url(${escapeHtml(heroImageUrl)})`;
+    builderViewsHtml = `
+<div id="builder-views" class="builder-views">
+  <div class="builder-view builder-view-hero active" id="builder-view-hero" data-builder-view="hero">
+    <div class="builder-hero-bg" style="background-image:${heroBg}"></div>
+    <div class="builder-hero-overlay">
+      <div class="builder-hero-search">Search:</div>
+      <div class="builder-hero-logo">${escapeHtml(content.siteName)}</div>
+      <div class="builder-hero-copy">
+        <p class="builder-hero-catchphrase">${escapeHtml(content.subheadline)}</p>
+        <h1 class="builder-hero-title">${escapeHtml(content.headline)}</h1>
+      </div>
+      <a href="#menu" class="builder-hero-menu-btn">MENU</a>
+      <div class="builder-hero-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="builder-view builder-view-menu" id="builder-view-menu" data-builder-view="menu">
+    <div class="builder-menu-inner">
+      <a href="#" class="builder-nav-close" aria-label="閉じる">CLOSE</a>
+      <div class="builder-menu-search">Search:</div>
+      <nav class="builder-nav-primary">
+        <a href="#works">WORKS</a>
+        <a href="#ideas">IDEAS</a>
+        <a href="#people">PEOPLE</a>
+        <a href="#about">ABOUT</a>
+      </nav>
+      <nav class="builder-nav-secondary">
+        <a href="#concept">news</a>
+        <a href="#contact">contact</a>
+        <a href="#access">access</a>
+        <a href="#contact">newsletter</a>
+        <span class="builder-menu-ja-en">ja / en</span>
+      </nav>
+    </div>
+  </div>
+  ${['works', 'ideas', 'people', 'about', 'access', 'contact'].map((viewId) => {
+    const sec = getSectionForView(viewId);
+    const title = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+    if (!sec) return `<div class="builder-view builder-view-${viewId}" id="builder-view-${viewId}" data-builder-view="${viewId}"><div class="builder-content-bar"><a href="#menu">MENU</a></div><div class="container builder-content-inner"><h2>${title}</h2><p>—</p></div></div>`;
+    return `<div class="builder-view builder-view-${viewId}" id="builder-view-${viewId}" data-builder-view="${viewId}">
+    <div class="builder-content-bar"><a href="#menu">MENU</a></div>
+    <div class="container builder-content-inner">
+      <section class="section section-rhythm-default">${sectionImg(sec)}${sectionBody(sec)}</section>
+    </div>
+  </div>`;
+  }).join('')}
+</div>`;
+
+    builderViewScript = `<script>
+(function(){
+  var views = document.querySelectorAll('.builder-view');
+  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
+  function applyView(){
+    var h = (location.hash || '#').replace(/^#/, '') || '';
+    var viewId = hashToView[h] || 'hero';
+    views.forEach(function(v){
+      var id = v.getAttribute('data-builder-view');
+      v.classList.toggle('active', id === viewId);
+    });
+  }
+  applyView();
+  window.addEventListener('hashchange', applyView);
+})();
+</script>`;
+  }
+
+  const bodyInner =
+    tid === 'builder'
+      ? `${skipLink}${builderViewsHtml}${builderViewScript}`
+      : `${skipLink}
   ${woChrome}
   ${marqueeBar}
   ${headerHtml}
@@ -513,7 +567,18 @@ ${extraSectionsHtml}
   ${woOrganicScript}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
-</script>
+</script>`;
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    ${metaTags}
+    ${googleFonts}
+    <script type="application/ld+json">${jsonLd}</script>
+    <style>${css}</style>
+</head>
+<body class="${bodyClass}">
+  ${bodyInner}
 </body>
 </html>`;
 }

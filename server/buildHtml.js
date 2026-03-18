@@ -150,6 +150,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 </div>`
     : '';
 
+  const sections = content.sections || [];
+
   const headerHtml = tid === 'salon_barber'
     ? `<header>
     <div class="container header-inner">
@@ -250,8 +252,6 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     seo.ogImageUrl ? `<meta property="og:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
     seo.canonicalUrl ? `<link rel="canonical" href="${escapeHtml(seo.canonicalUrl)}">` : '',
   ].filter(Boolean).join('\n    ');
-
-  const sections = content.sections || [];
 
   function getSectionRhythmClass(i, total) {
     if (total <= 0) return 'section-rhythm-default';
@@ -491,15 +491,87 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
 
   const ctaAfterHero = tid !== 'cafe_tea' ? ctaBlockHtml : '';
 
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-    ${metaTags}
-    ${googleFonts}
-    <style>${css}</style>
-</head>
-<body class="page-wrapper template-${tid}">
-  ${skipLink}
+  const builderViewIdToSectionId = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
+  const getSectionById = (id) => sections.find((s) => s.id === id);
+  const getSectionForView = (viewId) => {
+    const sid = builderViewIdToSectionId[viewId];
+    if (viewId === 'ideas') return sections.find((s) => s.id === 'concept');
+    return getSectionById(sid);
+  };
+
+  let builderViewsHtml = '';
+  let builderViewScript = '';
+  if (tid === 'builder') {
+    const heroBg = `url(${escapeHtml(heroImageUrl)})`;
+    builderViewsHtml = `
+<div id="builder-views" class="builder-views">
+  <div class="builder-view builder-view-hero active" id="builder-view-hero" data-builder-view="hero">
+    <div class="builder-hero-bg" style="background-image:${heroBg}"></div>
+    <div class="builder-hero-overlay">
+      <div class="builder-hero-search">Search:</div>
+      <div class="builder-hero-logo">${escapeHtml(content.siteName)}</div>
+      <div class="builder-hero-copy">
+        <p class="builder-hero-catchphrase">${escapeHtml(content.subheadline)}</p>
+        <h1 class="builder-hero-title">${escapeHtml(content.headline)}</h1>
+      </div>
+      <a href="#menu" class="builder-hero-menu-btn">MENU</a>
+      <div class="builder-hero-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="builder-view builder-view-menu" id="builder-view-menu" data-builder-view="menu">
+    <div class="builder-menu-inner">
+      <a href="#" class="builder-nav-close" aria-label="閉じる">CLOSE</a>
+      <div class="builder-menu-search">Search:</div>
+      <nav class="builder-nav-primary">
+        <a href="#works">WORKS</a>
+        <a href="#ideas">IDEAS</a>
+        <a href="#people">PEOPLE</a>
+        <a href="#about">ABOUT</a>
+      </nav>
+      <nav class="builder-nav-secondary">
+        <a href="#concept">news</a>
+        <a href="#contact">contact</a>
+        <a href="#access">access</a>
+        <a href="#contact">newsletter</a>
+        <span class="builder-menu-ja-en">ja / en</span>
+      </nav>
+    </div>
+  </div>
+  ${['works', 'ideas', 'people', 'about', 'access', 'contact'].map((viewId) => {
+    const sec = getSectionForView(viewId);
+    const title = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+    if (!sec) return `<div class="builder-view builder-view-${viewId}" id="builder-view-${viewId}" data-builder-view="${viewId}"><div class="builder-content-bar"><a href="#menu">MENU</a></div><div class="container builder-content-inner"><h2>${title}</h2><p>—</p></div></div>`;
+    return `<div class="builder-view builder-view-${viewId}" id="builder-view-${viewId}" data-builder-view="${viewId}">
+    <div class="builder-content-bar"><a href="#menu">MENU</a></div>
+    <div class="container builder-content-inner">
+      <section class="section section-rhythm-default">${sectionImg(sec)}${sectionBody(sec)}</section>
+    </div>
+  </div>`;
+  }).join('')}
+</div>`;
+
+    builderViewScript = `<script>
+(function(){
+  var views = document.querySelectorAll('.builder-view');
+  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
+  function applyView(){
+    var h = (location.hash || '#').replace(/^#/, '') || '';
+    var viewId = hashToView[h] || 'hero';
+    views.forEach(function(v){
+      var id = v.getAttribute('data-builder-view');
+      v.classList.toggle('active', id === viewId);
+    });
+  }
+  applyView();
+  window.addEventListener('hashchange', applyView);
+})();
+</script>`;
+  }
+
+  const isBuilder = tid === 'builder';
+  const bodyInner = isBuilder
+    ? `${skipLink}${builderViewsHtml}${builderViewScript}`
+    : `${skipLink}
   ${woChrome}
   ${marqueeBar}
   ${headerHtml}
@@ -521,7 +593,17 @@ ${extraSections}
 </script>` : ''}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
-</script>
+</script>`;
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    ${metaTags}
+    ${googleFonts}
+    <style>${css}</style>
+</head>
+<body class="page-wrapper template-${tid}">
+  ${bodyInner}
 </body>
 </html>`;
 }
