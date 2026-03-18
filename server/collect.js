@@ -20,11 +20,16 @@ export async function collectPlaces(query, options = {}) {
     const searchRes = await fetch(url);
     const searchData = await searchRes.json();
     if (searchData.status !== 'OK' && searchData.status !== 'ZERO_RESULTS') {
-      const msg = searchData.error_message || searchData.status;
-      const hint = (searchData.status === 'INVALID_REQUEST' || searchData.status === 'REQUEST_DENIED')
-        ? ' APIキー・請求の有効化・Places API（Text Search）の有効化を確認してください。'
-        : '';
-      throw new Error(`Google Maps API: ${msg}${hint}`);
+      const detail = searchData.error_message ? ` (${searchData.error_message})` : '';
+      let hint = '';
+      if (searchData.status === 'REQUEST_DENIED') {
+        hint =
+          ' 【対処】Google Cloud で「Places API」「Places API (New)」のいずれかを有効化し、請求をオンにしたうえで、サーバー用の API キーを使ってください。';
+      } else if (searchData.status === 'INVALID_REQUEST') {
+        hint =
+          ' 【よくある原因】Vercel／サーバーでは「ウェブサイトのリファラー制限」付きキーは使えません。Google Cloud Console で別キーを作り、アプリの制限は「なし」、API の制限で Places のみ、にして Vercel の GOOGLE_MAPS_API_KEY に設定してください。Places API（レガシーの Text Search）の有効化と請求も確認してください。';
+      }
+      throw new Error(`Google Maps API: ${searchData.status}${detail}${hint}`);
     }
     const pageResults = searchData.results || [];
     allResults = allResults.concat(pageResults);
