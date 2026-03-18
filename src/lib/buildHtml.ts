@@ -196,6 +196,14 @@ export function buildHtml(
   };
 
   const scrollInAttr = tid === 'minimal_luxury' ? '' : ' data-scroll-in';
+  const woHoursBody = (text: string) => {
+    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return '';
+    const [first, ...rest] = lines;
+    const head = `<p class="wo-hours-emphasis"><span class="wo-text-mark">${escapeHtml(first)}</span></p>`;
+    const tail = rest.map((l) => `<p class="wo-hours-detail">${escapeHtml(l)}</p>`).join('');
+    return head + tail;
+  };
   const sectionsDefault =
     tid === 'warm_organic'
       ? content.sections
@@ -204,17 +212,22 @@ export function buildHtml(
             const img = s.imageUrl
               ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`
               : '';
-            const body = `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
-      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
+            const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+      <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
             if (s.id === 'hours') {
-              return `    <section class="section wo-sec wo-hours-band ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="hours-band-inner"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2></div>
-      <div class="section-body"><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
+              return `    <section class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        ${woHoursBody(s.content)}
+      </div>
     </section>`;
             }
             if (i === 0) {
               return `    <section class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      ${body}
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+      </div>
       ${img}
     </section>`;
             }
@@ -475,17 +488,53 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
   if (genOpts) {
     const { contactForm, formActionUrl, instagramLine, instagramUrl, lineUrl, qrCode, qrCodeDataUrl } = genOpts;
     if (instagramLine && (instagramUrl || lineUrl)) {
-      const snsWo = tid === 'warm_organic' ? ' wo-sns' : '';
-      extraSectionsHtml += `
-    <section class="section sns-links${snsWo}"${extraMotionAttr} id="sns">
-      <h2 id="sns-title">フォロー・お問い合わせ</h2>
-      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer"${tid === 'warm_organic' ? ' aria-label="Instagram"' : ''}>${tid === 'warm_organic' ? 'IG' : 'Instagram'}</a>` : ''}
-      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer"${tid === 'warm_organic' ? ' aria-label="LINE"' : ''}>${tid === 'warm_organic' ? 'LINE' : 'LINE'}</a>` : ''}
+      if (tid === 'warm_organic') {
+        extraSectionsHtml += `
+    <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
+      <div class="section-body">
+        <h2 id="sns-title" class="wo-sec-heading">フォロー・お問い合わせ</h2>
+        <p class="wo-sns-caption">タップで開きます</p>
+        <div class="wo-sns-row" role="list">
+          ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="Instagram">📸</a>` : ''}
+          ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="LINE">💬</a>` : ''}
+        </div>
+      </div>
     </section>`;
+      } else {
+        extraSectionsHtml += `
+    <section class="section sns-links"${extraMotionAttr} id="sns">
+      <h2 id="sns-title">フォロー・お問い合わせ</h2>
+      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer">Instagram</a>` : ''}
+      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer">LINE</a>` : ''}
+    </section>`;
+      }
     }
     if (contactForm) {
       const formAction = (formActionUrl ?? '').trim() || '#';
-      extraSectionsHtml += `
+      if (tid === 'warm_organic') {
+        extraSectionsHtml += `
+    <section class="section wo-sec wo-form-block"${extraMotionAttr} id="contact-form">
+      <div class="section-body">
+        <h2 class="wo-sec-heading" id="wo-form-title">お問い合わせフォーム</h2>
+        <form class="wo-form" action="${escapeHtml(formAction)}" method="post" aria-labelledby="wo-form-title">
+          <div class="wo-form-field">
+            <label class="wo-form-label" for="wo-inp-name">お名前</label>
+            <input class="wo-form-control" id="wo-inp-name" type="text" name="name" required autocomplete="name" placeholder="山田 太郎">
+          </div>
+          <div class="wo-form-field">
+            <label class="wo-form-label" for="wo-inp-email">メール</label>
+            <input class="wo-form-control" id="wo-inp-email" type="email" name="email" required autocomplete="email" placeholder="example@email.com">
+          </div>
+          <div class="wo-form-field">
+            <label class="wo-form-label" for="wo-inp-body">内容</label>
+            <textarea class="wo-form-control wo-form-textarea" id="wo-inp-body" name="body" rows="6" placeholder="ご用件をご記入ください"></textarea>
+          </div>
+          <button type="submit" class="cta-btn wo-form-submit">送信する</button>
+        </form>
+      </div>
+    </section>`;
+      } else {
+        extraSectionsHtml += `
     <section class="section"${extraMotionAttr}>
       <h2>お問い合わせフォーム</h2>
       <form action="${escapeHtml(formAction)}" method="post">
@@ -495,6 +544,7 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
         <p><button type="submit">送信</button></p>
       </form>
     </section>`;
+      }
     }
     if (qrCode) {
       const qrImg = qrCodeDataUrl
