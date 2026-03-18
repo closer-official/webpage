@@ -10,6 +10,22 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+/** blob プレビュー等で iframe の相対 URL が壊れないよう補助 + 別タブフォールバック */
+function paymentIframeBootJs(iframeId, fallbackId) {
+  return (
+    '(function(){function abs(u){if(!u)return"";if(u.indexOf("://")!==-1)return u;' +
+    'var m0=document.querySelector(\'meta[name="closer-payment-api-origin"]\');var o=(m0&&m0.getAttribute("content")||"").trim();' +
+    'if(!o){try{o=new URL(window.location.href).origin}catch(e){}}' +
+    'if(!o||o==="null"){var m=String(window.location.href).match(/^blob:(https?:\\/\\/[^\\/#?]+)/i);if(m)o=m[1]}' +
+    'if(!o)o=window.location.origin||"";' +
+    'return(u.charAt(0)==="/"&&o&&o!=="null")?o+u:u}' +
+    'var f=document.getElementById("' + iframeId + '");if(!f)return;' +
+    'var b=abs(f.getAttribute("data-src"));if(!b)return;' +
+    'var q="?returnUrl="+encodeURIComponent(window.location.href);f.src=b+q;' +
+    'var a=document.getElementById("' + fallbackId + '");if(a)a.href=b+q;})();'
+  );
+}
+
 const DEFAULT_NAV = {
   salon_barber: [
     { label: 'ニュース', href: '#news' },
@@ -125,6 +141,24 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   } = genOptions;
 
   const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
+  const vercelHost = (process.env.VERCEL_URL || '').trim();
+  const vercelApiOrigin = vercelHost
+    ? (vercelHost.startsWith('http') ? vercelHost.replace(/\/$/, '') : `https://${vercelHost}`)
+    : '';
+  const pPay = (paymentFormBaseUrl || '').trim();
+  let paymentFormSrc;
+  if (pPay && pPay.includes('lp-payment-form')) paymentFormSrc = pPay;
+  else if (pPay) paymentFormSrc = pPay.replace(/\/$/, '') + '/api/lp-payment-form';
+  else if (vercelApiOrigin) paymentFormSrc = `${vercelApiOrigin}/api/lp-payment-form`;
+  else paymentFormSrc = '/api/lp-payment-form';
+  const paymentOriginMeta =
+    tid !== 'event' &&
+    (vercelApiOrigin || (pPay && !pPay.includes('lp-payment-form') ? pPay.replace(/\/$/, '') : ''));
+  const paymentMetaLine =
+    paymentOriginMeta
+      ? `<meta name="closer-payment-api-origin" content="${escapeHtml(String(paymentOriginMeta).trim())}">`
+      : '';
+
   let navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
   if (tid !== 'event') {
     navItems = [...(Array.isArray(navItems) ? navItems : []), { label: '料金・お支払', href: '#payment' }];
@@ -261,6 +295,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const metaTags = [
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    paymentMetaLine,
     `<title>${escapeHtml(seo.metaTitle)}</title>`,
     `<meta name="description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.keywords ? `<meta name="keywords" content="${escapeHtml(seo.keywords)}">` : '',
@@ -741,25 +776,17 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </div>`
     : '';
 
-  const paymentBase = (paymentFormBaseUrl || '').trim();
-  const paymentFormSrc = paymentBase && paymentBase.includes('lp-payment-form')
-    ? paymentBase
-    : (paymentBase ? paymentBase.replace(/\/$/, '') + '/api/lp-payment-form' : '/api/lp-payment-form');
   const paymentSectionHtml = tid !== 'event'
     ? `
     <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
       <h2 id="payment-title">料金・お支払い</h2>
       <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。完了するまでこのページをご利用いただけます。</p>
+      <p class="payment-fallback-hint"><a id="payment-fallback-link" target="_blank" rel="noopener noreferrer" href="#">別タブで料金・お支払いを開く</a></p>
       <div class="payment-iframe-wrap">
         <iframe id="payment-iframe" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
       </div>
       <script>
-(function(){
-  var f = document.getElementById('payment-iframe');
-  if (f && f.getAttribute('data-src')) {
-    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
-  }
-})();
+${paymentIframeBootJs('payment-iframe', 'payment-fallback-link')}
 </scr${''}ipt>
     </section>`
     : '';
@@ -817,16 +844,12 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
         <h2 id="payment-title">料金・お支払い</h2>
         <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。</p>
+        <p class="payment-fallback-hint"><a id="payment-fallback-link-builder" target="_blank" rel="noopener noreferrer" href="#">別タブで料金・お支払いを開く</a></p>
         <div class="payment-iframe-wrap">
           <iframe id="payment-iframe-builder" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
         </div>
         <script>
-(function(){
-  var f = document.getElementById('payment-iframe-builder');
-  if (f && f.getAttribute('data-src')) {
-    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
-  }
-})();
+${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')}
 </scr${''}ipt>
       </section>
     </div>

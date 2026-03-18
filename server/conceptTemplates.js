@@ -69,6 +69,8 @@ const COMMON_BASE = `
   .page-wrapper .section-payment .section-payment-note { font-size: 0.9375rem; color: var(--tp-text); margin: 0 0 1rem; }
   .page-wrapper .payment-iframe-wrap { width: 100%; min-height: 420px; border: 1px solid var(--tp-border); border-radius: 8px; overflow: hidden; background: #f8f8f8; }
   .page-wrapper .payment-iframe { width: 100%; height: 520px; border: 0; display: block; }
+  .page-wrapper .payment-fallback-hint { font-size: 0.875rem; margin: 0 0 0.75rem; }
+  .page-wrapper .payment-fallback-hint a { color: var(--tp-accent, #2563eb); text-decoration: underline; }
   .page-wrapper .qr-placeholder { font-size: 0.875rem; color: var(--tp-text, #666); margin: var(--space-xs) 0; }
   .quote-block { margin: var(--space-2xl) 0; padding: var(--space-md); font-size: 1.125rem; font-style: italic; text-align: center; }
   .stats-block { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-2xl); text-align: center; }

@@ -595,30 +595,47 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </div>`
       : '';
 
-  const paymentFormBaseUrl = options?.genOptions?.paymentFormBaseUrl ?? '';
-  const paymentBase = paymentFormBaseUrl.trim();
-  const paymentFormSrc =
-    paymentBase && paymentBase.includes('lp-payment-form')
-      ? paymentBase
-      : paymentBase
-        ? paymentBase.replace(/\/$/, '') + '/api/lp-payment-form'
-        : '/api/lp-payment-form';
+  const pPay = (options?.genOptions?.paymentFormBaseUrl ?? '').trim();
+  const browserOrigin =
+    typeof window !== 'undefined' &&
+    window.location?.origin &&
+    window.location.origin !== 'null'
+      ? window.location.origin
+      : '';
+  const viteSite = (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined)?.trim();
+  const paymentOriginFallback =
+    browserOrigin || (viteSite?.startsWith('http') ? new URL(viteSite).origin : '');
+  let paymentFormSrc: string;
+  if (pPay && pPay.includes('lp-payment-form')) paymentFormSrc = pPay;
+  else if (pPay) paymentFormSrc = pPay.replace(/\/$/, '') + '/api/lp-payment-form';
+  else if (paymentOriginFallback) paymentFormSrc = `${paymentOriginFallback}/api/lp-payment-form`;
+  else paymentFormSrc = '/api/lp-payment-form';
+  const paymentMetaLine =
+    tid !== 'event' && paymentFormSrc.startsWith('/') && paymentOriginFallback
+      ? `\n    <meta name="closer-payment-api-origin" content="${escapeHtml(paymentOriginFallback)}">`
+      : '';
+  const paymentBoot = (iframeId: string, fallbackId: string) =>
+    `(function(){function abs(u){if(!u)return"";if(u.indexOf("://")!==-1)return u;` +
+    `var m0=document.querySelector('meta[name="closer-payment-api-origin"]');var o=(m0&&m0.getAttribute("content")||"").trim();` +
+    `if(!o){try{o=new URL(window.location.href).origin}catch(e){}}` +
+    `if(!o||o==="null"){var m=String(window.location.href).match(/^blob:(https?:\\/\\/[^\\/#?]+)/i);if(m)o=m[1]}` +
+    `if(!o)o=window.location.origin||"";` +
+    `return(u.charAt(0)==="/"&&o&&o!=="null")?o+u:u}` +
+    `var f=document.getElementById("${iframeId}");if(!f)return;var b=abs(f.getAttribute("data-src"));if(!b)return;` +
+    `var q="?returnUrl="+encodeURIComponent(window.location.href);f.src=b+q;` +
+    `var a=document.getElementById("${fallbackId}");if(a)a.href=b+q;})();`;
   const paymentSectionHtml =
     tid !== 'event'
       ? `
     <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
       <h2 id="payment-title">料金・お支払い</h2>
       <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。完了するまでこのページをご利用いただけます。</p>
+      <p class="payment-fallback-hint"><a id="payment-fallback-link" target="_blank" rel="noopener noreferrer" href="#">別タブで料金・お支払いを開く</a></p>
       <div class="payment-iframe-wrap">
         <iframe id="payment-iframe" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
       </div>
       <script>
-(function(){
-  var f = document.getElementById('payment-iframe');
-  if (f && f.getAttribute('data-src')) {
-    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
-  }
-})();
+${paymentBoot('payment-iframe', 'payment-fallback-link')}
 </scr` + `ipt>
     </section>`
       : '';
@@ -796,16 +813,12 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
         <h2 id="payment-title">料金・お支払い</h2>
         <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。</p>
+        <p class="payment-fallback-hint"><a id="payment-fallback-link-builder" target="_blank" rel="noopener noreferrer" href="#">別タブで料金・お支払いを開く</a></p>
         <div class="payment-iframe-wrap">
           <iframe id="payment-iframe-builder" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
         </div>
         <script>
-(function(){
-  var f = document.getElementById('payment-iframe-builder');
-  if (f && f.getAttribute('data-src')) {
-    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
-  }
-})();
+${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
 </scr` + `ipt>
       </section>
     </div>
@@ -874,7 +887,7 @@ ${paymentSectionHtml}
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
-    ${metaTags}
+    ${metaTags}${paymentMetaLine}
     ${googleFonts}
     <script type="application/ld+json">${jsonLd}</script>
     <style>${css}</style>
