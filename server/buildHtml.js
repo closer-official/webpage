@@ -30,9 +30,11 @@ const DEFAULT_NAV = {
     { label: 'アクセス', href: '#access' },
   ],
   clinic_chiropractic: [
-    { label: '選ばれる理由', href: '#concept' },
-    { label: '施術内容', href: '#menu' },
+    { label: 'プログラム', href: '#program' },
+    { label: '施術者', href: '#staff' },
+    { label: '院内', href: '#evidence' },
     { label: 'アクセス', href: '#access' },
+    { label: '予約', href: '#contact' },
   ],
   gym_yoga: [
     { label: 'プログラム', href: '#menu' },
@@ -71,7 +73,7 @@ const DEFAULT_CTA = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#contact' },
   bakery: { label: 'お問い合わせ', href: '#contact' },
-  clinic_chiropractic: { label: 'ご予約', href: '#contact' },
+  clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '無料体験', href: '#contact' },
   builder: { label: 'お問い合わせ', href: '#contact' },
   professional: { label: '無料相談', href: '#contact' },
@@ -364,6 +366,14 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><p class="salon-access-text">${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
     </section>`;
             }
+            if (tid === 'clinic_chiropractic' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="clinic-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+    </section>`;
+            }
             if (tid === 'salon_barber' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
               const catalogImgs = content.catalogImages.map((url) => `<div class="salon-catalog-item"><img src="${escapeHtml(url)}" alt="" class="salon-catalog-img" loading="lazy"></div>`).join('');
               return `    <section class="section section-catalog ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
@@ -576,7 +586,51 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber') ? ctaBlockHtml : '';
+  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic') ? ctaBlockHtml : '';
+
+  const symptomItems = content.symptomItems || [];
+  const reasonItems = content.reasonItems || [];
+  const conceptDiagramLabels = content.conceptDiagramLabels || [];
+  let clinicBlocksHtml = '';
+  if (tid === 'clinic_chiropractic') {
+    if (symptomItems.length > 0) {
+      clinicBlocksHtml += `
+    <section class="clinic-symptoms" aria-labelledby="clinic-symptoms-title">
+      <h2 id="clinic-symptoms-title">こんなお悩みありませんか？</h2>
+      <ul class="clinic-symptoms-list">${symptomItems.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+      <a href="${escapeHtml(cta.href)}" class="clinic-cta-banner">その悩み、当院にお任せください</a>
+    </section>`;
+    }
+    if (reasonItems.length > 0) {
+      clinicBlocksHtml += `
+    <section class="clinic-reasons" aria-labelledby="clinic-reasons-title">
+      <h2 id="clinic-reasons-title">選ばれる理由</h2>
+      <div class="clinic-reason-list">${reasonItems.map((r) => `
+        <div class="clinic-reason-item">
+          <span class="clinic-reason-num">${escapeHtml(r.num)}</span>
+          <div class="clinic-reason-body">
+            <h3>${escapeHtml(r.title)}</h3>
+            <p>${escapeHtml(r.body)}</p>
+          </div>
+        </div>`).join('')}
+      </div>
+    </section>`;
+    }
+    const clinicStats = content.stats && content.stats.length ? content.stats : [];
+    if (clinicStats.length > 0) {
+      clinicBlocksHtml += `
+    <section class="clinic-stats-wrap" aria-label="実績">
+      <div class="stats-block">${clinicStats.map((st) => `<div class="stat-item"><span class="stat-value">${escapeHtml(st.value)}</span><span class="stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div>
+    </section>`;
+    }
+    if (conceptDiagramLabels.length >= 2) {
+      clinicBlocksHtml += `
+    <section class="clinic-diagram" aria-labelledby="clinic-diagram-title">
+      <h2 id="clinic-diagram-title">アプローチ</h2>
+      <div class="clinic-diagram-circles" role="img" aria-label="${escapeHtml(conceptDiagramLabels.join('・'))}">${conceptDiagramLabels.map((l) => `<span>${escapeHtml(l)}</span>`).join('')}</div>
+    </section>`;
+    }
+  }
 
   const builderViewIdToSectionId = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
   const getSectionById = (id) => sections.find((s) => s.id === id);
@@ -665,6 +719,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
   <main id="main-content">
     ${heroSection}
     ${ctaAfterHero}
+    ${clinicBlocksHtml}
     <div class="container">
 ${quoteBlockHtml}
 ${sectionsHtml}

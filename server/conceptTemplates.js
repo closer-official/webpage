@@ -465,7 +465,7 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
-const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
+const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-gym_yoga, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
 
 /** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
 const GENERIC_CSS = `
@@ -571,6 +571,60 @@ const BUILDER_CSS = `
   .page-wrapper.template-builder .section-img { width: 100%; height: auto; max-height: 420px; object-fit: cover; display: block; }
 `;
 
+/** 4. 整骨院・整体・鍼灸用（悩み→選ばれる理由→実績→図解→プログラム・院内・アクセス） */
+const CLINIC_CHIROPRACTIC_CSS = `
+  .page-wrapper.template-clinic_chiropractic {
+    --tp-bg: #F8FAFB; --tp-heading: #1a2b34; --tp-text: #333; --tp-accent: #5eb5c0; --tp-border: #e2e8ec;
+    --tp-bg-footer: #eef2f4; --hero-min-h: 58vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: var(--tp-bg); color: var(--tp-heading); font-weight: 500;
+  }
+  .page-wrapper.template-clinic_chiropractic .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-clinic_chiropractic header { position: sticky; top: 0; z-index: 100; padding: 14px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-clinic_chiropractic .logo { font-size: 1.125rem; font-weight: 700; color: var(--tp-heading); text-decoration: none; }
+  .page-wrapper.template-clinic_chiropractic .cta-btn { background: var(--tp-accent); color: #fff; border: none; padding: 14px 28px; min-height: 48px; font-weight: 600; border-radius: 999px; }
+  .page-wrapper.template-clinic_chiropractic .cta-btn:hover { background: #4a9fa8; color: #fff; }
+  .page-wrapper.template-clinic_chiropractic .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-clinic_chiropractic .hero-bg-overlay { background: rgba(0,0,0,0.35); }
+  .page-wrapper.template-clinic_chiropractic .hero-inner h1 { font-size: clamp(1.5rem, 4.5vw, 2.25rem); font-weight: 700; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.5); }
+  .page-wrapper.template-clinic_chiropractic .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-weight: 500; text-shadow: 0 1px 8px rgba(0,0,0,0.4); }
+  .clinic-symptoms { padding: var(--space-2xl) var(--space-lg); background: var(--tp-bg); }
+  .clinic-symptoms h2 { font-size: 1.125rem; font-weight: 700; color: var(--tp-heading); margin: 0 0 1.25rem; text-align: center; }
+  .clinic-symptoms-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; max-width: 28rem; margin-left: auto; margin-right: auto; }
+  .clinic-symptoms-list li { font-size: 1rem; font-weight: 500; color: var(--tp-text); padding: 0.6rem 1rem; background: #fff; border-radius: 8px; border: 1px solid var(--tp-border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .clinic-symptoms-list li::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--tp-accent); border-radius: 50%; margin-right: 0.6rem; vertical-align: 0.2em; }
+  .clinic-cta-banner { display: block; text-align: center; padding: 1rem 1.5rem; margin-top: 1.5rem; background: var(--tp-accent); color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none; border-radius: 8px; }
+  .clinic-cta-banner:hover { background: #4a9fa8; color: #fff; }
+  .clinic-reasons { padding: var(--space-2xl) var(--space-lg); background: #fff; border-top: 1px solid var(--tp-border); }
+  .clinic-reasons h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; color: var(--tp-heading); margin: 0 0 1.5rem; text-align: center; }
+  .clinic-reason-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 32rem; margin: 0 auto; }
+  .clinic-reason-item { display: flex; gap: 1rem; align-items: flex-start; text-align: left; }
+  .clinic-reason-num { flex-shrink: 0; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: var(--tp-accent); color: #fff; font-size: 0.8125rem; font-weight: 700; border-radius: 50%; }
+  .clinic-reason-body h3 { font-size: 1.0625rem; font-weight: 700; color: var(--tp-heading); margin: 0 0 0.35rem; }
+  .clinic-reason-body p { font-size: 0.9375rem; line-height: 1.8; color: var(--tp-text); margin: 0; }
+  .clinic-stats-wrap { padding: var(--space-xl) var(--space-lg); background: linear-gradient(180deg, rgba(94,181,192,0.12) 0%, transparent 100%); }
+  .clinic-stats-wrap .stats-block { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin: 0; }
+  .clinic-stats-wrap .stat-item { text-align: center; }
+  .clinic-stats-wrap .stat-value { font-size: 2rem; font-weight: 800; color: var(--tp-accent); display: block; }
+  .clinic-stats-wrap .stat-label { font-size: 0.875rem; font-weight: 500; color: var(--tp-text); margin-top: 0.25rem; }
+  .clinic-diagram { padding: var(--space-2xl) var(--space-lg); background: var(--tp-bg); }
+  .clinic-diagram h2 { font-size: 0.9375rem; font-weight: 700; letter-spacing: 0.06em; color: var(--tp-heading); margin: 0 0 1.25rem; text-align: center; }
+  .clinic-diagram-circles { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin: 0 auto; max-width: 20rem; }
+  .clinic-diagram-circles span { width: 4.5rem; height: 4.5rem; display: flex; align-items: center; justify-content: center; background: rgba(94,181,192,0.2); color: var(--tp-heading); font-size: 0.75rem; font-weight: 700; border: 2px solid var(--tp-accent); border-radius: 50%; }
+  .clinic-diagram-circles span:nth-child(1) { transform: translate(0.6rem, 0); }
+  .clinic-diagram-circles span:nth-child(2) { transform: translate(-0.3rem, 0); z-index: 1; }
+  .clinic-diagram-circles span:nth-child(3) { transform: translate(-0.6rem, 0); }
+  .page-wrapper.template-clinic_chiropractic .section h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; color: var(--tp-heading); margin: 0 0 0.75rem; }
+  .page-wrapper.template-clinic_chiropractic .section p { font-size: 1rem; line-height: 1.85; color: var(--tp-text); font-weight: 500; margin: 0 0 0.5rem; }
+  .page-wrapper.template-clinic_chiropractic .section-rhythm-after-hero { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+  .page-wrapper.template-clinic_chiropractic .section-rhythm-default { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+  .page-wrapper.template-clinic_chiropractic .section-img-wrap { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .page-wrapper.template-clinic_chiropractic footer { padding: var(--space-2xl) 0; border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); }
+  .page-wrapper.template-clinic_chiropractic .clinic-map-wrap { margin-top: 1rem; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .page-wrapper.template-clinic_chiropractic .clinic-map-wrap iframe { display: block; }
+  .page-wrapper.template-clinic_chiropractic .qr-block .qr-block-mobile-note { font-size: 0.875rem; margin-bottom: 0.75rem; }
+  @media (max-width: 768px) { .page-wrapper.template-clinic_chiropractic .qr-block .qr-block-img { display: none; } }
+`;
+
 /** 2. カフェ・喫茶用（旧 warm_organic と同一） */
 const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
 
@@ -579,6 +633,7 @@ export function getTemplateFullCss(templateId) {
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS
     : key === 'builder' ? BUILDER_CSS
+    : key === 'clinic_chiropractic' ? CLINIC_CHIROPRACTIC_CSS
     : GENERIC_CSS;
   return COMMON_BASE + css;
 }
