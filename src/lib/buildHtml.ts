@@ -67,6 +67,18 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'アクセス', href: '#access' },
     { label: '予約', href: '#contact' },
   ],
+  apparel: [
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'コレクション', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
+  event: [
+    { label: '概要', href: '#concept' },
+    { label: 'プログラム', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お申し込み', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
@@ -79,6 +91,8 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   cram_school: { label: 'お問い合わせ', href: '#contact' },
   izakaya: { label: '予約する', href: '#contact' },
   pet_salon: { label: '予約する', href: '#contact' },
+  apparel: { label: 'オンラインショップ', href: '#contact' },
+  event: { label: 'お申し込み', href: '#contact' },
 };
 
 /** プレビュー・エクスポート用の完全なHTMLを生成 */
@@ -348,6 +362,8 @@ export function buildHtml(
     cram_school: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200',
     izakaya: 'https://images.unsplash.com/photo-1514933653103-974c4e9b2c3b?auto=format&fit=crop&w=1200',
     pet_salon: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200',
+    apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
+    event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
   };
   const heroImageUrl = seo.ogImageUrl?.trim() || defaultHeroImages[tid] || '';
   const woHeroSlides =

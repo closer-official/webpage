@@ -52,6 +52,8 @@ const PREVIEW_BG: Record<string, string> = {
   cram_school: '#F9F9F7',
   izakaya: '#F9F9F7',
   pet_salon: '#F9F9F7',
+  apparel: '#F9F9F7',
+  event: '#F9F9F7',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -64,6 +66,8 @@ const PREVIEW_COLOR: Record<string, string> = {
   cram_school: '#1A1A1A',
   izakaya: '#1A1A1A',
   pet_salon: '#1A1A1A',
+  apparel: '#1A1A1A',
+  event: '#1A1A1A',
 };
 
 export function DesignCheckPanel() {

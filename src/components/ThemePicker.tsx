@@ -19,6 +19,8 @@ const PREVIEW_BG: Record<string, string> = {
   cram_school: '#FAFAFA',
   izakaya: '#FAFAFA',
   pet_salon: '#FAFAFA',
+  apparel: '#FAFAFA',
+  event: '#FAFAFA',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -31,6 +33,8 @@ const PREVIEW_COLOR: Record<string, string> = {
   cram_school: '#111',
   izakaya: '#111',
   pet_salon: '#111',
+  apparel: '#111',
+  event: '#111',
 };
 
 export function ThemePicker({

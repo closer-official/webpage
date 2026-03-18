@@ -200,10 +200,12 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   cram_school: genericPlaceholder('個別指導塾', '個別指導塾・習い事 | 月謝・講師', '親御さんが安心する優しいトーン。'),
   izakaya: genericPlaceholder('こだわり居酒屋', 'こだわり居酒屋・バー | 夜の雰囲気', 'ダークな配色でお酒・料理をドラマチックに。'),
   pet_salon: genericPlaceholder('ペットサロン', 'ペットサロン・ドッグ | 安心感', 'プロの専門性が伝わる安心感重視のデザイン。'),
+  apparel: genericPlaceholder('アパレルショップ', 'アパレル・ファッション | ブランド', 'コンセプト・コレクション・アクセスをご案内します。'),
+  event: genericPlaceholder('イベント', 'イベント・フェス | お申し込み', '概要・プログラム・アクセス・お申し込みをご案内します。'),
 };
 
 /**
- * 9テンプレ × 5バリアント = 45スロットの枠。
+ * 11テンプレ × 5バリアント = 55スロットの枠。
  * 各スロットは現状同じ内容のコピー。画像は template-sources/ で差し替え用を用意。
  */
 export const SHOWCASE_PRESETS_6X5: Record<

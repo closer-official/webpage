@@ -64,6 +64,18 @@ const DEFAULT_NAV = {
     { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
+  apparel: [
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'コレクション', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
+  event: [
+    { label: '概要', href: '#concept' },
+    { label: 'プログラム', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お申し込み', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA = {
@@ -88,12 +100,14 @@ const defaultHeroImages = {
   cram_school: 'https://images.unsplash.com/photo-1523240795612-9a05468c4e75?auto=format&fit=crop&w=1200',
   izakaya: 'https://images.unsplash.com/photo-1514933653103-974c4e9b2c3b?auto=format&fit=crop&w=1200',
   pet_salon: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200',
+  apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
+  event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
 };
 
 /**
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
- * templateId: salon_barber | cafe_tea | clinic_chiropractic | gym_yoga | builder | professional | cram_school | izakaya | pet_salon (9種)
+ * templateId: 11種（salon_barber, cafe_tea, ..., apparel, event）
  * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl?, purchaseUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
@@ -509,7 +523,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       </div>
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
     </section>`
-      : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon'
+      : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon' || tid === 'apparel' || tid === 'event'
         ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">

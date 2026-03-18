@@ -1,7 +1,7 @@
 import type { QueueTarget, StyleId } from '../types';
 
 /**
- * 検索クエリと Maps の category からテンプレを推定。9テンプレ対応（2と3はcafe_teaに統合）。
+ * 検索クエリと Maps の category からテンプレを推定。11テンプレ対応。
  */
 const RULES: { style: StyleId; re: RegExp }[] = [
   { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
@@ -13,6 +13,8 @@ const RULES: { style: StyleId; re: RegExp }[] = [
   { style: 'cram_school', re: /塾|習い事|教室|予備校|保育|幼稚園|キッズ|preschool|nursery|教育/i },
   { style: 'izakaya', re: /居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge/i },
   { style: 'pet_salon', re: /ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i },
+  { style: 'apparel', re: /アパレル|服|ファッション|cloth|apparel|fashion|ブティック|boutique|ブランド|brand/i },
+  { style: 'event', re: /イベント|event|フェス|フェスティバル|festival|コンサート|concert|展示会|セミナー|seminar|ワークショップ|workshop/i },
 ];
 
 const DEFAULT_STYLE: StyleId = 'salon_barber';

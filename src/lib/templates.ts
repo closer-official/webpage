@@ -158,13 +158,13 @@ function makeTemplate(
   };
 }
 
-/** テンプレ3〜10用の共通CSS（プレビュー用・builder・clinic・gym 除く） */
+/** テンプレ3〜11用の共通CSS（プレビュー用・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
-  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
-  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container, .page-wrapper.template-apparel .container, .page-wrapper.template-event .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header, .page-wrapper.template-apparel header, .page-wrapper.template-event header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn, .page-wrapper.template-apparel .cta-btn, .page-wrapper.template-event .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img, .page-wrapper.template-apparel .hero-full-img, .page-wrapper.template-event .hero-full-img { min-height: var(--hero-min-h); }
 `;
 
 /** 整骨院・整体・鍼灸用（悩み→選ばれる理由→実績→図解・透明感・視認性） */
@@ -372,6 +372,18 @@ export const TEMPLATES: TemplateOption[] = [
     'pet_salon',
     'ペットサロン・ドッグ',
     'プロの専門性と安心感',
+    GENERIC_TEMPLATE_CSS
+  ),
+  makeTemplate(
+    'apparel',
+    'アパレル',
+    'ファッション・ブランド・コレクション',
+    GENERIC_TEMPLATE_CSS
+  ),
+  makeTemplate(
+    'event',
+    'イベント',
+    'フェス・セミナー・ワークショップ・お申し込み',
     GENERIC_TEMPLATE_CSS
   ),
 ];

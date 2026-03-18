@@ -79,19 +79,21 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 9種類テンプレートID（業種別・2と3はカフェ・パン統合） */
+/** 11種類テンプレートID（業種別） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
-  | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ（旧2+3統合）
+  | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
   | 'clinic_chiropractic'// 3. 整骨院・整体・鍼灸
   | 'gym_yoga'           // 4. パーソナルジム・ヨガ
   | 'builder'            // 5. 工務店・リノベ
   | 'professional'       // 6. 士業
   | 'cram_school'        // 7. 塾・習い事教室
   | 'izakaya'            // 8. こだわり居酒屋・バー
-  | 'pet_salon';         // 9. ペットサロン・ドッグ
+  | 'pet_salon'          // 9. ペットサロン・ドッグ
+  | 'apparel'            // 10. アパレル
+  | 'event';             // 11. イベント
 
-/** テンプレートあたりのバリアント数（9×5 = 45 スロット） */
+/** テンプレートあたりのバリアント数（11×5 = 55 スロット） */
 export const SHOWCASE_VARIANT_COUNT = 5;
 
 /** バリアント番号 0 ～ (SHOWCASE_VARIANT_COUNT - 1) */
@@ -136,6 +138,8 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'cram_school', name: '塾・習い事教室' },
   { id: 'izakaya', name: 'こだわり居酒屋・バー' },
   { id: 'pet_salon', name: 'ペットサロン・ドッグ' },
+  { id: 'apparel', name: 'アパレル' },
+  { id: 'event', name: 'イベント' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

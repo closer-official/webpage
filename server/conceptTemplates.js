@@ -442,7 +442,7 @@ const TEMPLATE_CSS_RAW = {
 
 export const TEMPLATE_IDS = [
   'salon_barber',       // 1. 個人美容室・理容室
-  'cafe_tea',           // 2. カフェ・喫茶・パン・スイーツ（旧2+3統合）
+  'cafe_tea',           // 2. カフェ・喫茶・パン・スイーツ
   'clinic_chiropractic', // 3. 整骨院・整体・鍼灸
   'gym_yoga',           // 4. パーソナルジム・ヨガ
   'builder',            // 5. 工務店・リノベ
@@ -450,6 +450,8 @@ export const TEMPLATE_IDS = [
   'cram_school',        // 7. 塾・習い事教室
   'izakaya',            // 8. こだわり居酒屋・バー
   'pet_salon',          // 9. ペットサロン・ドッグ
+  'apparel',            // 10. アパレル
+  'event',              // 11. イベント
 ];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
@@ -464,7 +466,7 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
-const GENERIC_SELECTOR = '.page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
+const GENERIC_SELECTOR = '.page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon, .page-wrapper.template-apparel, .page-wrapper.template-event';
 
 /** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
 const GENERIC_CSS = `
