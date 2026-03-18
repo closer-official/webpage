@@ -61,7 +61,7 @@ export interface PageContent {
   mapEmbedUrl?: string;
   /** 整骨院テンプレ用：悩み・症状リスト（ファーストビュー直下） */
   symptomItems?: string[];
-  /** 整骨院テンプレ用：選ばれる理由（ナンバリング＋タイトル＋本文） */
+  /** 整骨院・ジムテンプレ用：選ばれる理由（ナンバリング＋タイトル＋本文） */
   reasonItems?: { num: string; title: string; body: string }[];
   /** 整骨院テンプレ用：図解ラベル（例: 心・身体・自律神経＝3円） */
   conceptDiagramLabels?: string[];

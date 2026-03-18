@@ -465,7 +465,7 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
-const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-gym_yoga, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
+const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
 
 /** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
 const GENERIC_CSS = `
@@ -625,6 +625,51 @@ const CLINIC_CHIROPRACTIC_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-clinic_chiropractic .qr-block .qr-block-img { display: none; } }
 `;
 
+/** 5. パーソナルジム・ヨガ用（黒×ゴールド・結果の可視化・固定CTA・シャープ） */
+const GYM_YOGA_CSS = `
+  .page-wrapper.template-gym_yoga {
+    --tp-bg: #fff; --tp-heading: #0a0a0a; --tp-text: #1a1a1a; --tp-accent: #c9a227; --tp-gold: #c9a227; --tp-border: #e5e5e5;
+    --tp-bg-footer: #0a0a0a; --hero-min-h: 70vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; font-weight: 600; background: var(--tp-bg);
+  }
+  .page-wrapper.template-gym_yoga .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-gym_yoga header { position: sticky; top: 0; z-index: 100; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.15); background: #0a0a0a; }
+  .page-wrapper.template-gym_yoga .logo { font-size: 1.125rem; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: 0.08em; }
+  .page-wrapper.template-gym_yoga .nav-link { color: rgba(255,255,255,0.9); }
+  .page-wrapper.template-gym_yoga .cta-btn { background: var(--tp-accent); color: #0a0a0a; border: none; padding: 12px 24px; min-height: 44px; font-weight: 700; letter-spacing: 0.08em; border-radius: 0; }
+  .page-wrapper.template-gym_yoga .cta-btn:hover { background: #d4af37; color: #0a0a0a; }
+  .page-wrapper.template-gym_yoga .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-gym_yoga .hero-bg-overlay { background: rgba(0,0,0,0.55); }
+  .page-wrapper.template-gym_yoga .hero-inner h1 { font-size: clamp(1.5rem, 4.5vw, 2.5rem); font-weight: 800; color: #fff; letter-spacing: 0.04em; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  .page-wrapper.template-gym_yoga .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-weight: 600; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
+  .gym-results-block { padding: var(--space-2xl) var(--space-lg); background: #0a0a0a; color: #fff; }
+  .gym-results-block h2 { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.15em; color: var(--tp-accent); margin: 0 0 1.5rem; text-align: center; }
+  .gym-results-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem 3rem; margin: 0; }
+  .gym-results-stats .gym-stat-item { text-align: center; }
+  .gym-results-stats .gym-stat-value { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--tp-accent); display: block; letter-spacing: 0.02em; line-height: 1.1; }
+  .gym-results-stats .gym-stat-label { font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-top: 0.35rem; letter-spacing: 0.06em; }
+  .gym-reasons-block { padding: var(--space-2xl) var(--space-lg); background: #fff; border-top: 3px solid var(--tp-accent); }
+  .gym-reasons-block h2 { font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.1em; color: var(--tp-heading); margin: 0 0 1.5rem; text-align: center; }
+  .gym-reason-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 36rem; margin: 0 auto; }
+  .gym-reason-item { display: flex; gap: 1rem; align-items: flex-start; text-align: left; padding: 1rem 0; border-bottom: 1px solid var(--tp-border); border-radius: 0; }
+  .gym-reason-item:last-child { border-bottom: none; }
+  .gym-reason-num { flex-shrink: 0; width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; background: #0a0a0a; color: var(--tp-accent); font-size: 0.8125rem; font-weight: 800; border-radius: 0; }
+  .gym-reason-body h3 { font-size: 1.0625rem; font-weight: 800; color: var(--tp-heading); margin: 0 0 0.35rem; }
+  .gym-reason-body p { font-size: 0.9375rem; line-height: 1.8; color: var(--tp-text); margin: 0; font-weight: 500; }
+  .page-wrapper.template-gym_yoga .section h2 { font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; color: var(--tp-heading); margin: 0 0 0.75rem; }
+  .page-wrapper.template-gym_yoga .section p { font-size: 1rem; line-height: 1.85; color: var(--tp-text); font-weight: 500; }
+  .page-wrapper.template-gym_yoga .section-rhythm-after-hero { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+  .page-wrapper.template-gym_yoga .section-rhythm-default { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+  .page-wrapper.template-gym_yoga .section-img-wrap { border-radius: 0; overflow: hidden; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-gym_yoga footer { padding: var(--space-2xl) 0; border-top: 3px solid var(--tp-accent); background: var(--tp-bg-footer); color: #fff; }
+  .page-wrapper.template-gym_yoga footer .footer-brand { color: var(--tp-accent); }
+  .page-wrapper.template-gym_yoga footer p, .page-wrapper.template-gym_yoga footer a { color: rgba(255,255,255,0.85); }
+  .gym-sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 12px 16px; background: #0a0a0a; border-top: 2px solid var(--tp-accent); }
+  .gym-sticky-cta .cta-btn { flex: 1; max-width: 320px; }
+  .page-wrapper.template-gym_yoga main { padding-bottom: 80px; }
+  .page-wrapper.template-gym_yoga .gym-map-wrap { margin-top: 1rem; border-radius: 0; overflow: hidden; border: 1px solid var(--tp-border); }
+  @media (max-width: 768px) { .page-wrapper.template-gym_yoga .qr-block .qr-block-img { display: none; } }
+`;
+
 /** 2. カフェ・喫茶用（旧 warm_organic と同一） */
 const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
 
@@ -634,6 +679,7 @@ export function getTemplateFullCss(templateId) {
     : key === 'cafe_tea' ? CAFE_TEA_CSS
     : key === 'builder' ? BUILDER_CSS
     : key === 'clinic_chiropractic' ? CLINIC_CHIROPRACTIC_CSS
+    : key === 'gym_yoga' ? GYM_YOGA_CSS
     : GENERIC_CSS;
   return COMMON_BASE + css;
 }

@@ -37,9 +37,11 @@ const DEFAULT_NAV = {
     { label: '予約', href: '#contact' },
   ],
   gym_yoga: [
-    { label: 'プログラム', href: '#menu' },
-    { label: '料金', href: '#price' },
+    { label: 'プログラム', href: '#program' },
+    { label: 'トレーナー', href: '#staff' },
+    { label: 'コース', href: '#menu' },
     { label: 'アクセス', href: '#access' },
+    { label: '無料カウンセリング', href: '#contact' },
   ],
   builder: [
     { label: 'WORKS', href: '#gallery' },
@@ -74,7 +76,7 @@ const DEFAULT_CTA = {
   cafe_tea: { label: '予約する', href: '#contact' },
   bakery: { label: 'お問い合わせ', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
-  gym_yoga: { label: '無料体験', href: '#contact' },
+  gym_yoga: { label: '無料カウンセリング', href: '#contact' },
   builder: { label: 'お問い合わせ', href: '#contact' },
   professional: { label: '無料相談', href: '#contact' },
   cram_school: { label: '無料体験', href: '#contact' },
@@ -374,6 +376,14 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
     </section>`;
             }
+            if (tid === 'gym_yoga' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="gym-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+    </section>`;
+            }
             if (tid === 'salon_barber' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
               const catalogImgs = content.catalogImages.map((url) => `<div class="salon-catalog-item"><img src="${escapeHtml(url)}" alt="" class="salon-catalog-img" loading="lazy"></div>`).join('');
               return `    <section class="section section-catalog ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
@@ -391,7 +401,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     ? `    <blockquote class="quote-block">${escapeHtml(content.quote)}</blockquote>`
     : '';
 
-  const stats = content.stats && content.stats.length && (tid === 'gym_yoga' || tid === 'professional') ? content.stats : [];
+  const stats = content.stats && content.stats.length && tid === 'professional' ? content.stats : [];
   const statsBlockHtml = stats.length
     ? `    <div class="stats-block">
       ${stats.map((st) => `<div class="stat-item"><span class="stat-value">${escapeHtml(st.value)}</span><span class="stat-label">${escapeHtml(st.label)}</span></div>`).join('')}
@@ -586,7 +596,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic') ? ctaBlockHtml : '';
+  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic' && tid !== 'gym_yoga') ? ctaBlockHtml : '';
 
   const symptomItems = content.symptomItems || [];
   const reasonItems = content.reasonItems || [];
@@ -631,6 +641,38 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </section>`;
     }
   }
+
+  const gymStats = tid === 'gym_yoga' && content.stats && content.stats.length ? content.stats : [];
+  const gymReasonItems = tid === 'gym_yoga' ? (content.reasonItems || []) : [];
+  let gymBlocksHtml = '';
+  if (tid === 'gym_yoga') {
+    if (gymStats.length > 0) {
+      gymBlocksHtml += `
+    <section class="gym-results-block" aria-labelledby="gym-results-title">
+      <h2 id="gym-results-title">実績</h2>
+      <div class="gym-results-stats">${gymStats.map((st) => `<div class="gym-stat-item"><span class="gym-stat-value">${escapeHtml(st.value)}</span><span class="gym-stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div>
+    </section>`;
+    }
+    if (gymReasonItems.length > 0) {
+      gymBlocksHtml += `
+    <section class="gym-reasons-block" aria-labelledby="gym-reasons-title">
+      <h2 id="gym-reasons-title">選ばれる理由</h2>
+      <div class="gym-reason-list">${gymReasonItems.map((r) => `
+        <div class="gym-reason-item">
+          <span class="gym-reason-num">${escapeHtml(r.num)}</span>
+          <div class="gym-reason-body">
+            <h3>${escapeHtml(r.title)}</h3>
+            <p>${escapeHtml(r.body)}</p>
+          </div>
+        </div>`).join('')}
+      </div>
+    </section>`;
+    }
+  }
+
+  const gymStickyCtaHtml = (tid === 'gym_yoga' && cta.label && cta.href)
+    ? `<div class="gym-sticky-cta" aria-label="申し込み"><a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
+    : '';
 
   const builderViewIdToSectionId = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
   const getSectionById = (id) => sections.find((s) => s.id === id);
@@ -720,12 +762,14 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     ${heroSection}
     ${ctaAfterHero}
     ${clinicBlocksHtml}
+    ${gymBlocksHtml}
     <div class="container">
 ${quoteBlockHtml}
 ${sectionsHtml}
 ${extraSections}
     </div>
   </main>
+  ${gymStickyCtaHtml}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}

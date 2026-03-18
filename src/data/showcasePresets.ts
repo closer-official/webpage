@@ -128,7 +128,45 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
-  gym_yoga: genericPlaceholder('パーソナルジム', 'パーソナルジム・ヨガ | 体験予約', 'ビフォーアフター・体験予約へ誘導。'),
+  gym_yoga: {
+    content: {
+      siteName: '〇〇パーソナルジム',
+      title: '〇〇パーソナルジム',
+      headline: '結果に、コミットする。',
+      subheadline: '最短2ヶ月で、理想のカラダへ。専属トレーナーが伴走します。',
+      ctaLabel: '無料カウンセリング',
+      ctaHref: '#contact',
+      stats: [
+        { value: '−12kg', label: '平均減量' },
+        { value: '98%', label: '目標達成率' },
+        { value: '2ヶ月', label: '最短プログラム' },
+      ],
+      reasonItems: [
+        { num: '01', title: '完全マンツーマン', body: '専属トレーナーが食事・トレーニング・生活習慣まで一貫してサポート。あなただけのプログラムで確実に結果を出します。' },
+        { num: '02', title: '結果にこだわるカリキュラム', body: '科学的根拠に基づいたメソッドと、実績あるトレーナー陣。短期集中で「変われた」を実感していただきます。' },
+        { num: '03', title: '通いやすい環境', body: '駅近・個室に近い空間で、初心者でも安心。清潔で集中できる環境で、続けられるトレーニングを。' },
+      ],
+      sections: [
+        { id: 'program', title: 'プログラム', content: '2ヶ月〜の短期集中プログラム。初回カウンセリングで目標と現状をヒアリングし、無理のないプランをご提案します。', imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800' },
+        { id: 'staff', title: 'トレーナー紹介', content: '全員が資格保有。結果を出すための伴走と、初心者にも寄り添う丁寧な指導を大切にしています。', imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800' },
+        { id: 'menu', title: 'コース・料金', content: '入会金・月額・回数プランをご案内。無料カウンセリングでご希望に合わせたプランをご提案します。', imageUrl: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800' },
+        { id: 'access', title: 'アクセス', content: '〒XXX-XXXX 〇〇県〇〇市〇〇 1-2-3\n〇〇駅より徒歩3分' },
+        { id: 'contact', title: '無料カウンセリング', content: 'まずはお気軽にご相談ください。目標・ご予算に合わせたプランをご提案します。' },
+      ],
+      footerText: '© 2025 〇〇パーソナルジム. All rights reserved.',
+      footerAddress: '〒XXX-XXXX 〇〇県〇〇市〇〇 1-2-3',
+      footerPhone: 'XXX-XXXX-XXXX',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      heroSlides: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200'],
+    },
+    seo: {
+      metaTitle: '〇〇パーソナルジム | 結果にコミット',
+      metaDescription: '最短2ヶ月で理想のカラダへ。専属トレーナーが伴走。無料カウンセリング受付中。',
+      keywords: 'パーソナルジム, ダイエット, 筋トレ, 無料体験',
+      ogImageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   builder: {
     content: {
       siteName: '〇〇設計事務所',
