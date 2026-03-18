@@ -20,6 +20,7 @@ import type { PageContent, SEOData, QueueTarget } from './types';
 import type { TemplateOption } from './types';
 import { isApiAvailable, api } from './lib/api';
 import { TEMPLATES } from './lib/templates';
+import { WARM_ORGANIC_CAFE_PRESET } from './data/warmOrganicCafePreset';
 import { getQueue, getDashboard } from './lib/queueStorage';
 import {
   generateMetaDescription,
@@ -215,15 +216,40 @@ function App() {
             <p className="tab-hint">
               PDFやテキストから店舗情報を取り込み、テーマを選んでLPを編集・出力します。キューを使わない単発作成用です。
             </p>
+            <div className="page-tab-shortcut">
+              <h3 className="page-tab-shortcut-title">テンプレ4（カフェ・Warm Organic）だけ作る</h3>
+              <p className="hint">
+                ひな形を読み込み、編集画面へ進みます。完成後は「テンプレ4用JSONをダウンロード」で{' '}
+                <code>src/data/warm-organic-showcase.json</code> に上書きすると、⓪デザインのプレビューが同じ内容になります。
+              </p>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => {
+                  const wo = TEMPLATES.find((t) => t.id === 'warm_organic') ?? null;
+                  setContent(
+                    JSON.parse(JSON.stringify(WARM_ORGANIC_CAFE_PRESET.content)) as PageContent
+                  );
+                  setSeo({ ...WARM_ORGANIC_CAFE_PRESET.seo });
+                  setTemplate(wo);
+                  setStyleId('warm_organic');
+                  setIndustryId('restaurant');
+                  setStep(3);
+                }}
+              >
+                Warm Organic のひな形から編集へ
+              </button>
+            </div>
             <>
-            {step >= 1 && (
+            {step === 1 && (
               <section className="step">
-                <h3>ステップ 1: コンテンツの取り込み</h3>
+                <h3>ステップ 1: コンテンツの取り込み（PDF）</h3>
                 <PDFUpload onComplete={handleContentReady} />
               </section>
             )}
-            {content && step >= 2 && (
+            {content && step === 2 && (
               <section className="step step-design">
+                <h3>ステップ 2: デザイン選択</h3>
                 <ThemePicker
                   selectedIndustryId={industryId}
                   selectedStyleId={styleId}

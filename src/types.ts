@@ -134,6 +134,8 @@ export interface QueueTarget {
   signals: VerificationSignals;
   /** 業種・カテゴリ（Maps の types や手動入力） */
   category: string;
+  /** Maps 検索時のクエリ（例: 港区 ホテル）。テンプレ自動選択に使用 */
+  searchQuery?: string;
   createdAt: string; // ISO
 }
 

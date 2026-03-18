@@ -1,0 +1,76 @@
+{
+  "content": {
+    "siteName": "café ことの葉",
+    "title": "café ことの葉",
+    "headline": "café ことの葉",
+    "subheadline": "自家焙煎と、季節のあんこ",
+    "heroSlides": [
+      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400",
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400",
+      "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400"
+    ],
+    "quote": "ちょっとだけ、甘い休憩を。",
+    "sections": [
+      {
+        "id": "concept",
+        "title": "こだわり",
+        "content": "町の焙煎所がはじめた、ちょっとだけ甘い休憩場所。豆は自家焙煎で、あんこは旬の小豆を炊いて毎日つくっています。",
+        "imageUrl": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800"
+      },
+      {
+        "id": "menu",
+        "title": "メニュー",
+        "content": "ブレンドコーヒー／単品豆／あんこトースト／季節のあんみつ／ケーキ各種。テイクアウトもご用意しています。",
+        "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800"
+      },
+      {
+        "id": "hours",
+        "title": "営業時間",
+        "content": "10:00–18:00（L.O. 17:30）\n水曜定休"
+      },
+      {
+        "id": "access",
+        "title": "アクセス",
+        "content": "東京都世田谷区奥沢 5-XX-X　東急大井町線・目黒線 奥沢駅より徒歩3分"
+      },
+      {
+        "id": "price",
+        "title": "料金",
+        "content": "ドリンク ¥500〜、あんこトースト ¥650〜"
+      },
+      {
+        "id": "staff",
+        "title": "私たち",
+        "content": "焙煎とあんこ、日々のことを大切にしています。"
+      },
+      {
+        "id": "faq",
+        "title": "よくある質問",
+        "content": "Q. 予約は必要ですか？ A. 少人数のためご予約いただくと安心です。"
+      },
+      {
+        "id": "gallery",
+        "title": "ギャラリー",
+        "content": "店内とメニューの写真です。",
+        "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800"
+      },
+      {
+        "id": "contact",
+        "title": "お問い合わせ",
+        "content": "ご予約・お問い合わせはInstagramのDMまたはお電話で。"
+      }
+    ],
+    "footerText": "© 2025 café ことの葉. All rights reserved.",
+    "ctaLabel": "予約する",
+    "ctaHref": "#contact",
+    "footerAddress": "東京都世田谷区奥沢 5-XX-X",
+    "footerPhone": "03-XXXX-XXXX"
+  },
+  "seo": {
+    "metaTitle": "café ことの葉 | 奥沢の自家焙煎カフェ",
+    "metaDescription": "自家焙煎コーヒーと季節のあんこが嬉しい、奥沢のカフェです。",
+    "keywords": "カフェ, 奥沢, 自家焙煎, あんこ",
+    "ogImageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200",
+    "canonicalUrl": ""
+  }
+}

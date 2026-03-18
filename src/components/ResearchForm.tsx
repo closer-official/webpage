@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { QueueTarget, ResearchedShop, StyleId } from '../types';
 import { STYLES } from '../types';
 import { TEMPLATES } from '../lib/templates';
-import { researchToPageContent, researchToSeo } from '../lib/researchToPage';
+import { researchToShowcasePageContent, researchToShowcaseSeo } from '../lib/researchToPage';
+import { inferStyleIdFromQueueTarget } from '../lib/inferTemplateFromSearch';
 import { addToDashboard, removeFromQueue } from '../lib/queueStorage';
 
 interface ResearchFormProps {
@@ -14,7 +15,15 @@ interface ResearchFormProps {
 export function ResearchForm({ target, onClose, onDone }: ResearchFormProps) {
   const [concept, setConcept] = useState('');
   const [strengths, setStrengths] = useState('');
-  const [imageColorStyleId, setImageColorStyleId] = useState<StyleId>('warm_organic');
+  const [imageColorStyleId, setImageColorStyleId] = useState<StyleId>(() =>
+    inferStyleIdFromQueueTarget(target)
+  );
+
+  useEffect(() => {
+    setImageColorStyleId(inferStyleIdFromQueueTarget(target));
+  }, [target.id, target.searchQuery, target.category]);
+
+  const inferredLabel = STYLES.find((s) => s.id === inferStyleIdFromQueueTarget(target))?.name ?? '';
 
   const handleCreate = useCallback(() => {
     const researched: ResearchedShop = {
@@ -28,8 +37,8 @@ export function ResearchForm({ target, onClose, onDone }: ResearchFormProps) {
       notes: target.notes,
       signals: target.signals,
     };
-    const content = researchToPageContent(researched);
-    const seo = researchToSeo(researched, content);
+    const content = researchToShowcasePageContent(researched);
+    const seo = researchToShowcaseSeo(researched, content);
     const template = TEMPLATES.find((t) => t.styleId === imageColorStyleId) ?? TEMPLATES[0];
     addToDashboard({
       researched,
@@ -97,15 +106,24 @@ export function ResearchForm({ target, onClose, onDone }: ResearchFormProps) {
               />
             </div>
             <div className="field">
-              <label>イメージカラー（テンプレート）</label>
+              <label>テンプレート（検索条件で自動選択・変更可）</label>
+              <p className="hint" style={{ margin: '0 0 8px' }}>
+                検索・業種からの推奨: <strong>{inferredLabel}</strong>
+                {target.searchQuery ? `（検索: 「${target.searchQuery}」）` : ''}
+              </p>
               <select
                 value={imageColorStyleId}
                 onChange={(e) => setImageColorStyleId(e.target.value as StyleId)}
               >
                 {STYLES.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
                 ))}
               </select>
+              <p className="hint" style={{ marginTop: 8 }}>
+                LP は選択中テンプレの完成例レイアウトのまま、店名・コンセプト・強み・アクセスだけ差し替わります。
+              </p>
             </div>
           </div>
         </div>

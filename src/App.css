@@ -842,3 +842,23 @@ button.danger:hover { background: #fee2e2; }
 .stripe-payment .plan-name { font-weight: 600; }
 .stripe-payment .plan-yen { margin-left: auto; font-weight: 600; }
 .stripe-payment .plan-target { font-size: 0.875rem; color: #64748b; }
+
+.page-tab-shortcut {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.page-tab-shortcut-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+.page-tab-shortcut code {
+  font-size: 0.8rem;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}

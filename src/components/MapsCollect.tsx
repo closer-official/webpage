@@ -34,19 +34,23 @@ export function MapsCollect() {
     }
   }, [query, minReviews]);
 
-  const addCandidate = useCallback((c: MapsPlaceCandidate) => {
-    const signals = candidateToVerificationSignals(c);
-    addToQueue({
-      source: 'google_maps',
-      name: c.name,
-      address: c.address,
-      placeId: c.placeId,
-      notes: '',
-      signals,
-      category: c.category,
-    });
-    setAddedIds((prev) => new Set(prev).add(c.placeId));
-  }, []);
+  const addCandidate = useCallback(
+    (c: MapsPlaceCandidate) => {
+      const signals = candidateToVerificationSignals(c);
+      addToQueue({
+        source: 'google_maps',
+        name: c.name,
+        address: c.address,
+        placeId: c.placeId,
+        notes: '',
+        signals,
+        category: c.category,
+        searchQuery: query.trim(),
+      });
+      setAddedIds((prev) => new Set(prev).add(c.placeId));
+    },
+    [query]
+  );
 
   if (!isMapsConfigured()) {
     return (
