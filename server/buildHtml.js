@@ -173,7 +173,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     return 'section-rhythm-default';
   }
 
-  const scrollInAttr = (tid === 'dark_edge' || tid === 'corporate_trust') ? ' data-scroll-in' : '';
+  const scrollInAttr = tid === 'minimal_luxury' ? '' : ' data-scroll-in';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
   const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
 
@@ -245,10 +245,11 @@ ${sections
           : sectionsDefault;
 
   const a1SectionAttr = tid === 'minimal_luxury' ? ' data-a1-animate' : '';
+  const extraMotionAttr = tid === 'minimal_luxury' ? a1SectionAttr : ' data-scroll-in';
   let extraSections = '';
   if (instagramLine && (instagramUrl || lineUrl)) {
     extraSections += `
-    <section class="section sns-links"${a1SectionAttr}>
+    <section class="section sns-links"${extraMotionAttr}>
       <h2>フォロー・お問い合わせ</h2>
       ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener">Instagram</a>` : ''}
       ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener">LINE</a>` : ''}
@@ -257,7 +258,7 @@ ${sections
   if (contactForm) {
     const formAction = formActionUrl.trim() || '#';
     extraSections += `
-    <section class="section"${a1SectionAttr}>
+    <section class="section"${extraMotionAttr}>
       <h2>お問い合わせ</h2>
       <form action="${escapeHtml(formAction)}" method="post">
         <p><label>お名前 <input type="text" name="name" required></label></p>
@@ -269,7 +270,7 @@ ${sections
   }
   if (qrCode && qrCodeDataUrl) {
     extraSections += `
-    <section class="section qr-block"${a1SectionAttr}>
+    <section class="section qr-block"${extraMotionAttr}>
       <h2>QRコード</h2>
       <img src="${escapeHtml(qrCodeDataUrl)}" alt="QRコード" width="120" height="120">
     </section>`;
@@ -305,7 +306,7 @@ ${sections
     </section>`
         : tid === 'corporate_trust'
           ? `<section class="hero hero-with-bg">
-      <div class="hero-bg-layer" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})"></div>
+      <div class="hero-bg-layer hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})"></div>
       <div class="hero-bg-overlay"></div>
       <div class="container hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -314,7 +315,7 @@ ${sections
       </div>
     </section>`
           : tid === 'high_energy'
-            ? `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+            ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -323,7 +324,7 @@ ${sections
       </div>
     </section>`
             : tid === 'warm_organic' || tid === 'pop_friendly'
-              ? `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+              ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -358,11 +359,21 @@ ${sections
 </script>`
       : '';
   const scrollInScript =
-    tid === 'dark_edge' || tid === 'corporate_trust'
-      ? `<script>
-(function(){var el=document.querySelectorAll('[data-scroll-in]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});el.forEach(function(e){io.observe(e);});})();
-</script>`
-      : '';
+    tid === 'minimal_luxury'
+      ? ''
+      : `<script>
+(function(){
+var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -28px 0px'});
+document.querySelectorAll('[data-scroll-in]').forEach(function(el){if(r){el.classList.add('in-view');}else{io.observe(el);}});
+if(!r){
+document.querySelectorAll('.hell-hero-parallax').forEach(function(el){
+function u(){var y=Math.min(window.scrollY,480);el.style.backgroundPosition='center calc(50% + '+(y*0.055)+'px)';}
+window.addEventListener('scroll',u,{passive:true});u();
+});
+}
+})();
+</script>`;
 
   const ctaAfterHero = tid === 'minimal_luxury' ? ctaBlockHtml : '';
 
