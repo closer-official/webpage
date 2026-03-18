@@ -34,7 +34,7 @@ export function Export({ content, seo, template }: ExportProps) {
     URL.revokeObjectURL(url);
   };
 
-  const isWarmOrganic = template?.id === 'warm_organic';
+  const isWarmOrganic = template?.id === 'cafe_tea';
 
   return (
     <div className="panel export-panel">

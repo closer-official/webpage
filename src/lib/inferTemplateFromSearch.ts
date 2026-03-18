@@ -1,38 +1,22 @@
 import type { QueueTarget, StyleId } from '../types';
 
 /**
- * 検索クエリ（例: 港区 ホテル）と Maps の category（例: lodging, gym）からテンプレを推定。
- * 先にヒットしたルールを採用（ジム→6、カフェ→4、ホテル・エステ→1 など）。
+ * 検索クエリと Maps の category からテンプレを推定。10テンプレ対応。
  */
-/** カフェ・飲食をホテル／サロンより先に判定（Maps の type が beauty_salon でも検索がカフェならテンプレ4） */
 const RULES: { style: StyleId; re: RegExp }[] = [
-  {
-    style: 'high_energy',
-    re: /ジム|gym|フィットネス|fitness|fitness_center|sports_complex|パーソナル|トレーニング|training|workout|クロスフィット|crossfit|ピラティス|pilates|ヨガスタジオ|\byoga\b|スポーツクラブ/i,
-  },
-  {
-    style: 'pop_friendly',
-    re: /キッズ|保育|幼稚園|児童|あそび場|室内遊|ボールプール|playground|amusement|preschool|nursery|子ども|子供向け|ファミリー向け/i,
-  },
-  {
-    style: 'warm_organic',
-    re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|ベーカリー|bakery|パン屋|レストラン|restaurant|brunch|スイーツ|カフェテリア|meal_takeaway|meal_delivery|food|bistro/i,
-  },
-  {
-    style: 'dark_edge',
-    re: /バー|\bbar\b|ナイト|night_club|ラウンジ|lounge|クラブ|club|pub|居酒屋|ワインバー|カクテル/i,
-  },
-  {
-    style: 'minimal_luxury',
-    re: /ホテル|hotel|lodging|motel|旅館|ryokan|民宿|guest house|エステ|esthetic|\bspa\b|beauty_salon|美容室|hair_care|hair_salon|resort|bed_and_breakfast/i,
-  },
-  {
-    style: 'corporate_trust',
-    re: /クリニック|医院|歯科|内科|外科|診療|dentist|doctor|hospital|physician|health|コンサル|consulting|税理|法律|lawyer|司法|不動産|real_estate|保険|insurance|士業|会計|株式会社|会社|オフィス/i,
-  },
+  { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
+  { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro/i },
+  { style: 'bakery', re: /パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
+  { style: 'clinic_chiropractic', re: /整骨院|整体|鍼灸|接骨|クリニック|医院|dentist|doctor|hospital|physician/i },
+  { style: 'gym_yoga', re: /ジム|gym|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates/i },
+  { style: 'builder', re: /工務店|リノベ|施工|建築|ハウスメーカー|builder|renovation/i },
+  { style: 'professional', re: /税理士|行政書士|社労士|弁護士|コンサル|consulting|税理|法律|lawyer|士業|会計|不動産|real_estate|保険|insurance/i },
+  { style: 'cram_school', re: /塾|習い事|教室|予備校|保育|幼稚園|キッズ|preschool|nursery|教育/i },
+  { style: 'izakaya', re: /居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge/i },
+  { style: 'pet_salon', re: /ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i },
 ];
 
-const DEFAULT_STYLE: StyleId = 'corporate_trust';
+const DEFAULT_STYLE: StyleId = 'salon_barber';
 
 export function inferStyleIdFromSearchQueryAndCategory(searchQuery: string, category: string): StyleId {
   const q = (searchQuery || '').trim();

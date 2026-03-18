@@ -418,16 +418,19 @@ const TEMPLATE_CSS_RAW = {
 };
 
 export const TEMPLATE_IDS = [
-  'minimal_luxury',
-  'dark_edge',
-  'corporate_trust',
-  'warm_organic',
-  'pop_friendly',
-  'high_energy',
+  'salon_barber',       // 1. 個人美容室・理容室
+  'cafe_tea',           // 2. 隠れ家カフェ・喫茶店（旧 warm_organic）
+  'bakery',             // 3. 街のパン屋・ケーキ屋
+  'clinic_chiropractic', // 4. 整骨院・整体・鍼灸
+  'gym_yoga',           // 5. パーソナルジム・ヨガ
+  'builder',            // 6. 工務店・リノベ
+  'professional',       // 7. 士業
+  'cram_school',        // 8. 塾・習い事教室
+  'izakaya',            // 9. こだわり居酒屋・バー
+  'pet_salon',          // 10. ペットサロン・ドッグ
 ];
 
-/** 業種は廃止し、全員が同じ6テンプレートを使用 */
-/** @deprecated 表示順は inferTemplatePriority.getOrderedTemplateIds を使用 */
+/** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
 export const CONCEPT_TEMPLATES = {
   general: TEMPLATE_IDS,
   cafe: TEMPLATE_IDS,
@@ -439,7 +442,45 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
+const GENERIC_SELECTOR = '.page-wrapper.template-bakery, .page-wrapper.template-clinic_chiropractic, .page-wrapper.template-gym_yoga, .page-wrapper.template-builder, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon';
+
+/** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
+const GENERIC_CSS = `
+  ${GENERIC_SELECTOR} { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #1A1A1A; --tp-accent: #666666; --tp-border: rgba(26,26,26,0.08); --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  ${GENERIC_SELECTOR} .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+  ${GENERIC_SELECTOR} header { padding: 32px 0; border-bottom: 1px solid var(--tp-border); background: transparent; }
+  ${GENERIC_SELECTOR} footer { padding: 64px 0 48px; border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); }
+  ${GENERIC_SELECTOR} .section h2 { margin-bottom: 24px; font-size: 1.35rem; }
+  ${GENERIC_SELECTOR} .section p { margin-bottom: 16px; line-height: 1.75; }
+  ${GENERIC_SELECTOR} .section-rhythm-after-hero { padding-top: 64px; padding-bottom: 64px; }
+  ${GENERIC_SELECTOR} .section-rhythm-default { padding-top: 48px; padding-bottom: 48px; }
+  ${GENERIC_SELECTOR} .section-rhythm-before-footer { padding-top: 48px; padding-bottom: 64px; }
+  ${GENERIC_SELECTOR} .cta-btn { border: 1px solid #1A1A1A; color: #1A1A1A; background: transparent; padding: 14px 40px; border-radius: 0; }
+  ${GENERIC_SELECTOR} .hero-full-img { min-height: var(--hero-min-h); }
+`;
+
+/** 1. 美容室・理容室用（GOALD/LECO/ALBUM 参照・白黒ベージュ・雑誌風） */
+const SALON_BARBER_CSS = `
+  .page-wrapper.template-salon_barber { --tp-bg: #fff; --tp-heading: #1a1a1a; --tp-text: #333; --tp-accent: #000; --tp-border: #e8e8e8; --tp-bg-footer: #f5f5f5; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-salon_barber .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-salon_barber header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-salon_barber .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.12em; }
+  .page-wrapper.template-salon_barber .cta-btn { background: #000; color: #fff; border: none; padding: 14px 28px; font-size: 0.875rem; letter-spacing: 0.08em; }
+  .page-wrapper.template-salon_barber .cta-btn:hover { background: #333; }
+  .page-wrapper.template-salon_barber .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-salon_barber .hero-inner h1 { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 600; letter-spacing: 0.05em; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.4); }
+  .page-wrapper.template-salon_barber .section-rhythm-after-hero { padding-top: 56px; padding-bottom: 56px; }
+  .page-wrapper.template-salon_barber .section-rhythm-default { padding-top: 48px; padding-bottom: 48px; }
+  .page-wrapper.template-salon_barber .section-view-all { display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #000; color: #fff; font-size: 0.75rem; letter-spacing: 0.15em; text-decoration: none; transition: background 0.25s ease; }
+  .page-wrapper.template-salon_barber .section-view-all:hover { background: #333; color: #fff; }
+  .page-wrapper.template-salon_barber footer { padding: 48px 0 32px; border-top: 1px solid var(--tp-border); }
+`;
+
+/** 2. カフェ・喫茶用（旧 warm_organic と同一） */
+const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
+
 export function getTemplateFullCss(templateId) {
-  const css = TEMPLATE_CSS_RAW[templateId] || TEMPLATE_CSS_RAW.minimal_luxury;
+  const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
+  const css = key === 'salon_barber' ? SALON_BARBER_CSS : key === 'cafe_tea' ? CAFE_TEA_CSS : GENERIC_CSS;
   return COMMON_BASE + css;
 }

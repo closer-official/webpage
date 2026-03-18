@@ -65,14 +65,24 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 6パターンテンプレートID（絶対ルール準拠） */
+/** 10種類テンプレートID（業種別・2025方針） */
 export type StyleId =
-  | 'minimal_luxury'   // A-1
-  | 'dark_edge'        // A-2
-  | 'corporate_trust'  // A-3
-  | 'warm_organic'     // B-1
-  | 'pop_friendly'     // B-2
-  | 'high_energy';     // B-3
+  | 'salon_barber'       // 1. 個人美容室・理容室（最優先）
+  | 'cafe_tea'           // 2. 隠れ家カフェ・喫茶店（旧 warm_organic）
+  | 'bakery'             // 3. 街のパン屋・ケーキ屋
+  | 'clinic_chiropractic'// 4. 自費診療の整骨院・整体・鍼灸
+  | 'gym_yoga'           // 5. パーソナルジム・ヨガスタジオ
+  | 'builder'            // 6. 街の工務店・リノベーション業者
+  | 'professional'       // 7. 士業（行政書士・税理士・社労士）
+  | 'cram_school'        // 8. 個別指導塾・習い事教室
+  | 'izakaya'            // 9. こだわり居酒屋・ダイニングバー
+  | 'pet_salon';         // 10. ペットサロン・ドッグトレーニング
+
+/** テンプレートあたりのバリアント数（10×5 = 50 スロット） */
+export const SHOWCASE_VARIANT_COUNT = 5;
+
+/** バリアント番号 0 ～ (SHOWCASE_VARIANT_COUNT - 1) */
+export type VariantIndex = 0 | 1 | 2 | 3 | 4;
 
 /** テンプレート定義 */
 export interface TemplateOption {
@@ -96,12 +106,16 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
 ];
 
 export const STYLES: { id: StyleId; name: string }[] = [
-  { id: 'minimal_luxury', name: 'Minimal Luxury' },
-  { id: 'dark_edge', name: 'Dark Edge' },
-  { id: 'corporate_trust', name: 'Corporate Trust' },
-  { id: 'warm_organic', name: 'Warm Organic' },
-  { id: 'pop_friendly', name: 'Pop & Friendly' },
-  { id: 'high_energy', name: 'High Energy' },
+  { id: 'salon_barber', name: '個人美容室・理容室' },
+  { id: 'cafe_tea', name: '隠れ家カフェ・喫茶店' },
+  { id: 'bakery', name: '街のパン屋・ケーキ屋' },
+  { id: 'clinic_chiropractic', name: '整骨院・整体・鍼灸' },
+  { id: 'gym_yoga', name: 'パーソナルジム・ヨガ' },
+  { id: 'builder', name: '工務店・リノベ' },
+  { id: 'professional', name: '士業' },
+  { id: 'cram_school', name: '塾・習い事教室' },
+  { id: 'izakaya', name: 'こだわり居酒屋・バー' },
+  { id: 'pet_salon', name: 'ペットサロン・ドッグ' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

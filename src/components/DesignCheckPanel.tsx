@@ -43,21 +43,29 @@ const SAMPLE_SEO_DEFAULT: SEOData = {
 };
 
 const PREVIEW_BG: Record<string, string> = {
-  minimal_luxury: '#F9F9F7',
-  dark_edge: '#080808',
-  corporate_trust: '#f8fafc',
-  warm_organic: '#f2efe8',
-  pop_friendly: '#fef08a',
-  high_energy: '#fff',
+  salon_barber: '#fff',
+  cafe_tea: '#f2efe8',
+  bakery: '#F9F9F7',
+  clinic_chiropractic: '#F9F9F7',
+  gym_yoga: '#F9F9F7',
+  builder: '#F9F9F7',
+  professional: '#F9F9F7',
+  cram_school: '#F9F9F7',
+  izakaya: '#F9F9F7',
+  pet_salon: '#F9F9F7',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
-  minimal_luxury: '#1A1A1A',
-  dark_edge: '#fff',
-  corporate_trust: '#1e293b',
-  warm_organic: '#3d5245',
-  pop_friendly: '#1a1a1a',
-  high_energy: '#0f0f0f',
+  salon_barber: '#1a1a1a',
+  cafe_tea: '#3d5245',
+  bakery: '#1A1A1A',
+  clinic_chiropractic: '#1A1A1A',
+  gym_yoga: '#1A1A1A',
+  builder: '#1A1A1A',
+  professional: '#1A1A1A',
+  cram_school: '#1A1A1A',
+  izakaya: '#1A1A1A',
+  pet_salon: '#1A1A1A',
 };
 
 export function DesignCheckPanel() {

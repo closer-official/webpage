@@ -11,61 +11,91 @@ function escapeHtml(s) {
 }
 
 const DEFAULT_NAV = {
-  minimal_luxury: [
-    { label: '宿泊', href: '#accommodation' },
-    { label: 'エステ', href: '#experience' },
-    { label: 'アクセス', href: '#access' },
-    { label: '予約', href: '#reserve' },
+  salon_barber: [
+    { label: 'ニュース', href: '#news' },
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'ヘアカタログ', href: '#menu' },
+    { label: 'サロン', href: '#gallery' },
+    { label: 'スタッフ', href: '#staff' },
+    { label: 'オンライン予約', href: '#contact' },
   ],
-  dark_edge: [
-    { label: 'RESERVE', href: '#reserve' },
-    { label: 'ACCESS', href: '#access' },
-  ],
-  corporate_trust: [
-    { label: 'サービス', href: '#service' },
-    { label: '実績', href: '#stats' },
-    { label: '会社概要', href: '#about' },
-    { label: 'お問い合わせ', href: '#contact' },
-  ],
-  warm_organic: [
+  cafe_tea: [
     { label: 'こだわり', href: '#concept' },
     { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
-  pop_friendly: [
-    { label: 'あそび場', href: '#concept' },
-    { label: '利用案内', href: '#info' },
+  bakery: [
+    { label: 'こだわり', href: '#concept' },
+    { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
-  high_energy: [
-    { label: 'プログラム', href: '#program' },
+  clinic_chiropractic: [
+    { label: '選ばれる理由', href: '#concept' },
+    { label: '施術内容', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+  ],
+  gym_yoga: [
+    { label: 'プログラム', href: '#menu' },
     { label: '料金', href: '#price' },
+    { label: 'アクセス', href: '#access' },
+  ],
+  builder: [
+    { label: '施工事例', href: '#gallery' },
+    { label: '会社概要', href: '#concept' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
+  professional: [
+    { label: 'サービス', href: '#menu' },
+    { label: '会社概要', href: '#concept' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
+  cram_school: [
+    { label: '講師の想い', href: '#concept' },
+    { label: 'コース・月謝', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+  ],
+  izakaya: [
+    { label: 'こだわり', href: '#concept' },
+    { label: 'メニュー', href: '#menu' },
+    { label: 'アクセス', href: '#access' },
+  ],
+  pet_salon: [
+    { label: 'こだわり', href: '#concept' },
+    { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
 };
 
 const DEFAULT_CTA = {
-  minimal_luxury: { label: 'ご予約はこちら', href: '#reserve' },
-  dark_edge: { label: 'RESERVE', href: '#reserve' },
-  corporate_trust: { label: '無料相談', href: '#contact' },
-  warm_organic: { label: '予約する', href: '#reserve' },
-  pop_friendly: { label: '予約はこちら', href: '#reserve' },
-  high_energy: { label: '無料体験', href: '#trial' },
+  salon_barber: { label: 'オンライン予約', href: '#contact' },
+  cafe_tea: { label: '予約する', href: '#contact' },
+  bakery: { label: 'お問い合わせ', href: '#contact' },
+  clinic_chiropractic: { label: 'ご予約', href: '#contact' },
+  gym_yoga: { label: '無料体験', href: '#contact' },
+  builder: { label: 'お問い合わせ', href: '#contact' },
+  professional: { label: '無料相談', href: '#contact' },
+  cram_school: { label: '無料体験', href: '#contact' },
+  izakaya: { label: 'ご予約', href: '#contact' },
+  pet_salon: { label: 'ご予約', href: '#contact' },
 };
 
 const defaultHeroImages = {
-  minimal_luxury: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200',
-  dark_edge: 'https://images.unsplash.com/photo-1514933653103-974c4e9b2c3b?auto=format&fit=crop&w=1200',
-  corporate_trust: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200',
-  warm_organic: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
-  pop_friendly: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200',
-  high_energy: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
+  salon_barber: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
+  cafe_tea: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
+  bakery: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200',
+  clinic_chiropractic: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200',
+  gym_yoga: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
+  builder: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200',
+  professional: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200',
+  cram_school: 'https://images.unsplash.com/photo-1523240795612-9a05468c4e75?auto=format&fit=crop&w=1200',
+  izakaya: 'https://images.unsplash.com/photo-1514933653103-974c4e9b2c3b?auto=format&fit=crop&w=1200',
+  pet_salon: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200',
 };
 
 /**
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
- * templateId: minimal_luxury | dark_edge | corporate_trust | warm_organic | pop_friendly | high_energy
+ * templateId: salon_barber | cafe_tea | bakery | clinic_chiropractic | gym_yoga | builder | professional | cram_school | izakaya | pet_salon
  * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl?, purchaseUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
@@ -83,17 +113,15 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const tid = templateId;
   const navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
-  const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'dark_edge'
-    ? `<a href="${escapeHtml(purchaseUrl)}" class="nav-overlay-link" id="nav-item-purchase">購入</a>`
-    : tid === 'warm_organic'
-      ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
-      : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
+  const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea'
+    ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
+    : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
   const cta = (content.ctaLabel && content.ctaHref) ? { label: content.ctaLabel, href: content.ctaHref } : (DEFAULT_CTA[tid] || { label: 'お問い合わせ', href: '#contact' });
   const heroImageUrl = (seo.ogImageUrl && seo.ogImageUrl.trim()) || defaultHeroImages[tid] || '';
   const woHeroSlides =
-    tid === 'warm_organic'
+    tid === 'cafe_tea'
       ? (() => {
-          const d1 = heroImageUrl || defaultHeroImages.warm_organic;
+          const d1 = heroImageUrl || defaultHeroImages.cafe_tea;
           const d2 = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
           const d3 = 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
           const hs = (content.heroSlides || []).filter((u) => (u || '').trim());
@@ -105,35 +133,20 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const skipLink = '<a href="#main-content" class="skip-link">メインコンテンツへ</a>';
 
-  const headerHtml = tid === 'dark_edge'
-    ? `<header class="header-with-menu">
+  const headerHtml = tid === 'salon_barber'
+    ? `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
-      <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="メニューを開く">
-      <label for="nav-toggle" class="nav-toggle-label"><span></span><span></span><span></span></label>
-      <nav class="nav-overlay" aria-label="メインメニュー">
-        <div class="nav-overlay-inner">
-          ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-overlay-link">${escapeHtml(n.label)}</a>`).join('')}
-          ${purchaseNavHtml}
-          <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-hero">${escapeHtml(cta.label)}</a>
-        </div>
-      </nav>
-    </div>
-  </header>`
-    : tid === 'minimal_luxury'
-      ? `<header class="header-a1">
-    <div class="container header-inner header-a1-inner">
-      <a href="#" class="logo logo-a1">${escapeHtml(content.siteName)}</a>
-      <nav class="nav nav-a1" aria-label="メインメニュー">
+      <nav class="nav" aria-label="メインメニュー">
         ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-link">${escapeHtml(n.label)}</a>`).join('')}
         ${purchaseNavHtml}
       </nav>
-      <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-a1">${escapeHtml(cta.label)}</a>
+      <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
     </div>
   </header>`
-      : tid === 'warm_organic'
-        ? ''
-        : `<header>
+    : tid === 'cafe_tea'
+      ? ''
+      : `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">
@@ -151,7 +164,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
   const footerHtml =
-    tid === 'warm_organic'
+    tid === 'cafe_tea'
       ? hasFooterCols
         ? `<footer class="footer-wo">
     <div class="container">
@@ -223,7 +236,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     return 'section-rhythm-default';
   }
 
-  const scrollInAttr = tid === 'minimal_luxury' ? '' : ' data-scroll-in';
+  const scrollInAttr = tid === 'cafe_tea' ? '' : ' data-scroll-in';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
   const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
 
@@ -238,7 +251,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   }
 
   const sectionsDefault =
-    tid === 'warm_organic'
+    tid === 'cafe_tea'
       ? sections
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, sections.length);
@@ -280,66 +293,22 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
           .join('\n');
 
   const quoteBlockHtml = content.quote
-    ? `    <blockquote class="quote-block"${tid === 'minimal_luxury' ? ' data-a1-animate' : ''}>${escapeHtml(content.quote)}</blockquote>`
+    ? `    <blockquote class="quote-block">${escapeHtml(content.quote)}</blockquote>`
     : '';
 
-  const stats = content.stats && content.stats.length && (tid === 'corporate_trust' || tid === 'high_energy') ? content.stats : [];
+  const stats = content.stats && content.stats.length && (tid === 'gym_yoga' || tid === 'professional') ? content.stats : [];
   const statsBlockHtml = stats.length
     ? `    <div class="stats-block">
       ${stats.map((st) => `<div class="stat-item"><span class="stat-value">${escapeHtml(st.value)}</span><span class="stat-label">${escapeHtml(st.label)}</span></div>`).join('')}
     </div>`
     : '';
 
-  const sectionsHtml =
-    tid === 'corporate_trust'
-      ? `    ${statsBlockHtml}
-    <div class="section-grid">${sections
-          .map(
-            (s, i) => {
-              const rhythm = getSectionRhythmClass(i, sections.length);
-              return `<div class="section-card ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
-        ${s.imageUrl ? `<div class="section-card-img"><img src="${escapeHtml(s.imageUrl)}" alt="" loading="lazy"></div>` : ''}
-        <div class="section-card-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
-      </div>`;
-            }
-          )
-          .join('')}</div>`
-      : tid === 'high_energy'
-        ? `    ${statsBlockHtml}
-${sections
-            .map(
-              (s, i) => {
-                const rhythm = getSectionRhythmClass(i, sections.length);
-                return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title" data-scroll-in>
-      <div class="section-inner">
-        ${sectionImg(s)}
-        <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
-        <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
-      </div>
-    </section>`;
-              }
-            )
-            .join('\n')}`
-        : tid === 'minimal_luxury'
-          ? sections
-              .map(
-                (s, i) => {
-                  const rhythm = getSectionRhythmClass(i, sections.length);
-                  const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
-                  return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title" data-a1-animate>
-      ${sectionImg(s)}
-      ${sectionBody(s)}
-    </section>`;
-                }
-              )
-              .join('\n')
-          : sectionsDefault;
+  const sectionsHtml = (statsBlockHtml ? statsBlockHtml + '\n' : '') + sectionsDefault;
 
-  const a1SectionAttr = tid === 'minimal_luxury' ? ' data-a1-animate' : '';
-  const extraMotionAttr = tid === 'minimal_luxury' ? a1SectionAttr : ' data-scroll-in';
+  const extraMotionAttr = ' data-scroll-in';
   let extraSections = '';
   if (instagramLine && (instagramUrl || lineUrl)) {
-    if (tid === 'warm_organic') {
+    if (tid === 'cafe_tea') {
       extraSections += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
@@ -362,7 +331,7 @@ ${sections
   }
   if (contactForm) {
     const formAction = formActionUrl.trim() || '#';
-    if (tid === 'warm_organic') {
+    if (tid === 'cafe_tea') {
       extraSections += `
     <section class="section wo-sec wo-form-block"${extraMotionAttr} id="contact-form">
       <div class="section-body">
@@ -405,55 +374,9 @@ ${sections
     </section>`;
   }
 
-  const a1HeroSlides = (tid === 'minimal_luxury' && content.heroSlides && content.heroSlides.length) ? content.heroSlides : [heroImageUrl];
-  const a1UseSlideshow = a1HeroSlides.length >= 2;
-  const a1HeroHtml = tid === 'minimal_luxury'
-    ? a1UseSlideshow
-      ? `<div class="hero-a1-slides">${a1HeroSlides.map((url, i) => `<img src="${escapeHtml(url)}" alt="" class="hero-a1-slide" data-slide="${i}" loading="eager">`).join('')}</div>`
-      : `<img src="${escapeHtml(a1HeroSlides[0] || heroImageUrl)}" alt="" class="hero-a1-img hero-ken-burns" loading="eager">`
-    : '';
-
-  const heroBgStyle = tid === 'dark_edge' ? ` style="background-image: url(${escapeHtml(heroImageUrl)})"` : '';
-
   const heroSection =
-    tid === 'dark_edge'
-      ? `<section class="hero">
-      <div class="hero-bg hero-bg-ken-burns"${heroBgStyle}></div>
-      <div class="hero-text">
-        <h1>${escapeHtml(content.headline)}</h1>
-        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-        <div class="hero-cta-wrap">
-          <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-hero">${escapeHtml(cta.label)}</a>
-          <a href="#access" class="cta-btn cta-btn-hero-outline">ACCESS</a>
-        </div>
-      </div>
-    </section>`
-      : tid === 'minimal_luxury'
-        ? `<section class="hero" data-a1-animate>
-      <div class="hero-a1-text"><h1>${escapeHtml(content.headline)}</h1><p class="subheadline">${escapeHtml(content.subheadline)}</p></div>
-      <div class="hero-a1-img-wrap">${a1HeroHtml}</div>
-    </section>`
-        : tid === 'corporate_trust'
-          ? `<section class="hero hero-with-bg">
-      <div class="hero-bg-layer hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})"></div>
-      <div class="hero-bg-overlay"></div>
-      <div class="container hero-inner">
-        <h1>${escapeHtml(content.headline)}</h1>
-        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
-      </div>
-    </section>`
-          : tid === 'high_energy'
-            ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
-      <div class="hero-bg-overlay"></div>
-      <div class="hero-inner">
-        <h1>${escapeHtml(content.headline)}</h1>
-        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
-      </div>
-    </section>`
-            : tid === 'warm_organic'
-              ? `<section class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
+    tid === 'cafe_tea'
+      ? `<section class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
       <div class="wo-hero-viewport">
         <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
       </div>
@@ -465,8 +388,8 @@ ${sections
       </div>
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
     </section>`
-              : tid === 'pop_friendly'
-                ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      : tid === 'salon_barber' || tid === 'bakery' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon'
+        ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -474,36 +397,21 @@ ${sections
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
-              : `<section class="hero">
-      <div class="container">
+        : `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`;
 
-  const marqueeText = `${escapeHtml(content.headline)}  ·  ${escapeHtml(content.siteName)}  ·  `;
-  const marqueeBar =
-    tid === 'high_energy'
-      ? `<div class="marquee-bar" aria-hidden="true"><span class="marquee-inner">${marqueeText}${marqueeText}</span></div>`
-      : '';
+  const marqueeBar = '';
 
   const css = getTemplateFullCss(tid);
-  const googleFonts =
-    tid === 'minimal_luxury'
-      ? '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">'
-      : tid === 'pop_friendly'
-        ? '<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">'
-        : '';
-  const a1Script =
-    tid === 'minimal_luxury'
-      ? `<script>
-(function(){var el=document.querySelectorAll('[data-a1-animate]');var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('a1-visible');io.unobserve(e.target);}});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});el.forEach(function(e){io.observe(e);});})();
-</script>`
-      : '';
-  const scrollInScript =
-    tid === 'minimal_luxury'
-      ? ''
-      : `<script>
+  const googleFonts = '';
+  const a1Script = '';
+  const scrollInScript = `<script>
 (function(){
 var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -28px 0px'});
@@ -518,7 +426,7 @@ window.addEventListener('scroll',u,{passive:true});u();
 </script>`;
 
   const woOrganicScript =
-    tid === 'warm_organic'
+    tid === 'cafe_tea'
       ? `<script>
 (function(){
 var track=document.getElementById('wo-hero-track');
@@ -540,7 +448,7 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
       : '';
 
   const woChrome =
-    tid === 'warm_organic'
+    tid === 'cafe_tea'
       ? `<div id="wo-top"></div>
 <input type="checkbox" id="wo-nav-toggle" class="wo-nav-cb" aria-hidden="true">
 <nav class="wo-nav-drawer" aria-label="メインメニュー">
@@ -555,7 +463,7 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = tid === 'minimal_luxury' ? ctaBlockHtml : '';
+  const ctaAfterHero = tid !== 'cafe_tea' ? ctaBlockHtml : '';
 
   return `<!DOCTYPE html>
 <html lang="ja">

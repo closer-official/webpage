@@ -27,7 +27,12 @@ const ADDONS = {
 /** その他サービス */
 const OTHER_SERVICES = {
   domainSetup: { yen: 15_000, name: 'ドメイン取得・設定代行', note: 'サーバー代永久無料設定込み' },
-  cms: { yen: 20_000, name: '管理者画面（CMS）追加' },
+  cms: {
+    yen: 20_000,
+    name: '管理者画面（店専用CMS）追加',
+    note:
+      '顧客がオプションを選んだ場合、その店舗専用の管理画面を用意。閲覧数の確認、ページ内の文章・写真の差し替えが可能（契約後に個別セットアップ）',
+  },
   onlinePayment: { yen: 30_000, name: 'オンライン決済導入', note: 'Square / Stripe連携' },
   fullCustom: { yen: 50_000, name: 'デザインフルカスタム', note: '50,000円〜' },
   seoMeo: { yen: 20_000, name: 'SEO・MEOセット', note: 'Google検索・マップ最適化' },

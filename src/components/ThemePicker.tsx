@@ -10,21 +10,29 @@ interface ThemePickerProps {
 }
 
 const PREVIEW_BG: Record<string, string> = {
-  minimal_luxury: '#FAFAFA',
-  dark_edge: '#080808',
-  corporate_trust: '#f8fafc',
-  warm_organic: '#f2efe8',
-  pop_friendly: '#fef08a',
-  high_energy: '#fff',
+  salon_barber: '#fff',
+  cafe_tea: '#f2efe8',
+  bakery: '#FAFAFA',
+  clinic_chiropractic: '#FAFAFA',
+  gym_yoga: '#FAFAFA',
+  builder: '#FAFAFA',
+  professional: '#FAFAFA',
+  cram_school: '#FAFAFA',
+  izakaya: '#FAFAFA',
+  pet_salon: '#FAFAFA',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
-  minimal_luxury: '#111',
-  dark_edge: '#fff',
-  corporate_trust: '#1e293b',
-  warm_organic: '#3d2914',
-  pop_friendly: '#1a1a1a',
-  high_energy: '#0f0f0f',
+  salon_barber: '#111',
+  cafe_tea: '#3d2914',
+  bakery: '#111',
+  clinic_chiropractic: '#111',
+  gym_yoga: '#111',
+  builder: '#111',
+  professional: '#111',
+  cram_school: '#111',
+  izakaya: '#111',
+  pet_salon: '#111',
 };
 
 export function ThemePicker({
@@ -37,7 +45,7 @@ export function ThemePicker({
   return (
     <div className="panel theme-picker theme-picker-design">
       <h2 className="design-step-label">⓪ デザイン</h2>
-      <p className="design-step-desc">6パターンから1つ選んでください。</p>
+      <p className="design-step-desc">10パターンから1つ選んでください。</p>
       <ul className="design-list" aria-label="デザインパターン一覧">
         {TEMPLATES.map((tpl, i) => (
           <li key={tpl.id}>
