@@ -24,11 +24,6 @@ const DEFAULT_NAV = {
     { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
-  bakery: [
-    { label: 'こだわり', href: '#concept' },
-    { label: 'メニュー', href: '#menu' },
-    { label: 'アクセス', href: '#access' },
-  ],
   clinic_chiropractic: [
     { label: 'プログラム', href: '#program' },
     { label: '施術者', href: '#staff' },
@@ -74,7 +69,6 @@ const DEFAULT_NAV = {
 const DEFAULT_CTA = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#contact' },
-  bakery: { label: 'お問い合わせ', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '無料カウンセリング', href: '#contact' },
   builder: { label: 'お問い合わせ', href: '#contact' },
@@ -87,7 +81,6 @@ const DEFAULT_CTA = {
 const defaultHeroImages = {
   salon_barber: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
   cafe_tea: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
-  bakery: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200',
   clinic_chiropractic: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200',
   gym_yoga: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
   builder: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200',
@@ -100,7 +93,7 @@ const defaultHeroImages = {
 /**
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
- * templateId: salon_barber | cafe_tea | bakery | clinic_chiropractic | gym_yoga | builder | professional | cram_school | izakaya | pet_salon
+ * templateId: salon_barber | cafe_tea | clinic_chiropractic | gym_yoga | builder | professional | cram_school | izakaya | pet_salon (9種)
  * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl?, purchaseUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
@@ -116,7 +109,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     purchaseUrl = '',
   } = genOptions;
 
-  const tid = templateId;
+  const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
   const navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
   const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea'
     ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
@@ -516,7 +509,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       </div>
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
     </section>`
-      : tid === 'salon_barber' || tid === 'bakery' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon'
+      : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon'
         ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">

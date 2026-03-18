@@ -79,20 +79,19 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 10種類テンプレートID（業種別・2025方針） */
+/** 9種類テンプレートID（業種別・2と3はカフェ・パン統合） */
 export type StyleId =
-  | 'salon_barber'       // 1. 個人美容室・理容室（最優先）
-  | 'cafe_tea'           // 2. 隠れ家カフェ・喫茶店（旧 warm_organic）
-  | 'bakery'             // 3. 街のパン屋・ケーキ屋
-  | 'clinic_chiropractic'// 4. 自費診療の整骨院・整体・鍼灸
-  | 'gym_yoga'           // 5. パーソナルジム・ヨガスタジオ
-  | 'builder'            // 6. 街の工務店・リノベーション業者
-  | 'professional'       // 7. 士業（行政書士・税理士・社労士）
-  | 'cram_school'        // 8. 個別指導塾・習い事教室
-  | 'izakaya'            // 9. こだわり居酒屋・ダイニングバー
-  | 'pet_salon';         // 10. ペットサロン・ドッグトレーニング
+  | 'salon_barber'       // 1. 個人美容室・理容室
+  | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ（旧2+3統合）
+  | 'clinic_chiropractic'// 3. 整骨院・整体・鍼灸
+  | 'gym_yoga'           // 4. パーソナルジム・ヨガ
+  | 'builder'            // 5. 工務店・リノベ
+  | 'professional'       // 6. 士業
+  | 'cram_school'        // 7. 塾・習い事教室
+  | 'izakaya'            // 8. こだわり居酒屋・バー
+  | 'pet_salon';         // 9. ペットサロン・ドッグ
 
-/** テンプレートあたりのバリアント数（10×5 = 50 スロット） */
+/** テンプレートあたりのバリアント数（9×5 = 45 スロット） */
 export const SHOWCASE_VARIANT_COUNT = 5;
 
 /** バリアント番号 0 ～ (SHOWCASE_VARIANT_COUNT - 1) */
@@ -108,6 +107,14 @@ export interface TemplateOption {
   css: string;
 }
 
+/** 雰囲気・フォント・ナビなどテンプレートの見た目だけを上書き（業種はそのまま） */
+export interface StyleOverrides {
+  /** フォントファミリ（例: "Noto Sans JP" / "Yu Mincho"） */
+  fontFamily?: string;
+  /** ナビの出し方: sticky=固定ヘッダー, drawer=ハンバーガーで開く */
+  navStyle?: 'sticky' | 'drawer';
+}
+
 export const INDUSTRIES: { id: IndustryId; name: string }[] = [
   { id: 'general', name: '一般・その他' },
   { id: 'restaurant', name: '飲食店' },
@@ -121,8 +128,7 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
 
 export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'salon_barber', name: '個人美容室・理容室' },
-  { id: 'cafe_tea', name: '隠れ家カフェ・喫茶店' },
-  { id: 'bakery', name: '街のパン屋・ケーキ屋' },
+  { id: 'cafe_tea', name: 'カフェ・喫茶・パン・スイーツ' },
   { id: 'clinic_chiropractic', name: '整骨院・整体・鍼灸' },
   { id: 'gym_yoga', name: 'パーソナルジム・ヨガ' },
   { id: 'builder', name: '工務店・リノベ' },
@@ -174,8 +180,10 @@ export interface ResearchedShop {
   address: string;
   concept: string;
   strengths: string;
-  /** テンプレートの styleId をそのままイメージカラーとして使用 */
+  /** テンプレートの styleId（雰囲気・業種に合わせて選択） */
   imageColorStyleId: StyleId;
+  /** フォント・ナビなど見た目だけの上書き（業種は imageColorStyleId のまま） */
+  styleOverrides?: StyleOverrides;
   category: string;
   notes: string;
   signals: VerificationSignals;
@@ -222,7 +230,7 @@ export interface GenerationOptions {
   qrCodeTargetUrl?: string;
 }
 
-/** buildHtml に渡すオプション用（SNS URL・QR画像など） */
+/** buildHtml に渡すオプション用（SNS URL・QR画像・スタイル上書きなど） */
 export interface BuildHtmlGenOptions {
   contactForm?: boolean;
   formActionUrl?: string;
@@ -233,6 +241,8 @@ export interface BuildHtmlGenOptions {
   qrCodeDataUrl?: string;
   qrCodeTargetUrl?: string;
   presentedBy?: boolean;
+  /** フォント・ナビなど見た目だけの上書き（テンプレートはそのまま） */
+  styleOverrides?: StyleOverrides;
 }
 
 /** ダッシュボード1件（API返却・3案入り） */

@@ -80,7 +80,6 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
     content: WARM_ORGANIC_CAFE_PRESET.content,
     seo: WARM_ORGANIC_CAFE_PRESET.seo,
   },
-  bakery: genericPlaceholder('街のパン屋', '街のパン屋 | 焼き立て・本日のラインナップ', '焼き立てパンと温かみのある空間。'),
   clinic_chiropractic: {
     content: {
       siteName: 'スタジオS',
@@ -204,7 +203,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
 };
 
 /**
- * 10テンプレ × 5バリアント = 50スロットの枠。
+ * 9テンプレ × 5バリアント = 45スロットの枠。
  * 各スロットは現状同じ内容のコピー。画像は template-sources/ で差し替え用を用意。
  */
 export const SHOWCASE_PRESETS_6X5: Record<
@@ -223,10 +222,11 @@ export const SHOWCASE_PRESETS_6X5: Record<
   return out;
 })();
 
-/** バリアント指定なしの場合は 0 を参照（従来どおり） */
+/** バリアント指定なしの場合は 0 を参照。旧データの bakery は cafe_tea にマップ */
 export function getShowcasePreset(styleId: StyleId, variant?: number): { content: PageContent; seo: SEOData } {
+  const normalizedId = ((styleId as string) === 'bakery' ? 'cafe_tea' : styleId) as StyleId;
   const v = variant != null && variant >= 0 && variant < VARIANT_COUNT ? variant : 0;
-  const p = SHOWCASE_PRESETS_6X5[styleId]![v]!;
+  const p = SHOWCASE_PRESETS_6X5[normalizedId]![v]!;
   return {
     content: structuredClone(p.content),
     seo: structuredClone(p.seo),

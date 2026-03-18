@@ -1,4 +1,4 @@
-import type { PageContent, SEOData } from '../types';
+import type { PageContent, SEOData, StyleOverrides } from '../types';
 import type { TemplateOption } from '../types';
 import { buildHtml } from '../lib/buildHtml';
 
@@ -6,12 +6,15 @@ interface ExportProps {
   content: PageContent;
   seo: SEOData;
   template: TemplateOption | null;
+  styleOverrides?: StyleOverrides;
 }
 
-export function Export({ content, seo, template }: ExportProps) {
+export function Export({ content, seo, template, styleOverrides }: ExportProps) {
   const handleExport = () => {
     if (!template) return;
-    const html = buildHtml(content, seo, template);
+    const html = buildHtml(content, seo, template, {
+      genOptions: styleOverrides ? { styleOverrides } : undefined,
+    });
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

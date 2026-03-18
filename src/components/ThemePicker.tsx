@@ -12,7 +12,6 @@ interface ThemePickerProps {
 const PREVIEW_BG: Record<string, string> = {
   salon_barber: '#fff',
   cafe_tea: '#f2efe8',
-  bakery: '#FAFAFA',
   clinic_chiropractic: '#FAFAFA',
   gym_yoga: '#FAFAFA',
   builder: '#fff',
@@ -25,7 +24,6 @@ const PREVIEW_BG: Record<string, string> = {
 const PREVIEW_COLOR: Record<string, string> = {
   salon_barber: '#111',
   cafe_tea: '#3d2914',
-  bakery: '#111',
   clinic_chiropractic: '#111',
   gym_yoga: '#111',
   builder: '#111',

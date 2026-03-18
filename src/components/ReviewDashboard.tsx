@@ -83,8 +83,11 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
     const html = variants
       ? variants[currentVariant]?.html ?? variants[0].html
       : (() => {
-          const template = TEMPLATES.find((t) => t.id === item.templateId) ?? TEMPLATES[0];
-          return buildHtml(item.content, item.seo, template);
+          const templateId = (item.templateId as string) === 'bakery' ? 'cafe_tea' : item.templateId;
+          const template = TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0];
+          return buildHtml(item.content, item.seo, template, {
+            genOptions: { styleOverrides: item.researched.styleOverrides },
+          });
         })();
     const s = item.researched.signals;
     return (
@@ -120,7 +123,7 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                     >
                       {variants.map((v, idx) => (
                         <option key={v.templateId} value={idx}>
-                          案{idx + 1}（{v.templateId}）
+                          案{idx + 1}（{(v.templateId as string) === 'bakery' ? 'cafe_tea' : v.templateId}）
                         </option>
                       ))}
                     </select>

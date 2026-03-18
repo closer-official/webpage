@@ -25,12 +25,6 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'アクセス', href: '#access' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
-  bakery: [
-    { label: 'こだわり', href: '#concept' },
-    { label: '商品', href: '#menu' },
-    { label: 'アクセス', href: '#access' },
-    { label: 'お問い合わせ', href: '#contact' },
-  ],
   clinic_chiropractic: [
     { label: 'プログラム', href: '#program' },
     { label: '施術者', href: '#staff' },
@@ -78,7 +72,6 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#reserve' },
-  bakery: { label: 'お問い合わせ', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '無料カウンセリング', href: '#contact' },
   builder: { label: 'お問い合わせ', href: '#contact' },
@@ -114,6 +107,8 @@ export function buildHtml(
 
   const bodyClass = `page-wrapper template-${template.id}`;
   const tid = template.id;
+  const overrides = options?.genOptions?.styleOverrides;
+  const useDrawerNav = tid === 'cafe_tea' && overrides?.navStyle !== 'sticky';
   const navItems = content.navItems?.length ? content.navItems : DEFAULT_NAV[tid] ?? [];
   const cta = content.ctaLabel && content.ctaHref
     ? { label: content.ctaLabel, href: content.ctaHref }
@@ -122,12 +117,7 @@ export function buildHtml(
   const skipLink =
     '<a href="#main-content" class="skip-link">メインコンテンツへ</a>';
 
-  const headerHtml =
-    tid === 'cafe_tea'
-      ? ''
-      : tid === 'builder'
-        ? ''
-        : `<header>
+  const normalHeader = `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">
@@ -136,6 +126,14 @@ export function buildHtml(
       <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
     </div>
   </header>`;
+  const headerHtml =
+    tid === 'builder'
+      ? ''
+      : tid === 'cafe_tea' && overrides?.navStyle === 'sticky'
+        ? normalHeader
+        : tid === 'cafe_tea'
+          ? ''
+          : normalHeader;
 
   const ctaBlockHtml =
     `<div class="cta-block">
@@ -343,7 +341,6 @@ export function buildHtml(
   const defaultHeroImages: Record<string, string> = {
     salon_barber: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
     cafe_tea: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
-    bakery: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200',
     clinic_chiropractic: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200',
     gym_yoga: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
     builder: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200',
@@ -392,7 +389,11 @@ export function buildHtml(
 
   const marqueeBar = '';
 
-  const css = options?.inlineCss !== false ? template.css : '';
+  let css = options?.inlineCss !== false ? template.css : '';
+  if (overrides?.fontFamily?.trim()) {
+    const fontFamily = overrides.fontFamily.trim().replace(/"/g, '');
+    css += `\n.page-wrapper { font-family: "${fontFamily}", "Hiragino Sans", "Noto Sans JP", sans-serif; }`;
+  }
   const googleFonts = '';
 
   const scrollInScript =
@@ -618,7 +619,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
   }
 
   const woChrome =
-    tid === 'cafe_tea'
+    useDrawerNav
       ? `<div id="wo-top"></div>
 <input type="checkbox" id="wo-nav-toggle" class="wo-nav-cb" aria-hidden="true">
 <nav class="wo-nav-drawer" aria-label="メインメニュー">

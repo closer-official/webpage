@@ -4,11 +4,10 @@
  */
 import { TEMPLATE_IDS } from './conceptTemplates.js';
 
-/** 10テンプレ対応。美容室・カフェを最優先で判定 */
+/** 9テンプレ対応。美容室・カフェ・パン等を最優先で判定（2と3はcafe_teaに統合） */
 const RULES = [
   { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
-  { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro/i },
-  { style: 'bakery', re: /パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
+  { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro|パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
   { style: 'clinic_chiropractic', re: /整骨院|整体|鍼灸|接骨|クリニック|医院|dentist|doctor|hospital|physician/i },
   { style: 'gym_yoga', re: /ジム|gym|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates/i },
   { style: 'builder', re: /工務店|リノベ|施工|建築|ハウスメーカー|builder|renovation/i },
@@ -22,7 +21,7 @@ const CONCEPT_DEFAULT = {
   cafe: 'cafe_tea',
   restaurant: 'cafe_tea',
   salon: 'salon_barber',
-  retail: 'bakery',
+  retail: 'cafe_tea',
   apparel: 'izakaya',
   service: 'professional',
   clinic: 'clinic_chiropractic',
@@ -34,7 +33,7 @@ const CONCEPT_DEFAULT = {
  * @param {string} category Maps types など
  * @param {string} conceptId Gemini の cafe | salon | …
  * @param {string} [shopName] 店名（手動キューで検索語が空でもカフェ等を推定）
- * @returns {string[]} 6テンプレID（先頭がメインLP）
+ * @returns {string[]} 9テンプレID（先頭がメインLP）
  */
 export function getOrderedTemplateIds(searchQuery, category, conceptId, shopName = '') {
   const q = String(searchQuery || '').trim();

@@ -1,12 +1,11 @@
 import type { QueueTarget, StyleId } from '../types';
 
 /**
- * 検索クエリと Maps の category からテンプレを推定。10テンプレ対応。
+ * 検索クエリと Maps の category からテンプレを推定。9テンプレ対応（2と3はcafe_teaに統合）。
  */
 const RULES: { style: StyleId; re: RegExp }[] = [
   { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
-  { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro/i },
-  { style: 'bakery', re: /パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
+  { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro|パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
   { style: 'clinic_chiropractic', re: /整骨院|整体|鍼灸|接骨|クリニック|医院|dentist|doctor|hospital|physician/i },
   { style: 'gym_yoga', re: /ジム|gym|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates/i },
   { style: 'builder', re: /工務店|リノベ|施工|建築|ハウスメーカー|builder|renovation/i },

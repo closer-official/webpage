@@ -124,7 +124,7 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
         <h2>フルオート（メイン）</h2>
         <p className="hint full-auto-lead">
           <strong>地域・カテゴリ・件数</strong>を決めて<strong>開始</strong>するだけです。
-          サーバーが <strong>検索 → 口コミ分析 → LP案3パターン作成 → DM（メール）文面</strong> まで自動で行い、
+          サーバーが <strong>検索 → 口コミ分析 → 9種類のテンプレからLP案3パターン作成 → DM（メール）文面</strong> まで自動で行い、
           結果は<strong>ダッシュボード</strong>に並びます。
         </p>
         <p className="hint full-auto-lead" style={{ marginTop: '-0.5rem', color: 'var(--text-muted, #555)' }}>

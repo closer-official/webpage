@@ -160,11 +160,11 @@ function makeTemplate(
 
 /** テンプレ3〜10用の共通CSS（プレビュー用・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
-  .page-wrapper.template-bakery, .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-bakery .container, .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-bakery header, .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-bakery .cta-btn, .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
-  .page-wrapper.template-bakery .hero-full-img, .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img { min-height: var(--hero-min-h); }
 `;
 
 /** 整骨院・整体・鍼灸用（悩み→選ばれる理由→実績→図解・透明感・視認性） */
@@ -299,8 +299,8 @@ export const TEMPLATES: TemplateOption[] = [
   `),
   makeTemplate(
     'cafe_tea',
-    '隠れ家カフェ・喫茶店',
-    '落ち着いたトーン・メニュー表の美しさ（旧4番）',
+    'カフェ・喫茶・パン・スイーツ',
+    '落ち着いたトーン・メニュー表の美しさ（カフェ・パン屋共通）',
     (() => {
       const wo = `
   .page-wrapper.template-cafe_tea { --tp-bg: #f2efe8; --tp-heading: #2c2418; --tp-text: #5c5348; --tp-accent: #b45309; --tp-brand: #3d5245; --tp-border: rgba(61,82,69,0.2); --hero-min-h: 72vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--tp-text); background: var(--tp-bg); }
@@ -331,12 +331,6 @@ export const TEMPLATES: TemplateOption[] = [
   `;
       return wo;
     })(),
-  ),
-  makeTemplate(
-    'bakery',
-    '街のパン屋・ケーキ屋',
-    '焼き立て・本日のラインナップ・温かみのある配色',
-    GENERIC_TEMPLATE_CSS
   ),
   makeTemplate(
     'clinic_chiropractic',
