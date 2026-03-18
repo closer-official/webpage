@@ -21,11 +21,12 @@ const STANDARD_SECTIONS = [
   { id: 'contact', title: 'お問い合わせ' },
 ];
 
-function analysisToContent(name, address, analysis) {
+function analysisToContent(name, address, analysis, extra = {}) {
+  const { openingHoursText = '' } = extra;
   const getContent = (id) => {
     if (id === 'concept' && analysis.concept) return analysis.concept;
     if (id === 'menu' && analysis.strengths) return analysis.strengths;
-    if (id === 'hours') return '営業時間はお問い合わせください。';
+    if (id === 'hours') return (openingHoursText && openingHoursText.trim()) ? openingHoursText.trim() : '営業時間はお問い合わせください。';
     if (id === 'access' && address) return address;
     if (id === 'price') return '料金の詳細はお問い合わせください。';
     if (id === 'staff') return 'スタッフ紹介は準備中です。';
@@ -74,7 +75,9 @@ export async function processOne(queueItem, genOptions) {
     queueItem.category || 'general',
     reviewsText
   );
-  const content = analysisToContent(queueItem.name, queueItem.address, analysis);
+  const content = analysisToContent(queueItem.name, queueItem.address || '', analysis, {
+    openingHoursText: queueItem.openingHoursText || '',
+  });
   let seo = contentToSeo(content);
 
   // placeId がある場合は Google Maps の写真を自動取得して hero・OG・セクションに割り当て

@@ -66,7 +66,7 @@ const defaultHeroImages = {
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
  * templateId: minimal_luxury | dark_edge | corporate_trust | warm_organic | pop_friendly | high_energy
- * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl? }
+ * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, qrCodeDataUrl?, purchaseUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
   const {
@@ -78,10 +78,16 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     instagramUrl = '',
     lineUrl = '',
     qrCodeDataUrl = '',
+    purchaseUrl = '',
   } = genOptions;
 
   const tid = templateId;
   const navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
+  const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'dark_edge'
+    ? `<a href="${escapeHtml(purchaseUrl)}" class="nav-overlay-link" id="nav-item-purchase">購入</a>`
+    : tid === 'warm_organic'
+      ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
+      : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
   const cta = (content.ctaLabel && content.ctaHref) ? { label: content.ctaLabel, href: content.ctaHref } : (DEFAULT_CTA[tid] || { label: 'お問い合わせ', href: '#contact' });
   const heroImageUrl = (seo.ogImageUrl && seo.ogImageUrl.trim()) || defaultHeroImages[tid] || '';
   const woHeroSlides =
@@ -108,6 +114,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <nav class="nav-overlay" aria-label="メインメニュー">
         <div class="nav-overlay-inner">
           ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-overlay-link">${escapeHtml(n.label)}</a>`).join('')}
+          ${purchaseNavHtml}
           <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-hero">${escapeHtml(cta.label)}</a>
         </div>
       </nav>
@@ -119,6 +126,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <a href="#" class="logo logo-a1">${escapeHtml(content.siteName)}</a>
       <nav class="nav nav-a1" aria-label="メインメニュー">
         ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-link">${escapeHtml(n.label)}</a>`).join('')}
+        ${purchaseNavHtml}
       </nav>
       <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-a1">${escapeHtml(cta.label)}</a>
     </div>
@@ -130,6 +138,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">
         ${navItems.map((n) => `<a href="${escapeHtml(n.href)}" class="nav-link">${escapeHtml(n.label)}</a>`).join('')}
+        ${purchaseNavHtml}
       </nav>
       <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
     </div>
@@ -448,7 +457,6 @@ ${sections
       <div class="wo-hero-viewport">
         <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
       </div>
-      <div class="wo-hero-strip" aria-hidden="true"></div>
       <div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
         <h1>${escapeHtml(content.headline)}</h1>
@@ -540,6 +548,7 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
   <div class="wo-nav-drawer-inner">
     <p class="wo-nav-brand">${escapeHtml(content.siteName)}</p>
     ${navItems.map((n) => `<a href="${escapeHtml(n.href)}">${escapeHtml(n.label)}</a>`).join('')}
+    ${purchaseNavHtml}
     <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
   </div>
 </nav>
@@ -573,6 +582,9 @@ ${extraSections}
   ${a1Script}
   ${scrollInScript}
   ${woOrganicScript}
+  ${purchaseUrl ? `<script>
+(function(){if(/[?&]payment=success/.test(location.search)){var el=document.getElementById('nav-item-purchase');if(el)el.style.display='none';}})();
+</script>` : ''}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
 </script>

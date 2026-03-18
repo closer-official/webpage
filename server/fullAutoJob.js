@@ -34,6 +34,7 @@ function placeToQueueItem(place, searchQuery) {
     hasPhoto: place.hasPhoto,
     instagramUrl: '',
     lineUrl: '',
+    openingHoursText: place.openingHoursText || '',
   };
 }
 

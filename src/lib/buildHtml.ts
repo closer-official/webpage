@@ -376,7 +376,6 @@ ${content.sections
       <div class="wo-hero-viewport">
         <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
       </div>
-      <div class="wo-hero-strip" aria-hidden="true"></div>
       <div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
         <h1>${escapeHtml(content.headline)}</h1>

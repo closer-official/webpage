@@ -259,13 +259,15 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   res.json(dashboard[i]);
 });
 
-/** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける */
+/** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける。Stripe 有効時はメニューに「購入」を追加 */
 app.get('/api/preview/:id', async (req, res) => {
   try {
     const dashboard = await store.getDashboard();
     const item = dashboard.find((d) => d.id === req.params.id);
     if (!item) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
     const options = await store.getOptions();
+    const origin = (req.headers.origin || (req.protocol + '://' + req.get('host')) || '').replace(/\/$/, '');
+    const previewUrl = origin ? `${origin}/api/preview/${encodeURIComponent(item.id)}` : '';
     const genOptions = {
       contactForm: options.contactForm ?? false,
       formActionUrl: options.formActionUrl || '',
@@ -276,6 +278,9 @@ app.get('/api/preview/:id', async (req, res) => {
       lineUrl: '',
       qrCodeDataUrl: '',
     };
+    if (isStripeConfigured() && origin) {
+      genOptions.purchaseUrl = `${origin}/api/checkout-redirect?returnUrl=${encodeURIComponent(previewUrl)}`;
+    }
     const html = buildHtml(item.content, item.seo, item.templateId, genOptions);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'private, max-age=0');
@@ -475,6 +480,32 @@ app.post('/api/create-checkout-session', async (req, res) => {
     console.error(e);
     res.status(500).json({ error: e.message || 'Checkout failed' });
   }
+});
+
+/** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */
+app.get('/api/checkout-redirect', async (req, res) => {
+  if (!isStripeConfigured()) {
+    return res.status(503).setHeader('Content-Type', 'text/html; charset=utf-8')
+      .send('<p>Stripe が未設定です。</p>');
+  }
+  const returnUrl = (req.query.returnUrl && String(req.query.returnUrl)) || '';
+  if (!returnUrl.startsWith('http')) {
+    return res.status(400).setHeader('Content-Type', 'text/html; charset=utf-8')
+      .send('<p>returnUrl が不正です。</p>');
+  }
+  try {
+    const billing = await store.getBilling();
+    const { amountYen, items } = calculatePrice(billing);
+    if (amountYen <= 0) {
+      return res.redirect(returnUrl);
+    }
+    const successUrl = returnUrl + (returnUrl.includes('?') ? '&' : '?') + 'payment=success';
+    const { url } = await createCheckoutSession(amountYen, items, successUrl, returnUrl, billing);
+    if (url) return res.redirect(302, url);
+  } catch (e) {
+    console.error('[checkout-redirect]', e);
+  }
+  res.redirect(returnUrl);
 });
 
 // JSON 破損など未処理エラーで 500 になるのを防ぎ、メッセージを返す

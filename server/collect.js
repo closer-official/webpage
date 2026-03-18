@@ -142,6 +142,9 @@ export async function collectPlaces(query, options = {}) {
     if (hasWebsite && !hasSite) continue;
     if (!hasWebsite && hasSite) continue;
     const reviews = (d.reviews || []).map((r) => (r.text || '').trim()).filter(Boolean);
+    const openingHoursText = d.opening_hours && Array.isArray(d.opening_hours.weekday_text)
+      ? d.opening_hours.weekday_text.join('\n')
+      : '';
     const item = {
       placeId: d.place_id,
       name: d.name || '(名称なし)',
@@ -152,6 +155,7 @@ export async function collectPlaces(query, options = {}) {
       hasOpeningHours: !!d.opening_hours,
       hasPhoto: !!(d.photos && d.photos.length > 0),
       reviews,
+      openingHoursText,
     };
     if (hasWebsite && hasSite) {
       item.websiteUrl = String(d.website).trim();
