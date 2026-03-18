@@ -25,6 +25,13 @@ export function isApiAvailable(): boolean {
   return import.meta.env.DEV || !!BASE.trim();
 }
 
+/** 案件のLPを表示する共有用URL（本番ではスマホ等でも開ける） */
+export function getPreviewPublicUrl(id: string): string {
+  if (typeof window === 'undefined') return '';
+  const origin = BASE && BASE.startsWith('http') ? new URL(BASE).origin : window.location.origin;
+  return `${origin}/api/preview/${encodeURIComponent(id)}`;
+}
+
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...options,

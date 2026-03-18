@@ -3,7 +3,7 @@ import type { DashboardItem } from '../types';
 import { TEMPLATES } from '../lib/templates';
 import { buildHtml } from '../lib/buildHtml';
 import { updateDashboardStatus, updateDashboardItem } from '../lib/queueStorage';
-import { api, isApiAvailable } from '../lib/api';
+import { api, isApiAvailable, getPreviewPublicUrl } from '../lib/api';
 import type { DashboardItem as DItem } from '../types';
 
 type DashboardItemAny = DashboardItem & { contentVariants?: { templateId: string; html: string }[] };
@@ -133,6 +133,31 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                   >
                     このページを別タブで開く
                   </button>
+                  {useApi && isApiAvailable() && (
+                    <div className="review-share-url" style={{ marginBottom: 12 }}>
+                      <label className="label-text" style={{ display: 'block', marginBottom: 4 }}>
+                        共有用URL（スマホ・他端末で開けます）
+                      </label>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input
+                          type="text"
+                          readOnly
+                          value={getPreviewPublicUrl(item.id)}
+                          className="small"
+                          style={{ flex: '1 1 200px', minWidth: 0, fontSize: '0.8rem' }}
+                        />
+                        <button
+                          type="button"
+                          className="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(getPreviewPublicUrl(item.id));
+                          }}
+                        >
+                          コピー
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div className="review-preview-wrap">
                     <iframe
                       title={`Preview ${item.researched.name}`}

@@ -12,6 +12,7 @@ import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
 import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
 import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
+import { buildHtml } from './buildHtml.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -256,6 +257,33 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   dashboard[i].status = 'rejected';
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
+});
+
+/** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける */
+app.get('/api/preview/:id', async (req, res) => {
+  try {
+    const dashboard = await store.getDashboard();
+    const item = dashboard.find((d) => d.id === req.params.id);
+    if (!item) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
+    const options = await store.getOptions();
+    const genOptions = {
+      contactForm: options.contactForm ?? false,
+      formActionUrl: options.formActionUrl || '',
+      instagramLine: options.instagramLine ?? true,
+      presentedBy: options.presentedBy ?? true,
+      qrCode: false,
+      instagramUrl: '',
+      lineUrl: '',
+      qrCodeDataUrl: '',
+    };
+    const html = buildHtml(item.content, item.seo, item.templateId, genOptions);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'private, max-age=0');
+    res.send(html);
+  } catch (e) {
+    console.error('[preview]', e);
+    res.status(500).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Error');
+  }
 });
 
 // ---------- 参照サイト（ウェブあり・上位表示分析用） ----------
