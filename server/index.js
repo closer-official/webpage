@@ -338,10 +338,12 @@ app.get('/api/learning/status', async (req, res) => {
 app.post('/api/full-auto/start', async (req, res) => {
   try {
     const out = await startFullAutoRun(req.body || {});
-    res.json(out);
+    return res.json(out);
   } catch (e) {
-    const msg = e.message || 'full-auto start failed';
+    console.error('[full-auto/start]', e);
+    const msg = e?.message || String(e);
     if (String(msg).includes('すでに')) return res.status(409).json({ error: msg });
+    if (String(msg).includes('地域とカテゴリ')) return res.status(400).json({ error: msg });
     return res.status(400).json({ error: msg });
   }
 });
@@ -442,6 +444,19 @@ app.post('/api/create-checkout-session', async (req, res) => {
     console.error(e);
     res.status(500).json({ error: e.message || 'Checkout failed' });
   }
+});
+
+// JSON 破損など未処理エラーで 500 になるのを防ぎ、メッセージを返す
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'JSONの形式が不正です。' });
+  }
+  console.error('[express]', err);
+  res.status(500).json({
+    error: err?.message || 'サーバー内部エラー',
+    hint: 'server/.env に GOOGLE_MAPS_API_KEY と GEMINI_API_KEY があるか、ターミナルでサーバーログを確認してください。',
+  });
 });
 
 if (!process.env.VERCEL) {

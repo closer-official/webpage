@@ -1,8 +1,11 @@
-// 本番（Vercel 等）では同じオリジンへ。開発時のみ VITE_API_URL（例: http://localhost:3001）を使用
-const BASE =
-  typeof window !== 'undefined' && !/localhost|127\.0\.0\.1/.test(window.location.origin)
-    ? ''
-    : (import.meta.env.VITE_API_URL || '');
+// 本番: 同じオリジン。ローカル開発: VITE_API_URL があれば直叩き、なければ Vite の /api プロキシ（127.0.0.1:3001）
+function getApiBase(): string {
+  if (typeof window === 'undefined') return '';
+  if (!/localhost|127\.0\.0\.1/.test(window.location.origin)) return '';
+  const u = (import.meta.env.VITE_API_URL || '').trim();
+  return u || '';
+}
+const BASE = getApiBase();
 
 export type GenerationOptions = {
   multiLanguage: boolean;
@@ -15,10 +18,11 @@ export type GenerationOptions = {
 };
 
 export function isApiAvailable(): boolean {
-  // 本番（Vercel 等）では同じオリジンに API があるので true
-  if (typeof window !== 'undefined' && !/localhost|127\.0\.0\.1/.test(window.location.origin))
-    return true;
-  return !!BASE.trim();
+  if (typeof window === 'undefined') return false;
+  // 本番（Vercel 等）
+  if (!/localhost|127\.0\.0\.1/.test(window.location.origin)) return true;
+  // ローカル: プロキシ or VITE_API_URL のどちらかで API に届く
+  return import.meta.env.DEV || !!BASE.trim();
 }
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
@@ -180,8 +184,21 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error((data as { error?: string }).error || res.statusText);
+    const text = await res.text();
+    let data: { error?: string } = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { error: text.slice(0, 200) || res.statusText };
+    }
+    if (!res.ok) {
+      const msg =
+        (data as { error?: string }).error ||
+        (res.status === 502 || res.status === 503
+          ? 'APIサーバーに接続できません。ターミナルで npm run server（ポート3001）を起動してください。'
+          : text.slice(0, 300) || res.statusText);
+      throw new Error(msg);
+    }
     return data;
   },
 };

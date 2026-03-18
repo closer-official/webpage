@@ -82,9 +82,11 @@ export async function startFullAutoRun(body) {
 
   (async () => {
     try {
+      // 指定件数ぶん出すため、検索では多めに候補を集める（サイト未掲載フィルタで落ちるため）
+      const fetchCap = Math.min(Math.max(count * 12, 24), 60);
       const places = await collectPlaces(query, {
         minReviews,
-        maxResults: count,
+        maxResults: fetchCap,
         hasWebsite: false,
       });
       const batch = places.slice(0, count);
@@ -111,7 +113,10 @@ export async function startFullAutoRun(body) {
         job.lastNames.unshift(p.name);
         job.lastNames = job.lastNames.slice(0, 8);
       }
-      job.phase = `${batch.length} 件をダッシュボードに追加しました。メール文面も入っています。`;
+      job.phase =
+        batch.length >= count
+          ? `${batch.length} 件をダッシュボードに追加しました（希望 ${count} 件）。メール文面も入っています。`
+          : `${batch.length} 件をダッシュボードに追加しました（希望 ${count} 件に足りませんでした）。メール文面も入っています。`;
       job.status = 'done';
     } catch (e) {
       console.error('full-auto error', e);

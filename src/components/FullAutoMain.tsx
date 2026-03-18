@@ -248,7 +248,9 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
           <li>
             検索クエリは「<strong>{region.trim() || '地域'}</strong> <strong>{category || 'カテゴリ'}</strong>」の形で Google に送ります。
           </li>
-          <li>サイト未掲載の店だけ対象です（既に公式サイトがある店は除外）。</li>
+          <li>
+            サイト未掲載の店だけ対象です。エリアによっては<strong>希望件数に満たない</strong>こともあります（進捗に件数表示）。
+          </li>
           <li>
             サーバーに <code>GEMINI_API_KEY</code> と <code>GOOGLE_MAPS_API_KEY</code>（server/.env）が必要です。
           </li>
