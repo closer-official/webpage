@@ -179,3 +179,15 @@ LPに含める項目（コンセプト・メニュー・営業時間・アクセ
   - `POST /api/create-checkout-session` … body に `billing`, `successUrl`, `cancelUrl`。Stripe Checkout の URL を返す。
 - **フロント** … 設定タブに「料金・お支払い」を表示。プラン（通常/学割/学割＋紹介）を選択し、削除オプション・追加オプション・その他サービスをON/OFF。選択に応じて合計が変わり、「料金を再計算」で反映。「Stripeで支払う」で Checkout にリダイレクト。決済後は `?payment=success` で戻る。
 - **サーバー環境変数** … `server/.env` に `STRIPE_SECRET_KEY=sk_...` を設定すると決済が有効になる。テスト時は `sk_test_...` を使用する。
+
+### 5-2. LP 埋め込み用「料金・お支払い」セクション（不正利用防止）
+
+- **対象** … イベント用テンプレ（`event`）以外の**全テンプレ**の生成LPに、「料金・お支払い」をメニューとセクションとして追加する。
+- **目的** … 支払いが完了するまでページに料金・お支払いを表示し続け、未払いのままサイトを利用している不正を防ぐ。
+- **挙動**  
+  - ナビに「料金・お支払」リンク（`#payment`）を追加。  
+  - セクション `#payment` に iframe で「料金・お支払い」フォームを表示。フォーム内でプラン・オプションのON/OFF、金額算出、「支払いを確定する」で Stripe Checkout へ遷移（同一タブ）。決済後は LP の URL に `?payment=success` 付きで戻る。
+- **API** … `GET /api/lp-payment-form?returnUrl=<LPのURL>` で埋め込み用フォームの HTML を返す。iframe の `src` はビルド時に `data-src` で渡し、表示時に `returnUrl` を付与して読み込む。
+- **genOptions**  
+  - `paymentFormBaseUrl`（任意）… フォームを配信するオリジンのベース URL。未指定時は同一オリジン（`/api/lp-payment-form`）。LP を別ドメイン（例: `店名.store-official.net`）に公開する場合は、API サーバー（例: `https://closer-official.com`）を指定する。
+- **Stripe の利用** … サーバーに `STRIPE_SECRET_KEY` を設定するだけで、埋め込みフォームからも同一の `/api/price`・`/api/create-checkout-session` が使え、決済と機能利用が可能になる。

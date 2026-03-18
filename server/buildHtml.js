@@ -121,10 +121,14 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     lineUrl = '',
     qrCodeDataUrl = '',
     purchaseUrl = '',
+    paymentFormBaseUrl = '',
   } = genOptions;
 
   const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
-  const navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
+  let navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
+  if (tid !== 'event') {
+    navItems = [...(Array.isArray(navItems) ? navItems : []), { label: '料金・お支払', href: '#payment' }];
+  }
   const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea'
     ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
     : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
@@ -200,7 +204,10 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
   </div>`;
 
-  const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
+  const CLOSER_URL = 'https://closer-official.com';
+  const footerLegal = presentedBy
+    ? `<div class="footer-legal"><p class="presented-by"><a href="${CLOSER_URL}" target="_blank" rel="noopener noreferrer">Presented by Closer</a></p></div>`
+    : '';
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
   const footerHtml =
     tid === 'cafe_tea'
@@ -734,6 +741,29 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </div>`
     : '';
 
+  const paymentBase = (paymentFormBaseUrl || '').trim();
+  const paymentFormSrc = paymentBase && paymentBase.includes('lp-payment-form')
+    ? paymentBase
+    : (paymentBase ? paymentBase.replace(/\/$/, '') + '/api/lp-payment-form' : '/api/lp-payment-form');
+  const paymentSectionHtml = tid !== 'event'
+    ? `
+    <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
+      <h2 id="payment-title">料金・お支払い</h2>
+      <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。完了するまでこのページをご利用いただけます。</p>
+      <div class="payment-iframe-wrap">
+        <iframe id="payment-iframe" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
+      </div>
+      <script>
+(function(){
+  var f = document.getElementById('payment-iframe');
+  if (f && f.getAttribute('data-src')) {
+    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
+  }
+})();
+</scr${''}ipt>
+    </section>`
+    : '';
+
   const builderViewIdToSectionId = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
   const getSectionById = (id) => sections.find((s) => s.id === id);
   const getSectionForView = (viewId) => {
@@ -775,9 +805,30 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
         <a href="#concept">news</a>
         <a href="#contact">contact</a>
         <a href="#access">access</a>
+        <a href="#payment">料金・お支払</a>
         <a href="#contact">newsletter</a>
         <span class="builder-menu-ja-en">ja / en</span>
       </nav>
+    </div>
+  </div>
+  <div class="builder-view builder-view-payment" id="builder-view-payment" data-builder-view="payment">
+    <div class="builder-content-bar"><a href="#menu">MENU</a></div>
+    <div class="container builder-content-inner">
+      <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
+        <h2 id="payment-title">料金・お支払い</h2>
+        <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。</p>
+        <div class="payment-iframe-wrap">
+          <iframe id="payment-iframe-builder" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
+        </div>
+        <script>
+(function(){
+  var f = document.getElementById('payment-iframe-builder');
+  if (f && f.getAttribute('data-src')) {
+    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
+  }
+})();
+</scr${''}ipt>
+      </section>
     </div>
   </div>
   ${['works', 'ideas', 'people', 'about', 'access', 'contact'].map((viewId) => {
@@ -796,7 +847,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     builderViewScript = `<script>
 (function(){
   var views = document.querySelectorAll('.builder-view');
-  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
+  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'payment': 'payment', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
   function applyView(){
     var h = (location.hash || '#').replace(/^#/, '') || '';
     var viewId = hashToView[h] || 'hero';
@@ -828,6 +879,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 ${quoteBlockHtml}
 ${sectionsHtml}
 ${extraSections}
+${paymentSectionHtml}
     </div>
   </main>
   ${gymStickyCtaHtml}

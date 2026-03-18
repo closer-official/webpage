@@ -1,15 +1,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { isApiAvailable, api } from '../lib/api';
 
+/** 11種類テンプレートに対応したカテゴリ（検索語として使用・テンプレ自動選択に連動） */
 const CATEGORY_PRESETS = [
-  { value: 'カフェ', label: 'カフェ・コーヒー' },
-  { value: 'ホテル', label: 'ホテル・宿泊' },
-  { value: 'ジム', label: 'ジム・フィットネス' },
-  { value: 'エステ', label: 'エステ・スパ' },
-  { value: 'バー', label: 'バー・ナイト' },
-  { value: 'キッズ', label: 'キッズ・室内あそび' },
-  { value: 'クリニック', label: 'クリニック・医院' },
-  { value: '美容室', label: '美容室・サロン' },
+  { value: '美容室', label: '1. 個人美容室・理容室' },
+  { value: 'カフェ', label: '2. カフェ・喫茶・パン・スイーツ' },
+  { value: '整骨院', label: '3. 整骨院・整体・鍼灸' },
+  { value: 'ジム', label: '4. パーソナルジム・ヨガ' },
+  { value: '工務店', label: '5. 工務店・リノベ' },
+  { value: '税理士', label: '6. 士業（税理士・行政書士・社労士等）' },
+  { value: '塾', label: '7. 個別指導塾・習い事教室' },
+  { value: '居酒屋', label: '8. こだわり居酒屋・ダイニングバー' },
+  { value: 'ペットサロン', label: '9. ペットサロン・ドッグトレーニング' },
+  { value: 'アパレル', label: '10. アパレル' },
+  { value: 'イベント', label: '11. イベント' },
 ];
 
 export type FullAutoStatus = {
@@ -32,7 +36,7 @@ interface FullAutoMainProps {
 export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMainProps) {
   const [region, setRegion] = useState('東京都港区');
   const [categoryMode, setCategoryMode] = useState<'preset' | 'custom'>('preset');
-  const [categoryPreset, setCategoryPreset] = useState('カフェ');
+  const [categoryPreset, setCategoryPreset] = useState(CATEGORY_PRESETS[0].value);
   const [categoryCustom, setCategoryCustom] = useState('');
   const [count, setCount] = useState(3);
   const [minReviews, setMinReviews] = useState(3);

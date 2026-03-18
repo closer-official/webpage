@@ -123,7 +123,10 @@ export function buildHtml(
   const tid = template.id;
   const overrides = options?.genOptions?.styleOverrides;
   const useDrawerNav = tid === 'cafe_tea' && overrides?.navStyle !== 'sticky';
-  const navItems = content.navItems?.length ? content.navItems : DEFAULT_NAV[tid] ?? [];
+  let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);
+  if (tid !== 'event') {
+    navItems = [...navItems, { label: '料金・お支払', href: '#payment' }];
+  }
   const cta = content.ctaLabel && content.ctaHref
     ? { label: content.ctaLabel, href: content.ctaHref }
     : DEFAULT_CTA[tid] ?? { label: 'お問い合わせ', href: '#contact' };
@@ -155,7 +158,11 @@ export function buildHtml(
   </div>`;
 
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
-  const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
+  const CLOSER_URL = 'https://closer-official.com';
+  const presentedBy = options?.genOptions?.presentedBy !== false;
+  const footerLegal = presentedBy
+    ? `<div class="footer-legal"><p class="presented-by"><a href="${CLOSER_URL}" target="_blank" rel="noopener noreferrer">Presented by Closer</a></p></div>`
+    : '';
   const footerHtml =
     tid === 'cafe_tea'
       ? hasFooterCols
@@ -588,6 +595,34 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </div>`
       : '';
 
+  const paymentFormBaseUrl = options?.genOptions?.paymentFormBaseUrl ?? '';
+  const paymentBase = paymentFormBaseUrl.trim();
+  const paymentFormSrc =
+    paymentBase && paymentBase.includes('lp-payment-form')
+      ? paymentBase
+      : paymentBase
+        ? paymentBase.replace(/\/$/, '') + '/api/lp-payment-form'
+        : '/api/lp-payment-form';
+  const paymentSectionHtml =
+    tid !== 'event'
+      ? `
+    <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
+      <h2 id="payment-title">料金・お支払い</h2>
+      <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。完了するまでこのページをご利用いただけます。</p>
+      <div class="payment-iframe-wrap">
+        <iframe id="payment-iframe" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
+      </div>
+      <script>
+(function(){
+  var f = document.getElementById('payment-iframe');
+  if (f && f.getAttribute('data-src')) {
+    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
+  }
+})();
+</scr` + `ipt>
+    </section>`
+      : '';
+
   const genOpts = options?.genOptions;
   const extraMotionAttr = tid === 'cafe_tea' ? '' : ' data-scroll-in';
   let extraSectionsHtml = '';
@@ -749,9 +784,30 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
         <a href="#concept">news</a>
         <a href="#contact">contact</a>
         <a href="#access">access</a>
+        <a href="#payment">料金・お支払</a>
         <a href="#contact">newsletter</a>
         <span class="builder-menu-ja-en">ja / en</span>
       </nav>
+    </div>
+  </div>
+  <div class="builder-view builder-view-payment" id="builder-view-payment" data-builder-view="payment">
+    <div class="builder-content-bar"><a href="#menu">MENU</a></div>
+    <div class="container builder-content-inner">
+      <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
+        <h2 id="payment-title">料金・お支払い</h2>
+        <p class="section-payment-note">プランとオプションを選択し、支払いを完了してください。</p>
+        <div class="payment-iframe-wrap">
+          <iframe id="payment-iframe-builder" title="料金・お支払い" data-src="${escapeHtml(paymentFormSrc)}" class="payment-iframe"></iframe>
+        </div>
+        <script>
+(function(){
+  var f = document.getElementById('payment-iframe-builder');
+  if (f && f.getAttribute('data-src')) {
+    f.src = f.getAttribute('data-src') + '?returnUrl=' + encodeURIComponent(window.location.href);
+  }
+})();
+</scr` + `ipt>
+      </section>
     </div>
   </div>
   ${['works', 'ideas', 'people', 'about', 'access', 'contact'].map((viewId) => {
@@ -770,7 +826,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     builderViewScript = `<script>
 (function(){
   var views = document.querySelectorAll('.builder-view');
-  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
+  var hashToView = { '': 'hero', 'hero': 'hero', 'menu': 'menu', 'payment': 'payment', 'works': 'works', 'ideas': 'ideas', 'people': 'people', 'about': 'about', 'access': 'access', 'contact': 'contact' };
   function applyView(){
     var h = (location.hash || '#').replace(/^#/, '') || '';
     var viewId = hashToView[h] || 'hero';
@@ -802,6 +858,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 ${quoteBlockHtml}
 ${mainSectionsHtml}
 ${extraSectionsHtml}
+${paymentSectionHtml}
     </div>
   </main>
   ${gymStickyCtaHtml}

@@ -13,6 +13,7 @@ import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, get
 import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
 import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
+import { renderLpPaymentForm } from './lpPaymentForm.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -480,6 +481,13 @@ app.post('/api/create-checkout-session', async (req, res) => {
     console.error(e);
     res.status(500).json({ error: e.message || 'Checkout failed' });
   }
+});
+
+/** LP埋め込み用: 料金・お支払いフォーム（オプションON/OFF・金額算出・支払い確定でStripeへ）。iframe で読み込む。 */
+app.get('/api/lp-payment-form', (req, res) => {
+  const returnUrl = (req.query.returnUrl && String(req.query.returnUrl)) || '';
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderLpPaymentForm(returnUrl));
 });
 
 /** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */

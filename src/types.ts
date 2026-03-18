@@ -252,6 +252,8 @@ export interface BuildHtmlGenOptions {
   presentedBy?: boolean;
   /** フォント・ナビなど見た目だけの上書き（テンプレートはそのまま） */
   styleOverrides?: StyleOverrides;
+  /** LP埋め込み用「料金・お支払い」フォームの取得元URL（未指定時は同一オリジン /api/lp-payment-form） */
+  paymentFormBaseUrl?: string;
 }
 
 /** ダッシュボード1件（API返却・3案入り） */
