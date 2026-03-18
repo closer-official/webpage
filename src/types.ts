@@ -51,6 +51,14 @@ export interface PageContent {
   footerEmail?: string;
   /** ヒーロー複数画像（2枚以上でスライドショー、1枚なら Ken Burns） */
   heroSlides?: string[];
+  /** よくある質問（アコーディオン用・cafe等） */
+  faqItems?: { q: string; a: string }[];
+  /** 料金表（メニュー表用・cafe等） */
+  priceRows?: { name: string; price: string }[];
+  /** ヘアカタログ等の複数画像（美容室テンプレ用） */
+  catalogImages?: string[];
+  /** アクセス用マップURL（iframe埋め込み用・任意） */
+  mapEmbedUrl?: string;
 }
 
 /** SEO用データ */

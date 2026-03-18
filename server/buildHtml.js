@@ -276,18 +276,40 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     return head + tail;
   }
 
+  const faqItems = content.faqItems || [];
+  const priceRows = content.priceRows || [];
+
   const sectionsDefault =
     tid === 'cafe_tea'
       ? sections
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, sections.length);
-            const img = sectionImg(s);
+            const imgWrapClass = s.imageUrl ? (i % 3 === 0 ? ' wo-img-wide' : i % 3 === 1 ? ' wo-img-tall' : ' wo-img-square') : '';
+            const img = s.imageUrl ? `<div class="section-img-wrap${imgWrapClass}"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
             const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2><div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
             if (s.id === 'hours') {
               return `    <section class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         ${woHoursBody(s.content)}
+      </div>
+    </section>`;
+            }
+            if (s.id === 'faq' && faqItems.length > 0) {
+              const faqHtml = faqItems.map((faq, j) => `<div class="wo-faq-item"><button type="button" class="wo-faq-q" aria-expanded="false" aria-controls="wo-faq-a-${i}-${j}" id="wo-faq-q-${i}-${j}">${escapeHtml(faq.q)}</button><div class="wo-faq-a" id="wo-faq-a-${i}-${j}" role="region" aria-labelledby="wo-faq-q-${i}-${j}"><p>${escapeHtml(faq.a)}</p></div></div>`).join('');
+              return `    <section class="section wo-sec wo-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-faq-list">${faqHtml}</div>
+      </div>
+    </section>`;
+            }
+            if (s.id === 'price' && priceRows.length > 0) {
+              const rowsHtml = priceRows.map((row) => `<tr><td class="wo-price-name">${escapeHtml(row.name)}</td><td class="wo-price-value">${escapeHtml(row.price)}</td></tr>`).join('');
+              return `    <section class="section wo-sec wo-price ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-price-table-wrap"><table class="wo-price-table"><tbody>${rowsHtml}</tbody></table></div>
       </div>
     </section>`;
             }
@@ -311,6 +333,43 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, sections.length);
             const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
+            if (tid === 'salon_barber' && s.id === 'concept') {
+              return `    <section class="section section-concept-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${sectionImg(s)}
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><div class="section-concept-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>
+    </section>`;
+            }
+            if (tid === 'salon_barber' && s.id === 'hours') {
+              const lines = String(s.content).split('\n').map((l) => l.trim()).filter(Boolean);
+              const dlRows = lines.map((line) => {
+                const fullColon = line.indexOf('：');
+                if (fullColon > 0) {
+                  return `<dt>${escapeHtml(line.slice(0, fullColon))}</dt><dd>${escapeHtml(line.slice(fullColon + 1))}</dd>`;
+                }
+                const space = line.indexOf(' ');
+                if (space > 0) {
+                  return `<dt>${escapeHtml(line.slice(0, space))}</dt><dd>${escapeHtml(line.slice(space + 1))}</dd>`;
+                }
+                return `<dt class="salon-hours-label">${escapeHtml(line)}</dt><dd></dd>`;
+              }).join('');
+              return `    <section class="section section-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><dl class="salon-hours-dl">${dlRows}</dl></div>
+    </section>`;
+            }
+            if (tid === 'salon_barber' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="salon-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><p class="salon-access-text">${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+    </section>`;
+            }
+            if (tid === 'salon_barber' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
+              const catalogImgs = content.catalogImages.map((url) => `<div class="salon-catalog-item"><img src="${escapeHtml(url)}" alt="" class="salon-catalog-img" loading="lazy"></div>`).join('');
+              return `    <section class="section section-catalog ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content)}</p><div class="salon-catalog-grid">${catalogImgs}</div></div>
+    </section>`;
+            }
             return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       ${sectionBody(s)}
@@ -379,6 +438,28 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
         </form>
       </div>
     </section>`;
+    } else if (tid === 'salon_barber') {
+      extraSections += `
+    <section class="section salon-form-block"${extraMotionAttr} id="contact-form">
+      <div class="section-body">
+        <h2 id="contact-form-title" class="salon-sec-title">お問い合わせ・予約</h2>
+        <form class="salon-form" action="${escapeHtml(formAction)}" method="post" aria-labelledby="contact-form-title">
+          <div class="salon-form-field">
+            <label class="salon-form-label" for="salon-inp-name">お名前</label>
+            <input class="salon-form-control" id="salon-inp-name" type="text" name="name" required autocomplete="name" placeholder="山田 太郎">
+          </div>
+          <div class="salon-form-field">
+            <label class="salon-form-label" for="salon-inp-email">メール</label>
+            <input class="salon-form-control" id="salon-inp-email" type="email" name="email" required autocomplete="email" placeholder="example@email.com">
+          </div>
+          <div class="salon-form-field">
+            <label class="salon-form-label" for="salon-inp-body">ご用件</label>
+            <textarea class="salon-form-control salon-form-textarea" id="salon-inp-body" name="body" rows="6" placeholder="ご予約希望日時・ご質問など"></textarea>
+          </div>
+          <button type="submit" class="cta-btn salon-form-submit">送信する</button>
+        </form>
+      </div>
+    </section>`;
     } else {
       extraSections += `
     <section class="section"${extraMotionAttr}>
@@ -396,7 +477,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     extraSections += `
     <section class="section qr-block"${extraMotionAttr}>
       <h2>QRコード</h2>
-      <img src="${escapeHtml(qrCodeDataUrl)}" alt="QRコード" width="120" height="120">
+      <p class="qr-block-mobile-note">スマホでご覧の方は、PCでこのページを開いてから読み取ってください。</p>
+      <div class="qr-block-img-wrap"><img src="${escapeHtml(qrCodeDataUrl)}" alt="QRコード" width="120" height="120" class="qr-block-img"></div>
     </section>`;
   }
 
@@ -469,6 +551,11 @@ if(slides>1)start();
 }
 var cb=document.getElementById('wo-nav-toggle');
 if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEventListener('click',function(){cb.checked=false;});});
+document.querySelectorAll('.wo-faq-item').forEach(function(item){
+var q=item.querySelector('.wo-faq-q');var a=item.querySelector('.wo-faq-a');
+if(!q||!a)return;
+q.addEventListener('click',function(){var open=item.classList.toggle('is-open');q.setAttribute('aria-expanded',open);});
+});
 })();
 </script>`
       : '';
@@ -489,7 +576,7 @@ if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEve
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = tid !== 'cafe_tea' ? ctaBlockHtml : '';
+  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber') ? ctaBlockHtml : '';
 
   const builderViewIdToSectionId = { works: 'gallery', ideas: 'concept', people: 'staff', about: 'about', access: 'access', contact: 'contact' };
   const getSectionById = (id) => sections.find((s) => s.id === id);

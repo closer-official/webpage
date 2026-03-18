@@ -206,12 +206,21 @@ const BUILDER_TEMPLATE_CSS = `
 
 export const TEMPLATES: TemplateOption[] = [
   makeTemplate('salon_barber', '個人美容室・理容室', '予約動線・雑誌風レイアウト（GOALD/LECO/ALBUM参照）', `
-  .page-wrapper.template-salon_barber { --tp-bg: #fff; --tp-heading: #1a1a1a; --tp-text: #333; --tp-accent: #000; --tp-border: #e8e8e8; --tp-bg-footer: #f5f5f5; --hero-min-h: 75vh; background: var(--tp-bg); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-salon_barber { --tp-bg: #fff; --tp-heading: #1a1a1a; --tp-text: #333; --tp-text-muted: #666; --tp-accent: #000; --tp-border: #e8e8e8; --tp-bg-footer: #f5f5f5; --hero-min-h: 75vh; background: var(--tp-bg); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
   .page-wrapper.template-salon_barber .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-salon_barber header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-salon_barber .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.12em; }
-  .page-wrapper.template-salon_barber .cta-btn { background: #000; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-salon_barber header { position: sticky; top: 0; z-index: 100; padding: 16px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-salon_barber .header-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; width: 100%; }
+  .page-wrapper.template-salon_barber .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.12em; text-decoration: none; color: var(--tp-heading); }
+  .page-wrapper.template-salon_barber .cta-btn { background: #000; color: #fff; border: none; padding: 12px 24px; min-height: 44px; }
   .page-wrapper.template-salon_barber .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-salon_barber .hero-bg-overlay { background: rgba(0,0,0,0.5); }
+  .page-wrapper.template-salon_barber .salon-sec-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--tp-text-muted); margin: 0 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-salon_barber .section-concept-lede .section-concept-prose { text-align: left; }
+  .page-wrapper.template-salon_barber .salon-hours-dl { margin: 0; display: grid; gap: 0.5rem 1.5rem; }
+  .page-wrapper.template-salon_barber .salon-catalog-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .page-wrapper.template-salon_barber .salon-catalog-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
+  .page-wrapper.template-salon_barber .salon-form-control { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--tp-border); border-radius: 6px; }
+  .page-wrapper.template-salon_barber .salon-form-submit { min-height: 48px; padding: 0.875rem 2rem; background: #000; color: #fff; border: none; }
   `),
   makeTemplate(
     'cafe_tea',
@@ -219,15 +228,31 @@ export const TEMPLATES: TemplateOption[] = [
     '落ち着いたトーン・メニュー表の美しさ（旧4番）',
     (() => {
       const wo = `
-  .page-wrapper.template-cafe_tea { --tp-bg: #f2efe8; --tp-heading: #2c2418; --tp-text: #5c5348; --tp-accent: #b45309; --tp-brand: #3d5245; --tp-band: #ebe8e0; --tp-hours-bg: #e5dfd2; --tp-border: rgba(61,82,69,0.2); --hero-min-h: 72vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--tp-text); background: var(--tp-bg); }
+  .page-wrapper.template-cafe_tea { --tp-bg: #f2efe8; --tp-heading: #2c2418; --tp-text: #5c5348; --tp-accent: #b45309; --tp-brand: #3d5245; --tp-border: rgba(61,82,69,0.2); --hero-min-h: 72vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; color: var(--tp-text); background: var(--tp-bg); }
   .page-wrapper.template-cafe_tea .container { padding: 0 var(--space-lg); max-width: 56rem; margin: 0 auto; }
-  @media (min-width: 1024px) { .page-wrapper.template-cafe_tea .container { padding: 0 var(--space-2xl); } }
   .page-wrapper.template-cafe_tea header { display: none; }
-  .page-wrapper.template-cafe_tea .section.wo-sec { border: none; border-radius: 0; margin-bottom: 0; background: var(--tp-bg); border-bottom: 1px solid rgba(44,36,24,0.06); }
+  .page-wrapper.template-cafe_tea .section.wo-sec { border: none; margin-bottom: 0; background: var(--tp-bg); border-bottom: 1px solid rgba(44,36,24,0.06); }
   .page-wrapper.template-cafe_tea .wo-hero { position: relative; min-height: var(--hero-min-h); overflow: hidden; background: var(--tp-brand); }
-  .page-wrapper.template-cafe_tea .wo-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: center; padding: 2rem 1.5rem 4.5rem; color: #fff; }
-  .page-wrapper.template-cafe_tea .cta-btn { background: #fff; color: var(--tp-brand); font-weight: 600; border: none; }
+  .page-wrapper.template-cafe_tea .wo-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: left; padding: 2rem 1.5rem 4rem; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  .page-wrapper.template-cafe_tea .cta-btn { background: #fff; color: var(--tp-brand); font-weight: 600; border: none; min-height: 48px; padding: 0.75rem 1.5rem; }
+  .page-wrapper.template-cafe_tea .wo-nav-drawer a { min-height: 48px; padding: 0.75rem 1rem; display: flex; align-items: center; }
+  .page-wrapper.template-cafe_tea .wo-lede-prose p, .page-wrapper.template-cafe_tea .wo-sec-prose p { line-height: 1.9; }
+  .page-wrapper.template-cafe_tea .section-img-wrap { border-radius: 12px; overflow: hidden; }
+  .page-wrapper.template-cafe_tea .section-img-wrap.wo-img-wide .section-img { aspect-ratio: 16/10; object-fit: cover; }
+  .page-wrapper.template-cafe_tea .section-img-wrap.wo-img-tall .section-img { aspect-ratio: 3/4; object-fit: cover; }
+  .page-wrapper.template-cafe_tea .wo-faq-item { border-bottom: 1px solid rgba(44,36,24,0.1); }
+  .page-wrapper.template-cafe_tea .wo-faq-q { width: 100%; padding: 1rem 0; text-align: left; background: none; border: none; font-size: 1rem; cursor: pointer; }
+  .page-wrapper.template-cafe_tea .wo-faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+  .page-wrapper.template-cafe_tea .wo-faq-item.is-open .wo-faq-a { max-height: 30em; }
+  .page-wrapper.template-cafe_tea .wo-price-table { width: 100%; border-collapse: collapse; }
+  .page-wrapper.template-cafe_tea .wo-price-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(44,36,24,0.12); }
+  .page-wrapper.template-cafe_tea .wo-price-value { text-align: right; font-weight: 600; color: var(--tp-accent); }
+  .page-wrapper.template-cafe_tea .wo-form-control { padding: 0.9rem 1.05rem; border-radius: 8px; border: 1px solid rgba(44,36,24,0.14); }
+  .page-wrapper.template-cafe_tea .wo-form-submit { min-height: 48px; padding: 0.875rem 2rem; }
+  .page-wrapper.template-cafe_tea .quote-block { text-align: left; border-left: 4px solid #c47c2a; padding-left: 1.25rem; background: rgba(180,83,9,0.06); }
   .page-wrapper.template-cafe_tea footer.footer-wo { background: var(--tp-brand); color: #fff; padding: var(--space-2xl); }
+  .page-wrapper.template-cafe_tea .qr-block-mobile-note { font-size: 0.875rem; margin-bottom: 0.75rem; }
+  @media (max-width: 768px) { .page-wrapper.template-cafe_tea .qr-block-img { display: none; } }
   `;
       return wo;
     })(),
