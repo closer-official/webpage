@@ -157,6 +157,33 @@ export const api = {
   getAutoProcessStatus: () => fetchApi<{ running: boolean }>('/api/auto-process/status'),
   startAutoProcess: () => fetchApi<{ running: boolean }>('/api/auto-process/start', { method: 'POST' }),
   stopAutoProcess: () => fetchApi<{ running: boolean }>('/api/auto-process/stop', { method: 'POST' }),
+
+  getFullAutoStatus: () =>
+    fetchApi<{
+      status: string;
+      phase: string;
+      processed: number;
+      total: number;
+      error: string | null;
+      lastNames: string[];
+      startedAt: string | null;
+      finishedAt: string | null;
+    }>('/api/full-auto/status'),
+  fullAutoStart: async (body: {
+    region: string;
+    category: string;
+    count: number;
+    minReviews: number;
+  }) => {
+    const res = await fetch(`${BASE}/api/full-auto/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error((data as { error?: string }).error || res.statusText);
+    return data;
+  },
 };
 
 export type LearningJobStatus = {

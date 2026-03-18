@@ -78,6 +78,77 @@
   border-color: #fff;
 }
 
+/* フルオート（メイン） */
+.full-auto-main .full-auto-hero {
+  margin-bottom: 16px;
+}
+.full-auto-lead {
+  font-size: 1rem;
+  line-height: 1.65;
+  max-width: 52rem;
+}
+.full-auto-form {
+  display: grid;
+  gap: 16px;
+  max-width: 32rem;
+  margin-top: 20px;
+}
+.full-auto-form .field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 520px) {
+  .full-auto-form .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+.full-auto-start-btn {
+  font-size: 1.05rem;
+  padding: 14px 24px;
+  margin-top: 4px;
+}
+.full-auto-status {
+  margin-top: 16px;
+}
+.full-auto-phase {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+.full-auto-names {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 8px 0 0;
+  padding-left: 1.2em;
+}
+.full-auto-done-actions {
+  margin-top: 16px;
+}
+.full-auto-note {
+  margin-top: 20px;
+}
+.full-auto-category-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.full-auto-main .label-text {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+.full-auto-main .radio-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
 .app-steps {
   max-width: 1200px;
   margin: 0 auto;

@@ -2,6 +2,12 @@ import { useState, useCallback } from 'react';
 import { searchPlacesNoWebsite, isMapsConfigured, candidateToVerificationSignals } from '../lib/maps';
 import type { MapsPlaceCandidate } from '../lib/maps';
 import { addToQueue } from '../lib/queueStorage';
+import { isApiAvailable, api } from '../lib/api';
+
+interface MapsCollectProps {
+  /** API 接続時はサーバー追加後に呼ぶ（キュー一覧を更新） */
+  onAdded?: () => void;
+}
 
 const MIN_REVIEW_OPTIONS = [
   { value: 0, label: '制限なし' },
@@ -10,13 +16,14 @@ const MIN_REVIEW_OPTIONS = [
   { value: 5, label: 'レビュー5件以上' },
 ];
 
-export function MapsCollect() {
+export function MapsCollect({ onAdded }: MapsCollectProps) {
   const [query, setQuery] = useState('');
   const [minReviews, setMinReviews] = useState(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MapsPlaceCandidate[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) return;
@@ -35,10 +42,10 @@ export function MapsCollect() {
   }, [query, minReviews]);
 
   const addCandidate = useCallback(
-    (c: MapsPlaceCandidate) => {
+    async (c: MapsPlaceCandidate) => {
       const signals = candidateToVerificationSignals(c);
-      addToQueue({
-        source: 'google_maps',
+      const payload = {
+        source: 'google_maps' as const,
         name: c.name,
         address: c.address,
         placeId: c.placeId,
@@ -46,10 +53,39 @@ export function MapsCollect() {
         signals,
         category: c.category,
         searchQuery: query.trim(),
-      });
+        rating: c.rating,
+        userRatingsTotal: c.userRatingsTotal,
+        hasOpeningHours: c.hasOpeningHours,
+        hasPhoto: c.hasPhoto,
+        reviews: [] as string[],
+      };
+      setError(null);
+      if (isApiAvailable()) {
+        setAddingId(c.placeId);
+        try {
+          await api.addToQueue(payload);
+          onAdded?.();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : 'サーバーへの追加に失敗しました');
+          return;
+        } finally {
+          setAddingId(null);
+        }
+      } else {
+        addToQueue({
+          source: 'google_maps',
+          name: c.name,
+          address: c.address,
+          placeId: c.placeId,
+          notes: '',
+          signals,
+          category: c.category,
+          searchQuery: query.trim(),
+        });
+      }
       setAddedIds((prev) => new Set(prev).add(c.placeId));
     },
-    [query]
+    [query, onAdded]
   );
 
   if (!isMapsConfigured()) {
@@ -71,6 +107,12 @@ export function MapsCollect() {
       <p className="hint">
         エリアやキーワードで検索し、<strong>Webサイトが未登録の店舗</strong>だけをキューに追加できます。
         実在確認のため、レビュー数でフィルタすることを推奨します。
+        {isApiAvailable() && (
+          <>
+            {' '}
+            <strong>バックエンド接続時はサーバーのキューに入ります</strong>（「フルオート」「キューを1件処理」の対象になります）。
+          </>
+        )}
       </p>
       <div className="search-row">
         <input
@@ -126,10 +168,14 @@ export function MapsCollect() {
                   <button
                     type="button"
                     className="small primary"
-                    onClick={() => addCandidate(c)}
-                    disabled={addedIds.has(c.placeId)}
+                    onClick={() => void addCandidate(c)}
+                    disabled={addedIds.has(c.placeId) || addingId === c.placeId}
                   >
-                    {addedIds.has(c.placeId) ? '追加済み' : 'キューに追加'}
+                    {addedIds.has(c.placeId)
+                      ? '追加済み'
+                      : addingId === c.placeId
+                        ? '追加中…'
+                        : 'キューに追加'}
                   </button>
                 </div>
               </li>

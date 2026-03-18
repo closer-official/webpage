@@ -11,6 +11,7 @@ import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
 import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
+import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -88,6 +89,10 @@ app.delete('/api/queue/:id', async (req, res) => {
 app.post('/api/queue', async (req, res) => {
   const queue = await store.getQueue();
   const body = req.body;
+  if (body.placeId) {
+    const dup = queue.find((q) => q.placeId === body.placeId);
+    if (dup) return res.status(200).json({ ...dup, alreadyInQueue: true });
+  }
   const item = {
     id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     source: body.source || 'google_maps',
@@ -327,6 +332,22 @@ app.post('/api/learning/start', async (req, res) => {
 
 app.get('/api/learning/status', async (req, res) => {
   res.json(await store.getLearningJob());
+});
+
+// ---------- フルオート（検索→LP→DM を一括・手離れ） ----------
+app.post('/api/full-auto/start', async (req, res) => {
+  try {
+    const out = await startFullAutoRun(req.body || {});
+    res.json(out);
+  } catch (e) {
+    const msg = e.message || 'full-auto start failed';
+    if (String(msg).includes('すでに')) return res.status(409).json({ error: msg });
+    return res.status(400).json({ error: msg });
+  }
+});
+
+app.get('/api/full-auto/status', (req, res) => {
+  res.json(getFullAutoStatus());
 });
 
 // ---------- キュー自動処理（調べる→作成→メール文まで自動） ----------
