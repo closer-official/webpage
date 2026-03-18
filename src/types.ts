@@ -209,6 +209,8 @@ export interface DashboardItem {
   dmBody: string;
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
+  /** 管理者画面用: プレビューURLの閲覧回数（サーバーで加算） */
+  viewCount?: number;
 }
 
 /** AI利用上限（将来AI組み込み時に、上限に達したら処理を止める用） */

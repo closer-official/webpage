@@ -11,6 +11,7 @@ import { QueueLocalSync } from './components/QueueLocalSync';
 import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
 import { DesignCheckPanel } from './components/DesignCheckPanel';
 import { FullAutoMain } from './components/FullAutoMain';
+import { StoreCms } from './components/StoreCms';
 import type { QueueTarget } from './types';
 import { isApiAvailable, api } from './lib/api';
 import { getQueue, getDashboard } from './lib/queueStorage';
@@ -20,7 +21,7 @@ type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
   contentVariants?: { templateId: string; html: string }[];
 };
 
-type TabId = 'auto' | 'design' | 'queue' | 'dashboard' | 'settings';
+type TabId = 'auto' | 'design' | 'queue' | 'dashboard' | 'admin' | 'settings';
 
 function App() {
   const [tab, setTab] = useState<TabId>('auto');
@@ -58,12 +59,13 @@ function App() {
     if (tab === 'queue') refreshQueue();
   }, [tab, refreshQueue]);
   useEffect(() => {
-    if (tab === 'dashboard') refreshDashboard();
+    if (tab === 'dashboard' || tab === 'admin') refreshDashboard();
   }, [tab, refreshDashboard]);
 
   const flowSteps: { id: TabId; label: string }[] = [
     { id: 'auto', label: 'フルオート' },
     { id: 'dashboard', label: 'ダッシュボード' },
+    { id: 'admin', label: '管理者' },
     { id: 'design', label: 'デザイン確認' },
     { id: 'queue', label: '手動・詳細' },
     { id: 'settings', label: '設定' },
@@ -147,6 +149,15 @@ function App() {
               onRefresh={refreshDashboard}
               useApi={isApiAvailable()}
             />
+          </section>
+        )}
+
+        {tab === 'admin' && (
+          <section className="tab-content">
+            <p className="tab-hint">
+              オプション「管理者画面」加入店向け。アクセス数・文言・写真の編集ができます。（一時的に全件表示）
+            </p>
+            <StoreCms items={dashboardItems} onRefresh={refreshDashboard} />
           </section>
         )}
 

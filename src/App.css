@@ -253,6 +253,190 @@
   margin: 0 0 16px;
 }
 
+/* 管理者画面（CMS） */
+.store-cms-hint {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 1rem;
+}
+.store-cms-empty {
+  color: #64748b;
+  margin: 1rem 0;
+}
+.store-cms-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.store-cms-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.store-cms-card-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.store-cms-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.store-cms-views {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+.store-cms-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.store-cms-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+.store-cms-btn:hover {
+  background: #f1f5f9;
+}
+.store-cms-btn-preview {
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.store-cms-btn-edit {
+  background: #1e40af;
+  color: #fff;
+  border-color: #1e40af;
+}
+.store-cms-btn-edit:hover {
+  background: #1d4ed8;
+}
+.store-cms-btn-primary {
+  background: #1e40af;
+  color: #fff;
+  border-color: #1e40af;
+}
+.store-cms-btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+.store-cms-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.store-cms-edit-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.store-cms-edit-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.store-cms-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.store-cms-error {
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin: 0 0 1rem;
+}
+.store-cms-form-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+.store-cms-form-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+.store-cms-form-section label {
+  display: block;
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+}
+.store-cms-form-section label input,
+.store-cms-form-section label textarea {
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+}
+.store-cms-form-section label textarea {
+  min-height: 4rem;
+  resize: vertical;
+}
+.store-cms-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.store-cms-section-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.store-cms-section-item h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+}
+.store-cms-section-preview {
+  margin-top: 0.5rem;
+}
+.store-cms-section-preview img {
+  max-width: 200px;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.store-cms-edit-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+.store-cms-file-row {
+  margin: 0.5rem 0 0.75rem;
+}
+.store-cms-file-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+.store-cms-file-input {
+  font-size: 0.875rem;
+}
+.store-cms-dataurl-note {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+}
+
 /* PDFアップロード */
 .pdf-upload .file-label {
   display: inline-block;

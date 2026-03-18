@@ -161,6 +161,13 @@ export const api = {
   markEmailSent: (id: string) =>
     fetchApi<unknown>(`/api/dashboard/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'email_sent' }) }),
 
+  /** 管理者画面用: コンテンツ・SEO を更新 */
+  updateDashboardContent: (id: string, content: unknown, seo?: unknown) =>
+    fetchApi<unknown>(`/api/dashboard/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(seo !== undefined ? { content, seo } : { content }),
+    }),
+
   getLearningIndustries: () => fetchApi<string[]>('/api/learning/industries'),
   startLearning: (industry: string, maxResults?: number) =>
     fetchApi<{ status: string }>('/api/learning/start', { method: 'POST', body: JSON.stringify({ industry, maxResults: maxResults ?? 60 }) }),

@@ -238,6 +238,8 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body.dmBody !== undefined) dashboard[i].dmBody = req.body.dmBody;
   if (req.body.status === 'email_sent') dashboard[i].status = 'email_sent';
+  if (req.body.content !== undefined) dashboard[i].content = req.body.content;
+  if (req.body.seo !== undefined) dashboard[i].seo = req.body.seo;
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
@@ -260,12 +262,15 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   res.json(dashboard[i]);
 });
 
-/** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける。Stripe 有効時はメニューに「購入」を追加 */
+/** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける。Stripe 有効時はメニューに「購入」を追加。閲覧時に viewCount を加算。 */
 app.get('/api/preview/:id', async (req, res) => {
   try {
     const dashboard = await store.getDashboard();
-    const item = dashboard.find((d) => d.id === req.params.id);
-    if (!item) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
+    const idx = dashboard.findIndex((d) => d.id === req.params.id);
+    if (idx === -1) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
+    const item = dashboard[idx];
+    item.viewCount = (item.viewCount || 0) + 1;
+    await store.setDashboard(dashboard);
     const options = await store.getOptions();
     const origin = (req.headers.origin || (req.protocol + '://' + req.get('host')) || '').replace(/\/$/, '');
     const previewUrl = origin ? `${origin}/api/preview/${encodeURIComponent(item.id)}` : '';
