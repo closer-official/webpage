@@ -37,7 +37,7 @@ function placeToQueueItem(place, searchQuery) {
   };
 }
 
-/** @type {{ status: string, phase: string, processed: number, total: number, error: string | null, lastNames: string[], startedAt: string | null, finishedAt: string | null }} */
+/** @type {{ status: string, phase: string, processed: number, total: number, error: string | null, lastNames: string[], startedAt: string | null, finishedAt: string | null, noMatches: boolean }} */
 let job = {
   status: 'idle',
   phase: '',
@@ -47,6 +47,7 @@ let job = {
   lastNames: [],
   startedAt: null,
   finishedAt: null,
+  noMatches: false,
 };
 
 export function getFullAutoStatus() {
@@ -70,12 +71,14 @@ async function runFullAutoPipeline(query, count, minReviews) {
   job.total = batch.length;
 
   if (batch.length === 0) {
+    job.noMatches = true;
     job.phase =
-      '条件に合う店が見つかりませんでした。地域・カテゴリの表記を変えるか、最低レビュー数を下げてください。';
+      '【理由】フルオートは Google Maps に「ウェブサイトURLが未登録」の店だけを対象にしています。東京都港区のカフェのように、都心・人気エリアでは掲載済みがほとんどのため、カフェがたくさんあっても 0 件になります。地方・郊外・商店街寄りのエリアに変えるか、最低レビュー数を下げて再検索してください。';
     job.status = 'done';
     job.finishedAt = new Date().toISOString();
     return;
   }
+  job.noMatches = false;
 
   const options = await store.getOptions();
   for (let i = 0; i < batch.length; i++) {
@@ -126,6 +129,7 @@ export async function startFullAutoRun(body) {
     lastNames: [],
     startedAt: new Date().toISOString(),
     finishedAt: null,
+    noMatches: false,
   };
 
   const onVercel = !!process.env.VERCEL;

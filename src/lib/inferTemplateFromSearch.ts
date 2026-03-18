@@ -4,6 +4,7 @@ import type { QueueTarget, StyleId } from '../types';
  * 検索クエリ（例: 港区 ホテル）と Maps の category（例: lodging, gym）からテンプレを推定。
  * 先にヒットしたルールを採用（ジム→6、カフェ→4、ホテル・エステ→1 など）。
  */
+/** カフェ・飲食をホテル／サロンより先に判定（Maps の type が beauty_salon でも検索がカフェならテンプレ4） */
 const RULES: { style: StyleId; re: RegExp }[] = [
   {
     style: 'high_energy',
@@ -14,16 +15,16 @@ const RULES: { style: StyleId; re: RegExp }[] = [
     re: /キッズ|保育|幼稚園|児童|あそび場|室内遊|ボールプール|playground|amusement|preschool|nursery|子ども|子供向け|ファミリー向け/i,
   },
   {
-    style: 'minimal_luxury',
-    re: /ホテル|hotel|lodging|motel|旅館|ryokan|民宿|guest house|エステ|esthetic|スパ|\bspa\b|beauty_salon|サロン|resort|bed_and_breakfast/i,
+    style: 'warm_organic',
+    re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|ベーカリー|bakery|パン屋|レストラン|restaurant|brunch|スイーツ|カフェテリア|meal_takeaway|meal_delivery|food|bistro/i,
   },
   {
     style: 'dark_edge',
     re: /バー|\bbar\b|ナイト|night_club|ラウンジ|lounge|クラブ|club|pub|居酒屋|ワインバー|カクテル/i,
   },
   {
-    style: 'warm_organic',
-    re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|ベーカリー|bakery|パン屋|レストラン|restaurant|brunch|スイーツ|カフェテリア/i,
+    style: 'minimal_luxury',
+    re: /ホテル|hotel|lodging|motel|旅館|ryokan|民宿|guest house|エステ|esthetic|\bspa\b|beauty_salon|美容室|hair_care|hair_salon|resort|bed_and_breakfast/i,
   },
   {
     style: 'corporate_trust',

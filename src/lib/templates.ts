@@ -58,7 +58,10 @@ const commonBase = `
   .page-wrapper * { box-sizing: border-box; }
   .skip-link { position: absolute; top: -4rem; left: var(--space-sm); z-index: 10001; padding: var(--space-xs) var(--space-sm); background: var(--tp-heading); color: #fafaf8; text-decoration: none; border-radius: 0.25rem; font-size: var(--text-sm); transition: top 0.35s var(--hell-ease); letter-spacing: 0.08em; }
   .skip-link:focus { top: var(--space-sm); outline: 2px solid var(--tp-accent); outline-offset: 3px; }
-  .page-wrapper .hero h1 { font-size: var(--type-display); line-height: 1.08; letter-spacing: -0.02em; }
+  .page-wrapper .hero h1, .wo-hero-inner h1 {
+    font-size: var(--type-display); line-height: 1.08; letter-spacing: -0.02em;
+    word-break: keep-all; line-break: strict; text-wrap: balance;
+  }
   .page-wrapper .section h2 { font-size: var(--type-h2); font-weight: 700; line-height: 1.15; letter-spacing: 0.04em; margin: 0 0 var(--space-lg); }
   .page-wrapper p, .page-wrapper .subheadline { line-height: 1.72; letter-spacing: 0.01em; }
   .page-wrapper .section p { font-size: var(--type-body); }
@@ -178,13 +181,13 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-minimal_luxury .section p { margin-bottom: 16px; }
   /* Header A-1: ロゴ中央・serif text-6xl tracking 0.3em uppercase / ナビ極小 10px tracking 0.2em hover opacity-50 */
   .page-wrapper.template-minimal_luxury .header-a1-inner { display: flex; flex-direction: column; align-items: center; gap: 32px; }
-  .page-wrapper.template-minimal_luxury .logo-a1 { font-family: "Playfair Display", "Yu Mincho", Georgia, serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: #1A1A1A; }
+  .page-wrapper.template-minimal_luxury .logo-a1 { font-family: "Playfair Display", "Yu Mincho", Georgia, serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: #1A1A1A; word-break: keep-all; line-break: strict; max-width: 100%; text-wrap: balance; }
   .page-wrapper.template-minimal_luxury .nav-a1 { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link { font-size: 10px; letter-spacing: 0.2em; opacity: 1; transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link::after { display: none; }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link:hover { opacity: 0.5; }
   /* Typography */
-  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.15em; color: #1A1A1A; margin: 0 0 16px; line-height: 1.15; }
+  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: clamp(1.75rem, 5.5vw, 3.75rem); font-weight: 400; letter-spacing: 0.12em; color: #1A1A1A; margin: 0 0 16px; line-height: 1.2; word-break: keep-all; line-break: strict; text-wrap: balance; }
   .page-wrapper.template-minimal_luxury .hero .subheadline { font-family: system-ui, -apple-system, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3em; color: #1A1A1A; opacity: 0.85; }
   .page-wrapper.template-minimal_luxury .section h2 { font-family: "Playfair Display", serif; color: #1A1A1A; font-size: 1.5rem; letter-spacing: 0.08em; }
   .page-wrapper.template-minimal_luxury .section p { color: #1A1A1A; line-height: 1.75; }
@@ -209,7 +212,7 @@ export const TEMPLATES: TemplateOption[] = [
     .page-wrapper.template-minimal_luxury .hero { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .page-wrapper.template-minimal_luxury .hero .hero-a1-text { grid-column: 1 / -1; order: 1; padding: 32px 0; }
     .page-wrapper.template-minimal_luxury .hero .hero-a1-img-wrap { grid-column: 1 / -1; }
-    .page-wrapper.template-minimal_luxury .hero h1 { font-size: 2.25rem; letter-spacing: 0.1em; }
+    .page-wrapper.template-minimal_luxury .hero h1 { font-size: clamp(1.5rem, 6vw, 2.25rem); letter-spacing: 0.08em; }
   }
   .page-wrapper.template-minimal_luxury * { border-radius: 0; }
   /* 登場アニメ: y:40→0, duration 1.2, ease [0.22,1,0.36,1], viewport once */
@@ -393,7 +396,7 @@ export const TEMPLATES: TemplateOption[] = [
     text-shadow: 0 2px 24px rgba(0,0,0,0.35);
   }
   .wo-hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.9; margin: 0 0 0.5rem; }
-  .wo-hero-inner h1 { font-size: clamp(1.65rem, 5vw, 2.35rem); font-weight: 600; margin: 0 0 0.5rem; line-height: 1.25; }
+  .wo-hero-inner h1 { font-size: clamp(1.65rem, 5vw, 2.35rem); font-weight: 600; margin: 0 0 0.5rem; line-height: 1.25; word-break: keep-all; line-break: strict; text-wrap: balance; }
   .wo-hero-inner .subheadline { font-size: 0.95rem; font-weight: 400; opacity: 0.95; margin: 0 0 1.25rem; line-height: 1.6; }
   .wo-hero-inner .cta-btn { background: #fff; color: var(--tp-brand); font-weight: 600; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
   .wo-hero-inner .cta-btn:hover { background: #f5f5f0; letter-spacing: 0.06em; }

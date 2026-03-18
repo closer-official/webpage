@@ -86,7 +86,10 @@ const COMMON_BASE = `
   @media (prefers-reduced-motion: reduce) { body.page-wrapper { opacity: 1 !important; animation: none !important; } }
   body.page-wrapper::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 10000; opacity: 0.028; mix-blend-mode: multiply; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
   .page-wrapper { --hell-ease: ${HELL_EASE}; --shadow-lift: 0 1px 1px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.05), 0 20px 40px rgba(0,0,0,0.06); --shadow-press: 0 1px 2px rgba(0,0,0,0.06); --type-display: clamp(2.25rem, 6vw + 1rem, 4.25rem); --type-h2: clamp(1.5rem, 2.8vw + 0.75rem, 2.35rem); --type-lead: clamp(1.0625rem, 1.2vw + 0.9rem, 1.3125rem); --type-body: clamp(0.9375rem, 0.4vw + 0.875rem, 1.0625rem); }
-  .page-wrapper .hero h1 { font-size: var(--type-display); line-height: 1.08; letter-spacing: -0.02em; }
+  .page-wrapper .hero h1, .wo-hero-inner h1 {
+    font-size: var(--type-display); line-height: 1.08; letter-spacing: -0.02em;
+    word-break: keep-all; line-break: strict; text-wrap: balance;
+  }
   .page-wrapper .section h2 { font-size: var(--type-h2); font-weight: 700; line-height: 1.15; letter-spacing: 0.04em; margin: 0 0 var(--space-lg); }
   .page-wrapper .section p { font-size: var(--type-body); line-height: 1.72; letter-spacing: 0.01em; }
   .page-wrapper .section-body > p:first-of-type { font-size: var(--type-lead); line-height: 1.75; letter-spacing: 0.02em; }
@@ -119,12 +122,12 @@ const TEMPLATE_CSS_RAW = {
   .page-wrapper.template-minimal_luxury .section h2 { margin-bottom: 32px; }
   .page-wrapper.template-minimal_luxury .section p { margin-bottom: 16px; }
   .page-wrapper.template-minimal_luxury .header-a1-inner { display: flex; flex-direction: column; align-items: center; gap: 32px; }
-  .page-wrapper.template-minimal_luxury .logo-a1 { font-family: "Playfair Display", "Yu Mincho", Georgia, serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: #1A1A1A; }
+  .page-wrapper.template-minimal_luxury .logo-a1 { font-family: "Playfair Display", "Yu Mincho", Georgia, serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: #1A1A1A; word-break: keep-all; line-break: strict; max-width: 100%; text-wrap: balance; }
   .page-wrapper.template-minimal_luxury .nav-a1 { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link { font-size: 10px; letter-spacing: 0.2em; opacity: 1; transition: opacity 0.3s ${A1_EASE}; }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link::after { display: none; }
   .page-wrapper.template-minimal_luxury .nav-a1 .nav-link:hover { opacity: 0.5; }
-  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: 3.75rem; font-weight: 400; letter-spacing: 0.15em; color: #1A1A1A; margin: 0 0 16px; line-height: 1.15; }
+  .page-wrapper.template-minimal_luxury .hero h1 { font-family: "Playfair Display", "Yu Mincho", serif; font-size: clamp(1.75rem, 5.5vw, 3.75rem); font-weight: 400; letter-spacing: 0.12em; color: #1A1A1A; margin: 0 0 16px; line-height: 1.2; word-break: keep-all; line-break: strict; text-wrap: balance; }
   .page-wrapper.template-minimal_luxury .hero .subheadline { font-family: system-ui, -apple-system, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3em; color: #1A1A1A; opacity: 0.85; }
   .page-wrapper.template-minimal_luxury .section h2 { font-family: "Playfair Display", serif; color: #1A1A1A; font-size: 1.5rem; letter-spacing: 0.08em; }
   .page-wrapper.template-minimal_luxury .section p { color: #1A1A1A; line-height: 1.75; }
@@ -148,7 +151,7 @@ const TEMPLATE_CSS_RAW = {
     .page-wrapper.template-minimal_luxury .hero { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .page-wrapper.template-minimal_luxury .hero .hero-a1-text { grid-column: 1 / -1; order: 1; padding: 32px 0; }
     .page-wrapper.template-minimal_luxury .hero .hero-a1-img-wrap { grid-column: 1 / -1; }
-    .page-wrapper.template-minimal_luxury .hero h1 { font-size: 2.25rem; letter-spacing: 0.1em; }
+    .page-wrapper.template-minimal_luxury .hero h1 { font-size: clamp(1.5rem, 6vw, 2.25rem); letter-spacing: 0.08em; }
   }
   .page-wrapper.template-minimal_luxury * { border-radius: 0; }
   .page-wrapper.template-minimal_luxury [data-a1-animate] { opacity: 0; transform: translateY(40px); transition: opacity 1.2s ${A1_EASE}, transform 1.2s ${A1_EASE}; }
@@ -293,7 +296,7 @@ const TEMPLATE_CSS_RAW = {
   .wo-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,35,30,0.55) 0%, transparent 45%); z-index: 3; pointer-events: none; }
   .wo-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: center; padding: 2rem 1.5rem 4.5rem; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
   .wo-hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.9; margin: 0 0 0.5rem; }
-  .wo-hero-inner h1 { font-size: clamp(1.65rem, 5vw, 2.35rem); font-weight: 600; margin: 0 0 0.5rem; line-height: 1.25; }
+  .wo-hero-inner h1 { font-size: clamp(1.65rem, 5vw, 2.35rem); font-weight: 600; margin: 0 0 0.5rem; line-height: 1.25; word-break: keep-all; line-break: strict; text-wrap: balance; }
   .wo-hero-inner .subheadline { font-size: 0.95rem; font-weight: 400; opacity: 0.95; margin: 0 0 1.25rem; line-height: 1.6; }
   .wo-hero-inner .cta-btn { background: #fff; color: var(--tp-brand); font-weight: 600; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
   .wo-hero-inner .cta-btn:hover { background: #f5f5f0; letter-spacing: 0.06em; }
@@ -424,6 +427,7 @@ export const TEMPLATE_IDS = [
 ];
 
 /** 業種は廃止し、全員が同じ6テンプレートを使用 */
+/** @deprecated 表示順は inferTemplatePriority.getOrderedTemplateIds を使用 */
 export const CONCEPT_TEMPLATES = {
   general: TEMPLATE_IDS,
   cafe: TEMPLATE_IDS,

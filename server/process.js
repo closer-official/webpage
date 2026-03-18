@@ -1,6 +1,6 @@
 import { analyzePlace, generateDmBody } from './gemini.js';
-import { CONCEPT_TEMPLATES } from './conceptTemplates.js';
 import { buildHtml } from './buildHtml.js';
+import { getOrderedTemplateIds } from './inferTemplatePriority.js';
 import { getPlacePhotoUrls } from './placePhotos.js';
 import QRCode from 'qrcode';
 
@@ -90,7 +90,12 @@ export async function processOne(queueItem, genOptions) {
   }
 
   const conceptId = analysis.conceptId || 'general';
-  const templateIds = CONCEPT_TEMPLATES[conceptId] || CONCEPT_TEMPLATES.general;
+  const templateIds = getOrderedTemplateIds(
+    queueItem.searchQuery,
+    queueItem.category,
+    conceptId,
+    queueItem.name
+  );
   const top3 = templateIds.slice(0, 3);
 
   let qrCodeDataUrl = '';

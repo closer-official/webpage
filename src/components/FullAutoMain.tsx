@@ -21,6 +21,7 @@ export type FullAutoStatus = {
   lastNames: string[];
   startedAt: string | null;
   finishedAt: string | null;
+  noMatches?: boolean;
 };
 
 interface FullAutoMainProps {
@@ -113,7 +114,8 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
   }
 
   const running = status?.status === 'running';
-  const doneOk = status?.status === 'done' && (status.processed > 0 || status.total === 0);
+  const noMatchesDone = status?.status === 'done' && (status.noMatches || (status.processed === 0 && status.total === 0));
+  const doneWithResults = status?.status === 'done' && status.processed > 0;
   const failed = status?.status === 'error';
 
   return (
@@ -123,7 +125,11 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
         <p className="hint full-auto-lead">
           <strong>地域・カテゴリ・件数</strong>を決めて<strong>開始</strong>するだけです。
           サーバーが <strong>検索 → 口コミ分析 → LP案3パターン作成 → DM（メール）文面</strong> まで自動で行い、
-          結果は<strong>ダッシュボード</strong>に並びます。デモ用の実データも、このフルオートでカテゴリごとに1件ずつ作る想定です。
+          結果は<strong>ダッシュボード</strong>に並びます。
+        </p>
+        <p className="hint full-auto-lead" style={{ marginTop: '-0.5rem', color: 'var(--text-muted, #555)' }}>
+          <strong>重要:</strong> 集めるのは Google に<strong>サイトURL未登録</strong>の店だけです。港区・渋谷などのカフェはほぼサイトあり →{' '}
+          <strong>0件になりやすい</strong>のは正常です。地方・郊外などを試してください。
         </p>
 
         <div className="full-auto-form">
@@ -219,7 +225,7 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
       </div>
 
       {(running || status?.phase) && (
-        <div className="panel full-auto-status">
+        <div className={`panel full-auto-status${noMatchesDone ? ' full-auto-no-matches' : ''}`}>
           <h3>進捗</h3>
           <p className="full-auto-phase">{status?.phase || '…'}</p>
           {status && status.total > 0 && (
@@ -235,12 +241,17 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
               ))}
             </ul>
           )}
-          {doneOk && (
+          {doneWithResults && (
             <div className="full-auto-done-actions">
               <button type="button" className="primary" onClick={onOpenDashboard}>
                 ダッシュボードで確認・送信
               </button>
             </div>
+          )}
+          {noMatchesDone && (
+            <p className="hint" style={{ marginTop: 12 }}>
+              サイト掲載ありの店を対象にしたい場合は「手動・詳細」で Maps からキューに追加してください。
+            </p>
           )}
         </div>
       )}
