@@ -50,6 +50,7 @@
 - **Vercel では**サーバーレスが終わると裏処理も止まるため、フルオートは **1リクエストの中で最後まで実行**します（2件で1〜3分かかることもあります。`vercel.json` の `maxDuration: 300` を維持してください）。
 - **ダッシュボードへの保存には Supabase が必須**です（ファイル保存は本番の無効な領域に書けず失敗します）。`SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY`（または ANON）を設定してください。
 - あわせて **`GOOGLE_MAPS_API_KEY`** と **`GEMINI_API_KEY`** を Vercel の環境変数に入れてください（`server/.env` はデプロイされません）。
+- **ルートの `package.json` にサーバー用依存（例: `qrcode`）が含まれている必要があります。** Vercel は `server/package.json` を自動では入れません。`FUNCTION_INVOCATION_FAILED` でログに `Cannot find module` と出る場合は、該当パッケージをルートで `npm install` してください。
 
 ### 2-2. 環境変数を設定する
 
