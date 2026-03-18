@@ -338,6 +338,9 @@ app.get('/api/learning/status', async (req, res) => {
 app.post('/api/full-auto/start', async (req, res) => {
   try {
     const out = await startFullAutoRun(req.body || {});
+    if (out && out.ok === false) {
+      return res.status(400).json({ error: out.error || 'フルオートに失敗しました', ...out });
+    }
     return res.json(out);
   } catch (e) {
     console.error('[full-auto/start]', e);

@@ -80,13 +80,16 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
     setStartError(null);
     setStarting(true);
     try {
-      await api.fullAutoStart({
+      const started = await api.fullAutoStart({
         region: region.trim(),
         category,
         count,
         minReviews,
       });
       await pollStatus();
+      if ((started as { completedOnServer?: boolean }).completedOnServer) {
+        onRefreshDashboard();
+      }
       pollRef.current = setInterval(pollStatus, 2000);
     } catch (e) {
       setStartError(e instanceof Error ? e.message : '開始に失敗しました');
@@ -252,7 +255,10 @@ export function FullAutoMain({ onOpenDashboard, onRefreshDashboard }: FullAutoMa
             サイト未掲載の店だけ対象です。エリアによっては<strong>希望件数に満たない</strong>こともあります（進捗に件数表示）。
           </li>
           <li>
-            サーバーに <code>GEMINI_API_KEY</code> と <code>GOOGLE_MAPS_API_KEY</code>（server/.env）が必要です。
+            サーバーに <code>GEMINI_API_KEY</code> と <code>GOOGLE_MAPS_API_KEY</code> が必要です。Vercel 本番では環境変数に設定し、フルオートは <strong>Supabase 接続</strong>も必要です。
+          </li>
+          <li>
+            <strong>本番（Vercel）</strong>では「開始」後、完了まで <strong>1〜数分</strong>そのまま待つ画面になります（サーバーレス仕様のため）。
           </li>
           <li>手動でキューに入れる・Maps で個別追加する場合は「手動・詳細」タブを使います。</li>
         </ul>
