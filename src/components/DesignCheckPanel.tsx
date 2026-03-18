@@ -133,6 +133,11 @@ const SAMPLE_BY_TEMPLATE: Record<
       title: 'café ことの葉',
       headline: 'café ことの葉',
       subheadline: '自家焙煎と、季節のあんこ',
+      heroSlides: [
+        'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400',
+        'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400',
+        'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400',
+      ],
       quote: 'ちょっとだけ、甘い休憩を。',
       sections: [
         { id: 'concept', title: 'こだわり', content: '町の焙煎所がはじめた、ちょっとだけ甘い休憩場所。豆は自家焙煎で、あんこは旬の小豆を炊いて毎日つくっています。', imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800' },
@@ -261,7 +266,7 @@ const PREVIEW_BG: Record<string, string> = {
   minimal_luxury: '#F9F9F7',
   dark_edge: '#080808',
   corporate_trust: '#f8fafc',
-  warm_organic: '#FDFBF7',
+  warm_organic: '#f2efe8',
   pop_friendly: '#fef08a',
   high_energy: '#fff',
 };
@@ -270,7 +275,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   minimal_luxury: '#1A1A1A',
   dark_edge: '#fff',
   corporate_trust: '#1e293b',
-  warm_organic: '#3d2914',
+  warm_organic: '#3d5245',
   pop_friendly: '#1a1a1a',
   high_energy: '#0f0f0f',
 };

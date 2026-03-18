@@ -117,7 +117,9 @@ export function buildHtml(
       <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-a1">${escapeHtml(cta.label)}</a>
     </div>
   </header>`
-        : `<header>
+        : tid === 'warm_organic'
+          ? ''
+          : `<header>
     <div class="container header-inner">
       <a href="#" class="logo">${escapeHtml(content.siteName)}</a>
       <nav class="nav" aria-label="メインメニュー">
@@ -134,8 +136,35 @@ export function buildHtml(
 
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
   const footerLegal = '<div class="footer-legal"><p class="presented-by">Presented by ウェブページ作成ツール</p></div>';
-  const footerHtml = hasFooterCols
-    ? `<footer>
+  const footerHtml =
+    tid === 'warm_organic'
+      ? hasFooterCols
+        ? `<footer class="footer-wo">
+    <div class="container">
+    <a href="#wo-top" class="wo-page-top">PAGE TOP</a>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <p class="footer-brand">${escapeHtml(content.siteName)}</p>
+        ${content.footerAddress ? `<p class="footer-address">${escapeHtml(content.footerAddress)}</p>` : ''}
+        ${content.footerPhone ? `<p><a href="tel:${escapeHtml(content.footerPhone.replace(/\s/g, ''))}" class="footer-link">${escapeHtml(content.footerPhone)}</a></p>` : ''}
+        ${content.footerEmail ? `<p><a href="mailto:${escapeHtml(content.footerEmail)}" class="footer-link">${escapeHtml(content.footerEmail)}</a></p>` : ''}
+      </div>
+      <div class="footer-col">
+        <p>${escapeHtml(content.footerText)}</p>
+      </div>
+    </div>
+    ${footerLegal}
+    </div>
+  </footer>`
+        : `<footer class="footer-wo">
+    <div class="container">
+    <a href="#wo-top" class="wo-page-top">PAGE TOP</a>
+    <p>${escapeHtml(content.footerText)}</p>
+    ${footerLegal}
+    </div>
+  </footer>`
+      : hasFooterCols
+        ? `<footer>
     <div class="container footer-cols">
       <div class="footer-col">
         <p class="footer-brand">${escapeHtml(content.siteName)}</p>
@@ -149,7 +178,7 @@ export function buildHtml(
     </div>
     ${footerLegal}
   </footer>`
-    : `<footer>
+        : `<footer>
     <div class="container">
       ${escapeHtml(content.footerText)}
     </div>
@@ -167,18 +196,47 @@ export function buildHtml(
   };
 
   const scrollInAttr = tid === 'minimal_luxury' ? '' : ' data-scroll-in';
-  const sectionsDefault = content.sections
-    .map((s, i) => {
-      const rhythm = getSectionRhythmClass(i, content.sections.length);
-      const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
-      const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-      return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+  const sectionsDefault =
+    tid === 'warm_organic'
+      ? content.sections
+          .map((s, i) => {
+            const rhythm = getSectionRhythmClass(i, content.sections.length);
+            const img = s.imageUrl
+              ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`
+              : '';
+            const body = `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
+            if (s.id === 'hours') {
+              return `    <section class="section wo-sec wo-hours-band ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="hours-band-inner"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2></div>
+      <div class="section-body"><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
+    </section>`;
+            }
+            if (i === 0) {
+              return `    <section class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${body}
+      ${img}
+    </section>`;
+            }
+            const alt = s.imageUrl ? (i % 2 === 1 ? ' wo-alt' : ' wo-alt wo-alt-rev') : '';
+            return `    <section class="section wo-sec ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${img}
+      ${body}
+    </section>`;
+          })
+          .join('\n')
+      : content.sections
+          .map((s, i) => {
+            const rhythm = getSectionRhythmClass(i, content.sections.length);
+            const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
+            const img = s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
+            return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${img}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>
     </section>`;
-    })
-    .join('\n');
+          })
+          .join('\n');
 
   const quoteBlockHtml = content.quote
     ? `    <blockquote class="quote-block"${tid === 'minimal_luxury' ? ' data-a1-animate' : ''}>${escapeHtml(content.quote)}</blockquote>`
@@ -233,7 +291,22 @@ ${content.sections
     high_energy: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
   };
   const heroImageUrl = (tid === 'minimal_luxury' ? seo.ogImageUrl?.trim() : seo.ogImageUrl?.trim()) || defaultHeroImages[tid] || '';
-  const a1HeroSlides = (tid === 'minimal_luxury' && content.heroSlides?.length) ? content.heroSlides : [heroImageUrl];
+  const woHeroSlides =
+    tid === 'warm_organic'
+      ? (() => {
+          const d1 = heroImageUrl || defaultHeroImages.warm_organic;
+          const d2 =
+            'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
+          const d3 =
+            'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
+          const hs = (content.heroSlides ?? []).filter((u) => (u || '').trim());
+          if (hs.length >= 2) return hs;
+          if (hs.length === 1) return [hs[0]!, d2, d3];
+          return [d1, d2, d3];
+        })()
+      : [];
+  const a1HeroSlides =
+    tid === 'minimal_luxury' && content.heroSlides?.length ? content.heroSlides : [heroImageUrl];
   const a1UseSlideshow = a1HeroSlides.length >= 2;
 
   const heroBgStyle =
@@ -285,8 +358,22 @@ ${content.sections
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
-            : tid === 'warm_organic' || tid === 'pop_friendly'
-              ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+            : tid === 'warm_organic'
+              ? `<section class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
+      <div class="wo-hero-viewport">
+        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
+      </div>
+      <div class="wo-hero-strip" aria-hidden="true"></div>
+      <div class="wo-hero-inner">
+        <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
+      </div>
+      <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}" data-wo-dot="${i}"></button>`).join('')}</div>
+    </section>`
+              : tid === 'pop_friendly'
+                ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -356,6 +443,28 @@ window.addEventListener('scroll',u,{passive:true});u();
 })();
 </script>`;
 
+  const woOrganicScript =
+    tid === 'warm_organic'
+      ? `<script>
+(function(){
+var track=document.getElementById('wo-hero-track');
+if(track){
+var slides=track.children.length,i=0,dots=[].slice.call(document.querySelectorAll('.wo-hero-dot')),reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches,timer,touchStart;
+function go(k){i=(k+slides)%slides;while(i<0)i+=slides;track.style.transform='translateX(-'+(i*100)+'%)';dots.forEach(function(d,j){d.classList.toggle('active',j===i);});}
+function next(){go(i+1);}function prev(){go(i-1);}
+function start(){clearInterval(timer);if(!reduced&&slides>1)timer=setInterval(next,4500);}
+function stop(){clearInterval(timer);}
+dots.forEach(function(d,j){d.addEventListener('click',function(){go(j);stop();start();});});
+track.addEventListener('touchstart',function(e){if(slides<2)return;touchStart=e.touches[0].clientX;stop();},{passive:true});
+track.addEventListener('touchend',function(e){if(slides<2)return;var x=e.changedTouches[0].clientX-touchStart;if(x>55)prev();else if(x<-55)next();start();},{passive:true});
+if(slides>1)start();
+}
+var cb=document.getElementById('wo-nav-toggle');
+if(cb)document.querySelectorAll('.wo-nav-drawer a').forEach(function(a){a.addEventListener('click',function(){cb.checked=false;});});
+})();
+</script>`
+      : '';
+
   const mainSectionsHtml = tid === 'minimal_luxury' ? sectionsWithA1! : sectionsHtml;
   const ctaAfterHero = tid === 'minimal_luxury' ? ctaBlockHtml : '';
 
@@ -366,11 +475,12 @@ window.addEventListener('scroll',u,{passive:true});u();
   if (genOpts) {
     const { contactForm, formActionUrl, instagramLine, instagramUrl, lineUrl, qrCode, qrCodeDataUrl } = genOpts;
     if (instagramLine && (instagramUrl || lineUrl)) {
+      const snsWo = tid === 'warm_organic' ? ' wo-sns' : '';
       extraSectionsHtml += `
-    <section class="section sns-links"${extraMotionAttr} id="sns">
+    <section class="section sns-links${snsWo}"${extraMotionAttr} id="sns">
       <h2 id="sns-title">フォロー・お問い合わせ</h2>
-      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener">Instagram</a>` : ''}
-      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener">LINE</a>` : ''}
+      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer"${tid === 'warm_organic' ? ' aria-label="Instagram"' : ''}>${tid === 'warm_organic' ? 'IG' : 'Instagram'}</a>` : ''}
+      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer"${tid === 'warm_organic' ? ' aria-label="LINE"' : ''}>${tid === 'warm_organic' ? 'LINE' : 'LINE'}</a>` : ''}
     </section>`;
     }
     if (contactForm) {
@@ -398,6 +508,21 @@ window.addEventListener('scroll',u,{passive:true});u();
     }
   }
 
+  const woChrome =
+    tid === 'warm_organic'
+      ? `<div id="wo-top"></div>
+<input type="checkbox" id="wo-nav-toggle" class="wo-nav-cb" aria-hidden="true">
+<nav class="wo-nav-drawer" aria-label="メインメニュー">
+  <label for="wo-nav-toggle" class="wo-nav-backdrop"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">閉じる</span></label>
+  <div class="wo-nav-drawer-inner">
+    <p class="wo-nav-brand">${escapeHtml(content.siteName)}</p>
+    ${navItems.map((n) => `<a href="${escapeHtml(n.href)}">${escapeHtml(n.label)}</a>`).join('')}
+    <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
+  </div>
+</nav>
+<label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
+      : '';
+
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -408,6 +533,7 @@ window.addEventListener('scroll',u,{passive:true});u();
 </head>
 <body class="${bodyClass}">
   ${skipLink}
+  ${woChrome}
   ${marqueeBar}
   ${headerHtml}
   <main id="main-content">
@@ -422,6 +548,7 @@ ${extraSectionsHtml}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}
+  ${woOrganicScript}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
 </script>

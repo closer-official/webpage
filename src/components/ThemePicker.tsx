@@ -13,7 +13,7 @@ const PREVIEW_BG: Record<string, string> = {
   minimal_luxury: '#FAFAFA',
   dark_edge: '#080808',
   corporate_trust: '#f8fafc',
-  warm_organic: '#FDFBF7',
+  warm_organic: '#f2efe8',
   pop_friendly: '#fef08a',
   high_energy: '#fff',
 };
