@@ -466,7 +466,7 @@ export const CONCEPT_TEMPLATES = {
   clinic: TEMPLATE_IDS,
 };
 
-const GENERIC_SELECTOR = '.page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon, .page-wrapper.template-apparel, .page-wrapper.template-event';
+const GENERIC_SELECTOR = '.page-wrapper.template-professional, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon, .page-wrapper.template-apparel, .page-wrapper.template-event';
 
 /** テンプレ3〜10用の共通CSS（minimal_luxury ベース） */
 const GENERIC_CSS = `
@@ -674,6 +674,61 @@ const GYM_YOGA_CSS = `
 /** 2. カフェ・喫茶用（旧 warm_organic と同一） */
 const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
 
+/** 7. 塾・習い事教室用（信頼ブロック直下・曲線区切り・円形バッジ・固定フッター2CTA・親しみやすさ） */
+const CRAM_SCHOOL_CSS = `
+  .page-wrapper.template-cram_school {
+    --cram-bg: #FDFBF7; --cram-heading: #2c2418; --cram-text: #4a4238; --cram-accent: #c73e3a; --cram-accent-soft: #e8a5a2;
+    --tp-bg: var(--cram-bg); --tp-heading: var(--cram-heading); --tp-text: var(--cram-text); --tp-accent: var(--cram-accent);
+    --tp-border: rgba(44,36,24,0.1); --tp-bg-footer: #f5f2ed; --hero-min-h: 58vh;
+    font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--tp-bg); color: var(--tp-heading); font-weight: 500;
+  }
+  .page-wrapper.template-cram_school .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-cram_school header { position: sticky; top: 0; z-index: 100; padding: 14px 0; border-bottom: 1px solid var(--tp-border); background: #fff; }
+  .page-wrapper.template-cram_school .logo { font-size: 1.125rem; font-weight: 700; color: var(--cram-accent); text-decoration: none; }
+  .page-wrapper.template-cram_school .nav-link { color: var(--cram-text); font-size: 0.9375rem; }
+  .page-wrapper.template-cram_school .cta-btn { background: var(--cram-accent); color: #fff; border: none; padding: 14px 28px; min-height: 48px; font-weight: 600; border-radius: 999px; font-size: 0.9375rem; }
+  .page-wrapper.template-cram_school .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-cram_school .hero-bg-overlay { background: rgba(0,0,0,0.25); }
+  .page-wrapper.template-cram_school .hero-inner h1 { font-size: clamp(1.35rem, 4vw, 2rem); font-weight: 700; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.4); }
+  .page-wrapper.template-cram_school .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-size: 0.9375rem; text-shadow: 0 1px 8px rgba(0,0,0,0.35); }
+  .cram-trust { padding: 1.5rem 1rem 2rem; background: linear-gradient(180deg, var(--cram-accent) 0%, #b53531 100%); position: relative; }
+  .cram-trust::after { content: ''; position: absolute; bottom: -12px; left: 0; right: 0; height: 24px; background: var(--cram-bg); border-radius: 24px 24px 0 0; }
+  .cram-trust-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem 1.5rem; margin: 0; padding: 0; list-style: none; }
+  .cram-trust-badges li { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 100px; padding: 1rem 1.25rem; background: #fff; border-radius: 50%; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .cram-trust-badges .cram-badge-value { font-size: 1.25rem; font-weight: 800; color: var(--cram-accent); line-height: 1.2; display: block; }
+  .cram-trust-badges .cram-badge-label { font-size: 0.75rem; font-weight: 600; color: var(--cram-text); margin-top: 0.25rem; text-align: center; }
+  .cram-cta-primary-wrap { text-align: center; padding: 1.5rem 1rem 2rem; }
+  .cram-cta-primary-wrap .cta-btn { min-height: 52px; padding: 16px 40px; font-size: 1rem; }
+  .cram-segment { padding: 0 1rem 2rem; }
+  .cram-segment h2 { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.08em; color: var(--cram-heading); margin: 0 0 1rem; text-align: center; }
+  .cram-segment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; max-width: 28rem; margin: 0 auto; }
+  .cram-segment-grid a { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.875rem 1rem; background: #fff; border: 2px solid var(--tp-border); border-radius: 12px; color: var(--cram-heading); font-weight: 600; font-size: 0.9375rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .cram-segment-grid a:hover { border-color: var(--cram-accent); color: var(--cram-accent); background: rgba(199,62,58,0.04); }
+  .cram-reasons { padding: 2rem 1rem; background: #fff; position: relative; }
+  .cram-reasons::before { content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 24px; background: #fff; border-radius: 0 0 24px 24px; }
+  .cram-reasons h2 { font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; color: var(--cram-heading); margin: 0 0 1.5rem; text-align: center; }
+  .cram-reason-list { display: flex; flex-direction: column; gap: 1.25rem; max-width: 32rem; margin: 0 auto; }
+  .cram-reason-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem; background: var(--cram-bg); border-radius: 12px; border-left: 4px solid var(--cram-accent); }
+  .cram-reason-num { flex-shrink: 0; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; background: var(--cram-accent); color: #fff; font-size: 0.8125rem; font-weight: 800; border-radius: 50%; }
+  .cram-reason-body h3 { font-size: 1rem; font-weight: 700; color: var(--cram-heading); margin: 0 0 0.35rem; }
+  .cram-reason-body p { font-size: 0.9375rem; line-height: 1.75; color: var(--cram-text); margin: 0; }
+  .page-wrapper.template-cram_school .section { position: relative; }
+  .page-wrapper.template-cram_school .section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 20px; background: var(--tp-bg); border-radius: 0 0 20px 20px; }
+  .page-wrapper.template-cram_school .section h2 { font-size: 1.125rem; font-weight: 700; color: var(--cram-heading); margin: 0 0 0.75rem; }
+  .page-wrapper.template-cram_school .section p { font-size: 1rem; line-height: 1.8; color: var(--cram-text); }
+  .page-wrapper.template-cram_school .section-rhythm-after-hero { padding-top: 2rem; padding-bottom: 2rem; }
+  .page-wrapper.template-cram_school .section-rhythm-default { padding-top: 2rem; padding-bottom: 2rem; }
+  .page-wrapper.template-cram_school .section-img-wrap { border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .page-wrapper.template-cram_school footer { padding: 3rem 0 100px; border-top: 1px solid var(--tp-border); background: var(--tp-bg-footer); }
+  .cram-sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; z-index: 90; display: flex; gap: 0.75rem; padding: 12px 16px; background: #fff; border-top: 2px solid var(--tp-border); box-shadow: 0 -4px 20px rgba(0,0,0,0.08); }
+  .cram-sticky-cta .cta-btn { flex: 1; min-height: 48px; border-radius: 999px; }
+  .cram-sticky-cta .cta-btn-secondary { background: #fff; color: var(--cram-accent); border: 2px solid var(--cram-accent); }
+  .cram-sticky-cta .cta-btn-secondary:hover { background: rgba(199,62,58,0.06); }
+  .page-wrapper.template-cram_school main { padding-bottom: 88px; }
+  .page-wrapper.template-cram_school .cram-map-wrap { margin-top: 1rem; border-radius: 16px; overflow: hidden; border: 1px solid var(--tp-border); }
+  @media (max-width: 768px) { .page-wrapper.template-cram_school .qr-block .qr-block-img { display: none; } }
+`;
+
 export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
@@ -681,6 +736,7 @@ export function getTemplateFullCss(templateId) {
     : key === 'builder' ? BUILDER_CSS
     : key === 'clinic_chiropractic' ? CLINIC_CHIROPRACTIC_CSS
     : key === 'gym_yoga' ? GYM_YOGA_CSS
+    : key === 'cram_school' ? CRAM_SCHOOL_CSS
     : GENERIC_CSS;
   return COMMON_BASE + css;
 }

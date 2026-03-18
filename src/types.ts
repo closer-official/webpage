@@ -65,6 +65,11 @@ export interface PageContent {
   reasonItems?: { num: string; title: string; body: string }[];
   /** 整骨院テンプレ用：図解ラベル（例: 心・身体・自律神経＝3円） */
   conceptDiagramLabels?: string[];
+  /** 塾・習い事テンプレ用：学年・年齢別セグメントナビ（幼児・小学生・中学生など） */
+  segmentItems?: { label: string; href: string }[];
+  /** 塾テンプレ用：固定フッターの第二CTA（例: 資料請求） */
+  ctaSecondaryLabel?: string;
+  ctaSecondaryHref?: string;
 }
 
 /** SEO用データ */
@@ -93,11 +98,11 @@ export type StyleId =
   | 'apparel'            // 10. アパレル
   | 'event';             // 11. イベント
 
-/** テンプレートあたりのバリアント数（11×5 = 55 スロット） */
-export const SHOWCASE_VARIANT_COUNT = 5;
+/** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
+export const SHOWCASE_VARIANT_COUNT = 1;
 
 /** バリアント番号 0 ～ (SHOWCASE_VARIANT_COUNT - 1) */
-export type VariantIndex = 0 | 1 | 2 | 3 | 4;
+export type VariantIndex = 0;
 
 /** テンプレート定義 */
 export interface TemplateOption {

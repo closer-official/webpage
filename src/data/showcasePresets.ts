@@ -2,7 +2,7 @@ import type { PageContent, SEOData, StyleId } from '../types';
 import { SHOWCASE_VARIANT_COUNT } from '../types';
 import { WARM_ORGANIC_CAFE_PRESET } from './warmOrganicCafePreset';
 
-/** 1テンプレあたりのバリアント数（6×5=30スロット） */
+/** 1テンプレあたりのバリアント数（11×1=11スロットでスタート） */
 const VARIANT_COUNT = SHOWCASE_VARIANT_COUNT;
 
 /** 汎用プレースホルダー（テンプレ3〜10のひな形） */
@@ -197,7 +197,49 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
     },
   },
   professional: genericPlaceholder('士業事務所', '行政書士・税理士・社労士 | お問い合わせ', '誠実さを感じさせるネイビー・白の基調。'),
-  cram_school: genericPlaceholder('個別指導塾', '個別指導塾・習い事 | 月謝・講師', '親御さんが安心する優しいトーン。'),
+  cram_school: {
+    content: {
+      siteName: 'キッズ塾サンプル',
+      title: 'キッズ塾サンプル',
+      headline: 'お子さまの「できた！」を増やす。',
+      subheadline: '無料体験・資料請求はお気軽にどうぞ。',
+      ctaLabel: '無料体験申込',
+      ctaHref: '#contact',
+      ctaSecondaryLabel: '資料請求',
+      ctaSecondaryHref: '#contact',
+      stats: [
+        { value: '94%', label: '保護者満足度' },
+        { value: '100+', label: '教室数' },
+        { value: '10,000+', label: '累計利用者' },
+      ],
+      segmentItems: [
+        { label: '幼児', href: '#menu' },
+        { label: '小学生', href: '#menu' },
+        { label: '中学生', href: '#menu' },
+        { label: '高校生', href: '#menu' },
+      ],
+      reasonItems: [
+        { num: '1', title: '一人ひとりに合わせた指導', body: '個別カリキュラムで、お子さまのペースと目標に合わせて無理なく学べます。' },
+        { num: '2', title: '無料体験で安心', body: '入会前に教室の雰囲気や講師を体験。資料請求も随時受付中です。' },
+        { num: '3', title: '通いやすい立地と時間', body: '駅近教室が多く、送迎しやすい時間帯もご相談いただけます。' },
+      ],
+      sections: [
+        { id: 'concept', title: '教室の想い', content: '「できた！」の積み重ねが、お子さまの自信につながります。私たちは一人ひとりに寄り添い、学ぶ楽しさと習慣づくりをサポートします。' },
+        { id: 'menu', title: 'コース・月謝', content: '幼児コース・小学生コース・中学生コース・高校生コースをご用意。月謝や時間帯はお問い合わせください。' },
+        { id: 'access', title: 'アクセス', content: '〇〇県〇〇市〇〇町1-2-3\n〇〇駅 徒歩5分\n駐車場あり' },
+        { id: 'contact', title: 'お問い合わせ', content: '無料体験・資料請求は下のボタンから。お電話でも承っております。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} キッズ塾サンプル. All rights reserved.`,
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+    },
+    seo: {
+      metaTitle: '個別指導塾・習い事 | 無料体験・資料請求',
+      metaDescription: 'お子さまの「できた！」を増やす。保護者満足度94%。無料体験・資料請求受付中。',
+      keywords: '塾, 習い事, 個別指導, 無料体験, 資料請求',
+      ogImageUrl: '',
+      canonicalUrl: '',
+    },
+  },
   izakaya: genericPlaceholder('こだわり居酒屋', 'こだわり居酒屋・バー | 夜の雰囲気', 'ダークな配色でお酒・料理をドラマチックに。'),
   pet_salon: genericPlaceholder('ペットサロン', 'ペットサロン・ドッグ | 安心感', 'プロの専門性が伝わる安心感重視のデザイン。'),
   apparel: genericPlaceholder('アパレルショップ', 'アパレル・ファッション | ブランド', 'コンセプト・コレクション・アクセスをご案内します。'),
@@ -205,21 +247,19 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
 };
 
 /**
- * 11テンプレ × 5バリアント = 55スロットの枠。
+ * 11テンプレ × 1バリアント = 11スロットの枠。
  * 各スロットは現状同じ内容のコピー。画像は template-sources/ で差し替え用を用意。
  */
-export const SHOWCASE_PRESETS_6X5: Record<
-  StyleId,
-  [{ content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }]
-> = (() => {
+type PresetSlot = { content: PageContent; seo: SEOData };
+export const SHOWCASE_PRESETS_6X5: Record<StyleId, PresetSlot[]> = (() => {
   const styleIds = Object.keys(SHOWCASE_BY_STYLE_ID) as StyleId[];
-  const out = {} as Record<StyleId, [{ content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }, { content: PageContent; seo: SEOData }]>;
+  const out = {} as Record<StyleId, PresetSlot[]>;
   for (const id of styleIds) {
     const base = SHOWCASE_BY_STYLE_ID[id]!;
     out[id] = Array.from({ length: VARIANT_COUNT }, () => ({
       content: structuredClone(base.content),
       seo: structuredClone(base.seo),
-    })) as typeof out[StyleId];
+    }));
   }
   return out;
 })();
@@ -228,7 +268,8 @@ export const SHOWCASE_PRESETS_6X5: Record<
 export function getShowcasePreset(styleId: StyleId, variant?: number): { content: PageContent; seo: SEOData } {
   const normalizedId = ((styleId as string) === 'bakery' ? 'cafe_tea' : styleId) as StyleId;
   const v = variant != null && variant >= 0 && variant < VARIANT_COUNT ? variant : 0;
-  const p = SHOWCASE_PRESETS_6X5[normalizedId]![v]!;
+  const arr = SHOWCASE_PRESETS_6X5[normalizedId]!;
+  const p = arr[v] ?? arr[0]!;
   return {
     content: structuredClone(p.content),
     seo: structuredClone(p.seo),
