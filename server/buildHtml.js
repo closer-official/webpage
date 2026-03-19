@@ -117,7 +117,7 @@ const DEFAULT_CTA = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
-  gym_yoga: { label: '予約・相談', href: '#contact' },
+  gym_yoga: { label: '予約・相談', href: '#reserve' },
   builder: { label: 'お問い合わせ', href: '#contact' },
   professional: { label: '無料相談', href: '#contact' },
   cram_school: { label: '無料体験', href: '#contact' },
@@ -264,8 +264,22 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     ? `<div class="footer-legal"><p class="presented-by"><a href="${CLOSER_URL}" target="_blank" rel="noopener noreferrer">Presented by Closer</a></p></div>`
     : '';
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
+  const gymFooterSns = content.gymFooterSns ?? [];
+  const gymHeroBadgeForFooter = content.gymHeroBadge ?? '';
   const footerHtml =
-    tid === 'cafe_tea'
+    tid === 'gym_yoga'
+      ? `<footer>
+    <div class="container gym-footer-inner">
+      <div class="gym-footer-sns">${gymFooterSns.map((s) => `<a href="${escapeHtml(s.href)}" target="_blank" rel="noopener noreferrer" class="gym-footer-sns-link">${escapeHtml(s.label)}</a>`).join('')}</div>
+      ${gymHeroBadgeForFooter ? `<p class="gym-footer-badge">${escapeHtml(gymHeroBadgeForFooter)}</p>` : ''}
+      <p class="footer-brand">${escapeHtml(content.siteName)}</p>
+      ${content.footerAddress ? `<p class="footer-address">${escapeHtml(content.footerAddress)}</p>` : ''}
+      ${content.footerPhone ? `<p><a href="tel:${escapeHtml(String(content.footerPhone).replace(/\s/g, ''))}" class="footer-link">${escapeHtml(content.footerPhone)}</a></p>` : ''}
+      <p class="footer-text">${escapeHtml(content.footerText)}</p>
+    </div>
+    ${footerLegal}
+  </footer>`
+      : tid === 'cafe_tea'
       ? hasFooterCols
         ? `<footer class="footer-wo">
     <div class="container">
@@ -921,27 +935,39 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     }
     if (gymCatalogImages.length > 0) {
       const priceRowsR = content.priceRows || [];
+      const clientVoices = content.gymClientVoices || [];
       gymBlocksHtml += `
     <section class="gym-results-block" aria-labelledby="gym-slider-title">
       <h2 id="gym-slider-title">Before / After</h2>
       <div class="gym-results-slider" role="list">${gymCatalogImages.map((url, i) => {
         const cap = priceRowsR[i] ? escapeHtml(priceRowsR[i].name) : '実績 ' + (i + 1);
-        return `<div class="gym-results-slide" role="listitem"><img src="${escapeHtml(url)}" alt="" loading="lazy"><p class="gym-results-slide-caption">${cap}</p></div>`;
+        const voice = clientVoices[i] ? '<p class="gym-results-slide-voice">「' + escapeHtml(clientVoices[i]) + '」</p>' : '';
+        return '<div class="gym-results-slide" role="listitem"><img src="' + escapeHtml(url) + '" alt="" loading="lazy"><p class="gym-results-slide-caption">' + cap + '</p>' + voice + '</div>';
       }).join('')}</div>
     </section>`;
     }
+    if (content.gymTrainerQuote) {
+      gymBlocksHtml += `
+    <section class="gym-quote-block" aria-hidden="true">
+      <p class="gym-trainer-quote">「${escapeHtml(content.gymTrainerQuote)}」</p>
+    </section>`;
+    }
     if (gymReasonItems.length > 0) {
+      const reasonIcons = content.gymReasonIcons || [];
       gymBlocksHtml += `
     <section class="gym-reasons-block" aria-labelledby="gym-reasons-title">
       <h2 id="gym-reasons-title">選ばれる3つの理由</h2>
-      <div class="gym-reason-list">${gymReasonItems.map((r) => `
+      <div class="gym-reason-list">${gymReasonItems.map((r, idx) => {
+        const icon = reasonIcons[idx] ? '<span class="gym-reason-icon" aria-hidden="true">' + escapeHtml(reasonIcons[idx]) + '</span>' : '';
+        return `
         <div class="gym-reason-item">
-          <span class="gym-reason-num">${escapeHtml(r.num)}</span>
+          ${icon}<span class="gym-reason-num">${escapeHtml(r.num)}</span>
           <div class="gym-reason-body">
             <h3>${escapeHtml(r.title)}</h3>
             <p>${escapeHtml(r.body)}</p>
           </div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
       </div>
     </section>`;
     }
@@ -949,11 +975,25 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       gymBlocksHtml += `
     <section class="section section-rhythm-default" aria-labelledby="gym-menu-title">
       <h2 id="gym-menu-title">メニュー紹介</h2>
+      <p class="gym-menu-lede">パーソナル（対面）とオンラインを比較して、自分に合う方を選べます。</p>
       <div class="gym-menu-cards">${gymMenuCards.map((c) => `
         <div class="gym-menu-card">
           <h3>${escapeHtml(c.title)}</h3>
           <p>${escapeHtml(c.body)}</p>
-          ${c.price ? `<p class="gym-menu-price">${escapeHtml(c.price)}</p>` : ''}
+          ${c.price ? '<p class="gym-menu-price">' + escapeHtml(c.price) + '</p>' : ''}
+        </div>`).join('')}
+      </div>
+    </section>`;
+    }
+    const gymTrainerQa = content.gymTrainerQa || [];
+    if (gymTrainerQa.length > 0) {
+      gymBlocksHtml += `
+    <section class="section gym-trainer-qa section-rhythm-default" aria-labelledby="gym-trainer-qa-title">
+      <h2 id="gym-trainer-qa-title">トレーナー紹介</h2>
+      <div class="gym-trainer-qa-list">${gymTrainerQa.map((qa) => `
+        <div class="gym-trainer-qa-item">
+          <p class="gym-trainer-qa-q">Q. ${escapeHtml(qa.q)}</p>
+          <p class="gym-trainer-qa-a">A. ${escapeHtml(qa.a)}</p>
         </div>`).join('')}
       </div>
     </section>`;
@@ -972,9 +1012,89 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     }
   }
 
+  const gymPaymentNote = tid === 'gym_yoga' ? (content.gymPaymentNote || '') : '';
   const gymStickyCtaHtml = (tid === 'gym_yoga' && cta.label && cta.href)
-    ? `<div class="gym-sticky-cta" aria-label="申し込み"><a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
+    ? `<div class="gym-sticky-cta" aria-label="申し込み">${gymPaymentNote ? '<p class="gym-sticky-cta-note">' + escapeHtml(gymPaymentNote) + '</p>' : ''}<a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
     : '';
+
+  let reserveSectionHtml = '';
+  if (tid === 'gym_yoga') {
+    const rooms = [
+      { name: 'ROOM1', capacity: '定員2名' },
+      { name: 'ROOM2', capacity: '定員2名' },
+      { name: 'ROOM3', capacity: '定員4名' },
+    ];
+    const slots = [
+      { start: '8:30', end: '10:00', label: '2名用サウナ' },
+      { start: '10:00', end: '11:30', label: '2名用サウナ' },
+      { start: '11:30', end: '13:00', label: '4名用' },
+      { start: '13:00', end: '14:30', label: '2名用サウナ' },
+      { start: '14:30', end: '16:00', label: '2名用サウナ' },
+      { start: '16:00', end: '17:30', label: '4名用' },
+    ];
+    const fullMap = { '0-1': true, '1-2': true, '2-0': true, '2-3': true, '0-4': true };
+    const dates = [
+      { m: '3', d: '19', w: 'Thu' }, { m: '3', d: '20', w: 'Fri' }, { m: '3', d: '21', w: 'Sat' },
+      { m: '3', d: '22', w: 'Sun' }, { m: '3', d: '23', w: 'Mon' }, { m: '3', d: '24', w: 'Tue' }, { m: '3', d: '25', w: 'Wed' },
+    ];
+    const roomHeaders = rooms.map((r) =>
+      `<div class="reserve-col-header"><span class="reserve-room-name">${escapeHtml(r.name)}</span> <span class="reserve-room-cap">(${escapeHtml(r.capacity)})</span></div>`
+    ).join('');
+    const gridCols = rooms.map((_, ri) => {
+      const cells = slots.map((slot, si) => {
+        const full = fullMap[ri + '-' + si];
+        if (full) {
+          return `<div class="reserve-slot reserve-slot-full"><span class="reserve-slot-time">${escapeHtml(slot.start)} - ${escapeHtml(slot.end)}</span><span class="reserve-slot-full-label">FULL</span></div>`;
+        }
+        return `<div class="reserve-slot"><span class="reserve-slot-time">${escapeHtml(slot.start)} - ${escapeHtml(slot.end)}</span><span class="reserve-slot-label">${escapeHtml(slot.label)}</span></div>`;
+      });
+      return `<div class="reserve-col">${cells.join('')}</div>`;
+    });
+    const dateTabs = dates.map((dt, i) =>
+      `<button type="button" class="reserve-date-tab${i === 0 ? ' reserve-date-tab-active' : ''}" data-reserve-date="${dt.m}/${dt.d}" aria-label="${dt.m}月${dt.d}日 ${dt.w}">${dt.d} ${dt.w}</button>`
+    ).join('');
+    const reservePaymentNote = content.gymPaymentNote || 'お支払いは当日、現地にて。キャッシュレス対応可。';
+    reserveSectionHtml = `
+  <section id="reserve" class="reserve-screen" aria-labelledby="reserve-title">
+    <h2 id="reserve-title" class="reserve-screen-title">予約</h2>
+    <p class="reserve-cushion">日時を選ぶだけ！ご希望の枠をタップして予約を完了してください。</p>
+    <p class="reserve-payment-note">${escapeHtml(reservePaymentNote)}</p>
+    <div class="reserve-week">
+      <button type="button" class="reserve-week-prev" aria-label="前の週">‹</button>
+      <span class="reserve-week-range">3/19 - 3/25</span>
+      <button type="button" class="reserve-week-next" aria-label="次の週">›</button>
+      <button type="button" class="reserve-week-cal" aria-label="カレンダー">▾</button>
+    </div>
+    <div class="reserve-dates" role="tablist">${dateTabs}</div>
+    <div class="reserve-date-bar">3/19 (Thu)</div>
+    <div class="reserve-grid">
+      <div class="reserve-grid-headers">${roomHeaders}</div>
+      <div class="reserve-grid-body">${gridCols.join('')}</div>
+    </div>
+    <nav class="reserve-bottom-nav" aria-label="メイン">
+      <a href="#main-content" class="reserve-nav-item">ホーム</a>
+      <a href="#reserve" class="reserve-nav-item reserve-nav-item-active">予約</a>
+      <span class="reserve-nav-item reserve-nav-qr" aria-label="会員証">QR</span>
+      <a href="#contact" class="reserve-nav-item">予定管理</a>
+      <a href="#contact" class="reserve-nav-item">マイページ</a>
+    </nav>
+  </section>
+  <script>
+(function(){
+  var screen = document.getElementById('reserve');
+  if(!screen) return;
+  var tabs = screen.querySelectorAll('.reserve-date-tab');
+  var dateBar = screen.querySelector('.reserve-date-bar');
+  tabs.forEach(function(t,i){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('reserve-date-tab-active'); });
+      t.classList.add('reserve-date-tab-active');
+      if(dateBar) dateBar.textContent = t.getAttribute('data-reserve-date') + ' (' + t.textContent.trim().split(' ')[1] + ')';
+    });
+  });
+})();
+</script>`;
+  }
 
   const cramStats = tid === 'cram_school' && content.stats && content.stats.length ? content.stats : [];
   const cramReasonItems = tid === 'cram_school' ? (content.reasonItems || []) : [];
@@ -1151,6 +1271,7 @@ ${sectionsHtml}
 ${extraSections}
 ${paymentSectionHtml}
     </div>
+${reserveSectionHtml}
   </main>
   ${gymStickyCtaHtml}
   ${cramStickyCtaHtml}

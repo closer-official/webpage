@@ -84,6 +84,18 @@ export interface PageContent {
   gymHeroBadge?: string;
   /** パーソナルジムテンプレ：メニュー比較カード（パーソナル対面 / オンラインコーチングなど） */
   gymMenuCards?: { title: string; body: string; price?: string }[];
+  /** パーソナルジムテンプレ：トレーナーの決めゼリフ（吹き出し用・例: バルク足りすぎてんだろー！） */
+  gymTrainerQuote?: string;
+  /** パーソナルジムテンプレ：クライアントの生の声（実績写真の下などに表示） */
+  gymClientVoices?: string[];
+  /** パーソナルジムテンプレ：トレーナー紹介Q&A（好きな種目は？など） */
+  gymTrainerQa?: { q: string; a: string }[];
+  /** パーソナルジムテンプレ：予約ボタン近くに大きく表示する支払い案内（例: お支払いは当日現地にて・キャッシュレス対応） */
+  gymPaymentNote?: string;
+  /** パーソナルジムテンプレ：選ばれる理由のアイコン（絵文字またはキー: badge / phone / muscle など） */
+  gymReasonIcons?: string[];
+  /** パーソナルジムテンプレ：フッターSNSリンク（Instagram, TikTok など） */
+  gymFooterSns?: { label: string; href: string }[];
 }
 
 /** SEO用データ */

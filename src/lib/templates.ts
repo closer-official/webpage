@@ -346,8 +346,9 @@ const GYM_TEMPLATE_CSS = `
   .page-wrapper.template-gym_yoga .hero-full-img { min-height: var(--hero-min-h); }
   .page-wrapper.template-gym_yoga .hero-bg-overlay { background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 50%, rgba(18,18,18,0.85) 100%); }
   .page-wrapper.template-gym_yoga .hero-inner { text-align: center; }
-  .page-wrapper.template-gym_yoga .hero-inner h1 { font-size: clamp(1.35rem, 4vw, 2.25rem); font-weight: 800; color: var(--gym-white); letter-spacing: 0.02em; text-shadow: 0 2px 24px rgba(0,0,0,0.6); line-height: 1.35; }
-  .page-wrapper.template-gym_yoga .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-top: 0.75rem; text-shadow: 0 1px 12px rgba(0,0,0,0.5); }
+  .page-wrapper.template-gym_yoga .hero-inner h1 { font-size: clamp(1.5rem, 4.5vw, 2.5rem); font-weight: 900; color: var(--gym-white); letter-spacing: 0.02em; text-shadow: 0 2px 24px rgba(0,0,0,0.6); line-height: 1.3; }
+  .page-wrapper.template-gym_yoga .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-size: 1rem; margin-top: 0.75rem; text-shadow: 0 1px 12px rgba(0,0,0,0.5); }
+  .page-wrapper.template-gym_yoga .hero-full-img { min-height: 85vh; }
   .gym-hero-badge { display: inline-block; margin-bottom: 1rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.12); border: 2px solid var(--gym-neon); color: var(--gym-neon); font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.12em; border-radius: 6px; }
   .gym-results-block { padding: var(--space-2xl) var(--space-lg); background: var(--gym-black); color: #fff; }
   .gym-results-block h2 { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.12em; color: var(--gym-neon); margin: 0 0 1.5rem; text-align: center; }
@@ -360,16 +361,28 @@ const GYM_TEMPLATE_CSS = `
   .gym-results-slide { flex: 0 0 85%; max-width: 320px; scroll-snap-align: start; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); background: #1a1a1a; }
   .gym-results-slide img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
   .gym-results-slide-caption { padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 700; color: var(--gym-neon); }
+  .gym-results-slide-voice { padding: 0 1rem 0.75rem; font-size: 0.8125rem; color: rgba(255,255,255,0.9); font-style: italic; }
+  .gym-quote-block { padding: 1.5rem var(--space-lg); background: #1a1a1a; text-align: center; border-top: 2px solid var(--tp-border); }
+  .gym-trainer-quote { margin: 0; padding: 1rem 1.5rem; background: var(--gym-black); border: 2px solid var(--gym-neon); border-radius: 16px; font-size: 1.1rem; font-weight: 800; color: var(--gym-neon); display: inline-block; position: relative; }
+  .gym-trainer-quote::before { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: var(--gym-neon); }
   .gym-reasons-block { padding: var(--space-2xl) var(--space-lg); background: #1a1a1a; border-top: 2px solid var(--tp-border); }
   .gym-reasons-block h2 { font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.08em; color: var(--gym-white); margin: 0 0 1.5rem; text-align: center; }
-  .gym-reason-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 36rem; margin: 0 auto; }
+  .gym-reason-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 40rem; margin: 0 auto; }
+  @media (min-width: 640px) { .gym-reason-list { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 1.5rem; } .gym-reason-item { flex: 1 1 280px; border-bottom: none; border: 1px solid var(--tp-border); border-radius: 12px; padding: 1.25rem; } }
   .gym-reason-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--tp-border); }
   .gym-reason-item:last-child { border-bottom: none; }
+  .gym-reason-icon { font-size: 1.5rem; line-height: 1; flex-shrink: 0; }
   .gym-reason-num { flex-shrink: 0; width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; background: var(--gym-red); color: #fff; font-size: 0.8125rem; font-weight: 800; border-radius: 8px; }
   .gym-reason-body h3 { font-size: 1.0625rem; font-weight: 800; color: var(--gym-white); margin: 0 0 0.35rem; }
   .gym-reason-body p { font-size: 0.9375rem; line-height: 1.8; color: var(--tp-text); margin: 0; }
+  .gym-menu-lede { font-size: 0.9375rem; color: var(--tp-text); margin: 0 auto 1.25rem; max-width: 720px; padding: 0 1rem; text-align: center; }
   .gym-menu-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; max-width: 720px; margin: 0 auto; padding: 0 1rem; }
   @media (max-width: 600px) { .gym-menu-cards { grid-template-columns: 1fr; } }
+  .gym-trainer-qa { background: #1a1a1a; }
+  .gym-trainer-qa-list { max-width: 36rem; margin: 0 auto; }
+  .gym-trainer-qa-item { padding: 1rem 0; border-bottom: 1px solid var(--tp-border); }
+  .gym-trainer-qa-q { font-weight: 700; color: var(--gym-neon); margin: 0 0 0.35rem; font-size: 0.9375rem; }
+  .gym-trainer-qa-a { margin: 0; color: var(--tp-text); font-size: 0.9375rem; line-height: 1.7; }
   .gym-menu-card { padding: 1.5rem; background: #1a1a1a; border: 2px solid var(--tp-border); border-radius: 12px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
   .gym-menu-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); border-color: var(--gym-neon); }
   .gym-menu-card h3 { font-size: 1.1rem; font-weight: 800; color: var(--gym-white); margin: 0 0 0.75rem; }
@@ -384,13 +397,49 @@ const GYM_TEMPLATE_CSS = `
   .page-wrapper.template-gym_yoga footer .footer-brand { color: var(--gym-red); }
   .page-wrapper.template-gym_yoga footer p, .page-wrapper.template-gym_yoga footer a { color: rgba(255,255,255,0.88); }
   @keyframes gym-cta-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
-  .gym-sticky-cta { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 90; padding: 0; }
+  .gym-sticky-cta { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 90; padding: 0; text-align: right; }
+  .gym-sticky-cta-note { font-size: 0.75rem; color: var(--gym-neon); margin: 0 0 0.5rem; padding: 0 0.25rem; font-weight: 700; }
   .gym-sticky-cta .cta-btn { min-width: 160px; padding: 14px 24px; box-shadow: 0 4px 20px rgba(255,59,48,0.5); animation: gym-cta-pulse 2s ease-in-out infinite; }
+  .gym-footer-inner { padding: var(--space-2xl) var(--space-lg); text-align: center; }
+  .gym-footer-sns { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+  .gym-footer-sns-link { color: var(--gym-neon); font-weight: 700; font-size: 0.9375rem; text-decoration: none; }
+  .gym-footer-sns-link:hover { text-decoration: underline; }
+  .gym-footer-badge { font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.1em; color: var(--gym-red); margin: 0 0 1rem; }
+  .reserve-cushion { font-size: 0.9375rem; text-align: center; padding: 0 1rem 0.5rem; margin: 0; color: #333; }
+  .reserve-payment-note { font-size: 0.875rem; font-weight: 700; text-align: center; padding: 0 1rem 1rem; margin: 0; color: #2d5a4a; background: rgba(90,122,117,0.12); border-radius: 8px; margin-left: 1rem; margin-right: 1rem; margin-bottom: 1rem; }
   .page-wrapper.template-gym_yoga main { padding-bottom: 100px; }
   .page-wrapper.template-gym_yoga .gym-map-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); }
   .page-wrapper.template-gym_yoga .gym-faq-item { border-bottom: 1px solid var(--tp-border); }
   .page-wrapper.template-gym_yoga .gym-faq-q { width: 100%; padding: 1rem 0; text-align: left; background: none; border: none; color: var(--gym-white); font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
   .page-wrapper.template-gym_yoga .gym-faq-a { padding: 0 0 1rem; color: var(--tp-text); font-size: 0.875rem; line-height: 1.75; }
+  .reserve-screen { background: #f5f5f3; color: #1a1a1a; padding: 1rem 0 5rem; min-height: 80vh; }
+  .reserve-screen-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  .reserve-week { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .reserve-week-prev, .reserve-week-next, .reserve-week-cal { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 1rem; cursor: pointer; }
+  .reserve-week-range { font-size: 0.9375rem; font-weight: 600; min-width: 7rem; text-align: center; }
+  .reserve-dates { display: flex; gap: 0.5rem; padding: 0 1rem; margin-bottom: 0.75rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .reserve-date-tab { flex: 0 0 auto; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #e0e0e0; background: #fff; font-size: 0.8125rem; font-weight: 600; color: #333; cursor: pointer; }
+  .reserve-date-tab-active { background: #5a7a75; color: #fff; border-color: #5a7a75; }
+  .reserve-date-bar { background: #5a7a75; color: #fff; padding: 0.6rem 1rem; font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .reserve-grid { padding: 0 1rem; }
+  .reserve-grid-headers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.5rem; }
+  .reserve-col-header { font-size: 0.8125rem; font-weight: 700; color: #333; }
+  .reserve-room-cap { font-weight: 500; color: #666; }
+  .reserve-grid-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+  .reserve-col { display: flex; flex-direction: column; gap: 0.75rem; }
+  .reserve-slot { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem; font-size: 0.8125rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .reserve-slot-time { font-weight: 700; color: #1a1a1a; }
+  .reserve-slot-label { font-size: 0.75rem; color: #666; }
+  .reserve-slot-full { background: #4a4a4a; border-color: #4a4a4a; color: #fff; position: relative; }
+  .reserve-slot-full .reserve-slot-time { color: rgba(255,255,255,0.8); }
+  .reserve-slot-full-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.25rem; font-weight: 800; color: #fff; }
+  .reserve-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: space-around; padding: 0.5rem 0.5rem max(0.5rem, env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #e0e0e0; }
+  .reserve-nav-item { font-size: 0.625rem; color: #666; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.25rem; }
+  .reserve-nav-item::before { content: ''; width: 24px; height: 24px; background: #ccc; border-radius: 50%; }
+  .reserve-nav-item-active { color: #5a7a75; font-weight: 700; }
+  .reserve-nav-item-active::before { background: #5a7a75; }
+  .reserve-nav-qr { width: 48px; height: 48px; border-radius: 50%; background: #333; margin-top: -24px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.75rem; font-weight: 700; }
+  .reserve-nav-qr::before { display: none; }
   @media (max-width: 768px) { .page-wrapper.template-gym_yoga .qr-block .qr-block-img { display: none; } }
 `;
 
