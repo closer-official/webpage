@@ -4,6 +4,16 @@ import type { PriceResult, BillingSelection, PricePlans } from '../lib/api';
 
 const DEFAULT_BILLING: BillingSelection = { plan: 'normal' };
 
+function normalizeBilling(b: BillingSelection): BillingSelection {
+  const out = { ...b };
+  if (out.plan === 'studentReferral') out.plan = 'student';
+  if (out.domainSetup && !out.storeOfficialSubdomain) {
+    out.storeOfficialSubdomain = true;
+  }
+  delete out.domainSetup;
+  return out;
+}
+
 export function StripePayment() {
   const [billing, setBilling] = useState<BillingSelection>(DEFAULT_BILLING);
   const [pricePlans, setPricePlans] = useState<PricePlans | null>(null);
@@ -11,12 +21,13 @@ export function StripePayment() {
   const [stripeConfigured, setStripeConfigured] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payInfo, setPayInfo] = useState<string | null>(null);
 
   const loadBilling = useCallback(async () => {
     if (!isApiAvailable()) return;
     try {
       const b = await api.getBilling();
-      setBilling({ ...DEFAULT_BILLING, ...b });
+      setBilling(normalizeBilling({ ...DEFAULT_BILLING, ...b }));
     } catch {
       setBilling(DEFAULT_BILLING);
     }
@@ -68,15 +79,20 @@ export function StripePayment() {
   const handlePay = async () => {
     if (!price || price.amountYen <= 0) return;
     setError(null);
+    setPayInfo(null);
     setLoading(true);
     try {
       const origin = window.location.origin + window.location.pathname;
-      const { url } = await api.createCheckoutSession(
+      const res = await api.createCheckoutSession(
         billing,
         `${origin}?payment=success`,
         `${origin}?payment=cancel`
       );
-      if (url) window.location.href = url;
+      if (res.free || !res.url) {
+        setPayInfo(res.message ?? 'この内容ではオンライン決済は不要です。運営よりご連絡します。');
+        return;
+      }
+      window.location.href = res.url;
     } catch (e) {
       setError(e instanceof Error ? e.message : '決済の開始に失敗しました');
     } finally {
@@ -112,6 +128,23 @@ export function StripePayment() {
           </div>
         </div>
       )}
+
+      {/* 紹介コード */}
+      <div className="billing-section">
+        <h3>紹介コード（任意）</h3>
+        <p className="hint">
+          お渡しした紹介コードをお持ちの方は入力してください。有効なコードは<strong>通常プラン／学割プランの基本料金のみ無料</strong>になります（オプションは別途）。コードは紹介者ごとに異なります。
+        </p>
+        <input
+          type="text"
+          className="billing-referral-input"
+          value={billing.referralCode ?? ''}
+          onChange={(e) => updateBilling({ referralCode: e.target.value })}
+          placeholder="コードを入力"
+          autoComplete="off"
+          style={{ maxWidth: 280, padding: '8px 10px', borderRadius: 6, border: '1px solid #cbd5e1' }}
+        />
+      </div>
 
       {/* 削除オプション（値引き） */}
       {pricePlans && Object.keys(pricePlans.removals).length > 0 && (
@@ -182,19 +215,47 @@ export function StripePayment() {
         <div className="billing-section">
           <h3>その他サービス</h3>
           <ul className="option-list">
-            {Object.entries(pricePlans.other).map(([key, v]) => (
-              <li key={key} className="option-item">
-                <span className="option-label">{v.name}（+{v.yen.toLocaleString()}円）{v.note && ` ${v.note}`}</span>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={!!billing[key as keyof BillingSelection]}
-                    onChange={(e) => updateBilling({ [key]: e.target.checked })}
-                  />
-                  <span className="slider" />
-                </label>
-              </li>
-            ))}
+            {Object.entries(pricePlans.other).map(([key, v]) => {
+              if ('yenPerYear' in v && typeof v.yenPerYear === 'number') {
+                const maxY = v.maxYears ?? 10;
+                const years = billing.customDomainYears ?? 0;
+                return (
+                  <li key={key} className="option-item">
+                    <span className="option-label">
+                      {v.name}（1年 +{v.yenPerYear.toLocaleString()}円）{v.note && ` ${v.note}`}
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={maxY}
+                      value={years}
+                      onChange={(e) =>
+                        updateBilling({
+                          customDomainYears: Math.max(0, Math.min(maxY, parseInt(e.target.value, 10) || 0)),
+                        })
+                      }
+                      style={{ width: 56 }}
+                    />
+                  </li>
+                );
+              }
+              const fixed = v as { yen: number; name: string; note?: string };
+              return (
+                <li key={key} className="option-item">
+                  <span className="option-label">
+                    {fixed.name}（+{fixed.yen.toLocaleString()}円）{fixed.note && ` ${fixed.note}`}
+                  </span>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={!!billing[key as keyof BillingSelection]}
+                      onChange={(e) => updateBilling({ [key]: e.target.checked } as Partial<BillingSelection>)}
+                    />
+                    <span className="slider" />
+                  </label>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -216,16 +277,30 @@ export function StripePayment() {
           <p className="price-total">
             合計: <strong>{price.amountYen.toLocaleString()}円</strong>
           </p>
-          {stripeConfigured ? (
+          {price.referralBaseWaived && (
+            <p className="hint" style={{ color: '#0f766e' }}>
+              紹介コードが適用され、基本料金は無料の計算です。
+            </p>
+          )}
+          {price.amountYen <= 0 ? (
+            <p className="hint" style={{ marginTop: 12, fontWeight: 600 }}>
+              この内容では<strong>オンライン決済は不要</strong>です。お手続き・公開URLのご案内は、運営よりメールまたはLINEで行います。
+            </p>
+          ) : stripeConfigured ? (
             <>
               <button
                 type="button"
                 className="primary"
                 onClick={handlePay}
-                disabled={loading || price.amountYen <= 0}
+                disabled={loading}
               >
                 {loading ? 'リダイレクト中…' : 'Stripeで支払う'}
               </button>
+              {payInfo && (
+                <p className="hint" style={{ marginTop: 8, color: '#0f766e' }}>
+                  {payInfo}
+                </p>
+              )}
               {error && <p className="error">{error}</p>}
             </>
           ) : (

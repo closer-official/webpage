@@ -10,6 +10,7 @@ import { analyzeReferenceSites, extractDesignFromHtml } from './gemini.js';
 import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
+import { isReferralCodeActive } from './referralCodes.js';
 import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
 import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
@@ -453,7 +454,8 @@ app.post('/api/billing', async (req, res) => {
 app.post('/api/price', async (req, res) => {
   const billing = await store.getBilling();
   const selection = pricePayload(req.body, billing);
-  const result = calculatePrice(selection);
+  const referralValid = await isReferralCodeActive(selection.referralCode);
+  const result = calculatePrice(selection, { referralWaivesBasePlan: referralValid });
   res.json(result);
 });
 
@@ -475,9 +477,16 @@ app.post('/api/create-checkout-session', async (req, res) => {
   try {
     const billing = req.body.billing ?? await store.getBilling();
     const { successUrl, cancelUrl } = req.body;
-    const { amountYen, items } = calculatePrice(billing);
+    const referralValid = await isReferralCodeActive(billing.referralCode);
+    const { amountYen, items } = calculatePrice(billing, { referralWaivesBasePlan: referralValid });
     if (amountYen <= 0) {
-      return res.status(400).json({ error: 'Amount must be positive' });
+      return res.json({
+        free: true,
+        amountYen: 0,
+        url: null,
+        message:
+          'この内容ではオンライン決済は不要です。お手続きは運営よりメールまたはLINEでご案内します。',
+      });
     }
     const { url } = await createCheckoutSession(amountYen, items, successUrl, cancelUrl, billing);
     if (!url) return res.status(500).json({ error: 'Failed to create session' });
@@ -508,9 +517,11 @@ app.get('/api/checkout-redirect', async (req, res) => {
   }
   try {
     const billing = await store.getBilling();
-    const { amountYen, items } = calculatePrice(billing);
+    const referralValid = await isReferralCodeActive(billing.referralCode);
+    const { amountYen, items } = calculatePrice(billing, { referralWaivesBasePlan: referralValid });
     if (amountYen <= 0) {
-      return res.redirect(returnUrl);
+      const sep = returnUrl.includes('?') ? '&' : '?';
+      return res.redirect(302, `${returnUrl}${sep}payment=not_required`);
     }
     const successUrl = returnUrl + (returnUrl.includes('?') ? '&' : '?') + 'payment=success';
     const { url } = await createCheckoutSession(amountYen, items, successUrl, returnUrl, billing);

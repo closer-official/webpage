@@ -44,11 +44,19 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-export type PriceResult = { amountYen: number; items: { name: string; yen: number }[] };
+export type PriceResult = {
+  amountYen: number;
+  items: { name: string; yen: number }[];
+  /** 紹介コードで通常/学割の基本料金が0円になったとき true */
+  referralBaseWaived?: boolean;
+};
 
 /** プラン・削除/追加オプション（料金算出・Stripe用） */
 export type BillingSelection = {
+  /** `studentReferral` は旧保存データ用（UIでは学割に正規化） */
   plan?: 'normal' | 'student' | 'studentReferral';
+  /** 発行済み紹介コード。サーバーで照合し、有効なら通常/学割の基本料金のみ0円（オプションは別途） */
+  referralCode?: string;
   contactFormRemoval?: boolean;
   snsFeedRemoval?: boolean;
   mapRemoval?: boolean;
@@ -56,6 +64,10 @@ export type BillingSelection = {
   presentedByRemoval?: boolean;
   customQrCode?: boolean;
   webCoupon?: boolean;
+  storeOfficialSubdomain?: boolean;
+  /** 独自ドメインの契約年数（1年あたり5,000円） */
+  customDomainYears?: number;
+  /** @deprecated 旧データ互換。storeOfficialSubdomain と同義 */
   domainSetup?: boolean;
   cms?: boolean;
   onlinePayment?: boolean;
@@ -92,11 +104,16 @@ export type DesignInsights = {
   updatedAt: string | null;
 };
 
+/** その他サービス: 定額チェック or 年数×単価 */
+export type PriceOtherOption =
+  | { yen: number; name: string; note?: string }
+  | { yenPerYear: number; maxYears?: number; name: string; note?: string };
+
 export type PricePlans = {
   plans: { id: string; name: string; yen: number; target: string }[];
   removals: Record<string, { yen: number; name: string; note?: string; namePer?: string }>;
   addons: Record<string, { yen: number; name: string }>;
-  other: Record<string, { yen: number; name: string; note?: string }>;
+  other: Record<string, PriceOtherOption>;
 };
 
 export const api = {
@@ -120,7 +137,12 @@ export const api = {
     successUrl: string,
     cancelUrl: string
   ) =>
-    fetchApi<{ url: string }>('/api/create-checkout-session', {
+    fetchApi<{
+      url: string | null;
+      free?: boolean;
+      amountYen?: number;
+      message?: string;
+    }>('/api/create-checkout-session', {
       method: 'POST',
       body: JSON.stringify({ billing, successUrl, cancelUrl }),
     }),

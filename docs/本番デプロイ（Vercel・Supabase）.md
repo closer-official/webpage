@@ -25,6 +25,7 @@
 
 1. 左サイドバー **SQL Editor** を開く。
 2. **New query** で新規クエリを開き、プロジェクト内の `supabase/migrations/20250116000000_app_store.sql` の内容をすべてコピーして貼り付け、**Run** で実行する。
+3. 同様に `supabase/migrations/20250316120000_referral_codes.sql` も実行する（**紹介コード**照合用テーブル `referral_codes`）。発行したコードは Table Editor で `code` を1行ずつ追加し、`active` をオンにする。
 
 ---
 
