@@ -132,21 +132,42 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       siteName: 'パーソナルトレーニング',
       title: 'パーソナルトレーニング',
       headline: 'お前の筋肉、バルク足りてねぇぞ！ぼくが筋肥大に変えてやる！',
-      subheadline: 'NSCA-CPT保持。初心者特化の分かりやすい指導で、理想のカラダへ。',
+      subheadline:
+        'NSCA-CPT保持。DMだけだと一歩が重い人へ——このサイトから予約の流れが一目でわかります。理想のカラダと、続くモチベを一緒に。',
       ctaLabel: '予約・相談',
       ctaHref: '#reserve',
       gymHeroBadge: 'NSCA-CPT保持',
       gymTrainerQuote: 'バルク足りすぎてんだろー！',
       gymPaymentNote: 'お支払いは当日、現地にて。キャッシュレス対応可。',
+      gymAudienceIntro:
+        'パーソナルを選ぶ理由は人それぞれ。この3タイプのどれに近いか、まずは自分に当てはまるものから読んでみてください。',
+      gymAudienceHooks: [
+        {
+          tag: 'BODY',
+          title: 'このトレーナーみたいな体になりたい',
+          body: '見た目の変化・筋肥大・バルクアップを最優先。Before/Afterと数値で「自分も変われる」イメージを具体化します。',
+        },
+        {
+          tag: 'FORM',
+          title: 'フォームを完璧にしたい・モチベを保ちたい',
+          body: '正しいフォームで効かせる感覚を、対面で丁寧に矯正。食事や習慣も含め、一人では続かない部分をプロが伴走します。',
+        },
+        {
+          tag: 'FAN',
+          title: 'この人に直接教わりたい',
+          body: 'SNSで見てきた世界観そのままに。人柄・こだわりはQ&Aと実績で。ファン目線でも「申し込みやすい導線」を用意しています。',
+        },
+      ],
+      gymStatAnimations: [{ end: 7, suffix: '万人' }, { end: 200, suffix: '名+' }],
       stats: [
-        { value: '5.5万人', label: 'SNSフォロワー' },
-        { value: '〇〇名', label: '指導実績' },
+        { value: '7万人', label: 'SNSフォロワー' },
+        { value: '200名+', label: '指導実績' },
         { value: '−10kg', label: 'お客様の変化例' },
       ],
       reasonItems: [
         { num: '1', title: 'NSCA-CPT保持の確かな知識', body: '国際的に認められた資格に基づく、安全で効果的なプログラム設計。根拠のあるトレーニングで確実に結果を出します。' },
         { num: '2', title: '初心者特化の分かりやすい指導', body: 'いきなりハードなメニューはしません。フォーム・呼吸・食事の基本から丁寧に。初めてでも続けられる環境です。' },
-        { num: '3', title: 'SNSフォロワー5万人超の信頼', body: '多くの方に支持されている実績。Before/Afterやお客様の声をSNSで発信し、透明性の高い指導を心がけています。' },
+        { num: '3', title: 'SNSフォロワー約7万人の信頼', body: '多くの方に支持されている実績。Before/Afterやお客様の声をSNSで発信し、透明性の高い指導を心がけています。' },
       ],
       gymReasonIcons: ['🏅', '📱', '💪'],
       catalogImages: [
@@ -164,9 +185,22 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         'フォームが変わって、効いてる感がすごい。',
         '食事のアドバイスが続けやすくて助かった。',
       ],
+      gymMenuLede:
+        '「何をされるか分からない不安」をなくすため、対面の流れとオンラインとの違いを表で整理しました。まずは自分に合う方を選んでください。',
+      gymProgramSteps: [
+        { title: 'カウンセリング', body: '目標・生活リズム・既往歴をヒアリング。無理のない頻度とメニューの方向性を決めます。' },
+        { title: 'フォーム修正', body: '関節の可動域と筋の入り方を確認。効かせる角度・呼吸を一つずつ整えます。' },
+        { title: '追い込み＆フィードバック', body: '本日のボリュームとRPEを管理。次回までの自主トレと食事のポイントもお渡しします。' },
+      ],
       gymMenuCards: [
         { title: 'パーソナル（対面）', body: 'ジムまたは出張でマンツーマン指導。カウンセリング→フォーム修正→追い込みまで一貫サポート。', price: '要相談' },
         { title: 'オンラインコーチング', body: '遠方の方もOK。食事・トレーニング計画の提案とチャットサポートで、ご自宅やお近くの施設で実践できます。', price: '要相談' },
+      ],
+      gymMenuCompareRows: [
+        { feature: '場所', onsite: '指定ジム・スタジオ等で対面', online: '自宅・お近くのジムで実施' },
+        { feature: 'フォーム指導', onsite: '手を添えてその場で矯正', online: '動画提出・ライブでチェック' },
+        { feature: '食事アドバイス', onsite: '◎（生活に合わせて提案）', online: '◎（チャットで継続フォロー）' },
+        { feature: '向いている人', onsite: '初心者〜上級・フォームに不安がある方', online: '遠方・忙しく通いづらい方' },
       ],
       gymTrainerQa: [
         { q: '好きな種目は？', a: 'ベンチプレスとスクワット。バルクの土台はここから。' },
@@ -175,7 +209,8 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       faqItems: [
         { q: '初心者でも大丈夫ですか？', a: 'はい。初心者こそ歓迎です。フォームや呼吸の基本から丁寧にお伝えしますので、運動が久しぶりの方でも安心してご参加いただけます。' },
         { q: '食事指導はありますか？', a: 'はい。トレーニングと合わせて食事のアドバイスも行います。無理な制限ではなく、続けやすい範囲でご提案します。' },
-        { q: '予約の流れを教えてください', a: 'まずはLINEまたは予約ボタンからお申し込みください。日程調整ののち、初回カウンセリング→トレーニング→アフターフォローの流れです。お支払いは当日現地にて、キャッシュレス対応です。' },
+        { q: 'DMだけだと不安でした。サイトからでも申し込めますか？', a: 'はい。このページの「予約・相談」から流れを確認し、日時を選ぶだけで申し込みに進めます。従来のDM相談と併用できます。' },
+        { q: '予約の流れを教えてください', a: '予約ボタンから枠を選択→初回カウンセリング→トレーニング→アフターフォローの流れです。お支払いは当日現地にて、キャッシュレス対応。事前のカード登録は不要です。' },
       ],
       sections: [
         { id: 'program', title: 'プログラム', content: '初回カウンセリングで目標と現状をヒアリング。無理のないプランをご提案し、最短で「変われた」を実感していただきます。', imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800' },
@@ -188,17 +223,22 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       footerAddress: '〒XXX-XXXX 〇〇県〇〇市〇〇 1-2-3',
       footerPhone: 'XXX-XXXX-XXXX',
       mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
-      heroSlides: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200'],
+      heroSlides: [
+        'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1400&q=85',
+        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1400&q=85',
+      ],
       gymFooterSns: [
         { label: 'Instagram', href: 'https://instagram.com/' },
         { label: 'TikTok', href: 'https://tiktok.com/' },
       ],
     },
     seo: {
-      metaTitle: 'パーソナルトレーニング | 筋トレの悩み、筋肥大に変えます',
-      metaDescription: 'NSCA-CPT保持。初心者特化の指導で理想のカラダへ。SNSフォロワー5万人超。予約・相談はこちら。',
-      keywords: 'パーソナルトレーニング, 筋トレ, ダイエット, NSCA-CPT, オンラインコーチング',
-      ogImageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
+      metaTitle: 'パーソナルトレーニング | NSCA-CPT 筋肥大・ダイエット 予約',
+      metaDescription:
+        'NSCA-CPT保持のパーソナルトレーニング。SNSフォロワー約7万人。体づくり・フォーム矯正・オンラインまで。DM以外にサイトから予約可能。初回カウンセリング歓迎。',
+      keywords:
+        'パーソナルトレーニング, パーソナルジム, 筋トレ, 筋肥大, ダイエット, NSCA-CPT, オンラインコーチング, フォーム指導, 初心者',
+      ogImageUrl: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=85',
       canonicalUrl: '',
     },
   },

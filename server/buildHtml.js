@@ -48,13 +48,13 @@ const DEFAULT_NAV = {
     { label: '予約', href: '#contact' },
   ],
   gym_yoga: [
-    { label: '選ばれる理由', href: '#gym-reasons-title' },
+    { label: 'こんな方へ', href: '#gym-audience' },
     { label: '実績', href: '#gym-results-title' },
+    { label: '選ばれる理由', href: '#gym-reasons-title' },
     { label: 'メニュー', href: '#gym-menu-title' },
     { label: 'よくある質問', href: '#faq' },
-    { label: '予約', href: '#contact' },
+    { label: '予約', href: '#reserve' },
     { label: 'アクセス', href: '#access' },
-    { label: '無料カウンセリング', href: '#contact' },
   ],
   builder: [
     { label: 'WORKS', href: '#gallery' },
@@ -130,7 +130,7 @@ const defaultHeroImages = {
   salon_barber: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
   cafe_tea: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
   clinic_chiropractic: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200',
-  gym_yoga: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200',
+  gym_yoga: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1400&q=85',
   builder: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200',
   professional: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200',
   cram_school: 'https://images.unsplash.com/photo-1523240795612-9a05468c4e75?auto=format&fit=crop&w=1200',
@@ -188,7 +188,12 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
     : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
   const cta = (content.ctaLabel && content.ctaHref) ? { label: content.ctaLabel, href: content.ctaHref } : (DEFAULT_CTA[tid] || { label: 'お問い合わせ', href: '#contact' });
-  const heroImageUrl = (seo.ogImageUrl && seo.ogImageUrl.trim()) || defaultHeroImages[tid] || '';
+  const heroSlidesFiltered = (content.heroSlides || []).filter((u) => (u || '').trim());
+  const heroImageUrl =
+    (tid === 'gym_yoga' && heroSlidesFiltered[0]) ||
+    (seo.ogImageUrl && seo.ogImageUrl.trim()) ||
+    defaultHeroImages[tid] ||
+    '';
   const woHeroSlides =
     tid === 'cafe_tea'
       ? (() => {
@@ -335,11 +340,47 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     `<meta name="description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.keywords ? `<meta name="keywords" content="${escapeHtml(seo.keywords)}">` : '',
     '<meta property="og:type" content="website">',
+    '<meta property="og:locale" content="ja_JP">',
     `<meta property="og:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta property="og:description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.ogImageUrl ? `<meta property="og:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
+    seo.canonicalUrl ? `<meta property="og:url" content="${escapeHtml(seo.canonicalUrl)}">` : '',
     seo.canonicalUrl ? `<link rel="canonical" href="${escapeHtml(seo.canonicalUrl)}">` : '',
+    '<meta name="twitter:card" content="summary_large_image">',
+    `<meta name="twitter:title" content="${escapeHtml(seo.metaTitle)}">`,
+    `<meta name="twitter:description" content="${escapeHtml(seo.metaDescription)}">`,
+    seo.ogImageUrl ? `<meta name="twitter:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
+    tid === 'gym_yoga' ? '<meta name="theme-color" content="#121212">' : '',
   ].filter(Boolean).join('\n    ');
+
+  const canonicalTrim = (seo.canonicalUrl && String(seo.canonicalUrl).trim()) || '';
+  const jsonLdGraphs = [
+    { '@context': 'https://schema.org', '@type': 'Organization', name: content.siteName, url: canonicalTrim || undefined },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: seo.metaTitle,
+      description: seo.metaDescription,
+      url: canonicalTrim || undefined,
+      inLanguage: 'ja-JP',
+    },
+  ];
+  if (tid === 'gym_yoga') {
+    const lb = {
+      '@context': 'https://schema.org',
+      '@type': 'ExerciseGym',
+      name: content.siteName,
+      description: seo.metaDescription,
+      url: canonicalTrim || undefined,
+    };
+    if (content.footerPhone) lb.telephone = content.footerPhone;
+    if (content.footerAddress) {
+      lb.address = { '@type': 'PostalAddress', streetAddress: content.footerAddress, addressCountry: 'JP' };
+    }
+    if (seo.ogImageUrl) lb.image = seo.ogImageUrl;
+    jsonLdGraphs.push(lb);
+  }
+  const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(jsonLdGraphs)}</script>`;
 
   function getSectionRhythmClass(i, total) {
     if (total <= 0) return 'section-rhythm-default';
@@ -778,13 +819,13 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       </div>
     </section>`
         : tid === 'gym_yoga'
-        ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+        ? `<section class="hero hero-full-img hell-hero-parallax gym-hero-section" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})" aria-label="メインビジュアル">
       <div class="hero-bg-overlay"></div>
-      <div class="hero-inner">
+      <div class="hero-inner gym-hero-inner">
         ${content.gymHeroBadge ? `<p class="gym-hero-badge">${escapeHtml(content.gymHeroBadge)}</p>` : ''}
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
-        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary gym-hero-cta">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
         : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'builder' || tid === 'cram_school' || tid === 'izakaya' || tid === 'apparel' || tid === 'event'
@@ -808,7 +849,12 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
   const marqueeBar = '';
 
   const css = getTemplateFullCss(tid);
-  const googleFonts = '';
+  const googleFonts =
+    tid === 'gym_yoga'
+      ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">`
+      : '';
   const a1Script = '';
   const scrollInScript = `<script>
 (function(){
@@ -924,38 +970,92 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
   const gymCatalogImages = tid === 'gym_yoga' ? (content.catalogImages || []) : [];
   const gymMenuCards = tid === 'gym_yoga' ? (content.gymMenuCards || []) : [];
   const gymFaqItems = tid === 'gym_yoga' ? (content.faqItems || []) : [];
+  const gymAudienceHooks = tid === 'gym_yoga' ? (content.gymAudienceHooks || []) : [];
+  const gymStatAnimations = tid === 'gym_yoga' ? (content.gymStatAnimations || []) : [];
+  const gymMenuCompareRows = tid === 'gym_yoga' ? (content.gymMenuCompareRows || []) : [];
+  const gymProgramSteps = tid === 'gym_yoga' ? (content.gymProgramSteps || []) : [];
+  const gymSi = ' data-scroll-in';
   let gymBlocksHtml = '';
   if (tid === 'gym_yoga') {
+    function gymStatValueHtml(st, i) {
+      const anim = gymStatAnimations[i];
+      if (anim && typeof anim.end === 'number' && Number.isFinite(anim.end)) {
+        return (
+          '<span class="gym-stat-value gym-stat-count" data-target="' +
+          anim.end +
+          '" data-suffix="' +
+          escapeHtml(anim.suffix || '') +
+          '" data-duration="1500">0' +
+          escapeHtml(anim.suffix || '') +
+          '</span>'
+        );
+      }
+      return '<span class="gym-stat-value">' + escapeHtml(st.value) + '</span>';
+    }
+
+    if (gymAudienceHooks.length > 0) {
+      const audIntro =
+        (content.gymAudienceIntro && String(content.gymAudienceIntro).trim()) ||
+        '「このトレーナーみたいな体になりたい」「フォームとモチベでプロに見てほしい」「この人に教わりたい」——どのタイプでも、同じゴールに向かって伴走します。';
+      gymBlocksHtml += `
+    <section id="gym-audience" class="gym-audience-block"${gymSi} aria-labelledby="gym-audience-title">
+      <h2 id="gym-audience-title">こんな方へ</h2>
+      <p class="gym-audience-lede">${escapeHtml(audIntro)}</p>
+      <div class="gym-audience-grid" role="list">${gymAudienceHooks.map((h) => `
+        <article class="gym-audience-card" role="listitem">
+          <span class="gym-audience-tag">${escapeHtml(h.tag)}</span>
+          <h3>${escapeHtml(h.title)}</h3>
+          <p>${escapeHtml(h.body)}</p>
+        </article>`).join('')}
+      </div>
+      <p class="gym-audience-cta"><a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a></p>
+    </section>`;
+    }
+
     if (gymStats.length > 0) {
       gymBlocksHtml += `
-    <section class="gym-results-block" aria-labelledby="gym-results-title">
+    <section class="gym-results-block"${gymSi} aria-labelledby="gym-results-title">
       <h2 id="gym-results-title">指導実績（見える化）</h2>
-      <div class="gym-results-stats">${gymStats.map((st) => `<div class="gym-stat-item"><span class="gym-stat-value">${escapeHtml(st.value)}</span><span class="gym-stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div>
+      <div class="gym-results-stats">${gymStats.map((st, i) => `<div class="gym-stat-item">${gymStatValueHtml(st, i)}<span class="gym-stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div>
     </section>`;
     }
     if (gymCatalogImages.length > 0) {
       const priceRowsR = content.priceRows || [];
       const clientVoices = content.gymClientVoices || [];
       gymBlocksHtml += `
-    <section class="gym-results-block" aria-labelledby="gym-slider-title">
+    <section class="gym-results-block gym-ba-section"${gymSi} aria-labelledby="gym-slider-title">
       <h2 id="gym-slider-title">Before / After</h2>
-      <div class="gym-results-slider" role="list">${gymCatalogImages.map((url, i) => {
-        const cap = priceRowsR[i] ? escapeHtml(priceRowsR[i].name) : '実績 ' + (i + 1);
-        const voice = clientVoices[i] ? '<p class="gym-results-slide-voice">「' + escapeHtml(clientVoices[i]) + '」</p>' : '';
-        return '<div class="gym-results-slide" role="listitem"><img src="' + escapeHtml(url) + '" alt="" loading="lazy"><p class="gym-results-slide-caption">' + cap + '</p>' + voice + '</div>';
-      }).join('')}</div>
+      <p class="gym-ba-lede">変化は写真と声でチェック。横スクロールで複数の事例をご覧いただけます。</p>
+      <div class="gym-results-slider" role="list">${gymCatalogImages
+        .map((url, i) => {
+          const cap = priceRowsR[i] ? escapeHtml(priceRowsR[i].name) : '実績 ' + (i + 1);
+          const voice = clientVoices[i] ? '<p class="gym-results-slide-voice">「' + escapeHtml(clientVoices[i]) + '」</p>' : '';
+          const alt = escapeHtml(content.siteName + 'のトレーニング実績イメージ ' + (i + 1));
+          return (
+            '<div class="gym-results-slide" role="listitem"><img src="' +
+            escapeHtml(url) +
+            '" alt="' +
+            alt +
+            '" loading="lazy" width="600" height="600"><p class="gym-results-slide-caption">' +
+            cap +
+            '</p>' +
+            voice +
+            '</div>'
+          );
+        })
+        .join('')}</div>
     </section>`;
     }
     if (content.gymTrainerQuote) {
       gymBlocksHtml += `
-    <section class="gym-quote-block" aria-hidden="true">
+    <section class="gym-quote-block"${gymSi} aria-label="トレーナーメッセージ">
       <p class="gym-trainer-quote">「${escapeHtml(content.gymTrainerQuote)}」</p>
     </section>`;
     }
     if (gymReasonItems.length > 0) {
       const reasonIcons = content.gymReasonIcons || [];
       gymBlocksHtml += `
-    <section class="gym-reasons-block" aria-labelledby="gym-reasons-title">
+    <section class="gym-reasons-block"${gymSi} aria-labelledby="gym-reasons-title">
       <h2 id="gym-reasons-title">選ばれる3つの理由</h2>
       <div class="gym-reason-list">${gymReasonItems.map((r, idx) => {
         const icon = reasonIcons[idx] ? '<span class="gym-reason-icon" aria-hidden="true">' + escapeHtml(reasonIcons[idx]) + '</span>' : '';
@@ -971,24 +1071,51 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       </div>
     </section>`;
     }
-    if (gymMenuCards.length > 0) {
-      gymBlocksHtml += `
-    <section class="section section-rhythm-default" aria-labelledby="gym-menu-title">
-      <h2 id="gym-menu-title">メニュー紹介</h2>
-      <p class="gym-menu-lede">パーソナル（対面）とオンラインを比較して、自分に合う方を選べます。</p>
-      <div class="gym-menu-cards">${gymMenuCards.map((c) => `
-        <div class="gym-menu-card">
+    if (gymMenuCards.length > 0 || gymProgramSteps.length > 0 || gymMenuCompareRows.length > 0) {
+      const menuLede =
+        (content.gymMenuLede && String(content.gymMenuLede).trim()) ||
+        '対面はフォームと追い込みを最優先。オンラインは場所を選ばず継続しやすく。下の表で違いを比較し、自分に合う方を選んでください。';
+      const stepsHtml =
+        gymProgramSteps.length > 0
+          ? `<div class="gym-program-block"${gymSi}><h3 id="gym-program-flow" class="gym-program-heading">パーソナルの流れ（対面）</h3><ol class="gym-program-steps" aria-labelledby="gym-program-flow">${gymProgramSteps
+              .map(
+                (s, i) =>
+                  `<li class="gym-program-step"${gymSi}><span class="gym-program-step-num" aria-hidden="true">${i + 1}</span><div><strong class="gym-program-step-title">${escapeHtml(s.title)}</strong><p>${escapeHtml(s.body)}</p></div></li>`
+              )
+              .join('')}</ol></div>`
+          : '';
+      const compareHtml =
+        gymMenuCompareRows.length > 0
+          ? `<div class="gym-compare-wrap"${gymSi}><h3 class="gym-compare-heading">対面とオンラインの違い</h3><div class="gym-compare-scroll"><table class="gym-compare-table"><thead><tr><th scope="col">項目</th><th scope="col">対面パーソナル</th><th scope="col">オンライン</th></tr></thead><tbody>${gymMenuCompareRows
+              .map(
+                (row) =>
+                  `<tr><th scope="row">${escapeHtml(row.feature)}</th><td>${escapeHtml(row.onsite)}</td><td>${escapeHtml(row.online)}</td></tr>`
+              )
+              .join('')}</tbody></table></div></div>`
+          : '';
+      const cardsHtml =
+        gymMenuCards.length > 0
+          ? `<div class="gym-menu-cards">${gymMenuCards.map((c) => `
+        <div class="gym-menu-card"${gymSi}>
           <h3>${escapeHtml(c.title)}</h3>
           <p>${escapeHtml(c.body)}</p>
           ${c.price ? '<p class="gym-menu-price">' + escapeHtml(c.price) + '</p>' : ''}
         </div>`).join('')}
-      </div>
+      </div>`
+          : '';
+      gymBlocksHtml += `
+    <section class="section section-rhythm-default gym-menu-section"${gymSi} aria-labelledby="gym-menu-title">
+      <h2 id="gym-menu-title">メニュー紹介</h2>
+      <p class="gym-menu-lede">${escapeHtml(menuLede)}</p>
+      ${stepsHtml}
+      ${cardsHtml}
+      ${compareHtml}
     </section>`;
     }
     const gymTrainerQa = content.gymTrainerQa || [];
     if (gymTrainerQa.length > 0) {
       gymBlocksHtml += `
-    <section class="section gym-trainer-qa section-rhythm-default" aria-labelledby="gym-trainer-qa-title">
+    <section class="section gym-trainer-qa section-rhythm-default"${gymSi} aria-labelledby="gym-trainer-qa-title">
       <h2 id="gym-trainer-qa-title">トレーナー紹介</h2>
       <div class="gym-trainer-qa-list">${gymTrainerQa.map((qa) => `
         <div class="gym-trainer-qa-item">
@@ -1000,7 +1127,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     }
     if (gymFaqItems.length > 0) {
       gymBlocksHtml += `
-    <section id="faq" class="section section-rhythm-default" aria-labelledby="gym-faq-title">
+    <section id="faq" class="section section-rhythm-default"${gymSi} aria-labelledby="gym-faq-title">
       <h2 id="gym-faq-title">よくある質問</h2>
       <div>${gymFaqItems.map((faq) => `
         <details class="gym-faq-item">
@@ -1011,6 +1138,39 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
     </section>`;
     }
   }
+
+  const gymMotionScript =
+    tid === 'gym_yoga'
+      ? `<script>
+(function(){
+var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(r)return;
+document.querySelectorAll('.gym-stat-count').forEach(function(el){
+var fired=false;
+var io=new IntersectionObserver(function(entries){
+entries.forEach(function(e){
+if(!e.isIntersecting||fired)return;
+fired=true;
+var target=parseInt(el.getAttribute('data-target'),10)||0;
+var suffix=el.getAttribute('data-suffix')||'';
+var dur=parseInt(el.getAttribute('data-duration'),10)||1200;
+var start=performance.now();
+function ease(t){return 1-Math.pow(1-t,3);}
+function tick(now){
+var t=Math.min(1,(now-start)/dur);
+var val=Math.round(target*ease(t));
+el.textContent=val+suffix;
+if(t<1)requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+io.unobserve(el);
+});
+},{threshold:0.15});
+io.observe(el);
+});
+})();
+</script>`
+      : '';
 
   const gymPaymentNote = tid === 'gym_yoga' ? (content.gymPaymentNote || '') : '';
   const gymStickyCtaHtml = (tid === 'gym_yoga' && cta.label && cta.href)
@@ -1279,6 +1439,7 @@ ${reserveSectionHtml}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}
+  ${gymMotionScript}
   ${woOrganicScript}
   ${purchaseUrl ? `<script>
 (function(){if(/[?&]payment=success/.test(location.search)){var el=document.getElementById('nav-item-purchase');if(el)el.style.display='none';}})();
@@ -1291,6 +1452,7 @@ ${reserveSectionHtml}
 <html lang="ja">
 <head>
     ${metaTags}
+    ${jsonLdScript}
     ${googleFonts}
     <style>${css}</style>
 </head>

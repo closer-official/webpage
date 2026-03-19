@@ -835,8 +835,50 @@ const GYM_YOGA_CSS = `
   .page-wrapper.template-gym_yoga {
     --gym-red: #FF3B30; --gym-red-dark: #e6352b; --gym-black: #121212; --gym-neon: #CCFF00; --gym-white: #FFFFFF;
     --tp-bg: var(--gym-black); --tp-heading: var(--gym-white); --tp-text: rgba(255,255,255,0.92); --tp-accent: var(--gym-red); --tp-border: rgba(255,255,255,0.12); --tp-bg-footer: var(--gym-black);
-    --hero-min-h: 75vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; font-weight: 600; background: var(--tp-bg); color: var(--tp-text);
+    --hero-min-h: 75vh; font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-weight: 600; background: var(--tp-bg); color: var(--tp-text);
   }
+  @keyframes gym-hero-fade-up { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  .page-wrapper.template-gym_yoga .gym-hero-inner > * { opacity: 0; animation: gym-hero-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .page-wrapper.template-gym_yoga .gym-hero-inner > *:nth-child(1) { animation-delay: 0.1s; }
+  .page-wrapper.template-gym_yoga .gym-hero-inner > *:nth-child(2) { animation-delay: 0.26s; }
+  .page-wrapper.template-gym_yoga .gym-hero-inner > *:nth-child(3) { animation-delay: 0.42s; }
+  .page-wrapper.template-gym_yoga .gym-hero-inner > *:nth-child(4) { animation-delay: 0.56s; }
+  @media (prefers-reduced-motion: reduce) {
+    .page-wrapper.template-gym_yoga .gym-hero-inner > * { animation: none; opacity: 1; transform: none; }
+    .page-wrapper.template-gym_yoga .gym-sticky-cta .cta-btn { animation: none !important; }
+  }
+  .gym-audience-block { padding: var(--space-2xl) var(--space-lg); background: linear-gradient(180deg, #0d0d0d 0%, #121212 100%); border-bottom: 2px solid var(--tp-border); color: #fff; }
+  .gym-audience-block h2 { font-size: clamp(1.25rem, 3.5vw, 1.75rem); font-weight: 900; text-align: center; margin: 0 0 0.75rem; letter-spacing: 0.04em; }
+  .gym-audience-lede { max-width: 40rem; margin: 0 auto 1.75rem; text-align: center; font-size: 0.9375rem; line-height: 1.85; color: rgba(255,255,255,0.88); }
+  .gym-audience-grid { display: grid; gap: 1.25rem; max-width: 960px; margin: 0 auto; }
+  @media (min-width: 700px) { .gym-audience-grid { grid-template-columns: repeat(3, 1fr); } }
+  .gym-audience-card { background: #1a1a1a; border: 1px solid var(--tp-border); border-radius: 14px; padding: 1.35rem 1.25rem; transition: border-color 0.35s ease, transform 0.35s ease; }
+  .gym-audience-card:hover { border-color: var(--gym-neon); transform: translateY(-3px); }
+  .gym-audience-tag { display: inline-block; font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.14em; color: var(--gym-black); background: var(--gym-neon); padding: 0.35rem 0.65rem; border-radius: 4px; margin-bottom: 0.75rem; }
+  .gym-audience-card h3 { font-size: 1.05rem; font-weight: 800; margin: 0 0 0.5rem; color: var(--gym-white); }
+  .gym-audience-card p { margin: 0; font-size: 0.875rem; line-height: 1.75; color: rgba(255,255,255,0.88); }
+  .gym-audience-cta { text-align: center; margin: 2rem 0 0; }
+  .gym-ba-lede { text-align: center; font-size: 0.875rem; color: rgba(255,255,255,0.78); margin: -0.5rem 0 0.5rem; max-width: 36rem; margin-left: auto; margin-right: auto; padding: 0 1rem; }
+  .gym-ba-section .gym-results-slide img { transform: scale(1.06); transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+  .gym-ba-section.in-view .gym-results-slide img { transform: scale(1); }
+  @media (prefers-reduced-motion: reduce) { .gym-ba-section .gym-results-slide img { transform: none; transition: none; } }
+  .gym-program-block { margin: 1.5rem auto 0; max-width: 720px; padding: 0 1rem; }
+  .gym-program-heading { font-size: 1rem; font-weight: 800; color: var(--gym-neon); margin: 0 0 1rem; text-align: center; letter-spacing: 0.06em; }
+  .gym-program-steps { list-style: none; margin: 0; padding: 0; counter-reset: gymstep; }
+  .gym-program-step { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--tp-border); }
+  .gym-program-step:last-child { border-bottom: none; }
+  .gym-program-step-num { flex-shrink: 0; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; background: var(--gym-red); color: #fff; font-weight: 800; border-radius: 50%; font-size: 0.9375rem; }
+  .gym-program-step-title { display: block; font-size: 1rem; color: var(--gym-white); margin-bottom: 0.35rem; }
+  .gym-program-step p { margin: 0; font-size: 0.875rem; line-height: 1.7; color: var(--tp-text); }
+  .gym-compare-wrap { margin: 2rem auto 0; max-width: 720px; padding: 0 1rem; }
+  .gym-compare-heading { font-size: 1rem; font-weight: 800; color: var(--gym-white); text-align: center; margin: 0 0 1rem; }
+  .gym-compare-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid var(--tp-border); }
+  .gym-compare-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 0.8125rem; background: #1a1a1a; }
+  .gym-compare-table th, .gym-compare-table td { padding: 0.75rem 0.85rem; text-align: left; border-bottom: 1px solid var(--tp-border); vertical-align: top; }
+  .gym-compare-table thead th { background: rgba(255,59,48,0.15); color: var(--gym-neon); font-weight: 800; }
+  .gym-compare-table tbody th { color: var(--gym-white); font-weight: 700; width: 28%; }
+  .gym-compare-table tbody td { color: rgba(255,255,255,0.88); }
+  .gym-menu-section .gym-menu-cards { margin-top: 1.5rem; }
   .page-wrapper.template-gym_yoga .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
   .page-wrapper.template-gym_yoga header { position: sticky; top: 0; z-index: 100; padding: 12px 0; border-bottom: 1px solid var(--tp-border); background: var(--gym-black); }
   .page-wrapper.template-gym_yoga .logo { font-size: 1.125rem; font-weight: 800; color: var(--gym-white); text-decoration: none; letter-spacing: 0.06em; }

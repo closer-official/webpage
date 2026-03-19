@@ -96,6 +96,20 @@ export interface PageContent {
   gymReasonIcons?: string[];
   /** パーソナルジムテンプレ：フッターSNSリンク（Instagram, TikTok など） */
   gymFooterSns?: { label: string; href: string }[];
+  /** パーソナルジム：「こんな方へ」ブロック直下のリード（任意） */
+  gymAudienceIntro?: string;
+  /** パーソナルジム：訴求セグメント（例: 体になりたい／フォーム・モチベ／ファン） */
+  gymAudienceHooks?: { tag: string; title: string; body: string }[];
+  /** パーソナルジム：メニュー見出し直下のリード文（未指定時はデフォルト） */
+  gymMenuLede?: string;
+  /** パーソナルジム：対面 vs オンライン比較表の行 */
+  gymMenuCompareRows?: { feature: string; onsite: string; online: string }[];
+  /** パーソナルジム：1セッションの流れ（ステップ） */
+  gymProgramSteps?: { title: string; body: string }[];
+  /**
+   * パーソナルジム：実績数値のカウントアップ（stats と同じ並びのインデックスに対応。未指定インデックスは通常表示）
+   */
+  gymStatAnimations?: { end: number; suffix: string }[];
 }
 
 /** SEO用データ */

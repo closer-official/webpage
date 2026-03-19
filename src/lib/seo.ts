@@ -43,19 +43,48 @@ export function generateKeywords(content: PageContent, count = 8): string[] {
 }
 
 /** JSON-LD Organization / WebPage 用の構造化データを生成 */
-export function buildJsonLd(content: PageContent, seo: SEOData, canonicalUrl: string): string {
+export function buildJsonLd(
+  content: PageContent,
+  seo: SEOData,
+  canonicalUrl: string,
+  templateId?: string
+): string {
+  const url = (canonicalUrl || seo.canonicalUrl || '').trim();
   const org = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: content.siteName,
-    url: canonicalUrl || seo.canonicalUrl,
+    url: url || undefined,
   };
   const webPage = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: seo.metaTitle,
     description: seo.metaDescription,
-    url: canonicalUrl || seo.canonicalUrl,
+    url: url || undefined,
+    inLanguage: 'ja-JP',
   };
-  return JSON.stringify([org, webPage]);
+  const graphs: object[] = [org, webPage];
+
+  if (templateId === 'gym_yoga') {
+    const localBusiness: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'ExerciseGym',
+      name: content.siteName,
+      description: seo.metaDescription,
+      url: url || undefined,
+    };
+    if (content.footerPhone) localBusiness.telephone = content.footerPhone;
+    if (content.footerAddress) {
+      localBusiness.address = {
+        '@type': 'PostalAddress',
+        streetAddress: content.footerAddress,
+        addressCountry: 'JP',
+      };
+    }
+    if (seo.ogImageUrl) localBusiness.image = seo.ogImageUrl;
+    graphs.push(localBusiness);
+  }
+
+  return JSON.stringify(graphs);
 }
