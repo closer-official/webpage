@@ -33,9 +33,11 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: '予約', href: '#contact' },
   ],
   gym_yoga: [
-    { label: 'プログラム', href: '#program' },
-    { label: 'トレーナー', href: '#staff' },
-    { label: 'コース', href: '#menu' },
+    { label: '選ばれる理由', href: '#gym-reasons-title' },
+    { label: '実績', href: '#gym-results-title' },
+    { label: 'メニュー', href: '#gym-menu-title' },
+    { label: 'よくある質問', href: '#faq' },
+    { label: '予約', href: '#contact' },
     { label: 'アクセス', href: '#access' },
     { label: '無料カウンセリング', href: '#contact' },
   ],
@@ -101,7 +103,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#reserve' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
-  gym_yoga: { label: '無料カウンセリング', href: '#contact' },
+  gym_yoga: { label: '予約・相談', href: '#contact' },
   builder: { label: 'お問い合わせ', href: '#contact' },
   professional: { label: '無料相談', href: '#contact' },
   cram_school: { label: 'お問い合わせ', href: '#contact' },
@@ -593,6 +595,16 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
+        : tid === 'gym_yoga'
+          ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
+        ${content.gymHeroBadge ? `<p class="gym-hero-badge">${escapeHtml(content.gymHeroBadge)}</p>` : ''}
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`
         : tid === 'professional'
           ? `<section class="hero hero-full-img pro-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
@@ -728,18 +740,32 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
   const gymStats = tid === 'gym_yoga' && content.stats?.length ? content.stats : [];
   const gymReasonItems = tid === 'gym_yoga' ? (content.reasonItems ?? []) : [];
   let gymBlocksHtml = '';
+  const gymCatalogImages = tid === 'gym_yoga' ? (content.catalogImages ?? []) : [];
+  const gymMenuCards = tid === 'gym_yoga' ? (content.gymMenuCards ?? []) : [];
+  const gymFaqItems = tid === 'gym_yoga' ? (content.faqItems ?? []) : [];
   if (tid === 'gym_yoga') {
     if (gymStats.length > 0) {
       gymBlocksHtml += `
     <section class="gym-results-block" aria-labelledby="gym-results-title">
-      <h2 id="gym-results-title">実績</h2>
+      <h2 id="gym-results-title">指導実績（見える化）</h2>
       <div class="gym-results-stats">${gymStats.map((st) => `<div class="gym-stat-item"><span class="gym-stat-value">${escapeHtml(st.value)}</span><span class="gym-stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div>
+    </section>`;
+    }
+    if (gymCatalogImages.length > 0) {
+      const priceRowsR = content.priceRows ?? [];
+      gymBlocksHtml += `
+    <section class="gym-results-block" aria-labelledby="gym-slider-title">
+      <h2 id="gym-slider-title">Before / After</h2>
+      <div class="gym-results-slider" role="list">${gymCatalogImages.map((url, i) => {
+        const cap = priceRowsR[i] ? escapeHtml(priceRowsR[i].name) : `実績 ${i + 1}`;
+        return `<div class="gym-results-slide" role="listitem"><img src="${escapeHtml(url)}" alt="" loading="lazy"><p class="gym-results-slide-caption">${cap}</p></div>`;
+      }).join('')}</div>
     </section>`;
     }
     if (gymReasonItems.length > 0) {
       gymBlocksHtml += `
     <section class="gym-reasons-block" aria-labelledby="gym-reasons-title">
-      <h2 id="gym-reasons-title">選ばれる理由</h2>
+      <h2 id="gym-reasons-title">選ばれる3つの理由</h2>
       <div class="gym-reason-list">${gymReasonItems.map((r) => `
         <div class="gym-reason-item">
           <span class="gym-reason-num">${escapeHtml(r.num)}</span>
@@ -748,6 +774,31 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
             <p>${escapeHtml(r.body)}</p>
           </div>
         </div>`).join('')}
+      </div>
+    </section>`;
+    }
+    if (gymMenuCards.length > 0) {
+      gymBlocksHtml += `
+    <section class="section section-rhythm-default" aria-labelledby="gym-menu-title">
+      <h2 id="gym-menu-title">メニュー紹介</h2>
+      <div class="gym-menu-cards">${gymMenuCards.map((c) => `
+        <div class="gym-menu-card">
+          <h3>${escapeHtml(c.title)}</h3>
+          <p>${escapeHtml(c.body)}</p>
+          ${c.price ? `<p class="gym-menu-price">${escapeHtml(c.price)}</p>` : ''}
+        </div>`).join('')}
+      </div>
+    </section>`;
+    }
+    if (gymFaqItems.length > 0) {
+      gymBlocksHtml += `
+    <section id="faq" class="section section-rhythm-default" aria-labelledby="gym-faq-title">
+      <h2 id="gym-faq-title">よくある質問</h2>
+      <div>${gymFaqItems.map((faq) => `
+        <details class="gym-faq-item">
+          <summary class="gym-faq-q">${escapeHtml(faq.q)}</summary>
+          <div class="gym-faq-a">${escapeHtml(faq.a).replace(/\n/g, '<br>')}</div>
+        </details>`).join('')}
       </div>
     </section>`;
     }

@@ -330,38 +330,67 @@ const CLINIC_TEMPLATE_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-clinic_chiropractic .qr-block .qr-block-img { display: none; } }
 `;
 
-/** パーソナルジム・ヨガ用（黒×ゴールド・実績の巨大化・選ばれる理由・固定CTA・シャープ） */
+/** パーソナルジム・ヨガ用（Energetic Trust: ビビッドレッド×リッチブラック×ネオンイエロー・バッジ・スライダー・フローティングCTAパルス） */
 const GYM_TEMPLATE_CSS = `
-  .page-wrapper.template-gym_yoga { --tp-bg: #fff; --tp-heading: #0a0a0a; --tp-text: #1a1a1a; --tp-accent: #c9a227; --tp-border: #e5e5e5; --tp-bg-footer: #0a0a0a; --hero-min-h: 70vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; font-weight: 600; background: var(--tp-bg); }
-  .page-wrapper.template-gym_yoga .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-gym_yoga header { position: sticky; top: 0; z-index: 100; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.15); background: #0a0a0a; }
-  .page-wrapper.template-gym_yoga .logo { font-size: 1.125rem; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: 0.08em; }
+  .page-wrapper.template-gym_yoga {
+    --gym-red: #FF3B30; --gym-red-dark: #e6352b; --gym-black: #121212; --gym-neon: #CCFF00; --gym-white: #FFFFFF;
+    --tp-bg: var(--gym-black); --tp-heading: var(--gym-white); --tp-text: rgba(255,255,255,0.92); --tp-accent: var(--gym-red); --tp-border: rgba(255,255,255,0.12); --tp-bg-footer: var(--gym-black);
+    --hero-min-h: 75vh; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; font-weight: 600; background: var(--tp-bg); color: var(--tp-text);
+  }
+  .page-wrapper.template-gym_yoga .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  .page-wrapper.template-gym_yoga header { position: sticky; top: 0; z-index: 100; padding: 12px 0; border-bottom: 1px solid var(--tp-border); background: var(--gym-black); }
+  .page-wrapper.template-gym_yoga .logo { font-size: 1.125rem; font-weight: 800; color: var(--gym-white); text-decoration: none; letter-spacing: 0.06em; }
   .page-wrapper.template-gym_yoga .nav-link { color: rgba(255,255,255,0.9); }
-  .page-wrapper.template-gym_yoga .cta-btn { background: var(--tp-accent); color: #0a0a0a; border: none; padding: 12px 24px; min-height: 44px; font-weight: 700; letter-spacing: 0.08em; border-radius: 0; }
+  .page-wrapper.template-gym_yoga .cta-btn { background: var(--gym-red); color: #fff; border: none; padding: 14px 28px; min-height: 48px; font-weight: 700; letter-spacing: 0.06em; border-radius: 8px; }
+  .page-wrapper.template-gym_yoga .cta-btn:hover { background: var(--gym-red-dark); color: #fff; }
   .page-wrapper.template-gym_yoga .hero-full-img { min-height: var(--hero-min-h); }
-  .page-wrapper.template-gym_yoga .hero-bg-overlay { background: rgba(0,0,0,0.55); }
-  .page-wrapper.template-gym_yoga .hero-inner h1 { font-size: clamp(1.5rem, 4.5vw, 2.5rem); font-weight: 800; color: #fff; letter-spacing: 0.04em; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
-  .page-wrapper.template-gym_yoga .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-weight: 600; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
-  .gym-results-block { padding: var(--space-2xl) var(--space-lg); background: #0a0a0a; color: #fff; }
-  .gym-results-block h2 { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.15em; color: var(--tp-accent); margin: 0 0 1.5rem; text-align: center; }
+  .page-wrapper.template-gym_yoga .hero-bg-overlay { background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 50%, rgba(18,18,18,0.85) 100%); }
+  .page-wrapper.template-gym_yoga .hero-inner { text-align: center; }
+  .page-wrapper.template-gym_yoga .hero-inner h1 { font-size: clamp(1.35rem, 4vw, 2.25rem); font-weight: 800; color: var(--gym-white); letter-spacing: 0.02em; text-shadow: 0 2px 24px rgba(0,0,0,0.6); line-height: 1.35; }
+  .page-wrapper.template-gym_yoga .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-top: 0.75rem; text-shadow: 0 1px 12px rgba(0,0,0,0.5); }
+  .gym-hero-badge { display: inline-block; margin-bottom: 1rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.12); border: 2px solid var(--gym-neon); color: var(--gym-neon); font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.12em; border-radius: 6px; }
+  .gym-results-block { padding: var(--space-2xl) var(--space-lg); background: var(--gym-black); color: #fff; }
+  .gym-results-block h2 { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.12em; color: var(--gym-neon); margin: 0 0 1.5rem; text-align: center; }
   .gym-results-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem 3rem; margin: 0; }
-  .gym-results-stats .gym-stat-value { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--tp-accent); display: block; }
+  .gym-results-stats .gym-stat-value { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--gym-neon); display: block; letter-spacing: 0.02em; line-height: 1.1; }
   .gym-results-stats .gym-stat-label { font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-top: 0.35rem; }
-  .gym-reasons-block { padding: var(--space-2xl) var(--space-lg); background: #fff; border-top: 3px solid var(--tp-accent); }
-  .gym-reasons-block h2 { font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.1em; color: var(--tp-heading); margin: 0 0 1.5rem; text-align: center; }
+  .gym-results-slider { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 1rem 0; margin-top: 1rem; -webkit-overflow-scrolling: touch; }
+  .gym-results-slider::-webkit-scrollbar { height: 6px; }
+  .gym-results-slider::-webkit-scrollbar-thumb { background: var(--gym-red); border-radius: 3px; }
+  .gym-results-slide { flex: 0 0 85%; max-width: 320px; scroll-snap-align: start; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); background: #1a1a1a; }
+  .gym-results-slide img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .gym-results-slide-caption { padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 700; color: var(--gym-neon); }
+  .gym-reasons-block { padding: var(--space-2xl) var(--space-lg); background: #1a1a1a; border-top: 2px solid var(--tp-border); }
+  .gym-reasons-block h2 { font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.08em; color: var(--gym-white); margin: 0 0 1.5rem; text-align: center; }
   .gym-reason-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 36rem; margin: 0 auto; }
-  .gym-reason-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--tp-border); border-radius: 0; }
-  .gym-reason-num { flex-shrink: 0; width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; background: #0a0a0a; color: var(--tp-accent); font-size: 0.8125rem; font-weight: 800; border-radius: 0; }
-  .gym-reason-body h3 { font-size: 1.0625rem; font-weight: 800; color: var(--tp-heading); margin: 0 0 0.35rem; }
-  .gym-reason-body p { font-size: 0.9375rem; line-height: 1.8; color: var(--tp-text); margin: 0; font-weight: 500; }
-  .page-wrapper.template-gym_yoga .section h2 { font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; }
-  .page-wrapper.template-gym_yoga .section-img-wrap { border-radius: 0; overflow: hidden; border: 1px solid var(--tp-border); }
-  .page-wrapper.template-gym_yoga footer { padding: var(--space-2xl) 0; border-top: 3px solid var(--tp-accent); background: var(--tp-bg-footer); color: #fff; }
-  .page-wrapper.template-gym_yoga footer .footer-brand { color: var(--tp-accent); }
-  .gym-sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 12px 16px; background: #0a0a0a; border-top: 2px solid var(--tp-accent); }
-  .gym-sticky-cta .cta-btn { flex: 1; max-width: 320px; }
-  .page-wrapper.template-gym_yoga main { padding-bottom: 80px; }
-  .page-wrapper.template-gym_yoga .gym-map-wrap { margin-top: 1rem; border-radius: 0; overflow: hidden; }
+  .gym-reason-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--tp-border); }
+  .gym-reason-item:last-child { border-bottom: none; }
+  .gym-reason-num { flex-shrink: 0; width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; background: var(--gym-red); color: #fff; font-size: 0.8125rem; font-weight: 800; border-radius: 8px; }
+  .gym-reason-body h3 { font-size: 1.0625rem; font-weight: 800; color: var(--gym-white); margin: 0 0 0.35rem; }
+  .gym-reason-body p { font-size: 0.9375rem; line-height: 1.8; color: var(--tp-text); margin: 0; }
+  .gym-menu-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; max-width: 720px; margin: 0 auto; padding: 0 1rem; }
+  @media (max-width: 600px) { .gym-menu-cards { grid-template-columns: 1fr; } }
+  .gym-menu-card { padding: 1.5rem; background: #1a1a1a; border: 2px solid var(--tp-border); border-radius: 12px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+  .gym-menu-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); border-color: var(--gym-neon); }
+  .gym-menu-card h3 { font-size: 1.1rem; font-weight: 800; color: var(--gym-white); margin: 0 0 0.75rem; }
+  .gym-menu-card p { font-size: 0.9375rem; line-height: 1.75; color: var(--tp-text); margin: 0 0 0.5rem; }
+  .gym-menu-card .gym-menu-price { font-size: 1rem; font-weight: 800; color: var(--gym-neon); }
+  .page-wrapper.template-gym_yoga .section h2 { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.04em; color: var(--gym-white); }
+  .page-wrapper.template-gym_yoga .section p { color: var(--tp-text); }
+  .page-wrapper.template-gym_yoga .section-rhythm-after-hero { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+  .page-wrapper.template-gym_yoga .section-rhythm-default { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+  .page-wrapper.template-gym_yoga .section-img-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-gym_yoga footer { padding: var(--space-2xl) 0; border-top: 2px solid var(--gym-red); background: var(--tp-bg-footer); color: #fff; }
+  .page-wrapper.template-gym_yoga footer .footer-brand { color: var(--gym-red); }
+  .page-wrapper.template-gym_yoga footer p, .page-wrapper.template-gym_yoga footer a { color: rgba(255,255,255,0.88); }
+  @keyframes gym-cta-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+  .gym-sticky-cta { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 90; padding: 0; }
+  .gym-sticky-cta .cta-btn { min-width: 160px; padding: 14px 24px; box-shadow: 0 4px 20px rgba(255,59,48,0.5); animation: gym-cta-pulse 2s ease-in-out infinite; }
+  .page-wrapper.template-gym_yoga main { padding-bottom: 100px; }
+  .page-wrapper.template-gym_yoga .gym-map-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-gym_yoga .gym-faq-item { border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-gym_yoga .gym-faq-q { width: 100%; padding: 1rem 0; text-align: left; background: none; border: none; color: var(--gym-white); font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+  .page-wrapper.template-gym_yoga .gym-faq-a { padding: 0 0 1rem; color: var(--tp-text); font-size: 0.875rem; line-height: 1.75; }
   @media (max-width: 768px) { .page-wrapper.template-gym_yoga .qr-block .qr-block-img { display: none; } }
 `;
 
@@ -513,7 +542,7 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'gym_yoga',
     'パーソナルジム・ヨガ',
-    '黒×ゴールド・実績の可視化・無料カウンセリング固定CTA・選ばれる理由',
+    'Energetic Trust：ビビッドレッド×リッチブラック×ネオンイエロー・バッジ・Before/Afterスライダー・フローティングCTA',
     GYM_TEMPLATE_CSS
   ),
   makeTemplate(

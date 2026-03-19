@@ -80,6 +80,10 @@ export interface PageContent {
   proStepItems?: { step: string; title: string; body: string }[];
   /** 士業テンプレ：業務内容・サービス一覧（アイコン・見出し・本文） */
   proServiceItems?: { icon: string; title: string; body: string }[];
+  /** パーソナルジムテンプレ：ヒーローに表示する資格バッジ（例: NSCA-CPT保持） */
+  gymHeroBadge?: string;
+  /** パーソナルジムテンプレ：メニュー比較カード（パーソナル対面 / オンラインコーチングなど） */
+  gymMenuCards?: { title: string; body: string; price?: string }[];
 }
 
 /** SEO用データ */
