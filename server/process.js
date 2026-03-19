@@ -1,5 +1,6 @@
 import { analyzePlace, generateDmBody } from './gemini.js';
 import { buildHtml } from './buildHtml.js';
+import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { getOrderedTemplateIds } from './inferTemplatePriority.js';
 import { getPlacePhotoUrls } from './placePhotos.js';
 import QRCode from 'qrcode';
@@ -55,12 +56,14 @@ function analysisToContent(name, address, analysis, extra = {}) {
 
 function contentToSeo(content) {
   const desc = (content.subheadline + ' ' + (content.sections[0]?.content || '')).slice(0, 160);
+  const envHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
   return {
     metaTitle: `${content.title} | ${content.siteName}`.slice(0, 60),
     metaDescription: desc,
     keywords: content.siteName + ', ' + content.headline,
     ogImageUrl: '',
     canonicalUrl: '',
+    ...(envHost ? { autoCanonicalHost: envHost } : {}),
   };
 }
 
@@ -103,7 +106,12 @@ export async function processOne(queueItem, genOptions) {
 
   let qrCodeDataUrl = '';
   if (genOptions.qrCode) {
-    const urlToEncode = seo.canonicalUrl || genOptions.qrCodeTargetUrl || '';
+    const envHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
+    const urlToEncode =
+      (seo.canonicalUrl || '').trim() ||
+      resolveEffectiveCanonicalUrl(seo, content.siteName, top3[0], envHost) ||
+      genOptions.qrCodeTargetUrl ||
+      '';
     if (urlToEncode) {
       try {
         qrCodeDataUrl = await QRCode.toDataURL(urlToEncode, { width: 120, margin: 1 });

@@ -56,3 +56,16 @@
 - カスタムドメインの紐づけ: **Vercel（または利用中のホスティング）の Domains** ＋ **DNS**。
 - 各LPの **canonicalUrl / og:url** は、実際に公開した **フルURL** に合わせて設定する（`docs/本番デプロイ（Vercel・Supabase）.md` 参照）。
 - LP を別ドメインに出してAPIだけ本家の場合は **`paymentFormBaseUrl`** 等の指定が必要になることがある（`docs/仕様と制限・Stripe決済.md` 参照）。
+
+---
+
+## 自動正規URL（店名サブドメイン）
+
+`canonicalUrl` が**空**のとき、次の優先で **`https://{店名スラッグ}.{親ドメイン}/`** をメタ・JSON-LD に使います。
+
+1. **`seo.autoCanonicalHost`**（CMS「自動用親ドメイン」）— 例: `closer-official.com`（`https://` は不要）
+2. **テンプレが `event` のとき** … 未設定でも **`event-view.net`** を既定
+3. **環境変数** … フロント: **`VITE_AUTO_CANONICAL_HOST`**／サーバー・キュー: **`AUTO_CANONICAL_HOST`**（または `VITE_AUTO_CANONICAL_HOST`）
+
+手入力の **`canonicalUrl`** が1文字でも入っている場合は、そちらが常に優先されます。  
+DNS で `店名.親ドメイン` を実際に向ける作業は、引き続きインフラ側で必要です。

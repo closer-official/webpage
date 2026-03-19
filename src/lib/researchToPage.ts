@@ -1,5 +1,5 @@
 import type { PageContent, PageSection, SEOData, ResearchedShop } from '../types';
-import { generateMetaDescription, generateMetaTitle, generateKeywords } from './seo';
+import { generateMetaDescription, generateMetaTitle, generateKeywords, readViteAutoCanonicalHost } from './seo';
 import { getShowcasePreset } from '../data/showcasePresets';
 import { mergeShopIntoShowcaseContent } from './mergeShopIntoShowcase';
 
@@ -13,8 +13,14 @@ export function researchToShowcasePageContent(shop: ResearchedShop): PageContent
 
 export function researchToShowcaseSeo(shop: ResearchedShop, content: PageContent): SEOData {
   const { seo: baseSeo } = getShowcasePreset(shop.imageColorStyleId);
+  const envHost = readViteAutoCanonicalHost();
+  const autoCanonicalHost =
+    shop.imageColorStyleId === 'event'
+      ? 'event-view.net'
+      : baseSeo.autoCanonicalHost || (envHost || undefined);
   return {
     ...baseSeo,
+    autoCanonicalHost,
     metaTitle: generateMetaTitle(content, shop.name),
     metaDescription: generateMetaDescription(content),
     keywords: generateKeywords(content).join(', '),
@@ -51,11 +57,15 @@ export function researchToPageContent(shop: ResearchedShop): PageContent {
 }
 
 export function researchToSeo(shop: ResearchedShop, content: PageContent): SEOData {
+  const envHost = readViteAutoCanonicalHost();
+  const autoCanonicalHost =
+    shop.imageColorStyleId === 'event' ? 'event-view.net' : envHost || undefined;
   return {
     metaTitle: generateMetaTitle(content, shop.name),
     metaDescription: generateMetaDescription(content),
     keywords: generateKeywords(content).join(', '),
     ogImageUrl: '',
     canonicalUrl: '',
+    ...(autoCanonicalHost ? { autoCanonicalHost } : {}),
   };
 }

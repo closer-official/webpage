@@ -66,8 +66,10 @@
    | `GEMINI_API_KEY` | 口コミ分析・DM・学習用 | [AI Studio](https://aistudio.google.com/apikey) で発行 |
    | `VITE_GOOGLE_MAPS_API_KEY` | フロントの地図用 | 上と同じキーでよい |
    | `VITE_API_URL` | 本番では **空** のままでよい（同じサイトから API を呼ぶため） | 未設定 or 空 |
+   | `VITE_AUTO_CANONICAL_HOST` | （任意）**店名サブドメイン型**の正規URLを自動で入れる親ドメイン。例: `closer-official.com` | `event` テンプレは未設定でも `event-view.net` を使用 |
    | `CRON_SECRET` | （任意）Cron 保護用 | 自分で決めた英数字 |
    | `STRIPE_SECRET_KEY` | （任意）Stripe 決済用 | Stripe ダッシュボード |
+   | `AUTO_CANONICAL_HOST` | （任意）キュー生成LPの **自動 canonical** 用親ドメイン。例: `closer-official.com` | 未設定なら `event` 以外は自動URLなし（`seo.autoCanonicalHost` がある場合はそちら優先） |
 
 - **VITE_*** は「ビルド時」に使われるので、環境変数を追加・変更したあとは **Deployments** から **Redeploy** すると反映されます。**
 

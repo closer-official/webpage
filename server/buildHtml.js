@@ -1,4 +1,5 @@
 import { getTemplateFullCss } from './conceptTemplates.js';
+import { resolveEffectiveCanonicalUrl } from './canonical.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -162,6 +163,13 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   } = genOptions;
 
   const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
+  const envCanonicalHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
+  const effectiveCanonical = resolveEffectiveCanonicalUrl(
+    seo,
+    content.siteName || content.title,
+    tid,
+    envCanonicalHost
+  );
   const vercelHost = (process.env.VERCEL_URL || '').trim();
   const vercelApiOrigin = vercelHost
     ? (vercelHost.startsWith('http') ? vercelHost.replace(/\/$/, '') : `https://${vercelHost}`)
@@ -344,8 +352,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     `<meta property="og:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta property="og:description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.ogImageUrl ? `<meta property="og:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
-    seo.canonicalUrl ? `<meta property="og:url" content="${escapeHtml(seo.canonicalUrl)}">` : '',
-    seo.canonicalUrl ? `<link rel="canonical" href="${escapeHtml(seo.canonicalUrl)}">` : '',
+    effectiveCanonical ? `<meta property="og:url" content="${escapeHtml(effectiveCanonical)}">` : '',
+    effectiveCanonical ? `<link rel="canonical" href="${escapeHtml(effectiveCanonical)}">` : '',
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta name="twitter:description" content="${escapeHtml(seo.metaDescription)}">`,
@@ -353,7 +361,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     tid === 'gym_yoga' ? '<meta name="theme-color" content="#121212">' : '',
   ].filter(Boolean).join('\n    ');
 
-  const canonicalTrim = (seo.canonicalUrl && String(seo.canonicalUrl).trim()) || '';
+  const canonicalTrim = (effectiveCanonical && String(effectiveCanonical).trim()) || '';
   const jsonLdGraphs = [
     { '@context': 'https://schema.org', '@type': 'Organization', name: content.siteName, url: canonicalTrim || undefined },
     {

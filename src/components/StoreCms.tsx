@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { DashboardItem, PageContent, SEOData, PageSection } from '../types';
 import { api, isApiAvailable, getPreviewPublicUrl } from '../lib/api';
+import { getEffectiveCanonicalForBuild } from '../lib/seo';
 
 function linesToUrls(text: string): string[] {
   return text
@@ -220,6 +221,32 @@ export function StoreCms({ items, onRefresh }: StoreCmsProps) {
               placeholder="https://..."
             />
           </label>
+          <label>
+            正規URL（canonical）— 空欄なら「自動用親ドメイン」から店名サブドメインを生成
+            <input
+              type="url"
+              value={seo.canonicalUrl}
+              onChange={(e) => updateSeo({ canonicalUrl: e.target.value })}
+              placeholder="https://example.com/"
+            />
+          </label>
+          <label>
+            自動用親ドメイン（例: closer-official.com ・ store-official.net）
+            <input
+              type="text"
+              value={seo.autoCanonicalHost ?? ''}
+              onChange={(e) =>
+                updateSeo({ autoCanonicalHost: e.target.value.trim() || undefined })
+              }
+              placeholder="未設定時は .env の VITE_AUTO_CANONICAL_HOST / event は event-view.net"
+            />
+          </label>
+          {editingItem && content ? (
+            <p className="hint" style={{ marginTop: '0.5rem' }}>
+              <strong>解決後の正規URL（プレビュー）:</strong>{' '}
+              {getEffectiveCanonicalForBuild(seo, content.siteName, editingItem.templateId) || '—（親ドメイン未設定で自動生成なし）'}
+            </p>
+          ) : null}
         </section>
       )}
 

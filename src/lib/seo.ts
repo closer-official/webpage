@@ -35,7 +35,7 @@ export function resolveEffectiveCanonicalUrl(
   return `https://${slug}.${host}/`;
 }
 
-function readViteAutoCanonicalHost(): string {
+export function readViteAutoCanonicalHost(): string {
   try {
     const v = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_AUTO_CANONICAL_HOST;
     return v ? String(v).trim() : '';
