@@ -1,5 +1,58 @@
 import type { PageContent, SEOData } from '../types';
 
+/** サブドメイン用に店名などをスラッグ化（先頭63文字・DNSラベル向け） */
+export function slugifyForSubdomain(name: string): string {
+  const n = name.normalize('NFKC').trim().toLowerCase();
+  let s = n.replace(/\s+/g, '-').replace(/[^\p{L}\p{N}\-]/gu, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  if (!s) {
+    let h = 2166136261;
+    for (let i = 0; i < n.length; i++) h = Math.imul(h ^ n.charCodeAt(i), 16777619);
+    s = 'site-' + (h >>> 0).toString(36).slice(0, 10);
+  }
+  return s.slice(0, 63);
+}
+
+/**
+ * 手入力 canonical が空のとき、`https://{slug}.{host}/` を返す。
+ * @param envDefaultHost 例: Vercel の `VITE_AUTO_CANONICAL_HOST`（closer-official.com）
+ */
+export function resolveEffectiveCanonicalUrl(
+  seo: SEOData,
+  siteName: string,
+  templateId: string,
+  envDefaultHost = ''
+): string {
+  const manual = (seo.canonicalUrl || '').trim();
+  if (manual) return manual;
+  let host = (seo.autoCanonicalHost || '').trim();
+  if (!host && templateId === 'event') host = 'event-view.net';
+  if (!host && envDefaultHost) host = envDefaultHost.trim();
+  if (!host) return '';
+  host = host.replace(/^https?:\/\//i, '').split('/')[0]?.trim() ?? '';
+  if (!host) return '';
+  const slug = slugifyForSubdomain(siteName || 'site');
+  if (!slug) return '';
+  return `https://${slug}.${host}/`;
+}
+
+function readViteAutoCanonicalHost(): string {
+  try {
+    const v = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_AUTO_CANONICAL_HOST;
+    return v ? String(v).trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+/** buildHtml 用: 解決済み canonical（メタ・JSON-LD 共通） */
+export function getEffectiveCanonicalForBuild(
+  seo: SEOData,
+  siteName: string,
+  templateId: string
+): string {
+  return resolveEffectiveCanonicalUrl(seo, siteName, templateId, readViteAutoCanonicalHost());
+}
+
 /** タイトルと本文からメタ説明を自動生成（160字前後） */
 export function generateMetaDescription(content: PageContent, maxLen = 160): string {
   const parts: string[] = [];
@@ -49,7 +102,7 @@ export function buildJsonLd(
   canonicalUrl: string,
   templateId?: string
 ): string {
-  const url = (canonicalUrl || seo.canonicalUrl || '').trim();
+  const url = (canonicalUrl || '').trim() || (seo.canonicalUrl || '').trim();
   const org = {
     '@context': 'https://schema.org',
     '@type': 'Organization',

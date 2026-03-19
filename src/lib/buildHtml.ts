@@ -1,6 +1,6 @@
 import type { PageContent, SEOData, TemplateOption, BuildHtmlGenOptions } from '../types';
 import type { NavItem } from '../types';
-import { buildJsonLd } from './seo';
+import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
 
 function escapeHtml(s: string): string {
   return s
@@ -121,7 +121,9 @@ export function buildHtml(
   template: TemplateOption,
   options?: { inlineCss?: boolean; genOptions?: BuildHtmlGenOptions }
 ): string {
-  const jsonLd = buildJsonLd(content, seo, seo.canonicalUrl || '', template.id);
+  const tid = template.id;
+  const effectiveCanonical = getEffectiveCanonicalForBuild(seo, content.siteName || content.title, tid);
+  const jsonLd = buildJsonLd(content, seo, effectiveCanonical, tid);
 
   const metaTags = [
     `<meta charset="UTF-8">`,
@@ -134,8 +136,8 @@ export function buildHtml(
     `<meta property="og:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta property="og:description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.ogImageUrl ? `<meta property="og:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
-    seo.canonicalUrl ? `<meta property="og:url" content="${escapeHtml(seo.canonicalUrl)}">` : '',
-    seo.canonicalUrl ? `<link rel="canonical" href="${escapeHtml(seo.canonicalUrl)}">` : '',
+    effectiveCanonical ? `<meta property="og:url" content="${escapeHtml(effectiveCanonical)}">` : '',
+    effectiveCanonical ? `<link rel="canonical" href="${escapeHtml(effectiveCanonical)}">` : '',
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta name="twitter:description" content="${escapeHtml(seo.metaDescription)}">`,
@@ -146,7 +148,6 @@ export function buildHtml(
     .join('\n    ');
 
   const bodyClass = `page-wrapper template-${template.id}`;
-  const tid = template.id;
   const overrides = options?.genOptions?.styleOverrides;
   const useDrawerNav = tid === 'cafe_tea' && overrides?.navStyle !== 'sticky';
   let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);

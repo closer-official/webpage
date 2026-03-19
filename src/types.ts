@@ -119,6 +119,12 @@ export interface SEOData {
   keywords: string;
   ogImageUrl: string;
   canonicalUrl: string;
+  /**
+   * canonicalUrl が空のとき `https://{スラッグ}.{親ドメイン}/` を自動で使う。
+   * 例: `closer-official.com` / `store-official.net`（https://は不要）
+   * event テンプレは未指定でも `event-view.net` が既定（buildHtml 側）。
+   */
+  autoCanonicalHost?: string;
 }
 
 /** 業界カテゴリ */
