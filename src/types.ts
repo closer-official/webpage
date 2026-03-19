@@ -70,6 +70,10 @@ export interface PageContent {
   /** 塾テンプレ用：固定フッターの第二CTA（例: 資料請求） */
   ctaSecondaryLabel?: string;
   ctaSecondaryHref?: string;
+  /** ペットサロンテンプレ：サービス（絵文字等アイコン・見出し・本文・視覚的わかりやすさ） */
+  petServiceItems?: { icon: string; title: string; body: string }[];
+  /** ペットサロンテンプレ：注意・規約（アコーディオンで畳んで表示） */
+  petPolicyItems?: { title: string; body: string }[];
 }
 
 /** SEO用データ */

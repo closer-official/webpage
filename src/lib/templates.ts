@@ -167,11 +167,68 @@ function makeTemplate(
 
 /** テンプレ3〜11用の共通CSS（プレビュー用・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
-  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-pet_salon, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-pet_salon .container, .page-wrapper.template-apparel .container, .page-wrapper.template-event .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-pet_salon header, .page-wrapper.template-apparel header, .page-wrapper.template-event header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-pet_salon .cta-btn, .page-wrapper.template-apparel .cta-btn, .page-wrapper.template-event .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
-  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-pet_salon .hero-full-img, .page-wrapper.template-apparel .hero-full-img, .page-wrapper.template-event .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-apparel .container, .page-wrapper.template-event .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-apparel header, .page-wrapper.template-event header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-apparel .cta-btn, .page-wrapper.template-event .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-apparel .hero-full-img, .page-wrapper.template-event .hero-full-img { min-height: var(--hero-min-h); }
+`;
+
+/** ペットサロン（ミント×白×ベージュ・アコーディオン規約・ヒーロー暗幕・日本語ナビ） */
+const PET_SALON_TEMPLATE_CSS = `
+  .page-wrapper.template-pet_salon { --pet-mint: #6BAFA0; --pet-mint-dark: #4a8f82; --pet-mint-light: #E8F4F1; --pet-cream: #FAF8F5; --pet-beige: #EDE8E2; --pet-text: #2d3436; --pet-text-soft: #5c6560; --tp-bg: #fff; --tp-heading: #2d3436; --tp-text: #2d3436; --tp-accent: var(--pet-mint); --tp-border: rgba(107,175,160,0.2); --tp-bg-footer: var(--pet-mint-dark); --hero-min-h: 72vh; background: var(--tp-bg); color: var(--pet-text); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-pet_salon .container { max-width: 720px; margin: 0 auto; padding: 0 22px; }
+  .page-wrapper.template-pet_salon header { position: sticky; top: 0; z-index: 100; padding: 14px 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-pet_salon .logo { font-size: 1.125rem; font-weight: 700; letter-spacing: 0.06em; color: var(--pet-mint-dark); text-decoration: none; }
+  .page-wrapper.template-pet_salon .nav { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; }
+  .page-wrapper.template-pet_salon .nav-link { font-size: 0.8125rem; font-weight: 600; color: var(--pet-text-soft); text-decoration: none; padding: 4px 0; }
+  .page-wrapper.template-pet_salon .nav-link:hover { color: var(--pet-mint-dark); }
+  .page-wrapper.template-pet_salon .cta-btn { background: var(--pet-mint); color: #fff; border: none; padding: 12px 22px; min-height: 46px; font-size: 0.875rem; font-weight: 700; border-radius: 999px; box-shadow: 0 4px 14px rgba(107,175,160,0.35); }
+  .page-wrapper.template-pet_salon .cta-btn:hover { background: var(--pet-mint-dark); color: #fff; }
+  .page-wrapper.template-pet_salon .pet-hero { min-height: var(--hero-min-h); }
+  .page-wrapper.template-pet_salon .pet-hero .hero-bg-overlay { background: linear-gradient(180deg, rgba(35,55,50,0.55) 0%, rgba(35,55,50,0.42) 50%, rgba(35,55,50,0.5) 100%); }
+  .page-wrapper.template-pet_salon .pet-hero .hero-inner h1 { font-size: clamp(1.65rem, 5.5vw, 2.35rem); font-weight: 800; color: #fff; letter-spacing: 0.04em; text-shadow: 0 2px 20px rgba(0,0,0,0.45), 0 0 40px rgba(0,0,0,0.25); line-height: 1.35; }
+  .page-wrapper.template-pet_salon .pet-hero .hero-inner .subheadline { color: rgba(255,255,255,0.96); font-size: 1rem; line-height: 1.65; text-shadow: 0 1px 12px rgba(0,0,0,0.4); margin-top: 0.75rem; }
+  .page-wrapper.template-pet_salon .pet-hero .cta-btn-primary { background: #fff; color: var(--pet-mint-dark); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  .page-wrapper.template-pet_salon .pet-hero .cta-btn-primary:hover { background: var(--pet-mint-light); color: var(--pet-mint-dark); }
+  .page-wrapper.template-pet_salon .pet-services { background: #fff; padding: 3rem 0 2.5rem; }
+  .page-wrapper.template-pet_salon .pet-sec-title { font-size: 1.35rem; font-weight: 800; color: var(--pet-mint-dark); margin: 0 0 0.5rem; letter-spacing: 0.04em; }
+  .page-wrapper.template-pet_salon .pet-sec-lede { font-size: 0.9rem; color: var(--pet-text-soft); margin: 0 0 2rem; line-height: 1.7; }
+  .page-wrapper.template-pet_salon .pet-service-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+  .page-wrapper.template-pet_salon .pet-service-card { display: flex; gap: 1.15rem; align-items: flex-start; padding: 1.25rem 1.1rem; background: var(--pet-cream); border-radius: 16px; border: 1px solid rgba(107,175,160,0.12); }
+  .page-wrapper.template-pet_salon .pet-service-icon { flex-shrink: 0; width: 3.25rem; height: 3.25rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; line-height: 1; background: #fff; border-radius: 50%; box-shadow: 0 2px 10px rgba(107,175,160,0.15); border: 2px dashed rgba(107,175,160,0.35); }
+  .page-wrapper.template-pet_salon .pet-service-card h3 { font-size: 1.05rem; font-weight: 800; color: var(--pet-mint-dark); margin: 0 0 0.45rem; }
+  .page-wrapper.template-pet_salon .pet-service-card p { font-size: 0.95rem; line-height: 1.85; color: var(--pet-text); margin: 0; }
+  .page-wrapper.template-pet_salon .pet-concept { background: var(--pet-beige); padding: 2.75rem 0; }
+  .page-wrapper.template-pet_salon .pet-concept .section-body h2 { font-size: 1.25rem; font-weight: 800; color: var(--pet-mint-dark); margin: 0 0 1.25rem; }
+  .page-wrapper.template-pet_salon .pet-concept .section-body p { font-size: 1rem; line-height: 1.9; color: var(--pet-text); margin: 0 0 1rem; }
+  .page-wrapper.template-pet_salon .pet-concept .section-img-wrap { border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; box-shadow: 0 8px 28px rgba(0,0,0,0.08); }
+  .page-wrapper.template-pet_salon .section:not(.pet-concept):not(.pet-services):not(.pet-gallery):not(.pet-policy) .section-body h2 { font-size: 1.2rem; font-weight: 800; color: var(--pet-mint-dark); margin: 0 0 1rem; }
+  .page-wrapper.template-pet_salon .section:not(.pet-concept) .section-body p { font-size: 1rem; line-height: 1.88; color: var(--pet-text); margin: 0 0 0.85rem; }
+  .page-wrapper.template-pet_salon .pet-gallery { background: var(--pet-cream); padding: 2.75rem 0; }
+  .page-wrapper.template-pet_salon .pet-gallery h2 { font-size: 1.25rem; font-weight: 800; color: var(--pet-mint-dark); margin: 0 0 0.65rem; }
+  .page-wrapper.template-pet_salon .pet-gallery-lede { font-size: 0.9rem; color: var(--pet-text-soft); margin: 0 0 1.5rem; line-height: 1.7; }
+  .page-wrapper.template-pet_salon .pet-gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 520px) { .page-wrapper.template-pet_salon .pet-gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+  .page-wrapper.template-pet_salon .pet-gallery-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; }
+  .page-wrapper.template-pet_salon .pet-policy { background: #fff; padding: 2.5rem 0 3rem; }
+  .page-wrapper.template-pet_salon .pet-policy-note { font-size: 0.875rem; color: var(--pet-text-soft); margin: 0 0 1.25rem; line-height: 1.7; }
+  .page-wrapper.template-pet_salon .pet-acc-item { border: 1px solid var(--tp-border); border-radius: 12px; margin-bottom: 0.65rem; overflow: hidden; background: var(--pet-cream); }
+  .page-wrapper.template-pet_salon .pet-acc-sum { padding: 1rem 1.1rem; font-size: 0.95rem; font-weight: 700; color: var(--pet-mint-dark); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+  .page-wrapper.template-pet_salon .pet-acc-sum::-webkit-details-marker { display: none; }
+  .page-wrapper.template-pet_salon .pet-acc-sum::after { content: '+'; font-weight: 300; font-size: 1.25rem; color: var(--pet-mint); }
+  .page-wrapper.template-pet_salon .pet-acc-item[open] .pet-acc-sum::after { content: '−'; }
+  .page-wrapper.template-pet_salon .pet-acc-body { padding: 0 1.1rem 1.15rem; font-size: 0.875rem; line-height: 1.8; color: var(--pet-text); border-top: 1px solid rgba(107,175,160,0.12); }
+  .page-wrapper.template-pet_salon .pet-map-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-pet_salon footer { padding: 2.5rem 0 2rem; background: var(--tp-bg-footer); color: #fff; border-top: none; }
+  .page-wrapper.template-pet_salon footer .container { color: rgba(255,255,255,0.95); }
+  .page-wrapper.template-pet_salon footer p { font-size: 0.9rem; line-height: 1.75; margin: 0.35rem 0; }
+  .page-wrapper.template-pet_salon .footer-brand { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.06em; color: #fff; margin-bottom: 0.75rem; }
+  .page-wrapper.template-pet_salon .footer-legal { border-top-color: rgba(255,255,255,0.2); }
+  .page-wrapper.template-pet_salon .footer-legal .presented-by a { color: rgba(255,255,255,0.85); }
+  .page-wrapper.template-pet_salon .section-rhythm-after-hero { padding-top: 0; }
+  .page-wrapper.template-pet_salon .section-rhythm-default { padding-top: 0; padding-bottom: 0; }
+  @media (max-width: 768px) { .page-wrapper.template-pet_salon .nav { max-width: 100%; } .page-wrapper.template-pet_salon .header-inner { flex-direction: column; gap: 10px; } }
 `;
 
 /** 整骨院・整体・鍼灸用（悩み→選ばれる理由→実績→図解・透明感・視認性） */
@@ -427,8 +484,8 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'pet_salon',
     'ペットサロン・ドッグ',
-    'プロの専門性と安心感',
-    GENERIC_TEMPLATE_CSS
+    'ミント×ベージュの清潔感、手描き風アイコン付きサービス、規約はアコーディオンで読みやすく',
+    PET_SALON_TEMPLATE_CSS
   ),
   makeTemplate(
     'apparel',

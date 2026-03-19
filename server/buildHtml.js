@@ -76,9 +76,13 @@ const DEFAULT_NAV = {
     { label: 'アクセス', href: '#access' },
   ],
   pet_salon: [
-    { label: 'こだわり', href: '#concept' },
+    { label: '想い', href: '#concept' },
+    { label: 'サービス', href: '#pet-services' },
     { label: 'メニュー', href: '#menu' },
+    { label: 'ギャラリー', href: '#gallery' },
+    { label: '注意・規約', href: '#pet-policy' },
     { label: 'アクセス', href: '#access' },
+    { label: '予約', href: '#contact' },
   ],
   apparel: [
     { label: 'コンセプト', href: '#concept' },
@@ -331,6 +335,30 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const faqItems = content.faqItems || [];
   const priceRows = content.priceRows || [];
+  const petSvc = content.petServiceItems || [];
+  const petPol = content.petPolicyItems || [];
+  const petServiceHtml =
+    tid === 'pet_salon' && petSvc.length > 0
+      ? `    <section id="pet-services" class="section pet-services section-rhythm-default" aria-labelledby="pet-services-title"${scrollInAttr}>
+      <div class="container">
+      <h2 id="pet-services-title" class="pet-sec-title">サービス内容</h2>
+      <p class="pet-sec-lede">アイコンでひと目で内容がわかります。</p>
+      <ul class="pet-service-list">
+${petSvc.map((row) => `        <li class="pet-service-card"><span class="pet-service-icon" aria-hidden="true">${escapeHtml(row.icon)}</span><div><h3>${escapeHtml(row.title)}</h3><p>${escapeHtml(row.body)}</p></div></li>`).join('\n')}
+      </ul>
+      </div>
+    </section>`
+      : '';
+  const petPolicyHtml =
+    tid === 'pet_salon' && petPol.length > 0
+      ? `    <section id="pet-policy" class="section pet-policy section-rhythm-default" aria-labelledby="pet-policy-title"${scrollInAttr}>
+      <div class="container">
+      <h2 id="pet-policy-title" class="pet-sec-title">ご利用上の注意・規約</h2>
+      <p class="pet-policy-note">長文はそのまま表示せず、タップで開いてご確認いただけます。</p>
+${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc-sum">${escapeHtml(p.title)}</summary><div class="pet-acc-body">${escapeHtml(p.body).replace(/\n/g, '<br>')}</div></details>`).join('\n')}
+      </div>
+    </section>`
+      : '';
 
   const sectionsDefault =
     tid === 'cafe_tea'
@@ -447,6 +475,32 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content)}</p><div class="salon-catalog-grid">${catalogImgs}</div></div>
     </section>`;
             }
+            if (tid === 'pet_salon' && s.id === 'concept') {
+              const paras = String(s.content).split('\n').map((l) => l.trim()).filter(Boolean).map((l) => `<p>${escapeHtml(l)}</p>`).join('');
+              const block = `    <section class="section pet-concept ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${sectionImg(s)}
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${paras}</div>
+    </section>`;
+              return block + (petSvc.length ? `\n${petServiceHtml}` : '');
+            }
+            if (tid === 'pet_salon' && s.id === 'gallery' && content.catalogImages && content.catalogImages.length > 0) {
+              const imgs = content.catalogImages.map((url) => `<div><img src="${escapeHtml(url)}" alt="" loading="lazy"></div>`).join('');
+              return `    <section id="gallery" class="section pet-gallery ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+        <p class="pet-gallery-lede">${escapeHtml(s.content)}</p>
+        <div class="pet-gallery-grid">${imgs}</div>
+      </div>
+    </section>`;
+            }
+            if (tid === 'pet_salon' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="pet-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+    </section>`;
+            }
             return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       ${sectionBody(s)}
@@ -465,7 +519,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     </div>`
     : '';
 
-  const sectionsHtml = (statsBlockHtml ? statsBlockHtml + '\n' : '') + sectionsDefault;
+  const sectionsHtml =
+    (statsBlockHtml ? statsBlockHtml + '\n' : '') + sectionsDefault + (petPolicyHtml ? `\n${petPolicyHtml}` : '');
 
   const extraMotionAttr = ' data-scroll-in';
   let extraSections = '';
@@ -573,7 +628,16 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       </div>
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
     </section>`
-      : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'pet_salon' || tid === 'apparel' || tid === 'event'
+      : tid === 'pet_salon'
+        ? `<section class="hero hero-full-img pet-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`
+        : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'builder' || tid === 'professional' || tid === 'cram_school' || tid === 'izakaya' || tid === 'apparel' || tid === 'event'
         ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">

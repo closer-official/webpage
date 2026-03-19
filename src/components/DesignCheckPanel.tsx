@@ -51,7 +51,7 @@ const PREVIEW_BG: Record<string, string> = {
   professional: '#F9F9F7',
   cram_school: '#F9F9F7',
   izakaya: '#F9F9F7',
-  pet_salon: '#F9F9F7',
+  pet_salon: '#E8F4F1',
   apparel: '#F9F9F7',
   event: '#F9F9F7',
 };
@@ -65,7 +65,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   professional: '#1A1A1A',
   cram_school: '#1A1A1A',
   izakaya: '#1A1A1A',
-  pet_salon: '#1A1A1A',
+  pet_salon: '#4a8f82',
   apparel: '#1A1A1A',
   event: '#1A1A1A',
 };

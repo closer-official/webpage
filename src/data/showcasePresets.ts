@@ -241,7 +241,88 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
     },
   },
   izakaya: genericPlaceholder('こだわり居酒屋', 'こだわり居酒屋・バー | 夜の雰囲気', 'ダークな配色でお酒・料理をドラマチックに。'),
-  pet_salon: genericPlaceholder('ペットサロン', 'ペットサロン・ドッグ | 安心感', 'プロの専門性が伝わる安心感重視のデザイン。'),
+  pet_salon: {
+    content: {
+      siteName: '薫トリミング',
+      title: '薫トリミング',
+      headline: 'トリミングに込める、ひとりひとりの想い',
+      subheadline: '清潔で安心できる空間で、ワンちゃんの個性を大切にした仕上がりをご提案します。',
+      ctaLabel: 'ご予約',
+      ctaHref: '#contact',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      petServiceItems: [
+        { icon: '📋', title: 'カウンセリング', body: '性格・被毛の状態を伺い、無理のないスタイルとお手入れのコツをご提案します。' },
+        { icon: '🧴', title: 'シャンプー・ブロー', body: '肌に優しい洗剤で丁寧に洗い上げ、ふんわり仕上げます。' },
+        { icon: '✂️', title: 'カット', body: 'お散歩しやすい長さからモデルカットまで、ご希望に沿って整えます。' },
+        { icon: '🛁', title: 'オプション', body: '歯みがき・爪切り・耳そうじなど、お困りごともまとめてご相談ください。' },
+      ],
+      petPolicyItems: [
+        {
+          title: 'ご来店前のご確認（ワクチン・体調など）',
+          body:
+            '混合ワクチン・狂犬病の接種を完了しているワンちゃんのみご利用いただけます。発情中・妊娠中・体調不良の場合は事前にご相談ください。攻撃性が強い場合、他のお客様の安全のためお断りすることがあります。',
+        },
+        {
+          title: 'キャンセル・無断キャンセルについて',
+          body:
+            '前日までのキャンセルは無料です。当日キャンセル・無断キャンセルはキャンセル料をいただく場合がございます。詳細はご予約時にご案内します。',
+        },
+        {
+          title: '利用規約（抜粋）',
+          body:
+            '1. 当サロンのサービスはペットの美容目的に限ります。\n2. 施術中の事故防止のため、スタッフの指示にご協力ください。\n3. 施術に伴う偶発的な皮膚トラブル等については、可能な限り配慮いたしますが、事前に申し出のない既往等によるものは責任を負いかねる場合があります。\n4. 本文の全文は店頭・お問い合わせにてご確認いただけます。',
+        },
+      ],
+      catalogImages: [
+        'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=400',
+        'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=400',
+        'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400',
+        'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=400',
+        'https://images.unsplash.com/photo-1530281700549-e82e7bf50d96?auto=format&fit=crop&w=400',
+        'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=400',
+      ],
+      sections: [
+        {
+          id: 'concept',
+          title: 'トリミングに込める想い',
+          content:
+            'うちの子がリラックスできるかどうか。それが何より大切だと考えています。\n\n無理なカットはせず、被毛の健康と生活しやすさのバランスを大切にしています。初めての方も、まずはカウンセリングからお気軽にどうぞ。',
+          imageUrl: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=800',
+        },
+        { id: 'staff', title: 'スタッフ', content: '愛犬家スタッフが、丁寧な声かけと手元で安心感をお届けします。', imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800' },
+        {
+          id: 'menu',
+          title: 'メニュー・料金',
+          content:
+            '【シャンプー＆カット】小型犬 〇〇円〜／中型犬 〇〇円〜\n【シャンプーのみ】〇〇円〜\n※被毛の長さ・状態により追加料金がかかる場合があります。正確なお見積りはご来店時にご案内します。',
+        },
+        {
+          id: 'gallery',
+          title: '仕上がりギャラリー',
+          content: 'スタイルのイメージにお役立てください。犬種・個体差により仕上がりは異なります。',
+        },
+        { id: 'hours', title: '営業時間', content: '平日 10:00–18:00\n土日祝 9:00–17:00\n定休日：火曜・水曜（祝日の場合は翌平日）' },
+        {
+          id: 'access',
+          title: 'アクセス',
+          content: '東京都〇〇区〇〇 1-2-3\n〇〇駅 徒歩7分\n※駐車場は近隣コインパーキングをご利用ください。',
+        },
+        { id: 'contact', title: 'ご予約・お問い合わせ', content: 'LINE・お電話にてご予約を承っております。初めての方もお気軽にご連絡ください。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} 薫トリミング`,
+      footerAddress: '東京都〇〇区〇〇 1-2-3',
+      footerPhone: '03-XXXX-XXXX',
+    },
+    seo: {
+      metaTitle: '薫トリミング | 犬のトリミングサロン',
+      metaDescription:
+        'カウンセリング重視・ミントとベージュの清潔感あるサロン。仕上がりギャラリーと分かりやすいメニューをご案内。',
+      keywords: 'トリミング, 犬, ドッグサロン, 予約',
+      ogImageUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   apparel: genericPlaceholder('アパレルショップ', 'アパレル・ファッション | ブランド', 'コンセプト・コレクション・アクセスをご案内します。'),
   event: genericPlaceholder('イベント', 'イベント・フェス | お申し込み', '概要・プログラム・アクセス・お申し込みをご案内します。'),
 };
