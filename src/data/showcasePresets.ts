@@ -2,7 +2,7 @@ import type { PageContent, SEOData, StyleId } from '../types';
 import { SHOWCASE_VARIANT_COUNT } from '../types';
 import { WARM_ORGANIC_CAFE_PRESET } from './warmOrganicCafePreset';
 
-/** 1テンプレあたりのバリアント数（11×1=11スロットでスタート） */
+/** 1テンプレあたりのバリアント数（12×1=12スロット） */
 const VARIANT_COUNT = SHOWCASE_VARIANT_COUNT;
 
 /** 汎用プレースホルダー（テンプレ3〜10のひな形） */
@@ -196,7 +196,92 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
-  professional: genericPlaceholder('士業事務所', '行政書士・税理士・社労士 | お問い合わせ', '誠実さを感じさせるネイビー・白の基調。'),
+  professional: {
+    content: {
+      siteName: '〇〇税理士事務所',
+      title: '〇〇税理士事務所',
+      headline: '相続・事業承継の悩みを、信頼で解決します',
+      subheadline: '初回相談無料。お気軽にご連絡ください。',
+      ctaLabel: '無料相談',
+      ctaHref: '#contact',
+      proTrustBullets: ['初回相談無料', '土日祝対応可', 'オンライン相談可'],
+      proStepItems: [
+        { step: '1', title: 'ご相談', body: 'お電話またはフォームでご予約。ご不安やご希望をお聞きします。' },
+        { step: '2', title: 'お見積り', body: '内容に応じてお見積りと今後の流れをご説明します。' },
+        { step: '3', title: '解決', body: '必要書類の作成・手続きをサポートし、完了まで伴走します。' },
+      ],
+      proServiceItems: [
+        { icon: '📋', title: '相続・遺言', body: '遺言書作成、相続手続き、遺産分割のご相談を承ります。' },
+        { icon: '🏢', title: '法人・事業承継', body: '会社設立、決算・申告、M&A・事業承継のサポートをいたします。' },
+        { icon: '📊', title: '個人の確定申告', body: '副業・不動産・医療費控除など、確定申告のご依頼を歓迎します。' },
+        { icon: '🤝', title: '経営相談', body: '資金繰り・補助金・節税など、経営者の悩みにワンストップで対応します。' },
+      ],
+      stats: [
+        { value: '500+', label: '相談実績' },
+        { value: '72時間', label: '最短対応' },
+        { value: '0円', label: '初回相談料' },
+      ],
+      priceRows: [
+        { name: '初回相談（60分）', price: '無料' },
+        { name: '相続税申告（目安）', price: '〇〇円〜' },
+        { name: '遺言書作成（1通）', price: '〇〇円〜' },
+      ],
+      faqItems: [
+        { q: '初回相談は無料ですか？', a: 'はい。60分程度、初回のご相談は無料で承っております。お気軽にご連絡ください。' },
+        { q: '土日祝は対応していますか？', a: '事前予約制で土日祝も対応可能な場合がございます。お問い合わせ時にご希望をお伝えください。' },
+        { q: 'オンライン相談はできますか？', a: 'Zoom等によるオンライン相談にも対応しています。遠方の方もご利用いただけます。' },
+      ],
+      sections: [
+        {
+          id: 'concept',
+          title: 'ご挨拶・理念',
+          content:
+            '「信頼を、自分に期待してください。」\n\n私たちは、お客様一人ひとりの事情に寄り添い、相続・事業・税務の悩みを一緒に整理し、納得のいく解決へと導きます。数字だけでなく、ご家族や経営の未来まで見据えた提案を心がけています。',
+          imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800',
+        },
+        {
+          id: 'staff',
+          title: '代表プロフィール',
+          content:
+            '〇〇 〇〇（税理士・〇〇年在籍）\n\n大手法人で経験を積んだのち独立。相続・事業承継を中心に、個人・法人の皆様からご依頼をいただいています。相談しやすいと評判をいただくよう、丁寧な説明とスピード感のある対応を心がけています。',
+          imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400',
+        },
+        {
+          id: 'menu',
+          title: '料金の目安',
+          content: '以下は目安です。案件の内容により変動します。正確なお見積りは初回相談時にご案内します。',
+        },
+        {
+          id: 'faq',
+          title: 'よくある質問',
+          content: 'ご相談前に、よくいただく質問をまとめました。',
+        },
+        {
+          id: 'access',
+          title: 'アクセス',
+          content: '〇〇県〇〇市〇〇町1-2-3 〇〇ビル 3F\n〇〇駅 徒歩5分\n駐車場2台完備',
+        },
+        {
+          id: 'contact',
+          title: '無料相談のご予約',
+          content: 'お電話または下のボタンからお申し込みください。24時間以内にご連絡いたします。',
+        },
+      ],
+      footerText: `© ${new Date().getFullYear()} 〇〇税理士事務所`,
+      footerAddress: '〇〇県〇〇市〇〇町1-2-3 〇〇ビル 3F',
+      footerPhone: '03-XXXX-XXXX',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+    },
+    seo: {
+      metaTitle: '〇〇税理士事務所 | 相続・事業承継・確定申告',
+      metaDescription:
+        '初回相談無料。相続・遺言・法人・確定申告まで、信頼と実績でお応えします。土日祝・オンライン対応可。',
+      keywords: '税理士, 相続, 事業承継, 確定申告, 無料相談',
+      ogImageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   cram_school: {
     content: {
       siteName: 'キッズ塾サンプル',
@@ -325,10 +410,67 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   apparel: genericPlaceholder('アパレルショップ', 'アパレル・ファッション | ブランド', 'コンセプト・コレクション・アクセスをご案内します。'),
   event: genericPlaceholder('イベント', 'イベント・フェス | お申し込み', '概要・プログラム・アクセス・お申し込みをご案内します。'),
+  ramen: {
+    content: {
+      siteName: '麺屋 こだわり',
+      title: '麺屋 こだわり',
+      headline: '一杯に、こだわりを。',
+      subheadline: 'スープと麺にこだわった一杯をご用意しています。',
+      ctaLabel: 'メニューを見る',
+      ctaHref: '#menu',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      catalogImages: [
+        'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=600',
+        'https://images.unsplash.com/photo-1557872943-16a5ac26437e?auto=format&fit=crop&w=600',
+        'https://images.unsplash.com/photo-1609909514023-474c5c430c6f?auto=format&fit=crop&w=600',
+      ],
+      priceRows: [
+        { name: '醤油ラーメン', price: '¥850' },
+        { name: '味噌ラーメン', price: '¥900' },
+        { name: '塩ラーメン', price: '¥850' },
+      ],
+      sections: [
+        {
+          id: 'concept',
+          title: 'こだわり',
+          content:
+            '創業より変わらぬ製法で、鶏ガラと豚骨を合わせたスープを一晩かけて仕込みています。中太ストレートの麺は、のど越しとコシのバランスにこだわりました。',
+          imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=800',
+        },
+        {
+          id: 'menu',
+          title: 'お品書き',
+          content: '人気メニューをご紹介します。替え玉・トッピングもご用意しています。',
+        },
+        {
+          id: 'gallery',
+          title: 'お知らせ',
+          content: '季節限定メニューや休業日のお知らせを掲載しています。',
+        },
+        {
+          id: 'access',
+          title: '店舗',
+          content: '東京都〇〇区〇〇 1-2-3\n〇〇駅 徒歩5分\n営業時間：11:00〜15:00、18:00〜22:00\n定休日：水曜',
+        },
+        { id: 'contact', title: 'お問い合わせ', content: 'ご予約・お問い合わせはお電話にて承っております。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} 麺屋 こだわり`,
+      footerAddress: '東京都〇〇区〇〇 1-2-3',
+      footerPhone: '03-XXXX-XXXX',
+    },
+    seo: {
+      metaTitle: '麺屋 こだわり | ラーメン',
+      metaDescription: 'スープと麺にこだわった一杯。醤油・味噌・塩ラーメンをご用意しています。',
+      keywords: 'ラーメン, 〇〇, 醤油, 味噌',
+      ogImageUrl: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
 };
 
 /**
- * 11テンプレ × 1バリアント = 11スロットの枠。
+ * 12テンプレ × 1バリアント = 12スロットの枠。
  * 各スロットは現状同じ内容のコピー。画像は template-sources/ で差し替え用を用意。
  */
 type PresetSlot = { content: PageContent; seo: SEOData };

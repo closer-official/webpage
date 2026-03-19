@@ -46,9 +46,15 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'ABOUT', href: '#about' },
   ],
   professional: [
-    { label: 'サービス', href: '#menu' },
-    { label: '料金', href: '#price' },
-    { label: 'お問い合わせ', href: '#contact' },
+    { label: '実績', href: '#pro-stats' },
+    { label: '流れ', href: '#pro-flow' },
+    { label: 'ご挨拶', href: '#concept' },
+    { label: '業務', href: '#pro-services' },
+    { label: '料金', href: '#menu' },
+    { label: 'スタッフ', href: '#staff' },
+    { label: 'FAQ', href: '#faq' },
+    { label: 'アクセス', href: '#access' },
+    { label: '相談', href: '#contact' },
   ],
   cram_school: [
     { label: 'コース', href: '#menu' },
@@ -82,6 +88,13 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'アクセス', href: '#access' },
     { label: 'お申し込み', href: '#contact' },
   ],
+  ramen: [
+    { label: 'こだわり', href: '#concept' },
+    { label: 'お品書き', href: '#menu' },
+    { label: 'お知らせ', href: '#gallery' },
+    { label: '店舗', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
@@ -96,6 +109,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   pet_salon: { label: '予約する', href: '#contact' },
   apparel: { label: 'オンラインショップ', href: '#contact' },
   event: { label: 'お申し込み', href: '#contact' },
+  ramen: { label: 'メニューを見る', href: '#menu' },
 };
 
 /** プレビュー・エクスポート用の完全なHTMLを生成 */
@@ -261,6 +275,22 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     </section>`
       : '';
 
+  const proBullets = content.proTrustBullets ?? [];
+  const proTrustHtml =
+    tid === 'professional' && proBullets.length > 0
+      ? `<div class="pro-trust-wrap"${scrollInAttr}><div class="pro-trust-inner">${proBullets.map((t) => `<span class="pro-trust-chip">${escapeHtml(t)}</span>`).join('')}</div></div>`
+      : '';
+  const proSteps = content.proStepItems ?? [];
+  const proStepsHtml =
+    tid === 'professional' && proSteps.length > 0
+      ? `    <section id="pro-flow" class="pro-flow"${scrollInAttr}><div class="pro-flow-inner"><h2>ご相談の流れ</h2><ul class="pro-step-list">${proSteps.map((st) => `<li class="pro-step-card"><span class="pro-step-num" aria-hidden="true">${escapeHtml(st.step)}</span><h3>${escapeHtml(st.title)}</h3><p>${escapeHtml(st.body)}</p></li>`).join('')}</ul></div></section>`
+      : '';
+  const proSvc = content.proServiceItems ?? [];
+  const proServiceHtml =
+    tid === 'professional' && proSvc.length > 0
+      ? `    <section id="pro-services" class="pro-services section-rhythm-default"${scrollInAttr}><h2>業務内容</h2><p class="pro-services-lede">主なサービスを分かりやすくご案内します。</p><div class="pro-svc-grid">${proSvc.map((row) => `<div class="pro-svc-card"><span class="pro-svc-icon" aria-hidden="true">${escapeHtml(row.icon)}</span><div><h3>${escapeHtml(row.title)}</h3><p>${escapeHtml(row.body)}</p></div></div>`).join('')}</div><p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></section>`
+      : '';
+
   const sectionsDefault =
     tid === 'cafe_tea'
       ? content.sections
@@ -400,6 +430,88 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
     </section>`;
             }
+            if (tid === 'ramen' && s.id === 'menu' && content.catalogImages?.length) {
+              const priceRowsR = content.priceRows ?? [];
+              const items = content.catalogImages.map((url, i) => {
+                const row = priceRowsR[i];
+                const name = row ? escapeHtml(row.name) : `メニュー${i + 1}`;
+                const price = row ? escapeHtml(row.price) : '—';
+                return `<div class="ramen-menu-item"><img src="${escapeHtml(url)}" alt="" loading="lazy"><div class="ramen-menu-body"><p class="ramen-menu-name">${name}</p><p class="ramen-menu-price">${price}</p></div></div>`;
+              }).join('');
+              return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p><div class="ramen-menu-grid">${items}</div></div>
+    </section>`;
+            }
+            if (tid === 'ramen' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="ramen-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+    </section>`;
+            }
+            if (tid === 'professional' && s.id === 'concept') {
+              const paras = String(s.content)
+                .split('\n')
+                .map((l) => l.trim())
+                .filter(Boolean)
+                .map((l) => `<p>${escapeHtml(l)}</p>`)
+                .join('');
+              const block = `    <section class="section pro-concept ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : ''}
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${paras}</div>
+      <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
+    </section>`;
+              return block + (proSvc.length ? `\n${proServiceHtml}` : '');
+            }
+            if (tid === 'professional' && s.id === 'staff') {
+              const photo = s.imageUrl
+                ? `<div class="pro-staff-photo"><img src="${escapeHtml(s.imageUrl)}" alt="" loading="lazy"></div>`
+                : '';
+              return `    <section class="section pro-staff ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="pro-staff-inner">
+        ${photo}
+        <div class="pro-staff-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+        <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></div>
+      </div>
+    </section>`;
+            }
+            if (tid === 'professional' && s.id === 'menu' && priceRows.length > 0) {
+              const rows = priceRows.map((row) => `<div class="pro-price-card"><span class="pro-price-name">${escapeHtml(row.name)}</span><span class="pro-price-val">${escapeHtml(row.price)}</span></div>`).join('');
+              return `    <section class="section pro-price-wrap ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p><div class="pro-price-grid">${rows}</div></div>
+      <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
+    </section>`;
+            }
+            if (tid === 'professional' && s.id === 'faq' && faqItems.length > 0) {
+              const fq = faqItems.map((f) => `<details class="pro-faq-item"><summary class="pro-faq-sum">${escapeHtml(f.q)}</summary><div class="pro-faq-body">${escapeHtml(f.a)}</div></details>`).join('');
+              return `    <section id="faq" class="section pro-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      ${fq}
+      <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
+    </section>`;
+            }
+            if (tid === 'professional' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="pro-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section pro-access section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
+    </section>`;
+            }
+            if (tid === 'professional' && s.id === 'contact') {
+              const telRaw = (content.footerPhone ?? '').replace(/\s/g, '');
+              const telBlock = content.footerPhone
+                ? `<p class="pro-contact-tel"><a href="tel:${escapeHtml(telRaw)}">${escapeHtml(content.footerPhone)}</a></p>`
+                : '';
+              return `    <section id="contact" class="section pro-contact-band ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+      ${telBlock}
+      <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+    </section>`;
+            }
             return `    <section class="section ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${img}
       ${secBody}
@@ -413,9 +525,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
 
   const statsBlockHtml =
     content.stats && content.stats.length > 0 && tid === 'professional'
-      ? `    <div class="stats-block">
-      ${content.stats.map((st) => `<div class="stat-item"><span class="stat-value">${escapeHtml(st.value)}</span><span class="stat-label">${escapeHtml(st.label)}</span></div>`).join('')}
-    </div>`
+      ? `    <section id="pro-stats" class="pro-stats-panel section-rhythm-default"${scrollInAttr}><div class="pro-stats-inner"><h2>実績・安心のひとこと</h2><div class="pro-stats-grid">${content.stats.map((st) => `<div><span class="pro-stat-value">${escapeHtml(st.value)}</span><span class="pro-stat-label">${escapeHtml(st.label)}</span></div>`).join('')}</div><p class="pro-stats-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></div></section>`
       : '';
 
   const sectionsHtml =
@@ -434,6 +544,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     pet_salon: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200',
     apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
     event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
+    ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
   };
   const heroImageUrl = seo.ogImageUrl?.trim() || defaultHeroImages[tid] || '';
   const woHeroSlides =
@@ -466,6 +577,24 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     </section>`
       : tid === 'pet_salon'
         ? `<section class="hero hero-full-img pet-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`
+        : tid === 'ramen'
+          ? `<section class="hero hero-full-img ramen-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`
+        : tid === 'professional'
+          ? `<section class="hero hero-full-img pro-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -536,7 +665,21 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       : '';
 
   const mainSectionsHtml = sectionsHtml;
-  const ctaAfterHero = (tid === 'cafe_tea' || tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'gym_yoga' || tid === 'cram_school') ? '' : ctaBlockHtml;
+  const ctaAfterHero =
+    tid === 'cafe_tea' ||
+    tid === 'salon_barber' ||
+    tid === 'clinic_chiropractic' ||
+    tid === 'gym_yoga' ||
+    tid === 'cram_school' ||
+    tid === 'professional'
+      ? ''
+      : ctaBlockHtml;
+
+  const proTelDigits = (content.footerPhone ?? '').replace(/\s/g, '');
+  const proStickyCtaHtml =
+    tid === 'professional' && cta.href && cta.label
+      ? `<div class="pro-sticky-cta" role="navigation" aria-label="お問い合わせ">${proTelDigits ? `<a href="tel:${escapeHtml(proTelDigits)}" class="pro-sticky-tel">お電話</a>` : ''}<a href="${escapeHtml(cta.href)}" class="pro-sticky-primary">${escapeHtml(cta.label)}</a></div>`
+      : '';
 
   const symptomItems = content.symptomItems ?? [];
   const reasonItems = content.reasonItems ?? [];
@@ -929,6 +1072,8 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
   ${headerHtml}
   <main id="main-content">
     ${heroSection}
+    ${proTrustHtml}
+    ${proStepsHtml}
     ${ctaAfterHero}
     ${clinicBlocksHtml}
     ${gymBlocksHtml}
@@ -942,6 +1087,7 @@ ${paymentSectionHtml}
   </main>
   ${gymStickyCtaHtml}
   ${cramStickyCtaHtml}
+  ${proStickyCtaHtml}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}

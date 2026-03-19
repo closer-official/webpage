@@ -48,12 +48,13 @@ const PREVIEW_BG: Record<string, string> = {
   clinic_chiropractic: '#F9F9F7',
   gym_yoga: '#F9F9F7',
   builder: '#fff',
-  professional: '#F9F9F7',
+  professional: '#e8f0fa',
   cram_school: '#F9F9F7',
   izakaya: '#F9F9F7',
   pet_salon: '#E8F4F1',
   apparel: '#F9F9F7',
   event: '#F9F9F7',
+  ramen: '#f8eeee',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -62,12 +63,13 @@ const PREVIEW_COLOR: Record<string, string> = {
   clinic_chiropractic: '#1A1A1A',
   gym_yoga: '#1A1A1A',
   builder: '#1A1A1A',
-  professional: '#1A1A1A',
+  professional: '#1a2744',
   cram_school: '#1A1A1A',
   izakaya: '#1A1A1A',
   pet_salon: '#4a8f82',
   apparel: '#1A1A1A',
   event: '#1A1A1A',
+  ramen: '#8B2E2E',
 };
 
 export function DesignCheckPanel() {

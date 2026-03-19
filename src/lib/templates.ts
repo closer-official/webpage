@@ -165,13 +165,35 @@ function makeTemplate(
   };
 }
 
-/** テンプレ3〜11用の共通CSS（プレビュー用・builder・clinic・gym 除く） */
+/** テンプレ3〜11用の共通CSS（プレビュー用・professional・pet_salon・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
-  .page-wrapper.template-professional, .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
-  .page-wrapper.template-professional .container, .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-apparel .container, .page-wrapper.template-event .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .page-wrapper.template-professional header, .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-apparel header, .page-wrapper.template-event header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
-  .page-wrapper.template-professional .cta-btn, .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-apparel .cta-btn, .page-wrapper.template-event .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
-  .page-wrapper.template-professional .hero-full-img, .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-apparel .hero-full-img, .page-wrapper.template-event .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
+  .page-wrapper.template-cram_school .container, .page-wrapper.template-izakaya .container, .page-wrapper.template-apparel .container, .page-wrapper.template-event .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .page-wrapper.template-cram_school header, .page-wrapper.template-izakaya header, .page-wrapper.template-apparel header, .page-wrapper.template-event header { padding: 20px 0; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-cram_school .cta-btn, .page-wrapper.template-izakaya .cta-btn, .page-wrapper.template-apparel .cta-btn, .page-wrapper.template-event .cta-btn { background: #1a1a1a; color: #fff; border: none; padding: 14px 28px; }
+  .page-wrapper.template-cram_school .hero-full-img, .page-wrapper.template-izakaya .hero-full-img, .page-wrapper.template-apparel .hero-full-img, .page-wrapper.template-event .hero-full-img { min-height: var(--hero-min-h); }
+`;
+
+/** 士業（ネイビー×白・オレンジCTA・ステップ・実績・曲線・親しみ） */
+const PROFESSIONAL_TEMPLATE_CSS = `
+  .page-wrapper.template-professional { --pro-navy: #1a2744; --pro-navy-mid: #2a3a5c; --pro-sky: #e8f0fa; --pro-sky-soft: #f4f8fc; --pro-orange: #e8952c; --pro-orange-dark: #c97a1a; --tp-bg: #fff; --tp-heading: var(--pro-navy); --tp-text: #334155; --tp-accent: var(--pro-navy); --tp-border: rgba(26,39,68,0.1); --tp-bg-footer: var(--pro-navy); --hero-min-h: 68vh; background: var(--tp-bg); color: var(--tp-text); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-professional .container { max-width: 720px; margin: 0 auto; padding: 0 22px; }
+  .page-wrapper.template-professional header { position: sticky; top: 0; z-index: 100; padding: 14px 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(10px); border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-professional .logo { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.06em; color: var(--pro-navy); text-decoration: none; }
+  .page-wrapper.template-professional .nav-link { font-size: 0.75rem; font-weight: 600; color: var(--pro-navy-mid); }
+  .page-wrapper.template-professional .cta-btn { background: var(--pro-orange); color: #fff; border: none; padding: 12px 22px; min-height: 46px; font-size: 0.875rem; font-weight: 700; border-radius: 999px; }
+  .page-wrapper.template-professional .pro-hero { min-height: var(--hero-min-h); }
+  .page-wrapper.template-professional .pro-hero .hero-bg-overlay { background: linear-gradient(165deg, rgba(26,39,68,0.72) 0%, rgba(26,39,68,0.45) 45%, rgba(26,39,68,0.55) 100%); }
+  .page-wrapper.template-professional .pro-hero .hero-inner h1 { font-size: clamp(1.4rem, 4.2vw, 2rem); font-weight: 800; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+  .page-wrapper.template-professional .pro-hero .cta-btn-primary { background: var(--pro-orange); color: #fff; }
+  .page-wrapper.template-professional .pro-trust-wrap, .page-wrapper.template-professional .pro-flow, .page-wrapper.template-professional .pro-stats-panel, .page-wrapper.template-professional .pro-concept, .page-wrapper.template-professional .pro-services, .page-wrapper.template-professional .pro-staff, .page-wrapper.template-professional .pro-price-wrap, .page-wrapper.template-professional .pro-faq, .page-wrapper.template-professional .pro-contact-band { }
+  .page-wrapper.template-professional .pro-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; }
+  .page-wrapper.template-professional .pro-stat-value { font-size: clamp(1.75rem, 5vw, 2.35rem); font-weight: 800; color: var(--pro-navy); }
+  .page-wrapper.template-professional .pro-ghost-cta { display: inline-flex; min-height: 44px; padding: 0.5rem 1.5rem; font-size: 0.8125rem; font-weight: 700; color: var(--pro-navy); border: 1.5px solid var(--pro-navy); border-radius: 999px; text-decoration: none; }
+  .page-wrapper.template-professional .pro-sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; display: flex; gap: 8px; padding: 10px 12px; background: rgba(255,255,255,0.98); border-top: 1px solid var(--tp-border); }
+  .page-wrapper.template-professional .pro-sticky-cta .pro-sticky-primary { background: var(--pro-orange); color: #fff; }
+  .page-wrapper.template-professional footer { background: var(--tp-bg-footer); color: rgba(255,255,255,0.92); }
+  .page-wrapper.template-professional main { padding-bottom: 72px; }
 `;
 
 /** ペットサロン（ミント×白×ベージュ・アコーディオン規約・ヒーロー暗幕・日本語ナビ） */
@@ -229,6 +251,43 @@ const PET_SALON_TEMPLATE_CSS = `
   .page-wrapper.template-pet_salon .section-rhythm-after-hero { padding-top: 0; }
   .page-wrapper.template-pet_salon .section-rhythm-default { padding-top: 0; padding-bottom: 0; }
   @media (max-width: 768px) { .page-wrapper.template-pet_salon .nav { max-width: 100%; } .page-wrapper.template-pet_salon .header-inner { flex-direction: column; gap: 10px; } }
+`;
+
+/** ラーメン（白×エンジ・シズルヒーロー・メニュー写真・余白・食欲訴求） */
+const RAMEN_TEMPLATE_CSS = `
+  .page-wrapper.template-ramen { --ramen-red: #8B2E2E; --ramen-red-dark: #6b2222; --ramen-red-soft: #f8eeee; --tp-bg: #fff; --tp-heading: #1a1a1a; --tp-text: #333; --tp-accent: var(--ramen-red); --tp-border: rgba(139,46,46,0.15); --tp-bg-footer: var(--ramen-red); --hero-min-h: 70vh; background: var(--tp-bg); color: var(--tp-text); font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .page-wrapper.template-ramen .container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+  .page-wrapper.template-ramen header { position: sticky; top: 0; z-index: 100; padding: 12px 0; background: #fff; border-bottom: 2px solid var(--ramen-red); }
+  .page-wrapper.template-ramen .logo { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.04em; color: var(--ramen-red); text-decoration: none; }
+  .page-wrapper.template-ramen .nav { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; }
+  .page-wrapper.template-ramen .nav-link { font-size: 0.8125rem; font-weight: 600; color: #333; text-decoration: none; }
+  .page-wrapper.template-ramen .nav-link:hover { color: var(--ramen-red); }
+  .page-wrapper.template-ramen .cta-btn { background: var(--ramen-red); color: #fff; border: none; padding: 12px 24px; min-height: 44px; font-size: 0.875rem; font-weight: 700; border-radius: 8px; }
+  .page-wrapper.template-ramen .cta-btn:hover { background: var(--ramen-red-dark); color: #fff; }
+  .page-wrapper.template-ramen .ramen-hero { min-height: var(--hero-min-h); }
+  .page-wrapper.template-ramen .ramen-hero .hero-bg-overlay { background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.5) 100%); }
+  .page-wrapper.template-ramen .ramen-hero .hero-inner h1 { font-size: clamp(1.5rem, 4.5vw, 2.1rem); font-weight: 800; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); line-height: 1.35; }
+  .page-wrapper.template-ramen .ramen-hero .hero-inner .subheadline { color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-top: 0.75rem; text-shadow: 0 1px 10px rgba(0,0,0,0.4); }
+  .page-wrapper.template-ramen .ramen-hero .cta-btn-primary { background: var(--ramen-red); color: #fff; }
+  .page-wrapper.template-ramen .ramen-hero .cta-btn-primary:hover { background: var(--ramen-red-dark); color: #fff; }
+  .page-wrapper.template-ramen .section h2 { font-size: 1.15rem; font-weight: 800; color: var(--ramen-red); margin: 0 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--tp-border); }
+  .page-wrapper.template-ramen .section p { font-size: 0.9375rem; line-height: 1.8; margin: 0 0 1rem; color: var(--tp-text); }
+  .page-wrapper.template-ramen .section-rhythm-after-hero { padding-top: 2.5rem; padding-bottom: 2rem; }
+  .page-wrapper.template-ramen .section-rhythm-default { padding-top: 2rem; padding-bottom: 2rem; }
+  .page-wrapper.template-ramen .section-rhythm-before-footer { padding-top: 2rem; padding-bottom: 2.5rem; }
+  .page-wrapper.template-ramen .section-img-wrap { border-radius: 12px; overflow: hidden; margin-bottom: 1rem; box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+  .page-wrapper.template-ramen .ramen-menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; }
+  @media (min-width: 560px) { .page-wrapper.template-ramen .ramen-menu-grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; } }
+  .page-wrapper.template-ramen .ramen-menu-item { background: #fff; border: 1px solid var(--tp-border); border-radius: 12px; overflow: hidden; }
+  .page-wrapper.template-ramen .ramen-menu-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .page-wrapper.template-ramen .ramen-menu-item .ramen-menu-body { padding: 0.75rem; }
+  .page-wrapper.template-ramen .ramen-menu-item .ramen-menu-name { font-weight: 700; color: var(--tp-heading); font-size: 0.9rem; margin: 0 0 0.25rem; }
+  .page-wrapper.template-ramen .ramen-menu-item .ramen-menu-price { font-weight: 800; color: var(--ramen-red); font-size: 0.95rem; }
+  .page-wrapper.template-ramen .ramen-map-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-ramen footer { padding: 2rem 0; background: var(--tp-bg-footer); color: #fff; border-top: none; }
+  .page-wrapper.template-ramen footer .footer-brand { color: #fff; font-weight: 800; }
+  .page-wrapper.template-ramen footer p, .page-wrapper.template-ramen footer .footer-link { color: rgba(255,255,255,0.92); }
+  .page-wrapper.template-ramen .footer-legal { border-top-color: rgba(255,255,255,0.2); }
 `;
 
 /** 整骨院・整体・鍼灸用（悩み→選ばれる理由→実績→図解・透明感・視認性） */
@@ -466,8 +525,8 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'professional',
     '士業',
-    'ネイビー・白の整然としたグリッド',
-    GENERIC_TEMPLATE_CSS
+    'ネイビー×白・オレンジCTA・流れ・実績数字・曲線で親しみやすく',
+    PROFESSIONAL_TEMPLATE_CSS
   ),
   makeTemplate(
     'cram_school',
@@ -498,5 +557,11 @@ export const TEMPLATES: TemplateOption[] = [
     'イベント',
     'フェス・セミナー・ワークショップ・お申し込み',
     GENERIC_TEMPLATE_CSS
+  ),
+  makeTemplate(
+    'ramen',
+    'ラーメン',
+    '白×エンジ・シズルヒーロー・お品書き・こだわり・店舗',
+    RAMEN_TEMPLATE_CSS
   ),
 ];

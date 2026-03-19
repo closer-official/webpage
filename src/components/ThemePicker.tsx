@@ -15,12 +15,13 @@ const PREVIEW_BG: Record<string, string> = {
   clinic_chiropractic: '#FAFAFA',
   gym_yoga: '#FAFAFA',
   builder: '#fff',
-  professional: '#FAFAFA',
+  professional: '#f4f8fc',
   cram_school: '#FAFAFA',
   izakaya: '#FAFAFA',
   pet_salon: '#FAF8F5',
   apparel: '#FAFAFA',
   event: '#FAFAFA',
+  ramen: '#f8eeee',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -29,12 +30,13 @@ const PREVIEW_COLOR: Record<string, string> = {
   clinic_chiropractic: '#111',
   gym_yoga: '#111',
   builder: '#111',
-  professional: '#111',
+  professional: '#1a2744',
   cram_school: '#111',
   izakaya: '#111',
   pet_salon: '#4a8f82',
   apparel: '#111',
   event: '#111',
+  ramen: '#8B2E2E',
 };
 
 export function ThemePicker({

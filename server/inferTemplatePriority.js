@@ -13,6 +13,7 @@ const RULES = [
   { style: 'builder', re: /工務店|リノベ|施工|建築|ハウスメーカー|builder|renovation/i },
   { style: 'professional', re: /税理士|行政書士|社労士|弁護士|コンサル|consulting|税理|法律|lawyer|士業|会計|不動産|real_estate|保険|insurance/i },
   { style: 'cram_school', re: /塾|習い事|教室|予備校|保育|幼稚園|キッズ|preschool|nursery|教育/i },
+  { style: 'ramen', re: /ラーメン|らーめん|ramen|つけ麺|油そば|支那そば|中華そば/i },
   { style: 'izakaya', re: /居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge/i },
   { style: 'pet_salon', re: /ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i },
   { style: 'apparel', re: /アパレル|服|ファッション|cloth|apparel|fashion|ブティック|boutique|ブランド|brand/i },

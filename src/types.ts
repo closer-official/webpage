@@ -74,6 +74,12 @@ export interface PageContent {
   petServiceItems?: { icon: string; title: string; body: string }[];
   /** ペットサロンテンプレ：注意・規約（アコーディオンで畳んで表示） */
   petPolicyItems?: { title: string; body: string }[];
+  /** 士業テンプレ：ヒーロー直下の強みチップ（例: 初回相談無料） */
+  proTrustBullets?: string[];
+  /** 士業テンプレ：ご相談からの流れ（ステップ番号・見出し・本文） */
+  proStepItems?: { step: string; title: string; body: string }[];
+  /** 士業テンプレ：業務内容・サービス一覧（アイコン・見出し・本文） */
+  proServiceItems?: { icon: string; title: string; body: string }[];
 }
 
 /** SEO用データ */
@@ -88,7 +94,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 11種類テンプレートID（業種別） */
+/** 12種類テンプレートID（業種別） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -100,7 +106,8 @@ export type StyleId =
   | 'izakaya'            // 8. こだわり居酒屋・バー
   | 'pet_salon'          // 9. ペットサロン・ドッグ
   | 'apparel'            // 10. アパレル
-  | 'event';             // 11. イベント
+  | 'event'              // 11. イベント
+  | 'ramen';             // 12. ラーメン
 
 /** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -149,6 +156,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'pet_salon', name: 'ペットサロン・ドッグ' },
   { id: 'apparel', name: 'アパレル' },
   { id: 'event', name: 'イベント' },
+  { id: 'ramen', name: 'ラーメン' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---
