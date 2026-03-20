@@ -197,7 +197,7 @@ function App() {
 
         {tab === 'design' && (
           <section className="tab-content">
-            <DesignCheckPanel />
+            <DesignCheckPanel onGoDashboard={() => setTab('dashboard')} />
           </section>
         )}
 

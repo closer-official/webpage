@@ -84,7 +84,12 @@ const PREVIEW_COLOR: Record<string, string> = {
   blueprint: '#f4f4f1',
 };
 
-export function DesignCheckPanel() {
+export interface DesignCheckPanelProps {
+  /** 案件LPのクリック編集へ誘導（ダッシュボードタブへ切り替え） */
+  onGoDashboard?: () => void;
+}
+
+export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) {
   const [candidates, setCandidates] = useState<TemplateCandidate[]>([]);
   const [selectedId, setSelectedId] = useState<string>(TEMPLATES[0]?.id || 'salon_barber');
   const [name, setName] = useState('');
@@ -391,7 +396,7 @@ export function DesignCheckPanel() {
       <p className="design-step-desc">
         参考URLから<strong>新規専用の設計ブループリント</strong>（構成・余白・タイポ・配色の数値）を生成します。既存の美容室テンプレ等には当てず、別レイアウトでプレビュー・保存します。文章・写真はオリジナル素材です。
       </p>
-      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1.2fr 1fr' }}>
+      <div className="design-check-panel-grid">
         <div>
           <ul className="design-list" aria-label="デザインパターン一覧">
             {resolvedCandidates.map((tpl, i) => (
@@ -430,6 +435,20 @@ export function DesignCheckPanel() {
           </ul>
         </div>
         <div style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
+          <div className="design-check-panel-callout" role="note">
+            <strong>LPのクリック編集</strong>（タップで文言・色・画像URLなど）は、上部の「
+            <strong>ダッシュボード</strong>」タブ → 該当案件の「<strong>プレビューを編集</strong>」から行います。
+            <br />
+            この「デザイン確認」ではテンプレ選択・色・見出しの入力と、完成イメージの<strong>別タブ表示</strong>のみです。
+          </div>
+          {onGoDashboard && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+              <button type="button" className="secondary" onClick={onGoDashboard}>
+                ダッシュボードへ（案件の編集）
+              </button>
+              <span className="design-check-panel-hint">編集画面が見つからないときはこちら</span>
+            </div>
+          )}
           <label>
             参考URL（任意・自動抽出）
             <input
@@ -451,7 +470,9 @@ export function DesignCheckPanel() {
           </div>
           <label>アクセント色<input value={accent} onChange={(e) => setAccent(e.target.value)} placeholder="#b8956f" /></label>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
-            <button type="button" onClick={openPreview}>プレビューを開く</button>
+            <button type="button" onClick={openPreview}>
+              プレビューを別タブで開く
+            </button>
             <button type="button" onClick={saveAsDraft} disabled={!isApiAvailable()}>
               下書き保存
             </button>
