@@ -50,6 +50,12 @@ export function renderCustomerIntakePage() {
       color: var(--text-muted);
       font-size: .92rem;
     }
+    .section-title {
+      margin: 26px 0 10px;
+      font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+      font-size: 1.08rem;
+      font-weight: 600;
+    }
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
     .full { grid-column: 1 / -1; }
     label { font-size:.9rem; font-weight:700; display:block; margin:0 0 6px; color: var(--text); }
@@ -98,9 +104,40 @@ export function renderCustomerIntakePage() {
     .err { color:#8f4f48; font-size:.9rem; }
     .footer-link { margin-top: 20px; font-size: .88rem; color: var(--text-muted); }
     .footer-link a { color: var(--sage); text-underline-offset: 2px; }
+    .chips { display:flex; flex-wrap: wrap; gap:8px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: var(--bg-base);
+      color: var(--text);
+      cursor: pointer;
+      font-size: .9rem;
+    }
+    .chip input { width: auto; margin: 0; accent-color: var(--terracotta); }
+    .style-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .style-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: var(--bg-base);
+      cursor: pointer;
+    }
+    .style-card input { width: auto; margin-right: 6px; accent-color: var(--terracotta); }
+    .style-card .ttl { font-weight: 700; }
+    .style-card .sub { color: var(--text-muted); font-size: .84rem; line-height: 1.6; margin-top: 4px; }
+    .style-card a { color: var(--sage); font-size: .82rem; text-underline-offset: 2px; }
     @media (max-width: 680px) {
       .wrap { padding-top: 48px; }
       .grid { grid-template-columns: 1fr; }
+      .style-cards { grid-template-columns: 1fr; }
       .card { padding: 18px; }
     }
   </style>
@@ -114,6 +151,7 @@ export function renderCustomerIntakePage() {
       <p class="micro-copy">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
 
       <form id="intake-form" novalidate>
+        <p class="section-title">基本情報</p>
         <div class="grid">
           <div>
             <label for="storeName">店舗名 / 事業名 *</label>
@@ -149,12 +187,78 @@ export function renderCustomerIntakePage() {
             <input id="referralCode" name="referralCode" maxlength="200" placeholder="お持ちの場合のみ入力" />
           </div>
           <div class="full">
-            <label for="requestSummary">ご要望・掲載したい内容 *</label>
-            <textarea id="requestSummary" name="requestSummary" required maxlength="5000" placeholder="例）ターゲット、雰囲気、掲載したいメニュー、営業時間、住所、予約導線など"></textarea>
+            <label for="websiteGoal">Webサイトの最大の目的 *</label>
+            <select id="websiteGoal" name="websiteGoal" required>
+              <option value="">選択してください</option>
+              <option value="business_card">名刺代わり</option>
+              <option value="sales">商品の販売</option>
+              <option value="inquiry">お問い合わせの増加</option>
+              <option value="recruit">採用強化</option>
+              <option value="other">その他</option>
+            </select>
           </div>
           <div class="full">
-            <label for="references">参考サイト / SNS（任意）</label>
-            <textarea id="references" name="references" maxlength="5000" placeholder="URLを改行で入力"></textarea>
+            <label for="targetAudience">メインターゲット層 *</label>
+            <textarea id="targetAudience" name="targetAudience" required maxlength="3000" placeholder="例）30代女性、仕事と育児で疲れていて、短時間で効果を感じたい人"></textarea>
+          </div>
+          <div class="full">
+            <label>デザインの希望テイスト（複数選択可）*</label>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" name="designTaste" value="シンプル">シンプル</label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="高級感">高級感</label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="ポップ">ポップ</label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="スタイリッシュ">スタイリッシュ</label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="親しみやすい">親しみやすい</label>
+            </div>
+          </div>
+          <div class="full">
+            <label for="mainColor">コーポレートカラー / 希望メインカラー *</label>
+            <input id="mainColor" name="mainColor" required maxlength="120" placeholder="例）ネイビー＋ゴールド、くすみグリーン など" />
+          </div>
+          <div class="full">
+            <label>一番近い雰囲気（サンプルから1つ選択）*</label>
+            <div class="style-cards">
+              <label class="style-card">
+                <div><input type="radio" name="styleSample" value="A_シンプル編集系" required><span class="ttl">A. シンプル編集系</span></div>
+                <p class="sub">余白多め、文字で魅せる。落ち着いた信頼感。</p>
+                <a href="https://www.apple.com/jp" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
+              </label>
+              <label class="style-card">
+                <div><input type="radio" name="styleSample" value="B_高級感ミニマル" required><span class="ttl">B. 高級感ミニマル</span></div>
+                <p class="sub">少ない色数、上質な写真、静かな高級感。</p>
+                <a href="https://www.muji.com/jp/ja/" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
+              </label>
+              <label class="style-card">
+                <div><input type="radio" name="styleSample" value="C_親しみナチュラル" required><span class="ttl">C. 親しみナチュラル</span></div>
+                <p class="sub">やわらかい色、温度感のあるトーン。</p>
+                <a href="https://note.com" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
+              </label>
+              <label class="style-card">
+                <div><input type="radio" name="styleSample" value="D_シャープスタイリッシュ" required><span class="ttl">D. シャープスタイリッシュ</span></div>
+                <p class="sub">直線的でスピード感のあるレイアウト。</p>
+                <a href="https://www.notion.so/ja-jp/product/websites" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
+              </label>
+            </div>
+          </div>
+          <div class="full">
+            <label for="styleDetail">「もっとこうしてほしい」があれば（任意）</label>
+            <textarea id="styleDetail" name="styleDetail" maxlength="3000" placeholder="例）Aが近いが、文字はもう少し太め。写真は暖色寄りにしたい"></textarea>
+          </div>
+          <div class="full">
+            <label for="favoriteSiteUrl">参考にしたい / 好きな雰囲気のWebサイトURL *</label>
+            <textarea id="favoriteSiteUrl" name="favoriteSiteUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）"></textarea>
+          </div>
+          <div class="full">
+            <label for="mustHaveContent">絶対に載せたいコンテンツ *</label>
+            <textarea id="mustHaveContent" name="mustHaveContent" required maxlength="5000" placeholder="例）事業内容、料金表、実績、代表挨拶、SNSリンク"></textarea>
+          </div>
+          <div class="full">
+            <label for="currentActivityUrl">現在の活動がわかるURL（SNS / YouTube / 既存資料など）*</label>
+            <textarea id="currentActivityUrl" name="currentActivityUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）"></textarea>
+          </div>
+          <div class="full">
+            <label for="requestSummary">その他ご要望・補足（任意）</label>
+            <textarea id="requestSummary" name="requestSummary" maxlength="5000" placeholder="運用面の希望、納期感、NG表現など"></textarea>
           </div>
         </div>
         <p class="note">※ 送信内容は制作の事前確認にのみ利用します。紹介コードの照合・ご案内は運営側で手動対応します。</p>
@@ -189,10 +293,23 @@ export function renderCustomerIntakePage() {
           contactValue: form.contactValue.value.trim(),
           plan: form.plan.value,
           referralCode: form.referralCode.value.trim(),
+          websiteGoal: form.websiteGoal.value,
+          targetAudience: form.targetAudience.value.trim(),
+          designTastes: Array.prototype.slice.call(form.querySelectorAll('input[name="designTaste"]:checked')).map(function (el) { return el.value; }),
+          mainColor: form.mainColor.value.trim(),
+          styleSample: (form.querySelector('input[name="styleSample"]:checked') || {}).value || '',
+          styleDetail: form.styleDetail.value.trim(),
+          favoriteSiteUrl: form.favoriteSiteUrl.value.trim(),
+          mustHaveContent: form.mustHaveContent.value.trim(),
+          currentActivityUrl: form.currentActivityUrl.value.trim(),
           requestSummary: form.requestSummary.value.trim(),
-          references: form.references.value.trim(),
           pageUrl: window.location.href
         };
+        if (!payload.designTastes.length) {
+          ng.textContent = 'デザインの希望テイストを1つ以上選択してください。';
+          btn.disabled = false;
+          return;
+        }
 
         fetch('/api/customer-intake', {
           method: 'POST',

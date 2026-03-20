@@ -137,7 +137,20 @@ app.get(['/customer-intake', '/api/customer-intake'], (req, res) => {
 
 app.post('/api/customer-intake', async (req, res) => {
   const body = req.body || {};
-  const required = ['storeName', 'contactName', 'contactMethod', 'contactValue', 'plan', 'requestSummary'];
+  const required = [
+    'storeName',
+    'contactName',
+    'contactMethod',
+    'contactValue',
+    'plan',
+    'websiteGoal',
+    'targetAudience',
+    'mainColor',
+    'styleSample',
+    'favoriteSiteUrl',
+    'mustHaveContent',
+    'currentActivityUrl',
+  ];
   for (const k of required) {
     if (!String(body[k] || '').trim()) return res.status(400).json({ error: `${k} is required` });
   }
@@ -146,6 +159,10 @@ app.post('/api/customer-intake', async (req, res) => {
   }
   if (!['email', 'line', 'phone'].includes(String(body.contactMethod))) {
     return res.status(400).json({ error: 'contactMethod must be email/line/phone' });
+  }
+  const designTastes = Array.isArray(body.designTastes) ? body.designTastes.map((v) => String(v).trim()).filter(Boolean) : [];
+  if (designTastes.length === 0) {
+    return res.status(400).json({ error: 'designTastes is required' });
   }
 
   const list = await store.getCustomerIntake();
@@ -157,8 +174,16 @@ app.post('/api/customer-intake', async (req, res) => {
     contactValue: String(body.contactValue || '').trim().slice(0, 160),
     plan: String(body.plan || '').trim(),
     referralCode: String(body.referralCode || '').trim().slice(0, 200),
+    websiteGoal: String(body.websiteGoal || '').trim().slice(0, 120),
+    targetAudience: String(body.targetAudience || '').trim().slice(0, 3000),
+    designTastes: designTastes.slice(0, 20),
+    mainColor: String(body.mainColor || '').trim().slice(0, 120),
+    styleSample: String(body.styleSample || '').trim().slice(0, 120),
+    styleDetail: String(body.styleDetail || '').trim().slice(0, 3000),
+    favoriteSiteUrl: String(body.favoriteSiteUrl || '').trim().slice(0, 5000),
+    mustHaveContent: String(body.mustHaveContent || '').trim().slice(0, 5000),
+    currentActivityUrl: String(body.currentActivityUrl || '').trim().slice(0, 5000),
     requestSummary: String(body.requestSummary || '').trim().slice(0, 5000),
-    references: String(body.references || '').trim().slice(0, 5000),
     pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
     status: 'new',
     createdAt: new Date().toISOString(),
