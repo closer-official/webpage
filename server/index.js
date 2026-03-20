@@ -893,6 +893,26 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   res.json(dashboard[i]);
 });
 
+/** 案件を複製（個別向け調整用）。元の案件はそのまま。 */
+app.post('/api/dashboard/:id/duplicate', async (req, res) => {
+  const dashboard = await store.getDashboard();
+  const i = dashboard.findIndex((d) => d.id === req.params.id);
+  if (i === -1) return res.status(404).json({ error: 'Not found' });
+  const src = dashboard[i];
+  const label = String(req.body?.personalizationLabel || '')
+    .trim()
+    .slice(0, 120);
+  const newItem = JSON.parse(JSON.stringify(src));
+  newItem.id = `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  newItem.createdAt = new Date().toISOString();
+  newItem.status = 'pending';
+  newItem.personalizationLabel = label || undefined;
+  newItem.viewCount = 0;
+  dashboard.unshift(newItem);
+  await store.setDashboard(dashboard);
+  res.status(201).json(newItem);
+});
+
 app.post('/api/dashboard/:id/approve', async (req, res) => {
   const dashboard = await store.getDashboard();
   const i = dashboard.findIndex((d) => d.id === req.params.id);

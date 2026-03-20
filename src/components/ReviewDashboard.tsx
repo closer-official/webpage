@@ -116,6 +116,11 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                 </div>
                 <div className="review-col review-center">
                   <h4>LPプレビュー</h4>
+                  {item.personalizationLabel && (
+                    <p className="review-personal-badge" aria-label="個別案用">
+                      個別: {item.personalizationLabel}
+                    </p>
+                  )}
                   {variants && variants.length > 1 && (
                     <select
                       className="variant-select"

@@ -370,6 +370,14 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  /** 個別向けに案件を複製（一覧先頭に追加・元は変更しない） */
+  duplicateDashboardItem: (id: string, body?: { personalizationLabel?: string }) =>
+    fetchApi<unknown>(`/api/dashboard/${id}/duplicate`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(body || {}),
+    }),
+
   getLearningIndustries: () => fetchApi<string[]>('/api/learning/industries'),
   startLearning: (industry: string, maxResults?: number) =>
     fetchApi<{ status: string }>('/api/learning/start', { method: 'POST', body: JSON.stringify({ industry, maxResults: maxResults ?? 60 }) }),

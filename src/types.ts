@@ -265,6 +265,8 @@ export interface DashboardItem {
   previewEditCss?: string;
   /** 3案LPのときの各テンプレHTML（保存時に再生成される） */
   contentVariants?: { templateId: string; html: string }[];
+  /** マスターから「個別用に複製」したときのメモ（例: A社向け） */
+  personalizationLabel?: string;
 }
 
 /** AI利用上限（将来AI組み込み時に、上限に達したら処理を止める用） */

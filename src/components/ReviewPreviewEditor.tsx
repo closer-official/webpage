@@ -3,7 +3,7 @@ import type { PageContent, SEOData, StyleOverrides } from '../types';
 import { TEMPLATES } from '../lib/templates';
 import { buildHtml } from '../lib/buildHtml';
 import { api, isApiAvailable } from '../lib/api';
-import { updateDashboardItem } from '../lib/queueStorage';
+import { updateDashboardItem, duplicateDashboardItem } from '../lib/queueStorage';
 import {
   injectPreviewEditCss,
   injectEditModeOutline,
@@ -196,6 +196,27 @@ export function ReviewPreviewEditor({
     }
   }, [selectedPe, draftContent]);
 
+  const duplicateForPersonal = useCallback(async () => {
+    const label = window.prompt(
+      '個別案用のメモ（例: A社向け・〇〇様向け）。空のままでも複製できます。',
+      ''
+    );
+    if (label === null) return;
+    try {
+      if (useApi && isApiAvailable()) {
+        await api.duplicateDashboardItem(itemId, { personalizationLabel: label.trim() });
+      } else {
+        duplicateDashboardItem(itemId, label.trim());
+      }
+      onSaved();
+      window.alert(
+        '一覧の先頭に「個別用の複製」を追加しました。元の案件はそのままです。「プレビューを編集」で本文・色を調整してください。'
+      );
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : '複製に失敗しました');
+    }
+  }, [itemId, useApi, onSaved]);
+
   const startEdit = useCallback(() => {
     setDraftContent(JSON.parse(JSON.stringify(initialContent)));
     setDraftSeo(JSON.parse(JSON.stringify(initialSeo)));
@@ -318,9 +339,19 @@ export function ReviewPreviewEditor({
     <div className="review-preview-editor">
       <div className="review-preview-toolbar">
         {!editing ? (
-          <button type="button" className="small review-edit-start" onClick={startEdit}>
-            プレビューを編集
-          </button>
+          <>
+            <button type="button" className="small review-edit-start" onClick={startEdit}>
+              プレビューを編集
+            </button>
+            <button
+              type="button"
+              className="small review-duplicate-personal"
+              onClick={duplicateForPersonal}
+              title="この案件のコピーを先頭に作り、宛先ごとに文言だけ変える用途向け（元の案件は変更されません）"
+            >
+              個別用に複製
+            </button>
+          </>
         ) : (
           <>
             <button type="button" className="small primary" onClick={handleSave}>
@@ -344,7 +375,7 @@ export function ReviewPreviewEditor({
       <p className="review-edit-hint">
         {editing
           ? 'プレビュー内の枠付き要素をクリックして選択。右パネルで色（RGB）・文字サイズ・本文を変更できます。'
-          : '「編集」で本文・色・画像URLをリアルタイム調整し、「保存」で案件に上書き保存します。'}
+          : '「プレビューを編集」＝この案件を直接更新。「個別用に複製」＝コピーを別案件にして A 社向けなどに文言だけ変える（レイアウト変更はテンプレコード側）。'}
       </p>
       <div className="review-preview-editor-body">
         <div className="review-preview-wrap review-preview-wrap--tall">

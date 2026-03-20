@@ -78,8 +78,8 @@ main, header, footer, section, article, .container, .header-inner, .hero-inner, 
     min-height: min(88dvh, 720px);
   }
   .hell-hero-parallax {
-    background-size: cover !important;
-    background-position: center center !important;
+    background-size: cover;
+    background-position: center center;
   }
   .pro-svc-grid,
   .pet-service-list,
@@ -102,25 +102,25 @@ main, header, footer, section, article, .container, .header-inner, .hero-inner, 
   .gym-hero-inner h1,
   .pro-hero .hero-inner h1,
   h1.builder-hero-title {
-    font-size: clamp(1.25rem, 5.2vw, 2.25rem) !important;
-    line-height: 1.18 !important;
+    font-size: clamp(1.25rem, 5.2vw, 2.25rem);
+    line-height: 1.18;
   }
   h2.wo-sec-heading,
   h2.salon-sec-title,
   .wo-lede-heading,
   .pet-sec-title {
-    font-size: clamp(1.05rem, 4vw, 1.75rem) !important;
+    font-size: clamp(1.05rem, 4vw, 1.75rem);
   }
   .subheadline,
   .builder-hero-catchphrase {
-    font-size: clamp(0.85rem, 3.2vw, 1.05rem) !important;
+    font-size: clamp(0.85rem, 3.2vw, 1.05rem);
   }
   table { font-size: 0.88rem; }
   .cta-btn,
   .cta-btn-primary,
   .cta-block .cta-btn {
-    padding: 0.65em 1em !important;
-    font-size: clamp(0.75rem, 3.2vw, 0.95rem) !important;
+    padding: 0.65em 1em;
+    font-size: clamp(0.75rem, 3.2vw, 0.95rem);
   }
   .pro-sticky-cta,
   .gym-sticky-cta,
@@ -152,7 +152,7 @@ body.bp-dark .bp-hero-grid-dark {
 @media (max-width: 899px) {
   body.bp .bp-hero-grid,
   body.bp-dark .bp-hero-grid-dark {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr;
   }
 }
 `;

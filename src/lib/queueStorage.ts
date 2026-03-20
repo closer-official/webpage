@@ -71,3 +71,19 @@ export function updateDashboardItem(
   const list = getDashboard().map((x) => (x.id === id ? { ...x, ...patch } : x));
   setDashboard(list);
 }
+
+/** 同じLP内容を複製し、個別向け調整用の別案件として先頭に追加する */
+export function duplicateDashboardItem(id: string, personalizationLabel?: string): DashboardItem | null {
+  const list = getDashboard();
+  const src = list.find((x) => x.id === id);
+  if (!src) return null;
+  const newItem: DashboardItem = JSON.parse(JSON.stringify(src));
+  newItem.id = `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  newItem.createdAt = new Date().toISOString();
+  newItem.status = 'pending';
+  newItem.personalizationLabel = personalizationLabel?.trim() || undefined;
+  newItem.viewCount = 0;
+  list.unshift(newItem);
+  setDashboard(list);
+  return newItem;
+}
