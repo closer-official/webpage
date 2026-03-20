@@ -16,6 +16,7 @@ import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
+import { isValidTemplateId, renderTemplatePreview } from './templatePreview.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -135,6 +136,18 @@ app.get(['/customer-intake', '/api/customer-intake'], (req, res) => {
   res.send(renderCustomerIntakePage());
 });
 
+app.get('/api/template-preview/:templateId', (req, res) => {
+  const templateId = String(req.params.templateId || '');
+  if (!isValidTemplateId(templateId)) {
+    return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
+  }
+  const html = renderTemplatePreview(templateId);
+  if (!html) return res.status(500).json({ error: 'failed to render preview' });
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'private, max-age=60');
+  res.send(html);
+});
+
 app.post('/api/customer-intake', async (req, res) => {
   const body = req.body || {};
   const required = [
@@ -146,7 +159,7 @@ app.post('/api/customer-intake', async (req, res) => {
     'websiteGoal',
     'targetAudience',
     'mainColor',
-    'styleSample',
+    'chosenTemplateId',
     'favoriteSiteUrl',
     'mustHaveContent',
     'currentActivityUrl',
@@ -164,6 +177,9 @@ app.post('/api/customer-intake', async (req, res) => {
   if (designTastes.length === 0) {
     return res.status(400).json({ error: 'designTastes is required' });
   }
+  if (!isValidTemplateId(body.chosenTemplateId)) {
+    return res.status(400).json({ error: 'chosenTemplateId is invalid' });
+  }
 
   const list = await store.getCustomerIntake();
   const row = {
@@ -178,7 +194,7 @@ app.post('/api/customer-intake', async (req, res) => {
     targetAudience: String(body.targetAudience || '').trim().slice(0, 3000),
     designTastes: designTastes.slice(0, 20),
     mainColor: String(body.mainColor || '').trim().slice(0, 120),
-    styleSample: String(body.styleSample || '').trim().slice(0, 120),
+    chosenTemplateId: String(body.chosenTemplateId || '').trim().slice(0, 120),
     styleDetail: String(body.styleDetail || '').trim().slice(0, 3000),
     favoriteSiteUrl: String(body.favoriteSiteUrl || '').trim().slice(0, 5000),
     mustHaveContent: String(body.mustHaveContent || '').trim().slice(0, 5000),

@@ -1,4 +1,13 @@
+import { TEMPLATE_CANDIDATES } from './templatePreview.js';
+
 export function renderCustomerIntakePage() {
+  const templateCards = TEMPLATE_CANDIDATES.map(
+    (t) => `<label class="style-card">
+      <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl">${t.name}</span></div>
+      <p class="sub">既存のテンプレページを別タブで確認できます。</p>
+      <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer">このテンプレをプレビュー</a>
+    </label>`
+  ).join('');
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -216,28 +225,9 @@ export function renderCustomerIntakePage() {
             <input id="mainColor" name="mainColor" required maxlength="120" placeholder="例）ネイビー＋ゴールド、くすみグリーン など" />
           </div>
           <div class="full">
-            <label>一番近い雰囲気（サンプルから1つ選択）*</label>
+            <label>テンプレ候補（今あるテンプレページから1つ選択）*</label>
             <div class="style-cards">
-              <label class="style-card">
-                <div><input type="radio" name="styleSample" value="A_シンプル編集系" required><span class="ttl">A. シンプル編集系</span></div>
-                <p class="sub">余白多め、文字で魅せる。落ち着いた信頼感。</p>
-                <a href="https://www.apple.com/jp" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
-              </label>
-              <label class="style-card">
-                <div><input type="radio" name="styleSample" value="B_高級感ミニマル" required><span class="ttl">B. 高級感ミニマル</span></div>
-                <p class="sub">少ない色数、上質な写真、静かな高級感。</p>
-                <a href="https://www.muji.com/jp/ja/" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
-              </label>
-              <label class="style-card">
-                <div><input type="radio" name="styleSample" value="C_親しみナチュラル" required><span class="ttl">C. 親しみナチュラル</span></div>
-                <p class="sub">やわらかい色、温度感のあるトーン。</p>
-                <a href="https://note.com" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
-              </label>
-              <label class="style-card">
-                <div><input type="radio" name="styleSample" value="D_シャープスタイリッシュ" required><span class="ttl">D. シャープスタイリッシュ</span></div>
-                <p class="sub">直線的でスピード感のあるレイアウト。</p>
-                <a href="https://www.notion.so/ja-jp/product/websites" target="_blank" rel="noopener noreferrer">参考サイトを見る</a>
-              </label>
+              ${templateCards}
             </div>
           </div>
           <div class="full">
@@ -297,7 +287,7 @@ export function renderCustomerIntakePage() {
           targetAudience: form.targetAudience.value.trim(),
           designTastes: Array.prototype.slice.call(form.querySelectorAll('input[name="designTaste"]:checked')).map(function (el) { return el.value; }),
           mainColor: form.mainColor.value.trim(),
-          styleSample: (form.querySelector('input[name="styleSample"]:checked') || {}).value || '',
+          chosenTemplateId: (form.querySelector('input[name="chosenTemplateId"]:checked') || {}).value || '',
           styleDetail: form.styleDetail.value.trim(),
           favoriteSiteUrl: form.favoriteSiteUrl.value.trim(),
           mustHaveContent: form.mustHaveContent.value.trim(),
