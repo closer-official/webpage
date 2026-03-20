@@ -1,4 +1,5 @@
 import { buildHtml } from './buildHtml.js';
+import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 
 export const TEMPLATE_CANDIDATES = [
   { id: 'salon_barber', name: 'テンプレ1（ミニマル）' },
@@ -32,11 +33,14 @@ export function getTemplateCandidates(customizations = [], options = {}) {
     })
     .map((c) => ({
       id: c.id,
-      name: c.name || `カスタムテンプレ (${c.id})`,
+      name: c.blueprint
+        ? c.name || `参考設計テンプレ (${c.id})`
+        : c.name || `カスタムテンプレ (${c.id})`,
       baseTemplateId: c.baseTemplateId,
       customization: c,
       isCustom: true,
       status: c.status || 'published',
+      kind: c.blueprint ? 'blueprint' : 'skin',
     }));
   const builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
   return [...builtin, ...custom];
@@ -102,6 +106,12 @@ function resolveTemplateOverride(customization) {
 }
 
 export function renderTemplatePreview(templateId, customization = null) {
+  const cust = customization && typeof customization === 'object' ? customization : null;
+  if (cust?.blueprint && typeof cust.blueprint === 'object' && cust.blueprint.version === 1) {
+    const ov = resolveTemplateOverride(cust);
+    return renderBlueprintHtml(cust.blueprint, { override: ov });
+  }
+
   const id = String(templateId || '');
   if (!TEMPLATE_IDS.has(id)) return null;
 

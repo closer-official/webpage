@@ -22,11 +22,35 @@ export type AdminAuthStatus = {
   authenticated: boolean;
 };
 
+export type DesignBlueprint = {
+  version: 1;
+  tokens?: {
+    space?: Record<string, number>;
+    colors?: {
+      bg?: string;
+      text?: string;
+      accent?: string;
+      muted?: string;
+      surface?: string;
+      border?: string;
+    };
+    type?: Record<string, string | number>;
+    radius?: Record<string, number>;
+    topColors?: string[];
+  };
+  layout?: Record<string, unknown>;
+  typography?: Record<string, string>;
+  composition?: Record<string, string>;
+  meta?: { sourceUrl?: string; extractedAt?: string; note?: string };
+};
+
 export type TemplateCandidate = {
   id: string;
   name: string;
   baseTemplateId: string;
   isCustom: boolean;
+  /** 参考URLから数値化した新規設計（既存業種テンプレではない） */
+  kind?: 'blueprint' | 'skin';
   /** 下書きは一般のヒアリング候補に出ない */
   status?: 'draft' | 'published';
   customization?: {
@@ -35,6 +59,7 @@ export type TemplateCandidate = {
     baseTemplateId: string;
     status?: 'draft' | 'published';
     sourceUrl?: string;
+    blueprint?: DesignBlueprint;
     override?: {
       headline?: string;
       subheadline?: string;
@@ -55,6 +80,8 @@ export type TemplateCustomization = {
   id: string;
   name: string;
   baseTemplateId: string;
+  /** baseTemplateId === 'blueprint' のとき参考設計の数値ブループリント */
+  blueprint?: DesignBlueprint;
   status?: 'draft' | 'published';
   sourceUrl?: string;
   sourceIntakeId?: string;
@@ -209,6 +236,7 @@ export const api = {
     id?: string;
     name?: string;
     baseTemplateId?: string;
+    blueprint?: DesignBlueprint;
     status?: 'draft' | 'published';
     sourceUrl?: string;
     sourceIntakeId?: string;
@@ -227,9 +255,27 @@ export const api = {
   extractStyleFromUrl: (url: string) =>
     fetchApi<{
       ok: boolean;
+      blueprint: DesignBlueprint;
       fingerprint: StyleFingerprint & { sourceUrl?: string };
       suggestedOverride: { theme?: { bg?: string; text?: string; accent?: string } };
     }>('/api/style-reference/extract', { method: 'POST', body: JSON.stringify({ url }) }),
+  /** 参考設計ブループリントのHTMLプレビュー（管理者Cookie必須） */
+  previewDesignBlueprint: async (body: {
+    blueprint: DesignBlueprint;
+    override?: TemplateCustomization['override'];
+  }) => {
+    const res = await fetch(`${BASE}/api/design-blueprint/preview`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { error?: string }).error || res.statusText);
+    }
+    return res.text();
+  },
   getCustomerIntakeList: () => fetchApi<CustomerIntakeItem[]>('/api/customer-intake-list'),
 
   getOptions: () => fetchApi<GenerationOptions>('/api/options'),

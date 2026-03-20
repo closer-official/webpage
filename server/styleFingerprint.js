@@ -2,10 +2,7 @@
  * 参考URLから「デザイン指紋」（色・フォント候補）を抽出する。
  * HTML/CSSのコピーは行わず、出現頻度の高い色などを抽象化して返す。
  */
-import fetch from 'node-fetch';
-
-const MAX_BYTES = 400_000;
-const TIMEOUT_MS = 12000;
+import { fetchReferenceHtml } from './referenceFetch.js';
 
 function normalizeHex(h) {
   if (!h) return null;
@@ -106,71 +103,47 @@ function suggestTheme(colorList) {
 }
 
 /**
+ * HTML断片から指紋と配色の叩き台を生成（1回の取得結果を再利用する用）
+ * @param {string} html
+ * @param {string} sourceUrl
+ */
+export function buildFingerprintFromHtml(html, sourceUrl) {
+  const colors = extractColorsFromHtml(html);
+  const topColors = pickTop(colors, 14);
+  const suggested = suggestTheme(topColors.length ? topColors : colors);
+
+  const fontMatches = [];
+  const fontRe = /font-family\s*:\s*([^;}"']+)/gi;
+  let fm;
+  while ((fm = fontRe.exec(html))) {
+    const first = fm[1].split(',')[0].trim().replace(/['"]/g, '');
+    if (first && first.length < 80) fontMatches.push(first);
+  }
+
+  const fingerprint = {
+    topColors,
+    sampleFonts: [...new Set(fontMatches)].slice(0, 6),
+    extractedAt: new Date().toISOString(),
+    sourceUrl: String(sourceUrl || '').slice(0, 2000),
+  };
+
+  return {
+    fingerprint,
+    suggestedOverride: {
+      theme: {
+        bg: suggested.bg,
+        text: suggested.text,
+        accent: suggested.accent,
+      },
+    },
+  };
+}
+
+/**
  * @param {string} urlStr
  * @returns {Promise<{ fingerprint: object, suggestedOverride: { theme: { bg: string, text: string, accent: string } } }>}
  */
 export async function extractStyleFingerprintFromUrl(urlStr) {
-  let url;
-  try {
-    url = new URL(String(urlStr).trim());
-  } catch {
-    throw new Error('URLの形式が正しくありません。');
-  }
-  if (!['http:', 'https:'].includes(url.protocol)) {
-    throw new Error('http / https のURLのみ対応しています。');
-  }
-
-  const controller = new AbortController();
-  const tid = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const res = await fetch(url.toString(), {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; CloserStyleBot/1.0; +https://webpage.closer-official.com)',
-        Accept: 'text/html,application/xhtml+xml',
-      },
-    });
-    clearTimeout(tid);
-    if (!res.ok) throw new Error(`取得に失敗しました（HTTP ${res.status}）`);
-
-    const buf = await res.arrayBuffer();
-    const slice = buf.byteLength > MAX_BYTES ? buf.slice(0, MAX_BYTES) : buf;
-    const html = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(slice));
-
-    const colors = extractColorsFromHtml(html);
-    const topColors = pickTop(colors, 14);
-    const suggested = suggestTheme(topColors.length ? topColors : colors);
-
-    const fontMatches = [];
-    const fontRe = /font-family\s*:\s*([^;}"']+)/gi;
-    let fm;
-    while ((fm = fontRe.exec(html))) {
-      const first = fm[1].split(',')[0].trim().replace(/['"]/g, '');
-      if (first && first.length < 80) fontMatches.push(first);
-    }
-
-    const fingerprint = {
-      topColors,
-      sampleFonts: [...new Set(fontMatches)].slice(0, 6),
-      extractedAt: new Date().toISOString(),
-      sourceUrl: url.toString(),
-    };
-
-    return {
-      fingerprint,
-      suggestedOverride: {
-        theme: {
-          bg: suggested.bg,
-          text: suggested.text,
-          accent: suggested.accent,
-        },
-      },
-    };
-  } catch (e) {
-    clearTimeout(tid);
-    if (e.name === 'AbortError') throw new Error('取得がタイムアウトしました。');
-    throw e;
-  }
+  const { url, html } = await fetchReferenceHtml(urlStr);
+  return buildFingerprintFromHtml(html, url.toString());
 }

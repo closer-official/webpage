@@ -1,23 +1,28 @@
-# テンプレ下書き・参考URL抽出
+# 参考URL → 新規設計テンプレ（ブループリント）
 
-## 流れ
+## 方針
 
-1. **参考URL**を管理者画面またはヒアリングフォームに入力する。
-2. サーバーがHTMLを取得し、**色・フォント名の出現傾向**などを抽象化した「スタイル指紋」を作る（第三者サイトのコードや画像のコピーはしない）。
-3. 結果は **`status: draft` のカスタムテンプレ**として保存される。ヒアリングのテンプレ候補には**出ない**。
-4. 管理者がデザイン画面で内容を確認し、**「公開承認」**すると `published` になり、ヒアリング候補に表示される。
+- **既存の美容室・飲食などの業種テンプレに「当てる」ことはしません。**
+- 参考URLのHTMLを取得し、**色・余白（px）・フォントサイズ傾向・セクション数・コンテナ幅・ヒーロー有無・ナビ本数**などを**数値・トークン化**した **設計ブループリント（`version: 1`）** を生成します。
+- 表示は **`buildHtml` / 既存テンプレCSSではなく**、`server/renderBlueprintHtml.js` による**専用レイアウト**です。
+- **文章・写真は参考サイトからコピーしません。** `blueprintContent.js` のオリジナル文言とストック写真で構成します（法的・品質上の分離）。
+
+## 保存形式
+
+- `baseTemplateId: 'blueprint'` かつ `blueprint: { version: 1, ... }` を `templateCustomizations` に保存。
+- 下書き（`status: 'draft'`）はヒアリング候補に出さない。公開承認で `published`。
 
 ## API
 
-- `POST /api/style-reference/extract` — 参考URLから指紋と配色の叩き台（レート制限あり）
-- `POST /api/template-customizations/save` — `status: draft` | `published` を指定可能
-- `POST /api/template-customizations/publish` — 下書きを公開（管理者のみ）
+- `POST /api/style-reference/extract` — `blueprint` + `fingerprint` + `suggestedOverride`（配色の互換用）
+- `POST /api/design-blueprint/preview` — 管理者のみ。ブループリントHTMLを返す（保存不要の確認用）
+- `POST /api/template-customizations/save` — `baseTemplateId: 'blueprint'` のとき `blueprint` 必須
 
-## ヒアリング側
+## ヒアリング
 
-「参考URLからテンプレ下書きを作成」にチェックを入れて送信すると、先頭のURLを解析し下書きテンプレを作成する（失敗時は送信自体は成功し、ログに記録）。
+「参考URLからテンプレ下書き」にチェックすると、**参考設計テンプレ（下書き）** が作成されます（従来の業種ベース上書きではありません）。
 
-## 注意
+## 限界（今後の拡張）
 
-- 解析対象サイトは外部通信のため、**CORS・ブロック・WAF**で取得できない場合があります。
-- 取得は先頭 **約400KB** のHTMLに限定しています。
+- 取得は先頭 **約400KB** のHTMLのみ。外部CSSの全読込・スクリーンショット解析は未実装。
+- レイアウトは**推定**であり、ピクセルパーフェクトではありません。より精密にする場合は、セクションDOMのクラス構造解析や、別途スクリーンショット＋Vision API などのハイブリッドが必要です。

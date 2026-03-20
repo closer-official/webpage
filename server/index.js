@@ -18,7 +18,10 @@ import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
-import { extractStyleFingerprintFromUrl } from './styleFingerprint.js';
+import { fetchReferenceHtml } from './referenceFetch.js';
+import { buildFingerprintFromHtml } from './styleFingerprint.js';
+import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
+import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 
 /** 参考URL抽出の簡易レート制限（メモリ保持・サーバーレスではインスタンス単位） */
 const styleExtractHits = new Map();
@@ -208,6 +211,18 @@ function sanitizeFingerprint(fp) {
   return Object.keys(out).length ? out : undefined;
 }
 
+/** 参考設計ブループリント（JSONサイズ上限あり） */
+function sanitizeBlueprint(bp) {
+  if (!bp || typeof bp !== 'object' || bp.version !== 1) return null;
+  try {
+    const s = JSON.stringify(bp);
+    if (s.length > 120000) return null;
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
+
 // ---------- 管理ページログイン ----------
 app.get('/api/admin-auth/status', (req, res) => {
   const enabled = adminAuthEnabled();
@@ -378,8 +393,10 @@ app.post('/api/style-reference/extract', async (req, res) => {
   const rawUrl = String(req.body?.url || '').trim();
   if (!rawUrl) return res.status(400).json({ error: 'url is required' });
   try {
-    const { fingerprint, suggestedOverride } = await extractStyleFingerprintFromUrl(rawUrl);
-    res.json({ ok: true, fingerprint, suggestedOverride });
+    const { url, html } = await fetchReferenceHtml(rawUrl);
+    const { fingerprint, suggestedOverride } = buildFingerprintFromHtml(html, url.toString());
+    const blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+    res.json({ ok: true, blueprint, fingerprint, suggestedOverride });
   } catch (e) {
     console.error('[style-reference/extract]', e?.message || e);
     res.status(400).json({ error: e?.message || '抽出に失敗しました' });
@@ -406,6 +423,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
       body.status === 'draft' || body.status === 'published'
         ? body.status
         : customizations[i].status || 'published';
+    const nextBp = body.blueprint != null ? sanitizeBlueprint(body.blueprint) : null;
     customizations[i] = {
       ...customizations[i],
       name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
@@ -415,6 +433,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
         ? { sourceUrl: String(body.sourceUrl || '').trim().slice(0, 5000) }
         : {}),
       ...(body.fingerprint != null ? { fingerprint: sanitizeFingerprint(body.fingerprint) } : {}),
+      ...(nextBp ? { blueprint: nextBp } : {}),
       updatedAt: now,
     };
     await store.setTemplateCustomizations(customizations);
@@ -422,7 +441,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
   }
 
   const baseTemplateId = String(body.baseTemplateId || '');
-  if (!isValidTemplateId(baseTemplateId, customizations)) {
+  const blueprint = sanitizeBlueprint(body.blueprint);
+  if (baseTemplateId === 'blueprint') {
+    if (!blueprint) return res.status(400).json({ error: '参考設計テンプレには blueprint が必要です' });
+  } else if (!isValidTemplateId(baseTemplateId, customizations)) {
     return res.status(400).json({ error: 'baseTemplateId is invalid' });
   }
   const id = `custom-${Date.now().toString(36)}`;
@@ -436,6 +458,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
     sourceUrl: String(body.sourceUrl || '').trim().slice(0, 5000) || undefined,
     fingerprint: sanitizeFingerprint(body.fingerprint),
     sourceIntakeId: String(body.sourceIntakeId || '').trim().slice(0, 80) || undefined,
+    ...(blueprint && baseTemplateId === 'blueprint' ? { blueprint } : {}),
     createdAt: now,
     updatedAt: now,
   };
@@ -456,6 +479,24 @@ app.post('/api/template-customizations/publish', async (req, res) => {
   customizations[i] = { ...customizations[i], status: 'published', updatedAt: now };
   await store.setTemplateCustomizations(customizations);
   res.json({ ok: true, item: customizations[i] });
+});
+
+/** 参考設計ブループリントのHTMLプレビュー（管理者のみ・保存不要） */
+app.post('/api/design-blueprint/preview', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const bp = sanitizeBlueprint(req.body?.blueprint);
+  if (!bp) return res.status(400).json({ error: 'invalid blueprint' });
+  try {
+    const html = renderBlueprintHtml(bp, {
+      override: normalizeCustomizationInput(req.body?.override || {}),
+    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'private, max-age=0');
+    res.send(html);
+  } catch (e) {
+    console.error('[design-blueprint/preview]', e);
+    res.status(500).json({ error: 'render failed' });
+  }
 });
 
 app.get('/api/customer-intake-list', async (req, res) => {
@@ -639,17 +680,21 @@ app.post('/api/customer-intake', async (req, res) => {
     if (firstUrl) {
       try {
         const freshCustoms = await store.getTemplateCustomizations();
-        const candidate = findTemplateCandidate(row.chosenTemplateId, freshCustoms);
-        const baseTid = candidate?.baseTemplateId || row.chosenTemplateId;
-        const { fingerprint, suggestedOverride } = await extractStyleFingerprintFromUrl(firstUrl);
+        const { url, html } = await fetchReferenceHtml(firstUrl);
+        const blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+        const { fingerprint } = buildFingerprintFromHtml(html, url.toString());
         const tid = `custom-${Date.now().toString(36)}`;
         const draftItem = {
           id: tid,
-          name: `ヒアリング:${row.storeName}`.slice(0, 80),
-          baseTemplateId: baseTid,
+          name: `参考設計:${row.storeName}`.slice(0, 80),
+          baseTemplateId: 'blueprint',
+          blueprint,
           override: normalizeCustomizationInput({
-            ...suggestedOverride,
-            theme: suggestedOverride.theme,
+            theme: {
+              bg: blueprint.tokens.colors.bg,
+              text: blueprint.tokens.colors.text,
+              accent: blueprint.tokens.colors.accent,
+            },
           }),
           status: 'draft',
           sourceUrl: firstUrl,

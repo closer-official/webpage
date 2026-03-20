@@ -3,7 +3,17 @@ import { TEMPLATES } from '../lib/templates';
 import { buildHtml } from '../lib/buildHtml';
 import type { PageContent, SEOData, BuildHtmlGenOptions } from '../types';
 import { SHOWCASE_BY_STYLE_ID } from '../data/showcasePresets';
-import { api, isApiAvailable, type TemplateCandidate } from '../lib/api';
+import { api, isApiAvailable, type TemplateCandidate, type DesignBlueprint } from '../lib/api';
+
+/** セッション抽出 or 保存済みブループリントを解決（スキンカスタム選択時はブループリントを使わない） */
+function resolveActiveBlueprint(sel: TemplateCandidate | undefined, session: DesignBlueprint | null) {
+  if (sel?.customization?.blueprint && (sel.customization.blueprint as DesignBlueprint).version === 1) {
+    return sel.customization.blueprint as DesignBlueprint;
+  }
+  if (session?.version !== 1) return null;
+  if (sel?.isCustom && sel.baseTemplateId !== 'blueprint') return null;
+  return session;
+}
 
 /** 完成例プレビュー用オプション（問い合わせフォーム・SNS・QRを表示） */
 const SAMPLE_GEN_OPTIONS: BuildHtmlGenOptions = {
@@ -71,6 +81,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   apparel: '#1A1A1A',
   event: '#1A1A1A',
   ramen: '#8B2E2E',
+  blueprint: '#f4f4f1',
 };
 
 export function DesignCheckPanel() {
@@ -84,6 +95,8 @@ export function DesignCheckPanel() {
   const [text, setText] = useState('');
   const [accent, setAccent] = useState('');
   const [refUrl, setRefUrl] = useState('');
+  /** 参考URLから抽出した新規設計ブループリント（既存業種テンプレには載せない） */
+  const [referenceBlueprint, setReferenceBlueprint] = useState<DesignBlueprint | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -117,6 +130,11 @@ export function DesignCheckPanel() {
     selected?.isCustom && (selected.status === 'draft' || selected.customization?.status === 'draft')
   );
 
+  const activeBlueprint = useMemo(
+    () => resolveActiveBlueprint(selected, referenceBlueprint),
+    [selected, referenceBlueprint]
+  );
+
   useEffect(() => {
     if (!selected) return;
     setName(selected.name || '');
@@ -128,9 +146,12 @@ export function DesignCheckPanel() {
     setText(ov?.theme?.text || '');
     setAccent(ov?.theme?.accent || '');
     setRefUrl(selected.customization?.sourceUrl || '');
+    if (selected.customization?.blueprint) {
+      setReferenceBlueprint(selected.customization.blueprint as DesignBlueprint);
+    }
     setMsg(null);
     setErr(null);
-  }, [selected?.id]);
+  }, [selected?.id, selected?.customization?.blueprint]);
 
   const makeThemeCss = useCallback((templateId: string, theme: { bg?: string; text?: string; accent?: string }) => {
     const b = (theme.bg || '').trim();
@@ -161,8 +182,24 @@ export function DesignCheckPanel() {
     [headline, subheadline, navLabels]
   );
 
-  const openPreview = useCallback(() => {
+  const openPreview = useCallback(async () => {
     if (!selected) return;
+    if (activeBlueprint?.version === 1) {
+      if (!isApiAvailable()) return;
+      try {
+        const html = await api.previewDesignBlueprint({
+          blueprint: activeBlueprint,
+          override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        });
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const u = URL.createObjectURL(blob);
+        window.open(u, '_blank', 'noopener');
+        setTimeout(() => URL.revokeObjectURL(u), 15000);
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : 'プレビューに失敗しました');
+      }
+      return;
+    }
     const baseId = selected.baseTemplateId || selected.id;
     const tpl = TEMPLATES.find((t) => t.id === baseId);
     if (!tpl) return;
@@ -176,7 +213,7 @@ export function DesignCheckPanel() {
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank', 'noopener');
     setTimeout(() => URL.revokeObjectURL(url), 10000);
-  }, [selected, applyOverrides, makeThemeCss, bg, text, accent]);
+  }, [selected, activeBlueprint, applyOverrides, makeThemeCss, bg, text, accent, headline, subheadline, navLabels]);
 
   const extractFromRefUrl = useCallback(async () => {
     if (!isApiAvailable() || !refUrl.trim()) {
@@ -187,11 +224,16 @@ export function DesignCheckPanel() {
     setMsg(null);
     try {
       const res = await api.extractStyleFromUrl(refUrl.trim());
-      const t = res.suggestedOverride?.theme;
-      if (t?.bg) setBg(t.bg);
-      if (t?.text) setText(t.text);
-      if (t?.accent) setAccent(t.accent);
-      setMsg('参考URLから配色の叩き台を反映しました。内容を確認して下書き保存または公開してください。');
+      if (res.blueprint?.version === 1) {
+        setReferenceBlueprint(res.blueprint);
+        const col = res.blueprint.tokens?.colors;
+        if (col?.bg) setBg(col.bg);
+        if (col?.text) setText(col.text);
+        if (col?.accent) setAccent(col.accent);
+      }
+      setMsg(
+        '参考ページから設計ブループリントを生成しました（構成・余白・タイポ・配色を数値化）。プレビューは新規専用レイアウトで開きます。既存の美容室テンプレ等には当てません。'
+      );
     } catch (e) {
       setErr(e instanceof Error ? e.message : '抽出に失敗しました');
     }
@@ -202,42 +244,66 @@ export function DesignCheckPanel() {
     setErr(null);
     setMsg(null);
     try {
-      await api.saveTemplateCustomization({
-        mode: 'create',
-        status: 'published',
-        name: name.trim() || `${selected.name} カスタム`,
-        baseTemplateId: selected.baseTemplateId || selected.id,
-        sourceUrl: refUrl.trim() || undefined,
-        override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
-      });
+      if (activeBlueprint?.version === 1) {
+        await api.saveTemplateCustomization({
+          mode: 'create',
+          status: 'published',
+          baseTemplateId: 'blueprint',
+          blueprint: activeBlueprint,
+          name: name.trim() || '参考設計テンプレ',
+          sourceUrl: refUrl.trim() || undefined,
+          override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        });
+      } else {
+        await api.saveTemplateCustomization({
+          mode: 'create',
+          status: 'published',
+          name: name.trim() || `${selected.name} カスタム`,
+          baseTemplateId: selected.baseTemplateId || selected.id,
+          sourceUrl: refUrl.trim() || undefined,
+          override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        });
+      }
       const list = await api.getTemplateCandidates();
       setCandidates(list || []);
       setMsg('公開テンプレとして保存しました（ヒアリングの候補にも表示されます）。');
     } catch (e) {
       setErr(e instanceof Error ? e.message : '保存に失敗しました');
     }
-  }, [selected, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
+  }, [selected, activeBlueprint, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
 
   const saveAsDraft = useCallback(async () => {
     if (!isApiAvailable() || !selected) return;
     setErr(null);
     setMsg(null);
     try {
-      await api.saveTemplateCustomization({
-        mode: 'create',
-        status: 'draft',
-        name: name.trim() || `${selected.name} 下書き`,
-        baseTemplateId: selected.baseTemplateId || selected.id,
-        sourceUrl: refUrl.trim() || undefined,
-        override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
-      });
+      if (activeBlueprint?.version === 1) {
+        await api.saveTemplateCustomization({
+          mode: 'create',
+          status: 'draft',
+          baseTemplateId: 'blueprint',
+          blueprint: activeBlueprint,
+          name: name.trim() || '参考設計 下書き',
+          sourceUrl: refUrl.trim() || undefined,
+          override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        });
+      } else {
+        await api.saveTemplateCustomization({
+          mode: 'create',
+          status: 'draft',
+          name: name.trim() || `${selected.name} 下書き`,
+          baseTemplateId: selected.baseTemplateId || selected.id,
+          sourceUrl: refUrl.trim() || undefined,
+          override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        });
+      }
       const list = await api.getTemplateCandidates();
       setCandidates(list || []);
       setMsg('下書きとして保存しました。公開承認で候補に表示できます。');
     } catch (e) {
       setErr(e instanceof Error ? e.message : '保存に失敗しました');
     }
-  }, [selected, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
+  }, [selected, activeBlueprint, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
 
   const publishSelectedDraft = useCallback(async () => {
     if (!isApiAvailable() || !selected?.isCustom || !selectedIsDraft) return;
@@ -261,6 +327,23 @@ export function DesignCheckPanel() {
     setErr(null);
     setMsg(null);
     try {
+      const baseBp =
+        (selected.customization?.blueprint as DesignBlueprint | undefined) ?? activeBlueprint ?? undefined;
+      let blueprintPayload: DesignBlueprint | undefined;
+      if (baseBp && baseBp.version === 1 && selected?.baseTemplateId === 'blueprint') {
+        blueprintPayload = {
+          ...baseBp,
+          tokens: {
+            ...baseBp.tokens,
+            colors: {
+              ...baseBp.tokens?.colors,
+              ...(bg.trim() ? { bg: bg.trim() } : {}),
+              ...(text.trim() ? { text: text.trim() } : {}),
+              ...(accent.trim() ? { accent: accent.trim() } : {}),
+            },
+          },
+        };
+      }
       await api.saveTemplateCustomization({
         mode: 'update',
         id: selected.id,
@@ -268,6 +351,7 @@ export function DesignCheckPanel() {
         status: selectedIsDraft ? 'draft' : 'published',
         sourceUrl: refUrl.trim() || undefined,
         override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
+        ...(blueprintPayload ? { blueprint: blueprintPayload } : {}),
       });
       const list = await api.getTemplateCandidates();
       setCandidates(list || []);
@@ -275,13 +359,13 @@ export function DesignCheckPanel() {
     } catch (e) {
       setErr(e instanceof Error ? e.message : '更新に失敗しました');
     }
-  }, [selected, selectedIsDraft, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
+  }, [selected, selectedIsDraft, activeBlueprint, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
 
   return (
     <div className="panel theme-picker theme-picker-design design-check-panel">
       <h2 className="design-step-label">⓪ デザイン</h2>
       <p className="design-step-desc">
-        参考URLから配色の叩き台を抽出し、下書き保存→公開承認でヒアリング候補に載せられます。文言・色・メニュー名はいつでも調整できます。
+        参考URLから<strong>新規専用の設計ブループリント</strong>（構成・余白・タイポ・配色の数値）を生成します。既存の美容室テンプレ等には当てず、別レイアウトでプレビュー・保存します。文章・写真はオリジナル素材です。
       </p>
       <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1.2fr 1fr' }}>
         <div>
@@ -303,8 +387,18 @@ export function DesignCheckPanel() {
                         : '（カスタム）'
                       : ''}
                   </span>
-                  <span className="design-card-desc">{tpl.baseTemplateId}</span>
-                  <div className="design-card-preview" style={{ background: PREVIEW_BG[tpl.baseTemplateId] ?? '#fff', color: PREVIEW_COLOR[tpl.baseTemplateId] ?? '#333' }}>Aa</div>
+                  <span className="design-card-desc">
+                    {tpl.kind === 'blueprint' || tpl.baseTemplateId === 'blueprint' ? '参考設計' : tpl.baseTemplateId}
+                  </span>
+                  <div
+                    className="design-card-preview"
+                    style={{
+                      background: PREVIEW_BG[tpl.baseTemplateId] ?? '#fff',
+                      color: PREVIEW_COLOR[tpl.baseTemplateId] ?? '#333',
+                    }}
+                  >
+                    Aa
+                  </div>
                   <span className="design-card-action">選択</span>
                 </button>
               </li>
@@ -317,11 +411,11 @@ export function DesignCheckPanel() {
             <input
               value={refUrl}
               onChange={(e) => setRefUrl(e.target.value)}
-              placeholder="https:// 配色の叩き台を取得（HTML/CSSはコピーしません）"
+              placeholder="https:// 設計ブループリントを生成（コード・文章のコピーはしません）"
             />
           </label>
           <button type="button" className="small" onClick={extractFromRefUrl} disabled={!isApiAvailable()}>
-            URLから配色を抽出
+            URLから設計を抽出（新規テンプレ）
           </button>
           <label>テンプレ名<input value={name} onChange={(e) => setName(e.target.value)} /></label>
           <label>見出し<input value={headline} onChange={(e) => setHeadline(e.target.value)} /></label>
