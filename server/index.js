@@ -15,6 +15,7 @@ import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
 import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
+import { renderCustomerIntakePage } from './customerIntakePage.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -126,6 +127,45 @@ app.post('/api/queue', async (req, res) => {
   queue.push(item);
   await store.setQueue(queue);
   res.status(201).json(item);
+});
+
+// ---------- 顧客ヒアリング ----------
+app.get('/customer-intake', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderCustomerIntakePage());
+});
+
+app.post('/api/customer-intake', async (req, res) => {
+  const body = req.body || {};
+  const required = ['storeName', 'contactName', 'contactMethod', 'contactValue', 'plan', 'requestSummary'];
+  for (const k of required) {
+    if (!String(body[k] || '').trim()) return res.status(400).json({ error: `${k} is required` });
+  }
+  if (!['normal', 'student'].includes(String(body.plan))) {
+    return res.status(400).json({ error: 'plan must be normal or student' });
+  }
+  if (!['email', 'line', 'phone'].includes(String(body.contactMethod))) {
+    return res.status(400).json({ error: 'contactMethod must be email/line/phone' });
+  }
+
+  const list = await store.getCustomerIntake();
+  const row = {
+    id: `intake-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    storeName: String(body.storeName || '').trim().slice(0, 120),
+    contactName: String(body.contactName || '').trim().slice(0, 80),
+    contactMethod: String(body.contactMethod || '').trim(),
+    contactValue: String(body.contactValue || '').trim().slice(0, 160),
+    plan: String(body.plan || '').trim(),
+    referralCode: String(body.referralCode || '').trim().slice(0, 200),
+    requestSummary: String(body.requestSummary || '').trim().slice(0, 5000),
+    references: String(body.references || '').trim().slice(0, 5000),
+    pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
+    status: 'new',
+    createdAt: new Date().toISOString(),
+  };
+  list.unshift(row);
+  await store.setCustomerIntake(list);
+  res.status(201).json({ ok: true, id: row.id });
 });
 
 app.post('/api/collect', async (req, res) => {

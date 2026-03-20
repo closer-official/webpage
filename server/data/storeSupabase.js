@@ -5,6 +5,7 @@ const KEYS = {
   dashboard: 'dashboard',
   options: 'options',
   billing: 'billing',
+  customerIntake: 'customerIntake',
   referenceSites: 'referenceSites',
   designInsights: 'designInsights',
   learningJob: 'learningJob',
@@ -12,7 +13,7 @@ const KEYS = {
 };
 
 function getDefault(name) {
-  if (name === 'queue' || name === 'dashboard' || name === 'referenceSites') return [];
+  if (name === 'queue' || name === 'dashboard' || name === 'referenceSites' || name === 'customerIntake') return [];
   if (name === 'designInsights') return { summary: '', byIndustry: {}, designSummary: '', byIndustryDesign: {}, updatedAt: null };
   if (name === 'learningJob') return { status: 'idle', industry: null, maxResults: null, phase: '', current: 0, total: 0, result: null, error: null, startedAt: null, completedAt: null };
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
@@ -47,6 +48,8 @@ export const storeSupabase = {
   },
   getBilling: () => get(KEYS.billing),
   setBilling: (b) => set(KEYS.billing, { ...getDefault(KEYS.billing), ...b }),
+  getCustomerIntake: () => get(KEYS.customerIntake),
+  setCustomerIntake: (arr) => set(KEYS.customerIntake, arr),
   getReferenceSites: () => get(KEYS.referenceSites),
   setReferenceSites: (arr) => set(KEYS.referenceSites, arr),
   getDesignInsights: () => get(KEYS.designInsights),
