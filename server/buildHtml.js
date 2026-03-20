@@ -42,6 +42,14 @@ const DEFAULT_NAV = {
     { label: 'メニュー', href: '#menu' },
     { label: 'アクセス', href: '#access' },
   ],
+  cafe_1: [
+    { label: 'About', href: '#concept' },
+    { label: 'Menu', href: '#menu' },
+    { label: 'Recruit', href: '#recruit' },
+    { label: 'Business', href: '#business' },
+    { label: 'Shop', href: '#access' },
+    { label: 'Contact', href: '#contact' },
+  ],
   clinic_chiropractic: [
     { label: 'プログラム', href: '#program' },
     { label: '施術者', href: '#staff' },
@@ -118,6 +126,7 @@ const DEFAULT_NAV = {
 const DEFAULT_CTA = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#contact' },
+  cafe_1: { label: 'お問い合わせ', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '予約・相談', href: '#reserve' },
   builder: { label: 'お問い合わせ', href: '#contact' },
@@ -131,6 +140,7 @@ const DEFAULT_CTA = {
 const defaultHeroImages = {
   salon_barber: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
   cafe_tea: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200',
+  cafe_1: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
   clinic_chiropractic: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200',
   gym_yoga: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1400&q=85',
   builder: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200',
@@ -193,7 +203,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   if (tid !== 'event') {
     navItems = [...(Array.isArray(navItems) ? navItems : []), { label: '料金・お支払', href: '#payment' }];
   }
-  const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea'
+  const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea' || tid === 'cafe_1'
     ? `<a href="${escapeHtml(purchaseUrl)}" id="nav-item-purchase">購入</a>`
     : `<a href="${escapeHtml(purchaseUrl)}" class="nav-link" id="nav-item-purchase">購入</a>`);
   const cta = (content.ctaLabel && content.ctaHref) ? { label: content.ctaLabel, href: content.ctaHref } : (DEFAULT_CTA[tid] || { label: 'お問い合わせ', href: '#contact' });
@@ -204,9 +214,10 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     defaultHeroImages[tid] ||
     '';
   const woHeroSlides =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? (() => {
-          const d1 = heroImageUrl || defaultHeroImages.cafe_tea;
+          const fallback = tid === 'cafe_1' ? defaultHeroImages.cafe_1 : defaultHeroImages.cafe_tea;
+          const d1 = heroImageUrl || fallback;
           const d2 = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
           const d3 = 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
           const hs = (content.heroSlides || []).filter((u) => (u || '').trim());
@@ -247,7 +258,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
     </div>
   </header>`
-    : tid === 'cafe_tea'
+    : tid === 'cafe_tea' || tid === 'cafe_1'
       ? ''
       : tid === 'builder'
         ? `<header>
@@ -293,7 +304,16 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     </div>
     ${footerLegal}
   </footer>`
-      : tid === 'cafe_tea'
+      : tid === 'cafe_1'
+        ? `<footer class="footer-c1">
+    <div class="container footer-c1-inner">
+      ${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-ig" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>` : ''}
+      <p class="footer-c1-text">${escapeHtml(content.footerText)}</p>
+      ${footerLegal}
+    </div>
+  </footer>
+  <a href="#wo-top" class="c1-page-top" aria-label="ページ上部へ">↑</a>`
+        : tid === 'cafe_tea'
       ? hasFooterCols
         ? `<footer class="footer-wo">
     <div class="container">
@@ -400,7 +420,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     return 'section-rhythm-default';
   }
 
-  const scrollInAttr = tid === 'cafe_tea' ? '' : ' data-scroll-in';
+  const scrollInAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
   const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
 
@@ -457,14 +477,81 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       ? `    <section id="pro-services" class="pro-services section-rhythm-default"${scrollInAttr}><h2>業務内容</h2><p class="pro-services-lede">主なサービスを分かりやすくご案内します。</p><div class="pro-svc-grid">${proSvc.map((row) => `<div class="pro-svc-card"><span class="pro-svc-icon" aria-hidden="true">${escapeHtml(row.icon)}</span><div><h3>${escapeHtml(row.title)}</h3><p>${escapeHtml(row.body)}</p></div></div>`).join('')}</div><p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></section>`
       : '';
 
+  function cafe1BranchMenuHtml() {
+    const items = content.cafeBranchMenuItems || [];
+    let lastG = '\0';
+    const chunks = [];
+    for (const it of items) {
+      const g = String(it.groupLabel || '').trim();
+      if (g && g !== lastG) {
+        chunks.push(`<p class="c1-menu-zone">${escapeHtml(g)}</p>`);
+        lastG = g;
+      }
+      chunks.push(`<a href="${escapeHtml(it.menuUrl)}" target="_blank" rel="noopener noreferrer" class="c1-menu-branch-btn">${escapeHtml(it.label)}</a>`);
+    }
+    return chunks.join('\n        ');
+  }
+  function cafe1ShopLocationsHtml() {
+    const locs = content.cafeShopLocations || [];
+    return locs
+      .map((loc) => {
+        const paras = String(loc.detail || '')
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((l) => `<p>${escapeHtml(l)}</p>`)
+          .join('');
+        const img = loc.imageUrl
+          ? `<img class="c1-shop-img" src="${escapeHtml(loc.imageUrl)}" alt="" loading="lazy">`
+          : '';
+        const mapL = loc.mapUrl
+          ? `<a class="c1-shop-map" href="${escapeHtml(loc.mapUrl)}" target="_blank" rel="noopener noreferrer">Google MAP ›</a>`
+          : '';
+        const res = loc.reserveUrl
+          ? `<a class="c1-shop-res" href="${escapeHtml(loc.reserveUrl)}">${escapeHtml(loc.reserveLabel || '予約する')}</a>`
+          : '';
+        return `      <article class="c1-shop-card">
+        ${img}
+        <h3 class="c1-shop-name">${escapeHtml(loc.name)}</h3>
+        <div class="c1-shop-detail">${paras}</div>
+        <div class="c1-shop-actions">${mapL}${res}</div>
+      </article>`;
+      })
+      .join('\n');
+  }
+
   const sectionsDefault =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? sections
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, sections.length);
             const imgWrapClass = s.imageUrl ? (i % 3 === 0 ? ' wo-img-wide' : i % 3 === 1 ? ' wo-img-tall' : ' wo-img-square') : '';
             const img = s.imageUrl ? `<div class="section-img-wrap${imgWrapClass}"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
             const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2><div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
+            if (tid === 'cafe_1' && s.id === 'menu' && (content.cafeBranchMenuItems || []).length > 0) {
+              return `    <section id="menu" class="section wo-sec c1-menu-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+        <div class="c1-menu-grid" role="list">
+        ${cafe1BranchMenuHtml()}
+        </div>
+      </div>
+    </section>`;
+            }
+            if (tid === 'cafe_1' && s.id === 'access' && (content.cafeShopLocations || []).length > 0) {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="c1-shop-map-embed" style="margin-top:2rem;"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section id="access" class="section wo-sec c1-shop-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+${cafe1ShopLocationsHtml()}
+        ${mapEmbed}
+      </div>
+    </section>`;
+            }
             if (s.id === 'hours') {
               return `    <section class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
@@ -489,6 +576,16 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         <div class="wo-price-table-wrap"><table class="wo-price-table"><tbody>${rowsHtml}</tbody></table></div>
       </div>
+    </section>`;
+            }
+            if (i === 0 && tid === 'cafe_1') {
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
+        ${content.subheadline ? `<p class="c1-lede-sub">${escapeHtml(content.subheadline)}</p>` : ''}
+        <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+      </div>
+      ${img}
     </section>`;
             }
             if (i === 0) {
@@ -697,7 +794,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
   const extraMotionAttr = ' data-scroll-in';
   let extraSections = '';
   if (instagramLine && (instagramUrl || lineUrl)) {
-    if (tid === 'cafe_tea') {
+    if (tid === 'cafe_tea' || tid === 'cafe_1') {
       extraSections += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
@@ -720,7 +817,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
   }
   if (contactForm) {
     const formAction = formActionUrl.trim() || '#';
-    if (tid === 'cafe_tea') {
+    if (tid === 'cafe_tea' || tid === 'cafe_1') {
       extraSections += `
     <section class="section wo-sec wo-form-block"${extraMotionAttr} id="contact-form">
       <div class="section-body">
@@ -786,18 +883,25 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     </section>`;
   }
 
-  const heroSection =
-    tid === 'cafe_tea'
-      ? `<section class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
-      <div class="wo-hero-viewport">
-        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
-      </div>
-      <div class="wo-hero-inner">
+  const woHeroInnerHtml =
+    tid === 'cafe_1'
+      ? `<div class="wo-hero-inner c1-hero-inner">
+        <p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>
+        ${content.headline ? `<p class="c1-hero-tagline">${escapeHtml(content.headline)}</p>` : ''}
+      </div>`
+      : `<div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
         <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
+      </div>`;
+  const heroSection =
+    tid === 'cafe_tea' || tid === 'cafe_1'
+      ? `<section${tid === 'cafe_1' ? ' id="wo-top"' : ''} class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
+      <div class="wo-hero-viewport">
+        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
       </div>
+      ${woHeroInnerHtml}
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
     </section>`
       : tid === 'pet_salon'
@@ -863,7 +967,11 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">`
-      : '';
+      : tid === 'cafe_1'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
+        : '';
   const a1Script = '';
   const scrollInScript = `<script>
 (function(){
@@ -880,7 +988,7 @@ window.addEventListener('scroll',u,{passive:true});u();
 </script>`;
 
   const woOrganicScript =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? `<script>
 (function(){
 var track=document.getElementById('wo-hero-track');
@@ -907,8 +1015,8 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       : '';
 
   const woChrome =
-    tid === 'cafe_tea'
-      ? `<div id="wo-top"></div>
+    tid === 'cafe_tea' || tid === 'cafe_1'
+      ? `${tid === 'cafe_1' ? '' : '<div id="wo-top"></div>'}
 <input type="checkbox" id="wo-nav-toggle" class="wo-nav-cb" aria-hidden="true">
 <nav class="wo-nav-drawer" aria-label="メインメニュー">
   <label for="wo-nav-toggle" class="wo-nav-backdrop"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">閉じる</span></label>
@@ -922,7 +1030,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic' && tid !== 'gym_yoga' && tid !== 'cram_school' && tid !== 'professional') ? ctaBlockHtml : '';
+  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'cafe_1' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic' && tid !== 'gym_yoga' && tid !== 'cram_school' && tid !== 'professional') ? ctaBlockHtml : '';
 
   const proTelDigits = (content.footerPhone || '').replace(/\s/g, '');
   const proStickyCtaHtml =

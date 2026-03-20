@@ -80,6 +80,104 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
     content: WARM_ORGANIC_CAFE_PRESET.content,
     seo: WARM_ORGANIC_CAFE_PRESET.seo,
   },
+  cafe_1: {
+    content: {
+      siteName: 'STUDIO TABLE',
+      title: 'STUDIO TABLE',
+      headline: '街と緑のあいだで、ひと息つく場所。',
+      subheadline: 'Have a calm moment.',
+      navItems: [
+        { label: 'About', href: '#concept' },
+        { label: 'Menu', href: '#menu' },
+        { label: 'Recruit', href: '#recruit' },
+        { label: 'Business', href: '#business' },
+        { label: 'Shop', href: '#access' },
+        { label: 'Contact', href: '#contact' },
+      ],
+      sections: [
+        {
+          id: 'concept',
+          title: 'ABOUT',
+          content:
+            '世代をまたいで通えるレストランカフェとして、ペントハウスのような開放感と落ち着きの両方を大切にしています。朝のコーヒーから夜の食事まで、日常にそっと寄り添う一杯と一皿をご用意しています。',
+        },
+        {
+          id: 'gallery',
+          title: '',
+          content: '',
+          imageUrl:
+            'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200',
+        },
+        {
+          id: 'menu',
+          title: 'MENU',
+          content: '店舗ごとのメニューは、ボタンから別タブでご覧いただけます。',
+        },
+        {
+          id: 'recruit',
+          title: 'RECRUIT',
+          content:
+            'ホール・キッチン・マネジメント候補を募集しています。未経験からキャリアを積みたい方、おいしいものと空間づくりが好きな方を歓迎します。詳細は採用サイトをご確認ください。',
+        },
+        {
+          id: 'business',
+          title: 'BUSINESS',
+          content:
+            '店舗運営のほか、ケータリングやコラボイベントのご相談も承っています。ブランドの世界観を守りながら、柔軟にご提案いたします。',
+        },
+        {
+          id: 'access',
+          title: 'SHOP',
+          content: '各店の最新情報・ご予約は店舗ページよりお願いいたします。',
+        },
+        {
+          id: 'contact',
+          title: 'CONTACT',
+          content: 'お問い合わせ・ご予約は下記よりお願いいたします。',
+        },
+      ],
+      footerText: '© STUDIO TABLE GROUP. All rights reserved.',
+      footerInstagramUrl: 'https://www.instagram.com/',
+      ctaLabel: 'お問い合わせ',
+      ctaHref: '#contact',
+      heroSlides: [
+        'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
+        'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1400',
+        'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1400',
+      ],
+      cafeBranchMenuItems: [
+        { groupLabel: '都心エリア', label: 'NORTH GATE', menuUrl: 'https://example.com/menu/north' },
+        { groupLabel: '都心エリア', label: 'EAST YARD', menuUrl: 'https://example.com/menu/east' },
+        { groupLabel: '公園沿い', label: 'RIVER SIDE', menuUrl: 'https://example.com/menu/river' },
+        { groupLabel: '公園沿い', label: 'HILL TERRACE', menuUrl: 'https://example.com/menu/hill' },
+      ],
+      cafeShopLocations: [
+        {
+          name: 'STUDIO TABLE NORTH GATE',
+          detail: '平日 11:00–22:00 / 土日祝 10:00–22:00\n03-0000-0001\n東京都〇〇区〇〇 1-2-3',
+          mapUrl: 'https://maps.google.com/',
+          reserveLabel: '予約する',
+          reserveUrl: 'https://example.com/reserve/north',
+          imageUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900',
+        },
+        {
+          name: 'STUDIO TABLE RIVER SIDE',
+          detail: '平日 10:00–21:00 / 定休：火曜\n03-0000-0002\n神奈川県〇〇市〇〇 4-5-6',
+          mapUrl: 'https://maps.google.com/',
+          reserveLabel: '予約する',
+          reserveUrl: 'https://example.com/reserve/river',
+          imageUrl: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=900',
+        },
+      ],
+    },
+    seo: {
+      metaTitle: 'STUDIO TABLE | レストランカフェ',
+      metaDescription: '街と緑のあいだで。複数店舗で展開するレストランカフェの公式ページ。',
+      keywords: 'カフェ, レストラン, 複数店舗, ブランチ',
+      ogImageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   clinic_chiropractic: {
     content: {
       siteName: 'スタジオS',

@@ -26,6 +26,14 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'アクセス', href: '#access' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  cafe_1: [
+    { label: 'About', href: '#concept' },
+    { label: 'Menu', href: '#menu' },
+    { label: 'Recruit', href: '#recruit' },
+    { label: 'Business', href: '#business' },
+    { label: 'Shop', href: '#access' },
+    { label: 'Contact', href: '#contact' },
+  ],
   clinic_chiropractic: [
     { label: 'プログラム', href: '#program' },
     { label: '施術者', href: '#staff' },
@@ -103,6 +111,7 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#reserve' },
+  cafe_1: { label: 'お問い合わせ', href: '#contact' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '予約・相談', href: '#reserve' },
   builder: { label: 'お問い合わせ', href: '#contact' },
@@ -150,7 +159,7 @@ export function buildHtml(
 
   const bodyClass = `page-wrapper template-${template.id}`;
   const overrides = options?.genOptions?.styleOverrides;
-  const useDrawerNav = tid === 'cafe_tea' && overrides?.navStyle !== 'sticky';
+  const useDrawerNav = (tid === 'cafe_tea' && overrides?.navStyle !== 'sticky') || tid === 'cafe_1';
   let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);
   if (tid !== 'event') {
     navItems = [...navItems, { label: '料金・お支払', href: '#payment' }];
@@ -176,7 +185,7 @@ export function buildHtml(
       ? ''
       : tid === 'cafe_tea' && overrides?.navStyle === 'sticky'
         ? normalHeader
-        : tid === 'cafe_tea'
+        : tid === 'cafe_tea' || tid === 'cafe_1'
           ? ''
           : normalHeader;
 
@@ -206,7 +215,16 @@ export function buildHtml(
     </div>
     ${footerLegal}
   </footer>`
-      : tid === 'cafe_tea'
+      : tid === 'cafe_1'
+        ? `<footer class="footer-c1">
+    <div class="container footer-c1-inner">
+      ${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-ig" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>` : ''}
+      <p class="footer-c1-text">${escapeHtml(content.footerText)}</p>
+      ${footerLegal}
+    </div>
+  </footer>
+  <a href="#wo-top" class="c1-page-top" aria-label="ページ上部へ">↑</a>`
+        : tid === 'cafe_tea'
       ? hasFooterCols
         ? `<footer class="footer-wo">
     <div class="container">
@@ -264,7 +282,7 @@ export function buildHtml(
     return 'section-rhythm-default';
   };
 
-  const scrollInAttr = tid === 'cafe_tea' ? '' : ' data-scroll-in';
+  const scrollInAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   const woHoursBody = (text: string) => {
     const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
     if (lines.length === 0) return '';
@@ -316,8 +334,53 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       ? `    <section id="pro-services" class="pro-services section-rhythm-default"${scrollInAttr}><h2>業務内容</h2><p class="pro-services-lede">主なサービスを分かりやすくご案内します。</p><div class="pro-svc-grid">${proSvc.map((row) => `<div class="pro-svc-card"><span class="pro-svc-icon" aria-hidden="true">${escapeHtml(row.icon)}</span><div><h3>${escapeHtml(row.title)}</h3><p>${escapeHtml(row.body)}</p></div></div>`).join('')}</div><p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></section>`
       : '';
 
+  const cafe1BranchMenuHtml = (): string => {
+    const items = content.cafeBranchMenuItems ?? [];
+    let lastG = '\0';
+    const chunks: string[] = [];
+    for (const it of items) {
+      const g = (it.groupLabel ?? '').trim();
+      if (g && g !== lastG) {
+        chunks.push(`<p class="c1-menu-zone">${escapeHtml(g)}</p>`);
+        lastG = g;
+      }
+      chunks.push(
+        `<a href="${escapeHtml(it.menuUrl)}" target="_blank" rel="noopener noreferrer" class="c1-menu-branch-btn">${escapeHtml(it.label)}</a>`
+      );
+    }
+    return chunks.join('\n        ');
+  };
+  const cafe1ShopLocationsHtml = (): string => {
+    const locs = content.cafeShopLocations ?? [];
+    return locs
+      .map((loc) => {
+        const paras = loc.detail
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((l) => `<p>${escapeHtml(l)}</p>`)
+          .join('');
+        const img = loc.imageUrl
+          ? `<img class="c1-shop-img" src="${escapeHtml(loc.imageUrl)}" alt="" loading="lazy">`
+          : '';
+        const mapL = loc.mapUrl
+          ? `<a class="c1-shop-map" href="${escapeHtml(loc.mapUrl)}" target="_blank" rel="noopener noreferrer">Google MAP ›</a>`
+          : '';
+        const res = loc.reserveUrl
+          ? `<a class="c1-shop-res" href="${escapeHtml(loc.reserveUrl)}">${escapeHtml(loc.reserveLabel ?? '予約する')}</a>`
+          : '';
+        return `      <article class="c1-shop-card">
+        ${img}
+        <h3 class="c1-shop-name">${escapeHtml(loc.name)}</h3>
+        <div class="c1-shop-detail">${paras}</div>
+        <div class="c1-shop-actions">${mapL}${res}</div>
+      </article>`;
+      })
+      .join('\n');
+  };
+
   const sectionsDefault =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? content.sections
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, content.sections.length);
@@ -327,6 +390,30 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
               : '';
             const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
       <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
+            if (tid === 'cafe_1' && s.id === 'menu' && (content.cafeBranchMenuItems?.length ?? 0) > 0) {
+              return `    <section id="menu" class="section wo-sec c1-menu-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+        <div class="c1-menu-grid" role="list">
+        ${cafe1BranchMenuHtml()}
+        </div>
+      </div>
+    </section>`;
+            }
+            if (tid === 'cafe_1' && s.id === 'access' && (content.cafeShopLocations?.length ?? 0) > 0) {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="c1-shop-map-embed" style="margin-top:2rem;border:0;width:100%;height:240px;"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section id="access" class="section wo-sec c1-shop-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+${cafe1ShopLocationsHtml()}
+        ${mapEmbed}
+      </div>
+    </section>`;
+            }
             if (s.id === 'hours') {
               return `    <section class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
@@ -351,6 +438,16 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         <div class="wo-price-table-wrap"><table class="wo-price-table"><tbody>${rowsHtml}</tbody></table></div>
       </div>
+    </section>`;
+            }
+            if (i === 0 && tid === 'cafe_1') {
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
+        ${content.subheadline ? `<p class="c1-lede-sub">${escapeHtml(content.subheadline)}</p>` : ''}
+        <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+      </div>
+      ${img}
     </section>`;
             }
             if (i === 0) {
@@ -570,6 +667,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
     event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
     ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
+    cafe_1: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
   };
   const heroSlidesFiltered = (content.heroSlides ?? []).filter((u) => (u || '').trim());
   const heroImageUrl =
@@ -578,9 +676,10 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     defaultHeroImages[tid] ||
     '';
   const woHeroSlides =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? (() => {
-          const d1 = heroImageUrl || defaultHeroImages.cafe_tea;
+          const fallback = tid === 'cafe_1' ? defaultHeroImages.cafe_1! : defaultHeroImages.cafe_tea!;
+          const d1 = heroImageUrl || fallback;
           const d2 =
             'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
           const d3 =
@@ -591,18 +690,25 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
           return [d1, d2, d3];
         })()
       : [];
-  const heroSection =
-    tid === 'cafe_tea'
-      ? `<section class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
-      <div class="wo-hero-viewport">
-        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
-      </div>
-      <div class="wo-hero-inner">
+  const woHeroInnerHtml =
+    tid === 'cafe_1'
+      ? `<div class="wo-hero-inner c1-hero-inner">
+        <p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>
+        ${content.headline ? `<p class="c1-hero-tagline">${escapeHtml(content.headline)}</p>` : ''}
+      </div>`
+      : `<div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
         <h1>${escapeHtml(content.headline)}</h1>
         <p class="subheadline">${escapeHtml(content.subheadline)}</p>
         <a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a>
+      </div>`;
+  const heroSection =
+    tid === 'cafe_tea' || tid === 'cafe_1'
+      ? `<section${tid === 'cafe_1' ? ' id="wo-top"' : ''} class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
+      <div class="wo-hero-viewport">
+        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
       </div>
+      ${woHeroInnerHtml}
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}" data-wo-dot="${i}"></button>`).join('')}</div>
     </section>`
       : tid === 'pet_salon'
@@ -664,10 +770,14 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">`
-      : '';
+      : tid === 'cafe_1'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
+        : '';
 
   const scrollInScript =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? ''
       : `<script>
 (function(){
@@ -684,7 +794,7 @@ window.addEventListener('scroll',u,{passive:true});u();
 </script>`;
 
   const woOrganicScript =
-    tid === 'cafe_tea'
+    tid === 'cafe_tea' || tid === 'cafe_1'
       ? `<script>
 (function(){
 var track=document.getElementById('wo-hero-track');
@@ -713,6 +823,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
   const mainSectionsHtml = sectionsHtml;
   const ctaAfterHero =
     tid === 'cafe_tea' ||
+    tid === 'cafe_1' ||
     tid === 'salon_barber' ||
     tid === 'clinic_chiropractic' ||
     tid === 'gym_yoga' ||
@@ -1145,12 +1256,12 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
       : '';
 
   const genOpts = options?.genOptions;
-  const extraMotionAttr = tid === 'cafe_tea' ? '' : ' data-scroll-in';
+  const extraMotionAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   let extraSectionsHtml = '';
   if (genOpts) {
     const { contactForm, formActionUrl, instagramLine, instagramUrl, lineUrl, qrCode, qrCodeDataUrl } = genOpts;
     if (instagramLine && (instagramUrl || lineUrl)) {
-      if (tid === 'cafe_tea') {
+      if (tid === 'cafe_tea' || tid === 'cafe_1') {
         extraSectionsHtml += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
@@ -1173,7 +1284,7 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
     }
     if (contactForm) {
       const formAction = (formActionUrl ?? '').trim() || '#';
-      if (tid === 'cafe_tea') {
+      if (tid === 'cafe_tea' || tid === 'cafe_1') {
         extraSectionsHtml += `
     <section class="section wo-sec wo-form-block"${extraMotionAttr} id="contact-form">
       <div class="section-body">
@@ -1244,7 +1355,7 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
 
   const woChrome =
     useDrawerNav
-      ? `<div id="wo-top"></div>
+      ? `${tid === 'cafe_1' ? '' : '<div id="wo-top"></div>'}
 <input type="checkbox" id="wo-nav-toggle" class="wo-nav-cb" aria-hidden="true">
 <nav class="wo-nav-drawer" aria-label="メインメニュー">
   <label for="wo-nav-toggle" class="wo-nav-backdrop"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">閉じる</span></label>

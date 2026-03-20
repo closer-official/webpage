@@ -110,6 +110,20 @@ export interface PageContent {
    * パーソナルジム：実績数値のカウントアップ（stats と同じ並びのインデックスに対応。未指定インデックスは通常表示）
    */
   gymStatAnimations?: { end: number; suffix: string }[];
+  /** cafe_1：複数店舗のメニュー画像・PDF 等（別タブで開く） */
+  cafeBranchMenuItems?: { groupLabel?: string; label: string; menuUrl: string }[];
+  /** cafe_1：店舗一覧（SHOP）。指定時は access セクションでカード表示 */
+  cafeShopLocations?: {
+    name: string;
+    /** 営業時間・電話・住所など（改行で段落分け） */
+    detail: string;
+    mapUrl?: string;
+    reserveLabel?: string;
+    reserveUrl?: string;
+    imageUrl?: string;
+  }[];
+  /** cafe_1：フッターに Instagram アイコンリンクを出す場合 */
+  footerInstagramUrl?: string;
 }
 
 /** SEO用データ */
@@ -130,10 +144,11 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 13種類テンプレートID（業種別+LP） */
+/** 14種類テンプレートID（業種別+LP） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
+  | 'cafe_1'             // 2b. カフェ（複数店舗・ミニマル）
   | 'clinic_chiropractic'// 3. 整骨院・整体・鍼灸
   | 'gym_yoga'           // 4. パーソナルジム・ヨガ
   | 'builder'            // 5. 工務店・リノベ
@@ -184,6 +199,7 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
 export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'salon_barber', name: '個人美容室・理容室' },
   { id: 'cafe_tea', name: 'カフェ・喫茶・パン・スイーツ' },
+  { id: 'cafe_1', name: 'カフェ（複数店舗・ミニマル）' },
   { id: 'clinic_chiropractic', name: '整骨院・整体・鍼灸' },
   { id: 'gym_yoga', name: 'パーソナルジム・ヨガ' },
   { id: 'builder', name: '工務店・リノベ' },

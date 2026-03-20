@@ -450,6 +450,7 @@ const TEMPLATE_CSS_RAW = {
 export const TEMPLATE_IDS = [
   'salon_barber',       // 1. 個人美容室・理容室
   'cafe_tea',           // 2. カフェ・喫茶・パン・スイーツ
+  'cafe_1',             // 2b. カフェ（複数店舗・ミニマル）
   'clinic_chiropractic', // 3. 整骨院・整体・鍼灸
   'gym_yoga',           // 4. パーソナルジム・ヨガ
   'builder',            // 5. 工務店・リノベ
@@ -990,6 +991,41 @@ const GYM_YOGA_CSS = `
 /** 2. カフェ・喫茶用（旧 warm_organic と同一） */
 const CAFE_TEA_CSS = TEMPLATE_CSS_RAW.warm_organic.replace(/template-warm_organic/g, 'template-cafe_tea');
 
+/** 2b. 複数店舗カフェ（cafe_tea ベース＋白トーン・右ドロワー・店舗メニュー用クラス） */
+const CAFE_1_CSS =
+  CAFE_TEA_CSS.replace(/template-cafe_tea/g, 'template-cafe_1') +
+  `
+  .page-wrapper.template-cafe_1 { --tp-bg: #fff !important; --tp-heading: #111 !important; --tp-text: #3a3a3a !important; --tp-brand: #1a1a1a !important; background: #fff !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-fab { background: rgba(255,255,255,0.92) !important; border: 1px solid rgba(0,0,0,0.12) !important; box-shadow: 0 6px 28px rgba(0,0,0,0.12) !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-fab span { background: #1a1a1a !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-drawer { justify-content: flex-end !important; padding: 0 !important; background: rgba(18,18,18,0.35) !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-drawer-inner { text-align: left !important; max-width: min(20rem, 88vw) !important; width: 100% !important; height: 100% !important; background: #fafafa !important; border-radius: 0 !important; box-shadow: -12px 0 48px rgba(0,0,0,0.12) !important; padding: max(4rem, env(safe-area-inset-top)) 1.75rem 2rem !important; overflow-y: auto !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-drawer a { color: #111 !important; border-bottom: 1px solid rgba(0,0,0,0.06) !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-drawer .wo-nav-brand { color: #9a9a9a !important; }
+  .page-wrapper.template-cafe_1 .wo-nav-drawer .cta-btn { background: #111 !important; color: #fff !important; width: 100%; justify-content: center; }
+  .page-wrapper.template-cafe_1 .wo-hero-inner { text-align: center !important; padding: 2rem 1.5rem 4.5rem !important; }
+  .page-wrapper.template-cafe_1 .c1-hero-brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; margin: 0 0 0.35rem; }
+  .page-wrapper.template-cafe_1 .c1-hero-tagline { font-family: Georgia, "Times New Roman", serif; font-size: clamp(1rem, 3vw, 1.25rem); font-style: italic; font-weight: 500; margin: 0; opacity: 0.95; }
+  .page-wrapper.template-cafe_1 .c1-lede-sub { font-family: Georgia, "Times New Roman", serif; font-size: 1.35rem; font-style: italic; color: var(--tp-heading); margin: 0 0 1.25rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-zone { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: #aaa; margin: 1.5rem 0 0.75rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-zone:first-child { margin-top: 0; }
+  .page-wrapper.template-cafe_1 .c1-menu-grid { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.5rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-branch-btn { display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0.75rem 1rem; border: 1px solid #111; color: #111; text-decoration: none; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+  .page-wrapper.template-cafe_1 .c1-menu-branch-btn:hover { background: #111; color: #fff; }
+  .page-wrapper.template-cafe_1 .c1-shop-card { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.08); }
+  .page-wrapper.template-cafe_1 .c1-shop-card:first-of-type { margin-top: 1rem; padding-top: 0; border-top: none; }
+  .page-wrapper.template-cafe_1 .c1-shop-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; margin-bottom: 1rem; }
+  .page-wrapper.template-cafe_1 .c1-shop-name { font-size: 1rem; font-weight: 600; letter-spacing: 0.08em; margin: 0 0 0.75rem; color: #111; }
+  .page-wrapper.template-cafe_1 .c1-shop-detail p { margin: 0 0 0.4rem; font-size: 0.9rem; line-height: 1.75; }
+  .page-wrapper.template-cafe_1 .c1-shop-actions { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center; margin-top: 1rem; }
+  .page-wrapper.template-cafe_1 .c1-shop-map { font-size: 0.8rem; letter-spacing: 0.06em; color: #111; text-decoration: none; border-bottom: 1px solid currentColor; }
+  .page-wrapper.template-cafe_1 .c1-shop-res { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 1rem; border: 1px solid #111; font-size: 0.75rem; letter-spacing: 0.12em; text-decoration: none; color: #111; }
+  .page-wrapper.template-cafe_1 footer.footer-c1 { padding: 3rem 1rem 5rem; text-align: center; background: #fff; border-top: 1px solid rgba(0,0,0,0.08); }
+  .page-wrapper.template-cafe_1 .footer-c1-ig { display: inline-flex; width: 2.5rem; height: 2.5rem; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.08); border-radius: 50%; text-decoration: none; color: #111; margin-bottom: 1.25rem; }
+  .page-wrapper.template-cafe_1 .footer-c1-text { font-size: 0.75rem; letter-spacing: 0.04em; color: #666; margin: 0; }
+  .page-wrapper.template-cafe_1 .c1-page-top { position: fixed; bottom: max(1.25rem, env(safe-area-inset-bottom)); right: max(1rem, env(safe-area-inset-right)); z-index: 200; width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid #ccc; background: #fff; color: #666; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  `;
+
 /** 7. 塾・習い事教室用（信頼ブロック直下・曲線区切り・円形バッジ・固定フッター2CTA・親しみやすさ） */
 const CRAM_SCHOOL_CSS = `
   .page-wrapper.template-cram_school {
@@ -1049,6 +1085,7 @@ export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS
+    : key === 'cafe_1' ? CAFE_1_CSS
     : key === 'builder' ? BUILDER_CSS
     : key === 'clinic_chiropractic' ? CLINIC_CHIROPRACTIC_CSS
     : key === 'gym_yoga' ? GYM_YOGA_CSS

@@ -4,6 +4,7 @@ import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 export const TEMPLATE_CANDIDATES = [
   { id: 'salon_barber', name: 'テンプレ1（ミニマル）' },
   { id: 'cafe_tea', name: 'テンプレ2（ナチュラル）' },
+  { id: 'cafe_1', name: 'テンプレ2b（複数店舗・ミニマル）' },
   { id: 'clinic_chiropractic', name: 'テンプレ3（信頼感）' },
   { id: 'gym_yoga', name: 'テンプレ4（力強い）' },
   { id: 'builder', name: 'テンプレ5（直線的）' },

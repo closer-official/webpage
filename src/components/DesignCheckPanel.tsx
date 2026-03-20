@@ -138,6 +138,7 @@ const SAMPLE_SEO_DEFAULT: SEOData = {
 const PREVIEW_BG: Record<string, string> = {
   salon_barber: '#fff',
   cafe_tea: '#f2efe8',
+  cafe_1: '#ffffff',
   clinic_chiropractic: '#F9F9F7',
   gym_yoga: '#121212',
   builder: '#fff',
@@ -153,6 +154,7 @@ const PREVIEW_BG: Record<string, string> = {
 const PREVIEW_COLOR: Record<string, string> = {
   salon_barber: '#1a1a1a',
   cafe_tea: '#3d5245',
+  cafe_1: '#1a1a1a',
   clinic_chiropractic: '#1A1A1A',
   gym_yoga: '#FF3B30',
   builder: '#1A1A1A',
