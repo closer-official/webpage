@@ -229,8 +229,10 @@ export const api = {
       body: JSON.stringify({ username, password }),
     }),
   logoutAdmin: () => fetchApi<{ ok: boolean }>('/api/admin-auth/logout', { method: 'POST' }),
-  getTemplateCandidates: () => fetchApi<TemplateCandidate[]>('/api/template-candidates'),
-  getTemplateCustomizations: () => fetchApi<TemplateCustomization[]>('/api/template-customizations'),
+  getTemplateCandidates: () =>
+    fetchApi<TemplateCandidate[]>('/api/template-candidates', { credentials: 'include' }),
+  getTemplateCustomizations: () =>
+    fetchApi<TemplateCustomization[]>('/api/template-customizations', { credentials: 'include' }),
   saveTemplateCustomization: (body: {
     mode: 'create' | 'update';
     id?: string;
@@ -245,11 +247,19 @@ export const api = {
   }) =>
     fetchApi<{ ok: boolean; item: TemplateCustomization }>('/api/template-customizations/save', {
       method: 'POST',
+      credentials: 'include',
       body: JSON.stringify(body),
     }),
   publishTemplateCustomization: (id: string) =>
     fetchApi<{ ok: boolean; item: TemplateCustomization }>('/api/template-customizations/publish', {
       method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({ id }),
+    }),
+  deleteTemplateCustomization: (id: string) =>
+    fetchApi<{ ok: boolean }>('/api/template-customizations/delete', {
+      method: 'POST',
+      credentials: 'include',
       body: JSON.stringify({ id }),
     }),
   extractStyleFromUrl: (url: string) =>

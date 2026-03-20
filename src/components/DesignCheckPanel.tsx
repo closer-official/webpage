@@ -319,6 +319,30 @@ export function DesignCheckPanel() {
     }
   }, [selected, selectedIsDraft]);
 
+  const deleteSelected = useCallback(async () => {
+    if (!isApiAvailable() || !selected?.isCustom || !selected.id) return;
+    if (
+      !window.confirm(
+        `カスタムテンプレ「${selected.name}」を削除しますか？ヒアリング候補からも消えます。この操作は取り消せません。`
+      )
+    ) {
+      return;
+    }
+    setErr(null);
+    setMsg(null);
+    try {
+      await api.deleteTemplateCustomization(selected.id);
+      const list = await api.getTemplateCandidates();
+      setCandidates(list || []);
+      const next = list?.find((c) => !c.isCustom) || list?.[0];
+      if (next?.id) setSelectedId(next.id);
+      setReferenceBlueprint(null);
+      setMsg('カスタムテンプレを削除しました。');
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : '削除に失敗しました');
+    }
+  }, [selected]);
+
   const saveUpdate = useCallback(async () => {
     if (!isApiAvailable() || !selected?.isCustom) {
       setErr('既存テンプレの直接更新は不可です。新規テンプレ保存を使ってください。');
@@ -444,6 +468,15 @@ export function DesignCheckPanel() {
               style={{ fontWeight: 700 }}
             >
               公開承認（下書き→候補表示）
+            </button>
+            <button
+              type="button"
+              className="small"
+              onClick={deleteSelected}
+              disabled={!isApiAvailable() || !selected?.isCustom}
+              style={{ color: '#b91c1c', borderColor: '#fecaca' }}
+            >
+              テンプレを削除
             </button>
           </div>
           {selectedIsDraft && (

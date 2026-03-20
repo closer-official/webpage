@@ -1,5 +1,6 @@
 /// <reference types="google.maps" />
 import type { VerificationSignals } from '../types';
+import { hasLikelyOwnWebsiteUrl } from './urlClassification';
 
 const SCRIPT_URL = 'https://maps.googleapis.com/maps/api/js';
 const DEFAULT_MIN_REVIEWS = 0;
@@ -110,9 +111,10 @@ export async function searchPlacesNoWebsite(
             (detail: google.maps.places.PlaceResult | null, detailStatus: google.maps.places.PlacesServiceStatus) => {
               checked++;
               if (detailStatus === google.maps.places.PlacesServiceStatus.OK && detail) {
-                const hasWebsite = !!(detail.website && String(detail.website).trim());
+                const raw = detail.website && String(detail.website).trim();
+                const hasOwnSite = hasLikelyOwnWebsiteUrl(raw);
                 const total = (detail.user_ratings_total as number) ?? 0;
-                if (!hasWebsite && total >= minReviews) {
+                if (!hasOwnSite && total >= minReviews) {
                   const types = (detail.types as string[]) ?? [];
                   const category = types[0]?.replace(/_/g, ' ') ?? 'store';
                   withoutWebsite.push({

@@ -105,7 +105,8 @@ export function MapsCollect({ onAdded }: MapsCollectProps) {
     <div className="panel maps-collect">
       <h2>Google Maps で取得</h2>
       <p className="hint">
-        エリアやキーワードで検索し、<strong>Webサイトが未登録の店舗</strong>だけをキューに追加できます。
+        エリアやキーワードで検索し、<strong>独自の公式サイトが無い店舗</strong>（URL未登録、またはホットペッパー・食べログ・Instagram
+        等の第三者URLのみ）だけをキューに追加できます。
         実在確認のため、レビュー数でフィルタすることを推奨します。
         {isApiAvailable() && (
           <>

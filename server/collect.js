@@ -1,8 +1,11 @@
 /**
  * Google Maps Places でエリア検索する。
  * - まずレガシー Text Search → INVALID_REQUEST/REQUEST_DENIED 時は Places API (New) の searchText にフォールバック
- * - hasWebsite: false → ウェブサイト未登録のみ / true → ウェブサイトありのみ（参照用）
+ * - hasWebsite: false → **独自の公式サイトが無い**店のみ（URL未登録、またはホットペッパー・SNS等のみ）
+ * - hasWebsite: true → 独自サイトありのみ（参照用）
  */
+
+import { hasLikelyOwnWebsiteUrl } from './urlClassification.js';
 
 const LEGACY_FIELDS =
   'place_id,name,formatted_address,website,rating,user_ratings_total,opening_hours,photos,types,reviews';
@@ -136,11 +139,12 @@ export async function collectPlaces(query, options = {}) {
     const detailData = await detailRes.json();
     if (detailData.status !== 'OK' || !detailData.result) continue;
     const d = detailData.result;
-    const hasSite = !!(d.website && String(d.website).trim());
+    const rawWebsite = d.website && String(d.website).trim();
+    const hasOwnWebsite = hasLikelyOwnWebsiteUrl(rawWebsite);
     const total = d.user_ratings_total ?? 0;
     if (total < minReviews) continue;
-    if (hasWebsite && !hasSite) continue;
-    if (!hasWebsite && hasSite) continue;
+    if (hasWebsite && !hasOwnWebsite) continue;
+    if (!hasWebsite && hasOwnWebsite) continue;
     const reviews = (d.reviews || []).map((r) => (r.text || '').trim()).filter(Boolean);
     const openingHoursText = d.opening_hours && Array.isArray(d.opening_hours.weekday_text)
       ? d.opening_hours.weekday_text.join('\n')
@@ -157,8 +161,8 @@ export async function collectPlaces(query, options = {}) {
       reviews,
       openingHoursText,
     };
-    if (hasWebsite && hasSite) {
-      item.websiteUrl = String(d.website).trim();
+    if (hasWebsite && hasOwnWebsite && rawWebsite) {
+      item.websiteUrl = rawWebsite;
       item.rankIndex = out.length + 1;
     }
     out.push(item);

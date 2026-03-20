@@ -483,6 +483,18 @@ app.post('/api/template-customizations/publish', async (req, res) => {
   res.json({ ok: true, item: customizations[i] });
 });
 
+/** カスタムテンプレ（下書き・公開）の削除 */
+app.post('/api/template-customizations/delete', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const id = String(req.body?.id || '').trim();
+  if (!id) return res.status(400).json({ error: 'id is required' });
+  const customizations = await store.getTemplateCustomizations();
+  const next = customizations.filter((v) => v.id !== id);
+  if (next.length === customizations.length) return res.status(404).json({ error: 'Customization not found' });
+  await store.setTemplateCustomizations(next);
+  res.json({ ok: true });
+});
+
 /** 参考設計ブループリントのHTMLプレビュー（管理者のみ・保存不要） */
 app.post('/api/design-blueprint/preview', async (req, res) => {
   if (!requireAdmin(req, res)) return;
