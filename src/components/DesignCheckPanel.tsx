@@ -390,6 +390,23 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     }
   }, [selected, selectedIsDraft, activeBlueprint, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
 
+  /** このテンプレを選び、右の編集フォームへスクロール */
+  const goTemplateEdit = useCallback((tplId: string) => {
+    setSelectedId(tplId);
+    requestAnimationFrame(() => {
+      document.getElementById('design-check-panel-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }, []);
+
+  /** 案件ごとのLPクリック編集へ（ダッシュボード） */
+  const goIndividualEdit = useCallback(
+    (tplId: string) => {
+      setSelectedId(tplId);
+      onGoDashboard?.();
+    },
+    [onGoDashboard]
+  );
+
   return (
     <div className="panel theme-picker theme-picker-design design-check-panel">
       <h2 className="design-step-label">⓪ デザイン</h2>
@@ -401,45 +418,65 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           <ul className="design-list" aria-label="デザインパターン一覧">
             {resolvedCandidates.map((tpl, i) => (
               <li key={tpl.id}>
-                <button
-                  type="button"
-                  className="design-card design-card-preview-only"
-                  onClick={() => setSelectedId(tpl.id)}
-                  style={{ outline: selectedId === tpl.id ? '2px solid #2563eb' : 'none' }}
-                >
-                  <span className="design-card-index">{i + 1}</span>
-                  <span className="design-card-name">
-                    {tpl.name}
-                    {tpl.isCustom
-                      ? tpl.status === 'draft' || tpl.customization?.status === 'draft'
-                        ? '（下書き）'
-                        : '（カスタム）'
-                      : ''}
-                  </span>
-                  <span className="design-card-desc">
-                    {tpl.kind === 'blueprint' || tpl.baseTemplateId === 'blueprint' ? '参考設計' : tpl.baseTemplateId}
-                  </span>
-                  <div
-                    className="design-card-preview"
-                    style={{
-                      background: PREVIEW_BG[tpl.baseTemplateId] ?? '#fff',
-                      color: PREVIEW_COLOR[tpl.baseTemplateId] ?? '#333',
-                    }}
+                <div className={`design-card design-card-block ${selectedId === tpl.id ? 'selected' : ''}`}>
+                  <button
+                    type="button"
+                    className="design-card-select-area design-card-preview-only"
+                    onClick={() => setSelectedId(tpl.id)}
+                    aria-pressed={selectedId === tpl.id}
                   >
-                    Aa
+                    <span className="design-card-index">{i + 1}</span>
+                    <span className="design-card-name">
+                      {tpl.name}
+                      {tpl.isCustom
+                        ? tpl.status === 'draft' || tpl.customization?.status === 'draft'
+                          ? '（下書き）'
+                          : '（カスタム）'
+                        : ''}
+                    </span>
+                    <span className="design-card-desc">
+                      {tpl.kind === 'blueprint' || tpl.baseTemplateId === 'blueprint' ? '参考設計' : tpl.baseTemplateId}
+                    </span>
+                    <div
+                      className="design-card-preview"
+                      style={{
+                        background: PREVIEW_BG[tpl.baseTemplateId] ?? '#fff',
+                        color: PREVIEW_COLOR[tpl.baseTemplateId] ?? '#333',
+                      }}
+                    >
+                      Aa
+                    </div>
+                    <span className="design-card-action">選択</span>
+                  </button>
+                  <div className="design-card-footer-actions">
+                    <button
+                      type="button"
+                      className="design-card-footer-btn"
+                      onClick={() => goTemplateEdit(tpl.id)}
+                    >
+                      テンプレ編集
+                    </button>
+                    <button
+                      type="button"
+                      className="design-card-footer-btn"
+                      onClick={() => goIndividualEdit(tpl.id)}
+                      disabled={!onGoDashboard}
+                      title={!onGoDashboard ? 'ダッシュボードへの遷移が未設定です' : '案件を選び「プレビューを編集」で個別に調整'}
+                    >
+                      個別編集
+                    </button>
                   </div>
-                  <span className="design-card-action">選択</span>
-                </button>
+                </div>
               </li>
             ))}
           </ul>
         </div>
-        <div style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
+        <div id="design-check-panel-form" style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
           <div className="design-check-panel-callout" role="note">
-            <strong>LPのクリック編集</strong>（タップで文言・色・画像URLなど）は、上部の「
-            <strong>ダッシュボード</strong>」タブ → 該当案件の「<strong>プレビューを編集</strong>」から行います。
+            各テンプレカード下の<strong>テンプレ編集</strong>＝そのテンプレを選び、右のフォーム（色・見出し）へジャンプ。
+            <strong>個別編集</strong>＝<strong>ダッシュボード</strong>へ移動し、案件ごとの「プレビューを編集」（LP上のクリック編集）へ。
             <br />
-            この「デザイン確認」ではテンプレ選択・色・見出しの入力と、完成イメージの<strong>別タブ表示</strong>のみです。
+            <strong>LPのクリック編集</strong>は「ダッシュボード」→「プレビューを編集」のみ。カードの<strong>選択</strong>は一覧のハイライト用です。
           </div>
           {onGoDashboard && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
