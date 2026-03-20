@@ -36,6 +36,14 @@ function findPeElement(doc: Document, pe: string): HTMLElement | null {
   return null;
 }
 
+export type ReviewPreviewPersistMode = 'dashboard' | 'callback';
+
+export interface ReviewPreviewPersistPayload {
+  content: PageContent;
+  seo: SEOData;
+  previewEditCss: string;
+}
+
 interface ReviewPreviewEditorProps {
   itemId: string;
   content: PageContent;
@@ -47,6 +55,13 @@ interface ReviewPreviewEditorProps {
   useApi?: boolean;
   styleOverrides?: StyleOverrides;
   onSaved: () => void;
+  /** dashboard=案件をAPI/ローカルに保存。callback=親の onPersist のみ（デザイン確認タブのサンドボックス等） */
+  persistMode?: ReviewPreviewPersistMode;
+  onPersist?: (payload: ReviewPreviewPersistPayload) => void | Promise<void>;
+  /** false のとき「個別用に複製」を出さない */
+  showDuplicatePersonal?: boolean;
+  /** ヒント文言の上書き（未編集時） */
+  idleHintOverride?: string;
 }
 
 export function ReviewPreviewEditor({
@@ -60,6 +75,10 @@ export function ReviewPreviewEditor({
   useApi,
   styleOverrides,
   onSaved,
+  persistMode = 'dashboard',
+  onPersist,
+  showDuplicatePersonal = true,
+  idleHintOverride,
 }: ReviewPreviewEditorProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [editing, setEditing] = useState(false);
@@ -313,7 +332,9 @@ export function ReviewPreviewEditor({
       });
     }
 
-    if (useApi && isApiAvailable()) {
+    if (persistMode === 'callback' && onPersist) {
+      await onPersist({ content: draftContent, seo: draftSeo, previewEditCss: cssTrim });
+    } else if (useApi && isApiAvailable()) {
       await api.patchDashboardItem(itemId, body);
     } else {
       updateDashboardItem(itemId, {
@@ -333,7 +354,7 @@ export function ReviewPreviewEditor({
     setEditing(false);
     setSelectedPe(null);
     onSaved();
-  }, [draftContent, draftSeo, draftCss, contentVariants, genOpts, itemId, useApi, onSaved]);
+  }, [draftContent, draftSeo, draftCss, contentVariants, genOpts, itemId, useApi, onSaved, persistMode, onPersist]);
 
   return (
     <div className="review-preview-editor">
@@ -343,14 +364,16 @@ export function ReviewPreviewEditor({
             <button type="button" className="small review-edit-start" onClick={startEdit}>
               プレビューを編集
             </button>
-            <button
-              type="button"
-              className="small review-duplicate-personal"
-              onClick={duplicateForPersonal}
-              title="この案件のコピーを先頭に作り、宛先ごとに文言だけ変える用途向け（元の案件は変更されません）"
-            >
-              個別用に複製
-            </button>
+            {showDuplicatePersonal && persistMode === 'dashboard' && (
+              <button
+                type="button"
+                className="small review-duplicate-personal"
+                onClick={duplicateForPersonal}
+                title="この案件のコピーを先頭に作り、宛先ごとに文言だけ変える用途向け（元の案件は変更されません）"
+              >
+                個別用に複製
+              </button>
+            )}
           </>
         ) : (
           <>
@@ -375,7 +398,8 @@ export function ReviewPreviewEditor({
       <p className="review-edit-hint">
         {editing
           ? 'プレビュー内の枠付き要素をクリックして選択。右パネルで色（RGB）・文字サイズ・本文を変更できます。'
-          : '「プレビューを編集」＝この案件を直接更新。「個別用に複製」＝コピーを別案件にして A 社向けなどに文言だけ変える（レイアウト変更はテンプレコード側）。'}
+          : idleHintOverride ||
+            '「プレビューを編集」＝この案件を直接更新。「個別用に複製」＝コピーを別案件にして A 社向けなどに文言だけ変える（レイアウト変更はテンプレコード側）。'}
       </p>
       <div className="review-preview-editor-body">
         <div className="review-preview-wrap review-preview-wrap--tall">

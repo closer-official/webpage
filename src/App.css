@@ -864,6 +864,47 @@
   line-height: 1.45;
 }
 
+/* デザイン確認：テンプレ／個別の全画面LP編集 */
+.design-inline-editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.design-inline-editor-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.design-inline-editor-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.design-inline-editor-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem 1rem 1.25rem;
+}
+
+.design-inline-editor-body .review-preview-editor {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 /* フィールド共通 */
 .field {
   margin-bottom: 16px;

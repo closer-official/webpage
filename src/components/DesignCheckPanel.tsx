@@ -4,6 +4,81 @@ import { buildHtml } from '../lib/buildHtml';
 import type { PageContent, SEOData, BuildHtmlGenOptions } from '../types';
 import { SHOWCASE_BY_STYLE_ID } from '../data/showcasePresets';
 import { api, isApiAvailable, type TemplateCandidate, type DesignBlueprint } from '../lib/api';
+import { ReviewPreviewEditor, type ReviewPreviewPersistPayload } from './ReviewPreviewEditor';
+
+const LS_INLINE_PREFIX = 'design-inline-editor-';
+
+function loadInlineDraft(
+  mode: 'template' | 'individual',
+  baseId: string
+): ReviewPreviewPersistPayload | null {
+  try {
+    const raw = localStorage.getItem(`${LS_INLINE_PREFIX}${mode}-${baseId}`);
+    if (!raw) return null;
+    const j = JSON.parse(raw) as ReviewPreviewPersistPayload;
+    if (j?.content && j?.seo) return { content: j.content, seo: j.seo, previewEditCss: j.previewEditCss || '' };
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function saveInlineDraft(mode: 'template' | 'individual', baseId: string, payload: ReviewPreviewPersistPayload) {
+  try {
+    localStorage.setItem(`${LS_INLINE_PREFIX}${mode}-${baseId}`, JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** インラインLP編集の初期データ（ショーケース＋テンプレの上書き＋任意で右フォームの値） */
+function buildSeedForInlineEditor(
+  tpl: TemplateCandidate,
+  live?: { headline: string; subheadline: string; navLabels: string }
+): ReviewPreviewPersistPayload {
+  const baseId = tpl.baseTemplateId || tpl.id;
+  const tplDef = TEMPLATES.find((t) => t.id === baseId);
+  const sample = tplDef ? SHOWCASE_BY_STYLE_ID[tplDef.styleId] : null;
+  const content = JSON.parse(JSON.stringify(sample ? sample.content : SAMPLE_DEFAULT)) as PageContent;
+  const seo = JSON.parse(JSON.stringify(sample ? sample.seo : SAMPLE_SEO_DEFAULT)) as SEOData;
+  const ov = tpl.customization?.override;
+  if (ov?.headline) content.headline = ov.headline;
+  if (ov?.subheadline) content.subheadline = ov.subheadline;
+  if (ov?.navLabels) {
+    const labels = ov.navLabels
+      .split(/[,，\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    if (labels.length) {
+      content.navItems = labels.map((label, i) => ({
+        label,
+        href: i === 0 ? '#concept' : i === 1 ? '#menu' : i === 2 ? '#access' : '#contact',
+      }));
+    }
+  }
+  if (live) {
+    if (live.headline.trim()) content.headline = live.headline.trim();
+    if (live.subheadline.trim()) content.subheadline = live.subheadline.trim();
+    const labels = live.navLabels
+      .split(/[,，\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    if (labels.length) {
+      content.navItems = labels.map((label, i) => ({
+        label,
+        href: i === 0 ? '#concept' : i === 1 ? '#menu' : i === 2 ? '#access' : '#contact',
+      }));
+    }
+  }
+  return { content, seo, previewEditCss: '' };
+}
+
+type InlineSession = {
+  mode: 'template' | 'individual';
+  tpl: TemplateCandidate;
+} & ReviewPreviewPersistPayload;
 
 /** セッション抽出 or 保存済みブループリントを解決（スキンカスタム選択時はブループリントを使わない） */
 function resolveActiveBlueprint(sel: TemplateCandidate | undefined, session: DesignBlueprint | null) {
@@ -104,6 +179,9 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
   const [referenceBlueprint, setReferenceBlueprint] = useState<DesignBlueprint | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  /** テンプレ／個別のLPクリック編集（ダッシュボードを経由しない） */
+  const [inlineOpen, setInlineOpen] = useState(false);
+  const [inlineSession, setInlineSession] = useState<InlineSession | null>(null);
 
   useEffect(() => {
     if (!isApiAvailable()) return;
@@ -390,22 +468,48 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     }
   }, [selected, selectedIsDraft, activeBlueprint, name, headline, subheadline, navLabels, bg, text, accent, refUrl]);
 
-  /** このテンプレを選び、右の編集フォームへスクロール */
-  const goTemplateEdit = useCallback((tplId: string) => {
-    setSelectedId(tplId);
-    requestAnimationFrame(() => {
-      document.getElementById('design-check-panel-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  /** 全画面でLPプレビュー編集（テンプレ＝マスタ案、個別＝別ストレージの案） */
+  const openInlineEditor = useCallback(
+    (mode: 'template' | 'individual', tplId: string) => {
+      const tpl = resolvedCandidates.find((c) => c.id === tplId);
+      if (!tpl) return;
+      const baseId = tpl.baseTemplateId || tpl.id;
+      if (tpl.kind === 'blueprint' || baseId === 'blueprint') {
+        setMsg('参考設計テンプレは右のフォームと「プレビューを別タブで開く」で編集してください。');
+        setSelectedId(tpl.id);
+        return;
+      }
+      setSelectedId(tpl.id);
+      const saved = loadInlineDraft(mode, baseId);
+      if (saved) {
+        setInlineSession({ mode, tpl, ...saved });
+      } else {
+        const useLive = tpl.id === selectedId;
+        const payload = buildSeedForInlineEditor(tpl, useLive ? { headline, subheadline, navLabels } : undefined);
+        setInlineSession({ mode, tpl, ...payload });
+      }
+      setInlineOpen(true);
+    },
+    [resolvedCandidates, selectedId, headline, subheadline, navLabels]
+  );
+
+  const handleInlinePersist = useCallback(async (payload: ReviewPreviewPersistPayload) => {
+    setInlineSession((prev) => {
+      if (!prev) return prev;
+      const bid = prev.tpl.baseTemplateId || prev.tpl.id;
+      saveInlineDraft(prev.mode, bid, payload);
+      return { ...prev, ...payload };
     });
+    setHeadline(payload.content.headline);
+    setSubheadline(payload.content.subheadline);
+    const nav = payload.content.navItems?.map((n) => n.label).join(', ') || '';
+    setNavLabels(nav);
+    setMsg('編集内容を保存しました（このブラウザに記録。見出し・メニュー名は右のフォームにも反映しました）。');
   }, []);
 
-  /** 案件ごとのLPクリック編集へ（ダッシュボード） */
-  const goIndividualEdit = useCallback(
-    (tplId: string) => {
-      setSelectedId(tplId);
-      onGoDashboard?.();
-    },
-    [onGoDashboard]
-  );
+  const closeInlineEditor = useCallback(() => {
+    setInlineOpen(false);
+  }, []);
 
   return (
     <div className="panel theme-picker theme-picker-design design-check-panel">
@@ -452,16 +556,15 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
                     <button
                       type="button"
                       className="design-card-footer-btn"
-                      onClick={() => goTemplateEdit(tpl.id)}
+                      onClick={() => openInlineEditor('template', tpl.id)}
                     >
                       テンプレ編集
                     </button>
                     <button
                       type="button"
                       className="design-card-footer-btn"
-                      onClick={() => goIndividualEdit(tpl.id)}
-                      disabled={!onGoDashboard}
-                      title={!onGoDashboard ? 'ダッシュボードへの遷移が未設定です' : '案件を選び「プレビューを編集」で個別に調整'}
+                      onClick={() => openInlineEditor('individual', tpl.id)}
+                      title="テンプレ案とは別ストレージで、個別向けにLPをクリック編集できます"
                     >
                       個別編集
                     </button>
@@ -473,10 +576,10 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
         </div>
         <div id="design-check-panel-form" style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
           <div className="design-check-panel-callout" role="note">
-            各テンプレカード下の<strong>テンプレ編集</strong>＝そのテンプレを選び、右のフォーム（色・見出し）へジャンプ。
-            <strong>個別編集</strong>＝<strong>ダッシュボード</strong>へ移動し、案件ごとの「プレビューを編集」（LP上のクリック編集）へ。
+            <strong>テンプレ編集</strong>／<strong>個別編集</strong>で、このタブ内に<strong>全画面のLPプレビュー編集</strong>が開きます（枠付き要素をクリックして色・文言を変更）。
+            テンプレ＝マスタ案、個別＝別データとしてブラウザに保存されます。右のフォームの見出しなどは保存時に同期されます。
             <br />
-            <strong>LPのクリック編集</strong>は「ダッシュボード」→「プレビューを編集」のみ。カードの<strong>選択</strong>は一覧のハイライト用です。
+            実案件のダッシュボード編集が必要なときは「ダッシュボードへ」から。
           </div>
           {onGoDashboard && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
@@ -546,6 +649,45 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           {err && <p style={{ color: '#b91c1c', margin: 0 }}>{err}</p>}
         </div>
       </div>
+
+      {inlineOpen && inlineSession && (
+        <div
+          className="design-inline-editor-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="design-inline-editor-title"
+        >
+          <div className="design-inline-editor-toolbar">
+            <button type="button" className="secondary" onClick={closeInlineEditor}>
+              ← 一覧に戻る
+            </button>
+            <h3 id="design-inline-editor-title" className="design-inline-editor-title">
+              {inlineSession.mode === 'template' ? 'テンプレ編集' : '個別編集'} · {inlineSession.tpl.name}
+            </h3>
+          </div>
+          <div className="design-inline-editor-body">
+            <ReviewPreviewEditor
+              key={`${inlineSession.mode}-${inlineSession.tpl.id}`}
+              itemId={`sandbox-${inlineSession.mode}-${inlineSession.tpl.id}`}
+              persistMode="callback"
+              onPersist={handleInlinePersist}
+              showDuplicatePersonal={false}
+              idleHintOverride={
+                inlineSession.mode === 'template'
+                  ? '「プレビューを編集」でLP上の要素をクリックして編集。保存はこのブラウザのテンプレ用データに記録され、右の見出し欄にも同期されます。'
+                  : '個別向けの案としてテンプレ案とは別に保存されます（このブラウザのみ）。ダッシュボードの案件とは別データです。'
+              }
+              content={inlineSession.content}
+              seo={inlineSession.seo}
+              templateId={inlineSession.tpl.baseTemplateId || inlineSession.tpl.id}
+              previewEditCss={inlineSession.previewEditCss}
+              variantIndex={0}
+              useApi={false}
+              onSaved={() => {}}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
