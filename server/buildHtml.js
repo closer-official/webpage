@@ -1,5 +1,6 @@
 import { getTemplateFullCss } from './conceptTemplates.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
+import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -342,7 +343,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const metaTags = [
     '<meta charset="UTF-8">',
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
     paymentMetaLine,
     `<title>${escapeHtml(seo.metaTitle)}</title>`,
     `<meta name="description" content="${escapeHtml(seo.metaDescription)}">`,
@@ -856,7 +857,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
 
   const marqueeBar = '';
 
-  const css = getTemplateFullCss(tid);
+  const css = getTemplateFullCss(tid) + RESPONSIVE_BASE_CSS;
   const googleFonts =
     tid === 'gym_yoga'
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">

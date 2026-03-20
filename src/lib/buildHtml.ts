@@ -1,6 +1,7 @@
 import type { PageContent, SEOData, TemplateOption, BuildHtmlGenOptions } from '../types';
 import type { NavItem } from '../types';
 import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
+import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
 
 function escapeHtml(s: string): string {
   return s
@@ -127,7 +128,7 @@ export function buildHtml(
 
   const metaTags = [
     `<meta charset="UTF-8">`,
-    `<meta name="viewport" content="width=device-width, initial-scale=1.0">`,
+    `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`,
     `<title>${escapeHtml(seo.metaTitle)}</title>`,
     `<meta name="description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.keywords ? `<meta name="keywords" content="${escapeHtml(seo.keywords)}">` : '',
@@ -657,6 +658,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     const fontFamily = overrides.fontFamily.trim().replace(/"/g, '');
     css += `\n.page-wrapper { font-family: "${fontFamily}", "Hiragino Sans", "Noto Sans JP", sans-serif; }`;
   }
+  css += RESPONSIVE_BASE_CSS;
   const googleFonts =
     tid === 'gym_yoga'
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">

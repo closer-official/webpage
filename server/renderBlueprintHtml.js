@@ -2,6 +2,7 @@
  * 設計ブループリントからHTMLを生成（既存 buildHtml / 業種テンプレに依存しない）
  */
 import { generateBlueprintPageModel } from './blueprintContent.js';
+import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 
 function escapeHtml(s) {
   if (s == null) return '';
@@ -192,7 +193,7 @@ body.bp {
   font-size: 0.82rem;
   color: var(--bp-muted);
 }
-`;
+` + RESPONSIVE_BASE_CSS;
 
   const sectionsHtml = page.sections
     .map(
@@ -242,7 +243,7 @@ body.bp {
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>${escapeHtml(page.title)}</title>
   <meta name="description" content="参考URLから数値化した設計ブループリントに基づく新規テンプレのプレビューです。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -610,7 +611,7 @@ body.bp-dark {
   color: color-mix(in srgb, var(--bp-muted) 80%, var(--bp-text));
   border: 1px solid color-mix(in srgb, var(--bp-border) 35%, transparent);
 }
-`;
+` + RESPONSIVE_BASE_CSS;
 
   const sectionsHtml = page.sections
     .map(
@@ -638,7 +639,7 @@ body.bp-dark {
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>${escapeHtml(page.title)}</title>
   <meta name="description" content="参考URLのビジュアル特徴に近づけた設計ブループリントのプレビューです。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
