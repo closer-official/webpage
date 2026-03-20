@@ -17,6 +17,11 @@ export type GenerationOptions = {
   qrCode: boolean;
 };
 
+export type AdminAuthStatus = {
+  enabled: boolean;
+  authenticated: boolean;
+};
+
 export function isApiAvailable(): boolean {
   if (typeof window === 'undefined') return false;
   // 本番（Vercel 等）
@@ -117,6 +122,14 @@ export type PricePlans = {
 };
 
 export const api = {
+  getAdminAuthStatus: () => fetchApi<AdminAuthStatus>('/api/admin-auth/status'),
+  loginAdmin: (username: string, password: string) =>
+    fetchApi<{ ok: boolean; enabled?: boolean }>('/api/admin-auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+  logoutAdmin: () => fetchApi<{ ok: boolean }>('/api/admin-auth/logout', { method: 'POST' }),
+
   getOptions: () => fetchApi<GenerationOptions>('/api/options'),
   setOptions: (o: Partial<GenerationOptions>) =>
     fetchApi<GenerationOptions>('/api/options', { method: 'POST', body: JSON.stringify(o) }),

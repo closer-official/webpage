@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { collectPlaces } from './collect.js';
 import { processOne } from './process.js';
 import { store } from './data/store.js';
@@ -32,6 +33,72 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
+
+function parseCookies(req) {
+  const raw = req.headers?.cookie || '';
+  const out = {};
+  raw.split(';').forEach((pair) => {
+    const i = pair.indexOf('=');
+    if (i <= 0) return;
+    const k = pair.slice(0, i).trim();
+    const v = decodeURIComponent(pair.slice(i + 1).trim());
+    out[k] = v;
+  });
+  return out;
+}
+
+function adminAuthEnabled() {
+  return !!(process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD);
+}
+
+function adminCookieValue() {
+  const raw = `${process.env.ADMIN_USERNAME || ''}:${process.env.ADMIN_PASSWORD || ''}`;
+  return createHash('sha256').update(raw).digest('hex');
+}
+
+function isAdminAuthenticated(req) {
+  if (!adminAuthEnabled()) return true;
+  const cookies = parseCookies(req);
+  const actual = Buffer.from(String(cookies.admin_auth || ''));
+  const expected = Buffer.from(adminCookieValue());
+  if (actual.length !== expected.length) return false;
+  try {
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+
+// ---------- 管理ページログイン ----------
+app.get('/api/admin-auth/status', (req, res) => {
+  const enabled = adminAuthEnabled();
+  const authenticated = enabled ? isAdminAuthenticated(req) : true;
+  res.json({ enabled, authenticated });
+});
+
+app.post('/api/admin-auth/login', (req, res) => {
+  const enabled = adminAuthEnabled();
+  if (!enabled) return res.json({ ok: true, enabled: false });
+  const username = String(req.body?.username || '');
+  const password = String(req.body?.password || '');
+  const ok = username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
+  if (!ok) return res.status(401).json({ error: 'ユーザー名またはパスワードが違います。' });
+  const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+  res.setHeader(
+    'Set-Cookie',
+    `admin_auth=${encodeURIComponent(adminCookieValue())}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
+  );
+  res.json({ ok: true, enabled: true });
+});
+
+app.post('/api/admin-auth/logout', (req, res) => {
+  const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+  res.setHeader(
+    'Set-Cookie',
+    `admin_auth=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`
+  );
+  res.json({ ok: true });
+});
 
 let autoProcessTimer = null;
 async function stopAutoProcess() {
