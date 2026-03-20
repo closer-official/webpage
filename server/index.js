@@ -21,6 +21,7 @@ import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTem
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
 import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
+import { enrichReferenceBlueprint } from './referenceDesignGemini.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 
 /** 参考URL抽出の簡易レート制限（メモリ保持・サーバーレスではインスタンス単位） */
@@ -395,7 +396,8 @@ app.post('/api/style-reference/extract', async (req, res) => {
   try {
     const { url, html } = await fetchReferenceHtml(rawUrl);
     const { fingerprint, suggestedOverride } = buildFingerprintFromHtml(html, url.toString());
-    const blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+    let blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+    blueprint = await enrichReferenceBlueprint(html, blueprint);
     res.json({ ok: true, blueprint, fingerprint, suggestedOverride });
   } catch (e) {
     console.error('[style-reference/extract]', e?.message || e);
@@ -681,7 +683,8 @@ app.post('/api/customer-intake', async (req, res) => {
       try {
         const freshCustoms = await store.getTemplateCustomizations();
         const { url, html } = await fetchReferenceHtml(firstUrl);
-        const blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+        let blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+        blueprint = await enrichReferenceBlueprint(html, blueprint);
         const { fingerprint } = buildFingerprintFromHtml(html, url.toString());
         const tid = `custom-${Date.now().toString(36)}`;
         const draftItem = {

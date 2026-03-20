@@ -3,6 +3,7 @@
  * 色・余白・タイポスケール・セクション数・コンテナ幅などを数値化する。
  */
 import { fetchReferenceHtml } from './referenceFetch.js';
+import { enrichReferenceBlueprint } from './referenceDesignGemini.js';
 import { extractColorsFromHtml } from './styleFingerprint.js';
 
 function median(arr) {
@@ -76,7 +77,7 @@ function pickTop(colors, n = 14) {
     .map((x) => x[0]);
 }
 
-function suggestTheme(colorList) {
+function suggestThemeLight(colorList) {
   const unique = [...new Set(colorList.map(normalizeHex).filter(Boolean))];
   if (unique.length === 0) {
     return { bg: '#f5f5f0', text: '#2a2a2a', accent: '#2563eb' };
@@ -93,6 +94,89 @@ function suggestTheme(colorList) {
   const accent = vibrant[0]?.h || vibrant[1]?.h || unique[1] || text;
 
   return { bg, text, accent };
+}
+
+/**
+ * 出現色の明暗比率でダークLPか判定し、背景・文字を合わせる（従来は常にライト寄りになっていた）
+ */
+function suggestThemeDarkAware(topColors) {
+  const unique = [...new Set(topColors.map(normalizeHex).filter(Boolean))];
+  if (unique.length === 0) {
+    return {
+      mode: 'light',
+      bg: '#f5f5f0',
+      text: '#2a2a2a',
+      accent: '#2563eb',
+      surface: '#ffffff',
+      muted: '#5c5c5c',
+    };
+  }
+  const withL = unique.map((h) => ({ h, l: luminance(h), s: saturation(h) }));
+  const darks = withL.filter((x) => x.l < 0.38);
+  const lights = withL.filter((x) => x.l > 0.55);
+  const darkDominant =
+    darks.length >= Math.max(3, Math.ceil(unique.length * 0.4)) || darks.length > lights.length;
+
+  if (darkDominant) {
+    const bg = [...darks].sort((a, b) => a.l - b.l)[0]?.h || '#050810';
+    const text = '#f4f4f8';
+    const muted = '#9a9aa8';
+    const vibrant = withL
+      .filter((x) => x.s > 0.18 && x.l > 0.25 && x.l < 0.92)
+      .sort((a, b) => b.s - a.s);
+    const accent = vibrant[0]?.h || '#ff4d8d';
+    const surface = mixHex(bg, '#151822', 0.55);
+    return { mode: 'dark', bg, text, accent, surface, muted };
+  }
+
+  const t = suggestThemeLight(unique);
+  return {
+    mode: 'light',
+    bg: t.bg,
+    text: t.text,
+    accent: t.accent,
+    surface: mixHex(t.bg, '#ffffff', 0.06),
+    muted: mixHex(t.text, t.bg, 0.38),
+  };
+}
+
+function extractGradients(html) {
+  const out = [];
+  const re = /(linear-gradient|radial-gradient)\([^;)]+\)/gi;
+  let m;
+  while ((m = re.exec(html))) {
+    const s = m[0].replace(/\s+/g, ' ').trim();
+    if (s.length > 12 && s.length < 900) out.push(s);
+  }
+  return [...new Set(out)].slice(0, 8);
+}
+
+function pickCtaGradient(gradients) {
+  const g = gradients.find((x) => /linear-gradient/i.test(x) && /#|rgb|hsl/i.test(x));
+  return g || gradients[0] || null;
+}
+
+function inferVisualStyle(themeMode, gradients, html) {
+  const hasGrad = gradients.length > 0 || /linear-gradient|radial-gradient/i.test(html);
+  if (themeMode === 'dark' && hasGrad) return 'dark_gradient_lp';
+  if (themeMode === 'dark') return 'dark_hero';
+  return 'light_default';
+}
+
+function inferHeroLayout(themeMode, html) {
+  const imgs = (html.match(/<img[^>]+>/gi) || []).length;
+  const flexGrid = /display\s*:\s*flex|grid-template-columns|float\s*:\s*(left|right)/i.test(html);
+  if (themeMode !== 'dark') return 'centered_stack';
+  if (imgs >= 1 && flexGrid) {
+    const stripped = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '');
+    const iImg = stripped.search(/<img[^>]+>/i);
+    const iH1 = stripped.search(/<h1[^>]*>/i);
+    if (iImg >= 0 && iH1 >= 0 && iImg < iH1) return 'split_photo_left';
+    return 'split_photo_right';
+  }
+  return 'split_photo_left';
 }
 
 function collectPxValues(html) {
@@ -178,7 +262,11 @@ function guessContainerMaxWidth(html) {
 export function buildDesignBlueprintFromHtml(html, sourceUrl) {
   const colors = extractColorsFromHtml(html);
   const topColors = pickTop(colors, 18);
-  const theme = suggestTheme(topColors.length ? topColors : colors);
+  const theme = suggestThemeDarkAware(topColors.length ? topColors : colors);
+  const gradients = extractGradients(html);
+  const ctaGradient = pickCtaGradient(gradients);
+  const visualStyle = inferVisualStyle(theme.mode, gradients, html);
+  const heroLayout = inferHeroLayout(theme.mode, html);
 
   const pxVals = collectPxValues(html);
   const space = deriveSpacingScale(pxVals);
@@ -210,23 +298,37 @@ export function buildDesignBlueprintFromHtml(html, sourceUrl) {
   const headingStack = firstFontFromContext(html, 'h1') || '"Noto Sans JP", system-ui, sans-serif';
   const bodyStack = firstFontFromContext(html, 'h2') || '"Noto Sans JP", system-ui, sans-serif';
 
-  const surface = mixHex(theme.bg, '#ffffff', luminance(theme.bg) < 0.5 ? 0.08 : 0.04);
-  const muted = mixHex(theme.text, theme.bg, 0.35);
-  const border = mixHex(theme.text, theme.bg, 0.9);
+  const border = mixHex(theme.text, theme.bg, luminance(theme.bg) < 0.35 ? 0.82 : 0.9);
+  let goldAccent = null;
+  for (const h of topColors) {
+    const hx = normalizeHex(h);
+    if (!hx) continue;
+    const r = parseInt(hx.slice(1, 3), 16);
+    const g = parseInt(hx.slice(3, 5), 16);
+    const b = parseInt(hx.slice(5, 7), 16);
+    if (r > 170 && g > 130 && b < 120) {
+      goldAccent = hx;
+      break;
+    }
+  }
 
   return {
     version: 1,
+    visualStyle,
     tokens: {
       space,
-      radius: { sm: 6, md: 12, lg: 20 },
+      radius: { sm: 6, md: 14, lg: 24 },
       colors: {
         bg: theme.bg,
-        surface,
+        surface: theme.surface,
         text: theme.text,
-        muted,
+        muted: theme.muted,
         accent: theme.accent,
         border,
+        ...(goldAccent ? { goldAccent } : {}),
       },
+      gradients,
+      ...(ctaGradient ? { ctaGradient } : {}),
       type,
       topColors,
     },
@@ -237,6 +339,8 @@ export function buildDesignBlueprintFromHtml(html, sourceUrl) {
       hasHero: heroPresent,
       navApproxItems,
       headerStyle: hasHeader || hasNav ? 'standard' : 'minimal',
+      heroLayout,
+      watermarkTypography: false,
     },
     typography: {
       headingStack,
@@ -260,6 +364,7 @@ export function buildDesignBlueprintFromHtml(html, sourceUrl) {
  */
 export async function extractDesignBlueprintFromUrl(urlStr) {
   const { url, html } = await fetchReferenceHtml(urlStr);
-  const blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+  let blueprint = buildDesignBlueprintFromHtml(html, url.toString());
+  blueprint = await enrichReferenceBlueprint(html, blueprint);
   return { blueprint, html };
 }

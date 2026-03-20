@@ -22,8 +22,66 @@ const SECTION_BODIES = [
   'フォーム・LINE・メールなど、希望の連絡手段を案内します。',
 ];
 
+/**
+ * ダーク系・グラデCTAの参考LPに近い静的レイアウト用（文章はプレースホルダ）
+ * @param {object} blueprint
+ */
+function generateDarkLpPageModel(blueprint) {
+  const layout = blueprint?.layout || {};
+  const n = Math.min(12, Math.max(3, layout.sectionCount || 5));
+  const navCount = Math.min(6, Math.max(2, layout.navApproxItems || 4));
+
+  const navItems = NAV_LABELS.slice(0, navCount).map((label, i) => ({
+    label,
+    href: i === 0 ? '#top' : `#sec-${i}`,
+  }));
+
+  const sections = [];
+  for (let i = 0; i < n; i++) {
+    sections.push({
+      id: `sec-${i + 1}`,
+      title: SECTION_TITLES[i % SECTION_TITLES.length],
+      content: SECTION_BODIES[i % SECTION_BODIES.length],
+    });
+  }
+
+  const heroImage =
+    'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1400&q=85';
+  const sectionImage =
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80';
+
+  return {
+    variant: 'dark_lp',
+    siteName: 'ブランド名（プレースホルダ）',
+    title: 'プレースホルダ | 参考設計プレビュー',
+    heroKicker: 'プロフェッショナル / サンプル肩書き',
+    heroTitle: '山田 太郎',
+    /** @type {{ text: string; mark?: boolean }[]} */
+    heroLeadSegments: [
+      { text: '成果は「情報の量」ではなく、' },
+      { text: 'どう事業に落とし込めるか。', mark: true },
+      { text: ' 意思決定に必要なのは「判断基準」です。参考URLから抽出した配色・余白・CTAの形状に近づけたプレビューです。' },
+    ],
+    heroWatermark: 'YAMADA TARO',
+    navItems,
+    sections,
+    heroImage,
+    sectionImage,
+    ctaLabel: '個別説明会に参加する',
+    ctaBadge: '無料',
+    ctaHref: '#contact',
+    footerText: `© ${new Date().getFullYear()} サンプル（プレビュー）`,
+    moodTag: 'dark,business',
+  };
+}
+
 /** @param {object} blueprint buildDesignBlueprintFromHtml の戻り値 */
 export function generateBlueprintPageModel(blueprint) {
+  const vs = blueprint?.visualStyle;
+  if (vs === 'dark_gradient_lp' || vs === 'dark_hero') {
+    return generateDarkLpPageModel(blueprint);
+  }
+
   const layout = blueprint?.layout || {};
   const n = Math.min(12, Math.max(3, layout.sectionCount || 5));
   const navCount = Math.min(6, Math.max(2, layout.navApproxItems || 4));
