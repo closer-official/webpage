@@ -308,7 +308,8 @@ export function renderCustomerIntakePage() {
         }).then(function (r) { return r.json(); })
           .then(function (data) {
             if (data && data.ok) {
-              ok.textContent = '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。';
+              var previewLink = (data.previewUrl ? ' 叩き台プレビュー: ' + data.previewUrl : '');
+              ok.textContent = '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。' + previewLink;
               form.reset();
             } else {
               ng.textContent = (data && data.error) ? data.error : '送信に失敗しました。';

@@ -69,6 +69,85 @@ function isAdminAuthenticated(req) {
   }
 }
 
+function splitLines(text, limit = 20) {
+  return String(text || '')
+    .split(/\r?\n|,|、|，/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+function goalLabel(goal) {
+  const m = {
+    business_card: '名刺代わり',
+    sales: '商品の販売',
+    inquiry: 'お問い合わせの増加',
+    recruit: '採用強化',
+    other: 'その他',
+  };
+  return m[String(goal)] || String(goal || 'Web集客');
+}
+
+function intakeToPageDraft(intake) {
+  const siteName = intake.storeName || 'サンプル店舗';
+  const tastes = Array.isArray(intake.designTastes) ? intake.designTastes.join(' / ') : '';
+  const musts = splitLines(intake.mustHaveContent, 8);
+  const refs = splitLines(intake.favoriteSiteUrl, 8);
+  const current = splitLines(intake.currentActivityUrl, 8);
+
+  const sections = [
+    {
+      id: 'concept',
+      title: 'コンセプト',
+      content: `最大の目的: ${goalLabel(intake.websiteGoal)}\n\nメインターゲット: ${intake.targetAudience || '未記入'}\n\n希望テイスト: ${tastes || '未記入'}`,
+    },
+    {
+      id: 'menu',
+      title: '掲載したい内容',
+      content: musts.length ? musts.map((v, i) => `${i + 1}. ${v}`).join('\n') : '掲載内容はヒアリング内容に合わせて調整します。',
+    },
+    {
+      id: 'gallery',
+      title: '参考イメージ',
+      content: refs.length ? refs.join('\n') : '参考URLは未記入です。',
+    },
+    {
+      id: 'contact',
+      title: 'お問い合わせ',
+      content: `ご連絡方法: ${intake.contactMethod || '-'}\n連絡先: ${intake.contactValue || '-'}\n\n現在の活動URL:\n${current.join('\n') || '-'}`,
+    },
+  ];
+
+  if (String(intake.requestSummary || '').trim()) {
+    sections.splice(2, 0, {
+      id: 'staff',
+      title: 'ご要望メモ',
+      content: String(intake.requestSummary).trim(),
+    });
+  }
+
+  const content = {
+    siteName,
+    title: siteName,
+    headline: `${siteName} 公式サイト案`,
+    subheadline: `ヒアリング回答をもとに作成した叩き台です（ベーステンプレ: ${intake.chosenTemplateId}）。`,
+    ctaLabel: 'お問い合わせ',
+    ctaHref: '#contact',
+    sections,
+    footerText: `© ${new Date().getFullYear()} ${siteName}. All rights reserved.`,
+  };
+
+  const seo = {
+    metaTitle: `${siteName} | サイト叩き台`,
+    metaDescription: `${goalLabel(intake.websiteGoal)}を目的とした叩き台です。`,
+    keywords: tastes || '',
+    ogImageUrl: '',
+    canonicalUrl: '',
+  };
+
+  return { content, seo, templateId: intake.chosenTemplateId };
+}
+
 // ---------- 管理ページログイン ----------
 app.get('/api/admin-auth/status', (req, res) => {
   const enabled = adminAuthEnabled();
@@ -273,7 +352,28 @@ app.post('/api/customer-intake', async (req, res) => {
   };
   list.unshift(row);
   await store.setCustomerIntake(list);
-  res.status(201).json({ ok: true, id: row.id });
+  const previewUrl = `/api/customer-intake/${encodeURIComponent(row.id)}/preview`;
+  res.status(201).json({ ok: true, id: row.id, previewUrl });
+});
+
+app.get('/api/customer-intake/:id/preview', async (req, res) => {
+  const list = await store.getCustomerIntake();
+  const row = (list || []).find((v) => v.id === req.params.id);
+  if (!row) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Intake not found');
+  if (!isValidTemplateId(row.chosenTemplateId)) {
+    return res.status(400).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Invalid template');
+  }
+
+  const { content, seo, templateId } = intakeToPageDraft(row);
+  const html = buildHtml(content, seo, templateId, {
+    contactForm: false,
+    instagramLine: false,
+    presentedBy: true,
+    qrCode: false,
+  });
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'private, max-age=0');
+  res.send(html);
 });
 
 app.post('/api/collect', async (req, res) => {
