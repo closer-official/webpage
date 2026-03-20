@@ -3,6 +3,12 @@
 **フルオート**：Webサイトがない店を探す → 口コミから雰囲気・客層・コンセプト・強みをAIで分析 → 既定フォーマットでLP案を3つ生成（コンセプト別テンプレート）→ DM文面を自動作成 → **あなたは最終チェック（承認）だけ**。  
 **手動フロー**：キューに手動/ブラウザMapsで追加 → 調査フォームで入力 → LP生成 → 検閲。PDF・テキストから直接作成も可能。
 
+## 制作運用（テンプレ化の流れ）
+
+**専用を一つずつ作る → 完成した納品物をテンプレに保存する** を基本線とします。詳細は [`docs/WORKFLOW.md`](docs/WORKFLOW.md) を参照してください。
+
+- お客様専用の静的LP例: [`public/deliverables/japanese-history-higashi/`](public/deliverables/japanese-history-higashi/)（開発時は `/deliverables/japanese-history-higashi/index.html` で開けます）
+
 ## 機能
 
 ### フルオート（サーバー起動時）
