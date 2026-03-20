@@ -279,6 +279,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
 
   const openPreview = useCallback(async () => {
     if (!selected) return;
+    setErr(null);
     if (blueprintVersionOk(activeBlueprint) && activeBlueprint) {
       if (!isApiAvailable()) return;
       try {
@@ -296,12 +297,33 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
       return;
     }
     const baseId = selected.baseTemplateId || selected.id;
-    const tpl = TEMPLATES.find((t) => t.id === baseId);
-    if (!tpl) return;
+    const tpl =
+      TEMPLATES.find((t) => t.id === baseId) ?? TEMPLATES.find((t) => t.id === selected.id);
+
+    // クライアントの TEMPLATES が古い／base と id がずれている場合でも、API 経由ならサーバー側で描画できる
+    if (!tpl && isApiAvailable()) {
+      const previewPath = `/api/template-preview/${encodeURIComponent(selected.id)}`;
+      window.open(previewPath, '_blank', 'noopener');
+      return;
+    }
+    if (!tpl) {
+      setErr(
+        `テンプレート「${baseId}」のプレビュー用定義が見つかりません。フロントを再ビルド（npm run build）するか、API 付きで開いてください。`
+      );
+      return;
+    }
     const sample = SHOWCASE_BY_STYLE_ID[tpl.styleId];
-    const content = sample ? sample.content : SAMPLE_DEFAULT;
-    const seo = sample ? sample.seo : SAMPLE_SEO_DEFAULT;
-    let html = buildHtml(applyOverrides(content), seo, tpl, { genOptions: SAMPLE_GEN_OPTIONS });
+    const content = JSON.parse(
+      JSON.stringify(sample ? sample.content : SAMPLE_DEFAULT)
+    ) as PageContent;
+    const seo = JSON.parse(JSON.stringify(sample ? sample.seo : SAMPLE_SEO_DEFAULT)) as SEOData;
+    let html: string;
+    try {
+      html = buildHtml(applyOverrides(content), seo, tpl, { genOptions: SAMPLE_GEN_OPTIONS });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'プレビューの生成に失敗しました');
+      return;
+    }
     const css = makeThemeCss(baseId, { bg, text, accent });
     if (css) html = html.replace('</head>', `<style id="custom-template-theme">${css}</style></head>`);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
