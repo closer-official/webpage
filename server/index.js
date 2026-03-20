@@ -18,6 +18,25 @@ import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
+import { extractStyleFingerprintFromUrl } from './styleFingerprint.js';
+
+/** 参考URL抽出の簡易レート制限（メモリ保持・サーバーレスではインスタンス単位） */
+const styleExtractHits = new Map();
+function allowStyleExtract(ip) {
+  const key = ip || 'unknown';
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000;
+  const max = 12;
+  const arr = (styleExtractHits.get(key) || []).filter((t) => now - t < windowMs);
+  if (arr.length >= max) return false;
+  arr.push(now);
+  styleExtractHits.set(key, arr);
+  return true;
+}
+function clientIp(req) {
+  const xf = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return xf || req.socket?.remoteAddress || '';
+}
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -172,6 +191,23 @@ function normalizeCustomizationInput(body = {}) {
   };
 }
 
+function sanitizeFingerprint(fp) {
+  if (!fp || typeof fp !== 'object') return undefined;
+  const topColors = Array.isArray(fp.topColors)
+    ? fp.topColors.map((c) => String(c).trim().slice(0, 20)).filter(Boolean).slice(0, 24)
+    : undefined;
+  const sampleFonts = Array.isArray(fp.sampleFonts)
+    ? fp.sampleFonts.map((s) => String(s).trim().slice(0, 80)).filter(Boolean).slice(0, 10)
+    : undefined;
+  const out = {
+    ...(topColors?.length ? { topColors } : {}),
+    ...(sampleFonts?.length ? { sampleFonts } : {}),
+    ...(fp.extractedAt ? { extractedAt: String(fp.extractedAt).slice(0, 40) } : {}),
+    ...(fp.sourceUrl ? { sourceUrl: String(fp.sourceUrl).trim().slice(0, 2000) } : {}),
+  };
+  return Object.keys(out).length ? out : undefined;
+}
+
 // ---------- 管理ページログイン ----------
 app.get('/api/admin-auth/status', (req, res) => {
   const enabled = adminAuthEnabled();
@@ -303,7 +339,7 @@ app.post('/api/queue', async (req, res) => {
 // ---------- 顧客ヒアリング ----------
 app.get(['/customer-intake', '/api/customer-intake'], async (req, res) => {
   const customs = await store.getTemplateCustomizations();
-  const candidates = getTemplateCandidates(customs);
+  const candidates = getTemplateCandidates(customs, { forPublicSelection: true });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(renderCustomerIntakePage(candidates));
 });
@@ -329,7 +365,25 @@ app.get('/api/template-preview/:templateId', (req, res) => {
 
 app.get('/api/template-candidates', async (req, res) => {
   const customs = await store.getTemplateCustomizations();
-  res.json(getTemplateCandidates(customs));
+  const includeDrafts = adminAuthEnabled() ? isAdminAuthenticated(req) : true;
+  res.json(getTemplateCandidates(customs, { forPublicSelection: !includeDrafts }));
+});
+
+/** 参考URLからスタイル指紋を取得（レート制限あり）。管理者画面・ヒアリング送信前のプレビュー用 */
+app.post('/api/style-reference/extract', async (req, res) => {
+  const ip = clientIp(req);
+  if (!allowStyleExtract(ip)) {
+    return res.status(429).json({ error: 'しばらく時間をおいて再度お試しください。' });
+  }
+  const rawUrl = String(req.body?.url || '').trim();
+  if (!rawUrl) return res.status(400).json({ error: 'url is required' });
+  try {
+    const { fingerprint, suggestedOverride } = await extractStyleFingerprintFromUrl(rawUrl);
+    res.json({ ok: true, fingerprint, suggestedOverride });
+  } catch (e) {
+    console.error('[style-reference/extract]', e?.message || e);
+    res.status(400).json({ error: e?.message || '抽出に失敗しました' });
+  }
 });
 
 app.get('/api/template-customizations', async (req, res) => {
@@ -348,10 +402,19 @@ app.post('/api/template-customizations/save', async (req, res) => {
     const id = String(body.id || '');
     const i = customizations.findIndex((v) => v.id === id);
     if (i === -1) return res.status(404).json({ error: 'Customization not found' });
+    const nextStatus =
+      body.status === 'draft' || body.status === 'published'
+        ? body.status
+        : customizations[i].status || 'published';
     customizations[i] = {
       ...customizations[i],
       name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
       override: normalizeCustomizationInput(body.override || {}),
+      status: nextStatus,
+      ...(body.sourceUrl != null
+        ? { sourceUrl: String(body.sourceUrl || '').trim().slice(0, 5000) }
+        : {}),
+      ...(body.fingerprint != null ? { fingerprint: sanitizeFingerprint(body.fingerprint) } : {}),
       updatedAt: now,
     };
     await store.setTemplateCustomizations(customizations);
@@ -363,17 +426,36 @@ app.post('/api/template-customizations/save', async (req, res) => {
     return res.status(400).json({ error: 'baseTemplateId is invalid' });
   }
   const id = `custom-${Date.now().toString(36)}`;
+  const status = body.status === 'draft' ? 'draft' : 'published';
   const item = {
     id,
     name: String(body.name || `カスタムテンプレ ${customizations.length + 1}`).trim().slice(0, 80),
     baseTemplateId,
     override: normalizeCustomizationInput(body.override || {}),
+    status,
+    sourceUrl: String(body.sourceUrl || '').trim().slice(0, 5000) || undefined,
+    fingerprint: sanitizeFingerprint(body.fingerprint),
+    sourceIntakeId: String(body.sourceIntakeId || '').trim().slice(0, 80) || undefined,
     createdAt: now,
     updatedAt: now,
   };
   customizations.unshift(item);
   await store.setTemplateCustomizations(customizations);
   res.json({ ok: true, item });
+});
+
+/** 下書きテンプレを公開（候補一覧・ヒアリングに表示） */
+app.post('/api/template-customizations/publish', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const id = String(req.body?.id || '').trim();
+  if (!id) return res.status(400).json({ error: 'id is required' });
+  const customizations = await store.getTemplateCustomizations();
+  const i = customizations.findIndex((v) => v.id === id);
+  if (i === -1) return res.status(404).json({ error: 'Customization not found' });
+  const now = new Date().toISOString();
+  customizations[i] = { ...customizations[i], status: 'published', updatedAt: now };
+  await store.setTemplateCustomizations(customizations);
+  res.json({ ok: true, item: customizations[i] });
 });
 
 app.get('/api/customer-intake-list', async (req, res) => {
@@ -413,6 +495,7 @@ app.get('/api/customer-intake-draft/:id', async (req, res) => {
     mustHaveContent: row.mustHaveContent || '',
     currentActivityUrl: row.currentActivityUrl || '',
     requestSummary: row.requestSummary || '',
+    extractStyleToDraft: !!row.extractStyleToDraft,
   });
 });
 
@@ -441,6 +524,7 @@ app.post('/api/customer-intake-draft', async (req, res) => {
     currentActivityUrl: String(body.currentActivityUrl || '').trim().slice(0, 5000),
     requestSummary: String(body.requestSummary || '').trim().slice(0, 5000),
     pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
+    extractStyleToDraft: Boolean(body.extractStyleToDraft),
     status: 'draft',
     updatedAt: now,
   };
@@ -504,7 +588,9 @@ app.post('/api/customer-intake', async (req, res) => {
     return res.status(400).json({ error: 'designTastes is required' });
   }
   const templateCustoms = await store.getTemplateCustomizations();
-  if (!isValidTemplateId(body.chosenTemplateId, templateCustoms)) {
+  const publicCandidates = getTemplateCandidates(templateCustoms, { forPublicSelection: true });
+  const allowedTemplateIds = new Set(publicCandidates.map((c) => c.id));
+  if (!allowedTemplateIds.has(String(body.chosenTemplateId || '').trim())) {
     return res.status(400).json({ error: 'chosenTemplateId is invalid' });
   }
 
@@ -512,8 +598,16 @@ app.post('/api/customer-intake', async (req, res) => {
   const now = new Date().toISOString();
   const draftId = String(body.draftId || '').trim();
   const draftToken = String(body.draftToken || '').trim();
+  const existingDraft = draftId ? list.find((v) => v.id === draftId) : null;
+  const rowId = draftId || `intake-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const extractStyleToDraft =
+    body.extractStyleToDraft === true ||
+    body.extractStyleToDraft === 'true' ||
+    body.extractStyleToDraft === 'on';
+
   const row = {
-    id: draftId || `intake-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: rowId,
     storeName: String(body.storeName || '').trim().slice(0, 120),
     contactName: String(body.contactName || '').trim().slice(0, 80),
     contactMethod: String(body.contactMethod || '').trim(),
@@ -533,8 +627,47 @@ app.post('/api/customer-intake', async (req, res) => {
     pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
     status: 'submitted',
     updatedAt: now,
-    createdAt: now,
+    createdAt: existingDraft?.createdAt || now,
   };
+
+  let styleDraftTemplateId = null;
+  if (extractStyleToDraft) {
+    const firstUrl = String(row.favoriteSiteUrl || '')
+      .split(/[\n\r]+/)
+      .map((s) => s.trim())
+      .find(Boolean);
+    if (firstUrl) {
+      try {
+        const freshCustoms = await store.getTemplateCustomizations();
+        const candidate = findTemplateCandidate(row.chosenTemplateId, freshCustoms);
+        const baseTid = candidate?.baseTemplateId || row.chosenTemplateId;
+        const { fingerprint, suggestedOverride } = await extractStyleFingerprintFromUrl(firstUrl);
+        const tid = `custom-${Date.now().toString(36)}`;
+        const draftItem = {
+          id: tid,
+          name: `ヒアリング:${row.storeName}`.slice(0, 80),
+          baseTemplateId: baseTid,
+          override: normalizeCustomizationInput({
+            ...suggestedOverride,
+            theme: suggestedOverride.theme,
+          }),
+          status: 'draft',
+          sourceUrl: firstUrl,
+          fingerprint,
+          sourceIntakeId: row.id,
+          createdAt: now,
+          updatedAt: now,
+        };
+        freshCustoms.unshift(draftItem);
+        await store.setTemplateCustomizations(freshCustoms);
+        styleDraftTemplateId = tid;
+      } catch (e) {
+        console.error('[intake style draft]', e);
+      }
+    }
+  }
+  if (styleDraftTemplateId) row.styleDraftTemplateId = styleDraftTemplateId;
+
   if (draftId) {
     const i = list.findIndex((v) => v.id === draftId);
     if (i >= 0) {
@@ -550,7 +683,12 @@ app.post('/api/customer-intake', async (req, res) => {
   }
   await store.setCustomerIntake(list);
   const previewUrl = `/api/customer-intake/${encodeURIComponent(row.id)}/preview`;
-  res.status(201).json({ ok: true, id: row.id, previewUrl });
+  res.status(201).json({
+    ok: true,
+    id: row.id,
+    previewUrl,
+    styleDraftTemplateId: row.styleDraftTemplateId || null,
+  });
 });
 
 app.get('/api/customer-intake/:id/preview', async (req, res) => {

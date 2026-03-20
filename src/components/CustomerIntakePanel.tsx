@@ -62,6 +62,19 @@ export function CustomerIntakePanel() {
               <p>
                 プレビュー: <a href={it.previewUrl} target="_blank" rel="noopener noreferrer">{it.previewUrl}</a>
               </p>
+              {it.styleDraftTemplateId && (
+                <p>
+                  参考URLからのテンプレ下書き:{' '}
+                  <a
+                    href={`/api/template-preview/${encodeURIComponent(it.styleDraftTemplateId)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {it.styleDraftTemplateId}
+                  </a>{' '}
+                  （公開承認後にヒアリング候補へ）
+                </p>
+              )}
             </li>
           ))}
         </ul>

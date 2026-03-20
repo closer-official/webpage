@@ -237,7 +237,11 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           </div>
           <div class="full">
             <label for="favoriteSiteUrl">参考にしたい / 好きな雰囲気のWebサイトURL *</label>
-            <textarea id="favoriteSiteUrl" name="favoriteSiteUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）"></textarea>
+            <textarea id="favoriteSiteUrl" name="favoriteSiteUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）。先頭のURLをスタイル解析に使います。"></textarea>
+            <label class="chip full" style="margin-top:10px; border-radius:12px; padding:10px 12px;">
+              <input type="checkbox" name="extractStyleToDraft" id="extractStyleToDraft" value="on" />
+              先頭の参考URLから配色などを自動抽出し、<strong>カスタムテンプレの下書き</strong>を作成する（管理者が公開承認するまでヒアリングの候補には出ません）
+            </label>
           </div>
           <div class="full">
             <label for="mustHaveContent">絶対に載せたいコンテンツ *</label>
@@ -306,6 +310,8 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
             form.mainColor.value = d.mainColor || '';
             form.styleDetail.value = d.styleDetail || '';
             form.favoriteSiteUrl.value = d.favoriteSiteUrl || '';
+            var ex = document.getElementById('extractStyleToDraft');
+            if (ex) ex.checked = !!d.extractStyleToDraft;
             form.mustHaveContent.value = d.mustHaveContent || '';
             form.currentActivityUrl.value = d.currentActivityUrl || '';
             form.requestSummary.value = d.requestSummary || '';
@@ -334,7 +340,8 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           mustHaveContent: form.mustHaveContent.value.trim(),
           currentActivityUrl: form.currentActivityUrl.value.trim(),
           requestSummary: form.requestSummary.value.trim(),
-          pageUrl: window.location.href
+          pageUrl: window.location.href,
+          extractStyleToDraft: !!(form.extractStyleToDraft && form.extractStyleToDraft.checked)
         };
       }
 
@@ -384,7 +391,8 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           .then(function (data) {
             if (data && data.ok) {
               var previewLink = (data.previewUrl ? ' 叩き台プレビュー: ' + data.previewUrl : '');
-              ok.textContent = '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。' + previewLink;
+              var draftNote = (data.styleDraftTemplateId ? ' テンプレ下書きID: ' + data.styleDraftTemplateId + '（運営が確認・公開します）' : '');
+              ok.textContent = '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。' + previewLink + draftNote;
               form.reset();
             } else {
               ng.textContent = (data && data.error) ? data.error : '送信に失敗しました。';

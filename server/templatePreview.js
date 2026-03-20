@@ -18,14 +18,25 @@ export const TEMPLATE_CANDIDATES = [
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 
-export function getTemplateCandidates(customizations = []) {
+/**
+ * @param {unknown[]} customizations
+ * @param {{ forPublicSelection?: boolean }} [options] forPublicSelection=true のとき下書き（draft）は一覧に含めない（ヒアリング・一般向け）
+ */
+export function getTemplateCandidates(customizations = [], options = {}) {
+  const forPublic = options.forPublicSelection !== false;
   const custom = (Array.isArray(customizations) ? customizations : [])
+    .filter((c) => {
+      if (!forPublic) return true;
+      if (c && c.status === 'draft') return false;
+      return true;
+    })
     .map((c) => ({
       id: c.id,
       name: c.name || `カスタムテンプレ (${c.id})`,
       baseTemplateId: c.baseTemplateId,
       customization: c,
       isCustom: true,
+      status: c.status || 'published',
     }));
   const builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
   return [...builtin, ...custom];
@@ -81,9 +92,20 @@ function labelOf(id) {
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
 }
 
+/** カスタム保存オブジェクト { override: {...} } とフラットな上書きの両方に対応 */
+function resolveTemplateOverride(customization) {
+  if (!customization || typeof customization !== 'object') return {};
+  if (customization.override && typeof customization.override === 'object') {
+    return customization.override;
+  }
+  return customization;
+}
+
 export function renderTemplatePreview(templateId, customization = null) {
   const id = String(templateId || '');
   if (!TEMPLATE_IDS.has(id)) return null;
+
+  const ov = resolveTemplateOverride(customization);
 
   const now = new Date().getFullYear();
   const name = labelOf(id);
@@ -112,7 +134,7 @@ export function renderTemplatePreview(templateId, customization = null) {
     canonicalUrl: '',
   };
 
-  content = applyTemplateCustomization(content, customization || {});
+  content = applyTemplateCustomization(content, ov);
   let html = buildHtml(content, seo, id, {
     contactForm: true,
     formActionUrl: '#',
@@ -122,6 +144,6 @@ export function renderTemplatePreview(templateId, customization = null) {
     qrCode: true,
     qrCodeTargetUrl: 'https://example.com',
   });
-  html = injectThemeCss(html, buildThemeCss(id, customization?.theme));
+  html = injectThemeCss(html, buildThemeCss(id, ov.theme));
   return html;
 }

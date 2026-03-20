@@ -27,10 +27,14 @@ export type TemplateCandidate = {
   name: string;
   baseTemplateId: string;
   isCustom: boolean;
+  /** 下書きは一般のヒアリング候補に出ない */
+  status?: 'draft' | 'published';
   customization?: {
     id: string;
     name: string;
     baseTemplateId: string;
+    status?: 'draft' | 'published';
+    sourceUrl?: string;
     override?: {
       headline?: string;
       subheadline?: string;
@@ -40,10 +44,21 @@ export type TemplateCandidate = {
   };
 };
 
+export type StyleFingerprint = {
+  topColors?: string[];
+  sampleFonts?: string[];
+  extractedAt?: string;
+  sourceUrl?: string;
+};
+
 export type TemplateCustomization = {
   id: string;
   name: string;
   baseTemplateId: string;
+  status?: 'draft' | 'published';
+  sourceUrl?: string;
+  sourceIntakeId?: string;
+  fingerprint?: StyleFingerprint;
   override?: {
     headline?: string;
     subheadline?: string;
@@ -75,6 +90,9 @@ export type CustomerIntakeItem = {
   createdAt: string;
   updatedAt?: string;
   previewUrl: string;
+  /** 参考URLから自動生成したカスタムテンプレ下書きID */
+  styleDraftTemplateId?: string;
+  extractStyleToDraft?: boolean;
 };
 
 export function isApiAvailable(): boolean {
@@ -191,12 +209,27 @@ export const api = {
     id?: string;
     name?: string;
     baseTemplateId?: string;
+    status?: 'draft' | 'published';
+    sourceUrl?: string;
+    sourceIntakeId?: string;
+    fingerprint?: StyleFingerprint;
     override?: TemplateCustomization['override'];
   }) =>
     fetchApi<{ ok: boolean; item: TemplateCustomization }>('/api/template-customizations/save', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  publishTemplateCustomization: (id: string) =>
+    fetchApi<{ ok: boolean; item: TemplateCustomization }>('/api/template-customizations/publish', {
+      method: 'POST',
+      body: JSON.stringify({ id }),
+    }),
+  extractStyleFromUrl: (url: string) =>
+    fetchApi<{
+      ok: boolean;
+      fingerprint: StyleFingerprint & { sourceUrl?: string };
+      suggestedOverride: { theme?: { bg?: string; text?: string; accent?: string } };
+    }>('/api/style-reference/extract', { method: 'POST', body: JSON.stringify({ url }) }),
   getCustomerIntakeList: () => fetchApi<CustomerIntakeItem[]>('/api/customer-intake-list'),
 
   getOptions: () => fetchApi<GenerationOptions>('/api/options'),
