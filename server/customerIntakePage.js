@@ -4,34 +4,114 @@ export function renderCustomerIntakePage() {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ヒアリングフォーム | CLOSER</title>
+  <title>ヒアリングフォーム | Tadanosuke Closer</title>
   <style>
-    :root { --bg:#f8fafc; --card:#fff; --text:#0f172a; --sub:#475569; --line:#cbd5e1; --accent:#0f766e; --btn:#0d6efd; }
+    :root {
+      --bg-base: #f2f0eb;
+      --bg-card: #ebe9e4;
+      --text: #3d3935;
+      --text-muted: #6b6560;
+      --terracotta: #b8956f;
+      --terracotta-soft: #d4c4b0;
+      --sage: #8b9a7a;
+      --sage-soft: #a8b498;
+      --border: #ddd9d2;
+    }
     * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font-family:"Hiragino Sans","Noto Sans JP",sans-serif; }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 20px 14px 48px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:0 10px 25px rgba(15,23,42,.05); }
-    h1 { margin:0 0 8px; font-size:1.35rem; }
-    .lead { margin:0 0 16px; color:var(--sub); line-height:1.7; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    body {
+      margin: 0;
+      background: var(--bg-base);
+      color: var(--text);
+      font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+      line-height: 1.8;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 72px 14px 72px; }
+    .brand { margin-bottom: 18px; color: var(--text-muted); font-size: .84rem; letter-spacing: .06em; text-transform: uppercase; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(107, 101, 96, .08);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.55rem;
+      line-height: 1.45;
+      font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .lead { margin: 0 0 18px; color: var(--text-muted); }
+    .micro-copy {
+      margin: 0 0 20px;
+      padding-left: 10px;
+      border-left: 3px solid var(--terracotta-soft);
+      color: var(--text-muted);
+      font-size: .92rem;
+    }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
     .full { grid-column: 1 / -1; }
-    label { font-size:.9rem; font-weight:700; display:block; margin:0 0 6px; }
-    input, select, textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px; font-size:14px; }
-    textarea { min-height:100px; resize:vertical; }
-    .note { margin-top:10px; color:var(--sub); font-size:.84rem; line-height:1.6; }
-    .actions { margin-top:16px; display:flex; gap:10px; align-items:center; }
-    button { border:none; background:var(--btn); color:#fff; border-radius:8px; padding:10px 16px; font-weight:700; cursor:pointer; }
+    label { font-size:.9rem; font-weight:700; display:block; margin:0 0 6px; color: var(--text); }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--bg-base);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 14px;
+      font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(184, 149, 111, .22);
+    }
+    textarea { min-height:120px; resize:vertical; }
+    .note {
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: .86rem;
+      line-height: 1.8;
+    }
+    .actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      background: var(--terracotta);
+      color: var(--bg-base);
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    button:hover { transform: translateY(-1px); }
     button:disabled { opacity:.55; cursor:not-allowed; }
-    .msg { font-size:.9rem; color:var(--accent); }
-    .err { color:#b91c1c; font-size:.9rem; }
-    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+    .msg { font-size:.9rem; color:var(--sage); }
+    .err { color:#8f4f48; font-size:.9rem; }
+    .footer-link { margin-top: 20px; font-size: .88rem; color: var(--text-muted); }
+    .footer-link a { color: var(--sage); text-underline-offset: 2px; }
+    @media (max-width: 680px) {
+      .wrap { padding-top: 48px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { padding: 18px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <p class="brand">Tadanosuke Closer</p>
     <div class="card">
       <h1>制作前ヒアリングフォーム</h1>
-      <p class="lead">ご依頼内容を確認するための入力フォームです。送信後、運営側で確認し、メールまたはLINEでご連絡します。</p>
+      <p class="lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>
+      <p class="micro-copy">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
 
       <form id="intake-form" novalidate>
         <div class="grid">
@@ -77,13 +157,14 @@ export function renderCustomerIntakePage() {
             <textarea id="references" name="references" maxlength="5000" placeholder="URLを改行で入力"></textarea>
           </div>
         </div>
-        <p class="note">※ 送信内容は制作の事前確認にのみ利用します。紹介コードの判定は運営側で行います。</p>
+        <p class="note">※ 送信内容は制作の事前確認にのみ利用します。紹介コードの照合・ご案内は運営側で手動対応します。</p>
         <div class="actions">
           <button id="submit-btn" type="submit">ヒアリングを送信</button>
           <span id="ok" class="msg"></span>
           <span id="ng" class="err"></span>
         </div>
       </form>
+      <p class="footer-link">送信後、確認のうえ <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">closer-official.com</a> よりメールまたはLINEでご連絡します。</p>
     </div>
   </div>
 
