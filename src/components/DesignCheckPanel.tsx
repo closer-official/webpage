@@ -80,12 +80,19 @@ type InlineSession = {
   tpl: TemplateCandidate;
 } & ReviewPreviewPersistPayload;
 
+function blueprintVersionOk(bp: DesignBlueprint | undefined | null): boolean {
+  return bp != null && Number((bp as DesignBlueprint).version) === 1;
+}
+
 /** セッション抽出 or 保存済みブループリントを解決（スキンカスタム選択時はブループリントを使わない） */
 function resolveActiveBlueprint(sel: TemplateCandidate | undefined, session: DesignBlueprint | null) {
-  if (sel?.customization?.blueprint && (sel.customization.blueprint as DesignBlueprint).version === 1) {
-    return sel.customization.blueprint as DesignBlueprint;
+  const saved = sel?.customization?.blueprint as DesignBlueprint | undefined;
+  /** 保存済みの参考設計テンプレは DB の blueprint を最優先 */
+  if (sel?.isCustom && sel.baseTemplateId === 'blueprint' && blueprintVersionOk(saved)) {
+    return saved as DesignBlueprint;
   }
-  if (session?.version !== 1) return null;
+  if (session && !blueprintVersionOk(session)) return null;
+  /** 業種スキンのカスタムはセッションのブループリントを混ぜない */
   if (sel?.isCustom && sel.baseTemplateId !== 'blueprint') return null;
   return session;
 }
@@ -229,8 +236,11 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     setText(ov?.theme?.text || '');
     setAccent(ov?.theme?.accent || '');
     setRefUrl(selected.customization?.sourceUrl || '');
-    if (selected.customization?.blueprint) {
-      setReferenceBlueprint(selected.customization.blueprint as DesignBlueprint);
+    const bp = selected.customization?.blueprint as DesignBlueprint | undefined;
+    if (blueprintVersionOk(bp) && bp) {
+      setReferenceBlueprint(bp);
+    } else if (selected.isCustom && selected.baseTemplateId === 'blueprint') {
+      setReferenceBlueprint(null);
     }
     setMsg(null);
     setErr(null);
@@ -267,7 +277,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
 
   const openPreview = useCallback(async () => {
     if (!selected) return;
-    if (activeBlueprint?.version === 1) {
+    if (blueprintVersionOk(activeBlueprint) && activeBlueprint) {
       if (!isApiAvailable()) return;
       try {
         const html = await api.previewDesignBlueprint({
@@ -307,7 +317,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     setMsg(null);
     try {
       const res = await api.extractStyleFromUrl(refUrl.trim());
-      if (res.blueprint?.version === 1) {
+      if (blueprintVersionOk(res.blueprint)) {
         setReferenceBlueprint(res.blueprint);
         const col = res.blueprint.tokens?.colors;
         if (col?.bg) setBg(col.bg);
@@ -327,8 +337,8 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     setErr(null);
     setMsg(null);
     try {
-      if (activeBlueprint?.version === 1) {
-        await api.saveTemplateCustomization({
+      if (blueprintVersionOk(activeBlueprint) && activeBlueprint) {
+        const { item } = await api.saveTemplateCustomization({
           mode: 'create',
           status: 'published',
           baseTemplateId: 'blueprint',
@@ -337,8 +347,9 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           sourceUrl: refUrl.trim() || undefined,
           override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
         });
+        if (item?.id) setSelectedId(item.id);
       } else {
-        await api.saveTemplateCustomization({
+        const { item } = await api.saveTemplateCustomization({
           mode: 'create',
           status: 'published',
           name: name.trim() || `${selected.name} カスタム`,
@@ -346,6 +357,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           sourceUrl: refUrl.trim() || undefined,
           override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
         });
+        if (item?.id) setSelectedId(item.id);
       }
       const list = await api.getTemplateCandidates();
       setCandidates(list || []);
@@ -360,8 +372,8 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
     setErr(null);
     setMsg(null);
     try {
-      if (activeBlueprint?.version === 1) {
-        await api.saveTemplateCustomization({
+      if (blueprintVersionOk(activeBlueprint) && activeBlueprint) {
+        const { item } = await api.saveTemplateCustomization({
           mode: 'create',
           status: 'draft',
           baseTemplateId: 'blueprint',
@@ -370,8 +382,9 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           sourceUrl: refUrl.trim() || undefined,
           override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
         });
+        if (item?.id) setSelectedId(item.id);
       } else {
-        await api.saveTemplateCustomization({
+        const { item } = await api.saveTemplateCustomization({
           mode: 'create',
           status: 'draft',
           name: name.trim() || `${selected.name} 下書き`,
@@ -379,6 +392,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
           sourceUrl: refUrl.trim() || undefined,
           override: { headline, subheadline, navLabels, theme: { bg, text, accent } },
         });
+        if (item?.id) setSelectedId(item.id);
       }
       const list = await api.getTemplateCandidates();
       setCandidates(list || []);
@@ -437,7 +451,7 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
       const baseBp =
         (selected.customization?.blueprint as DesignBlueprint | undefined) ?? activeBlueprint ?? undefined;
       let blueprintPayload: DesignBlueprint | undefined;
-      if (baseBp && baseBp.version === 1 && selected?.baseTemplateId === 'blueprint') {
+      if (baseBp && blueprintVersionOk(baseBp) && selected?.baseTemplateId === 'blueprint') {
         blueprintPayload = {
           ...baseBp,
           tokens: {
