@@ -130,7 +130,7 @@ app.post('/api/queue', async (req, res) => {
 });
 
 // ---------- 顧客ヒアリング ----------
-app.get('/customer-intake', (req, res) => {
+app.get(['/customer-intake', '/api/customer-intake'], (req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(renderCustomerIntakePage());
 });
