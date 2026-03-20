@@ -139,6 +139,9 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                   >
                     このページを別タブで開く
                   </button>
+                  <p className="review-preview-note" style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#64748b' }}>
+                    <strong>編集</strong>は下の「<strong>プレビューを編集</strong>」から行います（別タブ・共有URLの表示画面には編集ボタンはありません）。
+                  </p>
                   {useApi && isApiAvailable() && (
                     <div className="review-share-url" style={{ marginBottom: 12 }}>
                       <label className="label-text" style={{ display: 'block', marginBottom: 4 }}>

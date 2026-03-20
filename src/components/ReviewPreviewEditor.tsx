@@ -319,7 +319,7 @@ export function ReviewPreviewEditor({
       <div className="review-preview-toolbar">
         {!editing ? (
           <button type="button" className="small review-edit-start" onClick={startEdit}>
-            編集
+            プレビューを編集
           </button>
         ) : (
           <>
