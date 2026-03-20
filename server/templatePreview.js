@@ -17,21 +17,76 @@ export const TEMPLATE_CANDIDATES = [
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 
-export function isValidTemplateId(id) {
-  return TEMPLATE_IDS.has(String(id || ''));
+export function getTemplateCandidates(customizations = []) {
+  const custom = (Array.isArray(customizations) ? customizations : [])
+    .map((c) => ({
+      id: c.id,
+      name: c.name || `カスタムテンプレ (${c.id})`,
+      baseTemplateId: c.baseTemplateId,
+      customization: c,
+      isCustom: true,
+    }));
+  const builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
+  return [...builtin, ...custom];
+}
+
+export function findTemplateCandidate(id, customizations = []) {
+  const tid = String(id || '');
+  return getTemplateCandidates(customizations).find((t) => t.id === tid) || null;
+}
+
+export function isValidTemplateId(id, customizations = []) {
+  const tid = String(id || '');
+  if (TEMPLATE_IDS.has(tid)) return true;
+  return !!findTemplateCandidate(tid, customizations);
+}
+
+function makeNavItems(csv) {
+  const labels = String(csv || '')
+    .split(/[,，\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  if (!labels.length) return undefined;
+  return labels.map((label, i) => {
+    const href = i === 0 ? '#concept' : i === 1 ? '#menu' : i === 2 ? '#access' : '#contact';
+    return { label, href };
+  });
+}
+
+export function applyTemplateCustomization(content, customization = {}) {
+  const out = { ...content };
+  if (customization.headline) out.headline = String(customization.headline).slice(0, 200);
+  if (customization.subheadline) out.subheadline = String(customization.subheadline).slice(0, 400);
+  const navItems = makeNavItems(customization.navLabels);
+  if (navItems) out.navItems = navItems;
+  return out;
+}
+
+function buildThemeCss(baseTemplateId, theme = {}) {
+  const bg = String(theme.bg || '').trim();
+  const text = String(theme.text || '').trim();
+  const accent = String(theme.accent || '').trim();
+  if (!bg && !text && !accent) return '';
+  return `.page-wrapper.template-${baseTemplateId}{${bg ? `--tp-bg:${bg};` : ''}${text ? `--tp-text:${text};--tp-heading:${text};` : ''}${accent ? `--tp-accent:${accent};` : ''}}`;
+}
+
+function injectThemeCss(html, css) {
+  if (!css) return html;
+  return String(html).replace('</head>', `<style id="custom-template-theme">${css}</style></head>`);
 }
 
 function labelOf(id) {
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
 }
 
-export function renderTemplatePreview(templateId) {
+export function renderTemplatePreview(templateId, customization = null) {
   const id = String(templateId || '');
-  if (!isValidTemplateId(id)) return null;
+  if (!TEMPLATE_IDS.has(id)) return null;
 
   const now = new Date().getFullYear();
   const name = labelOf(id);
-  const content = {
+  let content = {
     siteName: `${name} サンプル`,
     title: `${name} サンプル`,
     headline: `${name} サンプル`,
@@ -56,7 +111,8 @@ export function renderTemplatePreview(templateId) {
     canonicalUrl: '',
   };
 
-  return buildHtml(content, seo, id, {
+  content = applyTemplateCustomization(content, customization || {});
+  let html = buildHtml(content, seo, id, {
     contactForm: true,
     formActionUrl: '#',
     instagramLine: true,
@@ -65,4 +121,6 @@ export function renderTemplatePreview(templateId) {
     qrCode: true,
     qrCodeTargetUrl: 'https://example.com',
   });
+  html = injectThemeCss(html, buildThemeCss(id, customization?.theme));
+  return html;
 }

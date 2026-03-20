@@ -17,7 +17,7 @@ import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
-import { isValidTemplateId, renderTemplatePreview } from './templatePreview.js';
+import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
 function pricePayload(body, billing) {
@@ -67,6 +67,13 @@ function isAdminAuthenticated(req) {
   } catch {
     return false;
   }
+}
+
+function requireAdmin(req, res) {
+  if (!adminAuthEnabled()) return true;
+  if (isAdminAuthenticated(req)) return true;
+  res.status(401).json({ error: '管理者ログインが必要です。' });
+  return false;
 }
 
 function splitLines(text, limit = 20) {
@@ -146,6 +153,19 @@ function intakeToPageDraft(intake) {
   };
 
   return { content, seo, templateId: intake.chosenTemplateId };
+}
+
+function normalizeCustomizationInput(body = {}) {
+  return {
+    headline: String(body.headline || '').trim().slice(0, 200),
+    subheadline: String(body.subheadline || '').trim().slice(0, 400),
+    navLabels: String(body.navLabels || '').trim().slice(0, 600),
+    theme: {
+      bg: String(body.theme?.bg || '').trim().slice(0, 30),
+      text: String(body.theme?.text || '').trim().slice(0, 30),
+      accent: String(body.theme?.accent || '').trim().slice(0, 30),
+    },
+  };
 }
 
 // ---------- 管理ページログイン ----------
@@ -277,21 +297,89 @@ app.post('/api/queue', async (req, res) => {
 });
 
 // ---------- 顧客ヒアリング ----------
-app.get(['/customer-intake', '/api/customer-intake'], (req, res) => {
+app.get(['/customer-intake', '/api/customer-intake'], async (req, res) => {
+  const customs = await store.getTemplateCustomizations();
+  const candidates = getTemplateCandidates(customs);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(renderCustomerIntakePage());
+  res.send(renderCustomerIntakePage(candidates));
 });
 
 app.get('/api/template-preview/:templateId', (req, res) => {
   const templateId = String(req.params.templateId || '');
-  if (!isValidTemplateId(templateId)) {
-    return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
+  Promise.resolve(store.getTemplateCustomizations()).then((customs) => {
+    const candidate = findTemplateCandidate(templateId, customs);
+    if (!candidate) {
+      return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
+    }
+    const baseId = candidate.baseTemplateId || candidate.id;
+    const html = renderTemplatePreview(baseId, candidate.customization || null);
+    if (!html) return res.status(500).json({ error: 'failed to render preview' });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'private, max-age=60');
+    res.send(html);
+  }).catch((e) => {
+    console.error('[template-preview]', e);
+    res.status(500).json({ error: 'template preview failed' });
+  });
+});
+
+app.get('/api/template-candidates', async (req, res) => {
+  const customs = await store.getTemplateCustomizations();
+  res.json(getTemplateCandidates(customs));
+});
+
+app.get('/api/template-customizations', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  res.json(await store.getTemplateCustomizations());
+});
+
+app.post('/api/template-customizations/save', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  const mode = body.mode === 'update' ? 'update' : 'create';
+  const customizations = await store.getTemplateCustomizations();
+  const now = new Date().toISOString();
+
+  if (mode === 'update') {
+    const id = String(body.id || '');
+    const i = customizations.findIndex((v) => v.id === id);
+    if (i === -1) return res.status(404).json({ error: 'Customization not found' });
+    customizations[i] = {
+      ...customizations[i],
+      name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
+      override: normalizeCustomizationInput(body.override || {}),
+      updatedAt: now,
+    };
+    await store.setTemplateCustomizations(customizations);
+    return res.json({ ok: true, item: customizations[i] });
   }
-  const html = renderTemplatePreview(templateId);
-  if (!html) return res.status(500).json({ error: 'failed to render preview' });
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'private, max-age=60');
-  res.send(html);
+
+  const baseTemplateId = String(body.baseTemplateId || '');
+  if (!isValidTemplateId(baseTemplateId, customizations)) {
+    return res.status(400).json({ error: 'baseTemplateId is invalid' });
+  }
+  const id = `custom-${Date.now().toString(36)}`;
+  const item = {
+    id,
+    name: String(body.name || `カスタムテンプレ ${customizations.length + 1}`).trim().slice(0, 80),
+    baseTemplateId,
+    override: normalizeCustomizationInput(body.override || {}),
+    createdAt: now,
+    updatedAt: now,
+  };
+  customizations.unshift(item);
+  await store.setTemplateCustomizations(customizations);
+  res.json({ ok: true, item });
+});
+
+app.get('/api/customer-intake-list', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const list = await store.getCustomerIntake();
+  const out = (Array.isArray(list) ? list : []).map((row) => ({
+    ...row,
+    previewUrl: `/api/customer-intake/${encodeURIComponent(row.id)}/preview`,
+  }));
+  res.json(out);
 });
 
 app.post('/api/customer-intake', async (req, res) => {
@@ -323,7 +411,8 @@ app.post('/api/customer-intake', async (req, res) => {
   if (designTastes.length === 0) {
     return res.status(400).json({ error: 'designTastes is required' });
   }
-  if (!isValidTemplateId(body.chosenTemplateId)) {
+  const templateCustoms = await store.getTemplateCustomizations();
+  if (!isValidTemplateId(body.chosenTemplateId, templateCustoms)) {
     return res.status(400).json({ error: 'chosenTemplateId is invalid' });
   }
 
@@ -360,12 +449,15 @@ app.get('/api/customer-intake/:id/preview', async (req, res) => {
   const list = await store.getCustomerIntake();
   const row = (list || []).find((v) => v.id === req.params.id);
   if (!row) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Intake not found');
-  if (!isValidTemplateId(row.chosenTemplateId)) {
+  const templateCustoms = await store.getTemplateCustomizations();
+  if (!isValidTemplateId(row.chosenTemplateId, templateCustoms)) {
     return res.status(400).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Invalid template');
   }
-
-  const { content, seo, templateId } = intakeToPageDraft(row);
-  const html = buildHtml(content, seo, templateId, {
+  const candidate = findTemplateCandidate(row.chosenTemplateId, templateCustoms);
+  const { content, seo } = intakeToPageDraft(row);
+  const baseTemplateId = candidate?.baseTemplateId || row.chosenTemplateId;
+  const mergedContent = applyTemplateCustomization(content, candidate?.customization?.override || null);
+  const html = buildHtml(mergedContent, seo, baseTemplateId, {
     contactForm: false,
     instagramLine: false,
     presentedBy: true,

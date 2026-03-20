@@ -1,7 +1,8 @@
 import { TEMPLATE_CANDIDATES } from './templatePreview.js';
 
-export function renderCustomerIntakePage() {
-  const templateCards = TEMPLATE_CANDIDATES.map(
+export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
+  const list = Array.isArray(candidates) && candidates.length ? candidates : TEMPLATE_CANDIDATES;
+  const templateCards = list.map(
     (t) => `<label class="style-card">
       <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl">${t.name}</span></div>
       <p class="sub">既存のテンプレページを別タブで確認できます。</p>

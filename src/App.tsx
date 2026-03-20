@@ -12,6 +12,7 @@ import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
 import { DesignCheckPanel } from './components/DesignCheckPanel';
 import { FullAutoMain } from './components/FullAutoMain';
 import { StoreCms } from './components/StoreCms';
+import { CustomerIntakePanel } from './components/CustomerIntakePanel';
 import type { QueueTarget } from './types';
 import { isApiAvailable, api } from './lib/api';
 import { getQueue, getDashboard } from './lib/queueStorage';
@@ -21,7 +22,7 @@ type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
   contentVariants?: { templateId: string; html: string }[];
 };
 
-type TabId = 'auto' | 'design' | 'queue' | 'dashboard' | 'admin' | 'settings';
+type TabId = 'auto' | 'design' | 'queue' | 'dashboard' | 'admin' | 'intake' | 'settings';
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -91,6 +92,7 @@ function App() {
   const flowSteps: { id: TabId; label: string }[] = [
     { id: 'auto', label: 'フルオート' },
     { id: 'dashboard', label: 'ダッシュボード' },
+    { id: 'intake', label: 'ヒアリング回答' },
     { id: 'admin', label: '管理者' },
     { id: 'design', label: 'デザイン確認' },
     { id: 'queue', label: '手動・詳細' },
@@ -245,6 +247,8 @@ function App() {
             <StoreCms items={dashboardItems} onRefresh={refreshDashboard} />
           </section>
         )}
+
+        {tab === 'intake' && <CustomerIntakePanel />}
 
         {tab === 'settings' && (
           <section className="tab-content settings-tab">

@@ -12,6 +12,7 @@ const FILES = {
   options: 'options.json',
   billing: 'billing.json',
   customerIntake: 'customerIntake.json',
+  templateCustomizations: 'templateCustomizations.json',
   referenceSites: 'referenceSites.json',
   designInsights: 'designInsights.json',
   learningJob: 'learningJob.json',
@@ -38,7 +39,7 @@ function write(name, data) {
 }
 
 function getDefault(name) {
-  if (name === 'queue' || name === 'dashboard' || name === 'referenceSites' || name === 'customerIntake') return [];
+  if (name === 'queue' || name === 'dashboard' || name === 'referenceSites' || name === 'customerIntake' || name === 'templateCustomizations') return [];
   if (name === 'designInsights') return { summary: '', byIndustry: {}, designSummary: '', byIndustryDesign: {}, updatedAt: null };
   if (name === 'learningJob') return { status: 'idle', industry: null, maxResults: null, phase: '', current: 0, total: 0, result: null, error: null, startedAt: null, completedAt: null };
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
@@ -57,6 +58,8 @@ const fileStore = {
   setBilling: (b) => { write('billing', { ...getDefault('billing'), ...b }); return Promise.resolve(); },
   getCustomerIntake: () => Promise.resolve(read('customerIntake')),
   setCustomerIntake: (arr) => { write('customerIntake', arr); return Promise.resolve(); },
+  getTemplateCustomizations: () => Promise.resolve(read('templateCustomizations')),
+  setTemplateCustomizations: (arr) => { write('templateCustomizations', arr); return Promise.resolve(); },
   getReferenceSites: () => Promise.resolve(read('referenceSites')),
   setReferenceSites: (arr) => { write('referenceSites', arr); return Promise.resolve(); },
   getDesignInsights: () => Promise.resolve(read('designInsights')),

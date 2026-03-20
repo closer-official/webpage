@@ -22,6 +22,52 @@ export type AdminAuthStatus = {
   authenticated: boolean;
 };
 
+export type TemplateCandidate = {
+  id: string;
+  name: string;
+  baseTemplateId: string;
+  isCustom: boolean;
+  customization?: {
+    id: string;
+    name: string;
+    baseTemplateId: string;
+    override?: {
+      headline?: string;
+      subheadline?: string;
+      navLabels?: string;
+      theme?: { bg?: string; text?: string; accent?: string };
+    };
+  };
+};
+
+export type TemplateCustomization = {
+  id: string;
+  name: string;
+  baseTemplateId: string;
+  override?: {
+    headline?: string;
+    subheadline?: string;
+    navLabels?: string;
+    theme?: { bg?: string; text?: string; accent?: string };
+  };
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CustomerIntakeItem = {
+  id: string;
+  storeName: string;
+  contactName: string;
+  contactMethod: string;
+  contactValue: string;
+  plan: string;
+  chosenTemplateId: string;
+  requestSummary?: string;
+  mustHaveContent?: string;
+  createdAt: string;
+  previewUrl: string;
+};
+
 export function isApiAvailable(): boolean {
   if (typeof window === 'undefined') return false;
   // 本番（Vercel 等）
@@ -129,6 +175,20 @@ export const api = {
       body: JSON.stringify({ username, password }),
     }),
   logoutAdmin: () => fetchApi<{ ok: boolean }>('/api/admin-auth/logout', { method: 'POST' }),
+  getTemplateCandidates: () => fetchApi<TemplateCandidate[]>('/api/template-candidates'),
+  getTemplateCustomizations: () => fetchApi<TemplateCustomization[]>('/api/template-customizations'),
+  saveTemplateCustomization: (body: {
+    mode: 'create' | 'update';
+    id?: string;
+    name?: string;
+    baseTemplateId?: string;
+    override?: TemplateCustomization['override'];
+  }) =>
+    fetchApi<{ ok: boolean; item: TemplateCustomization }>('/api/template-customizations/save', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  getCustomerIntakeList: () => fetchApi<CustomerIntakeItem[]>('/api/customer-intake-list'),
 
   getOptions: () => fetchApi<GenerationOptions>('/api/options'),
   setOptions: (o: Partial<GenerationOptions>) =>
