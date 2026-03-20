@@ -486,6 +486,32 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   apparel: genericPlaceholder('アパレルショップ', 'アパレル・ファッション | ブランド', 'コンセプト・コレクション・アクセスをご案内します。'),
   event: genericPlaceholder('イベント', 'イベント・フェス | お申し込み', '概要・プログラム・アクセス・お申し込みをご案内します。'),
+  academy_lp: {
+    content: {
+      siteName: 'REAL GROWTH ACADEMY',
+      title: 'REAL GROWTH ACADEMY',
+      headline: '実行まで、やり切る。',
+      subheadline: '経営者としての基準と実行力を鍛える実践型プログラム',
+      ctaLabel: '無料説明会に参加する',
+      ctaHref: '#contact',
+      sections: [
+        { id: 'concept', title: 'このスクールの価値', content: '一流の実践知を学ぶだけでなく、事業に落とし込む実行まで伴走します。' },
+        { id: 'menu', title: '4つの特徴', content: '実践設計 / 短いPDCA / 高頻度フィードバック / 同期コミュニティ' },
+        { id: 'staff', title: 'フェーズ別ロードマップ', content: '起業前・立ち上げ・成長の各段階で、今やるべきことを整理して進めます。' },
+        { id: 'faq', title: 'よくある質問', content: '仕事と両立できる？未経験でも可能？などの疑問に回答します。' },
+        { id: 'contact', title: 'お申し込みの流れ', content: 'LINE登録 → 日程調整 → 無料カウンセリング → 個別相談' },
+      ],
+      footerText: `© ${new Date().getFullYear()} REAL GROWTH ACADEMY`,
+      heroSlides: ['https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400'],
+    },
+    seo: {
+      metaTitle: 'REAL GROWTH ACADEMY | 実践型経営スクール',
+      metaDescription: '経営者としての基準と実行力を鍛える実践型スクール。',
+      keywords: '経営, スクール, 実践, 起業',
+      ogImageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   ramen: {
     content: {
       siteName: '麺屋 こだわり',

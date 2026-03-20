@@ -130,7 +130,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 12種類テンプレートID（業種別） */
+/** 13種類テンプレートID（業種別+LP） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -143,7 +143,8 @@ export type StyleId =
   | 'pet_salon'          // 9. ペットサロン・ドッグ
   | 'apparel'            // 10. アパレル
   | 'event'              // 11. イベント
-  | 'ramen';             // 12. ラーメン
+  | 'ramen'              // 12. ラーメン
+  | 'academy_lp';        // 13. 高CVセールスLP
 
 /** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -193,6 +194,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'apparel', name: 'アパレル' },
   { id: 'event', name: 'イベント' },
   { id: 'ramen', name: 'ラーメン' },
+  { id: 'academy_lp', name: 'ハイコンバージョンLP' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

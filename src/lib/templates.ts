@@ -684,4 +684,26 @@ export const TEMPLATES: TemplateOption[] = [
     '白×エンジ・シズルヒーロー・お品書き・こだわり・店舗',
     RAMEN_TEMPLATE_CSS
   ),
+  makeTemplate(
+    'academy_lp',
+    'ハイコンバージョンLP（テンプレ13）',
+    '強い見出し・実績訴求・FAQ・申込導線を中心にした縦長LP',
+    `
+  .page-wrapper.template-academy_lp { --tp-bg:#0f1115; --tp-heading:#ffffff; --tp-text:#d7dce6; --tp-accent:#f7b500; --tp-border:rgba(255,255,255,0.12); --tp-bg-footer:#0b0d11; --hero-min-h:72vh; background:var(--tp-bg); color:var(--tp-text); font-family:"Noto Sans JP","Hiragino Sans",sans-serif; }
+  .page-wrapper.template-academy_lp .container { max-width: 860px; margin: 0 auto; padding: 0 22px; }
+  .page-wrapper.template-academy_lp header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,17,0.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-academy_lp .logo { color: #fff; font-weight: 800; letter-spacing: .04em; }
+  .page-wrapper.template-academy_lp .nav-link { color: #d7dce6; font-size: .82rem; }
+  .page-wrapper.template-academy_lp .cta-btn { background: var(--tp-accent); color: #111; border: none; border-radius: 999px; padding: 12px 24px; min-height: 46px; font-weight: 800; }
+  .page-wrapper.template-academy_lp .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-academy_lp .hero-bg-overlay { background: linear-gradient(180deg,rgba(0,0,0,.65),rgba(0,0,0,.4)); }
+  .page-wrapper.template-academy_lp .hero-inner h1 { color: #fff; font-size: clamp(1.8rem,5vw,2.8rem); font-weight: 900; letter-spacing: .01em; text-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .page-wrapper.template-academy_lp .hero-inner .subheadline { color: rgba(255,255,255,.92); max-width: 42rem; margin: .7rem auto 0; }
+  .page-wrapper.template-academy_lp .section h2 { color: #fff; font-size: 1.35rem; border-left: 4px solid var(--tp-accent); padding-left: .7rem; margin-bottom: 1rem; }
+  .page-wrapper.template-academy_lp .section { background: #131821; border: 1px solid var(--tp-border); border-radius: 14px; padding: 1.2rem; margin-bottom: 1rem; }
+  .page-wrapper.template-academy_lp .section p { color: var(--tp-text); }
+  .page-wrapper.template-academy_lp .cta-block { background: linear-gradient(135deg,#161d2a,#10141d); border: 1px solid var(--tp-border); border-radius: 14px; }
+  .page-wrapper.template-academy_lp footer { background: var(--tp-bg-footer); color: #c8cfdb; border-top: 1px solid var(--tp-border); }
+  `
+  ),
 ];

@@ -460,6 +460,7 @@ export const TEMPLATE_IDS = [
   'apparel',            // 10. アパレル
   'event',              // 11. イベント
   'ramen',              // 12. ラーメン
+  'academy_lp',         // 13. 高CVセールスLP
 ];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
