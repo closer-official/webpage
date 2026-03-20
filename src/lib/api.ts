@@ -60,11 +60,20 @@ export type CustomerIntakeItem = {
   contactName: string;
   contactMethod: string;
   contactValue: string;
+  status?: 'draft' | 'submitted' | string;
   plan: string;
+  websiteGoal?: string;
+  targetAudience?: string;
+  designTastes?: string[];
+  mainColor?: string;
   chosenTemplateId: string;
+  styleDetail?: string;
+  favoriteSiteUrl?: string;
+  currentActivityUrl?: string;
   requestSummary?: string;
   mustHaveContent?: string;
   createdAt: string;
+  updatedAt?: string;
   previewUrl: string;
 };
 
