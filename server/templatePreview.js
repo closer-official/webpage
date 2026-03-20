@@ -1,18 +1,18 @@
 import { buildHtml } from './buildHtml.js';
 
 export const TEMPLATE_CANDIDATES = [
-  { id: 'salon_barber', name: '個人美容室・理容室' },
-  { id: 'cafe_tea', name: 'カフェ・喫茶・パン・スイーツ' },
-  { id: 'clinic_chiropractic', name: '整骨院・整体・鍼灸' },
-  { id: 'gym_yoga', name: 'パーソナルジム・ヨガ' },
-  { id: 'builder', name: '工務店・リノベ' },
-  { id: 'professional', name: '士業' },
-  { id: 'cram_school', name: '塾・習い事教室' },
-  { id: 'izakaya', name: 'こだわり居酒屋・バー' },
-  { id: 'pet_salon', name: 'ペットサロン・ドッグ' },
-  { id: 'apparel', name: 'アパレル' },
-  { id: 'event', name: 'イベント' },
-  { id: 'ramen', name: 'ラーメン' },
+  { id: 'salon_barber', name: 'テンプレ1（ミニマル）' },
+  { id: 'cafe_tea', name: 'テンプレ2（ナチュラル）' },
+  { id: 'clinic_chiropractic', name: 'テンプレ3（信頼感）' },
+  { id: 'gym_yoga', name: 'テンプレ4（力強い）' },
+  { id: 'builder', name: 'テンプレ5（直線的）' },
+  { id: 'professional', name: 'テンプレ6（上品）' },
+  { id: 'cram_school', name: 'テンプレ7（親しみ）' },
+  { id: 'izakaya', name: 'テンプレ8（ダーク）' },
+  { id: 'pet_salon', name: 'テンプレ9（やわらかい）' },
+  { id: 'apparel', name: 'テンプレ10（洗練）' },
+  { id: 'event', name: 'テンプレ11（躍動感）' },
+  { id: 'ramen', name: 'テンプレ12（和モダン）' },
 ];
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
