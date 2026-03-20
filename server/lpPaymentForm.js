@@ -132,7 +132,7 @@ export function renderLpPaymentForm(returnUrl = '') {
     var b = { plan: (form.querySelector('input[name="plan"]:checked') || {}).value || 'normal' };
     var refIn = form.querySelector('input[name="referralCode"]');
     if (refIn) b.referralCode = String(refIn.value || '').trim();
-    ['contactFormRemoval','snsFeedRemoval','mapRemoval','presentedByRemoval','customQrCode','webCoupon','storeOfficialSubdomain','cms','onlinePayment','fullCustom','seoMeo'].forEach(function(k){
+    ['contactFormRemoval','snsFeedRemoval','mapRemoval','presentedByRemoval','customQrCode','webCoupon','storeOfficialSubdomain','cms','onlinePayment','fullCustom','seoMeo','bookingSystem'].forEach(function(k){
       var el = form.querySelector('input[name="' + k + '"]');
       if (el) b[k] = el.type === 'checkbox' ? el.checked : (parseInt(el.value,10)||0);
     });

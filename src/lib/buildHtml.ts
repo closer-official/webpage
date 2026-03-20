@@ -2,6 +2,7 @@ import type { PageContent, SEOData, TemplateOption, BuildHtmlGenOptions } from '
 import type { NavItem } from '../types';
 import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
+import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml';
 
 function escapeHtml(s: string): string {
   return s
@@ -132,10 +133,16 @@ export function buildHtml(
   options?: { inlineCss?: boolean; genOptions?: BuildHtmlGenOptions }
 ): string {
   const tid = template.id;
+  const genOpts = options?.genOptions;
+  const bookingOn = !!(
+    genOpts?.bookingEnabled &&
+    genOpts.bookingItemId &&
+    genOpts.bookingApiOrigin
+  );
   const effectiveCanonical = getEffectiveCanonicalForBuild(seo, content.siteName || content.title, tid);
   const jsonLd = buildJsonLd(content, seo, effectiveCanonical, tid);
 
-  const metaTags = [
+  let metaTags = [
     `<meta charset="UTF-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`,
     `<title>${escapeHtml(seo.metaTitle)}</title>`,
@@ -152,10 +159,13 @@ export function buildHtml(
     `<meta name="twitter:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta name="twitter:description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.ogImageUrl ? `<meta name="twitter:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
-    tid === 'gym_yoga' ? `<meta name="theme-color" content="#121212">` : '',
+    tid === 'gym_yoga' ? `<meta name="theme-color" content="#1a6b4a">` : '',
   ]
     .filter(Boolean)
     .join('\n    ');
+  if (bookingOn && genOpts?.bookingItemId && genOpts.bookingApiOrigin) {
+    metaTags += renderBookingHeadMeta(genOpts.bookingItemId, genOpts.bookingApiOrigin);
+  }
 
   const bodyClass = `page-wrapper template-${template.id}`;
   const overrides = options?.genOptions?.styleOverrides;
@@ -1062,13 +1072,23 @@ io.observe(el);
 
   const gymPaymentNote = tid === 'gym_yoga' ? (content.gymPaymentNote ?? '') : '';
   const gymStickyCtaHtml =
-    tid === 'gym_yoga' && cta.label && cta.href
+    tid === 'gym_yoga' && !bookingOn && cta.label && cta.href
       ? `<div class="gym-sticky-cta" aria-label="申し込み">${gymPaymentNote ? `<p class="gym-sticky-cta-note">${escapeHtml(gymPaymentNote)}</p>` : ''}<a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
       : '';
 
   const reserveSectionHtml =
-    tid === 'gym_yoga'
+    tid === 'gym_yoga' && bookingOn
       ? (() => {
+          const reservePaymentNote = content.gymPaymentNote ?? 'お支払いは当日、現地にて。キャッシュレス対応可。';
+          return `
+  <section id="reserve" class="section section-rhythm-default reserve-screen-lite" aria-labelledby="reserve-title">
+    <h2 id="reserve-title" class="reserve-screen-title">予約</h2>
+    <p class="reserve-cushion">実際の予約は、画面下の固定ボタンから日時（○の枠）をお選びください。ホットペッパー風に空き状況を表示します。</p>
+    <p class="reserve-payment-note">${escapeHtml(reservePaymentNote)}</p>
+  </section>`;
+        })()
+      : tid === 'gym_yoga'
+        ? (() => {
           const rooms = [
             { name: 'ROOM1', capacity: '定員2名' },
             { name: 'ROOM2', capacity: '定員2名' },
@@ -1162,7 +1182,7 @@ io.observe(el);
 })();
 </script>`;
         })()
-      : '';
+        : '';
 
   const cramStats = tid === 'cram_school' && content.stats?.length ? content.stats : [];
   const cramReasonItems = tid === 'cram_school' ? (content.reasonItems ?? []) : [];
@@ -1255,7 +1275,6 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
     </section>`
       : '';
 
-  const genOpts = options?.genOptions;
   const extraMotionAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   let extraSectionsHtml = '';
   if (genOpts) {
@@ -1502,7 +1521,15 @@ ${reserveSectionHtml}
   ${woOrganicScript}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
-</script>`;
+</script>
+  ${
+    bookingOn && genOpts?.bookingItemId && genOpts.bookingApiOrigin
+      ? renderBookingBodyWidget({
+          ctaLabel: cta.label || '予約する',
+          siteName: content.siteName || content.title || '',
+        })
+      : ''
+  }`;
 
   return `<!DOCTYPE html>
 <html lang="ja">

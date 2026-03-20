@@ -23,6 +23,15 @@ import { buildFingerprintFromHtml } from './styleFingerprint.js';
 import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
 import { enrichReferenceBlueprint } from './referenceDesignGemini.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
+import {
+  upcomingDateKeys,
+  getBookingTimeLabels,
+  slotKey,
+  isSlotPastJst,
+  googleCalendarTemplateUrl,
+  BOOKING_SLOT_DURATION_MIN,
+} from './bookingUtil.js';
+import { sendBookingNotification } from './bookingEmail.js';
 
 /** 参考URL抽出の簡易レート制限（メモリ保持・サーバーレスではインスタンス単位） */
 const styleExtractHits = new Map();
@@ -40,6 +49,37 @@ function allowStyleExtract(ip) {
 function clientIp(req) {
   const xf = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
   return xf || req.socket?.remoteAddress || '';
+}
+
+const bookingPostHits = new Map();
+function allowBookingPost(ip) {
+  const now = Date.now();
+  const key = ip || 'unknown';
+  const arr = (bookingPostHits.get(key) || []).filter((t) => now - t < 3600000);
+  if (arr.length >= 15) return false;
+  arr.push(now);
+  bookingPostHits.set(key, arr);
+  return true;
+}
+
+function bookingBillingEnabled(billing) {
+  return !!(billing && billing.bookingSystem);
+}
+
+function getBookingAdminEmail(item) {
+  const direct = String(item.bookingNotifyEmail || '').trim();
+  if (direct) return direct;
+  const foot = String(item.content?.footerEmail || '').trim();
+  if (foot) return foot;
+  return String(process.env.BOOKING_NOTIFY_EMAIL || '').trim();
+}
+
+function escHtmlBooking(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 // 旧オプション形式でも料金計算できるよう互換（billing は呼び出し側で await store.getBilling() して渡す）
@@ -931,6 +971,119 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   res.json(dashboard[i]);
 });
 
+app.get('/api/booking/availability/:itemId', async (req, res) => {
+  try {
+    const billing = await store.getBilling();
+    if (!bookingBillingEnabled(billing)) {
+      return res.status(403).json({ error: '予約システムが有効ではありません。オプション契約後にご利用いただけます。' });
+    }
+    const dashboard = await store.getDashboard();
+    const item = dashboard.find((d) => d.id === req.params.itemId);
+    if (!item) return res.status(404).json({ error: 'not found' });
+    const booked = new Set(item.bookingSlots || []);
+    const dates = upcomingDateKeys(14);
+    const times = getBookingTimeLabels();
+    const schedule = dates.map((dateKey) => ({
+      date: dateKey,
+      slots: times.map((t) => {
+        const key = slotKey(dateKey, t);
+        const past = isSlotPastJst(dateKey, t);
+        const taken = booked.has(key);
+        const available = !past && !taken;
+        return { time: t, available, symbol: available ? '○' : '×' };
+      }),
+    }));
+    res.json({ schedule });
+  } catch (e) {
+    console.error('[booking-availability]', e);
+    res.status(500).json({ error: '取得に失敗しました' });
+  }
+});
+
+app.post('/api/booking/:itemId', async (req, res) => {
+  try {
+    const ip = clientIp(req);
+    if (!allowBookingPost(ip)) {
+      return res.status(429).json({ error: 'しばらく時間をおいて再度お試しください。' });
+    }
+    const billing = await store.getBilling();
+    if (!bookingBillingEnabled(billing)) {
+      return res.status(403).json({ error: '予約システムが有効ではありません。' });
+    }
+    const body = req.body || {};
+    const customerName = String(body.customerName || '').trim();
+    if (!customerName) return res.status(400).json({ error: 'お名前を入力してください。' });
+    const dateKey = String(body.dateKey || '').trim();
+    const time = String(body.time || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+      return res.status(400).json({ error: '日付が不正です。' });
+    }
+    const labels = getBookingTimeLabels();
+    if (!labels.includes(time)) return res.status(400).json({ error: '時間が不正です。' });
+    if (isSlotPastJst(dateKey, time)) {
+      return res.status(400).json({ error: 'この枠は選択できません。' });
+    }
+    const dashboard = await store.getDashboard();
+    const idx = dashboard.findIndex((d) => d.id === req.params.itemId);
+    if (idx === -1) return res.status(404).json({ error: 'not found' });
+    const item = dashboard[idx];
+    const sk = slotKey(dateKey, time);
+    const slots = [...(item.bookingSlots || [])];
+    if (slots.includes(sk)) return res.status(409).json({ error: 'この枠は既に埋まりました。別の時間をお選びください。' });
+    slots.push(sk);
+    item.bookingSlots = slots;
+    dashboard[idx] = item;
+    await store.setDashboard(dashboard);
+
+    const site = String(item.content?.siteName || item.researched?.name || 'Web予約').trim();
+    const customerEmail = String(body.customerEmail || '').trim();
+    const customerPhone = String(body.customerPhone || '').trim();
+    const note = String(body.note || '').trim();
+    const calUrl = googleCalendarTemplateUrl({
+      title: `[${site}] ${customerName}様`,
+      description: `予約者: ${customerName}\nメール: ${customerEmail || '-'}\n電話: ${customerPhone || '-'}\nメモ: ${note || '-'}\n`,
+      dateKey,
+      startTime: time,
+      durationMin: BOOKING_SLOT_DURATION_MIN,
+    });
+
+    const adminTo = getBookingAdminEmail(item);
+    const text = `新しい予約が入りました。
+
+サイト: ${site}
+日時: ${dateKey} ${time} 〜（約${BOOKING_SLOT_DURATION_MIN}分）
+お名前: ${customerName}
+メール: ${customerEmail || '-'}
+電話: ${customerPhone || '-'}
+ご要望: ${note || '-'}
+
+▼ Googleカレンダーに追加（リンクをタップ）
+${calUrl}
+`;
+
+    await sendBookingNotification({
+      to: adminTo,
+      subject: `【予約】${site} ${dateKey} ${time} ${customerName}様`,
+      text,
+      html: `<p>新しい予約が入りました。</p>
+<ul>
+<li>サイト: <strong>${escHtmlBooking(site)}</strong></li>
+<li>日時: <strong>${escHtmlBooking(dateKey)} ${escHtmlBooking(time)}</strong>（約${BOOKING_SLOT_DURATION_MIN}分）</li>
+<li>お名前: ${escHtmlBooking(customerName)}</li>
+<li>メール: ${escHtmlBooking(customerEmail || '-')}</li>
+<li>電話: ${escHtmlBooking(customerPhone || '-')}</li>
+<li>ご要望: ${escHtmlBooking(note || '-')}</li>
+</ul>
+<p><a href="${escHtmlBooking(calUrl)}">Googleカレンダーに追加</a></p>`,
+    });
+
+    res.json({ ok: true, calendarUrl: calUrl });
+  } catch (e) {
+    console.error('[booking-post]', e);
+    res.status(500).json({ error: '送信に失敗しました' });
+  }
+});
+
 /** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける。Stripe 有効時はメニューに「購入」を追加。閲覧時に viewCount を加算。 */
 app.get('/api/preview/:id', async (req, res) => {
   try {
@@ -941,6 +1094,7 @@ app.get('/api/preview/:id', async (req, res) => {
     item.viewCount = (item.viewCount || 0) + 1;
     await store.setDashboard(dashboard);
     const options = await store.getOptions();
+    const billing = await store.getBilling();
     const origin = (req.headers.origin || (req.protocol + '://' + req.get('host')) || '').replace(/\/$/, '');
     const previewUrl = origin ? `${origin}/api/preview/${encodeURIComponent(item.id)}` : '';
     const genOptions = {
@@ -955,6 +1109,11 @@ app.get('/api/preview/:id', async (req, res) => {
     };
     if (isStripeConfigured() && origin) {
       genOptions.purchaseUrl = `${origin}/api/checkout-redirect?returnUrl=${encodeURIComponent(previewUrl)}`;
+    }
+    if (bookingBillingEnabled(billing) && origin) {
+      genOptions.bookingEnabled = true;
+      genOptions.bookingItemId = item.id;
+      genOptions.bookingApiOrigin = origin;
     }
     const html = buildHtml(item.content, item.seo, item.templateId, genOptions);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');

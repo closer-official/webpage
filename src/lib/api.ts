@@ -178,6 +178,8 @@ export type BillingSelection = {
   onlinePayment?: boolean;
   fullCustom?: boolean;
   seoMeo?: boolean;
+  /** 予約システム（カレンダー枠・通知メール・Googleカレンダー） */
+  bookingSystem?: boolean;
 };
 
 export type DesignTraits = {

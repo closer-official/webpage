@@ -1,6 +1,7 @@
 import { getTemplateFullCss } from './conceptTemplates.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
+import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -171,7 +172,12 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     qrCodeDataUrl = '',
     purchaseUrl = '',
     paymentFormBaseUrl = '',
+    bookingEnabled = false,
+    bookingItemId = '',
+    bookingApiOrigin = '',
   } = genOptions;
+
+  const bookingOn = !!(bookingEnabled && bookingItemId && bookingApiOrigin);
 
   const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
   const envCanonicalHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
@@ -361,7 +367,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     ${footerLegal}
   </footer>`;
 
-  const metaTags = [
+  let metaTags = [
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
     paymentMetaLine,
@@ -379,8 +385,13 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     `<meta name="twitter:title" content="${escapeHtml(seo.metaTitle)}">`,
     `<meta name="twitter:description" content="${escapeHtml(seo.metaDescription)}">`,
     seo.ogImageUrl ? `<meta name="twitter:image" content="${escapeHtml(seo.ogImageUrl)}">` : '',
-    tid === 'gym_yoga' ? '<meta name="theme-color" content="#121212">' : '',
-  ].filter(Boolean).join('\n    ');
+    tid === 'gym_yoga' ? '<meta name="theme-color" content="#1a6b4a">' : '',
+  ]
+    .filter(Boolean)
+    .join('\n    ');
+  if (bookingOn) {
+    metaTags += renderBookingHeadMeta(bookingItemId, bookingApiOrigin);
+  }
 
   const canonicalTrim = (effectiveCanonical && String(effectiveCanonical).trim()) || '';
   const jsonLdGraphs = [
@@ -1290,12 +1301,21 @@ io.observe(el);
       : '';
 
   const gymPaymentNote = tid === 'gym_yoga' ? (content.gymPaymentNote || '') : '';
-  const gymStickyCtaHtml = (tid === 'gym_yoga' && cta.label && cta.href)
-    ? `<div class="gym-sticky-cta" aria-label="申し込み">${gymPaymentNote ? '<p class="gym-sticky-cta-note">' + escapeHtml(gymPaymentNote) + '</p>' : ''}<a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
-    : '';
+  const gymStickyCtaHtml =
+    tid === 'gym_yoga' && !bookingOn && cta.label && cta.href
+      ? `<div class="gym-sticky-cta" aria-label="申し込み">${gymPaymentNote ? '<p class="gym-sticky-cta-note">' + escapeHtml(gymPaymentNote) + '</p>' : ''}<a href="${escapeHtml(cta.href)}" class="cta-btn">${escapeHtml(cta.label)}</a></div>`
+      : '';
 
   let reserveSectionHtml = '';
-  if (tid === 'gym_yoga') {
+  if (tid === 'gym_yoga' && bookingOn) {
+    const reservePaymentNote = content.gymPaymentNote || 'お支払いは当日、現地にて。キャッシュレス対応可。';
+    reserveSectionHtml = `
+  <section id="reserve" class="section section-rhythm-default reserve-screen-lite" aria-labelledby="reserve-title">
+    <h2 id="reserve-title" class="reserve-screen-title">予約</h2>
+    <p class="reserve-cushion">実際の予約は、画面下の固定ボタンから日時（○の枠）をお選びください。ホットペッパー風に空き状況を表示します。</p>
+    <p class="reserve-payment-note">${escapeHtml(reservePaymentNote)}</p>
+  </section>`;
+  } else if (tid === 'gym_yoga') {
     const rooms = [
       { name: 'ROOM1', capacity: '定員2名' },
       { name: 'ROOM2', capacity: '定員2名' },
@@ -1563,7 +1583,8 @@ ${reserveSectionHtml}
 </script>` : ''}
   <script>
 (function(){var h=document.querySelector('header');if(!h)return;function upd(){h.classList.toggle('scrolled',window.scrollY>40);}upd();window.addEventListener('scroll',upd,{passive:true});})();
-</script>`;
+</script>
+  ${bookingOn ? renderBookingBodyWidget({ ctaLabel: cta.label || '予約する', siteName: content.siteName || content.title || '' }) : ''}`;
 
   return `<!DOCTYPE html>
 <html lang="ja">

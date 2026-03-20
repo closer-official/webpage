@@ -283,6 +283,10 @@ export interface DashboardItem {
   contentVariants?: { templateId: string; html: string }[];
   /** マスターから「個別用に複製」したときのメモ（例: A社向け） */
   personalizationLabel?: string;
+  /** 予約システムで確定済みの枠キー `YYYY-MM-DD_HH:mm` */
+  bookingSlots?: string[];
+  /** 予約通知を送るメール（未指定時は content.footerEmail） */
+  bookingNotifyEmail?: string;
 }
 
 /** AI利用上限（将来AI組み込み時に、上限に達したら処理を止める用） */
@@ -328,6 +332,12 @@ export interface BuildHtmlGenOptions {
   styleOverrides?: StyleOverrides;
   /** LP埋め込み用「料金・お支払い」フォームの取得元URL（未指定時は同一オリジン /api/lp-payment-form） */
   paymentFormBaseUrl?: string;
+  /** 予約オプション契約時: 全テンプレで画面下に予約UIを出す */
+  bookingEnabled?: boolean;
+  /** ダッシュボード案件ID（/api/preview/:id と予約APIの紐付け） */
+  bookingItemId?: string;
+  /** 予約APIのオリジン（blobプレビュー時などに埋め込む） */
+  bookingApiOrigin?: string;
 }
 
 /** ダッシュボード1件（API返却・3案入り） */

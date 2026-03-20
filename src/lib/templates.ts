@@ -330,10 +330,10 @@ const CLINIC_TEMPLATE_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-clinic_chiropractic .qr-block .qr-block-img { display: none; } }
 `;
 
-/** パーソナルジム・ヨガ用（Energetic Trust: ビビッドレッド×リッチブラック×ネオンイエロー・バッジ・スライダー・フローティングCTAパルス） */
+/** パーソナルジム・ヨガ用（ダーク×ネオン＋参考LP寄せのグリーンCTA） */
 const GYM_TEMPLATE_CSS = `
   .page-wrapper.template-gym_yoga {
-    --gym-red: #FF3B30; --gym-red-dark: #e6352b; --gym-black: #121212; --gym-neon: #CCFF00; --gym-white: #FFFFFF;
+    --gym-red: #1fa36f; --gym-red-dark: #157a52; --gym-black: #121212; --gym-neon: #CCFF00; --gym-white: #FFFFFF;
     --tp-bg: var(--gym-black); --tp-heading: var(--gym-white); --tp-text: rgba(255,255,255,0.92); --tp-accent: var(--gym-red); --tp-border: rgba(255,255,255,0.12); --tp-bg-footer: var(--gym-black);
     --hero-min-h: 75vh; font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-weight: 600; background: var(--tp-bg); color: var(--tp-text);
   }
@@ -375,7 +375,7 @@ const GYM_TEMPLATE_CSS = `
   .gym-compare-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid var(--tp-border); }
   .gym-compare-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 0.8125rem; background: #1a1a1a; }
   .gym-compare-table th, .gym-compare-table td { padding: 0.75rem 0.85rem; text-align: left; border-bottom: 1px solid var(--tp-border); vertical-align: top; }
-  .gym-compare-table thead th { background: rgba(255,59,48,0.15); color: var(--gym-neon); font-weight: 800; }
+  .gym-compare-table thead th { background: rgba(31,163,111,0.2); color: var(--gym-neon); font-weight: 800; }
   .gym-compare-table tbody th { color: var(--gym-white); font-weight: 700; width: 28%; }
   .gym-compare-table tbody td { color: rgba(255,255,255,0.88); }
   .gym-menu-section .gym-menu-cards { margin-top: 1.5rem; }
@@ -441,7 +441,7 @@ const GYM_TEMPLATE_CSS = `
   @keyframes gym-cta-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
   .gym-sticky-cta { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 90; padding: 0; text-align: right; }
   .gym-sticky-cta-note { font-size: 0.75rem; color: var(--gym-neon); margin: 0 0 0.5rem; padding: 0 0.25rem; font-weight: 700; }
-  .gym-sticky-cta .cta-btn { min-width: 160px; padding: 14px 24px; box-shadow: 0 4px 20px rgba(255,59,48,0.5); animation: gym-cta-pulse 2s ease-in-out infinite; }
+  .gym-sticky-cta .cta-btn { min-width: 160px; padding: 14px 24px; box-shadow: 0 4px 20px rgba(31,163,111,0.45); animation: gym-cta-pulse 2s ease-in-out infinite; }
   .gym-footer-inner { padding: var(--space-2xl) var(--space-lg); text-align: center; }
   .gym-footer-sns { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
   .gym-footer-sns-link { color: var(--gym-neon); font-weight: 700; font-size: 0.9375rem; text-decoration: none; }
@@ -454,6 +454,8 @@ const GYM_TEMPLATE_CSS = `
   .page-wrapper.template-gym_yoga .gym-faq-item { border-bottom: 1px solid var(--tp-border); }
   .page-wrapper.template-gym_yoga .gym-faq-q { width: 100%; padding: 1rem 0; text-align: left; background: none; border: none; color: var(--gym-white); font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
   .page-wrapper.template-gym_yoga .gym-faq-a { padding: 0 0 1rem; color: var(--tp-text); font-size: 0.875rem; line-height: 1.75; }
+  .reserve-screen-lite { background: #f5f2ec; color: #1a1a1a; padding: var(--space-2xl) var(--space-md); border-radius: 0; }
+  .reserve-screen-lite .reserve-screen-title { position: static; width: auto; height: auto; clip: auto; font-size: 1.1rem; font-weight: 800; margin: 0 0 1rem; color: #1a1a1a; }
   .reserve-screen { background: #f5f5f3; color: #1a1a1a; padding: 1rem 0 5rem; min-height: 80vh; }
   .reserve-screen-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   .reserve-week { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }

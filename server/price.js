@@ -39,6 +39,12 @@ const OTHER_SERVICES_CHECKBOX = {
   onlinePayment: { yen: 30_000, name: 'オンライン決済導入', note: 'Square / Stripe連携' },
   fullCustom: { yen: 50_000, name: 'デザインフルカスタム', note: '50,000円〜' },
   seoMeo: { yen: 20_000, name: 'SEO・MEOセット', note: 'Google検索・マップ最適化' },
+  /** 全テンプレ共通: 画面下固定の予約ボタン・日時枠（○×）・管理者メール通知・Googleカレンダー追加リンク */
+  bookingSystem: {
+    yen: 4_000,
+    name: '予約システム',
+    note: 'ホットペッパー風の枠表示・メール通知・カレンダーリンク（3,000〜5,000円帯の標準価格）',
+  },
 };
 
 /** 独自ドメインは年数 × 単価（UI は数値入力） */
@@ -67,6 +73,7 @@ const OTHER_CUSTOM_DOMAIN = {
  * @property {boolean} [onlinePayment]
  * @property {boolean} [fullCustom]
  * @property {boolean} [seoMeo]
+ * @property {boolean} [bookingSystem]
  */
 
 /**
@@ -162,6 +169,11 @@ export function calculatePrice(selection = {}, options = {}) {
   if (selection.seoMeo) {
     items.push({ name: OTHER_SERVICES_CHECKBOX.seoMeo.name, yen: OTHER_SERVICES_CHECKBOX.seoMeo.yen });
     total += OTHER_SERVICES_CHECKBOX.seoMeo.yen;
+  }
+  if (selection.bookingSystem) {
+    const b = OTHER_SERVICES_CHECKBOX.bookingSystem;
+    items.push({ name: b.name, yen: b.yen });
+    total += b.yen;
   }
 
   return {
