@@ -5,6 +5,8 @@ import { buildHtml } from '../lib/buildHtml';
 import { updateDashboardStatus, updateDashboardItem } from '../lib/queueStorage';
 import { api, isApiAvailable, getPreviewPublicUrl } from '../lib/api';
 import type { DashboardItem as DItem } from '../types';
+import { injectPreviewEditCss } from '../lib/previewEditMarkers';
+import { ReviewPreviewEditor } from './ReviewPreviewEditor';
 
 type DashboardItemAny = DashboardItem & { contentVariants?: { templateId: string; html: string }[] };
 
@@ -65,9 +67,10 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   }, []);
 
-  /** 生成されたLPのHTMLを別タブで開く（確認用） */
-  const handleOpenPreviewInNewTab = useCallback((html: string) => {
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  /** 生成されたLPのHTMLを別タブで開く（確認用・編集CSS反映） */
+  const handleOpenPreviewInNewTab = useCallback((html: string, previewCss?: string) => {
+    const merged = injectPreviewEditCss(html, previewCss);
+    const blob = new Blob([merged], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank', 'noopener');
     setTimeout(() => URL.revokeObjectURL(url), 10000);
@@ -131,7 +134,7 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                   <button
                     type="button"
                     className="small"
-                    onClick={() => handleOpenPreviewInNewTab(html)}
+                    onClick={() => handleOpenPreviewInNewTab(html, item.previewEditCss)}
                     style={{ marginBottom: 8 }}
                   >
                     このページを別タブで開く
@@ -161,14 +164,18 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
                       </div>
                     </div>
                   )}
-                  <div className="review-preview-wrap">
-                    <iframe
-                      title={`Preview ${item.researched.name}`}
-                      srcDoc={html}
-                      className="review-preview-iframe"
-                      sandbox="allow-same-origin"
-                    />
-                  </div>
+                  <ReviewPreviewEditor
+                    itemId={item.id}
+                    content={item.content}
+                    seo={item.seo}
+                    templateId={item.templateId}
+                    previewEditCss={item.previewEditCss}
+                    contentVariants={variants || undefined}
+                    variantIndex={currentVariant}
+                    useApi={useApi}
+                    styleOverrides={item.researched.styleOverrides}
+                    onSaved={onRefresh}
+                  />
                 </div>
                 <div className="review-col review-right">
                   <h4>DM文面</h4>

@@ -64,7 +64,9 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
 
 export function updateDashboardItem(
   id: string,
-  patch: Partial<Pick<DashboardItem, 'dmBody' | 'content' | 'seo'>>
+  patch: Partial<
+    Pick<DashboardItem, 'dmBody' | 'content' | 'seo' | 'previewEditCss' | 'contentVariants'>
+  >
 ): void {
   const list = getDashboard().map((x) => (x.id === id ? { ...x, ...patch } : x));
   setDashboard(list);

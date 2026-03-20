@@ -358,7 +358,16 @@ export const api = {
   updateDashboardContent: (id: string, content: unknown, seo?: unknown) =>
     fetchApi<unknown>(`/api/dashboard/${id}`, {
       method: 'PATCH',
+      credentials: 'include',
       body: JSON.stringify(seo !== undefined ? { content, seo } : { content }),
+    }),
+
+  /** 検閲プレビュー編集の保存（content / seo / previewEditCss / contentVariants） */
+  patchDashboardItem: (id: string, body: Record<string, unknown>) =>
+    fetchApi<unknown>(`/api/dashboard/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      body: JSON.stringify(body),
     }),
 
   getLearningIndustries: () => fetchApi<string[]>('/api/learning/industries'),

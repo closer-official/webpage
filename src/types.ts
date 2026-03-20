@@ -261,6 +261,10 @@ export interface DashboardItem {
   createdAt: string;
   /** 管理者画面用: プレビューURLの閲覧回数（サーバーで加算） */
   viewCount?: number;
+  /** 検閲プレビュー編集で保存した追加CSS（data-pe セレクタ） */
+  previewEditCss?: string;
+  /** 3案LPのときの各テンプレHTML（保存時に再生成される） */
+  contentVariants?: { templateId: string; html: string }[];
 }
 
 /** AI利用上限（将来AI組み込み時に、上限に達したら処理を止める用） */

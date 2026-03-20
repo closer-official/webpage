@@ -887,6 +887,8 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.status === 'email_sent') dashboard[i].status = 'email_sent';
   if (req.body.content !== undefined) dashboard[i].content = req.body.content;
   if (req.body.seo !== undefined) dashboard[i].seo = req.body.seo;
+  if (req.body.previewEditCss !== undefined) dashboard[i].previewEditCss = req.body.previewEditCss;
+  if (req.body.contentVariants !== undefined) dashboard[i].contentVariants = req.body.contentVariants;
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

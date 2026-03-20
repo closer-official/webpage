@@ -1055,6 +1055,100 @@ button.secondary {
 .review-left .signals { font-size: 0.8125rem; color: #64748b; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
 .review-preview-wrap { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
 .review-preview-iframe { width: 100%; height: 320px; border: none; display: block; }
+
+/* 検閲LPプレビュー：インライン編集 */
+.review-preview-editor {
+  position: relative;
+  padding-top: 42px;
+  margin-top: 4px;
+}
+.review-preview-toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+}
+.review-edit-start {
+  font-weight: 700;
+}
+.review-edit-hint {
+  font-size: 0.82rem;
+  color: #475569;
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+.review-preview-editor-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .review-preview-editor-body:has(.review-preview-edit-panel) {
+    grid-template-columns: minmax(0, 1fr) min(300px, 32vw);
+  }
+}
+.review-preview-wrap--tall .review-preview-iframe {
+  min-height: 420px;
+  height: min(62vh, 640px);
+}
+.review-preview-edit-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.88rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+.review-preview-edit-panel .muted {
+  color: #64748b;
+  margin: 0;
+}
+.review-panel-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+.review-panel-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #334155;
+}
+.review-panel-textarea,
+.review-panel-input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 400;
+}
+.review-panel-label input[type='range'] {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+.review-rgb-sliders {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.review-rgb-label {
+  font-weight: 600;
+  color: #334155;
+}
+.review-color-swatch {
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-top: 6px;
+}
 .dm-textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.875rem; resize: vertical; margin-bottom: 8px; }
 .review-actions { display: flex; gap: 8px; margin-top: 12px; }
 button.danger { padding: 10px 20px; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; cursor: pointer; font-weight: 500; }
