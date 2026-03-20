@@ -76,6 +76,10 @@ function requireAdmin(req, res) {
   return false;
 }
 
+function makeDraftToken() {
+  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+}
+
 function splitLines(text, limit = 20) {
   return String(text || '')
     .split(/\r?\n|,|、|，/)
@@ -382,6 +386,94 @@ app.get('/api/customer-intake-list', async (req, res) => {
   res.json(out);
 });
 
+app.get('/api/customer-intake-draft/:id', async (req, res) => {
+  const list = await store.getCustomerIntake();
+  const row = (list || []).find((v) => v.id === req.params.id);
+  if (!row) return res.status(404).json({ error: 'Draft not found' });
+  if (row.status !== 'draft') return res.status(400).json({ error: 'Not a draft' });
+  const token = String(req.query.token || '');
+  if (!token || token !== String(row.draftToken || '')) {
+    return res.status(401).json({ error: '再開リンクが無効です。' });
+  }
+  res.json({
+    id: row.id,
+    storeName: row.storeName || '',
+    contactName: row.contactName || '',
+    contactMethod: row.contactMethod || '',
+    contactValue: row.contactValue || '',
+    plan: row.plan || 'normal',
+    referralCode: row.referralCode || '',
+    websiteGoal: row.websiteGoal || '',
+    targetAudience: row.targetAudience || '',
+    designTastes: row.designTastes || [],
+    mainColor: row.mainColor || '',
+    chosenTemplateId: row.chosenTemplateId || '',
+    styleDetail: row.styleDetail || '',
+    favoriteSiteUrl: row.favoriteSiteUrl || '',
+    mustHaveContent: row.mustHaveContent || '',
+    currentActivityUrl: row.currentActivityUrl || '',
+    requestSummary: row.requestSummary || '',
+  });
+});
+
+app.post('/api/customer-intake-draft', async (req, res) => {
+  const body = req.body || {};
+
+  const list = await store.getCustomerIntake();
+  const now = new Date().toISOString();
+  const targetId = String(body.id || '').trim();
+  const targetToken = String(body.draftToken || '').trim();
+  const base = {
+    storeName: String(body.storeName || '').trim().slice(0, 120),
+    contactName: String(body.contactName || '').trim().slice(0, 80),
+    contactMethod: String(body.contactMethod || '').trim(),
+    contactValue: String(body.contactValue || '').trim().slice(0, 160),
+    plan: String(body.plan || '').trim(),
+    referralCode: String(body.referralCode || '').trim().slice(0, 200),
+    websiteGoal: String(body.websiteGoal || '').trim().slice(0, 120),
+    targetAudience: String(body.targetAudience || '').trim().slice(0, 3000),
+    designTastes: Array.isArray(body.designTastes) ? body.designTastes.map((v) => String(v).trim()).filter(Boolean).slice(0, 20) : [],
+    mainColor: String(body.mainColor || '').trim().slice(0, 120),
+    chosenTemplateId: String(body.chosenTemplateId || '').trim().slice(0, 120),
+    styleDetail: String(body.styleDetail || '').trim().slice(0, 3000),
+    favoriteSiteUrl: String(body.favoriteSiteUrl || '').trim().slice(0, 5000),
+    mustHaveContent: String(body.mustHaveContent || '').trim().slice(0, 5000),
+    currentActivityUrl: String(body.currentActivityUrl || '').trim().slice(0, 5000),
+    requestSummary: String(body.requestSummary || '').trim().slice(0, 5000),
+    pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
+    status: 'draft',
+    updatedAt: now,
+  };
+
+  let rowId = targetId;
+  if (rowId) {
+    const i = list.findIndex((v) => v.id === rowId);
+    if (i >= 0) {
+      if (!targetToken || String(list[i].draftToken || '') !== targetToken) {
+        return res.status(401).json({ error: '途中保存の更新権限がありません。' });
+      }
+      list[i] = { ...list[i], ...base, status: 'draft' };
+      await store.setCustomerIntake(list);
+      return res.json({
+        ok: true,
+        id: rowId,
+        draftToken: targetToken,
+        resumeUrl: `/api/customer-intake?draft=${encodeURIComponent(rowId)}&token=${encodeURIComponent(targetToken)}`,
+      });
+    }
+  }
+  rowId = `draft-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const draftToken = makeDraftToken();
+  list.unshift({ id: rowId, draftToken, ...base, createdAt: now });
+  await store.setCustomerIntake(list);
+  res.json({
+    ok: true,
+    id: rowId,
+    draftToken,
+    resumeUrl: `/api/customer-intake?draft=${encodeURIComponent(rowId)}&token=${encodeURIComponent(draftToken)}`,
+  });
+});
+
 app.post('/api/customer-intake', async (req, res) => {
   const body = req.body || {};
   const required = [
@@ -417,8 +509,11 @@ app.post('/api/customer-intake', async (req, res) => {
   }
 
   const list = await store.getCustomerIntake();
+  const now = new Date().toISOString();
+  const draftId = String(body.draftId || '').trim();
+  const draftToken = String(body.draftToken || '').trim();
   const row = {
-    id: `intake-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: draftId || `intake-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     storeName: String(body.storeName || '').trim().slice(0, 120),
     contactName: String(body.contactName || '').trim().slice(0, 80),
     contactMethod: String(body.contactMethod || '').trim(),
@@ -436,10 +531,23 @@ app.post('/api/customer-intake', async (req, res) => {
     currentActivityUrl: String(body.currentActivityUrl || '').trim().slice(0, 5000),
     requestSummary: String(body.requestSummary || '').trim().slice(0, 5000),
     pageUrl: String(body.pageUrl || '').trim().slice(0, 500),
-    status: 'new',
-    createdAt: new Date().toISOString(),
+    status: 'submitted',
+    updatedAt: now,
+    createdAt: now,
   };
-  list.unshift(row);
+  if (draftId) {
+    const i = list.findIndex((v) => v.id === draftId);
+    if (i >= 0) {
+      if (!draftToken || String(list[i].draftToken || '') !== draftToken) {
+        return res.status(401).json({ error: '下書き送信の権限がありません。' });
+      }
+      list[i] = { ...list[i], ...row, id: draftId, status: 'submitted', updatedAt: now };
+    } else {
+      list.unshift(row);
+    }
+  } else {
+    list.unshift(row);
+  }
   await store.setCustomerIntake(list);
   const previewUrl = `/api/customer-intake/${encodeURIComponent(row.id)}/preview`;
   res.status(201).json({ ok: true, id: row.id, previewUrl });

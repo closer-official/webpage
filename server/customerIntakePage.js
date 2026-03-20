@@ -267,17 +267,57 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
     (function () {
       var form = document.getElementById('intake-form');
       var btn = document.getElementById('submit-btn');
+      var draftBtn = document.createElement('button');
+      draftBtn.type = 'button';
+      draftBtn.id = 'draft-btn';
+      draftBtn.textContent = '途中保存';
+      draftBtn.style.background = 'var(--sage)';
+      draftBtn.style.color = 'var(--bg-base)';
+      var actions = form.querySelector('.actions');
+      if (actions) actions.insertBefore(draftBtn, actions.firstChild);
       var ok = document.getElementById('ok');
       var ng = document.getElementById('ng');
+      var draftId = '';
+      var draftToken = '';
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        ok.textContent = '';
-        ng.textContent = '';
-        if (!form.reportValidity()) return;
-        btn.disabled = true;
+      var q = new URLSearchParams(window.location.search);
+      if (q.get('draft')) {
+        draftId = q.get('draft') || '';
+        draftToken = q.get('token') || '';
+        fetch('/api/customer-intake-draft/' + encodeURIComponent(draftId) + '?token=' + encodeURIComponent(draftToken))
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d || !d.id) return;
+            form.storeName.value = d.storeName || '';
+            form.contactName.value = d.contactName || '';
+            form.contactMethod.value = d.contactMethod || '';
+            form.contactValue.value = d.contactValue || '';
+            form.plan.value = d.plan || '';
+            form.referralCode.value = d.referralCode || '';
+            form.websiteGoal.value = d.websiteGoal || '';
+            form.targetAudience.value = d.targetAudience || '';
+            Array.prototype.slice.call(form.querySelectorAll('input[name="designTaste"]')).forEach(function (el) {
+              el.checked = (d.designTastes || []).indexOf(el.value) >= 0;
+            });
+            if (d.chosenTemplateId) {
+              var radio = form.querySelector('input[name="chosenTemplateId"][value="' + d.chosenTemplateId + '"]');
+              if (radio) radio.checked = true;
+            }
+            form.mainColor.value = d.mainColor || '';
+            form.styleDetail.value = d.styleDetail || '';
+            form.favoriteSiteUrl.value = d.favoriteSiteUrl || '';
+            form.mustHaveContent.value = d.mustHaveContent || '';
+            form.currentActivityUrl.value = d.currentActivityUrl || '';
+            form.requestSummary.value = d.requestSummary || '';
+            ok.textContent = '途中保存データを読み込みました。';
+          })
+          .catch(function () {});
+      }
 
-        var payload = {
+      function collectPayload() {
+        return {
+          draftId: draftId || undefined,
+          draftToken: draftToken || undefined,
           storeName: form.storeName.value.trim(),
           contactName: form.contactName.value.trim(),
           contactMethod: form.contactMethod.value,
@@ -296,6 +336,40 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           requestSummary: form.requestSummary.value.trim(),
           pageUrl: window.location.href
         };
+      }
+
+      draftBtn.addEventListener('click', function () {
+        ok.textContent = '';
+        ng.textContent = '';
+        var payload = collectPayload();
+        fetch('/api/customer-intake-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, id: draftId || undefined })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && data.ok) {
+              draftId = data.id || draftId;
+              draftToken = data.draftToken || draftToken;
+              ok.textContent = '途中保存しました。再開URL: ' + (data.resumeUrl || ('/api/customer-intake?draft=' + draftId + '&token=' + draftToken));
+            } else {
+              ng.textContent = (data && data.error) ? data.error : '途中保存に失敗しました。';
+            }
+          })
+          .catch(function () {
+            ng.textContent = '途中保存に失敗しました。';
+          });
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        ok.textContent = '';
+        ng.textContent = '';
+        if (!form.reportValidity()) return;
+        btn.disabled = true;
+
+        var payload = collectPayload();
         if (!payload.designTastes.length) {
           ng.textContent = 'デザインの希望テイストを1つ以上選択してください。';
           btn.disabled = false;
