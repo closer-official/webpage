@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>GLOBAL WORK × NAOKO TAKAYAMA | Lookbook（構成デモ）</title>
-  <meta name="description" content="参照LPと同一構成のデモ。文言・色・画像は本番で差し替えてください。" />
-  <!-- 構成・配置は参照コラボLPに準拠。コードは独自実装です。 -->
+  <title>EiiS | GLOBAL WORK × NAOKO TAKAYAMA（参照レイアウト）</title>
+  <meta name="description" content="参照スクリーンショット4枚の構成に準拠したデモ。文言・画像は差し替え。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Kaushan+Script&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --alb-sky: #79acc4;
-      --alb-sky-mid: #6a9db8;
+      --alb-sky: #7eb3cf;
+      --alb-sky-deep: #6a9eb8;
       --alb-white: #ffffff;
-      --alb-ink: #1c1c1c;
-      --alb-body: #eef1f4;
-      --alb-line: rgba(28, 28, 28, 0.12);
-      --alb-font-script: "Dancing Script", cursive;
+      --alb-ink: #1a1a1a;
+      --alb-muted: #6b6b6b;
+      --alb-body: #ffffff;
+      --alb-shop-bg: #efeff1;
+      --alb-line: rgba(0, 0, 0, 0.08);
+      --alb-font-script: "Kaushan Script", cursive;
       --alb-font-sans: "Montserrat", "Noto Sans JP", system-ui, sans-serif;
-      --alb-radius-card: 16px;
-      --alb-ease: cubic-bezier(0.22, 1, 0.36, 1);
-      --alb-pad-x: clamp(14px, 4.2vw, 22px);
-      --alb-content-max: 520px;
+      --alb-font-serif: "Cormorant Garamond", "Noto Sans JP", serif;
+      --alb-radius-card: 22px;
+      --alb-ease: cubic-bezier(0.25, 0.9, 0.35, 1);
+      --alb-pad-x: 18px;
+      --alb-letter-ui: 0.14em;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -34,27 +36,30 @@
     }
     .alb-page { min-height: 100vh; }
 
-    /* 言語スイッチ風（右上ピル・参照と同配置） */
     .alb-lang {
       position: fixed;
       top: max(10px, env(safe-area-inset-top));
       right: max(10px, env(safe-area-inset-right));
-      z-index: 60;
-      font-family: var(--alb-font-sans);
+      z-index: 80;
       font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       color: rgba(255, 255, 255, 0.95);
-      background: rgba(0, 0, 0, 0.2);
-      border: none;
-      padding: 7px 11px;
-      border-radius: 3px;
-      cursor: default;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid transparent;
+      padding: 7px 12px;
+      border-radius: 2px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    }
+    body.alb-past-hero .alb-lang {
+      color: #222;
+      background: rgba(255, 255, 255, 0.94);
+      border-color: rgba(0, 0, 0, 0.08);
     }
 
-    /* ----- オープニング ----- */
+    /* ========== オープニング（①青のみ ②角丸カード＋写真上に白文字 ③全画面＋上下スカイレター ④動画） ========== */
     .alb-intro {
       position: relative;
       min-height: 100svh;
@@ -67,73 +72,85 @@
       background: var(--alb-sky);
       z-index: 0;
     }
-    .alb-intro-words {
-      position: relative;
-      z-index: 3;
-      text-align: center;
-      padding: clamp(5rem, 22vh, 10rem) var(--alb-pad-x) 0;
-      color: var(--alb-white);
-      transition: opacity 0.65s ease, transform 0.85s var(--alb-ease);
+
+    /* ① 固体青：文字は画面上部〜中央寄り（参照4枚目） */
+    .alb-intro-splash {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--alb-pad-x);
+      padding-bottom: 22vh;
+      pointer-events: none;
+      transition: opacity 0.55s ease;
     }
+    .alb-intro-splash-inner {
+      text-align: center;
+      color: var(--alb-white);
+    }
+    .alb-intro.alb-phase-card .alb-intro-splash,
+    .alb-intro.alb-phase-expand .alb-intro-splash,
+    .alb-intro.alb-phase-video .alb-intro-splash {
+      opacity: 0;
+    }
+
+    /* ②③ 写真上の白文字（参照1・3枚目：カード内／全画面とも中央スタック） */
+    .alb-intro-oncard {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8%;
+      text-align: center;
+      color: var(--alb-white);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+    .alb-intro.alb-phase-card .alb-intro-oncard,
+    .alb-intro.alb-phase-expand .alb-intro-oncard {
+      opacity: 1;
+    }
+    .alb-intro.alb-phase-video .alb-intro-oncard {
+      opacity: 0;
+      transition: opacity 0.55s ease;
+    }
+
     .alb-logo-script {
       font-family: var(--alb-font-script);
-      font-size: clamp(3.8rem, 17vw, 6.25rem);
-      line-height: 0.95;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      text-shadow: 0 6px 36px rgba(0, 0, 0, 0.15);
+      font-size: clamp(4.2rem, 19vw, 7rem);
+      line-height: 0.92;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.2));
     }
     .alb-tagline {
-      margin-top: 0.5rem;
-      font-family: var(--alb-font-sans);
-      font-size: 0.74rem;
-      font-weight: 400;
-      letter-spacing: 0.04em;
-      opacity: 0.96;
+      margin-top: 0.45rem;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      opacity: 0.98;
     }
     .alb-brand-caps {
-      margin-top: 0.65rem;
-      font-family: var(--alb-font-sans);
-      font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+      margin-top: 0.55rem;
+      font-size: clamp(0.95rem, 3.8vw, 1.2rem);
       font-weight: 700;
-      letter-spacing: 0.18em;
-      line-height: 1.2;
+      letter-spacing: 0.22em;
+      line-height: 1.25;
     }
     .alb-collab {
-      margin-top: 0.45rem;
-      font-family: var(--alb-font-sans);
-      font-size: 0.7rem;
-      font-weight: 400;
-      letter-spacing: 0.14em;
-      opacity: 0.93;
-    }
-    /* ロング版トップ：英語短段落（参照LP同位置・任意で削除可） */
-    .alb-intro-en {
-      max-width: 17.5rem;
-      margin: 1.35rem auto 0;
-      font-family: var(--alb-font-sans);
-      font-size: 0.65rem;
-      line-height: 1.85;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      opacity: 0.88;
-    }
-    /* 全画面写真・動画フェーズ：中央オーバーレイ（参照スクリーンショット同等） */
-    .alb-intro.alb-phase-expand .alb-intro-words {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 0 var(--alb-pad-x);
-      z-index: 25;
-      pointer-events: none;
-      opacity: 1;
-      text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
-    }
-    .alb-intro.alb-phase-video .alb-intro-words {
-      opacity: 0;
-      pointer-events: none;
+      margin-top: 0.4rem;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.95;
     }
 
     .alb-intro-card-wrap {
@@ -144,48 +161,52 @@
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: clamp(4rem, 14vh, 7rem);
+      padding-bottom: 11vh;
       z-index: 2;
       pointer-events: none;
-      transition:
-        padding 1s var(--alb-ease),
-        position 0s linear 0s;
     }
+
     .alb-intro-card {
       position: relative;
-      width: min(78vw, 320px);
-      aspect-ratio: 3 / 4.2;
+      width: min(86vw, 340px);
+      aspect-ratio: 3 / 4.15;
       border-radius: var(--alb-radius-card);
       overflow: hidden;
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
-      transform: translate3d(0, calc(100% + 140px), 0);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.28);
+      transform: translate3d(0, calc(100% + 120px), 0);
       transition:
-        transform 1.15s var(--alb-ease),
-        width 0.95s var(--alb-ease),
-        max-width 0.95s var(--alb-ease),
-        aspect-ratio 0.95s var(--alb-ease),
-        border-radius 0.85s var(--alb-ease),
-        box-shadow 0.6s ease;
+        transform 1.2s var(--alb-ease),
+        width 1s var(--alb-ease),
+        height 1s var(--alb-ease),
+        border-radius 0.9s var(--alb-ease),
+        box-shadow 0.5s ease;
     }
     .alb-intro.alb-phase-card .alb-intro-card {
       transform: translate3d(0, 0, 0);
     }
+
+    /* ③ 全画面：上下にスカイブルーのレターボックス（参照3枚目） */
     .alb-intro.alb-phase-expand .alb-intro-card-wrap {
       position: fixed;
       inset: 0;
-      padding: 0;
-      z-index: 20;
-      align-items: center;
+      padding: 7px 0;
+      background: var(--alb-sky);
+      z-index: 40;
+      align-items: stretch;
+      justify-content: center;
       pointer-events: auto;
     }
     .alb-intro.alb-phase-expand .alb-intro-card {
-      width: 100vw;
-      max-width: none;
-      height: 100svh;
+      width: 100%;
+      max-width: 100%;
+      height: calc(100svh - 14px);
+      margin: 0 auto;
       aspect-ratio: auto;
       border-radius: 0;
       box-shadow: none;
+      align-self: center;
     }
+
     .alb-intro-card-img,
     .alb-intro-card-vid {
       position: absolute;
@@ -197,11 +218,10 @@
     }
     .alb-intro-card-vid {
       opacity: 0;
-      transition: opacity 0.7s ease;
+      transition: opacity 0.65s ease;
     }
     .alb-intro.alb-phase-video .alb-intro-card-img {
       opacity: 0;
-      transition: opacity 0.5s ease;
     }
     .alb-intro.alb-phase-video .alb-intro-card-vid {
       opacity: 1;
@@ -209,120 +229,95 @@
 
     .alb-scroll-cue {
       position: absolute;
-      bottom: 1.1rem;
+      bottom: 1rem;
       left: 50%;
       transform: translateX(-50%);
       width: 1px;
-      height: 28px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), transparent);
-      z-index: 4;
-      opacity: 0.85;
-      animation: alb-cue-pulse 2.2s ease-in-out infinite;
+      height: 26px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+      z-index: 6;
+      opacity: 0.9;
+      animation: alb-cue 2s ease-in-out infinite;
+      pointer-events: none;
     }
-    .alb-intro.alb-phase-expand .alb-scroll-cue,
     .alb-intro.alb-phase-video .alb-scroll-cue {
       opacity: 0;
     }
-    @keyframes alb-cue-pulse {
-      0%, 100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
-      50% { opacity: 0.95; transform: translateX(-50%) translateY(6px); }
+    @keyframes alb-cue {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 1; transform: translateX(-50%) translateY(5px); }
     }
 
-    /* オープニング後：固定レイヤーを解除して通常スクロールへ */
     .alb-intro.alb-phase-done {
       min-height: 0;
     }
     .alb-intro.alb-phase-done .alb-intro-card-wrap {
       position: relative;
       inset: auto;
-      min-height: 100svh;
       padding: 0;
-      align-items: stretch;
+      background: transparent;
+      min-height: 100svh;
     }
     .alb-intro.alb-phase-done .alb-intro-card {
       width: 100%;
-      max-width: none;
       height: 100svh;
+      max-width: none;
       border-radius: 0;
-      transform: none;
       box-shadow: none;
+      transform: none;
     }
     .alb-intro.alb-phase-done .alb-intro-bg {
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.45s ease;
     }
 
-    /* ----- ルックセクション（番号＋日本語見出し＋右へ伸びる罫線） ----- */
-    .alb-looks { background: var(--alb-body); }
+    /* ========== ルック：白ベース・大余白・01 | ENGLISH（参照ロング2枚目） ========== */
+    .alb-looks {
+      background: var(--alb-body);
+    }
     .alb-look {
-      padding: clamp(2.25rem, 8vw, 3.25rem) 0 clamp(1.75rem, 5vw, 2.5rem);
-      border-bottom: 1px solid var(--alb-line);
+      padding: clamp(2.75rem, 10vw, 4.5rem) 0 clamp(2rem, 7vw, 3.25rem);
     }
     .alb-look-head {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 0 var(--alb-pad-x) 14px;
-      max-width: var(--alb-content-max);
-      margin: 0 auto;
-    }
-    .alb-look-head__left {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 0 10px;
+      padding: 0 var(--alb-pad-x) 18px;
     }
     .alb-look-num {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.22em;
-    }
-    .alb-look-title {
-      font-size: 11px;
+      font-family: var(--alb-font-serif);
+      font-size: 1.35rem;
       font-weight: 600;
       letter-spacing: 0.08em;
-      white-space: nowrap;
+      color: var(--alb-ink);
     }
-    .alb-look-head__line {
-      flex: 1;
-      height: 1px;
-      background: var(--alb-line);
-      min-width: 24px;
+    .alb-look-sep {
+      font-size: 11px;
+      font-weight: 400;
+      color: #bbb;
+      margin: 0 2px;
     }
-
-    /* 2枚並び（参照LPの一部セクションと同型） */
-    .alb-dual {
-      max-width: var(--alb-content-max);
-      margin: 0 auto;
-      padding: 0 var(--alb-pad-x);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-    .alb-dual__cell {
-      overflow: hidden;
-    }
-    .alb-dual__cell img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 3 / 4;
-      object-fit: cover;
-    }
-    .alb-look .alb-dual + .alb-shop {
-      margin-top: 1.25rem;
+    .alb-look-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--alb-ink);
     }
 
+    /* 全幅ビジュアル */
     .alb-slider {
-      max-width: var(--alb-content-max);
-      margin: 0 auto;
+      width: 100%;
       overflow: hidden;
-      padding: 0 var(--alb-pad-x);
     }
-    .alb-slider-viewport { overflow: hidden; border-radius: 4px; }
+    .alb-slider-viewport {
+      overflow: hidden;
+    }
     .alb-slider-track {
       display: flex;
-      transition: transform 0.55s var(--alb-ease);
+      transition: transform 0.6s var(--alb-ease);
       will-change: transform;
     }
     .alb-slide {
@@ -335,98 +330,107 @@
       display: block;
       aspect-ratio: 3 / 4;
       object-fit: cover;
-      vertical-align: middle;
     }
 
     .alb-slider-nav {
       display: flex;
       justify-content: flex-end;
-      align-items: center;
-      gap: 0.2rem;
-      padding: 10px var(--alb-pad-x) 0;
-      max-width: var(--alb-content-max);
-      margin: 0 auto;
+      gap: 0.15rem;
+      padding: 12px var(--alb-pad-x) 0;
     }
     .alb-slider-dot {
       font-family: var(--alb-font-sans);
-      font-size: 0.72rem;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 500;
       color: var(--alb-ink);
-      opacity: 0.35;
+      opacity: 0.28;
       background: none;
       border: none;
-      padding: 0.35rem 0.5rem;
+      padding: 6px 10px;
       cursor: pointer;
-      min-width: 2rem;
-      transition: opacity 0.25s ease;
+      min-width: 1.75rem;
+      transition: opacity 0.2s ease;
     }
-    .alb-slider-dot.is-on {
-      opacity: 1;
-    }
+    .alb-slider-dot.is-on { opacity: 1; }
     .alb-slider-dot:focus-visible {
-      outline: 2px solid var(--alb-sky-mid);
+      outline: 2px solid var(--alb-sky-deep);
       outline-offset: 2px;
     }
 
-    /* 商品行 */
+    /* ショップ：薄グレー帯（参照ロング） */
+    .alb-shop-band {
+      margin-top: 6px;
+      background: var(--alb-shop-bg);
+      padding: 18px var(--alb-pad-x) 26px;
+    }
     .alb-shop {
-      max-width: var(--alb-content-max);
-      margin: 1.1rem auto 0;
-      padding: 0 var(--alb-pad-x);
       list-style: none;
+      max-width: 640px;
+      margin: 0 auto;
     }
     .alb-shop li {
       display: grid;
-      grid-template-columns: 56px 1fr auto;
-      gap: 0.65rem;
+      grid-template-columns: 52px 1fr auto;
+      gap: 12px;
       align-items: center;
-      padding: 0.65rem 0;
-      border-top: 1px solid var(--alb-line);
+      padding: 14px 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
     }
     .alb-shop li:first-child { border-top: none; }
     .alb-shop-thumb {
-      width: 56px;
-      height: 56px;
+      width: 52px;
+      height: 52px;
       object-fit: cover;
-      border-radius: 2px;
     }
-    .alb-shop-meta { min-width: 0; }
     .alb-shop-name {
       display: block;
-      font-size: 0.72rem;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: var(--alb-letter-ui);
+      text-transform: uppercase;
     }
     .alb-shop-price {
       display: block;
-      font-size: 0.68rem;
-      margin-top: 0.15rem;
-      opacity: 0.65;
+      font-size: 10px;
+      margin-top: 3px;
+      color: var(--alb-muted);
+      letter-spacing: 0.06em;
     }
-    .alb-buy {
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
+    .alb-check {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-decoration: none;
+      text-transform: uppercase;
       color: var(--alb-ink);
-      border: 1px solid var(--alb-ink);
-      padding: 0.45rem 0.65rem;
+      background: var(--alb-white);
+      border: 1px solid rgba(0, 0, 0, 0.35);
+      padding: 8px 14px;
       transition: background 0.2s ease, color 0.2s ease;
     }
-    .alb-buy:hover {
+    .alb-check:hover {
       background: var(--alb-ink);
       color: var(--alb-white);
+      border-color: var(--alb-ink);
     }
 
-    /* インタースティシャル（背景動画＋コピー） */
+    .alb-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    .alb-dual img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      display: block;
+    }
+
     .alb-interstitial {
       position: relative;
-      min-height: 72svh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      min-height: 70svh;
+      margin: clamp(2rem, 6vw, 3rem) 0;
       overflow: hidden;
-      margin: 2rem 0;
     }
     .alb-interstitial-vid {
       position: absolute;
@@ -434,137 +438,134 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(0.72);
+      filter: brightness(0.7);
     }
     .alb-interstitial::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(28, 28, 28, 0.35), rgba(28, 28, 28, 0.5));
-      pointer-events: none;
+      background: rgba(0, 0, 0, 0.35);
     }
     .alb-interstitial-inner {
       position: relative;
       z-index: 1;
+      height: 100%;
+      min-height: 70svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem var(--alb-pad-x);
       text-align: center;
-      padding: 2rem 1.5rem;
       color: var(--alb-white);
-      max-width: 22rem;
-    }
-    .alb-interstitial-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      opacity: 0.85;
-      margin-bottom: 0.75rem;
     }
     .alb-interstitial-text {
-      font-size: 0.8rem;
-      line-height: 1.85;
-      font-weight: 400;
-      letter-spacing: 0.04em;
+      font-size: 11px;
+      line-height: 2;
+      letter-spacing: 0.12em;
+      max-width: 20rem;
     }
 
-    /* フッター */
     .alb-footer {
       text-align: center;
-      padding: clamp(2.75rem, 9vw, 4rem) var(--alb-pad-x) clamp(3.5rem, 12vw, 5rem);
-      background: #e4e7ea;
+      padding: clamp(3.5rem, 12vw, 6rem) var(--alb-pad-x) clamp(4rem, 14vw, 7rem);
+      background: var(--alb-body);
     }
-    .alb-footer-logo {
+    .alb-footer-look {
+      font-family: var(--alb-font-serif);
+      font-size: clamp(3.5rem, 18vw, 6rem);
+      font-weight: 400;
+      color: #d8d8d8;
+      letter-spacing: 0.35em;
+      line-height: 1;
+    }
+    .alb-footer-script {
       font-family: var(--alb-font-script);
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       color: var(--alb-ink);
+      margin-top: 1.5rem;
       opacity: 0.85;
     }
     .alb-footer-links {
-      margin-top: 1.25rem;
+      margin-top: 1.5rem;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.75rem 1.25rem;
+      gap: 1rem 1.5rem;
     }
     .alb-footer-links a {
-      font-size: 0.68rem;
-      letter-spacing: 0.14em;
+      font-size: 9px;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--alb-ink);
+      color: var(--alb-muted);
       text-decoration: none;
-      opacity: 0.55;
     }
-    .alb-footer-links a:hover { opacity: 1; }
     .alb-footer-copy {
-      margin-top: 2rem;
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      opacity: 0.45;
+      margin-top: 2.25rem;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: #aaa;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .alb-intro-card { transition: none; }
-      .alb-slider-track { transition: none; }
+      .alb-intro-card, .alb-slider-track { transition: none; }
       .alb-scroll-cue { animation: none; }
     }
   </style>
 </head>
 <body>
+  <button type="button" class="alb-lang">日本語 ▾</button>
+
   <div class="alb-page">
     <section class="alb-intro" id="albIntro" aria-label="オープニング">
       <div class="alb-intro-bg" aria-hidden="true"></div>
-      <div class="alb-intro-words">
-        <p class="alb-logo-script">L.u.m.e</p>
-        <p class="alb-season">2025 Spring Summer</p>
-        <p class="alb-tagline">Even if it’s small</p>
-        <p class="alb-intro-lede">日常の光に馴染む、小さなワードローブ。風通しのよい素材感と、すっと肩の力が抜けるシルエット。</p>
+
+      <div class="alb-intro-splash">
+        <div class="alb-intro-splash-inner">
+          <p class="alb-logo-script">EiiS</p>
+          <p class="alb-tagline">Even if it’s Small</p>
+          <p class="alb-brand-caps">GLOBAL WORK</p>
+          <p class="alb-collab">with NAOKO TAKAYAMA</p>
+        </div>
       </div>
+
       <div class="alb-intro-card-wrap">
         <div class="alb-intro-card">
           <img
             class="alb-intro-card-img"
-            src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=85"
+            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=88"
             alt=""
-            width="900"
-            height="1200"
+            width="960"
+            height="1280"
             fetchpriority="high"
           />
-          <video
-            class="alb-intro-card-vid"
-            muted
-            playsinline
-            loop
-            preload="metadata"
-            aria-label="コレクション映像"
-          >
+          <video class="alb-intro-card-vid" muted playsinline loop preload="metadata" aria-label="映像">
             <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
           </video>
+          <div class="alb-intro-oncard">
+            <p class="alb-logo-script">EiiS</p>
+            <p class="alb-tagline">Even if it’s Small</p>
+            <p class="alb-brand-caps">GLOBAL WORK</p>
+            <p class="alb-collab">with NAOKO TAKAYAMA</p>
+          </div>
+          <div class="alb-scroll-cue" aria-hidden="true"></div>
         </div>
       </div>
-      <div class="alb-scroll-cue" aria-hidden="true"></div>
     </section>
 
     <div class="alb-looks">
-      <section class="alb-look" aria-labelledby="look01">
-        <div class="alb-look-head">
-          <div class="alb-look-head__left">
-            <span class="alb-look-num">01</span>
-            <h2 class="alb-look-title" id="look01">シーンに合わせて着回す</h2>
-          </div>
-          <div class="alb-look-head__line" aria-hidden="true"></div>
-        </div>
+      <!-- 01–10: 参照ロングの英語見出し -->
+      <section class="alb-look" aria-labelledby="l01">
+        <header class="alb-look-head">
+          <span class="alb-look-num">01</span>
+          <span class="alb-look-sep">|</span>
+          <h2 class="alb-look-title" id="l01">On the morning road</h2>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
             <div class="alb-slider-track">
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <video muted playsinline loop preload="metadata" aria-label="ルック動画">
-                  <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
-                </video>
-              </div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
             </div>
           </div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
@@ -573,43 +574,32 @@
             <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
           </div>
         </div>
-        <ul class="alb-shop">
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">KNIT</span>
-              <span class="alb-shop-price">¥12,000</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">PANTS</span>
-              <span class="alb-shop-price">¥18,500</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-        </ul>
+        <div class="alb-shop-band">
+          <ul class="alb-shop">
+            <li>
+              <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=160&q=80" alt="" />
+              <div><span class="alb-shop-name">Knit</span><span class="alb-shop-price">¥8,000</span></div>
+              <a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a>
+            </li>
+            <li>
+              <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=160&q=80" alt="" />
+              <div><span class="alb-shop-name">Pants</span><span class="alb-shop-price">¥12,000</span></div>
+              <a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a>
+            </li>
+          </ul>
+        </div>
       </section>
 
-      <section class="alb-look" aria-labelledby="look02">
-        <div class="alb-look-head">
-          <div class="alb-look-head__left">
-            <span class="alb-look-num">02</span>
-            <h2 class="alb-look-title" id="look02">街と自然のあいだで</h2>
-          </div>
-          <div class="alb-look-head__line" aria-hidden="true"></div>
-        </div>
+      <section class="alb-look" aria-labelledby="l02">
+        <header class="alb-look-head">
+          <span class="alb-look-num">02</span><span class="alb-look-sep">|</span>
+          <h2 class="alb-look-title" id="l02">Blue moment</h2>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
             <div class="alb-slider-track">
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
             </div>
           </div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
@@ -617,150 +607,172 @@
             <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
           </div>
         </div>
-        <ul class="alb-shop">
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">JACKET</span>
-              <span class="alb-shop-price">¥24,000</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-        </ul>
+        <div class="alb-shop-band">
+          <ul class="alb-shop">
+            <li>
+              <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=160&q=80" alt="" />
+              <div><span class="alb-shop-name">Jacket</span><span class="alb-shop-price">¥18,000</span></div>
+              <a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a>
+            </li>
+          </ul>
+        </div>
       </section>
 
-      <section class="alb-interstitial" aria-label="ブランドメッセージ">
+      <section class="alb-look" aria-labelledby="l03">
+        <header class="alb-look-head">
+          <span class="alb-look-num">03</span><span class="alb-look-sep">|</span>
+          <h2 class="alb-look-title" id="l03">In the afternoon</h2>
+        </header>
+        <div class="alb-dual">
+          <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
+          <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
+        </div>
+        <div class="alb-shop-band">
+          <ul class="alb-shop">
+            <li>
+              <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=160&q=80" alt="" />
+              <div><span class="alb-shop-name">Shirt</span><span class="alb-shop-price">¥6,900</span></div>
+              <a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="alb-look" aria-labelledby="l04">
+        <header class="alb-look-head">
+          <span class="alb-look-num">04</span><span class="alb-look-sep">|</span>
+          <h2 class="alb-look-title" id="l04">Sunset</h2>
+        </header>
+        <div class="alb-slider" data-alb-slider>
+          <div class="alb-slider-viewport">
+            <div class="alb-slider-track">
+              <div class="alb-slide"><video muted playsinline loop preload="metadata" aria-label=""><source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" /></video></div>
+              <div class="alb-slide"><img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            </div>
+          </div>
+          <div class="alb-slider-nav" role="tablist" aria-label="スライド">
+            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+          </div>
+        </div>
+        <div class="alb-shop-band">
+          <ul class="alb-shop">
+            <li>
+              <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=160&q=80" alt="" />
+              <div><span class="alb-shop-name">Skirt</span><span class="alb-shop-price">¥9,900</span></div>
+              <a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="alb-interstitial" aria-label="world">
         <video class="alb-interstitial-vid" autoplay muted playsinline loop preload="metadata" aria-hidden="true">
           <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
         </video>
         <div class="alb-interstitial-inner">
-          <p class="alb-interstitial-label">Craft</p>
-          <p class="alb-interstitial-text">縫製の強度と、肌触りのバランス。長く手元に残る一着を目指して、国内のパートナー工房と仕立てています。</p>
+          <p class="alb-interstitial-text">風の通り道をイメージした軽やかな素材感と、日々に馴染むシルエット。歩くたびに表情が変わる布の落ち感を楽しんで。</p>
         </div>
       </section>
 
-      <section class="alb-look" aria-labelledby="look03">
-        <div class="alb-look-head">
-          <div class="alb-look-head__left">
-            <span class="alb-look-num">03</span>
-            <h2 class="alb-look-title" id="look03">余白のあるシルエット</h2>
-          </div>
-          <div class="alb-look-head__line" aria-hidden="true"></div>
-        </div>
+      <section class="alb-look" aria-labelledby="l05">
+        <header class="alb-look-head"><span class="alb-look-num">05</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l05">Night</h2></header>
         <div class="alb-slider" data-alb-slider>
-          <div class="alb-slider-viewport">
-            <div class="alb-slider-track">
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-            </div>
-          </div>
+          <div class="alb-slider-viewport"><div class="alb-slider-track">
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+          </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
             <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
             <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
             <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
           </div>
         </div>
-        <ul class="alb-shop">
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">TEE</span>
-              <span class="alb-shop-price">¥6,500</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">SKIRT</span>
-              <span class="alb-shop-price">¥14,000</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-        </ul>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Knit</span><span class="alb-shop-price">¥8,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
 
-      <!-- 04: 2枚並び（参照LPのデュアルビジュアルセクションと同型） -->
-      <section class="alb-look" aria-labelledby="look04">
-        <div class="alb-look-head">
-          <div class="alb-look-head__left">
-            <span class="alb-look-num">04</span>
-            <h2 class="alb-look-title" id="look04">風が通る重ね方</h2>
-          </div>
-          <div class="alb-look-head__line" aria-hidden="true"></div>
-        </div>
-        <div class="alb-dual">
-          <div class="alb-dual__cell">
-            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=85" alt="" loading="lazy" width="600" height="800" />
-          </div>
-          <div class="alb-dual__cell">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=85" alt="" loading="lazy" width="600" height="800" />
-          </div>
-        </div>
-        <ul class="alb-shop">
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">KNIT</span>
-              <span class="alb-shop-price">¥12,000</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-        </ul>
-      </section>
-
-      <section class="alb-look" aria-labelledby="look05">
-        <div class="alb-look-head">
-          <div class="alb-look-head__left">
-            <span class="alb-look-num">05</span>
-            <h2 class="alb-look-title" id="look05">夕方の光に合う色</h2>
-          </div>
-          <div class="alb-look-head__line" aria-hidden="true"></div>
-        </div>
+      <section class="alb-look" aria-labelledby="l06">
+        <header class="alb-look-head"><span class="alb-look-num">06</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l06">A new day</h2></header>
         <div class="alb-slider" data-alb-slider>
-          <div class="alb-slider-viewport">
-            <div class="alb-slider-track">
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-              <div class="alb-slide">
-                <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
-              </div>
-            </div>
-          </div>
+          <div class="alb-slider-viewport"><div class="alb-slider-track">
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+          </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
             <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
             <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
           </div>
         </div>
-        <ul class="alb-shop">
-          <li>
-            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
-            <div class="alb-shop-meta">
-              <span class="alb-shop-name">COAT</span>
-              <span class="alb-shop-price">¥29,000</span>
-            </div>
-            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
-          </li>
-        </ul>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Pants</span><span class="alb-shop-price">¥11,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
+      </section>
+
+      <section class="alb-look" aria-labelledby="l07">
+        <header class="alb-look-head"><span class="alb-look-num">07</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l07">Before sleeping</h2></header>
+        <div class="alb-slider" data-alb-slider>
+          <div class="alb-slider-viewport"><div class="alb-slider-track">
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+          </div></div>
+          <div class="alb-slider-nav" role="tablist" aria-label="スライド">
+            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+          </div>
+        </div>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Tee</span><span class="alb-shop-price">¥4,900</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
+      </section>
+
+      <section class="alb-look" aria-labelledby="l08">
+        <header class="alb-look-head"><span class="alb-look-num">08</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l08">Dreaming</h2></header>
+        <div class="alb-slider" data-alb-slider>
+          <div class="alb-slider-viewport"><div class="alb-slider-track">
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+          </div></div>
+          <div class="alb-slider-nav" role="tablist" aria-label="スライド">
+            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+          </div>
+        </div>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Dress</span><span class="alb-shop-price">¥15,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
+      </section>
+
+      <section class="alb-look" aria-labelledby="l09">
+        <header class="alb-look-head"><span class="alb-look-num">09</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l09">Wake up</h2></header>
+        <div class="alb-dual">
+          <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
+          <img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
+        </div>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Outer</span><span class="alb-shop-price">¥22,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
+      </section>
+
+      <section class="alb-look" aria-labelledby="l10">
+        <header class="alb-look-head"><span class="alb-look-num">10</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l10">Relax</h2></header>
+        <div class="alb-slider" data-alb-slider>
+          <div class="alb-slider-viewport"><div class="alb-slider-track">
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+            <div class="alb-slide"><img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
+          </div></div>
+          <div class="alb-slider-nav" role="tablist" aria-label="スライド">
+            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+          </div>
+        </div>
+        <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Knit</span><span class="alb-shop-price">¥8,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
     </div>
 
     <footer class="alb-footer">
-      <p class="alb-footer-logo">EiiS</p>
+      <p class="alb-footer-look">LOOK</p>
+      <p class="alb-footer-script">EiiS</p>
       <div class="alb-footer-links">
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-        <a href="https://thebase.in" target="_blank" rel="noopener noreferrer">Online Store</a>
+        <a href="#">Instagram</a>
+        <a href="#">X</a>
+        <a href="https://thebase.in" target="_blank" rel="noopener noreferrer">Store</a>
       </div>
-      <p class="alb-footer-copy">© GLOBAL WORK × NAOKO TAKAYAMA（構成デモ・文言は差し替え）</p>
+      <p class="alb-footer-copy">© GLOBAL WORK × NAOKO TAKAYAMA — デモ用（公開前に差し替え）</p>
     </footer>
   </div>
 
@@ -778,18 +790,13 @@
         if (!track || slides < 1) return;
         var idx = 0;
         function pauseVideos() {
-          wrap.querySelectorAll("video").forEach(function (v) {
-            v.pause();
-          });
+          wrap.querySelectorAll("video").forEach(function (v) { v.pause(); });
         }
         function playActive() {
           var slide = track.children[idx];
           if (!slide) return;
           var vo = slide.querySelector("video");
-          if (vo) {
-            vo.muted = true;
-            vo.play().catch(function () {});
-          }
+          if (vo) { vo.muted = true; vo.play().catch(function () {}); }
         }
         function go(i) {
           idx = ((i % slides) + slides) % slides;
@@ -802,17 +809,14 @@
           playActive();
         }
         dots.forEach(function (d, j) {
-          d.addEventListener("click", function () {
-            go(j);
-          });
+          d.addEventListener("click", function () { go(j); });
         });
         go(0);
       });
     }
 
     function finishIntroLayout() {
-      if (!intro) return;
-      intro.classList.add("alb-phase-done");
+      if (intro) intro.classList.add("alb-phase-done");
     }
 
     if (!intro) {
@@ -822,9 +826,7 @@
 
     if (reduced) {
       intro.classList.add("alb-phase-card", "alb-phase-expand", "alb-phase-video");
-      if (vid) {
-        vid.play().catch(function () {});
-      }
+      if (vid) vid.play().catch(function () {});
       finishIntroLayout();
       initSliders();
       return;
@@ -832,24 +834,21 @@
 
     initSliders();
 
-    setTimeout(function () {
-      intro.classList.add("alb-phase-card");
-    }, 550);
-
-    setTimeout(function () {
-      intro.classList.add("alb-phase-expand");
-    }, 2100);
-
+    setTimeout(function () { intro.classList.add("alb-phase-card"); }, 500);
+    setTimeout(function () { intro.classList.add("alb-phase-expand"); }, 2000);
     setTimeout(function () {
       intro.classList.add("alb-phase-video");
-      if (vid) {
-        vid.play().catch(function () {});
-      }
-    }, 3000);
+      if (vid) vid.play().catch(function () {});
+    }, 2950);
+    setTimeout(function () { finishIntroLayout(); }, 4000);
 
-    setTimeout(function () {
-      finishIntroLayout();
-    }, 4200);
+    function onScroll() {
+      var y = window.scrollY || 0;
+      var th = Math.min(window.innerHeight || 600, 640) * 0.75;
+      document.body.classList.toggle("alb-past-hero", y > th);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
   })();
   </script>
 </body>
