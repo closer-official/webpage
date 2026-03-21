@@ -2,7 +2,7 @@ import type { PageContent, SEOData, StyleId } from '../types';
 import { SHOWCASE_VARIANT_COUNT } from '../types';
 import { WARM_ORGANIC_CAFE_PRESET } from './warmOrganicCafePreset';
 
-/** 1テンプレあたりのバリアント数（12×1=12スロット） */
+/** 1テンプレあたりのバリアント数（14×バリアント数スロット） */
 const VARIANT_COUNT = SHOWCASE_VARIANT_COUNT;
 
 /** 汎用プレースホルダー（テンプレ3〜10のひな形） */
@@ -607,56 +607,6 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       metaDescription: '経営者としての基準と実行力を鍛える実践型スクール。',
       keywords: '経営, スクール, 実践, 起業',
       ogImageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200',
-      canonicalUrl: '',
-    },
-  },
-  apparel_lookbook: {
-    content: {
-      siteName: 'GLOBAL WORK × NAOKO TAKAYAMA',
-      title: 'EiiS | Lookbook（構成デモ）',
-      headline: 'GLOBAL WORK',
-      subheadline: 'Even if it’s Small — with NAOKO TAKAYAMA（HTML内の固定LPで表示。文言は差し替え）',
-      ctaLabel: 'ONLINE STORE',
-      ctaHref: 'https://thebase.in',
-      sections: [
-        { id: 'concept', title: 'コンセプト', content: 'テンプレ15は apparel-lookbook-intro の固定HTMLを埋め込みます。' },
-      ],
-      footerText: `© ${new Date().getFullYear()} 構成デモ（本番では文言・権利表記を差し替え）`,
-      heroSlides: [
-        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
-      ],
-    },
-    seo: {
-      metaTitle: 'EiiS | Lookbook 構成デモ',
-      metaDescription: '参照LPに準じた構成：一色OP→カード→全画面動画、番号スライド、2枚並び、BUY導線。',
-      keywords: 'アパレル, ルックブック, GLOBAL WORK, BASE',
-      ogImageUrl:
-        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
-      canonicalUrl: '',
-    },
-  },
-  craft_editorial: {
-    content: {
-      siteName: 'CRAFT LEATHER ATELIER',
-      title: '匠レザー工房 | 職人・編集テンプレ',
-      headline: '素材と時間を編む',
-      subheadline: 'テンプレ16は craft-editorial-intro の固定HTMLを埋め込みます（縦書き・テクスチャ・没入FV）。',
-      ctaLabel: 'Online Shop',
-      ctaHref: 'https://thebase.in',
-      sections: [
-        { id: 'concept', title: 'コンセプト', content: '没入ファーストビュー、和紙テクスチャ、番号付きマテリアル、View More 誘導。' },
-      ],
-      footerText: `© ${new Date().getFullYear()} 構成デモ（公開前に差し替え）`,
-      heroSlides: [
-        'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85',
-      ],
-    },
-    seo: {
-      metaTitle: '匠レザー工房 | 職人・編集LP（デモ）',
-      metaDescription: '縦書き・セリフ×筆の対比、和紙テクスチャ、視差スクロール、赤ドットView More。',
-      keywords: '革, レザー, 職人, 工房, 縦書き, LP',
-      ogImageUrl:
-        'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85',
       canonicalUrl: '',
     },
   },

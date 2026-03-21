@@ -151,8 +151,6 @@ const PREVIEW_BG: Record<string, string> = {
   ramen: '#f8eeee',
   academy_lp: '#0f1115',
   navy_cyan_consult: '#0a0d14',
-  apparel_lookbook: '#79acc4',
-  craft_editorial: '#ebe6dc',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -171,8 +169,6 @@ const PREVIEW_COLOR: Record<string, string> = {
   ramen: '#8B2E2E',
   academy_lp: '#f7b500',
   navy_cyan_consult: '#22d3ee',
-  apparel_lookbook: '#ffffff',
-  craft_editorial: '#1a1810',
   blueprint: '#f4f4f1',
 };
 
