@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>管理者画面 | 日本史徹底攻略</title>
+  <title>管理者画面 | ウェブ制作 LP</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --cyan: #22d3ee; --red: #f87171; }
@@ -48,18 +48,17 @@
     </div>
     <div id="adminArea" style="display:none;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
-        <h1 style="margin:0;">日本史徹底攻略 LP 管理者画面</h1>
+        <h1 style="margin:0;">ウェブ制作 LP 管理者画面</h1>
         <button type="button" class="btn btn-secondary" id="logoutBtn">ログアウト</button>
       </div>
       <p id="authBanner" style="display:none;padding:12px;border-radius:8px;background:rgba(251,191,36,0.15);color:#fcd34d;font-size:0.85rem;margin-bottom:16px;line-height:1.55;"></p>
       <div id="msg"></div>
 
       <section>
-        <h2>リンク</h2>
-        <label>LINE URL</label>
-        <input type="url" id="lineUrl" placeholder="https://lin.ee/..." />
-        <label>TikTok URL</label>
-        <input type="url" id="tiktokUrl" placeholder="https://..." />
+        <h2>申し込み</h2>
+        <label>ヒアリングシート・申し込み先URL</label>
+        <input type="text" id="applyUrl" placeholder="/customer-intake または https://..." />
+        <p style="font-size:0.8rem;color:var(--muted);margin-top:-8px;">空欄のとき LP 上は <code>/customer-intake</code> になります。</p>
       </section>
 
       <section>
@@ -154,8 +153,6 @@
         <input type="text" id="footer.brand" />
         <label>サブ</label>
         <input type="text" id="footer.sub" />
-        <label>LINE ID</label>
-        <input type="text" id="footer.lineId" />
         <label>©表記</label>
         <input type="text" id="footer.copyright" />
         <div class="locked" style="margin-top:12px;">
@@ -202,7 +199,7 @@
 
   <script>
     const API = '/api';
-    const SLUG = 'japanese-history-higashi';
+    const SLUG = 'web-closer-intro';
 
     function getApiBase() {
       const p = location.pathname;
@@ -253,8 +250,7 @@
         const val = el.value.trim();
         setByPath(out, id, val);
       });
-      out.lineUrl = document.getElementById('lineUrl').value.trim();
-      out.tiktokUrl = document.getElementById('tiktokUrl').value.trim();
+      out.applyUrl = document.getElementById('applyUrl').value.trim();
       const hero = out.hero || {};
       hero.photos = [
         document.getElementById('hero.photo0')?.value?.trim() || '',
@@ -297,7 +293,7 @@
     function fillForm(c) {
       if (!c) return;
       const sets = [
-        ['lineUrl','lineUrl'], ['tiktokUrl','tiktokUrl'],
+        ['applyUrl','applyUrl'],
         ['hero.brand','hero.brand'], ['hero.logo','hero.logo'], ['hero.sub','hero.sub'], ['hero.h1','hero.h1'],
         ['hero.bar1','hero.bar1'], ['hero.bar2','hero.bar2'],
         ['hero.photo0','hero.photos.0'], ['hero.photo1','hero.photos.1'], ['hero.photo2','hero.photos.2'],
@@ -310,7 +306,7 @@
         ['reasons.02.img','reasons.02.img'], ['reasons.02.title','reasons.02.title'], ['reasons.02.item0','reasons.02.items.0'], ['reasons.02.item1','reasons.02.items.1'], ['reasons.02.item2','reasons.02.items.2'],
         ['reasons.03.img','reasons.03.img'], ['reasons.03.title','reasons.03.title'], ['reasons.03.item0','reasons.03.items.0'], ['reasons.03.item1','reasons.03.items.1'],
         ['reasons.04.img','reasons.04.img'], ['reasons.04.title','reasons.04.title'], ['reasons.04.item0','reasons.04.items.0'], ['reasons.04.item1','reasons.04.items.1'],
-        ['footer.brand','footer.brand'], ['footer.sub','footer.sub'], ['footer.lineId','footer.lineId'], ['footer.copyright','footer.copyright'],
+        ['footer.brand','footer.brand'], ['footer.sub','footer.sub'], ['footer.copyright','footer.copyright'],
         ['legal.tokushohou.seller','legal.tokushohou.seller'], ['legal.tokushohou.responsible','legal.tokushohou.responsible'],
         ['legal.tokushohou.address','legal.tokushohou.address'], ['legal.tokushohou.contact','legal.tokushohou.contact'],
         ['legal.tokushohou.paymentMethod','legal.tokushohou.paymentMethod'], ['legal.tokushohou.paymentTiming','legal.tokushohou.paymentTiming'],
@@ -346,7 +342,7 @@
       authState = await statusR.json();
 
       if (authState.mode === 'lp_cms' && !authState.authenticated) {
-        document.getElementById('loginTitle').textContent = '日本史LP 管理者ログイン';
+        document.getElementById('loginTitle').textContent = 'LP 管理者ログイン';
         document.getElementById('loginHint').textContent =
           'Vercel の環境変数 JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD で設定したアカウントでログインしてください。';
         document.getElementById('loginArea').style.display = 'block';
@@ -367,7 +363,7 @@
         const b = document.getElementById('authBanner');
         b.style.display = 'block';
         b.textContent =
-          '※ 保存するには、Vercel に JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD（日本史LP専用・推奨）または ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。';
+          '※ 保存するには、Vercel に JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD（LP CMS・推奨）または ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。';
       }
 
       const c = await loadContent();

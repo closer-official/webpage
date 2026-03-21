@@ -57,8 +57,7 @@
     }
   },
   "web-closer-intro": {
-    "lineUrl": "https://lin.ee/nLMnCmt",
-    "tiktokUrl": "https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/",
+    "applyUrl": "/customer-intake",
     "hero": {
       "brand": "Web Production · Studio",
       "logo": "ウェブ制作 / Closer",
@@ -75,7 +74,6 @@
     "footer": {
       "brand": "ウェブ制作 / Closer",
       "sub": "サイト制作・ランディングページ・保守",
-      "lineId": "@871fitgx",
       "copyright": "© ウェブ制作 / Closer"
     }
   }

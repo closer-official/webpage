@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>特定商取引法に基づく表記 | 日本史徹底攻略 / よし先生</title>
+  <title>特定商取引法に基づく表記 | ウェブ制作 / Closer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -42,7 +42,7 @@
       <tr><th>販売価格</th><td>各プランにより異なります。料金は税込表示です。</td></tr>
       <tr><th>支払方法</th><td data-cid="legal.tokushohou.paymentMethod">【管理者画面で編集】<br />（例：クレジットカード決済、銀行振込等）</td></tr>
       <tr><th>支払時期</th><td data-cid="legal.tokushohou.paymentTiming">【管理者画面で編集】<br />（例：毎月〇日締め翌月〇日請求 等）</td></tr>
-      <tr><th>役務の提供時期</th><td>お申込手続き完了後、速やかにサービスを提供いたします。</td></tr>
+      <tr><th>役務の提供時期</th><td>ご契約・お見積り合意後、所定のスケジュールに沿って制作・納品いたします。</td></tr>
       <tr><th>返品・キャンセル</th><td>デジタルコンテンツおよび役務の性質上、ご購入後のキャンセル・返金はお受けしておりません。月額制の場合は、解約手続きにより次回以降の請求を停止できます。詳細はご契約時にご案内します。</td></tr>
       <tr><th>特別条件</th><td data-cid="legal.tokushohou.specialConditions">【管理者画面で編集】<br />（特記事項がある場合は記載）</td></tr>
     </table>
@@ -57,7 +57,7 @@
     var api = '/api';
     var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
     if (base) api = base + api;
-    fetch(api + '/lp-content/japanese-history-higashi').then(function(r){ return r.json(); }).then(function(c){
+    fetch(api + '/lp-content/web-closer-intro').then(function(r){ return r.json(); }).then(function(c){
       if (!c || !c.legal || !c.legal.tokushohou) return;
       var t = c.legal.tokushohou;
       ['seller','responsible','address','contact','paymentMethod','paymentTiming','specialConditions'].forEach(function(k){

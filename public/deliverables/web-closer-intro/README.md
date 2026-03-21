@@ -11,7 +11,7 @@
 
 - **文言・画像**: このフォルダ内の `index.html`（および必要なら `terms.html` など）だけを編集。
 - **動的差し替え**: `/api/lp-content/web-closer-intro` と `server/data/json/lpContent.json` の `web-closer-intro` キー（管理者・CMSからも更新可）。
-- **LINE / TikTok URL**: アプリ側の `genOptions.lineUrl` / `tiktokUrl` で上書き可能（HTML 内の既定 URL と置換）。
+- **申し込み先URL**: `lpContent.json` の `applyUrl`（未設定時 `/customer-intake`）。管理者画面の「ヒアリングシート・申し込み先URL」からも変更可。
 
 ## 別ブランド用に複製するとき
 
