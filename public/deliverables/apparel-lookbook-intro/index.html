@@ -7,23 +7,24 @@
   <meta name="description" content="参照スクリーンショット4枚の構成に準拠したデモ。文言・画像は差し替え。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Kaushan+Script&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Kaushan+Script&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --alb-sky: #7eb3cf;
+      /* 参照スクショ（docs/references/apparel-lookbook/*.png）スポイト平均に近いトーン */
+      --alb-sky: #7db0cc;
       --alb-sky-deep: #6a9eb8;
       --alb-white: #ffffff;
       --alb-ink: #1a1a1a;
       --alb-muted: #6b6b6b;
       --alb-body: #ffffff;
-      --alb-shop-bg: #efeff1;
+      --alb-shop-bg: #f4f4f6;
       --alb-line: rgba(0, 0, 0, 0.08);
-      --alb-font-script: "Kaushan Script", cursive;
+      --alb-font-script: "Great Vibes", "Kaushan Script", cursive;
       --alb-font-sans: "Montserrat", "Noto Sans JP", system-ui, sans-serif;
       --alb-font-serif: "Cormorant Garamond", "Noto Sans JP", serif;
-      --alb-radius-card: 22px;
+      --alb-radius-card: 28px;
       --alb-ease: cubic-bezier(0.25, 0.9, 0.35, 1);
-      --alb-pad-x: 18px;
+      --alb-pad-x: 20px;
       --alb-letter-ui: 0.14em;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,14 +44,14 @@
       z-index: 80;
       font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.06em;
-      color: rgba(255, 255, 255, 0.95);
-      background: rgba(0, 0, 0, 0.22);
-      border: 1px solid transparent;
-      padding: 7px 12px;
-      border-radius: 2px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.92);
+      background: rgba(120, 120, 120, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 14px;
+      border-radius: 3px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
     }
     body.alb-past-hero .alb-lang {
@@ -64,7 +65,7 @@
       position: relative;
       min-height: 100svh;
       background: var(--alb-sky);
-      overflow: clip;
+      overflow: visible;
     }
     .alb-intro-bg {
       position: absolute;
@@ -73,16 +74,17 @@
       z-index: 0;
     }
 
-    /* ① 固体青：文字は画面上部〜中央寄り（参照4枚目） */
+    /* ① 固体青：ロゴは下寄せ＋上に大きな余白（参照 01-splash-card-peek） */
     .alb-intro-splash {
       position: absolute;
       inset: 0;
       z-index: 5;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       padding: 0 var(--alb-pad-x);
-      padding-bottom: 22vh;
+      padding-bottom: 46vh;
+      padding-top: min(12vh, 96px);
       pointer-events: none;
       transition: opacity 0.55s ease;
     }
@@ -96,21 +98,28 @@
       opacity: 0;
     }
 
-    /* ②③ 写真上の白文字（参照1・3枚目：カード内／全画面とも中央スタック） */
+    /* ② カード上：中央スタック＋ロゴはカード上辺からはみ出し（参照 03-card-rounded） */
+    /* ③ レター時：画像下側の三分の一付近にテキスト（参照 02-letterbox） */
     .alb-intro-oncard {
       position: absolute;
       inset: 0;
-      z-index: 3;
+      z-index: 4;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8%;
+      padding: 7% 8% 11%;
       text-align: center;
       color: var(--alb-white);
       opacity: 0;
       transition: opacity 0.5s ease;
       pointer-events: none;
+    }
+    .alb-intro.alb-phase-expand .alb-intro-oncard,
+    .alb-intro.alb-phase-video .alb-intro-oncard {
+      justify-content: flex-end;
+      padding-bottom: 16%;
+      padding-top: 35%;
     }
     .alb-intro.alb-phase-card .alb-intro-oncard,
     .alb-intro.alb-phase-expand .alb-intro-oncard {
@@ -123,34 +132,46 @@
 
     .alb-logo-script {
       font-family: var(--alb-font-script);
-      font-size: clamp(4.2rem, 19vw, 7rem);
-      line-height: 0.92;
+      font-size: clamp(4.8rem, 21vw, 7.5rem);
+      line-height: 0.88;
       font-weight: 400;
-      letter-spacing: 0.02em;
-      filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.2));
+      letter-spacing: 0.04em;
+      filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.18));
+    }
+    .alb-intro.alb-phase-card .alb-intro-oncard .alb-logo-script {
+      margin-top: -0.2em;
+      font-size: clamp(5.2rem, 24vw, 8.25rem);
     }
     .alb-tagline {
-      margin-top: 0.45rem;
-      font-size: 9px;
+      margin-top: 0.35rem;
+      font-size: 8px;
       font-weight: 500;
-      letter-spacing: 0.32em;
+      letter-spacing: 0.38em;
       text-transform: uppercase;
-      opacity: 0.98;
+      opacity: 0.96;
     }
     .alb-brand-caps {
-      margin-top: 0.55rem;
-      font-size: clamp(0.95rem, 3.8vw, 1.2rem);
+      margin-top: 0.5rem;
+      font-size: clamp(0.88rem, 3.5vw, 1.05rem);
       font-weight: 700;
-      letter-spacing: 0.22em;
-      line-height: 1.25;
+      letter-spacing: 0.28em;
+      line-height: 1.3;
     }
-    .alb-collab {
-      margin-top: 0.4rem;
+    .alb-collab-with {
+      margin-top: 0.35rem;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      opacity: 0.92;
+    }
+    .alb-collab-name {
+      margin-top: 0.12rem;
       font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
+      font-weight: 600;
+      letter-spacing: 0.24em;
       text-transform: uppercase;
-      opacity: 0.95;
+      opacity: 0.96;
     }
 
     .alb-intro-card-wrap {
@@ -161,25 +182,33 @@
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: 11vh;
+      padding-bottom: 7vh;
       z-index: 2;
       pointer-events: none;
     }
 
     .alb-intro-card {
       position: relative;
-      width: min(86vw, 340px);
-      aspect-ratio: 3 / 4.15;
+      width: min(82vw, 320px);
+      aspect-ratio: 3 / 4.05;
       border-radius: var(--alb-radius-card);
-      overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.28);
-      transform: translate3d(0, calc(100% + 120px), 0);
+      overflow: visible;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26);
+      transform: translate3d(0, calc(100% + 140px), 0);
       transition:
         transform 1.2s var(--alb-ease),
         width 1s var(--alb-ease),
         height 1s var(--alb-ease),
         border-radius 0.9s var(--alb-ease),
         box-shadow 0.5s ease;
+    }
+    .alb-intro-card-clip {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      z-index: 1;
+      background: #000;
     }
     .alb-intro.alb-phase-card .alb-intro-card {
       transform: translate3d(0, 0, 0);
@@ -189,7 +218,7 @@
     .alb-intro.alb-phase-expand .alb-intro-card-wrap {
       position: fixed;
       inset: 0;
-      padding: 7px 0;
+      padding: min(11vh, 88px) 0;
       background: var(--alb-sky);
       z-index: 40;
       align-items: stretch;
@@ -199,12 +228,15 @@
     .alb-intro.alb-phase-expand .alb-intro-card {
       width: 100%;
       max-width: 100%;
-      height: calc(100svh - 14px);
+      height: calc(100svh - min(22vh, 176px));
       margin: 0 auto;
       aspect-ratio: auto;
       border-radius: 0;
       box-shadow: none;
       align-self: center;
+    }
+    .alb-intro.alb-phase-expand .alb-intro-card-clip {
+      border-radius: 0;
     }
 
     .alb-intro-card-img,
@@ -272,43 +304,111 @@
       transition: opacity 0.45s ease;
     }
 
-    /* ========== ルック：白ベース・大余白・01 | ENGLISH（参照ロング2枚目） ========== */
+    /* ========== ロング参照：青地のキャンペーンブロック（04-full-page-scroll 上部） ========== */
+    .alb-campaign-hero {
+      background: var(--alb-sky);
+      color: var(--alb-white);
+      text-align: center;
+      padding: clamp(2.25rem, 9vw, 3.5rem) var(--alb-pad-x) clamp(1.75rem, 7vw, 2.75rem);
+    }
+    .alb-campaign-logo {
+      font-family: var(--alb-font-script);
+      font-size: clamp(3.5rem, 16vw, 5.5rem);
+      line-height: 1;
+      filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.12));
+    }
+    .alb-campaign-collab {
+      margin-top: 1rem;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+    .alb-campaign-ss {
+      margin-top: 1.35rem;
+      font-size: clamp(0.72rem, 2.8vw, 0.82rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      line-height: 1.65;
+      text-transform: uppercase;
+    }
+    .alb-campaign-lead {
+      margin: 1.5rem auto 0;
+      max-width: 20.5rem;
+      font-family: "Noto Sans JP", var(--alb-font-sans);
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 2;
+      letter-spacing: 0.08em;
+      opacity: 0.92;
+    }
+    .alb-campaign-photo-wrap {
+      margin: clamp(1.75rem, 6vw, 2.5rem) auto 0;
+      max-width: min(340px, 88vw);
+      border-radius: 20px 20px 0 0;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+    .alb-campaign-photo {
+      width: 100%;
+      display: block;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+
+    /* ========== ルック：白ベース・大余白・01 | ENGLISH（参照 04-full-page-scroll） ========== */
     .alb-looks {
       background: var(--alb-body);
     }
     .alb-look {
-      padding: clamp(2.75rem, 10vw, 4.5rem) 0 clamp(2rem, 7vw, 3.25rem);
+      padding: clamp(3rem, 11vw, 4.75rem) 0 clamp(2.25rem, 8vw, 3.5rem);
     }
     .alb-look-head {
+      padding: 0 var(--alb-pad-x) clamp(1.1rem, 4vw, 1.35rem);
+    }
+    .alb-look-head-row {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       flex-wrap: wrap;
       gap: 0 10px;
-      padding: 0 var(--alb-pad-x) 18px;
     }
     .alb-look-num {
       font-family: var(--alb-font-serif);
-      font-size: 1.35rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      font-size: clamp(2.4rem, 10vw, 3.15rem);
+      font-weight: 300;
+      letter-spacing: 0.06em;
       color: var(--alb-ink);
+      line-height: 1;
     }
     .alb-look-sep {
-      font-size: 11px;
-      font-weight: 400;
-      color: #bbb;
-      margin: 0 2px;
+      font-size: 10px;
+      font-weight: 300;
+      color: #c8c8c8;
+      margin: 0 1px;
+      transform: translateY(-2px);
     }
     .alb-look-title {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.26em;
       text-transform: uppercase;
       color: var(--alb-ink);
+    }
+    .alb-look-ja {
+      margin-top: 0.45rem;
+      padding-left: 0.15rem;
+      font-family: "Noto Sans JP", var(--alb-font-sans);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      color: var(--alb-muted);
+      line-height: 1.5;
     }
 
     /* 全幅ビジュアル */
     .alb-slider {
+      position: relative;
       width: 100%;
       overflow: hidden;
     }
@@ -333,25 +433,49 @@
     }
 
     .alb-slider-nav {
+      position: absolute;
+      right: max(10px, var(--alb-pad-x));
+      bottom: 14px;
+      z-index: 3;
       display: flex;
-      justify-content: flex-end;
-      gap: 0.15rem;
-      padding: 12px var(--alb-pad-x) 0;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 5px 4px 5px 10px;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 2px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    .alb-slider-count {
+      font-family: var(--alb-font-sans);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--alb-ink);
+      padding-right: 2px;
+      opacity: 0.85;
+    }
+    .alb-slider-count .alb-n-now { font-weight: 700; }
+    .alb-slider-btns {
+      display: flex;
+      align-items: center;
+      gap: 0.05rem;
     }
     .alb-slider-dot {
       font-family: var(--alb-font-sans);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       color: var(--alb-ink);
-      opacity: 0.28;
+      opacity: 0.3;
       background: none;
       border: none;
-      padding: 6px 10px;
+      padding: 4px 8px;
       cursor: pointer;
-      min-width: 1.75rem;
+      min-width: 1.5rem;
       transition: opacity 0.2s ease;
     }
-    .alb-slider-dot.is-on { opacity: 1; }
+    .alb-slider-dot.is-on { opacity: 1; font-weight: 700; }
     .alb-slider-dot:focus-visible {
       outline: 2px solid var(--alb-sky-deep);
       outline-offset: 2px;
@@ -404,8 +528,9 @@
       text-transform: uppercase;
       color: var(--alb-ink);
       background: var(--alb-white);
-      border: 1px solid rgba(0, 0, 0, 0.35);
-      padding: 8px 14px;
+      border: 1px solid rgba(0, 0, 0, 0.32);
+      padding: 9px 16px;
+      border-radius: 999px;
       transition: background 0.2s ease, color 0.2s ease;
     }
     .alb-check:hover {
@@ -472,18 +597,26 @@
     }
     .alb-footer-look {
       font-family: var(--alb-font-serif);
-      font-size: clamp(3.5rem, 18vw, 6rem);
-      font-weight: 400;
-      color: #d8d8d8;
-      letter-spacing: 0.35em;
+      font-size: clamp(4rem, 20vw, 6.75rem);
+      font-weight: 300;
+      color: #e4e4e4;
+      letter-spacing: 0.42em;
       line-height: 1;
     }
     .alb-footer-script {
       font-family: var(--alb-font-script);
-      font-size: 2.75rem;
+      font-size: clamp(2.5rem, 12vw, 3.25rem);
       color: var(--alb-ink);
-      margin-top: 1.5rem;
-      opacity: 0.85;
+      margin-top: 1.35rem;
+      opacity: 0.88;
+    }
+    .alb-footer-gw {
+      margin-top: 2rem;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #bbb;
     }
     .alb-footer-links {
       margin-top: 1.5rem;
@@ -524,31 +657,52 @@
           <p class="alb-logo-script">EiiS</p>
           <p class="alb-tagline">Even if it’s Small</p>
           <p class="alb-brand-caps">GLOBAL WORK</p>
-          <p class="alb-collab">with NAOKO TAKAYAMA</p>
+          <p class="alb-collab-with">with</p>
+          <p class="alb-collab-name">NAOKO TAKAYAMA</p>
         </div>
       </div>
 
       <div class="alb-intro-card-wrap">
         <div class="alb-intro-card">
-          <img
-            class="alb-intro-card-img"
-            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=88"
-            alt=""
-            width="960"
-            height="1280"
-            fetchpriority="high"
-          />
-          <video class="alb-intro-card-vid" muted playsinline loop preload="metadata" aria-label="映像">
-            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
-          </video>
+          <div class="alb-intro-card-clip" aria-hidden="true">
+            <img
+              class="alb-intro-card-img"
+              src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=88"
+              alt=""
+              width="960"
+              height="1280"
+              fetchpriority="high"
+            />
+            <video class="alb-intro-card-vid" muted playsinline loop preload="metadata" aria-label="映像">
+              <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+            </video>
+          </div>
           <div class="alb-intro-oncard">
             <p class="alb-logo-script">EiiS</p>
             <p class="alb-tagline">Even if it’s Small</p>
             <p class="alb-brand-caps">GLOBAL WORK</p>
-            <p class="alb-collab">with NAOKO TAKAYAMA</p>
+            <p class="alb-collab-with">with</p>
+            <p class="alb-collab-name">NAOKO TAKAYAMA</p>
           </div>
           <div class="alb-scroll-cue" aria-hidden="true"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="alb-campaign-hero" aria-label="スペシャルルックブック">
+      <p class="alb-campaign-logo">EiiS</p>
+      <p class="alb-campaign-collab">GLOBAL WORK × NAOKO TAKAYAMA</p>
+      <p class="alb-campaign-ss">2024 SPRING / SUMMER<br />COLLECTION</p>
+      <p class="alb-campaign-lead">旅先の風景に重なる、軽やかなシルエット。日々に馴染む素材感を楽しむコラボレーション。（文言は差し替え）</p>
+      <div class="alb-campaign-photo-wrap">
+        <img
+          class="alb-campaign-photo"
+          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=88"
+          alt=""
+          width="960"
+          height="1280"
+          loading="lazy"
+        />
       </div>
     </section>
 
@@ -556,9 +710,12 @@
       <!-- 01–10: 参照ロングの英語見出し -->
       <section class="alb-look" aria-labelledby="l01">
         <header class="alb-look-head">
-          <span class="alb-look-num">01</span>
-          <span class="alb-look-sep">|</span>
-          <h2 class="alb-look-title" id="l01">On the morning road</h2>
+          <div class="alb-look-head-row">
+            <span class="alb-look-num">01</span>
+            <span class="alb-look-sep">|</span>
+            <h2 class="alb-look-title" id="l01">On the morning road</h2>
+          </div>
+          <p class="alb-look-ja">朝の道／軽やかなレイヤードスタイル</p>
         </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -569,9 +726,12 @@
             </div>
           </div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">3</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band">
@@ -592,8 +752,11 @@
 
       <section class="alb-look" aria-labelledby="l02">
         <header class="alb-look-head">
-          <span class="alb-look-num">02</span><span class="alb-look-sep">|</span>
-          <h2 class="alb-look-title" id="l02">Blue moment</h2>
+          <div class="alb-look-head-row">
+            <span class="alb-look-num">02</span><span class="alb-look-sep">|</span>
+            <h2 class="alb-look-title" id="l02">Blue moment</h2>
+          </div>
+          <p class="alb-look-ja">ブルーの時間帯／空と街のコントラスト</p>
         </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -603,8 +766,11 @@
             </div>
           </div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">2</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band">
@@ -620,8 +786,11 @@
 
       <section class="alb-look" aria-labelledby="l03">
         <header class="alb-look-head">
-          <span class="alb-look-num">03</span><span class="alb-look-sep">|</span>
-          <h2 class="alb-look-title" id="l03">In the afternoon</h2>
+          <div class="alb-look-head-row">
+            <span class="alb-look-num">03</span><span class="alb-look-sep">|</span>
+            <h2 class="alb-look-title" id="l03">In the afternoon</h2>
+          </div>
+          <p class="alb-look-ja">午後の光／ツインルック</p>
         </header>
         <div class="alb-dual">
           <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
@@ -640,8 +809,11 @@
 
       <section class="alb-look" aria-labelledby="l04">
         <header class="alb-look-head">
-          <span class="alb-look-num">04</span><span class="alb-look-sep">|</span>
-          <h2 class="alb-look-title" id="l04">Sunset</h2>
+          <div class="alb-look-head-row">
+            <span class="alb-look-num">04</span><span class="alb-look-sep">|</span>
+            <h2 class="alb-look-title" id="l04">Sunset</h2>
+          </div>
+          <p class="alb-look-ja">夕景／動きのある一枚</p>
         </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -651,8 +823,11 @@
             </div>
           </div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">2</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band">
@@ -676,7 +851,10 @@
       </section>
 
       <section class="alb-look" aria-labelledby="l05">
-        <header class="alb-look-head"><span class="alb-look-num">05</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l05">Night</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">05</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l05">Night</h2></div>
+          <p class="alb-look-ja">夜の街／モードなシルエット</p>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport"><div class="alb-slider-track">
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
@@ -684,46 +862,64 @@
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
           </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">3</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Knit</span><span class="alb-shop-price">¥8,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
 
       <section class="alb-look" aria-labelledby="l06">
-        <header class="alb-look-head"><span class="alb-look-num">06</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l06">A new day</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">06</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l06">A new day</h2></div>
+          <p class="alb-look-ja">新しい朝／クリーンなトーン</p>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport"><div class="alb-slider-track">
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
           </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">2</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Pants</span><span class="alb-shop-price">¥11,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
 
       <section class="alb-look" aria-labelledby="l07">
-        <header class="alb-look-head"><span class="alb-look-num">07</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l07">Before sleeping</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">07</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l07">Before sleeping</h2></div>
+          <p class="alb-look-ja">就寝前／やわらかい質感</p>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport"><div class="alb-slider-track">
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
           </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">2</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Tee</span><span class="alb-shop-price">¥4,900</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
 
       <section class="alb-look" aria-labelledby="l08">
-        <header class="alb-look-head"><span class="alb-look-num">08</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l08">Dreaming</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">08</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l08">Dreaming</h2></div>
+          <p class="alb-look-ja">夢見る午後／レイヤード</p>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport"><div class="alb-slider-track">
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
@@ -731,16 +927,22 @@
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
           </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">3</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">3</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Dress</span><span class="alb-shop-price">¥15,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
       </section>
 
       <section class="alb-look" aria-labelledby="l09">
-        <header class="alb-look-head"><span class="alb-look-num">09</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l09">Wake up</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">09</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l09">Wake up</h2></div>
+          <p class="alb-look-ja">目覚めの瞬間／ツインスタイル</p>
+        </header>
         <div class="alb-dual">
           <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
           <img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=640&q=85" alt="" loading="lazy" />
@@ -749,15 +951,21 @@
       </section>
 
       <section class="alb-look" aria-labelledby="l10">
-        <header class="alb-look-head"><span class="alb-look-num">10</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l10">Relax</h2></header>
+        <header class="alb-look-head">
+          <div class="alb-look-head-row"><span class="alb-look-num">10</span><span class="alb-look-sep">|</span><h2 class="alb-look-title" id="l10">Relax</h2></div>
+          <p class="alb-look-ja">リラックス／オフの日の装い</p>
+        </header>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport"><div class="alb-slider-track">
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
             <div class="alb-slide"><img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=960&q=85" alt="" loading="lazy" /></div>
           </div></div>
           <div class="alb-slider-nav" role="tablist" aria-label="スライド">
-            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
-            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            <span class="alb-slider-count" aria-live="polite"><span class="alb-n-now">1</span><span> / </span><span class="alb-n-max">2</span></span>
+            <span class="alb-slider-btns">
+              <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+              <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+            </span>
           </div>
         </div>
         <div class="alb-shop-band"><ul class="alb-shop"><li><img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=160&q=80" alt="" /><div><span class="alb-shop-name">Knit</span><span class="alb-shop-price">¥8,000</span></div><a class="alb-check" href="https://thebase.in" target="_blank" rel="noopener noreferrer">Check</a></li></ul></div>
@@ -767,6 +975,7 @@
     <footer class="alb-footer">
       <p class="alb-footer-look">LOOK</p>
       <p class="alb-footer-script">EiiS</p>
+      <p class="alb-footer-gw">GLOBAL WORK</p>
       <div class="alb-footer-links">
         <a href="#">Instagram</a>
         <a href="#">X</a>
@@ -805,9 +1014,13 @@
             d.classList.toggle("is-on", j === idx);
             d.setAttribute("aria-selected", j === idx ? "true" : "false");
           });
+          var nowEl = wrap.querySelector(".alb-n-now");
+          if (nowEl) nowEl.textContent = String(idx + 1);
           pauseVideos();
           playActive();
         }
+        var maxEl = wrap.querySelector(".alb-n-max");
+        if (maxEl) maxEl.textContent = String(slides);
         dots.forEach(function (d, j) {
           d.addEventListener("click", function () { go(j); });
         });
@@ -844,7 +1057,11 @@
 
     function onScroll() {
       var y = window.scrollY || 0;
-      var th = Math.min(window.innerHeight || 600, 640) * 0.75;
+      var introEl = document.getElementById("albIntro");
+      var campaign = document.querySelector(".alb-campaign-hero");
+      var h0 = introEl ? introEl.offsetHeight : 0;
+      var h1 = campaign ? campaign.offsetHeight : 0;
+      var th = Math.max(h0 + h1 * 0.25, (window.innerHeight || 600) * 0.45);
       document.body.classList.toggle("alb-past-hero", y > th);
     }
     onScroll();
