@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>日本史徹底攻略 / 東 | 受験生向け・日本史専門コンサル</title>
-  <meta name="description" content="参考書1冊分以下の価格で、一人ひとりに合った日本史コンサル。少人数だからこその丁寧な指導。LINEで無料相談。" />
+  <title>日本史徹底攻略 / よし先生 | 受験生向け・日本史専門コンサル</title>
+  <meta name="description" content="月額1,000円から。追加料金・教材費の押し付けなし。日本史専門の少人数コンサル。逆転合格も応援。LINEで無料相談。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet" />
@@ -322,6 +322,15 @@
       font-size: 0.85rem;
       color: #64748b;
     }
+    .reason-card__img img,
+    .benefit-block__img img,
+    .hero__frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero__frame { overflow: hidden; padding: 0; }
     .reason-card__body { padding: 20px 18px 24px; }
     .reason-card__tag { text-align: center; font-weight: 900; font-size: 0.85rem; margin-bottom: 12px; }
     .reason-card__h { font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; line-height: 1.55; }
@@ -499,15 +508,22 @@
       margin-bottom: -24px;
     }
     .faq__title { text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 24px; }
-    .faq__item {
+    .faq-acc {
+      border-bottom: 1px solid var(--line);
+    }
+    .faq-acc summary {
+      list-style: none;
       display: flex;
       gap: 12px;
+      align-items: flex-start;
       padding: 16px 0;
-      border-bottom: 1px solid var(--line);
+      cursor: pointer;
       font-size: 0.88rem;
-      font-weight: 600;
+      font-weight: 700;
       line-height: 1.65;
     }
+    .faq-acc summary::-webkit-details-marker { display: none; }
+    .faq-acc[open] summary { padding-bottom: 8px; }
     .faq__q {
       flex-shrink: 0;
       width: 28px;
@@ -519,6 +535,36 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .faq-acc__a {
+      padding: 0 0 18px 40px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    /* --- 逆転合格 --- */
+    .gyakuten {
+      background: linear-gradient(180deg, rgba(14, 116, 144, 0.2) 0%, var(--bg-navy-mid) 100%);
+      padding: 36px 18px;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .gyakuten__label {
+      font-size: 0.72rem;
+      color: var(--cyan-bright);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+    }
+    .gyakuten__text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.65;
+      max-width: 22em;
+      margin: 0 auto;
     }
 
     /* --- Flow --- */
@@ -586,12 +632,13 @@
   </style>
 </head>
 <body>
+  <!-- 掲載写真: 開発用に Unsplash。本番（例: supernihonshi.store-official.net）では写真AC（ACワークス）の規約に沿って差し替えください。 -->
   <div class="grain" aria-hidden="true"></div>
 
   <!-- 1. Hero -->
   <header class="hero">
     <p class="hero__brand">Japanese History · Consulting</p>
-    <p class="hero__logo">日本史徹底攻略 / 東</p>
+    <p class="hero__logo">日本史徹底攻略 / よし先生</p>
     <p class="hero__sub">高校受験・大学受験の日本史を、<br />「苦手」から「得点源」へ導く少人数コンサル。</p>
     <h1 class="hero__h1">
       勉強法が分からない子から、<br />
@@ -599,9 +646,9 @@
       幅広く伴走します。
     </h1>
     <div class="hero__photos" aria-hidden="true">
-      <div class="hero__frame">📚</div>
-      <div class="hero__frame">✏️</div>
-      <div class="hero__frame">🎯</div>
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
     </div>
     <div class="hero__bars">
       <div class="hero__bar">参考書1冊分以下の価格帯で、個別に合わせたコンサル</div>
@@ -644,6 +691,15 @@
     </p>
   </section>
 
+  <!-- 3b. 逆転合格 -->
+  <section class="gyakuten">
+    <p class="gyakuten__label">逆転合格</p>
+    <p class="gyakuten__text">
+      残り時間が少なくても、<span class="hl" style="color: var(--cyan-bright);">最後の伸びしろ</span>を一緒に拾い上げます。<br />
+      「今からでも変わりたい」受験生を歓迎します。
+    </p>
+  </section>
+
   <!-- 4. Benefits 01 / 02 -->
   <section class="section benefits">
     <div class="wrap">
@@ -657,7 +713,9 @@
             <span class="line-hl">参考書1冊分以下の価格帯</span>で、<br />
             あなた専用のコンサルが受けられる
           </h3>
-          <div class="benefit-block__img" role="img" aria-label="イメージ">学習プラン・教材選びの伴走イメージ</div>
+          <div class="benefit-block__img" role="img" aria-label="学習・伴走のイメージ">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+          </div>
         </div>
       </div>
 
@@ -707,12 +765,14 @@
   <section class="reasons-head" style="position: relative;">
     <div class="reasons-head__bg en-serif">Reason</div>
     <div class="wrap" style="position: relative;">
-      <p class="reasons-head__small">日本史徹底攻略 / 東が選ばれる</p>
+      <p class="reasons-head__small">日本史徹底攻略 / よし先生が選ばれる</p>
       <h2 class="reasons-head__title">4つの理由</h2>
     </div>
   </section>
   <div class="reason-card-wrap wrap" style="margin-top: -8px;">
-    <div class="reason-card__img" role="img" aria-label="オンライン学習イメージ">オンライン・チャットで伴走</div>
+    <div class="reason-card__img" role="img" aria-label="オンライン学習イメージ">
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
     <div class="reason-card__body">
       <p class="reason-card__tag">Reason 01</p>
       <h3 class="reason-card__h">「暗記」だけに逃げない、戦略から逆算した設計</h3>
@@ -723,13 +783,16 @@
     </div>
   </div>
   <div class="reason-card-wrap wrap" style="margin-top: 16px;">
-    <div class="reason-card__img" style="background: linear-gradient(120deg, #dbeafe, #e0f2fe);">価格・プランのイメージ</div>
+    <div class="reason-card__img" role="img" aria-label="シンプルな料金のイメージ">
+      <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
     <div class="reason-card__body">
       <p class="reason-card__tag">Reason 02</p>
-      <h3 class="reason-card__h">参考書1冊分以下の価格帯を目安に、個別に設計</h3>
+      <h3 class="reason-card__h">月額1000円。それだけ。</h3>
       <ul class="reason-card__ul">
-        <li>教材費を押し上げないよう、既存の参考書・問題集との役割分担も相談</li>
-        <li>「買い足し」より「使い切り」を優先するプランも可能</li>
+        <li>追加料金・教材費の押し付け一切なし</li>
+        <li>既存の参考書をそのまま使えるので買い足し不要</li>
+        <li>1000円で専属の指導員がつき、勉強法から参考書ルートまで個別にサポート</li>
       </ul>
     </div>
   </div>
@@ -745,7 +808,9 @@
     </div>
   </div>
   <div class="reason-card-wrap wrap" style="margin-top: 16px;">
-    <div class="reason-card__img" style="background: linear-gradient(120deg, #cffafe, #a5f3fc);">日本史に集中</div>
+    <div class="reason-card__img" role="img" aria-label="日本史学習に集中するイメージ">
+      <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
     <div class="reason-card__body">
       <p class="reason-card__tag">Reason 04</p>
       <h3 class="reason-card__h">日本史に特化 — 科目横断は最小限に</h3>
@@ -781,7 +846,7 @@
       <p class="solve__p">を持たないまま</p>
       <p class="solve__p"><span class="solve__accent">感覚・なんとなくの暗記</span>で積み上げてきているから。</p>
       <div class="solve__goldhead">
-        日本史徹底攻略 / 東では、日本史に特化した実践基準と学び方を共有し、
+        日本史徹底攻略 / よし先生では、日本史に特化した実践基準と学び方を共有し、
         志望校レベルに合わせて<strong>勉強内容を正しく落とし込みます。</strong>
       </div>
     </div>
@@ -815,7 +880,7 @@
   <!-- 8. 4 commitments -->
   <section class="feat4">
     <p class="feat4__bg en-serif">Features</p>
-    <p class="feat4__small">日本史徹底攻略 / 東独自の</p>
+    <p class="feat4__small">日本史徹底攻略 / よし先生独自の</p>
     <h2 class="feat4__title">4つのこだわり</h2>
     <div class="feat4-card">
       <div class="feat4-card__head"><span>1. 実力に合わせたロードマップ</span><span>⚙</span></div>
@@ -850,15 +915,23 @@
     </div>
   </section>
 
-  <!-- 9. FAQ -->
+  <!-- 9. FAQ（アコーディオン） -->
   <section class="faq">
     <p class="faq__bg en-serif">FAQ</p>
     <h2 class="faq__title">よくある質問</h2>
     <div class="wrap">
-      <div class="faq__item"><span class="faq__q">Q</span><span>受験まで時間が少ないのですが大丈夫ですか？</span></div>
-      <div class="faq__item"><span class="faq__q">Q</span><span>日本史がほぼ初めてでもついていけますか？</span></div>
-      <div class="faq__item"><span class="faq__q">Q</span><span>使っている参考書・塾のカリキュラムと併用できますか？</span></div>
-      <div class="faq__item"><span class="faq__q">Q</span><span>志望校の過去問・論述の添削はお願いできますか？</span></div>
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>受験まで時間が少ないのですが大丈夫ですか？</span></summary>
+        <div class="faq-acc__a">大丈夫です。</div>
+      </details>
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>日本史がほぼ初めてでもついていけますか？</span></summary>
+        <div class="faq-acc__a">大丈夫です。このサービスを活用して勉強すればついていけます。</div>
+      </details>
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>志望校の過去問・論述の添削はお願いできますか？</span></summary>
+        <div class="faq-acc__a">できます。</div>
+      </details>
     </div>
   </section>
 
@@ -899,14 +972,17 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p class="footer__brand">日本史徹底攻略 / 東</p>
+    <p class="footer__brand">日本史徹底攻略 / よし先生</p>
     <p>高校受験・大学受験の日本史コンサルティング</p>
     <div class="footer__links">
       <a href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">公式LINE</a>
       <a href="https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/" target="_blank" rel="noopener noreferrer">TikTok</a>
     </div>
     <p class="footer__line">LINE ID: @871fitgx</p>
-    <p style="margin-top: 20px; font-size: 0.7rem; opacity: 0.65;">© 日本史徹底攻略 / 東</p>
+    <p style="margin-top: 16px; font-size: 0.65rem; opacity: 0.55; line-height: 1.6; max-width: 280px; margin-left: auto; margin-right: auto;">
+      写真：Unsplash（本番公開時は<a href="https://www.photo-ac.com/" target="_blank" rel="noopener noreferrer">写真AC（ACワークス）</a>の規約に沿って差し替え可能です）
+    </p>
+    <p style="margin-top: 12px; font-size: 0.7rem; opacity: 0.65;">© 日本史徹底攻略 / よし先生</p>
   </footer>
 
   <div class="sticky-cta">
