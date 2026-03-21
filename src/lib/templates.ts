@@ -177,7 +177,7 @@ const NAVY_DELIVERABLE_PAGE_CSS =
 
 const GYM_VALX_DELIVERABLE_PAGE_CSS = `
   .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #000; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-  .skip-link:focus { top: 16px; outline: 2px solid #00f2ff; outline-offset: 2px; }
+  .skip-link:focus { top: 16px; outline: 2px solid #ef4444; outline-offset: 2px; }
   .page-wrapper.template-gym_personal_neon main#main-content { padding: 0; margin: 0; max-width: none; }
   .page-wrapper.template-gym_personal_neon .vgx-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
@@ -830,7 +830,7 @@ export const TEMPLATES: TemplateOption[] = [
   makeTemplate(
     'gym_personal_neon',
     'パーソナルジム・ネオン（固定LP）',
-    'テンプレ15：黒×ネオンシアン・LINE固定CTA・キャンペーン／料金／FAQ 等の縦長静的LP（gym-valx-intro）',
+    'テンプレ15：黒×赤ネオン・テンプレ14型スティッキー申し込み・キャンペーン／料金／FAQ 等の縦長静的LP（gym-valx-intro）',
     GYM_VALX_DELIVERABLE_PAGE_CSS,
     { omitCommonBase: true }
   ),

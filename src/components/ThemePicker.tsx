@@ -40,7 +40,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   apparel: '#111',
   event: '#111',
   ramen: '#8B2E2E',
-  gym_personal_neon: '#00f2ff',
+  gym_personal_neon: '#ef4444',
 };
 
 export function ThemePicker({

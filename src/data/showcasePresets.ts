@@ -656,7 +656,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       siteName: 'VALX GYM',
       title: 'VALX GYM | 24時間フィットネス',
       headline: '理想の空間を、月額6,980円で。',
-      subheadline: 'テンプレ15は gym-valx-intro の固定HTMLを埋め込みます（単一店舗想定・黒×ネオンシアン・LINE CTA・料金・FAQ・アクセス）。',
+      subheadline: 'テンプレ15は gym-valx-intro の固定HTMLを埋め込みます（単一店舗想定・黒×赤ネオン・テンプレ14型スティッキー申し込み・料金・FAQ・アクセス）。',
       ctaLabel: 'LINEで入会',
       ctaHref: '#top',
       sections: [

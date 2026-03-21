@@ -9,7 +9,9 @@
       content="VALX GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
     />
   </head>
-  <body class="m-0 min-h-screen bg-black pb-36 font-sans text-white antialiased [font-family:'Noto_Sans_JP',system-ui,sans-serif]">
+  <body
+    class="m-0 min-h-screen bg-black pb-[calc(88px+env(safe-area-inset-bottom))] font-sans text-white antialiased [font-family:'Noto_Sans_JP',system-ui,sans-serif]"
+  >
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -22,17 +24,17 @@
         theme: {
           extend: {
             colors: {
-              neon: '#00f2ff',
-              'neon-hot': '#00ffff',
+              neon: '#ef4444',
+              'neon-hot': '#f87171',
               line: '#06C755',
               'pink-cmp': '#ff2d6b',
               'pink-soft': '#f0707a',
               'pink-deep': '#e84860',
             },
             boxShadow: {
-              neon: '0 0 14px rgba(0, 242, 255, 0.55)',
-              'neon-lg': '0 0 22px rgba(0, 242, 255, 0.45)',
-              card: '0 0 12px rgba(0, 242, 255, 0.35)',
+              neon: '0 0 14px rgba(239, 68, 68, 0.55)',
+              'neon-lg': '0 0 22px rgba(239, 68, 68, 0.45)',
+              card: '0 0 12px rgba(239, 68, 68, 0.35)',
             },
           },
         },
@@ -44,9 +46,9 @@
         color: transparent;
       }
       .vgx-text-outline-faq {
-        -webkit-text-stroke: 2px #00f2ff;
+        -webkit-text-stroke: 2px #ef4444;
         color: rgba(0, 0, 0, 0.25);
-        filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.75));
+        filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.75));
       }
       .vgx-text-outline-price {
         -webkit-text-stroke: 2px rgba(255, 255, 255, 0.95);
@@ -58,6 +60,71 @@
       }
       .vgx-petal {
         background: radial-gradient(circle, rgba(255, 150, 180, 0.95) 0%, rgba(255, 100, 150, 0.4) 60%, transparent 70%);
+      }
+      /* テンプレ14（web-closer）sticky-cta + cta に準拠（配色は赤グラデ） */
+      .vgx-sticky-cta {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+        background: linear-gradient(to top, rgba(6, 10, 18, 0.96), rgba(6, 10, 18, 0.55), transparent);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .vgx-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        max-width: 360px;
+        margin: 0 auto;
+        padding: 12px 14px;
+        border-radius: 999px;
+        background: linear-gradient(105deg, #f87171 0%, #ef4444 40%, #b91c1c 100%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.88rem;
+        border: none;
+        text-decoration: none;
+        box-shadow: 0 10px 32px rgba(239, 68, 68, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .vgx-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 40px rgba(239, 68, 68, 0.45);
+        text-decoration: none;
+        color: #fff;
+      }
+      .vgx-cta__badge {
+        background: #fff;
+        color: #b91c1c;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 900;
+      }
+      .vgx-cta__icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+      }
+      .vgx-cta-note {
+        text-align: center;
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.55);
+        max-width: 320px;
+        margin: 0;
+        line-height: 1.45;
       }
     </style>
 
@@ -136,8 +203,8 @@
           <div
             class="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg bg-white/90 p-3 text-center shadow-lg"
           >
-            <div class="text-3xl text-neon" aria-hidden="true">🚃</div>
-            <p class="text-[11px] font-black leading-snug text-black">アクセス抜群！<br />駅チカ好立地！</p>
+            <div class="text-3xl text-neon" aria-hidden="true">💪</div>
+            <p class="text-[11px] font-black leading-snug text-black">トレーナーが伴走<br />パーソナル重視</p>
           </div>
         </div>
       </div>
@@ -451,15 +518,15 @@
         PRICE + SERVICE
       </h2>
       <div class="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div class="rounded-md bg-cyan-200/90 p-2 text-center text-[10px] font-black text-black">
+        <div class="rounded-md bg-red-200/90 p-2 text-center text-[10px] font-black text-black">
           伴走プラン
           <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Intermediate</span>
         </div>
-        <div class="rounded-md bg-cyan-400 p-2 text-center text-[10px] font-black text-black">
+        <div class="rounded-md bg-red-400 p-2 text-center text-[10px] font-black text-black">
           ウィークリー
           <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Advanced</span>
         </div>
-        <div class="rounded-md bg-sky-500 p-2 text-center text-[10px] font-black text-white">
+        <div class="rounded-md bg-red-700 p-2 text-center text-[10px] font-black text-white">
           フルサポート
           <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Advanced</span>
         </div>
@@ -469,46 +536,46 @@
         </div>
       </div>
       <div class="mt-6 overflow-hidden rounded-xl bg-white text-black shadow-neon-lg">
-        <div class="grid grid-cols-3 bg-neon/20 text-center text-[10px] font-black">
+        <div class="grid grid-cols-3 bg-red-500/15 text-center text-[10px] font-black">
           <div class="p-2"></div>
-          <div class="border-l border-white/40 bg-cyan-100/80 p-2">伴走プラン</div>
-          <div class="border-l border-white/40 bg-cyan-200/80 p-2">ウィークリー</div>
+          <div class="border-l border-white/40 bg-red-100/90 p-2">伴走プラン</div>
+          <div class="border-l border-white/40 bg-red-200/90 p-2">ウィークリー</div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[11px]">
           <div class="bg-zinc-100 p-3 text-left font-bold">月額料金</div>
-          <div class="border-l border-zinc-200 bg-cyan-50 p-3">
+          <div class="border-l border-zinc-200 bg-red-50 p-3">
             <span class="text-lg font-black text-red-600">9,000円</span>
             <p class="text-[10px] text-red-600">(税込9,900円)</p>
           </div>
-          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3">
+          <div class="border-l border-zinc-200 bg-red-100/80 p-3">
             <span class="text-lg font-black text-red-600">14,800円</span>
             <p class="text-[10px] text-red-600">(税込16,280円)</p>
           </div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
           <div class="bg-zinc-100 p-3 text-left text-[11px]">24時間ジム利用</div>
-          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
-          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-100/80 p-3 text-2xl">○</div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[10px]">
           <div class="bg-zinc-100 p-3 text-left font-bold">パーソナルトレーニング</div>
-          <div class="border-l border-cyan-50 bg-cyan-50 p-2">月1回（45分）</div>
-          <div class="border-l border-cyan-100 bg-cyan-100/60 p-2">月4回（45分）</div>
+          <div class="border-l border-red-50 bg-red-50 p-2">月1回（45分）</div>
+          <div class="border-l border-red-100 bg-red-100/80 p-2">月4回（45分）</div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
           <div class="bg-zinc-100 p-3 text-left text-[11px]">初回カウンセリング</div>
-          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
-          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-100/80 p-3 text-2xl">○</div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
           <div class="bg-zinc-100 p-3 text-left text-[11px]">InBody測定</div>
-          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
-          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-red-100/80 p-3 text-2xl">○</div>
         </div>
         <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[10px]">
           <div class="bg-zinc-100 p-3 text-left font-bold">専用プラン作成</div>
-          <div class="border-l border-cyan-50 bg-cyan-50 p-2">○</div>
-          <div class="border-l border-cyan-100 bg-cyan-100/60 p-2">○</div>
+          <div class="border-l border-red-50 bg-red-50 p-2">○</div>
+          <div class="border-l border-red-100 bg-red-100/80 p-2">○</div>
         </div>
       </div>
     </section>
@@ -693,33 +760,20 @@
     <!-- 上へ（静的アンカーのみ） -->
     <a
       href="#top"
-      class="fixed bottom-[5.5rem] right-4 z-[55] flex h-11 w-11 items-center justify-center rounded-full bg-neon text-lg font-black text-black shadow-neon"
+      class="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[55] flex h-11 w-11 items-center justify-center rounded-full bg-neon text-lg font-black text-white shadow-neon"
       aria-label="ページ上部へ"
       >^</a
     >
 
-    <!-- ========== 固定フッター CTA ========== -->
-    <div
-      class="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-500 px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.35)]"
-    >
-      <div class="mx-auto flex max-w-lg items-center justify-between gap-2">
-        <p class="text-left text-xs font-black leading-tight text-red-600">
-          24時間<br />受付可
-        </p>
-        <a
-          href="#top"
-          class="flex shrink-0 flex-col items-center rounded-lg border-2 border-white bg-line px-2 py-1.5 text-center shadow-md"
-        >
-          <span class="text-[10px] font-black text-white">入会はLINEから</span>
-          <span class="mt-1 flex items-center gap-1 rounded-full bg-black px-3 py-1 text-[10px] font-black text-white">
-            <span aria-hidden="true">L</span>
-            今すぐ友だち追加!
-          </span>
-        </a>
-      </div>
-      <div class="mt-2 flex justify-center pb-1">
-        <span class="rounded-full bg-cyan-100 px-6 py-1 text-[10px] font-bold text-zinc-900 shadow">gym.valx.jp</span>
-      </div>
+    <!-- テンプレ14相当: sticky-cta + ピル型「申し込む」（LINE 導線はバッジで明示） -->
+    <div class="vgx-sticky-cta" role="region" aria-label="お申し込み">
+      <a href="#top" class="vgx-cta">
+        <span class="vgx-cta__badge">LINE</span>
+        <span>申し込む</span>
+        <span class="vgx-cta__icon" aria-hidden="true">▶</span>
+      </a>
+      <p class="vgx-cta-note">24時間受付可 · 公式LINEから入会・お問い合わせいただけます。</p>
+      <p class="vgx-cta-note opacity-80">gym.valx.jp</p>
     </div>
   </body>
 </html>

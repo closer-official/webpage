@@ -170,7 +170,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   ramen: '#8B2E2E',
   academy_lp: '#f7b500',
   navy_cyan_consult: '#22d3ee',
-  gym_personal_neon: '#00f2ff',
+  gym_personal_neon: '#ef4444',
   blueprint: '#f4f4f1',
 };
 
