@@ -3,7 +3,17 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api?_vp=$1" }
+    { "source": "/api/(.*)", "destination": "/api?_vp=$1" },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "supernihonshi.store-official.net" }],
+      "destination": "/deliverables/japanese-history-higashi/index.html"
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "supernihonshi.store-official.net" }],
+      "destination": "/deliverables/japanese-history-higashi/:path+"
+    }
   ],
   "functions": {
     "api/index.js": {
