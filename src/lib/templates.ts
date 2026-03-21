@@ -815,8 +815,8 @@ export const TEMPLATES: TemplateOption[] = [
   ),
   makeTemplate(
     'navy_cyan_consult',
-    'ネイビー×シアン（講座・コンサル）',
-    '納品LP（日本史コンサル）と同一構成の固定HTML＋スコープCSS',
+    'ネイビー×シアン（Web制作・LP）',
+    'テンプレ14：web-closer-intro 既定の固定HTML＋スコープCSS（納品デモは navyDeliverableSlug で切替）',
     NAVY_DELIVERABLE_PAGE_CSS,
     { omitCommonBase: true }
   ),

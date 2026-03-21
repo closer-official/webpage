@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const DEFAULT_NAVY_DELIVERABLE_SLUG = 'japanese-history-higashi';
+export const DEFAULT_NAVY_DELIVERABLE_SLUG = 'web-closer-intro';
 
 export const NAVY_DELIVERABLE_DEFAULT_LINE = 'https://lin.ee/nLMnCmt';
 export const NAVY_DELIVERABLE_DEFAULT_TIKTOK = 'https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/';
@@ -26,7 +26,7 @@ export function sanitizeNavyDeliverableSlug(slug) {
  * 納品LP（public/deliverables/{slug}/index.html）の <body> 内を読み取り、
  * 末尾の動的差し替え用 <script> を除き、LINE/TikTok URL を置換して
  * <main><div class="nc-jh-deliverable">…</div></main> で返す。
- * 元の納品フォルダ（japanese-history-higashi）は変更しない。別フォルダを slug で指定可能。
+ * 既定は web-closer-intro（テンプレ14）。納品デモは japanese-history-higashi を navyDeliverableSlug で指定。
  */
 export function buildNavyDeliverableMainHtml(escapeHtmlFn, lineUrl, tiktokUrl, slug) {
   const s = sanitizeNavyDeliverableSlug(slug);

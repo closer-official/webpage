@@ -126,7 +126,7 @@ export interface PageContent {
   footerInstagramUrl?: string;
   /**
    * navy_cyan_consult のみ: 埋め込む LP のフォルダ名（public/deliverables/{slug}/）。
-   * 未指定時は japanese-history-higashi（納品サンプル）。自社用はフォルダをコピーして slug を指定。
+   * 未指定時は web-closer-intro（テンプレ14・自社紹介 LP）。納品デモは japanese-history-higashi 等を指定。
    */
   navyDeliverableSlug?: string;
 }
@@ -165,7 +165,7 @@ export type StyleId =
   | 'event'              // 11. イベント
   | 'ramen'              // 12. ラーメン
   | 'academy_lp'         // 13. 高CVセールスLP
-  | 'navy_cyan_consult'; // 14. ダークネイビー×シアン（講座・コンサルLP）
+  | 'navy_cyan_consult'; // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
 
 /** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -217,7 +217,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'event', name: 'イベント' },
   { id: 'ramen', name: 'ラーメン' },
   { id: 'academy_lp', name: 'ハイコンバージョンLP' },
-  { id: 'navy_cyan_consult', name: 'ネイビー×シアン（講座・コンサル）' },
+  { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web制作・LP）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

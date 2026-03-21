@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const src = fs.readFileSync(
-  path.join(root, 'public/deliverables/japanese-history-higashi/index.html'),
+  path.join(root, 'public/deliverables/web-closer-intro/index.html'),
   'utf8'
 );
 const m = src.match(/<style>([\s\S]*?)<\/style>/);

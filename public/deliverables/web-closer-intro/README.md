@@ -4,10 +4,8 @@
 
 ## 使い方（Closer アプリ内）
 
-1. テンプレート **`navy_cyan_consult`** を選ぶ。
-2. 案件の `PageContent` に次を設定する:
-   - `navyDeliverableSlug: "web-closer-intro"`
-3. ビルド・プレビューすると、このフォルダの `index.html` が埋め込まれます。
+1. テンプレート **`navy_cyan_consult`（テンプレ14）** を選ぶだけで、既定でこのフォルダの `index.html` が埋め込まれます。
+2. 納品デモ（日本史LP）を使う場合のみ `PageContent.navyDeliverableSlug: "japanese-history-higashi"` を指定。
 
 ## 編集するとき
 

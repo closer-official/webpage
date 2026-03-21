@@ -1086,7 +1086,7 @@ const CRAM_SCHOOL_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-cram_school .qr-block .qr-block-img { display: none; } }
 `;
 
-/** 14. navy_cyan_consult — 納品LP（japanese-history-higashi）をスコープしたCSSのみ（COMMON_BASE は付けない） */
+/** 14. navy_cyan_consult — LP（既定: web-closer-intro）の style をスコープしたCSSのみ（COMMON_BASE は付けない） */
 const NAVY_DELIVERABLE_PAGE_CSS =
   `
   .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
