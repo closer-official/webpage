@@ -31,6 +31,7 @@
 <body>
   <div class="wrap">
     <a class="back" href="index.html">← トップへ戻る</a>
+    <div id="legal-main">
     <h1>利用規約</h1>
     <p>本利用規約は、日本史徹底攻略 / よし先生（以下「当サービス」）の利用に関する条件を定めるものです。ご利用いただく前に必ずお読みください。</p>
 
@@ -63,11 +64,26 @@
 
     <h2>第8条（準拠法・管轄）</h2>
     <p>本規約の解釈および適用については、日本法に準拠します。本規約に関する紛争については、当サービスの本店所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。</p>
+    </div>
 
     <div class="footer">
       <p>Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
       <p><a href="index.html">トップへ</a>　<a href="tokushohou.html">特定商取引法に基づく表記</a>　<a href="privacy.html">プライバシーポリシー</a></p>
     </div>
   </div>
+  <script>
+  (function(){
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+    fetch(api + '/lp-content/japanese-history-higashi').then(function(r){ return r.json(); }).then(function(c){
+      var html = c && c.legal && c.legal.termsHtml;
+      if (html && String(html).trim()) {
+        var el = document.getElementById('legal-main');
+        if (el) el.innerHTML = html;
+      }
+    }).catch(function(){});
+  })();
+  </script>
 </body>
 </html>

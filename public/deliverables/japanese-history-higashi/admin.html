@@ -36,17 +36,22 @@
   <div class="wrap">
     <a class="back" href="index.html">← LPに戻る</a>
     <div id="loginArea" class="login-form" style="display:none;">
-      <h1>管理者ログイン</h1>
+      <h1 id="loginTitle">管理者ログイン</h1>
+      <p id="loginHint" style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.55;"></p>
       <form id="loginForm">
         <label>ユーザー名</label>
-        <input type="text" name="username" required />
+        <input type="text" name="username" autocomplete="username" required />
         <label>パスワード</label>
-        <input type="password" name="password" required />
+        <input type="password" name="password" autocomplete="current-password" required />
         <button type="submit" class="btn">ログイン</button>
       </form>
     </div>
     <div id="adminArea" style="display:none;">
-      <h1>日本史徹底攻略 LP 管理者画面</h1>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+        <h1 style="margin:0;">日本史徹底攻略 LP 管理者画面</h1>
+        <button type="button" class="btn btn-secondary" id="logoutBtn">ログアウト</button>
+      </div>
+      <p id="authBanner" style="display:none;padding:12px;border-radius:8px;background:rgba(251,191,36,0.15);color:#fcd34d;font-size:0.85rem;margin-bottom:16px;line-height:1.55;"></p>
       <div id="msg"></div>
 
       <section>
@@ -176,6 +181,18 @@
         <input type="text" id="legal.tokushohou.specialConditions" />
       </section>
 
+      <section>
+        <h2>利用規約（terms.html）</h2>
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">HTMLで記述できます。空のときはページ同梱の初期文言のまま表示されます。</p>
+        <textarea id="legal.termsHtml" rows="14" placeholder="未設定時は初期表示"></textarea>
+      </section>
+
+      <section>
+        <h2>プライバシーポリシー（privacy.html）</h2>
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">HTMLで記述できます。空のときはページ同梱の初期文言のまま表示されます。</p>
+        <textarea id="legal.privacyHtml" rows="14" placeholder="未設定時は初期表示"></textarea>
+      </section>
+
       <div style="display:flex;gap:12px;margin-top:24px;">
         <button type="button" class="btn" id="saveBtn">保存する</button>
         <a href="index.html" class="btn btn-secondary" target="_blank">プレビューを開く</a>
@@ -197,12 +214,7 @@
     }
     const apiBase = getApiBase();
 
-    async function checkAuth() {
-      const r = await fetch(apiBase + '/admin-auth/status', { credentials: 'include' });
-      const { enabled, authenticated } = await r.json();
-      if (!enabled || authenticated) return true;
-      return false;
-    }
+    let authState = { mode: 'none', authenticated: false };
 
     function showMsg(text, ok) {
       const el = document.getElementById('msg');
@@ -237,6 +249,7 @@
       document.querySelectorAll('#adminArea input, #adminArea textarea').forEach((el) => {
         const id = el.id;
         if (!id || !id.includes('.')) return;
+        if (id.startsWith('legal.')) return;
         const val = el.value.trim();
         setByPath(out, id, val);
       });
@@ -265,15 +278,18 @@
         reasons[key].items = [0,1,2].map(i => document.getElementById('reasons.'+key+'.item'+i)?.value?.trim()).filter(Boolean);
       });
       out.reasons = reasons;
-      out.legal = out.legal || {};
-      out.legal.tokushohou = {
-        seller: document.getElementById('legal.tokushohou.seller')?.value?.trim() || '',
-        responsible: document.getElementById('legal.tokushohou.responsible')?.value?.trim() || '',
-        address: document.getElementById('legal.tokushohou.address')?.value?.trim() || '',
-        contact: document.getElementById('legal.tokushohou.contact')?.value?.trim() || '',
-        paymentMethod: document.getElementById('legal.tokushohou.paymentMethod')?.value?.trim() || '',
-        paymentTiming: document.getElementById('legal.tokushohou.paymentTiming')?.value?.trim() || '',
-        specialConditions: document.getElementById('legal.tokushohou.specialConditions')?.value?.trim() || '',
+      out.legal = {
+        termsHtml: document.getElementById('legal.termsHtml')?.value?.trim() || '',
+        privacyHtml: document.getElementById('legal.privacyHtml')?.value?.trim() || '',
+        tokushohou: {
+          seller: document.getElementById('legal.tokushohou.seller')?.value?.trim() || '',
+          responsible: document.getElementById('legal.tokushohou.responsible')?.value?.trim() || '',
+          address: document.getElementById('legal.tokushohou.address')?.value?.trim() || '',
+          contact: document.getElementById('legal.tokushohou.contact')?.value?.trim() || '',
+          paymentMethod: document.getElementById('legal.tokushohou.paymentMethod')?.value?.trim() || '',
+          paymentTiming: document.getElementById('legal.tokushohou.paymentTiming')?.value?.trim() || '',
+          specialConditions: document.getElementById('legal.tokushohou.specialConditions')?.value?.trim() || '',
+        },
       };
       return out;
     }
@@ -299,6 +315,7 @@
         ['legal.tokushohou.address','legal.tokushohou.address'], ['legal.tokushohou.contact','legal.tokushohou.contact'],
         ['legal.tokushohou.paymentMethod','legal.tokushohou.paymentMethod'], ['legal.tokushohou.paymentTiming','legal.tokushohou.paymentTiming'],
         ['legal.tokushohou.specialConditions','legal.tokushohou.specialConditions'],
+        ['legal.termsHtml','legal.termsHtml'], ['legal.privacyHtml','legal.privacyHtml'],
       ];
       sets.forEach(([id, path]) => {
         const el = document.getElementById(id);
@@ -325,28 +342,44 @@
     }
 
     async function init() {
-      const authed = await checkAuth();
-      if (!authed) {
+      const statusR = await fetch(apiBase + '/lp-cms/' + SLUG + '/status', { credentials: 'include' });
+      authState = await statusR.json();
+
+      if (authState.mode === 'lp_cms' && !authState.authenticated) {
+        document.getElementById('loginTitle').textContent = '日本史LP 管理者ログイン';
+        document.getElementById('loginHint').textContent =
+          'Vercel の環境変数 JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD で設定したアカウントでログインしてください。';
         document.getElementById('loginArea').style.display = 'block';
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.target);
-          const r = await fetch(apiBase + '/admin-auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
-            credentials: 'include',
-          });
-          const j = await r.json();
-          if (j.authenticated) location.reload();
-          else showMsg('ログインに失敗しました。', false);
-        });
+        bindLoginForm('lp_cms');
         return;
       }
+      if (authState.mode === 'global_admin' && !authState.authenticated) {
+        document.getElementById('loginTitle').textContent = 'ツール管理者ログイン';
+        document.getElementById('loginHint').textContent =
+          '環境変数 ADMIN_USERNAME / ADMIN_PASSWORD でログインしてください。';
+        document.getElementById('loginArea').style.display = 'block';
+        bindLoginForm('global_admin');
+        return;
+      }
+
       document.getElementById('adminArea').style.display = 'block';
+      if (authState.mode === 'none') {
+        const b = document.getElementById('authBanner');
+        b.style.display = 'block';
+        b.textContent =
+          '※ 保存するには、Vercel に JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD（日本史LP専用・推奨）または ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。';
+      }
+
       const c = await loadContent();
       fillForm(c);
       setupPreviewHandlers();
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch(apiBase + '/lp-cms/' + SLUG + '/logout', { method: 'POST', credentials: 'include' });
+        await fetch(apiBase + '/admin-auth/logout', { method: 'POST', credentials: 'include' });
+        location.reload();
+      });
+
       document.getElementById('saveBtn').addEventListener('click', async () => {
         const data = collectFormData();
         const r = await fetch(apiBase + '/lp-content/' + SLUG, {
@@ -357,11 +390,51 @@
         });
         if (r.ok) showMsg('保存しました。', true);
         else {
-          const j = await r.json();
-          showMsg(j.error || '保存に失敗しました。', false);
+          let msg = '保存に失敗しました。';
+          try {
+            const j = await r.json();
+            if (j.error) msg = j.error;
+          } catch (e) {}
+          showMsg(msg, false);
         }
       });
     }
+
+    function bindLoginForm(kind) {
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = { username: fd.get('username'), password: fd.get('password') };
+        const url =
+          kind === 'lp_cms'
+            ? apiBase + '/lp-cms/' + SLUG + '/login'
+            : apiBase + '/admin-auth/login';
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        });
+        if (r.ok) {
+          location.reload();
+          return;
+        }
+        let msg = 'ログインに失敗しました。';
+        try {
+          const j = await r.json();
+          if (j.error) msg = j.error;
+        } catch (e2) {}
+        const errEl = document.createElement('p');
+        errEl.className = 'msg err';
+        errEl.style.marginTop = '12px';
+        errEl.textContent = msg;
+        const form = document.getElementById('loginForm');
+        const old = form.querySelector('.msg.err');
+        if (old) old.remove();
+        form.appendChild(errEl);
+      });
+    }
+
     init();
   </script>
 </body>

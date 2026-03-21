@@ -13,9 +13,12 @@ Vite 開発サーバー起動後:
 `http://localhost:5173/deliverables/japanese-history-higashi/admin.html`
 
 - サーバー（`cd server && npm run dev`）が起動している必要があります
-- 管理者認証が有効な場合（`ADMIN_USERNAME` / `ADMIN_PASSWORD` 設定時）はログインが必要です
+- **本番（Vercel）では推奨:** `JP_HISTORY_LP_CMS_USER` / `JP_HISTORY_LP_CMS_PASSWORD` を環境変数に設定すると、日本史LP専用のログイン画面が表示されます（ツール全体の `ADMIN_*` とは別）。
+- 上記が未設定で `ADMIN_USERNAME` / `ADMIN_PASSWORD` だけある場合は、ツール管理者ログインで保存できます。
+- どちらも未設定のときは画面は開けますが、**保存はできません**（画面上に注意が出ます）。
 - 「Presented by Closer」は削除・変更できません
 - 写真はURL入力で差し替え可能です
+- **利用規約・プライバシーポリシー**も管理者画面からHTMLで編集可能（空のときは同梱HTMLの初期文言のまま）
 
 本番では `dist` に同梱されるか、静的ホスティングに `public/deliverables/` ごとアップロードしてください。API（`/api/lp-content/...`）が利用可能な環境では、管理者画面で保存した内容がLPに反映されます。
 

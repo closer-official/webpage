@@ -30,6 +30,7 @@
 <body>
   <div class="wrap">
     <a class="back" href="index.html">← トップへ戻る</a>
+    <div id="legal-main">
     <h1>プライバシーポリシー</h1>
     <p>日本史徹底攻略 / よし先生（以下「当サービス」）は、利用者の個人情報の保護を重要視しています。本ポリシーでは、個人情報の取得・利用・管理について定めます。</p>
 
@@ -62,11 +63,26 @@
 
     <h2>6. ポリシーの変更</h2>
     <p>本ポリシーは、必要に応じて変更することがあります。変更後のポリシーは、当サイトに掲載した時点から効力を生じます。</p>
+    </div>
 
     <div class="footer">
       <p>Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
       <p><a href="index.html">トップへ</a>　<a href="terms.html">利用規約</a>　<a href="tokushohou.html">特定商取引法に基づく表記</a></p>
     </div>
   </div>
+  <script>
+  (function(){
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+    fetch(api + '/lp-content/japanese-history-higashi').then(function(r){ return r.json(); }).then(function(c){
+      var html = c && c.legal && c.legal.privacyHtml;
+      if (html && String(html).trim()) {
+        var el = document.getElementById('legal-main');
+        if (el) el.innerHTML = html;
+      }
+    }).catch(function(){});
+  })();
+  </script>
 </body>
 </html>

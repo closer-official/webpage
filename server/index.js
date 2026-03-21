@@ -144,6 +144,53 @@ function requireAdmin(req, res) {
   return false;
 }
 
+/** 日本史LPなど・納品LP専用CMS（Vercel: JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD） */
+const LP_CMS_SLUGS = new Set(['japanese-history-higashi']);
+function lpCmsCookieName(slug) {
+  return `lp_cms_${String(slug).replace(/[^a-zA-Z0-9_]/g, '_')}`;
+}
+function lpCmsAuthEnabledForSlug(slug) {
+  return (
+    LP_CMS_SLUGS.has(slug) &&
+    !!(process.env.JP_HISTORY_LP_CMS_USER && process.env.JP_HISTORY_LP_CMS_PASSWORD)
+  );
+}
+function lpCmsCookieValue(slug) {
+  const u = process.env.JP_HISTORY_LP_CMS_USER || '';
+  const p = process.env.JP_HISTORY_LP_CMS_PASSWORD || '';
+  return createHash('sha256').update(`lp-cms|${slug}|${u}|${p}`).digest('hex');
+}
+function isLpCmsAuthenticated(req, slug) {
+  if (!lpCmsAuthEnabledForSlug(slug)) return false;
+  const cookies = parseCookies(req);
+  const actual = Buffer.from(String(cookies[lpCmsCookieName(slug)] || ''));
+  const expected = Buffer.from(lpCmsCookieValue(slug));
+  if (actual.length !== expected.length) return false;
+  try {
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+/** LPコンテンツ保存: LP専用認証優先、なければ全体ADMIN、どちらもなければ503 */
+function requireLpContentWrite(req, res, slug) {
+  if (!LP_CONTENT_SLUGS.includes(slug)) {
+    res.status(404).json({ error: 'Not found' });
+    return false;
+  }
+  if (lpCmsAuthEnabledForSlug(slug)) {
+    if (isLpCmsAuthenticated(req, slug)) return true;
+    res.status(401).json({ error: '日本史LP管理者のログインが必要です。' });
+    return false;
+  }
+  if (adminAuthEnabled()) return requireAdmin(req, res);
+  res.status(503).json({
+    error:
+      '保存できません。Vercel（サーバー）に JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD を設定するか、ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。',
+  });
+  return false;
+}
+
 function makeDraftToken() {
   return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 }
@@ -1339,6 +1386,54 @@ app.get('/api/lp-payment-form', (req, res) => {
 /** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */
 // ---------- LP コンテンツ（日本史など納品LP用） ----------
 const LP_CONTENT_SLUGS = ['japanese-history-higashi'];
+
+app.get('/api/lp-cms/:slug/status', (req, res) => {
+  const slug = req.params.slug;
+  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  const lpConfigured = lpCmsAuthEnabledForSlug(slug);
+  const adminOn = adminAuthEnabled();
+  let mode = 'none';
+  if (lpConfigured) mode = 'lp_cms';
+  else if (adminOn) mode = 'global_admin';
+  let authenticated = false;
+  if (mode === 'lp_cms') authenticated = isLpCmsAuthenticated(req, slug);
+  else if (mode === 'global_admin') authenticated = isAdminAuthenticated(req);
+  else authenticated = true;
+  res.json({ mode, authenticated, lpConfigured });
+});
+
+app.post('/api/lp-cms/:slug/login', (req, res) => {
+  const slug = req.params.slug;
+  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  if (!lpCmsAuthEnabledForSlug(slug)) {
+    return res.status(400).json({ error: 'LP用の認証がサーバーに未設定です（JP_HISTORY_LP_CMS_USER / PASSWORD）。' });
+  }
+  const username = String(req.body?.username || '');
+  const password = String(req.body?.password || '');
+  const ok =
+    username === process.env.JP_HISTORY_LP_CMS_USER && password === process.env.JP_HISTORY_LP_CMS_PASSWORD;
+  if (!ok) return res.status(401).json({ error: 'ユーザー名またはパスワードが違います。' });
+  const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+  const name = lpCmsCookieName(slug);
+  const val = encodeURIComponent(lpCmsCookieValue(slug));
+  res.setHeader(
+    'Set-Cookie',
+    `${name}=${val}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
+  );
+  res.json({ ok: true });
+});
+
+app.post('/api/lp-cms/:slug/logout', (req, res) => {
+  const slug = req.params.slug;
+  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+  const name = lpCmsCookieName(slug);
+  res.setHeader(
+    'Set-Cookie',
+    `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`
+  );
+  res.json({ ok: true });
+});
 function getLpContentDefault(slug) {
   try {
     const p = path.join(__dirname, 'data', 'json', 'lpContent.json');
@@ -1361,9 +1456,8 @@ app.get('/api/lp-content/:slug', async (req, res) => {
 });
 
 app.put('/api/lp-content/:slug', async (req, res) => {
-  if (!requireAdmin(req, res)) return;
   const slug = req.params.slug;
-  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  if (!requireLpContentWrite(req, res, slug)) return;
   const content = req.body;
   if (!content || typeof content !== 'object') return res.status(400).json({ error: 'Invalid content' });
   await store.setLpContent(slug, content);
