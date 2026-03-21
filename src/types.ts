@@ -326,6 +326,8 @@ export interface BuildHtmlGenOptions {
   instagramLine?: boolean;
   instagramUrl?: string;
   lineUrl?: string;
+  /** navy_cyan_consult（納品LPクローン）フッター・CTA の TikTok リンク */
+  tiktokUrl?: string;
   qrCode?: boolean;
   qrCodeDataUrl?: string;
   qrCodeTargetUrl?: string;

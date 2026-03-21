@@ -1,3 +1,5 @@
+import { NAVY_DELIVERABLE_SCOPED_CSS } from './navyDeliverableScopedCss.js';
+
 /**
  * 6パターンテンプレート（絶対ルール準拠）
  * A-1 Minimal Luxury, A-2 Dark Edge, A-3 Corporate Trust
@@ -1084,143 +1086,20 @@ const CRAM_SCHOOL_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-cram_school .qr-block .qr-block-img { display: none; } }
 `;
 
-/** 14. ダークネイビー×シアン（講座・コンサルLP：白カード／波形ライト帯／FAQアコーディオン／弧CTA） */
-const NAVY_CYAN_CONSULT_CSS = `
-  .page-wrapper.template-navy_cyan_consult {
-    --nc-bg: #0a0d14; --nc-bg-deep: #06080f; --nc-slab: #e8edf2; --nc-slab-text: #0f172a;
-    --tp-bg: var(--nc-bg); --tp-heading: #f8fafc; --tp-text: #cbd5e1; --tp-accent: #22d3ee; --tp-accent-2: #0891b2;
-    --tp-border: rgba(34,211,238,0.22); --tp-bg-footer: #050810; --hero-min-h: 78vh;
-    background: radial-gradient(ellipse 100% 70% at 50% -15%, rgba(34,211,238,0.09), transparent 55%),
-      linear-gradient(180deg, #0c1220 0%, var(--nc-bg) 35%, var(--nc-bg-deep) 100%);
-    color: var(--tp-text); font-family: "Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;
-  }
-  body.page-wrapper.template-navy_cyan_consult::after { opacity: 0.04; mix-blend-mode: soft-light; }
-  .page-wrapper.template-navy_cyan_consult .container.nc-inner { max-width: 720px; margin: 0 auto; padding-left: 1.35rem; padding-right: 1.35rem; }
-  .page-wrapper.template-navy_cyan_consult main { padding-top: 0; padding-bottom: 0; }
-  .page-wrapper.template-navy_cyan_consult header {
-    position: sticky; top: 0; z-index: 100; padding: 0.65rem 0; background: rgba(10,13,20,0.92); backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--tp-border);
-  }
-  .page-wrapper.template-navy_cyan_consult .header-inner { justify-content: center; gap: 0.75rem; flex-direction: column; align-items: center; }
-  @media (min-width: 769px) {
-    .page-wrapper.template-navy_cyan_consult .header-inner { flex-direction: row; justify-content: space-between; align-items: center; }
-  }
-  .page-wrapper.template-navy_cyan_consult .logo { color: #f8fafc; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.14em; text-transform: uppercase; }
-  .page-wrapper.template-navy_cyan_consult .nav { justify-content: center; gap: 0.5rem 1rem; }
-  .page-wrapper.template-navy_cyan_consult .nav-link { color: #94a3b8; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; }
-  .page-wrapper.template-navy_cyan_consult .nav-link:hover, .page-wrapper.template-navy_cyan_consult .nav-link:focus-visible { color: #67e8f9; }
-  .page-wrapper.template-navy_cyan_consult header .cta-btn {
-    background: linear-gradient(105deg, #0891b2 0%, #22d3ee 48%, #5eead4 100%); color: #042f2e; border: none; border-radius: 999px;
-    padding: 0.65rem 1.35rem; min-height: 44px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em;
-    box-shadow: 0 6px 28px rgba(34,211,238,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset;
-  }
-  .page-wrapper.template-navy_cyan_consult header .cta-btn:hover { filter: brightness(1.07); color: #042f2e; }
-  .page-wrapper.template-navy_cyan_consult .nc-hero { min-height: var(--hero-min-h); }
-  .page-wrapper.template-navy_cyan_consult .nc-hero .hero-bg-overlay {
-    background: linear-gradient(180deg, rgba(6,8,15,0.82) 0%, rgba(10,13,20,0.55) 45%, rgba(10,13,20,0.75) 100%);
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-inner { max-width: 36rem; padding: 3rem 1.25rem 3.5rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-brand { color: #22d3ee; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; margin: 0 0 1rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-title {
-    color: #fff; font-size: clamp(1.55rem, 5vw, 2.45rem) !important; font-weight: 900; line-height: 1.35; letter-spacing: 0.02em; margin: 0;
-    text-shadow: 0 4px 40px rgba(0,0,0,0.5), 0 0 60px rgba(34,211,238,0.15);
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-sub { color: rgba(226,232,240,0.92); font-size: 0.95rem; line-height: 1.75; margin: 1.1rem auto 0; max-width: 26rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-cta {
-    margin-top: 1.75rem; background: linear-gradient(105deg, #0891b2 0%, #22d3ee 50%, #67e8f9 100%); color: #042f2e; border: none; border-radius: 999px;
-    padding: 1rem 2rem; min-height: 52px; font-weight: 900; font-size: 0.9rem; letter-spacing: 0.05em;
-    box-shadow: 0 8px 32px rgba(34,211,238,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-hero-cta:hover { filter: brightness(1.08); color: #042f2e; }
-  .page-wrapper.template-navy_cyan_consult .hero-inner .cta-btn { background: linear-gradient(105deg, #0891b2 0%, #22d3ee 50%, #67e8f9 100%); color: #042f2e; }
-  .page-wrapper.template-navy_cyan_consult .cta-block {
-    padding: 2.5rem 1.25rem; margin: 0; background: transparent; border: none; border-radius: 0;
-    border-bottom: 1px solid rgba(34,211,238,0.12);
-  }
-  .page-wrapper.template-navy_cyan_consult .cta-block .cta-btn {
-    background: linear-gradient(105deg, #0891b2 0%, #22d3ee 50%, #67e8f9 100%); color: #042f2e; border-radius: 999px; font-weight: 900;
-    padding: 0.95rem 2rem; min-height: 52px; box-shadow: 0 8px 28px rgba(34,211,238,0.35);
-  }
-  .page-wrapper.template-navy_cyan_consult .section.nc-band,
-  .page-wrapper.template-navy_cyan_consult .section.nc-faq-sec,
-  .page-wrapper.template-navy_cyan_consult .section.nc-final-sec { display: block; background: transparent; border: none; box-shadow: none; border-radius: 0; gap: 0; }
-  .page-wrapper.template-navy_cyan_consult .nc-stack { display: flex; flex-direction: column; gap: 1.25rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-surface-card {
-    background: #f1f5f9; color: var(--nc-slab-text); border-radius: 22px; padding: 1.75rem 1.5rem 1.85rem;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.5) inset;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-card-h {
-    font-size: 1.05rem; font-weight: 900; color: #0f172a; margin: 0 0 1rem; letter-spacing: 0.04em; border: none; padding: 0; background: none;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-card-text p { color: #334155; font-size: 0.9375rem; line-height: 1.85; margin: 0 0 0.75rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-card-text p:last-child { margin-bottom: 0; }
-  .page-wrapper.template-navy_cyan_consult .nc-card-media-below .section-img-wrap { margin: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
-  .page-wrapper.template-navy_cyan_consult .nc-card-media-below .section-img { max-height: 280px; width: 100%; object-fit: cover; display: block; }
-  .page-wrapper.template-navy_cyan_consult .nc-section-label {
-    text-align: center; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: #22d3ee; margin: 0 0 1.5rem;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-list { display: flex; flex-direction: column; gap: 0.85rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-item { border-radius: 16px; overflow: hidden; border: 1px solid var(--tp-border); background: rgba(15,23,42,0.65); }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-q {
-    display: flex; align-items: flex-start; gap: 0.75rem; width: 100%; padding: 1rem 1.1rem; cursor: pointer; list-style: none; text-align: left;
-    color: #f1f5f9; font-weight: 700; font-size: 0.9rem; line-height: 1.5; background: rgba(8,12,22,0.85); border: none; margin: 0;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-q::-webkit-details-marker { display: none; }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-q-icon {
-    flex-shrink: 0; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: linear-gradient(145deg, #22d3ee, #0891b2);
-    color: #042f2e; font-size: 0.65rem; font-weight: 900; display: flex; align-items: center; justify-content: center;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-a {
-    display: flex; gap: 0.75rem; padding: 1rem 1.1rem 1.2rem; background: #f8fafc; color: #1e293b; border-top: 1px solid rgba(15,23,42,0.08);
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-a-icon {
-    flex-shrink: 0; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #0f172a; color: #f1f5f9; font-size: 0.65rem; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-faq-a-body p { margin: 0; font-size: 0.875rem; line-height: 1.75; color: #334155; }
-  .page-wrapper.template-navy_cyan_consult .nc-price-sec { position: relative; padding: 0; margin-top: 0.5rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-price-wave-top {
-    height: 48px; margin-top: -1px; background: var(--nc-slab);
-    clip-path: ellipse(75% 100% at 50% 100%);
-    border: none;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-price-slab {
-    background: var(--nc-slab); color: var(--nc-slab-text); padding: 0.5rem 0 3.5rem;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-price-heading {
-    text-align: center; font-size: 1.35rem; font-weight: 900; color: #0f172a; margin: 0 0 1.5rem; letter-spacing: 0.02em;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-  @media (max-width: 520px) { .page-wrapper.template-navy_cyan_consult .nc-price-grid { grid-template-columns: 1fr; } }
-  .page-wrapper.template-navy_cyan_consult .nc-price-card {
-    background: linear-gradient(165deg, #0891b2 0%, #0e7490 40%, #155e75 100%); color: #ecfeff; border-radius: 18px; padding: 1.35rem 1.1rem; text-align: center;
-    box-shadow: 0 12px 32px rgba(8,145,178,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-price-name { display: block; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; opacity: 0.95; margin-bottom: 0.5rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-price-val { display: block; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.02em; }
-  .page-wrapper.template-navy_cyan_consult .nc-price-note { text-align: center; font-size: 0.8125rem; color: #475569; line-height: 1.65; }
-  .page-wrapper.template-navy_cyan_consult .nc-price-note p { margin: 0 0 0.35rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-final-sec { position: relative; padding: 3rem 0 4rem; text-align: center; overflow: hidden; }
-  .page-wrapper.template-navy_cyan_consult .nc-final-arc {
-    position: absolute; bottom: -20%; left: 50%; transform: translateX(-50%); width: min(140vw, 720px); height: min(140vw, 720px);
-    border-radius: 50%; background: radial-gradient(circle at 40% 35%, rgba(103,232,249,0.35), rgba(34,211,238,0.12) 45%, transparent 70%);
-    pointer-events: none;
-  }
-  .page-wrapper.template-navy_cyan_consult .nc-final-inner { position: relative; z-index: 1; }
-  .page-wrapper.template-navy_cyan_consult .nc-final-title { color: #f8fafc; font-size: 1.25rem; font-weight: 900; margin: 0 0 0.75rem; letter-spacing: 0.02em; }
-  .page-wrapper.template-navy_cyan_consult .nc-final-copy { color: #94a3b8; font-size: 0.9rem; line-height: 1.75; margin: 0 0 1.5rem; }
-  .page-wrapper.template-navy_cyan_consult .nc-cta-pill {
-    background: linear-gradient(105deg, #0891b2 0%, #22d3ee 50%, #67e8f9 100%); color: #042f2e; border-radius: 999px; font-weight: 900; padding: 1rem 2.25rem; min-height: 54px;
-    box-shadow: 0 10px 36px rgba(34,211,238,0.4); font-size: 0.9rem;
-  }
-  .page-wrapper.template-navy_cyan_consult footer {
-    background: var(--tp-bg-footer); color: #64748b; border-top: 1px solid rgba(34,211,238,0.1); padding: 2.5rem 1rem 2rem; font-size: 0.75rem; line-height: 1.7;
-  }
-  .page-wrapper.template-navy_cyan_consult footer .presented-by a { color: #64748b; }
-`;
+/** 14. navy_cyan_consult — 納品LP（japanese-history-higashi）をスコープしたCSSのみ（COMMON_BASE は付けない） */
+const NAVY_DELIVERABLE_PAGE_CSS =
+  `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #22d3ee; outline-offset: 2px; }
+  .page-wrapper.template-navy_cyan_consult main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-navy_cyan_consult .nc-jh-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+` + NAVY_DELIVERABLE_SCOPED_CSS;
 
 export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
+  if (key === 'navy_cyan_consult') {
+    return NAVY_DELIVERABLE_PAGE_CSS;
+  }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS
     : key === 'cafe_1' ? CAFE_1_CSS
@@ -1231,7 +1110,6 @@ export function getTemplateFullCss(templateId) {
     : key === 'pet_salon' ? PET_SALON_CSS
     : key === 'professional' ? PROFESSIONAL_CSS
     : key === 'ramen' ? RAMEN_CSS
-    : key === 'navy_cyan_consult' ? NAVY_CYAN_CONSULT_CSS
     : GENERIC_CSS;
   return COMMON_BASE + css;
 }
