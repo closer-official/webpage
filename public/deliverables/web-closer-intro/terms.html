@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>利用規約 | 日本史徹底攻略 / よし先生</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #060a12;
+      --bg-navy: #0c1220;
+      --white: #ffffff;
+      --text-muted: #94a3b8;
+      --cyan-bright: #67e8f9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans JP", sans-serif; background: var(--bg-deep); color: var(--white); line-height: 1.8; font-size: 14px; }
+    a { color: var(--cyan-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 24px 18px 48px; }
+    .back { display: inline-block; margin-bottom: 24px; font-size: 0.88rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 28px; }
+    h2 { font-size: 1.1rem; margin: 24px 0 12px; }
+    p, li { margin-bottom: 10px; color: var(--text-muted); }
+    ol, ul { padding-left: 24px; margin-bottom: 16px; }
+    .footer { margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(148,163,184,0.2); text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← トップへ戻る</a>
+    <div id="legal-main">
+    <h1>利用規約</h1>
+    <p>本利用規約は、日本史徹底攻略 / よし先生（以下「当サービス」）の利用に関する条件を定めるものです。ご利用いただく前に必ずお読みください。</p>
+
+    <h2>第1条（適用）</h2>
+    <p>本規約は、当サービスを利用するすべての利用者（以下「利用者」）に適用されます。利用者が当サービスを利用した時点で、本規約に同意したものとみなします。</p>
+
+    <h2>第2条（サービス内容）</h2>
+    <p>当サービスは、高校受験・大学受験の日本史を対象としたオンラインコンサルティング・伴走支援を提供します。具体的な内容・範囲は、個別のご契約に基づき決定されます。</p>
+
+    <h2>第3条（利用料金・支払い）</h2>
+    <p>利用料金は、各プランに応じた月額料金（税込）とし、所定の方法によりお支払いいただきます。料金の変更がある場合は、事前に通知いたします。</p>
+
+    <h2>第4条（禁止事項）</h2>
+    <p>利用者は、以下の行為を行ってはなりません。</p>
+    <ul>
+      <li>当サービスの内容を第三者に転載・再配布すること</li>
+      <li>当サービスを営利目的で利用すること</li>
+      <li>他の利用者または第三者に不利益を与える行為</li>
+      <li>法令または公序良俗に反する行為</li>
+    </ul>
+
+    <h2>第5条（著作権・知的財産権）</h2>
+    <p>当サービスで提供するコンテンツ（テキスト、動画、資料等）の著作権およびその他の知的財産権は、当サービスまたは正当な権利者に帰属します。利用者は、当サービスの利用に必要な範囲でのみ使用することができます。</p>
+
+    <h2>第6条（免責事項）</h2>
+    <p>当サービスは、試験の合否や成績向上を保証するものではありません。学習の成果は、利用者の取り組みや環境に大きく依存します。</p>
+
+    <h2>第7条（規約の変更）</h2>
+    <p>当サービスは、必要に応じて本規約を変更することがあります。変更後の規約は、当サイト上に掲載した時点から効力を生じます。重要な変更の場合は、お知らせいたします。</p>
+
+    <h2>第8条（準拠法・管轄）</h2>
+    <p>本規約の解釈および適用については、日本法に準拠します。本規約に関する紛争については、当サービスの本店所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。</p>
+    </div>
+
+    <div class="footer">
+      <p>Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
+      <p><a href="index.html">トップへ</a>　<a href="tokushohou.html">特定商取引法に基づく表記</a>　<a href="privacy.html">プライバシーポリシー</a></p>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+    fetch(api + '/lp-content/japanese-history-higashi').then(function(r){ return r.json(); }).then(function(c){
+      var html = c && c.legal && c.legal.termsHtml;
+      if (html && String(html).trim()) {
+        var el = document.getElementById('legal-main');
+        if (el) el.innerHTML = html;
+      }
+    }).catch(function(){});
+  })();
+  </script>
+</body>
+</html>

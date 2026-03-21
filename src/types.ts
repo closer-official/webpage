@@ -124,6 +124,11 @@ export interface PageContent {
   }[];
   /** cafe_1：フッターに Instagram アイコンリンクを出す場合 */
   footerInstagramUrl?: string;
+  /**
+   * navy_cyan_consult のみ: 埋め込む LP のフォルダ名（public/deliverables/{slug}/）。
+   * 未指定時は japanese-history-higashi（納品サンプル）。自社用はフォルダをコピーして slug を指定。
+   */
+  navyDeliverableSlug?: string;
 }
 
 /** SEO用データ */
@@ -328,6 +333,8 @@ export interface BuildHtmlGenOptions {
   lineUrl?: string;
   /** navy_cyan_consult（納品LPクローン）フッター・CTA の TikTok リンク */
   tiktokUrl?: string;
+  /** navy_cyan_consult: PageContent に無いときの deliverables フォルダ名（プレビュー用） */
+  navyDeliverableSlug?: string;
   qrCode?: boolean;
   qrCodeDataUrl?: string;
   qrCodeTargetUrl?: string;

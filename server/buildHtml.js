@@ -1564,7 +1564,14 @@ ${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')
 
   const isBuilder = tid === 'builder';
   const navyMainHtml =
-    tid === 'navy_cyan_consult' ? buildNavyDeliverableMainHtml(escapeHtml, lineUrl, tiktokUrl) : '';
+    tid === 'navy_cyan_consult'
+      ? buildNavyDeliverableMainHtml(
+          escapeHtml,
+          lineUrl,
+          tiktokUrl,
+          content.navyDeliverableSlug || genOptions.navyDeliverableSlug
+        )
+      : '';
   const bodyInner = isBuilder
     ? `${skipLink}${builderViewsHtml}${builderViewScript}`
     : tid === 'navy_cyan_consult'

@@ -612,6 +612,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   navy_cyan_consult: {
     content: {
+      navyDeliverableSlug: 'japanese-history-higashi',
       siteName: 'STUDY NAVY',
       title: 'STUDY NAVY',
       headline: '理解が続く、学びの設計。',

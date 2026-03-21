@@ -55,5 +55,28 @@
         "specialConditions": "（特記事項がある場合は記載）"
       }
     }
+  },
+  "web-closer-intro": {
+    "lineUrl": "https://lin.ee/nLMnCmt",
+    "tiktokUrl": "https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/",
+    "hero": {
+      "brand": "Web Production · Studio",
+      "logo": "ウェブ制作 / Closer",
+      "sub": "コーポレートサイト・LPの設計から公開まで、<br />事業の伝わり方を一緒に整えます。",
+      "h1": "作りっぱなしにしない。<br /><strong>運用まで見据えた</strong>サイト制作を、<br />ご提案します。",
+      "photos": [
+        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80",
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80",
+        "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=400&q=80"
+      ],
+      "bar1": "納期・構成・更新のしやすさまで、最初にすり合わせ",
+      "bar2": "デザイン・実装・公開後の微修正まで一括サポート"
+    },
+    "footer": {
+      "brand": "ウェブ制作 / Closer",
+      "sub": "サイト制作・ランディングページ・保守",
+      "lineId": "@871fitgx",
+      "copyright": "© ウェブ制作 / Closer"
+    }
   }
 }

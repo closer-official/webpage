@@ -145,7 +145,7 @@ function requireAdmin(req, res) {
 }
 
 /** 日本史LPなど・納品LP専用CMS（Vercel: JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD） */
-const LP_CMS_SLUGS = new Set(['japanese-history-higashi']);
+const LP_CMS_SLUGS = new Set(['japanese-history-higashi', 'web-closer-intro']);
 function lpCmsCookieName(slug) {
   return `lp_cms_${String(slug).replace(/[^a-zA-Z0-9_]/g, '_')}`;
 }
@@ -1385,7 +1385,7 @@ app.get('/api/lp-payment-form', (req, res) => {
 
 /** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */
 // ---------- LP コンテンツ（日本史など納品LP用） ----------
-const LP_CONTENT_SLUGS = ['japanese-history-higashi'];
+const LP_CONTENT_SLUGS = ['japanese-history-higashi', 'web-closer-intro'];
 
 app.get('/api/lp-cms/:slug/status', (req, res) => {
   const slug = req.params.slug;

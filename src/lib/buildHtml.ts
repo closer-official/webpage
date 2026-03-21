@@ -1504,7 +1504,12 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
 
   const navyMainHtmlClient =
     tid === 'navy_cyan_consult'
-      ? buildNavyDeliverableMainHtmlClient(escapeHtml, genOpts?.lineUrl, genOpts?.tiktokUrl)
+      ? buildNavyDeliverableMainHtmlClient(
+          escapeHtml,
+          genOpts?.lineUrl,
+          genOpts?.tiktokUrl,
+          content.navyDeliverableSlug ?? genOpts?.navyDeliverableSlug
+        )
       : '';
 
   const bodyInner =

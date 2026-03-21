@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ウェブ制作 / Closer | サイト制作・LP・保守</title>
+  <meta name="description" content="コーポレートサイト・ランディングページの設計から公開まで。運用しやすさを見据えたWeb制作。お問い合わせはLINEから。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #060a12;
+      --bg-navy: #0c1220;
+      --bg-navy-mid: #111827;
+      --card-light: #f1f5f9;
+      --white: #ffffff;
+      --text-muted: #94a3b8;
+      --cyan: #22d3ee;
+      --cyan-bright: #67e8f9;
+      --cyan-dark: #0891b2;
+      --line: rgba(148, 163, 184, 0.25);
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      --radius: 14px;
+      --cta: linear-gradient(105deg, #22d3ee 0%, #06b6d4 45%, #0e7490 100%);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: var(--bg-deep);
+      color: var(--white);
+      line-height: 1.75;
+      font-size: 15px;
+      overflow-x: hidden;
+    }
+    a { color: var(--cyan-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .en-serif {
+      font-family: "Playfair Display", Georgia, serif;
+      font-style: italic;
+      letter-spacing: 0.04em;
+    }
+    .section { padding: 56px 18px; position: relative; }
+    .section--tight { padding-top: 40px; padding-bottom: 40px; }
+    .wrap { max-width: 480px; margin: 0 auto; }
+    .grain {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* --- Hero --- */
+    .hero {
+      padding: 28px 18px 48px;
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.12), transparent 55%), var(--bg-navy);
+      text-align: center;
+    }
+    .hero__brand {
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .hero__logo {
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, var(--white), var(--cyan-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero__sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .hero__h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.55;
+      margin-bottom: 28px;
+      text-shadow: 0 2px 24px rgba(34, 211, 238, 0.15);
+      text-wrap: balance;
+    }
+    .hero__photos {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      perspective: 400px;
+    }
+    .hero__frame {
+      width: 30%;
+      max-width: 110px;
+      aspect-ratio: 3/4;
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+      border: 2px solid rgba(34, 211, 238, 0.35);
+      border-radius: 6px;
+      transform: rotate(-6deg);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+    .hero__frame:nth-child(2) { transform: rotate(0deg) translateY(-4px); z-index: 1; border-color: rgba(34, 211, 238, 0.55); }
+    .hero__frame:nth-child(3) { transform: rotate(6deg); }
+    .hero__bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .hero__bar {
+      background: var(--white);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* --- CTA --- */
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: var(--cta);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 32px rgba(34, 211, 238, 0.25);
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s;
+    }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(34, 211, 238, 0.35); text-decoration: none; }
+    .cta__badge {
+      background: var(--white);
+      color: var(--cyan-dark);
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 900;
+    }
+    .cta__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+    .cta-note {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    /* --- Pain --- */
+    .pain { background: var(--bg-navy); }
+    .pain__title {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .pain__list { display: flex; flex-direction: column; gap: 12px; }
+    .pain-card {
+      background: var(--white);
+      color: #0f172a;
+      border-radius: var(--radius);
+      padding: 16px 16px 16px 44px;
+      position: relative;
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.65;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+    .pain-card::before {
+      content: "✓";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+      color: var(--white);
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+    .pain-card em {
+      font-style: normal;
+      color: var(--cyan-dark);
+      font-weight: 800;
+    }
+
+    /* --- Urgency --- */
+    .urgency {
+      text-align: center;
+      padding: 40px 18px;
+      background: linear-gradient(180deg, var(--bg-navy) 0%, #0a101c 100%);
+    }
+    .urgency__sparkle { font-size: 1.2rem; opacity: 0.5; margin-bottom: 8px; }
+    .urgency__text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .urgency__text .hl { color: var(--cyan-bright); }
+
+    /* --- Benefits --- */
+    .benefits { background: var(--bg-navy); padding-bottom: 32px; }
+    .benefit-block { margin-bottom: 48px; position: relative; }
+    .benefit-block__label {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 2rem;
+      color: rgba(34, 211, 238, 0.85);
+      line-height: 1;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 12px rgba(6, 10, 18, 0.9);
+    }
+    .benefit-block__label small {
+      display: block;
+      font-family: "Noto Sans JP", sans-serif;
+      font-style: normal;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--cyan-bright);
+      margin-bottom: 6px;
+      opacity: 0.95;
+    }
+    .benefit-block__card {
+      background: var(--card-light);
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 20px 16px;
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--shadow);
+      margin-top: 0;
+    }
+    .benefit-block__card h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+    .benefit-block__card h3 .line-hl {
+      display: inline;
+      background: linear-gradient(transparent 60%, rgba(34, 211, 238, 0.45) 60%);
+      padding: 0 2px;
+    }
+    .benefit-block__img {
+      width: 100%;
+      border-radius: 8px;
+      height: 160px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .benefit-block--right .benefit-block__label { text-align: right; }
+
+    /* --- Reasons --- */
+    .reasons-head {
+      background: #0f172a;
+      padding: 40px 18px 20px;
+      text-align: center;
+    }
+    .reasons-head__small { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
+    .reasons-head__title {
+      font-size: 1.65rem;
+      font-weight: 900;
+      line-height: 1.35;
+      position: relative;
+      z-index: 1;
+    }
+    .reasons-head__bg {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 3.5rem;
+      color: rgba(255, 255, 255, 0.06);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .reason-card-wrap { background: var(--white); color: #0f172a; margin: 0 18px 40px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .reason-card__img {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(120deg, #e2e8f0, #cbd5e1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .reason-card__img img,
+    .benefit-block__img img,
+    .hero__frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hero__frame { overflow: hidden; padding: 0; }
+    .reason-card__body { padding: 20px 18px 24px; }
+    .reason-card__tag { text-align: center; font-weight: 900; font-size: 0.85rem; margin-bottom: 12px; }
+    .reason-card__h { font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; line-height: 1.55; }
+    .reason-card__ul { list-style: none; font-size: 0.88rem; }
+    .reason-card__ul li {
+      padding-left: 22px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .reason-card__ul li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--cyan-dark);
+      font-weight: 900;
+    }
+
+    /* --- Problem / Solution --- */
+    .prob { background: #000; padding: 40px 18px 0; text-align: center; }
+    .prob__lead { font-size: 0.8rem; margin-bottom: 8px; opacity: 0.85; }
+    .prob__chev { font-size: 1.2rem; opacity: 0.5; margin-bottom: 16px; }
+    .prob__text {
+      font-size: 0.95rem;
+      line-height: 1.85;
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+    .prob__text em { font-style: normal; color: var(--cyan-bright); font-weight: 800; }
+    .prob__triangle {
+      width: 100%;
+      height: 36px;
+      background: linear-gradient(to bottom right, transparent 49.5%, var(--card-light) 50%),
+                  linear-gradient(to bottom left, transparent 49.5%, var(--card-light) 50%);
+      background-size: 50.2% 100%;
+      background-repeat: no-repeat;
+      background-position: left, right;
+    }
+    .solve {
+      background: var(--card-light);
+      color: #0f172a;
+      padding: 36px 18px 48px;
+      text-align: center;
+    }
+    .solve__tilt {
+      display: inline-block;
+      background: var(--white);
+      padding: 10px 20px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      transform: rotate(-2deg);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      margin-bottom: 18px;
+      border-radius: 4px;
+    }
+    .solve__p { font-size: 0.92rem; margin-bottom: 12px; font-weight: 600; }
+    .solve__bar {
+      display: inline-block;
+      background: var(--bg-navy);
+      color: var(--white);
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      margin: 8px 0;
+      border-radius: 4px;
+      text-emphasis-style: dot filled;
+      text-emphasis-color: var(--cyan);
+    }
+    .solve__accent { color: var(--cyan-dark); font-weight: 900; }
+    .solve__goldhead {
+      margin-top: 28px;
+      background: linear-gradient(90deg, var(--cyan-dark), var(--cyan));
+      color: var(--white);
+      padding: 16px 14px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      line-height: 1.65;
+      border-radius: 8px;
+    }
+
+    /* --- X Hero（×は誤解を招くため「2軸」カードレイアウトに変更） --- */
+    .xhero {
+      background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.08), transparent 50%), var(--bg-deep);
+      padding: 48px 18px 40px;
+      text-align: center;
+    }
+    .xhero__kicker {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      color: var(--cyan-bright);
+      margin-bottom: 18px;
+    }
+    .xhero__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 440px;
+      margin: 0 auto 28px;
+      text-align: center;
+    }
+    .xhero__cell {
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 12px;
+      padding: 16px 10px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      min-height: 168px;
+      background: rgba(15, 23, 42, 0.45);
+    }
+    .xhero__sub {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(226, 232, 240, 0.9);
+      line-height: 1.55;
+      writing-mode: horizontal-tb;
+      margin: 0;
+    }
+    .xhero__main {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+      margin: 0;
+      color: var(--white);
+    }
+    .xhero__h2 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.75;
+      margin-bottom: 8px;
+    }
+    .xhero__big {
+      font-size: 1.65rem;
+      font-weight: 900;
+      text-decoration: underline;
+      text-underline-offset: 6px;
+      text-decoration-color: var(--cyan);
+    }
+
+    /* --- Features 4 --- */
+    .feat4 { background: var(--bg-navy); padding: 48px 18px; }
+    .feat4__small { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; }
+    .feat4__title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .feat4__bg {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.05);
+      text-align: center;
+      margin-bottom: -28px;
+    }
+    .feat4-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .feat4-card__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.6);
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+    .feat4-card__body {
+      background: var(--card-light);
+      color: #0f172a;
+      padding: 16px;
+      font-size: 0.86rem;
+      line-height: 1.75;
+    }
+    .feat4-card__body em { font-style: normal; color: #0e7490; font-weight: 800; }
+
+    /* --- FAQ --- */
+    .faq { background: var(--bg-navy-mid); padding: 48px 18px; }
+    .faq__bg {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.06);
+      text-align: center;
+      margin-bottom: -24px;
+    }
+    .faq__title { text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 24px; }
+    .faq-acc {
+      border-bottom: 1px solid var(--line);
+    }
+    .faq-acc summary {
+      list-style: none;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px 0;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+    .faq-acc summary::-webkit-details-marker { display: none; }
+    .faq-acc[open] summary { padding-bottom: 8px; }
+    .faq__q {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--white);
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .faq-acc__a {
+      padding: 0 0 18px 40px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    /* --- 逆転合格 --- */
+    .gyakuten {
+      background: linear-gradient(180deg, rgba(14, 116, 144, 0.2) 0%, var(--bg-navy-mid) 100%);
+      padding: 36px 18px;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .gyakuten__label {
+      font-size: 0.72rem;
+      color: var(--cyan-bright);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+    }
+    .gyakuten__text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.65;
+      max-width: 22em;
+      margin: 0 auto;
+    }
+
+    /* --- Flow --- */
+    .flow { background: var(--white); color: #0f172a; padding: 48px 18px 56px; }
+    .flow__bg {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 3rem;
+      color: rgba(15, 23, 42, 0.06);
+      text-align: center;
+      margin-bottom: -24px;
+    }
+    .flow__title { text-align: center; font-size: 1.35rem; font-weight: 900; margin-bottom: 28px; color: var(--bg-navy); }
+    .flow-step {
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-step__badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--cyan-dark), var(--cyan));
+      color: var(--white);
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .flow-step__h { font-weight: 900; font-size: 0.95rem; margin-bottom: 8px; color: var(--bg-navy); }
+    .flow-step__p { font-size: 0.86rem; color: #334155; line-height: 1.7; }
+
+    /* --- Footer --- */
+    .footer {
+      background: var(--bg-deep);
+      padding: 36px 18px 48px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .footer__brand { font-weight: 900; color: var(--white); font-size: 1rem; margin-bottom: 12px; }
+    .footer__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 20px; margin: 16px 0; }
+    .footer__line { font-size: 0.85rem; color: var(--cyan-bright); margin-top: 8px; }
+    .footer__presented {
+      margin-top: 20px;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: rgba(148, 163, 184, 0.95);
+    }
+    .footer__presented a {
+      color: var(--cyan-bright);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .footer__presented a:hover { text-decoration: underline; }
+    .footer__legal {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 16px;
+      margin-top: 16px;
+      font-size: 0.72rem;
+    }
+    .footer__legal a { opacity: 0.85; }
+
+    /* Sticky CTA */
+    .sticky-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, rgba(6, 10, 18, 0.95), transparent);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+    }
+    .sticky-cta .cta { max-width: 100%; font-size: 0.88rem; padding: 12px 14px; }
+    body { padding-bottom: 76px; }
+
+    @media (min-width: 600px) {
+      .wrap { max-width: 520px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- 1. Hero -->
+  <header class="hero">
+    <p class="hero__brand" data-cid="hero.brand">Web Production · Studio</p>
+    <p class="hero__logo" data-cid="hero.logo">ウェブ制作 / Closer</p>
+    <p class="hero__sub" data-cid="hero.sub">コーポレートサイト・LPの設計から公開まで、<br />事業の伝わり方を一緒に整えます。</p>
+    <h1 class="hero__h1" data-cid="hero.h1">
+      作りっぱなしにしない。<br />
+      <strong>運用まで見据えた</strong>サイト制作を、<br />
+      ご提案します。
+    </h1>
+    <div class="hero__photos" aria-hidden="true" data-cid="hero.photos">
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
+      <div class="hero__frame"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="" width="200" height="267" loading="lazy" /></div>
+    </div>
+    <div class="hero__bars">
+      <div class="hero__bar" data-cid="hero.bar1">納期・構成・更新のしやすさまで、最初にすり合わせ</div>
+      <div class="hero__bar" data-cid="hero.bar2">デザイン・実装・公開後の微修正まで一括サポート</div>
+    </div>
+    <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+      <span class="cta__badge">無料</span>
+      <span>LINEで相談・申し込み</span>
+      <span class="cta__icon">▶</span>
+    </a>
+    <p class="cta-note">※しつこい勧誘はしません。まずはお気軽に。</p>
+  </header>
+
+  <!-- 2. Pain -->
+  <section class="section pain">
+    <div class="wrap">
+      <h2 class="pain__title" data-cid="pain.title">こんな状況に<br />陥っていませんか？</h2>
+      <div class="pain__list">
+        <div class="pain-card" data-cid="pain.card0">情報が多すぎて、何から手を付けるべきか<em>選べない</em></div>
+        <div class="pain-card" data-cid="pain.card1">デザインは整っているのに、<em>問い合わせに繋がらない</em></div>
+        <div class="pain-card" data-cid="pain.card2">構成・文言で、<em>何を載せればいいか分からない</em></div>
+        <div class="pain-card" data-cid="pain.card3">テンプレや他社事例に振り回され、<em>自社の強みが分からない</em></div>
+        <div class="pain-card" data-cid="pain.card4">サイトだけが古く、<em>事業の魅力が伝わりきっていない</em></div>
+      </div>
+      <div style="text-align: center; margin-top: 28px;">
+        <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+          <span class="cta__badge">無料</span>
+          <span>LINEで無料相談</span>
+          <span class="cta__icon">▶</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Urgency -->
+  <section class="urgency">
+    <p class="urgency__sparkle">✦ ✦</p>
+    <p class="urgency__text">
+      始めるなら、<span class="hl">今がチャンス</span>です。
+    </p>
+  </section>
+
+  <!-- 3b. 逆転合格 -->
+  <section class="gyakuten">
+    <p class="gyakuten__label">立ち上げ・改善</p>
+    <p class="gyakuten__text">
+      リリース前でも公開後でも、<span class="hl" style="color: var(--cyan-bright);">伝わり方の伸びしろ</span>を一緒に拾い上げます。<br />
+      「今からでも整えたい」事業者を歓迎します。
+    </p>
+  </section>
+
+  <!-- 4. Benefits 01 / 02 -->
+  <section class="section benefits">
+    <div class="wrap">
+      <div class="benefit-block">
+        <div class="benefit-block__label">
+          <small>Benefits</small>
+          01
+        </div>
+        <div class="benefit-block__card">
+          <h3 data-cid="benefits.01.title">
+            <span class="line-hl">無理のない見積り</span>から、あなたの事業に合わせた<br />
+            制作プランをご提案
+          </h3>
+          <div class="benefit-block__img" role="img" aria-label="Web制作・伴走のイメージ">
+            <img data-cid="benefits.01.img" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+          </div>
+        </div>
+      </div>
+
+      <div class="benefit-block benefit-block--right">
+        <div class="benefit-block__label">
+          <small>Benefits</small>
+          02
+        </div>
+        <div class="benefit-block__card">
+          <h3 data-cid="benefits.02.title">
+            <span class="line-hl">今は人数が少ないからこそ</span>、<br />
+            細やかに丁寧に見られる
+          </h3>
+          <p style="font-size: 0.86rem; line-height: 1.8; margin-top: 12px;" data-cid="benefits.02.body">
+            一人ひとりのフェーズ・予算・社内リソースに合わせて、構成と公開後の運用まで調整します。
+            <strong style="color: #0e7490;">「作って終わり」ではなく「続くサイト」</strong>を重視しています。
+          </p>
+        </div>
+      </div>
+
+      <div class="benefit-block">
+        <div class="benefit-block__label">
+          <small>Benefits</small>
+          03
+        </div>
+        <div class="benefit-block__card">
+          <h3 data-cid="benefits.03.title">
+            <span class="line-hl">Webに集中</span> — 本業の時間を削らない伴走
+          </h3>
+          <p style="font-size: 0.86rem; line-height: 1.8; margin-top: 12px;" data-cid="benefits.03.body">
+            導線・更新・計測まで、サイト周りだけに視野を絞って伴走します。
+          </p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 8px;">
+        <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+          <span class="cta__badge">無料</span>
+          <span>LINEで無料相談</span>
+          <span class="cta__icon">▶</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Reasons head + card -->
+  <section class="reasons-head" style="position: relative;">
+    <div class="reasons-head__bg en-serif">Reason</div>
+    <div class="wrap" style="position: relative;">
+      <p class="reasons-head__small">ウェブ制作 / Closer が選ばれる</p>
+      <h2 class="reasons-head__title">4つの理由</h2>
+    </div>
+  </section>
+  <div class="reason-card-wrap wrap" style="margin-top: -8px;">
+    <div class="reason-card__img" role="img" aria-label="オンライン学習イメージ">
+      <img data-cid="reasons.01.img" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
+    <div class="reason-card__body">
+      <p class="reason-card__tag">Reason 01</p>
+      <h3 class="reason-card__h" data-cid="reasons.01.title">「暗記」だけに逃げない、戦略から逆算した設計</h3>
+      <ul class="reason-card__ul" data-cid="reasons.01.items">
+        <li>志望校の傾向と、あなたの現在地から逆算して優先順位を決める</li>
+        <li>動画講義だけに頼らず、質問・添削で「出力」を鍛える</li>
+      </ul>
+    </div>
+  </div>
+  <div class="reason-card-wrap wrap" style="margin-top: 16px;">
+    <div class="reason-card__img" role="img" aria-label="シンプルな料金のイメージ">
+      <img data-cid="reasons.02.img" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
+    <div class="reason-card__body">
+      <p class="reason-card__tag">Reason 02</p>
+      <h3 class="reason-card__h" data-cid="reasons.02.title">料金は事前に明確に。</h3>
+      <ul class="reason-card__ul" data-cid="reasons.02.items">
+        <li>範囲外の追加請求は事前合意なしでは行いません</li>
+        <li>既存の写真・ロゴがあればそのまま活用できます</li>
+        <li>専任の窓口がつき、構成から公開・微修正まで個別にサポート</li>
+      </ul>
+    </div>
+  </div>
+  <div class="reason-card-wrap wrap" style="margin-top: 16px;">
+    <div class="reason-card__img" role="img" aria-label="少人数で伴走する学習のイメージ">
+      <img data-cid="reasons.03.img" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
+    <div class="reason-card__body">
+      <p class="reason-card__tag">Reason 03</p>
+      <h3 class="reason-card__h" data-cid="reasons.03.title">今は人数が少ないから、細かくフォローできる</h3>
+      <ul class="reason-card__ul" data-cid="reasons.03.items">
+        <li>週次の進捗確認や、詰まりポイントの早期発見に注力</li>
+        <li>テスト後の振り返りも、一人ひとりのペースに合わせて調整</li>
+      </ul>
+    </div>
+  </div>
+  <div class="reason-card-wrap wrap" style="margin-top: 16px;">
+    <div class="reason-card__img" role="img" aria-label="Web制作に集中するイメージ">
+      <img data-cid="reasons.04.img" src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
+    <div class="reason-card__body">
+      <p class="reason-card__tag">Reason 04</p>
+      <h3 class="reason-card__h" data-cid="reasons.04.title">制作に特化 — 不要な横展開はしない</h3>
+      <ul class="reason-card__ul" data-cid="reasons.04.items">
+        <li>デザイン・実装・公開後の微修正のバランスを、フェーズに合わせて調整</li>
+        <li>「他チャネルは任せ、サイトだけ整えたい」スタイルにも対応</li>
+      </ul>
+    </div>
+  </div>
+  <div style="text-align: center; padding: 0 18px 40px; background: var(--white);">
+    <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer" style="color: #fff;">
+      <span class="cta__badge">無料</span>
+      <span>LINEで無料相談</span>
+      <span class="cta__icon">▶</span>
+    </a>
+  </div>
+
+  <!-- 6. Problem / Solution -->
+  <section class="prob">
+    <p class="prob__lead">実際のところ…</p>
+    <p class="prob__chev">∨</p>
+    <p class="prob__text">
+      多くの事業者が、<em>「何をどう載せれば伝わるか」に<br />確信が持てないまま</em>、
+      本来届けられるはずの価値を取りこぼしています。
+    </p>
+    <div class="prob__triangle" aria-hidden="true"></div>
+  </section>
+  <section class="solve">
+    <div class="wrap">
+      <div class="solve__tilt">その要因は？</div>
+      <p class="solve__p">多くの人が</p>
+      <div class="solve__bar">正しい「学習の型」と「優先順位」</div>
+      <p class="solve__p">を持たないまま</p>
+      <p class="solve__p"><span class="solve__accent">感覚・なんとなくの暗記</span>で積み上げてきているから。</p>
+      <div class="solve__goldhead">
+        ウェブ制作 / Closer では、設計から公開までの型を共有し、
+        ゴールに合わせて<strong>情報設計と見せ方を落とし込みます。</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. X Hero -->
+  <section class="xhero">
+    <p class="xhero__kicker">学びの2つの軸</p>
+    <div class="xhero__grid">
+      <div class="xhero__cell">
+        <p class="xhero__sub">成果に繋がる設計へ</p>
+        <p class="xhero__main">「戦略」</p>
+      </div>
+      <div class="xhero__cell">
+        <p class="xhero__sub">事業に合わせて</p>
+        <p class="xhero__main">「伴走」</p>
+      </div>
+    </div>
+    <p class="xhero__h2">本気でWebを整えたい事業者へ</p>
+    <p class="xhero__big">最適なWeb体験</p>
+    <p class="xhero__h2" style="margin-top: 8px;">を用意しました</p>
+    <div style="margin-top: 28px;">
+      <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+        <span class="cta__badge">無料</span>
+        <span>LINEで無料相談</span>
+        <span class="cta__icon">▶</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 8. 4 commitments -->
+  <section class="feat4">
+    <p class="feat4__bg en-serif">Features</p>
+    <p class="feat4__small">ウェブ制作 / Closer 独自の</p>
+    <h2 class="feat4__title">4つのこだわり</h2>
+    <div class="feat4-card">
+      <div class="feat4-card__head"><span>1. 実力に合わせたロードマップ</span><span>◇</span></div>
+      <div class="feat4-card__body">
+        入試までの期間・週あたりの学習時間から逆算し、<em>「やること」と「やらないこと」</em>をはっきりさせます。
+      </div>
+    </div>
+    <div class="feat4-card">
+      <div class="feat4-card__head"><span>2. 短いサイクルで振り返り</span><span>◇</span></div>
+      <div class="feat4-card__body">
+        週次で進捗と理解度を確認。詰まりを早めに解消し、<em>モチベーションを維持</em>しやすくします。
+      </div>
+    </div>
+    <div class="feat4-card">
+      <div class="feat4-card__head"><span>3. 質問・添削で「出力」を鍛える</span><span>◇</span></div>
+      <div class="feat4-card__body">
+        論述・小論・資料対策は、<em>書いてもらう・直す</em>を繰り返して本番に近づけます。
+      </div>
+    </div>
+    <div class="feat4-card">
+      <div class="feat4-card__head"><span>4. 制作に集中した伴走</span><span>◇</span></div>
+      <div class="feat4-card__body">
+        本業に取られがちな時間を、<em>サイトの改善</em>に振り向けられるようサポートします。
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 28px;">
+      <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+        <span class="cta__badge">無料</span>
+        <span>LINEで無料相談</span>
+        <span class="cta__icon">▶</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 9. FAQ（アコーディオン） -->
+  <section class="faq">
+    <p class="faq__bg en-serif">FAQ</p>
+    <h2 class="faq__title">よくある質問</h2>
+    <div class="wrap">
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>納期がタイトでも大丈夫ですか？</span></summary>
+        <div class="faq-acc__a">スコープを絞る・優先度を決めることで対応可能な場合があります。まずはLINEでご相談ください。</div>
+      </details>
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>Webの知識がほぼなくても進められますか？</span></summary>
+        <div class="faq-acc__a">大丈夫です。用語や手順は噛み砕いてご説明し、必要な更新は運用しやすい形でお渡しします。</div>
+      </details>
+      <details class="faq-acc">
+        <summary><span class="faq__q">Q</span><span>公開後の文言変更や画像差し替えも依頼できますか？</span></summary>
+        <div class="faq-acc__a">できます。都度のお見積り、または保守プランで対応可能です。</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 10. Flow -->
+  <section class="flow">
+    <p class="flow__bg en-serif">Flow</p>
+    <h2 class="flow__title">お申し込みの流れ</h2>
+    <div class="wrap">
+      <div class="flow-step">
+        <span class="flow-step__badge">STEP 01</span>
+        <p class="flow-step__h">公式LINEに登録</p>
+        <p class="flow-step__p">下のボタンから友だち追加。ID: <a class="cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer"><span data-cid="footer.lineId">@871fitgx</span></a></p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step__badge">STEP 02</span>
+        <p class="flow-step__h">LINEで日程・内容を調整</p>
+        <p class="flow-step__p">リッチメニューやトークから、無料相談の日程をご相談ください。</p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step__badge">STEP 03</span>
+        <p class="flow-step__h">無料相談</p>
+        <p class="flow-step__p">現状のサイト・事業内容・課題をヒアリングし、構成と優先順位をすり合わせます。</p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step__badge">STEP 04</span>
+        <p class="flow-step__h">ご希望に応じて制作・改善をご提案</p>
+        <p class="flow-step__p">範囲・スケジュールに合わせてご案内します（無理な勧誘はしません）。</p>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 8px;">
+      <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+        <span class="cta__badge">無料</span>
+        <span>LINEで無料相談</span>
+        <span class="cta__icon">▶</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer__brand" data-cid="footer.brand">ウェブ制作 / Closer</p>
+    <p data-cid="footer.sub">サイト制作・ランディングページ・保守</p>
+    <div class="footer__links">
+      <a class="cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">公式LINE</a>
+      <a class="cta-tiktok" href="https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/" target="_blank" rel="noopener noreferrer">TikTok</a>
+    </div>
+    <p class="footer__line">LINE ID: <span data-cid="footer.lineId">@871fitgx</span></p>
+    <p class="footer__presented">Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
+    <div class="footer__legal">
+      <a href="terms.html">利用規約</a>
+      <a href="tokushohou.html">特定商取引法に基づく表記</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+    </div>
+    <p style="margin-top: 12px; font-size: 0.7rem; opacity: 0.65;" data-cid="footer.copyright">© ウェブ制作 / Closer</p>
+  </footer>
+
+  <div class="sticky-cta">
+    <a class="cta cta-line" href="https://lin.ee/nLMnCmt" target="_blank" rel="noopener noreferrer">
+      <span class="cta__badge">無料</span>
+      <span>LINEで相談・申し込み</span>
+      <span class="cta__icon">▶</span>
+    </a>
+  </div>
+
+  <script>
+  (function(){
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+    fetch(api + '/lp-content/web-closer-intro').then(function(r){ return r.json(); }).then(function(c){
+      if (!c || typeof c !== 'object') return;
+      function g(o,p){ return p.split('.').reduce(function(a,k){ return a ? a[k] : undefined; }, o); }
+      function set(id, val, attr){
+        var els = document.querySelectorAll('[data-cid="'+id+'"]');
+        if (!els.length || val == null) return;
+        els.forEach(function(el){
+          if (attr === 'src') el.src = val;
+          else if (attr === 'href') el.href = val;
+          else el.innerHTML = val;
+        });
+      }
+      if (c.hero){ set('hero.brand',c.hero.brand); set('hero.logo',c.hero.logo); set('hero.sub',c.hero.sub); set('hero.h1',c.hero.h1); set('hero.bar1',c.hero.bar1); set('hero.bar2',c.hero.bar2); }
+      if (c.hero && c.hero.photos && c.hero.photos.length){
+        var container = document.querySelector('[data-cid="hero.photos"]');
+        if (container){
+          var frames = container.querySelectorAll('.hero__frame');
+          c.hero.photos.slice(0,3).forEach(function(url,i){
+            if (frames[i] && frames[i].querySelector('img')) frames[i].querySelector('img').src = url;
+          });
+        }
+      }
+      if (c.pain){ set('pain.title',c.pain.title); [0,1,2,3,4].forEach(function(i){ set('pain.card'+i, c.pain.cards&&c.pain.cards[i]); }); }
+      if (c.benefits){
+        ['01','02','03'].forEach(function(k){ var b=c.benefits[k]; if(b){ set('benefits.'+k+'.title',b.title); set('benefits.'+k+'.img',b.img,'src'); set('benefits.'+k+'.body',b.body); } });
+      }
+      if (c.reasons){
+        ['01','02','03','04'].forEach(function(k){ var r=c.reasons[k]; if(r){ set('reasons.'+k+'.img',r.img,'src'); set('reasons.'+k+'.title',r.title); var ul=document.querySelector('[data-cid="reasons.'+k+'.items"]'); if(ul&&r.items&&r.items.length){ ul.innerHTML=r.items.map(function(x){ return '<li>'+x+'</li>'; }).join(''); } } });
+      }
+      if (c.footer){ set('footer.brand',c.footer.brand); set('footer.sub',c.footer.sub); set('footer.lineId',c.footer.lineId); set('footer.copyright',c.footer.copyright); }
+      var lineUrl = c.lineUrl || 'https://lin.ee/nLMnCmt';
+      var tiktokUrl = c.tiktokUrl || 'https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/';
+      document.querySelectorAll('.cta-line').forEach(function(a){ a.href = lineUrl; });
+      document.querySelectorAll('.cta-tiktok').forEach(function(a){ a.href = tiktokUrl; });
+    }).catch(function(){});
+  })();
+  </script>
+</body>
+</html>
