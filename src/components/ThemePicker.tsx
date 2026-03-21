@@ -24,6 +24,7 @@ const PREVIEW_BG: Record<string, string> = {
   event: '#FAFAFA',
   ramen: '#f8eeee',
   apparel_lookbook: '#79acc4',
+  craft_editorial: '#ebe6dc',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -41,6 +42,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   event: '#111',
   ramen: '#8B2E2E',
   apparel_lookbook: '#fff',
+  craft_editorial: '#1a1810',
 };
 
 export function ThemePicker({
@@ -53,7 +55,7 @@ export function ThemePicker({
   return (
     <div className="panel theme-picker theme-picker-design">
       <h2 className="design-step-label">⓪ デザイン</h2>
-      <p className="design-step-desc">10パターンから1つ選んでください。</p>
+      <p className="design-step-desc">{TEMPLATES.length}種類のテンプレから1つ選んでください。</p>
       <ul className="design-list" aria-label="デザインパターン一覧">
         {TEMPLATES.map((tpl, i) => (
           <li key={tpl.id}>

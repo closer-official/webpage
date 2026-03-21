@@ -149,7 +149,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 15種類テンプレートID（業種別+LP） */
+/** 16種類テンプレートID（業種別+LP） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -166,9 +166,10 @@ export type StyleId =
   | 'ramen'              // 12. ラーメン
   | 'academy_lp'         // 13. 高CVセールスLP
   | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
-  | 'apparel_lookbook'; // 15. アパレル・ルックブック（apparel-lookbook-intro）
+  | 'apparel_lookbook' // 15. アパレル・ルックブック（apparel-lookbook-intro）
+  | 'craft_editorial'; // 16. 職人・編集（革・工芸 / craft-editorial-intro）
 
-/** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
+/** テンプレートあたりのバリアント数（現状 1） */
 export const SHOWCASE_VARIANT_COUNT = 1;
 
 /** バリアント番号 0 ～ (SHOWCASE_VARIANT_COUNT - 1) */
@@ -220,6 +221,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'academy_lp', name: 'ハイコンバージョンLP' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web制作・LP）' },
   { id: 'apparel_lookbook', name: 'アパレル・ルックブック' },
+  { id: 'craft_editorial', name: '職人・編集（革・工芸）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

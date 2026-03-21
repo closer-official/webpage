@@ -1,7 +1,7 @@
 import type { QueueTarget, StyleId } from '../types';
 
 /**
- * 検索クエリと Maps の category からテンプレを推定。11テンプレ対応。
+ * 検索クエリと Maps の category からテンプレを推定（TEMPLATE_IDS 準拠）。
  */
 const RULES: { style: StyleId; re: RegExp }[] = [
   { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
@@ -17,6 +17,10 @@ const RULES: { style: StyleId; re: RegExp }[] = [
   {
     style: 'apparel_lookbook',
     re: /ルックブック|look\s*book|特集ページ|コラボページ|コレクション.?ページ|キャンペーン.?ページ/i,
+  },
+  {
+    style: 'craft_editorial',
+    re: /革|レザー|\bleather\b|ジビエ|鞣し|タンニン|バッグ|財布|小物|職人|工房|クラフト|アトリエ|素材感|縦書き|工芸|レザークラフト/i,
   },
   { style: 'apparel', re: /アパレル|服|ファッション|cloth|apparel|fashion|ブティック|boutique|ブランド|brand/i },
   { style: 'event', re: /イベント|event|フェス|フェスティバル|festival|コンサート|concert|展示会|セミナー|seminar|ワークショップ|workshop/i },

@@ -635,6 +635,31 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  craft_editorial: {
+    content: {
+      siteName: 'CRAFT LEATHER ATELIER',
+      title: '匠レザー工房 | 職人・編集テンプレ',
+      headline: '素材と時間を編む',
+      subheadline: 'テンプレ16は craft-editorial-intro の固定HTMLを埋め込みます（縦書き・テクスチャ・没入FV）。',
+      ctaLabel: 'Online Shop',
+      ctaHref: 'https://thebase.in',
+      sections: [
+        { id: 'concept', title: 'コンセプト', content: '没入ファーストビュー、和紙テクスチャ、番号付きマテリアル、View More 誘導。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} 構成デモ（公開前に差し替え）`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85',
+      ],
+    },
+    seo: {
+      metaTitle: '匠レザー工房 | 職人・編集LP（デモ）',
+      metaDescription: '縦書き・セリフ×筆の対比、和紙テクスチャ、視差スクロール、赤ドットView More。',
+      keywords: '革, レザー, 職人, 工房, 縦書き, LP',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85',
+      canonicalUrl: '',
+    },
+  },
   navy_cyan_consult: {
     content: {
       siteName: 'ウェブ制作 / Closer',

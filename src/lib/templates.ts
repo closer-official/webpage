@@ -182,6 +182,13 @@ const APPAREL_LOOKBOOK_PAGE_CSS = `
   .page-wrapper.template-apparel_lookbook .alb-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+const CRAFT_EDITORIAL_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1810; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #a85a4a; outline-offset: 2px; }
+  .page-wrapper.template-craft_editorial main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-craft_editorial .ced-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 /** テンプレ3〜11用の共通CSS（プレビュー用・professional・pet_salon・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
   .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
@@ -832,6 +839,13 @@ export const TEMPLATES: TemplateOption[] = [
     'アパレル・ルックブック',
     'テンプレ15：一色オープニング→写真→全画面動画、番号タップ横スライド、BASEのBUY導線（apparel-lookbook-intro）',
     APPAREL_LOOKBOOK_PAGE_CSS,
+    { omitCommonBase: true }
+  ),
+  makeTemplate(
+    'craft_editorial',
+    '職人・編集（革・工芸）',
+    'テンプレ16：没入FV・縦書き・和紙テクスチャ・番号セクション・View More／craft-editorial-intro',
+    CRAFT_EDITORIAL_PAGE_CSS,
     { omitCommonBase: true }
   ),
 ];

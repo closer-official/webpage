@@ -3,6 +3,7 @@ import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml.js';
 import { buildApparelLookbookDeliverableMainHtml } from './apparelLookbookDeliverableClone.js';
+import { buildCraftEditorialDeliverableMainHtml } from './craftEditorialDeliverableClone.js';
 import { buildNavyDeliverableMainHtml } from './navyDeliverableClone.js';
 
 function escapeHtml(s) {
@@ -133,6 +134,7 @@ const DEFAULT_NAV = {
     { label: 'お問い合わせ', href: '#contact' },
   ],
   apparel_lookbook: [{ label: 'Online', href: 'https://thebase.in' }],
+  craft_editorial: [{ label: 'Shop', href: 'https://thebase.in' }],
 };
 
 const DEFAULT_CTA = {
@@ -149,6 +151,7 @@ const DEFAULT_CTA = {
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   apparel_lookbook: { label: 'ONLINE STORE', href: 'https://thebase.in' },
+  craft_editorial: { label: 'Online Shop', href: 'https://thebase.in' },
 };
 
 const defaultHeroImages = {
@@ -168,12 +171,14 @@ const defaultHeroImages = {
   navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
   apparel_lookbook:
     'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
+  craft_editorial:
+    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85',
 };
 
 /**
  * content: { siteName, title, headline, subheadline, sections: [{ id, title, content }], footerText }
  * seo: { metaTitle, metaDescription, keywords, ogImageUrl, canonicalUrl }
- * templateId: 11種（salon_barber, cafe_tea, ..., apparel, event）
+ * templateId: TEMPLATE_IDS 参照（例: craft_editorial, apparel_lookbook など）
  * genOptions: { contactForm, formActionUrl?, instagramLine, presentedBy, qrCode, instagramUrl?, lineUrl?, tiktokUrl?, qrCodeDataUrl?, purchaseUrl? }
  */
 export function buildHtml(content, seo, templateId, genOptions = {}) {
@@ -223,7 +228,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       : '';
 
   let navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
-  if (tid !== 'event') {
+  if (tid !== 'event' && tid !== 'apparel_lookbook' && tid !== 'craft_editorial') {
     navItems = [...(Array.isArray(navItems) ? navItems : []), { label: '料金・お支払', href: '#payment' }];
   }
   const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea' || tid === 'cafe_1'
@@ -1003,6 +1008,10 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Kaushan+Script&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
+      : tid === 'craft_editorial'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@400;600;700&family=Shippori+Mincho&family=Yuji+Syuku&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1584,10 +1593,12 @@ ${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')
       : '';
   const apparelLookbookMainHtml =
     tid === 'apparel_lookbook' ? buildApparelLookbookDeliverableMainHtml(escapeHtml) : '';
-  const embeddedDeliverableMainHtml = navyMainHtml + apparelLookbookMainHtml;
+  const craftEditorialMainHtml =
+    tid === 'craft_editorial' ? buildCraftEditorialDeliverableMainHtml(escapeHtml) : '';
+  const embeddedDeliverableMainHtml = navyMainHtml + apparelLookbookMainHtml + craftEditorialMainHtml;
   const bodyInner = isBuilder
     ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-    : tid === 'navy_cyan_consult' || tid === 'apparel_lookbook'
+    : tid === 'navy_cyan_consult' || tid === 'apparel_lookbook' || tid === 'craft_editorial'
       ? `${skipLink}
 ${embeddedDeliverableMainHtml}
   ${bookingOn ? renderBookingBodyWidget({ ctaLabel: cta.label || '予約する', siteName: content.siteName || content.title || '' }) : ''}`

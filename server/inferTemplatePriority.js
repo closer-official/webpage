@@ -4,7 +4,7 @@
  */
 import { TEMPLATE_IDS } from './conceptTemplates.js';
 
-/** 11テンプレ対応 */
+/** TEMPLATE_IDS 準拠（業種キューでテンプレ順を決定） */
 const RULES = [
   { style: 'salon_barber', re: /美容室|理容室|ヘアサロン|hair_salon|hair_care|beauty_salon|barber/i },
   { style: 'cafe_tea', re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro|パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー/i },
@@ -19,6 +19,10 @@ const RULES = [
   {
     style: 'apparel_lookbook',
     re: /ルックブック|look\s*book|特集ページ|コラボページ|コレクション.?ページ|キャンペーン.?ページ/i,
+  },
+  {
+    style: 'craft_editorial',
+    re: /革|レザー|\bleather\b|ジビエ|鞣し|タンニン|バッグ|財布|小物|職人|工房|クラフト|アトリエ|素材感|縦書き|工芸|レザークラフト/i,
   },
   { style: 'apparel', re: /アパレル|服|ファッション|cloth|apparel|fashion|ブティック|boutique|ブランド|brand/i },
   { style: 'event', re: /イベント|event|フェス|フェスティバル|festival|コンサート|concert|展示会|セミナー|seminar|ワークショップ|workshop/i },
@@ -40,7 +44,7 @@ const CONCEPT_DEFAULT = {
  * @param {string} category Maps types など
  * @param {string} conceptId Gemini の cafe | salon | …
  * @param {string} [shopName] 店名（手動キューで検索語が空でもカフェ等を推定）
- * @returns {string[]} 11テンプレID（先頭がメインLP）
+ * @returns {string[]} テンプレID配列（先頭がメインLP）
  */
 export function getOrderedTemplateIds(searchQuery, category, conceptId, shopName = '') {
   const q = String(searchQuery || '').trim();

@@ -466,6 +466,7 @@ export const TEMPLATE_IDS = [
   'academy_lp',         // 13. 高CVセールスLP
   'navy_cyan_consult',  // 14. ダークネイビー×シアン（講座・コンサルLP）
   'apparel_lookbook',   // 15. アパレル・ルックブック（オープニング動画／番号スライド／BASE）
+  'craft_editorial',    // 16. 職人・編集（革・工芸：縦書き／テクスチャ／没入FV／craft-editorial-intro）
 ];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
@@ -1104,6 +1105,14 @@ const APPAREL_LOOKBOOK_PAGE_CSS = `
   .page-wrapper.template-apparel_lookbook .alb-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+/** 16. craft_editorial — deliverables/craft-editorial-intro */
+const CRAFT_EDITORIAL_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1810; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #a85a4a; outline-offset: 2px; }
+  .page-wrapper.template-craft_editorial main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-craft_editorial .ced-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
   if (key === 'navy_cyan_consult') {
@@ -1111,6 +1120,9 @@ export function getTemplateFullCss(templateId) {
   }
   if (key === 'apparel_lookbook') {
     return APPAREL_LOOKBOOK_PAGE_CSS;
+  }
+  if (key === 'craft_editorial') {
+    return CRAFT_EDITORIAL_PAGE_CSS;
   }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS
