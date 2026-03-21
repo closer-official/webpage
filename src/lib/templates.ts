@@ -803,4 +803,49 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-academy_lp footer { background: var(--tp-bg-footer); color: #c8cfdb; border-top: 1px solid var(--tp-border); }
   `
   ),
+  makeTemplate(
+    'navy_cyan_consult',
+    'ネイビー×シアン（講座・コンサル）',
+    '深いネイビー背景×シアンアクセント・グラデCTA・カード型セクション（動画講座・コンサルLPトーン）',
+    `
+  .page-wrapper.template-navy_cyan_consult {
+    --nc-bg: #060a12; --nc-bg-mid: #0c1220; --nc-card: #111827;
+    --tp-bg: var(--nc-bg); --tp-heading: #f1f5f9; --tp-text: #cbd5e1; --tp-accent: #22d3ee; --tp-accent-soft: #67e8f9;
+    --tp-border: rgba(34,211,238,0.16); --tp-bg-footer: #04070c; --hero-min-h: 72vh;
+    background: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(34,211,238,0.07), transparent 50%),
+      linear-gradient(180deg, var(--nc-bg-mid) 0%, var(--nc-bg) 45%);
+    color: var(--tp-text); font-family: "Noto Sans JP","Hiragino Sans",sans-serif;
+  }
+  .page-wrapper.template-navy_cyan_consult .container { max-width: 860px; margin: 0 auto; padding: 0 22px; }
+  .page-wrapper.template-navy_cyan_consult header { position: sticky; top: 0; z-index: 100; background: rgba(6,10,18,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-navy_cyan_consult .logo { color: #f8fafc; font-weight: 800; letter-spacing: 0.06em; }
+  .page-wrapper.template-navy_cyan_consult .nav-link { color: #94a3b8; font-size: 0.82rem; }
+  .page-wrapper.template-navy_cyan_consult .nav-link:hover { color: var(--tp-accent-soft); }
+  .page-wrapper.template-navy_cyan_consult .cta-btn {
+    background: linear-gradient(105deg, #0891b2 0%, #22d3ee 55%, #67e8f9 100%); color: #042f2e; border: none; border-radius: 999px;
+    padding: 12px 24px; min-height: 46px; font-weight: 800; box-shadow: 0 4px 24px rgba(34,211,238,0.28);
+  }
+  .page-wrapper.template-navy_cyan_consult .cta-btn:hover { filter: brightness(1.08); color: #042f2e; }
+  .page-wrapper.template-navy_cyan_consult .hero-full-img { min-height: var(--hero-min-h); }
+  .page-wrapper.template-navy_cyan_consult .hero-bg-overlay { background: linear-gradient(180deg, rgba(6,10,18,0.78), rgba(12,18,32,0.48)); }
+  .page-wrapper.template-navy_cyan_consult .hero-inner h1 {
+    color: #f8fafc; font-size: clamp(1.75rem,5vw,2.75rem); font-weight: 900; letter-spacing: 0.02em;
+    text-shadow: 0 4px 32px rgba(0,0,0,0.45), 0 0 48px rgba(34,211,238,0.12);
+  }
+  .page-wrapper.template-navy_cyan_consult .hero-inner .subheadline { color: rgba(203,213,225,0.95); max-width: 42rem; margin: 0.7rem auto 0; line-height: 1.65; }
+  .page-wrapper.template-navy_cyan_consult .section h2 {
+    color: #f1f5f9; font-size: 1.3rem; font-weight: 800; border-left: 3px solid var(--tp-accent); padding-left: 0.75rem; margin-bottom: 1rem;
+    background: linear-gradient(90deg, rgba(34,211,238,0.1), transparent);
+  }
+  .page-wrapper.template-navy_cyan_consult .section {
+    background: rgba(17,24,39,0.88); border: 1px solid var(--tp-border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  }
+  .page-wrapper.template-navy_cyan_consult .section p { color: var(--tp-text); line-height: 1.85; }
+  .page-wrapper.template-navy_cyan_consult .cta-block {
+    background: linear-gradient(135deg, rgba(8,145,178,0.22), rgba(17,24,39,0.96)); border: 1px solid var(--tp-border); border-radius: 16px;
+  }
+  .page-wrapper.template-navy_cyan_consult footer { background: var(--tp-bg-footer); color: #94a3b8; border-top: 1px solid var(--tp-border); }
+  `
+  ),
 ];

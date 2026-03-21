@@ -149,6 +149,8 @@ const PREVIEW_BG: Record<string, string> = {
   apparel: '#F9F9F7',
   event: '#F9F9F7',
   ramen: '#f8eeee',
+  academy_lp: '#0f1115',
+  navy_cyan_consult: '#060a12',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -165,6 +167,8 @@ const PREVIEW_COLOR: Record<string, string> = {
   apparel: '#1A1A1A',
   event: '#1A1A1A',
   ramen: '#8B2E2E',
+  academy_lp: '#f7b500',
+  navy_cyan_consult: '#22d3ee',
   blueprint: '#f4f4f1',
 };
 

@@ -610,6 +610,32 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  navy_cyan_consult: {
+    content: {
+      siteName: 'STUDY NAVY',
+      title: 'STUDY NAVY',
+      headline: '理解が続く、学びの設計。',
+      subheadline: 'オンライン講座・個別コンサルで、迷いを減らし次の一歩まで伴走します。',
+      ctaLabel: '無料相談を予約する',
+      ctaHref: '#contact',
+      sections: [
+        { id: 'concept', title: 'こんな方におすすめ', content: '独学で行き詰まっている／体系立てて学び直したい／短期で成果の出る計画が欲しい、という方へ。' },
+        { id: 'menu', title: '3つの特徴', content: '短時間モジュール設計／復習しやすい資料／質問しやすいサポート体制で、続けやすさを重視しています。' },
+        { id: 'staff', title: 'プログラムの流れ', content: 'ヒアリング → カリキュラム提案 → 学習・実践 → 振り返り。ペースは個別に調整します。' },
+        { id: 'faq', title: 'よくある質問', content: '受講形式、料金の目安、サポート範囲など、お問い合わせ前の疑問にお答えします。' },
+        { id: 'contact', title: 'お問い合わせ', content: 'フォームまたはLINEからご連絡ください。24時間以内にご返信します。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} STUDY NAVY`,
+      heroSlides: ['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400'],
+    },
+    seo: {
+      metaTitle: 'STUDY NAVY | オンライン講座・コンサル',
+      metaDescription: 'ネイビー基調の落ち着いたトーンで、講座・コンサル・セミナーLPに。',
+      keywords: '講座, オンライン, コンサル, 学習',
+      ogImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   ramen: {
     content: {
       siteName: '麺屋 こだわり',
@@ -670,7 +696,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
 };
 
 /**
- * 12テンプレ × 1バリアント = 12スロットの枠。
+ * 全テンプレ × 1バリアントの枠。
  * 各スロットは現状同じ内容のコピー。画像は template-sources/ で差し替え用を用意。
  */
 type PresetSlot = { content: PageContent; seo: SEOData };
