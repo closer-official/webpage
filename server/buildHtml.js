@@ -132,7 +132,10 @@ const DEFAULT_NAV = {
     { label: 'FAQ', href: '#faq' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
-  gym_personal_neon: [{ label: 'トップ', href: '#top' }],
+  gym_personal_neon: [
+    { label: 'トップ', href: '#top' },
+    { label: 'アクセス', href: '#access' },
+  ],
 };
 
 const DEFAULT_CTA = {
