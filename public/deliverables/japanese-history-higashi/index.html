@@ -84,6 +84,7 @@
       line-height: 1.55;
       margin-bottom: 28px;
       text-shadow: 0 2px 24px rgba(34, 211, 238, 0.15);
+      text-wrap: balance;
     }
     .hero__photos {
       display: flex;
@@ -235,12 +236,13 @@
     .benefit-block__label {
       font-family: "Playfair Display", serif;
       font-style: italic;
-      font-size: 2.4rem;
-      color: rgba(34, 211, 238, 0.35);
+      font-size: 2rem;
+      color: rgba(34, 211, 238, 0.85);
       line-height: 1;
-      margin-bottom: -12px;
+      margin-bottom: 10px;
       position: relative;
-      z-index: 0;
+      z-index: 2;
+      text-shadow: 0 2px 12px rgba(6, 10, 18, 0.9);
     }
     .benefit-block__label small {
       display: block;
@@ -248,8 +250,9 @@
       font-style: normal;
       font-size: 0.65rem;
       letter-spacing: 0.15em;
-      color: var(--cyan);
-      margin-bottom: 4px;
+      color: var(--cyan-bright);
+      margin-bottom: 6px;
+      opacity: 0.95;
     }
     .benefit-block__card {
       background: var(--card-light);
@@ -259,6 +262,7 @@
       position: relative;
       z-index: 1;
       box-shadow: var(--shadow);
+      margin-top: 0;
     }
     .benefit-block__card h3 {
       font-size: 0.95rem;
@@ -410,36 +414,60 @@
       border-radius: 8px;
     }
 
-    /* --- X Hero --- */
+    /* --- X Hero（×は誤解を招くため「2軸」カードレイアウトに変更） --- */
     .xhero {
       background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.08), transparent 50%), var(--bg-deep);
       padding: 48px 18px 40px;
       text-align: center;
     }
-    .xhero__x {
-      font-size: 4rem;
-      font-weight: 200;
-      color: rgba(255, 255, 255, 0.25);
-      line-height: 1;
-      margin-bottom: 20px;
-      letter-spacing: -0.05em;
+    .xhero__kicker {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      color: var(--cyan-bright);
+      margin-bottom: 18px;
     }
-    .xhero__cols {
+    .xhero__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 440px;
+      margin: 0 auto 28px;
+      text-align: center;
+    }
+    .xhero__cell {
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 12px;
+      padding: 16px 10px 18px;
       display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 28px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      line-height: 1.9;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      min-height: 168px;
+      background: rgba(15, 23, 42, 0.45);
     }
-    .xhero__col {
+    .xhero__sub {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(226, 232, 240, 0.9);
+      line-height: 1.55;
+      writing-mode: horizontal-tb;
+      margin: 0;
+    }
+    .xhero__vert {
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      letter-spacing: 0.15em;
-      max-height: 140px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      line-height: 1.35;
+      margin: 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .xhero__col--sub { font-size: 0.62rem; opacity: 0.75; font-weight: 600; margin-bottom: 6px; }
     .xhero__h2 {
       font-size: 1.05rem;
       font-weight: 800;
@@ -610,6 +638,18 @@
     .footer__brand { font-weight: 900; color: var(--white); font-size: 1rem; margin-bottom: 12px; }
     .footer__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 20px; margin: 16px 0; }
     .footer__line { font-size: 0.85rem; color: var(--cyan-bright); margin-top: 8px; }
+    .footer__presented {
+      margin-top: 20px;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: rgba(148, 163, 184, 0.95);
+    }
+    .footer__presented a {
+      color: var(--cyan-bright);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .footer__presented a:hover { text-decoration: underline; }
 
     /* Sticky CTA */
     .sticky-cta {
@@ -641,8 +681,8 @@
     <p class="hero__logo">日本史徹底攻略 / よし先生</p>
     <p class="hero__sub">高校受験・大学受験の日本史を、<br />「苦手」から「得点源」へ導く少人数コンサル。</p>
     <h1 class="hero__h1">
-      勉強法が分からない子から、<br />
-      日本史を<strong>完全な得点源</strong>にしたい子まで。<br />
+      勉強法が分からない子から、日本史を<br />
+      <strong>完全な得点源</strong>にしたい子まで、<br />
       幅広く伴走します。
     </h1>
     <div class="hero__photos" aria-hidden="true">
@@ -710,8 +750,8 @@
         </div>
         <div class="benefit-block__card">
           <h3>
-            <span class="line-hl">参考書1冊分以下の価格帯</span>で、<br />
-            あなた専用のコンサルが受けられる
+            <span class="line-hl">参考書1冊分以下の価格帯</span>で、あなた専用の<br />
+            コンサルが受けられる
           </h3>
           <div class="benefit-block__img" role="img" aria-label="学習・伴走のイメージ">
             <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
@@ -726,8 +766,8 @@
         </div>
         <div class="benefit-block__card">
           <h3>
-            <span class="line-hl">今は人数が少ないからこそ</span><br />
-            細やかに、丁寧に見られる
+            <span class="line-hl">今は人数が少ないからこそ</span>、<br />
+            細やかに丁寧に見られる
           </h3>
           <p style="font-size: 0.86rem; line-height: 1.8; margin-top: 12px;">
             一人ひとりのレベル・志望・学習時間に合わせて、ロードマップと週次のフォローを調整します。
@@ -797,7 +837,9 @@
     </div>
   </div>
   <div class="reason-card-wrap wrap" style="margin-top: 16px;">
-    <div class="reason-card__img" style="background: linear-gradient(120deg, #f1f5f9, #e2e8f0);">少人数・丁寧なフォロー</div>
+    <div class="reason-card__img" role="img" aria-label="少人数で伴走する学習のイメージ">
+      <img src="https://images.unsplash.com/photo-1573496359142-bdbd635edfb6?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" width="800" height="450" loading="lazy" />
+    </div>
     <div class="reason-card__body">
       <p class="reason-card__tag">Reason 03</p>
       <h3 class="reason-card__h">今は人数が少ないから、細かくフォローできる</h3>
@@ -833,8 +875,8 @@
     <p class="prob__lead">実際のところ…</p>
     <p class="prob__chev">∨</p>
     <p class="prob__text">
-      多くの受験生が、<em>「何をどう勉強すれば点になるか」に確信が持てないまま</em>、
-      本来取れるはずの日本史の点を、取りこぼしています。
+      多くの受験生が、<em>「何をどう勉強すれば点になるか」に<br />確信が持てないまま</em>、
+      本来取れるはずの日本史の点を取りこぼしています。
     </p>
     <div class="prob__triangle" aria-hidden="true"></div>
   </section>
@@ -854,15 +896,15 @@
 
   <!-- 7. X Hero -->
   <section class="xhero">
-    <div class="xhero__x">×</div>
-    <div class="xhero__cols">
-      <div>
-        <p class="xhero__col--sub">点になる勉強へ</p>
-        <p class="xhero__col">「戦略」</p>
+    <p class="xhero__kicker">学びの2つの軸</p>
+    <div class="xhero__grid">
+      <div class="xhero__cell">
+        <p class="xhero__sub">点になる勉強へ</p>
+        <p class="xhero__vert">「戦略」</p>
       </div>
-      <div>
-        <p class="xhero__col--sub">一人ひとりに合わせて</p>
-        <p class="xhero__col">「伴走」</p>
+      <div class="xhero__cell">
+        <p class="xhero__sub">一人ひとりに合わせて</p>
+        <p class="xhero__vert">「伴走」</p>
       </div>
     </div>
     <p class="xhero__h2">本気で日本史を変えたい受験生へ</p>
@@ -979,6 +1021,7 @@
       <a href="https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/" target="_blank" rel="noopener noreferrer">TikTok</a>
     </div>
     <p class="footer__line">LINE ID: @871fitgx</p>
+    <p class="footer__presented">Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
     <p style="margin-top: 16px; font-size: 0.65rem; opacity: 0.55; line-height: 1.6; max-width: 280px; margin-left: auto; margin-right: auto;">
       写真：Unsplash（本番公開時は<a href="https://www.photo-ac.com/" target="_blank" rel="noopener noreferrer">写真AC（ACワークス）</a>の規約に沿って差し替え可能です）
     </p>
