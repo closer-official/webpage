@@ -122,6 +122,14 @@ const DEFAULT_NAV = {
     { label: '店舗', href: '#access' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  navy_cyan_consult: [
+    { label: 'コンセプト', href: '#concept' },
+    { label: '特徴', href: '#menu' },
+    { label: '講師', href: '#staff' },
+    { label: '料金', href: '#payment' },
+    { label: 'FAQ', href: '#faq' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA = {
@@ -152,6 +160,7 @@ const defaultHeroImages = {
   apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
   event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
   ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
+  navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
 };
 
 /**
@@ -216,6 +225,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const heroSlidesFiltered = (content.heroSlides || []).filter((u) => (u || '').trim());
   const heroImageUrl =
     (tid === 'gym_yoga' && heroSlidesFiltered[0]) ||
+    (tid === 'navy_cyan_consult' && heroSlidesFiltered[0]) ||
     (seo.ogImageUrl && seo.ogImageUrl.trim()) ||
     defaultHeroImages[tid] ||
     '';
@@ -619,6 +629,61 @@ ${cafe1ShopLocationsHtml()}
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, sections.length);
             const alt = s.imageUrl && i >= 1 ? (i % 2 === 1 ? ' section-alt' : ' section-alt section-alt-reverse') : '';
+            if (tid === 'navy_cyan_consult') {
+              if (s.id === 'faq' && faqItems.length > 0) {
+                const faqHtml = faqItems
+                  .map(
+                    (faq) =>
+                      `<details class="nc-faq-item"><summary class="nc-faq-q"><span class="nc-faq-q-icon" aria-hidden="true">Q</span><span class="nc-faq-q-text">${escapeHtml(faq.q)}</span></summary><div class="nc-faq-a"><span class="nc-faq-a-icon" aria-hidden="true">A</span><div class="nc-faq-a-body"><p>${escapeHtml(faq.a)}</p></div></div></details>`
+                  )
+                  .join('');
+                return `    <section id="faq" class="section nc-faq-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="container nc-inner">
+        <h2 id="${s.id}-title" class="nc-section-label">${escapeHtml(s.title)}</h2>
+        <div class="nc-faq-list">${faqHtml}</div>
+      </div>
+    </section>`;
+              }
+              if (s.id === 'price' && priceRows.length > 0) {
+                const cards = priceRows
+                  .map(
+                    (row) =>
+                      `<div class="nc-price-card"><span class="nc-price-name">${escapeHtml(row.name)}</span><span class="nc-price-val">${escapeHtml(row.price)}</span></div>`
+                  )
+                  .join('');
+                return `    <section id="payment" class="section nc-price-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="nc-price-wave-top" aria-hidden="true"></div>
+      <div class="nc-price-slab">
+        <div class="container nc-inner">
+          <h2 id="${s.id}-title" class="nc-price-heading">${escapeHtml(s.title)}</h2>
+          <div class="nc-price-grid">${cards}</div>
+          <div class="nc-price-note">${String(s.content)
+                  .split('\n')
+                  .map((l) => l.trim())
+                  .filter(Boolean)
+                  .map((l) => `<p>${escapeHtml(l)}</p>`)
+                  .join('')}</div>
+        </div>
+      </div>
+    </section>`;
+              }
+              if (s.id === 'contact') {
+                return `    <section id="contact" class="section nc-final-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="nc-final-arc" aria-hidden="true"></div>
+      <div class="container nc-inner nc-final-inner">
+        <h2 id="${s.id}-title" class="nc-final-title">${escapeHtml(s.title)}</h2>
+        <p class="nc-final-copy">${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary nc-cta-pill">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`;
+              }
+              const img = s.imageUrl ? sectionImg(s) : '';
+              const cardInner = `<div class="section-body nc-surface-card"><h2 id="${s.id}-title" class="nc-card-h">${escapeHtml(s.title)}</h2><div class="nc-card-text"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
+              const stack = img ? `${cardInner}<div class="nc-card-media-below">${img}</div>` : cardInner;
+              return `    <section id="${escapeHtml(s.id)}" class="section nc-band ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="container nc-inner nc-stack">${stack}</div>
+    </section>`;
+            }
             if (tid === 'salon_barber' && s.id === 'concept') {
               return `    <section class="section section-concept-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
@@ -961,6 +1026,16 @@ ${cafe1ShopLocationsHtml()}
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
+        : tid === 'navy_cyan_consult'
+        ? `<section class="hero hero-full-img nc-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner nc-hero-inner">
+        <p class="nc-hero-brand">${escapeHtml(content.siteName)}</p>
+        <h1 class="nc-hero-title">${escapeHtml(content.headline)}</h1>
+        <p class="subheadline nc-hero-sub">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary nc-hero-cta">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>`
         : `<section class="hero hero-full-img" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
@@ -978,6 +1053,10 @@ ${cafe1ShopLocationsHtml()}
       ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">`
+      : tid === 'navy_cyan_consult'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

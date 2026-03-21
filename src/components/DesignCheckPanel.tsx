@@ -150,7 +150,7 @@ const PREVIEW_BG: Record<string, string> = {
   event: '#F9F9F7',
   ramen: '#f8eeee',
   academy_lp: '#0f1115',
-  navy_cyan_consult: '#060a12',
+  navy_cyan_consult: '#0a0d14',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
