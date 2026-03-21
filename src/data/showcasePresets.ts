@@ -612,24 +612,24 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   apparel_lookbook: {
     content: {
-      siteName: 'L.u.m.e',
-      title: 'L.u.m.e | Lookbook',
-      headline: '2025 Spring Summer',
-      subheadline: 'Even if it’s small — 日常の光に馴染む小さなワードローブ。',
+      siteName: 'GLOBAL WORK × NAOKO TAKAYAMA',
+      title: 'EiiS | Lookbook（構成デモ）',
+      headline: 'GLOBAL WORK',
+      subheadline: 'Even if it’s Small — with NAOKO TAKAYAMA（HTML内の固定LPで表示。文言は差し替え）',
       ctaLabel: 'ONLINE STORE',
       ctaHref: 'https://thebase.in',
       sections: [
-        { id: 'concept', title: 'コンセプト', content: 'このテンプレは固定HTML（apparel-lookbook-intro）で表示されます。' },
+        { id: 'concept', title: 'コンセプト', content: 'テンプレ15は apparel-lookbook-intro の固定HTMLを埋め込みます。' },
       ],
-      footerText: `© ${new Date().getFullYear()} L.u.m.e demo`,
+      footerText: `© ${new Date().getFullYear()} 構成デモ（本番では文言・権利表記を差し替え）`,
       heroSlides: [
         'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
       ],
     },
     seo: {
-      metaTitle: 'L.u.m.e | Lookbook デモ',
-      metaDescription: '一色オープニングから動画へ。番号タップの横スライドとショップ導線。',
-      keywords: 'アパレル, ルックブック, ファッション, BASE',
+      metaTitle: 'EiiS | Lookbook 構成デモ',
+      metaDescription: '参照LPに準じた構成：一色OP→カード→全画面動画、番号スライド、2枚並び、BUY導線。',
+      keywords: 'アパレル, ルックブック, GLOBAL WORK, BASE',
       ogImageUrl:
         'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
       canonicalUrl: '',

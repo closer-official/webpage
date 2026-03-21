@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Lookbook デモ | アパレル・ルックブック</title>
-  <meta name="description" content="一色オープニングから動画へ。番号タップの横スライドとショップ導線。" />
+  <title>GLOBAL WORK × NAOKO TAKAYAMA | Lookbook（構成デモ）</title>
+  <meta name="description" content="参照LPと同一構成のデモ。文言・色・画像は本番で差し替えてください。" />
+  <!-- 構成・配置は参照コラボLPに準拠。コードは独自実装です。 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --alb-sky: #79acc4;
@@ -16,10 +17,12 @@
       --alb-ink: #1c1c1c;
       --alb-body: #eef1f4;
       --alb-line: rgba(28, 28, 28, 0.12);
-      --alb-font-script: "Great Vibes", cursive;
-      --alb-font-sans: "DM Sans", "Noto Sans JP", system-ui, sans-serif;
-      --alb-radius-card: 18px;
+      --alb-font-script: "Dancing Script", cursive;
+      --alb-font-sans: "Montserrat", "Noto Sans JP", system-ui, sans-serif;
+      --alb-radius-card: 16px;
       --alb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --alb-pad-x: clamp(14px, 4.2vw, 22px);
+      --alb-content-max: 520px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -30,6 +33,26 @@
       -webkit-font-smoothing: antialiased;
     }
     .alb-page { min-height: 100vh; }
+
+    /* 言語スイッチ風（右上ピル・参照と同配置） */
+    .alb-lang {
+      position: fixed;
+      top: max(10px, env(safe-area-inset-top));
+      right: max(10px, env(safe-area-inset-right));
+      z-index: 60;
+      font-family: var(--alb-font-sans);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.2);
+      border: none;
+      padding: 7px 11px;
+      border-radius: 3px;
+      cursor: default;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
 
     /* ----- オープニング ----- */
     .alb-intro {
@@ -48,41 +71,69 @@
       position: relative;
       z-index: 3;
       text-align: center;
-      padding: clamp(4.5rem, 18vh, 9rem) 1.5rem 0;
+      padding: clamp(5rem, 22vh, 10rem) var(--alb-pad-x) 0;
       color: var(--alb-white);
-      transition: opacity 0.75s var(--alb-ease);
+      transition: opacity 0.65s ease, transform 0.85s var(--alb-ease);
     }
     .alb-logo-script {
       font-family: var(--alb-font-script);
-      font-size: clamp(3.2rem, 14vw, 5.5rem);
-      line-height: 1;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-      text-shadow: 0 4px 40px rgba(0, 0, 0, 0.12);
-    }
-    .alb-season {
-      margin-top: 0.75rem;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      opacity: 0.95;
+      font-size: clamp(3.8rem, 17vw, 6.25rem);
+      line-height: 0.95;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-shadow: 0 6px 36px rgba(0, 0, 0, 0.15);
     }
     .alb-tagline {
-      margin-top: 0.35rem;
-      font-size: 0.78rem;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      opacity: 0.92;
-    }
-    .alb-intro-lede {
-      max-width: 20rem;
-      margin: 1.25rem auto 0;
-      font-size: 0.72rem;
-      line-height: 1.75;
+      margin-top: 0.5rem;
+      font-family: var(--alb-font-sans);
+      font-size: 0.74rem;
       font-weight: 400;
       letter-spacing: 0.04em;
+      opacity: 0.96;
+    }
+    .alb-brand-caps {
+      margin-top: 0.65rem;
+      font-family: var(--alb-font-sans);
+      font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      line-height: 1.2;
+    }
+    .alb-collab {
+      margin-top: 0.45rem;
+      font-family: var(--alb-font-sans);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      opacity: 0.93;
+    }
+    /* ロング版トップ：英語短段落（参照LP同位置・任意で削除可） */
+    .alb-intro-en {
+      max-width: 17.5rem;
+      margin: 1.35rem auto 0;
+      font-family: var(--alb-font-sans);
+      font-size: 0.65rem;
+      line-height: 1.85;
+      font-weight: 400;
+      letter-spacing: 0.06em;
       opacity: 0.88;
+    }
+    /* 全画面写真・動画フェーズ：中央オーバーレイ（参照スクリーンショット同等） */
+    .alb-intro.alb-phase-expand .alb-intro-words {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 var(--alb-pad-x);
+      z-index: 25;
+      pointer-events: none;
+      opacity: 1;
+      text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+    }
+    .alb-intro.alb-phase-video .alb-intro-words {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .alb-intro-card-wrap {
@@ -134,10 +185,6 @@
       aspect-ratio: auto;
       border-radius: 0;
       box-shadow: none;
-    }
-    .alb-intro.alb-phase-expand .alb-intro-words {
-      opacity: 0;
-      pointer-events: none;
     }
     .alb-intro-card-img,
     .alb-intro-card-vid {
@@ -206,47 +253,71 @@
       transition: opacity 0.5s ease;
     }
 
-    /* ----- ルックセクション ----- */
+    /* ----- ルックセクション（番号＋日本語見出し＋右へ伸びる罫線） ----- */
     .alb-looks { background: var(--alb-body); }
     .alb-look {
-      padding: 2.5rem 0 2rem;
+      padding: clamp(2.25rem, 8vw, 3.25rem) 0 clamp(1.75rem, 5vw, 2.5rem);
       border-bottom: 1px solid var(--alb-line);
     }
     .alb-look-head {
       display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      padding: 0 1.25rem 1rem;
-      max-width: 520px;
+      align-items: center;
+      gap: 12px;
+      padding: 0 var(--alb-pad-x) 14px;
+      max-width: var(--alb-content-max);
       margin: 0 auto;
     }
-    .alb-look-head::before {
-      content: "";
+    .alb-look-head__left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .alb-look-num {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+    }
+    .alb-look-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .alb-look-head__line {
       flex: 1;
       height: 1px;
       background: var(--alb-line);
-      order: 2;
-      min-width: 0;
+      min-width: 24px;
     }
-    .alb-look-num {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      order: 1;
+
+    /* 2枚並び（参照LPの一部セクションと同型） */
+    .alb-dual {
+      max-width: var(--alb-content-max);
+      margin: 0 auto;
+      padding: 0 var(--alb-pad-x);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
     }
-    .alb-look-title {
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      order: 3;
-      white-space: nowrap;
+    .alb-dual__cell {
+      overflow: hidden;
+    }
+    .alb-dual__cell img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+    .alb-look .alb-dual + .alb-shop {
+      margin-top: 1.25rem;
     }
 
     .alb-slider {
-      max-width: 520px;
+      max-width: var(--alb-content-max);
       margin: 0 auto;
       overflow: hidden;
-      padding: 0 1.25rem;
+      padding: 0 var(--alb-pad-x);
     }
     .alb-slider-viewport { overflow: hidden; border-radius: 4px; }
     .alb-slider-track {
@@ -271,9 +342,9 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.65rem 1.25rem 0;
-      max-width: 520px;
+      gap: 0.2rem;
+      padding: 10px var(--alb-pad-x) 0;
+      max-width: var(--alb-content-max);
       margin: 0 auto;
     }
     .alb-slider-dot {
@@ -299,9 +370,9 @@
 
     /* 商品行 */
     .alb-shop {
-      max-width: 520px;
-      margin: 1.25rem auto 0;
-      padding: 0 1.25rem;
+      max-width: var(--alb-content-max);
+      margin: 1.1rem auto 0;
+      padding: 0 var(--alb-pad-x);
       list-style: none;
     }
     .alb-shop li {
@@ -397,8 +468,8 @@
     /* フッター */
     .alb-footer {
       text-align: center;
-      padding: 3rem 1.5rem 4rem;
-      background: #e8eaed;
+      padding: clamp(2.75rem, 9vw, 4rem) var(--alb-pad-x) clamp(3.5rem, 12vw, 5rem);
+      background: #e4e7ea;
     }
     .alb-footer-logo {
       font-family: var(--alb-font-script);
@@ -474,8 +545,11 @@
     <div class="alb-looks">
       <section class="alb-look" aria-labelledby="look01">
         <div class="alb-look-head">
-          <span class="alb-look-num">01</span>
-          <h2 class="alb-look-title" id="look01">シーンに合わせて着回す</h2>
+          <div class="alb-look-head__left">
+            <span class="alb-look-num">01</span>
+            <h2 class="alb-look-title" id="look01">シーンに合わせて着回す</h2>
+          </div>
+          <div class="alb-look-head__line" aria-hidden="true"></div>
         </div>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -521,8 +595,11 @@
 
       <section class="alb-look" aria-labelledby="look02">
         <div class="alb-look-head">
-          <span class="alb-look-num">02</span>
-          <h2 class="alb-look-title" id="look02">街と自然のあいだで</h2>
+          <div class="alb-look-head__left">
+            <span class="alb-look-num">02</span>
+            <h2 class="alb-look-title" id="look02">街と自然のあいだで</h2>
+          </div>
+          <div class="alb-look-head__line" aria-hidden="true"></div>
         </div>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -564,8 +641,11 @@
 
       <section class="alb-look" aria-labelledby="look03">
         <div class="alb-look-head">
-          <span class="alb-look-num">03</span>
-          <h2 class="alb-look-title" id="look03">余白のあるシルエット</h2>
+          <div class="alb-look-head__left">
+            <span class="alb-look-num">03</span>
+            <h2 class="alb-look-title" id="look03">余白のあるシルエット</h2>
+          </div>
+          <div class="alb-look-head__line" aria-hidden="true"></div>
         </div>
         <div class="alb-slider" data-alb-slider>
           <div class="alb-slider-viewport">
@@ -606,16 +686,81 @@
           </li>
         </ul>
       </section>
+
+      <!-- 04: 2枚並び（参照LPのデュアルビジュアルセクションと同型） -->
+      <section class="alb-look" aria-labelledby="look04">
+        <div class="alb-look-head">
+          <div class="alb-look-head__left">
+            <span class="alb-look-num">04</span>
+            <h2 class="alb-look-title" id="look04">風が通る重ね方</h2>
+          </div>
+          <div class="alb-look-head__line" aria-hidden="true"></div>
+        </div>
+        <div class="alb-dual">
+          <div class="alb-dual__cell">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=85" alt="" loading="lazy" width="600" height="800" />
+          </div>
+          <div class="alb-dual__cell">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=85" alt="" loading="lazy" width="600" height="800" />
+          </div>
+        </div>
+        <ul class="alb-shop">
+          <li>
+            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
+            <div class="alb-shop-meta">
+              <span class="alb-shop-name">KNIT</span>
+              <span class="alb-shop-price">¥12,000</span>
+            </div>
+            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="alb-look" aria-labelledby="look05">
+        <div class="alb-look-head">
+          <div class="alb-look-head__left">
+            <span class="alb-look-num">05</span>
+            <h2 class="alb-look-title" id="look05">夕方の光に合う色</h2>
+          </div>
+          <div class="alb-look-head__line" aria-hidden="true"></div>
+        </div>
+        <div class="alb-slider" data-alb-slider>
+          <div class="alb-slider-viewport">
+            <div class="alb-slider-track">
+              <div class="alb-slide">
+                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
+              </div>
+              <div class="alb-slide">
+                <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=85" alt="" loading="lazy" width="900" height="1200" />
+              </div>
+            </div>
+          </div>
+          <div class="alb-slider-nav" role="tablist" aria-label="スライド">
+            <button type="button" class="alb-slider-dot is-on" role="tab" aria-selected="true">1</button>
+            <button type="button" class="alb-slider-dot" role="tab" aria-selected="false">2</button>
+          </div>
+        </div>
+        <ul class="alb-shop">
+          <li>
+            <img class="alb-shop-thumb" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=200&q=80" alt="" width="200" height="200" loading="lazy" />
+            <div class="alb-shop-meta">
+              <span class="alb-shop-name">COAT</span>
+              <span class="alb-shop-price">¥29,000</span>
+            </div>
+            <a class="alb-buy" href="https://thebase.in" target="_blank" rel="noopener noreferrer">BUY</a>
+          </li>
+        </ul>
+      </section>
     </div>
 
     <footer class="alb-footer">
-      <p class="alb-footer-logo">L.u.m.e</p>
+      <p class="alb-footer-logo">EiiS</p>
       <div class="alb-footer-links">
         <a href="#">About</a>
         <a href="#">Contact</a>
-        <a href="https://thebase.in" target="_blank" rel="noopener noreferrer">Online</a>
+        <a href="https://thebase.in" target="_blank" rel="noopener noreferrer">Online Store</a>
       </div>
-      <p class="alb-footer-copy">© Lookbook template demo</p>
+      <p class="alb-footer-copy">© GLOBAL WORK × NAOKO TAKAYAMA（構成デモ・文言は差し替え）</p>
     </footer>
   </div>
 
