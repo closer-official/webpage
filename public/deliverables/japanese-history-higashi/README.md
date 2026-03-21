@@ -8,7 +8,22 @@ Vite 開発サーバー起動後:
 
 `http://localhost:5173/deliverables/japanese-history-higashi/index.html`
 
-本番では `dist` に同梱されるか、静的ホスティングに `public/deliverables/` ごとアップロードしてください。
+**管理者画面**（文言・写真の差し替え）:
+
+`http://localhost:5173/deliverables/japanese-history-higashi/admin.html`
+
+- サーバー（`cd server && npm run dev`）が起動している必要があります
+- 管理者認証が有効な場合（`ADMIN_USERNAME` / `ADMIN_PASSWORD` 設定時）はログインが必要です
+- 「Presented by Closer」は削除・変更できません
+- 写真はURL入力で差し替え可能です
+
+本番では `dist` に同梱されるか、静的ホスティングに `public/deliverables/` ごとアップロードしてください。API（`/api/lp-content/...`）が利用可能な環境では、管理者画面で保存した内容がLPに反映されます。
+
+## 法的ページ
+
+- **利用規約** … `terms.html`
+- **特定商取引法に基づく表記** … `tokushohou.html`（管理者画面で事業者名・連絡先等を編集可能）
+- **プライバシーポリシー** … `privacy.html`
 
 ## 納品後のテンプレ化（手順）
 

@@ -16,6 +16,7 @@ const FILES = {
   referenceSites: 'referenceSites.json',
   designInsights: 'designInsights.json',
   learningJob: 'learningJob.json',
+  lpContent: 'lpContent.json',
 };
 
 function ensureDir() {
@@ -68,6 +69,15 @@ const fileStore = {
   setLearningJob: (data) => { write('learningJob', data); return Promise.resolve(); },
   getAutoProcessEnabled: () => Promise.resolve(false),
   setAutoProcessEnabled: () => Promise.resolve(),
+  getLpContent: async (slug) => {
+    const data = read('lpContent');
+    return data[slug] ?? null;
+  },
+  setLpContent: async (slug, content) => {
+    const data = read('lpContent');
+    data[slug] = content;
+    write('lpContent', data);
+  },
 };
 
 export const store = isSupabaseConfigured() ? storeSupabase : fileStore;

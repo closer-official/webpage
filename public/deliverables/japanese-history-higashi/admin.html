@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理者画面 | 日本史徹底攻略</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --cyan: #22d3ee; --red: #f87171; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans JP", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 1.3rem; margin-bottom: 24px; }
+    section { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    section h2 { font-size: 1rem; margin-bottom: 16px; color: var(--cyan); }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+    input[type="text"], input[type="url"], textarea { width: 100%; padding: 10px 12px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: var(--text); font-size: 0.9rem; margin-bottom: 12px; }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .locked { background: #1e293b; padding: 12px; border-radius: 8px; color: var(--muted); font-size: 0.9rem; }
+    .locked strong { color: var(--cyan); }
+    .btn { display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, var(--cyan), #0891b2); color: #0f172a; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary { background: #334155; color: var(--text); }
+    .msg { padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    .msg.ok { background: rgba(34, 211, 238, 0.15); color: var(--cyan); }
+    .msg.err { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+    .login-form { max-width: 320px; margin: 0 auto; padding: 40px 0; }
+    .login-form input { margin-bottom: 12px; }
+    .img-preview { max-width: 120px; max-height: 80px; object-fit: cover; border-radius: 6px; margin-top: 4px; }
+    .back { color: var(--cyan); text-decoration: none; font-size: 0.88rem; margin-bottom: 16px; display: inline-block; }
+    .back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← LPに戻る</a>
+    <div id="loginArea" class="login-form" style="display:none;">
+      <h1>管理者ログイン</h1>
+      <form id="loginForm">
+        <label>ユーザー名</label>
+        <input type="text" name="username" required />
+        <label>パスワード</label>
+        <input type="password" name="password" required />
+        <button type="submit" class="btn">ログイン</button>
+      </form>
+    </div>
+    <div id="adminArea" style="display:none;">
+      <h1>日本史徹底攻略 LP 管理者画面</h1>
+      <div id="msg"></div>
+
+      <section>
+        <h2>リンク</h2>
+        <label>LINE URL</label>
+        <input type="url" id="lineUrl" placeholder="https://lin.ee/..." />
+        <label>TikTok URL</label>
+        <input type="url" id="tiktokUrl" placeholder="https://..." />
+      </section>
+
+      <section>
+        <h2>ヒーロー</h2>
+        <label>ブランド</label>
+        <input type="text" id="hero.brand" />
+        <label>ロゴ・タイトル</label>
+        <input type="text" id="hero.logo" />
+        <label>サブコピー（改行は &lt;br /&gt;）</label>
+        <textarea id="hero.sub" rows="2"></textarea>
+        <label>メイン見出し（HTML可）</label>
+        <textarea id="hero.h1" rows="3"></textarea>
+        <label>バー1</label>
+        <input type="text" id="hero.bar1" />
+        <label>バー2</label>
+        <input type="text" id="hero.bar2" />
+        <div class="row">
+          <div><label>写真1 URL</label><input type="url" id="hero.photo0" /><img class="img-preview" id="preview0" alt="" /></div>
+          <div><label>写真2 URL</label><input type="url" id="hero.photo1" /><img class="img-preview" id="preview1" alt="" /></div>
+          <div><label>写真3 URL</label><input type="url" id="hero.photo2" /><img class="img-preview" id="preview2" alt="" /></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>ペイン・悩み</h2>
+        <label>見出し</label>
+        <input type="text" id="pain.title" />
+        <label>カード1〜5</label>
+        <input type="text" id="pain.card0" />
+        <input type="text" id="pain.card1" />
+        <input type="text" id="pain.card2" />
+        <input type="text" id="pain.card3" />
+        <input type="text" id="pain.card4" />
+      </section>
+
+      <section>
+        <h2>Benefits</h2>
+        <label>01 見出し（HTML可）</label>
+        <textarea id="benefits.01.title" rows="2"></textarea>
+        <label>01 画像URL</label>
+        <input type="url" id="benefits.01.img" /><img class="img-preview" id="previewB01" alt="" />
+        <label>02 見出し</label>
+        <textarea id="benefits.02.title" rows="2"></textarea>
+        <label>02 本文</label>
+        <textarea id="benefits.02.body" rows="3"></textarea>
+        <label>03 見出し</label>
+        <input type="text" id="benefits.03.title" />
+        <label>03 本文</label>
+        <textarea id="benefits.03.body" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>Reason 01〜04（画像・タイトル・箇条書き）</h2>
+        <label>Reason 01 画像</label>
+        <input type="url" id="reasons.01.img" /><img class="img-preview" id="previewR01" alt="" />
+        <label>Reason 01 タイトル</label>
+        <input type="text" id="reasons.01.title" />
+        <label>Reason 01 箇条1</label>
+        <input type="text" id="reasons.01.item0" />
+        <label>Reason 01 箇条2</label>
+        <input type="text" id="reasons.01.item1" />
+        <hr style="border-color:#334155;margin:16px 0;" />
+        <label>Reason 02 画像</label>
+        <input type="url" id="reasons.02.img" /><img class="img-preview" id="previewR02" alt="" />
+        <label>Reason 02 タイトル</label>
+        <input type="text" id="reasons.02.title" />
+        <label>Reason 02 箇条1〜3</label>
+        <input type="text" id="reasons.02.item0" />
+        <input type="text" id="reasons.02.item1" />
+        <input type="text" id="reasons.02.item2" />
+        <hr style="border-color:#334155;margin:16px 0;" />
+        <label>Reason 03 画像</label>
+        <input type="url" id="reasons.03.img" /><img class="img-preview" id="previewR03" alt="" />
+        <label>Reason 03 タイトル</label>
+        <input type="text" id="reasons.03.title" />
+        <label>Reason 03 箇条1〜2</label>
+        <input type="text" id="reasons.03.item0" />
+        <input type="text" id="reasons.03.item1" />
+        <hr style="border-color:#334155;margin:16px 0;" />
+        <label>Reason 04 画像</label>
+        <input type="url" id="reasons.04.img" /><img class="img-preview" id="previewR04" alt="" />
+        <label>Reason 04 タイトル</label>
+        <input type="text" id="reasons.04.title" />
+        <label>Reason 04 箇条1〜2</label>
+        <input type="text" id="reasons.04.item0" />
+        <input type="text" id="reasons.04.item1" />
+      </section>
+
+      <section>
+        <h2>フッター</h2>
+        <label>ブランド名</label>
+        <input type="text" id="footer.brand" />
+        <label>サブ</label>
+        <input type="text" id="footer.sub" />
+        <label>LINE ID</label>
+        <input type="text" id="footer.lineId" />
+        <label>©表記</label>
+        <input type="text" id="footer.copyright" />
+        <div class="locked" style="margin-top:12px;">
+          <strong>Presented by Closer</strong> は削除・変更できません。（固定表示）
+        </div>
+      </section>
+
+      <section>
+        <h2>特定商取引法に基づく表記</h2>
+        <label>販売事業者</label>
+        <input type="text" id="legal.tokushohou.seller" />
+        <label>運営責任者</label>
+        <input type="text" id="legal.tokushohou.responsible" />
+        <label>所在地</label>
+        <input type="text" id="legal.tokushohou.address" />
+        <label>連絡先</label>
+        <input type="text" id="legal.tokushohou.contact" />
+        <label>支払方法</label>
+        <input type="text" id="legal.tokushohou.paymentMethod" />
+        <label>支払時期</label>
+        <input type="text" id="legal.tokushohou.paymentTiming" />
+        <label>特別条件</label>
+        <input type="text" id="legal.tokushohou.specialConditions" />
+      </section>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button type="button" class="btn" id="saveBtn">保存する</button>
+        <a href="index.html" class="btn btn-secondary" target="_blank">プレビューを開く</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    const SLUG = 'japanese-history-higashi';
+
+    function getApiBase() {
+      const p = location.pathname;
+      if (p.includes('/deliverables/')) {
+        const parts = p.split('/deliverables/')[0];
+        return parts ? parts + API : API;
+      }
+      return API;
+    }
+    const apiBase = getApiBase();
+
+    async function checkAuth() {
+      const r = await fetch(apiBase + '/admin-auth/status', { credentials: 'include' });
+      const { enabled, authenticated } = await r.json();
+      if (!enabled || authenticated) return true;
+      return false;
+    }
+
+    function showMsg(text, ok) {
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    async function loadContent() {
+      const r = await fetch(apiBase + '/lp-content/' + SLUG);
+      const c = await r.json();
+      return c;
+    }
+
+    function setByPath(obj, path, val) {
+      const parts = path.split('.');
+      let o = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const k = parts[i];
+        if (!(k in o)) o[k] = {};
+        o = o[k];
+      }
+      o[parts[parts.length - 1]] = val;
+    }
+
+    function getByPath(obj, path) {
+      return path.split('.').reduce((o, k) => o?.[k], obj);
+    }
+
+    function collectFormData() {
+      const out = {};
+      document.querySelectorAll('#adminArea input, #adminArea textarea').forEach((el) => {
+        const id = el.id;
+        if (!id || !id.includes('.')) return;
+        const val = el.value.trim();
+        setByPath(out, id, val);
+      });
+      out.lineUrl = document.getElementById('lineUrl').value.trim();
+      out.tiktokUrl = document.getElementById('tiktokUrl').value.trim();
+      const hero = out.hero || {};
+      hero.photos = [
+        document.getElementById('hero.photo0')?.value?.trim() || '',
+        document.getElementById('hero.photo1')?.value?.trim() || '',
+        document.getElementById('hero.photo2')?.value?.trim() || '',
+      ].filter(Boolean);
+      out.hero = hero;
+      const pain = out.pain || {};
+      pain.cards = [0,1,2,3,4].map(i => document.getElementById('pain.card'+i)?.value?.trim() || '').filter(Boolean);
+      out.pain = pain;
+      const benefits = out.benefits || {};
+      benefits['01'] = { title: document.getElementById('benefits.01.title')?.value?.trim() || '', img: document.getElementById('benefits.01.img')?.value?.trim() || '' };
+      benefits['02'] = { title: document.getElementById('benefits.02.title')?.value?.trim() || '', body: document.getElementById('benefits.02.body')?.value?.trim() || '' };
+      benefits['03'] = { title: document.getElementById('benefits.03.title')?.value?.trim() || '', body: document.getElementById('benefits.03.body')?.value?.trim() || '' };
+      out.benefits = benefits;
+      const reasons = out.reasons || {};
+      ['01','02','03','04'].forEach(key => {
+        reasons[key] = reasons[key] || {};
+        reasons[key].img = document.getElementById('reasons.'+key+'.img')?.value?.trim() || '';
+        reasons[key].title = document.getElementById('reasons.'+key+'.title')?.value?.trim() || '';
+        reasons[key].items = [0,1,2].map(i => document.getElementById('reasons.'+key+'.item'+i)?.value?.trim()).filter(Boolean);
+      });
+      out.reasons = reasons;
+      out.legal = out.legal || {};
+      out.legal.tokushohou = {
+        seller: document.getElementById('legal.tokushohou.seller')?.value?.trim() || '',
+        responsible: document.getElementById('legal.tokushohou.responsible')?.value?.trim() || '',
+        address: document.getElementById('legal.tokushohou.address')?.value?.trim() || '',
+        contact: document.getElementById('legal.tokushohou.contact')?.value?.trim() || '',
+        paymentMethod: document.getElementById('legal.tokushohou.paymentMethod')?.value?.trim() || '',
+        paymentTiming: document.getElementById('legal.tokushohou.paymentTiming')?.value?.trim() || '',
+        specialConditions: document.getElementById('legal.tokushohou.specialConditions')?.value?.trim() || '',
+      };
+      return out;
+    }
+
+    function fillForm(c) {
+      if (!c) return;
+      const sets = [
+        ['lineUrl','lineUrl'], ['tiktokUrl','tiktokUrl'],
+        ['hero.brand','hero.brand'], ['hero.logo','hero.logo'], ['hero.sub','hero.sub'], ['hero.h1','hero.h1'],
+        ['hero.bar1','hero.bar1'], ['hero.bar2','hero.bar2'],
+        ['hero.photo0','hero.photos.0'], ['hero.photo1','hero.photos.1'], ['hero.photo2','hero.photos.2'],
+        ['pain.title','pain.title'],
+        ['pain.card0','pain.cards.0'], ['pain.card1','pain.cards.1'], ['pain.card2','pain.cards.2'], ['pain.card3','pain.cards.3'], ['pain.card4','pain.cards.4'],
+        ['benefits.01.title','benefits.01.title'], ['benefits.01.img','benefits.01.img'],
+        ['benefits.02.title','benefits.02.title'], ['benefits.02.body','benefits.02.body'],
+        ['benefits.03.title','benefits.03.title'], ['benefits.03.body','benefits.03.body'],
+        ['reasons.01.img','reasons.01.img'], ['reasons.01.title','reasons.01.title'], ['reasons.01.item0','reasons.01.items.0'], ['reasons.01.item1','reasons.01.items.1'],
+        ['reasons.02.img','reasons.02.img'], ['reasons.02.title','reasons.02.title'], ['reasons.02.item0','reasons.02.items.0'], ['reasons.02.item1','reasons.02.items.1'], ['reasons.02.item2','reasons.02.items.2'],
+        ['reasons.03.img','reasons.03.img'], ['reasons.03.title','reasons.03.title'], ['reasons.03.item0','reasons.03.items.0'], ['reasons.03.item1','reasons.03.items.1'],
+        ['reasons.04.img','reasons.04.img'], ['reasons.04.title','reasons.04.title'], ['reasons.04.item0','reasons.04.items.0'], ['reasons.04.item1','reasons.04.items.1'],
+        ['footer.brand','footer.brand'], ['footer.sub','footer.sub'], ['footer.lineId','footer.lineId'], ['footer.copyright','footer.copyright'],
+        ['legal.tokushohou.seller','legal.tokushohou.seller'], ['legal.tokushohou.responsible','legal.tokushohou.responsible'],
+        ['legal.tokushohou.address','legal.tokushohou.address'], ['legal.tokushohou.contact','legal.tokushohou.contact'],
+        ['legal.tokushohou.paymentMethod','legal.tokushohou.paymentMethod'], ['legal.tokushohou.paymentTiming','legal.tokushohou.paymentTiming'],
+        ['legal.tokushohou.specialConditions','legal.tokushohou.specialConditions'],
+      ];
+      sets.forEach(([id, path]) => {
+        const el = document.getElementById(id);
+        const v = getByPath(c, path);
+        if (el && v != null) el.value = v;
+      });
+      ['hero.photo0','hero.photo1','hero.photo2','benefits.01.img','reasons.01.img','reasons.02.img','reasons.03.img','reasons.04.img'].forEach((id, i) => {
+        const preview = document.getElementById('preview0') || document.getElementById('previewB01') || document.getElementById('previewR01');
+        const ids = ['preview0','preview1','preview2','previewB01','previewR01','previewR02','previewR03','previewR04'];
+        const inputs = ['hero.photo0','hero.photo1','hero.photo2','benefits.01.img','reasons.01.img','reasons.02.img','reasons.03.img','reasons.04.img'];
+        const inp = document.getElementById(inputs[i]);
+        const prev = document.getElementById(ids[i]);
+        if (inp && prev && inp.value) prev.src = inp.value; else if (prev) prev.removeAttribute('src');
+      });
+    }
+
+    function setupPreviewHandlers() {
+      ['hero.photo0','hero.photo1','hero.photo2','benefits.01.img','reasons.01.img','reasons.02.img','reasons.03.img','reasons.04.img'].forEach((id, i) => {
+        const inp = document.getElementById(id);
+        const pid = ['preview0','preview1','preview2','previewB01','previewR01','previewR02','previewR03','previewR04'][i];
+        const prev = document.getElementById(pid);
+        if (inp && prev) inp.addEventListener('input', () => { prev.src = inp.value || ''; });
+      });
+    }
+
+    async function init() {
+      const authed = await checkAuth();
+      if (!authed) {
+        document.getElementById('loginArea').style.display = 'block';
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const r = await fetch(apiBase + '/admin-auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
+            credentials: 'include',
+          });
+          const j = await r.json();
+          if (j.authenticated) location.reload();
+          else showMsg('ログインに失敗しました。', false);
+        });
+        return;
+      }
+      document.getElementById('adminArea').style.display = 'block';
+      const c = await loadContent();
+      fillForm(c);
+      setupPreviewHandlers();
+      document.getElementById('saveBtn').addEventListener('click', async () => {
+        const data = collectFormData();
+        const r = await fetch(apiBase + '/lp-content/' + SLUG, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+        });
+        if (r.ok) showMsg('保存しました。', true);
+        else {
+          const j = await r.json();
+          showMsg(j.error || '保存に失敗しました。', false);
+        }
+      });
+    }
+    init();
+  </script>
+</body>
+</html>

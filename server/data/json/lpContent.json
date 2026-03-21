@@ -1,0 +1,57 @@
+{
+  "japanese-history-higashi": {
+    "lineUrl": "https://lin.ee/nLMnCmt",
+    "tiktokUrl": "https://lite.tiktok.com/t/ZS9RPVvCBsTpb-OZms8/",
+    "hero": {
+      "brand": "Japanese History · Consulting",
+      "logo": "日本史徹底攻略 / よし先生",
+      "sub": "高校受験・大学受験の日本史を、<br />「苦手」から「得点源」へ導く少人数コンサル。",
+      "h1": "勉強法が分からない子から、日本史を<br /><strong>完全な得点源</strong>にしたい子まで、<br />幅広く伴走します。",
+      "photos": [
+        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&q=80",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80",
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80"
+      ],
+      "bar1": "参考書1冊分以下の価格帯で、個別に合わせたコンサル",
+      "bar2": "日本史専門 — 年号暗記から論述まで一気通貫"
+    },
+    "pain": {
+      "title": "こんな状況に<br />陥っていませんか？",
+      "cards": [
+        "情報が多すぎて、何から手を付けるべきか<em>選べない</em>",
+        "年号や人物は覚えたつもりなのに、<em>試験で点にならない</em>",
+        "論述・資料問題で、<em>何を書けばいいか分からない</em>",
+        "塾や参考書に振り回され、<em>自分の弱点が分からない</em>",
+        "日本史だけが足を引っ張り、<em>志望校のラインに届かない</em>"
+      ]
+    },
+    "benefits": {
+      "01": { "title": "<span class=\"line-hl\">参考書1冊分以下の価格帯</span>で、あなた専用の<br />コンサルが受けられる", "img": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" },
+      "02": { "title": "<span class=\"line-hl\">今は人数が少ないからこそ</span>、<br />細やかに丁寧に見られる", "body": "一人ひとりのレベル・志望・学習時間に合わせて、ロードマップと週次のフォローを調整します。<strong style=\"color: #0e7490;\">「詰め込み」ではなく「続く設計」</strong>を重視しています。" },
+      "03": { "title": "<span class=\"line-hl\">日本史に特化</span> — 他科目に取られない伴走", "body": "通年の流れ・頻出テーマ・出題趣向まで、日本史だけに視野を絞って伴走します。" }
+    },
+    "reasons": {
+      "01": { "img": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80", "title": "「暗記」だけに逃げない、戦略から逆算した設計", "items": ["志望校の傾向と、あなたの現在地から逆算して優先順位を決める", "動画講義だけに頼らず、質問・添削で「出力」を鍛える"] },
+      "02": { "img": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80", "title": "月額1000円。それだけ。", "items": ["追加料金・教材費の押し付け一切なし", "既存の参考書をそのまま使えるので買い足し不要", "1000円で専属の指導員がつき、勉強法から参考書ルートまで個別にサポート"] },
+      "03": { "img": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80", "title": "今は人数が少ないから、細かくフォローできる", "items": ["週次の進捗確認や、詰まりポイントの早期発見に注力", "テスト後の振り返りも、一人ひとりのペースに合わせて調整"] },
+      "04": { "img": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80", "title": "日本史に特化 — 科目横断は最小限に", "items": ["年号・人物・論述・資料問題のバランスを、受験種別に合わせて調整", "「他科目は学校・塾に任せ、日本史だけ伸ばす」スタイルにも対応"] }
+    },
+    "footer": {
+      "brand": "日本史徹底攻略 / よし先生",
+      "sub": "高校受験・大学受験の日本史コンサルティング",
+      "lineId": "@871fitgx",
+      "copyright": "© 日本史徹底攻略 / よし先生"
+    },
+    "legal": {
+      "tokushohou": {
+        "seller": "（管理者画面で編集）",
+        "responsible": "（管理者画面で編集）",
+        "address": "（管理者画面で編集）",
+        "contact": "（管理者画面で編集）",
+        "paymentMethod": "（管理者画面で編集）",
+        "paymentTiming": "（管理者画面で編集）",
+        "specialConditions": "（特記事項がある場合は記載）"
+      }
+    }
+  }
+}

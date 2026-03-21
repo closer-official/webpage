@@ -1,6 +1,11 @@
 import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { collectPlaces } from './collect.js';
 import { processOne } from './process.js';
@@ -1332,6 +1337,39 @@ app.get('/api/lp-payment-form', (req, res) => {
 });
 
 /** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */
+// ---------- LP コンテンツ（日本史など納品LP用） ----------
+const LP_CONTENT_SLUGS = ['japanese-history-higashi'];
+function getLpContentDefault(slug) {
+  try {
+    const p = path.join(__dirname, 'data', 'json', 'lpContent.json');
+    if (fs.existsSync(p)) {
+      const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+      return raw[slug] ?? null;
+    }
+  } catch (e) {
+    console.error('[lpContent default]', e);
+  }
+  return null;
+}
+
+app.get('/api/lp-content/:slug', async (req, res) => {
+  const slug = req.params.slug;
+  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  let content = await store.getLpContent(slug);
+  if (!content) content = getLpContentDefault(slug);
+  res.json(content || {});
+});
+
+app.put('/api/lp-content/:slug', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const slug = req.params.slug;
+  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  const content = req.body;
+  if (!content || typeof content !== 'object') return res.status(400).json({ error: 'Invalid content' });
+  await store.setLpContent(slug, content);
+  res.json({ ok: true });
+});
+
 app.get('/api/checkout-redirect', async (req, res) => {
   if (!isStripeConfigured()) {
     return res.status(503).setHeader('Content-Type', 'text/html; charset=utf-8')

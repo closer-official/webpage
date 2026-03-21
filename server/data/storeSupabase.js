@@ -2,6 +2,7 @@ import { getSupabase, isSupabaseConfigured } from './supabaseClient.js';
 
 const KEYS = {
   queue: 'queue',
+  lpContent: 'lpContent',
   dashboard: 'dashboard',
   options: 'options',
   billing: 'billing',
@@ -19,6 +20,7 @@ function getDefault(name) {
   if (name === 'learningJob') return { status: 'idle', industry: null, maxResults: null, phase: '', current: 0, total: 0, result: null, error: null, startedAt: null, completedAt: null };
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
   if (name === 'billing') return { plan: 'normal' };
+  if (name === 'lpContent') return {};
   if (name === 'autoProcessEnabled') return false;
   return {};
 }
@@ -40,6 +42,17 @@ async function set(key, value) {
 export const storeSupabase = {
   getQueue: () => get(KEYS.queue),
   setQueue: (arr) => set(KEYS.queue, arr),
+  getLpContent: async (slug) => {
+    const data = await get(KEYS.lpContent);
+    const obj = data && typeof data === 'object' ? data : {};
+    return obj[slug] ?? null;
+  },
+  setLpContent: async (slug, content) => {
+    const data = (await get(KEYS.lpContent)) || {};
+    const obj = typeof data === 'object' ? { ...data } : {};
+    obj[slug] = content;
+    await set(KEYS.lpContent, obj);
+  },
   getDashboard: () => get(KEYS.dashboard),
   setDashboard: (arr) => set(KEYS.dashboard, arr),
   getOptions: () => get(KEYS.options),

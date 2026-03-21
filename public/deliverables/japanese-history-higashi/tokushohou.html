@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>特定商取引法に基づく表記 | 日本史徹底攻略 / よし先生</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #060a12;
+      --white: #ffffff;
+      --text-muted: #94a3b8;
+      --cyan-bright: #67e8f9;
+      --line: rgba(148,163,184,0.25);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans JP", sans-serif; background: var(--bg-deep); color: var(--white); line-height: 1.8; font-size: 14px; }
+    a { color: var(--cyan-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 24px 18px 48px; }
+    .back { display: inline-block; margin-bottom: 24px; font-size: 0.88rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 28px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { width: 40%; color: var(--text-muted); font-weight: 600; }
+    td { color: var(--white); }
+    .footer { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← トップへ戻る</a>
+    <h1>特定商取引法に基づく表記</h1>
+
+    <table>
+      <tr><th>販売事業者</th><td data-cid="legal.tokushohou.seller">【管理者画面で編集】</td></tr>
+      <tr><th>運営責任者</th><td data-cid="legal.tokushohou.responsible">【管理者画面で編集】</td></tr>
+      <tr><th>所在地</th><td data-cid="legal.tokushohou.address">【管理者画面で編集】</td></tr>
+      <tr><th>連絡先</th><td data-cid="legal.tokushohou.contact">【管理者画面で編集】<br />（メール・電話等）</td></tr>
+      <tr><th>販売価格</th><td>各プランにより異なります。料金は税込表示です。</td></tr>
+      <tr><th>支払方法</th><td data-cid="legal.tokushohou.paymentMethod">【管理者画面で編集】<br />（例：クレジットカード決済、銀行振込等）</td></tr>
+      <tr><th>支払時期</th><td data-cid="legal.tokushohou.paymentTiming">【管理者画面で編集】<br />（例：毎月〇日締め翌月〇日請求 等）</td></tr>
+      <tr><th>役務の提供時期</th><td>お申込手続き完了後、速やかにサービスを提供いたします。</td></tr>
+      <tr><th>返品・キャンセル</th><td>デジタルコンテンツおよび役務の性質上、ご購入後のキャンセル・返金はお受けしておりません。月額制の場合は、解約手続きにより次回以降の請求を停止できます。詳細はご契約時にご案内します。</td></tr>
+      <tr><th>特別条件</th><td data-cid="legal.tokushohou.specialConditions">【管理者画面で編集】<br />（特記事項がある場合は記載）</td></tr>
+    </table>
+
+    <div class="footer">
+      <p>Presented by <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">Closer</a></p>
+      <p><a href="index.html">トップへ</a>　<a href="terms.html">利用規約</a>　<a href="privacy.html">プライバシーポリシー</a></p>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+    fetch(api + '/lp-content/japanese-history-higashi').then(function(r){ return r.json(); }).then(function(c){
+      if (!c || !c.legal || !c.legal.tokushohou) return;
+      var t = c.legal.tokushohou;
+      ['seller','responsible','address','contact','paymentMethod','paymentTiming','specialConditions'].forEach(function(k){
+        var el = document.querySelector('[data-cid="legal.tokushohou.'+k+'"]');
+        if (el && t[k]) el.innerHTML = t[k];
+      });
+    }).catch(function(){});
+  })();
+  </script>
+</body>
+</html>
