@@ -1,0 +1,19 @@
+---
+description: Do not modify shipped deliverables under public/deliverables/ unless the user explicitly requests it. All other paths are unrestricted.
+alwaysApply: true
+---
+
+# 納品物の保護のみ
+
+## 触ってはいけないもの（例外あり）
+
+- **`public/deliverables/**` 以下の既存ファイル**  
+  ユーザーが **その納品の修正・差し替え・追記** を明示的に依頼したときだけ変更してよい。
+
+## それ以外
+
+- `vercel.json`、アプリ本体、`src/`、`server/`、テンプレ登録、その他 **納品フォルダ外**は、納品物を変えない限り **自由に変更してよい**。
+
+## 新規納品を追加するとき
+
+- ユーザーが **新しい納品を `public/deliverables/` に作る** よう依頼した場合のみ、その配下に追加・編集してよい。
