@@ -17,6 +17,7 @@ export const TEMPLATE_CANDIDATES = [
   { id: 'ramen', name: 'テンプレ12（和モダン）' },
   { id: 'academy_lp', name: 'テンプレ13（高CVセールスLP）' },
   { id: 'navy_cyan_consult', name: 'テンプレ14（ネイビー×シアン・Web/LP）' },
+  { id: 'apparel_lookbook', name: 'テンプレ15（アパレル・ルックブック）' },
 ];
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));

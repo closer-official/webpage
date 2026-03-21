@@ -23,6 +23,7 @@ const PREVIEW_BG: Record<string, string> = {
   apparel: '#FAFAFA',
   event: '#FAFAFA',
   ramen: '#f8eeee',
+  apparel_lookbook: '#79acc4',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -39,6 +40,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   apparel: '#111',
   event: '#111',
   ramen: '#8B2E2E',
+  apparel_lookbook: '#fff',
 };
 
 export function ThemePicker({

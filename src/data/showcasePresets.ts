@@ -610,6 +610,31 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  apparel_lookbook: {
+    content: {
+      siteName: 'L.u.m.e',
+      title: 'L.u.m.e | Lookbook',
+      headline: '2025 Spring Summer',
+      subheadline: 'Even if it’s small — 日常の光に馴染む小さなワードローブ。',
+      ctaLabel: 'ONLINE STORE',
+      ctaHref: 'https://thebase.in',
+      sections: [
+        { id: 'concept', title: 'コンセプト', content: 'このテンプレは固定HTML（apparel-lookbook-intro）で表示されます。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} L.u.m.e demo`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
+      ],
+    },
+    seo: {
+      metaTitle: 'L.u.m.e | Lookbook デモ',
+      metaDescription: '一色オープニングから動画へ。番号タップの横スライドとショップ導線。',
+      keywords: 'アパレル, ルックブック, ファッション, BASE',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
+      canonicalUrl: '',
+    },
+  },
   navy_cyan_consult: {
     content: {
       siteName: 'ウェブ制作 / Closer',

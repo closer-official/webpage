@@ -3,6 +3,7 @@ import type { NavItem } from '../types';
 import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml';
+import { buildApparelLookbookDeliverableMainHtmlClient } from './apparelLookbookDeliverableMainHtml';
 import { buildNavyDeliverableMainHtmlClient } from './navyDeliverableMainHtml';
 
 function escapeHtml(s: string): string {
@@ -116,6 +117,7 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'FAQ', href: '#faq' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  apparel_lookbook: [{ label: 'Online', href: 'https://thebase.in' }],
 };
 
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
@@ -132,6 +134,8 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   apparel: { label: 'オンラインショップ', href: '#contact' },
   event: { label: 'お申し込み', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
+  navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
+  apparel_lookbook: { label: 'ONLINE STORE', href: 'https://thebase.in' },
 };
 
 /** プレビュー・エクスポート用の完全なHTMLを生成 */
@@ -688,6 +692,8 @@ ${cafe1ShopLocationsHtml()}
     ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
     cafe_1: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
+    apparel_lookbook:
+      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
   };
   const heroSlidesFiltered = (content.heroSlides ?? []).filter((u) => (u || '').trim());
   const heroImageUrl =
@@ -794,6 +800,10 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">`
+      : tid === 'apparel_lookbook'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Great+Vibes&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -801,7 +811,7 @@ ${cafe1ShopLocationsHtml()}
         : '';
 
   const scrollInScript =
-    tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult'
+    tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult' || tid === 'apparel_lookbook'
       ? ''
       : `<script>
 (function(){
@@ -1512,12 +1522,19 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
         )
       : '';
 
+  const apparelLookbookMainHtmlClient =
+    tid === 'apparel_lookbook'
+      ? buildApparelLookbookDeliverableMainHtmlClient(escapeHtml)
+      : '';
+
+  const embeddedDeliverableMainHtml = navyMainHtmlClient + apparelLookbookMainHtmlClient;
+
   const bodyInner =
     tid === 'builder'
       ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-      : tid === 'navy_cyan_consult'
+      : tid === 'navy_cyan_consult' || tid === 'apparel_lookbook'
         ? `${skipLink}
-${navyMainHtmlClient}
+${embeddedDeliverableMainHtml}
   ${
     bookingOn && genOpts?.bookingItemId && genOpts?.bookingApiOrigin
       ? renderBookingBodyWidget({

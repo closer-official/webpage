@@ -165,7 +165,8 @@ export type StyleId =
   | 'event'              // 11. イベント
   | 'ramen'              // 12. ラーメン
   | 'academy_lp'         // 13. 高CVセールスLP
-  | 'navy_cyan_consult'; // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
+  | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
+  | 'apparel_lookbook'; // 15. アパレル・ルックブック（apparel-lookbook-intro）
 
 /** テンプレートあたりのバリアント数（11×1 = 11 スロットでスタート） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -218,6 +219,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'ramen', name: 'ラーメン' },
   { id: 'academy_lp', name: 'ハイコンバージョンLP' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web制作・LP）' },
+  { id: 'apparel_lookbook', name: 'アパレル・ルックブック' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

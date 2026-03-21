@@ -16,6 +16,10 @@ const RULES = [
   { style: 'ramen', re: /ラーメン|らーめん|ramen|つけ麺|油そば|支那そば|中華そば/i },
   { style: 'izakaya', re: /居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge/i },
   { style: 'pet_salon', re: /ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i },
+  {
+    style: 'apparel_lookbook',
+    re: /ルックブック|look\s*book|特集ページ|コラボページ|コレクション.?ページ|キャンペーン.?ページ/i,
+  },
   { style: 'apparel', re: /アパレル|服|ファッション|cloth|apparel|fashion|ブティック|boutique|ブランド|brand/i },
   { style: 'event', re: /イベント|event|フェス|フェスティバル|festival|コンサート|concert|展示会|セミナー|seminar|ワークショップ|workshop/i },
 ];

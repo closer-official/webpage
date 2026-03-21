@@ -175,6 +175,13 @@ const NAVY_DELIVERABLE_PAGE_CSS =
   .page-wrapper.template-navy_cyan_consult .nc-jh-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 ` + NAVY_DELIVERABLE_SCOPED_CSS;
 
+const APPAREL_LOOKBOOK_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #79acc4; outline-offset: 2px; }
+  .page-wrapper.template-apparel_lookbook main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-apparel_lookbook .alb-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 /** テンプレ3〜11用の共通CSS（プレビュー用・professional・pet_salon・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
   .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
@@ -818,6 +825,13 @@ export const TEMPLATES: TemplateOption[] = [
     'ネイビー×シアン（Web制作・LP）',
     'テンプレ14：web-closer-intro 既定の固定HTML＋スコープCSS（納品デモは navyDeliverableSlug で切替）',
     NAVY_DELIVERABLE_PAGE_CSS,
+    { omitCommonBase: true }
+  ),
+  makeTemplate(
+    'apparel_lookbook',
+    'アパレル・ルックブック',
+    'テンプレ15：一色オープニング→写真→全画面動画、番号タップ横スライド、BASEのBUY導線（apparel-lookbook-intro）',
+    APPAREL_LOOKBOOK_PAGE_CSS,
     { omitCommonBase: true }
   ),
 ];

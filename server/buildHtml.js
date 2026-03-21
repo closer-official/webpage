@@ -2,6 +2,7 @@ import { getTemplateFullCss } from './conceptTemplates.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml.js';
+import { buildApparelLookbookDeliverableMainHtml } from './apparelLookbookDeliverableClone.js';
 import { buildNavyDeliverableMainHtml } from './navyDeliverableClone.js';
 
 function escapeHtml(s) {
@@ -131,6 +132,7 @@ const DEFAULT_NAV = {
     { label: 'FAQ', href: '#faq' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  apparel_lookbook: [{ label: 'Online', href: 'https://thebase.in' }],
 };
 
 const DEFAULT_CTA = {
@@ -145,6 +147,8 @@ const DEFAULT_CTA = {
   izakaya: { label: 'ご予約', href: '#contact' },
   pet_salon: { label: 'ご予約', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
+  navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
+  apparel_lookbook: { label: 'ONLINE STORE', href: 'https://thebase.in' },
 };
 
 const defaultHeroImages = {
@@ -162,6 +166,8 @@ const defaultHeroImages = {
   event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
   ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
   navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
+  apparel_lookbook:
+    'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=85',
 };
 
 /**
@@ -993,6 +999,10 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">`
+      : tid === 'apparel_lookbook'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Great+Vibes&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1572,11 +1582,14 @@ ${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')
           content.navyDeliverableSlug || genOptions.navyDeliverableSlug
         )
       : '';
+  const apparelLookbookMainHtml =
+    tid === 'apparel_lookbook' ? buildApparelLookbookDeliverableMainHtml(escapeHtml) : '';
+  const embeddedDeliverableMainHtml = navyMainHtml + apparelLookbookMainHtml;
   const bodyInner = isBuilder
     ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-    : tid === 'navy_cyan_consult'
+    : tid === 'navy_cyan_consult' || tid === 'apparel_lookbook'
       ? `${skipLink}
-${navyMainHtml}
+${embeddedDeliverableMainHtml}
   ${bookingOn ? renderBookingBodyWidget({ ctaLabel: cta.label || '予約する', siteName: content.siteName || content.title || '' }) : ''}`
       : `${skipLink}
   ${woChrome}
