@@ -2,7 +2,7 @@ import type { PageContent, SEOData, StyleId } from '../types';
 import { SHOWCASE_VARIANT_COUNT } from '../types';
 import { WARM_ORGANIC_CAFE_PRESET } from './warmOrganicCafePreset';
 
-/** 1テンプレあたりのバリアント数（14×バリアント数スロット） */
+/** 1テンプレあたりのバリアント数（15×バリアント数スロット） */
 const VARIANT_COUNT = SHOWCASE_VARIANT_COUNT;
 
 /** 汎用プレースホルダー（テンプレ3〜10のひな形） */
@@ -648,6 +648,31 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       metaDescription: 'コーポレートサイト・ランディングページの設計から公開まで。運用しやすさを見据えたWeb制作。',
       keywords: 'Web制作, サイト制作, LP, コーポレートサイト, Closer',
       ogImageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
+  gym_personal_neon: {
+    content: {
+      siteName: 'VALX GYM',
+      title: 'VALX GYM | 24時間フィットネス',
+      headline: '理想の空間を、月額6,980円で。',
+      subheadline: 'テンプレ15は gym-valx-intro の固定HTMLを埋め込みます（黒×ネオンシアン・LINE CTA・料金表・FAQ 等）。',
+      ctaLabel: 'LINEで入会',
+      ctaHref: '#top',
+      sections: [
+        { id: 'concept', title: 'このテンプレについて', content: '参照スクリーンショットに基づく静的レイアウトです。文言・画像は本番前に差し替えてください。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} VALX GYM（構成デモ）`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
+      ],
+    },
+    seo: {
+      metaTitle: 'VALX GYM | 24時間フィットネス（テンプレデモ）',
+      metaDescription: 'パーソナルジム・ネオンシアン系モバイルLPの固定HTMLテンプレート。',
+      keywords: 'ジム, フィットネス, パーソナル, 24時間, LP',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
       canonicalUrl: '',
     },
   },

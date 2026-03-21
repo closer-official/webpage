@@ -149,7 +149,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 14種類テンプレートID（業種別+LP） */
+/** 15種類テンプレートID（業種別+LP） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -165,7 +165,8 @@ export type StyleId =
   | 'event'              // 11. イベント
   | 'ramen'              // 12. ラーメン
   | 'academy_lp'         // 13. 高CVセールスLP
-  | 'navy_cyan_consult'; // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
+  | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
+  | 'gym_personal_neon'; // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
 
 /** テンプレートあたりのバリアント数（現状 1） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -218,6 +219,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'ramen', name: 'ラーメン' },
   { id: 'academy_lp', name: 'ハイコンバージョンLP' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web制作・LP）' },
+  { id: 'gym_personal_neon', name: 'パーソナルジム・ネオン（固定LP）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

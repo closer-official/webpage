@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>VALX GYM | 24時間フィットネス（構成デモ）</title>
+    <meta
+      name="description"
+      content="VALX GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
+    />
+  </head>
+  <body class="m-0 min-h-screen bg-black pb-36 font-sans text-white antialiased [font-family:'Noto_Sans_JP',system-ui,sans-serif]">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              neon: '#00f2ff',
+              'neon-hot': '#00ffff',
+              line: '#06C755',
+              'pink-cmp': '#ff2d6b',
+              'pink-soft': '#f0707a',
+              'pink-deep': '#e84860',
+            },
+            boxShadow: {
+              neon: '0 0 14px rgba(0, 242, 255, 0.55)',
+              'neon-lg': '0 0 22px rgba(0, 242, 255, 0.45)',
+              card: '0 0 12px rgba(0, 242, 255, 0.35)',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .vgx-text-outline-light {
+        -webkit-text-stroke: 1.5px rgba(180, 180, 180, 0.85);
+        color: transparent;
+      }
+      .vgx-text-outline-faq {
+        -webkit-text-stroke: 2px #00f2ff;
+        color: rgba(0, 0, 0, 0.25);
+        filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.75));
+      }
+      .vgx-text-outline-price {
+        -webkit-text-stroke: 2px rgba(255, 255, 255, 0.95);
+        color: transparent;
+      }
+      .vgx-text-outline-flow {
+        -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);
+        color: transparent;
+      }
+      .vgx-text-outline-floor {
+        -webkit-text-stroke: 2px #00f2ff;
+        color: rgba(0, 0, 0, 0.15);
+        filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.9));
+      }
+      .vgx-petal {
+        background: radial-gradient(circle, rgba(255, 150, 180, 0.95) 0%, rgba(255, 100, 150, 0.4) 60%, transparent 70%);
+      }
+    </style>
+
+    <!-- ========== 共通ヘッダー（黒） ========== -->
+    <header
+      id="top"
+      class="sticky top-0 z-[60] flex items-center justify-between border-b border-white/5 bg-black px-4 py-3"
+      aria-label="サイトヘッダー"
+    >
+      <div class="flex flex-col leading-none">
+        <span class="text-[1.05rem] font-black italic tracking-tight text-neon">VALX</span>
+        <span class="text-[0.72rem] font-bold tracking-[0.2em] text-neon">GYM</span>
+      </div>
+      <div class="flex flex-col gap-[5px]" aria-hidden="true">
+        <span class="h-[2px] w-6 bg-white"></span>
+        <span class="h-[2px] w-6 bg-white"></span>
+        <span class="h-[2px] w-6 bg-white"></span>
+      </div>
+    </header>
+
+    <!-- ========== LIFE MAKE / トップヒーロー ========== -->
+    <section
+      class="relative isolate min-h-[92vh] overflow-hidden bg-zinc-950 bg-cover bg-center"
+      style="
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82)),
+          url(https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <div class="pointer-events-none absolute right-6 top-24 text-[10px] font-bold tracking-[0.35em] text-neon">
+        LIFE MAKE STATION
+      </div>
+      <div class="relative mx-auto flex max-w-md flex-col px-5 pb-28 pt-10">
+        <div class="mb-6 flex justify-center">
+          <svg width="120" height="100" viewBox="0 0 120 100" class="text-neon" aria-hidden="true">
+            <path
+              d="M20 15 L55 85 M35 15 L70 85"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="10"
+              stroke-linecap="square"
+            />
+            <path
+              d="M65 15 L100 85 M80 15 L115 85"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="10"
+              stroke-linecap="square"
+              opacity="0.85"
+            />
+          </svg>
+        </div>
+        <p class="text-center text-xl font-black tracking-wide text-neon">
+          VALX <span class="border-b-2 border-neon pb-0.5">GYM</span>
+        </p>
+        <p class="mt-4 text-center text-sm font-bold text-white/95">
+          武蔵小山 - 調布 - 溝の口 - 錦糸町 - 福岡天神
+        </p>
+        <div class="mt-10 space-y-1 text-left">
+          <p class="text-2xl font-black leading-snug text-white">理想の空間を、</p>
+          <p class="text-2xl font-black leading-snug text-white">
+            月額<span class="text-5xl font-black text-neon">6,980</span>円で。
+          </p>
+          <p class="text-sm font-medium text-white/80">（税込7,678円）</p>
+        </div>
+        <div class="mt-8 grid grid-cols-2 gap-3">
+          <div
+            class="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg bg-white/90 p-3 text-center shadow-lg"
+          >
+            <div
+              class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-neon text-[9px] font-black leading-tight text-neon shadow-neon"
+            >
+              24H<br />OPEN
+            </div>
+            <p class="text-[11px] font-black leading-snug text-black">いつでも通える<br />24時間営業！</p>
+          </div>
+          <div
+            class="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg bg-white/90 p-3 text-center shadow-lg"
+          >
+            <div class="text-3xl text-neon" aria-hidden="true">🚃</div>
+            <p class="text-[11px] font-black leading-snug text-black">アクセス抜群！<br />駅チカ好立地！</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== INTRODUCTION ========== -->
+    <section
+      class="relative bg-zinc-950 bg-cover bg-center px-6 py-14"
+      style="
+        background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.55)),
+          url(https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <p class="mb-3 text-xs font-bold tracking-[0.25em] text-white/90">INTRODUCTION</p>
+      <h2 class="text-2xl font-black leading-snug text-white md:text-[1.65rem]">
+        理想の空間を、月額6,980円で。
+      </h2>
+      <p class="mt-1 text-sm text-white/85">（税込7,678円）</p>
+      <p class="mt-6 text-base font-bold leading-relaxed text-white">
+        ジム初心者の方からジムに通い慣れた方まで、全ての人が満足できるジム環境を妥協なく追求。
+      </p>
+      <p class="mt-4 text-sm leading-relaxed text-white/85">
+        メジャーリーガー監修のトレーニングメソッド。YouTube登録者数69万人超の発信力で、正しい知識と継続のサポートを提供します。
+      </p>
+    </section>
+
+    <!-- ========== 8つの理由 ========== -->
+    <section class="bg-white pb-10 pt-8 text-black">
+      <div class="relative px-4">
+        <p
+          class="absolute -right-1 top-0 max-w-[40%] text-right text-[2.5rem] font-black leading-none vgx-text-outline-light opacity-90"
+          style="font-family: system-ui, sans-serif"
+        >
+          WHY<br />VALX<br />GYM?
+        </p>
+        <h2 class="relative z-10 max-w-[78%] text-2xl font-black leading-tight">
+          VALX GYMが選ばれる、<span class="border-b-[5px] border-neon pb-0.5">8つの理由</span>。
+        </h2>
+      </div>
+      <div class="mt-8 grid grid-cols-2 gap-3 px-3">
+        <!-- 1 -->
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">1</span>
+          <h3 class="text-sm font-black text-white">24時間営業</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+            仕事帰りに、休みの日に、自分のペースで好きな時間に
+          </p>
+          <div
+            class="mt-1 flex h-12 w-12 items-center justify-center rounded-full border border-neon text-[8px] font-black text-neon shadow-neon"
+          >
+            24H
+          </div>
+        </article>
+        <!-- 2 -->
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">2</span>
+          <h3 class="text-sm font-black text-white">面倒なアプリ<br />ダウンロード不要！</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+            LINE 友だち追加だけで全てのサービスが受けられます
+          </p>
+          <div class="text-2xl text-neon" aria-hidden="true">💬</div>
+        </article>
+        <!-- 3 -->
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">3</span>
+          <h3 class="text-sm font-black text-white">充実の<br />マシンラインナップ</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+            BULL / TORQUE / TECHNOGYM 本格マシンでトレーニング
+          </p>
+          <div class="text-2xl text-neon" aria-hidden="true">🏋️</div>
+        </article>
+        <!-- 4 -->
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">4</span>
+          <h3 class="text-sm font-black text-white">非接触型の<br />最新ジム運営</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+            来店不要、入会手続きはWEBで完結
+          </p>
+          <div class="text-2xl text-neon" aria-hidden="true">📱</div>
+        </article>
+        <!-- 5-8 -->
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">5</span>
+          <h3 class="text-sm font-black text-white">プロ監修<br />トレーニング</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">正しいフォームとメニューで効率よく結果へ</p>
+          <div class="text-2xl text-neon" aria-hidden="true">✓</div>
+        </article>
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">6</span>
+          <h3 class="text-sm font-black text-white">清潔で快適な<br />トレーニング空間</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">広々フロアと最新空調で集中できる環境</p>
+          <div class="text-2xl text-neon" aria-hidden="true">✨</div>
+        </article>
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">7</span>
+          <h3 class="text-sm font-black text-white">初心者も安心<br />サポート体制</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">スタッフ・コンテンツで最初の一歩を後押し</p>
+          <div class="text-2xl text-neon" aria-hidden="true">＋</div>
+        </article>
+        <article
+          class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
+        >
+          <span class="text-4xl font-black text-neon">8</span>
+          <h3 class="text-sm font-black text-white">複数エリア<br />で展開</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90">都内・福岡など主要エリアに店舗ネットワーク</p>
+          <div class="text-2xl text-neon" aria-hidden="true">📍</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== 春のキャンペーン ========== -->
+    <section class="relative overflow-hidden bg-black">
+      <div
+        class="relative min-h-[320px] bg-cover bg-center"
+        style="
+          background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.75)),
+            url(https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80);
+        "
+      >
+        <div class="vgx-petal absolute left-[8%] top-[18%] h-6 w-10 rotate-12 rounded-full opacity-80"></div>
+        <div class="vgx-petal absolute left-[22%] top-[10%] h-5 w-8 -rotate-6 rounded-full opacity-70"></div>
+        <div class="vgx-petal absolute right-[12%] top-[22%] h-7 w-11 rotate-45 rounded-full opacity-75"></div>
+        <div class="relative px-5 pb-8 pt-10">
+          <p class="font-serif text-3xl font-bold leading-tight text-white drop-shadow-lg md:text-4xl">
+            <span class="block">春の</span>
+            <span class="block text-4xl md:text-5xl">新生活応援</span>
+            <span class="block text-3xl md:text-4xl">キャンペーン</span>
+          </p>
+          <div class="mt-4 inline-block bg-black/70 px-3 py-1 text-[10px] font-bold text-white">
+            24時間365日 フィットネスジム
+          </div>
+          <div
+            class="absolute right-4 top-16 flex h-24 w-24 flex-col items-center justify-center rounded-full bg-pink-cmp text-center shadow-lg"
+          >
+            <span class="text-xs font-bold text-white">4/30</span>
+            <span class="text-sm font-black text-white">まで</span>
+          </div>
+        </div>
+      </div>
+      <div class="bg-pink-cmp py-3 text-center">
+        <p class="text-base font-black text-white">最大15,400円(税込)お得！</p>
+      </div>
+      <div class="bg-pink-soft px-4 py-8">
+        <div class="relative mx-auto grid max-w-md grid-cols-[1fr_auto] gap-2">
+          <div class="space-y-4">
+            <div>
+              <span class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+                >入会金</span
+              >
+              <p class="mt-1 text-2xl font-black text-white">5,500円(税込)</p>
+            </div>
+            <div>
+              <span class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+                >入会翌月会費</span
+              >
+              <p class="mt-1 text-xl font-black text-white">〜9,900円(税込)</p>
+              <p class="text-[10px] text-black/70">※伴走プランの場合</p>
+            </div>
+          </div>
+          <div class="relative flex flex-col items-center justify-center">
+            <div class="absolute -left-2 top-1/2 h-0 w-0 -translate-y-1/2 border-y-8 border-l-12 border-y-transparent border-l-white"></div>
+            <p class="text-7xl font-black leading-none text-white">0<span class="text-4xl">円</span></p>
+          </div>
+        </div>
+        <div
+          class="mx-auto mt-6 flex max-w-md items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-pink-deep"
+        >
+          さらに！VALXオリジナルシェイカープレゼント！
+          <span
+            class="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-200 text-[8px] font-black text-zinc-600"
+            >VALX</span
+          >
+        </div>
+        <p class="mx-auto mt-4 max-w-md text-[10px] leading-relaxed text-black/80">
+          ※セルフ/伴走プランのみ適応です。※初回事務手数料5,500円(税込)がかかります。
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== LINE 誘導（白地） ========== -->
+    <section class="bg-white px-5 py-10 text-black">
+      <p class="text-center text-sm font-bold">LINEからの入会手続きで</p>
+      <p class="mt-2 text-center text-lg font-black">
+        <span class="bg-yellow-300/90 px-1">お得なキャンペーンを適用する！</span>
+      </p>
+      <a
+        href="#top"
+        class="mx-auto mt-6 flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#00b900] py-4 text-sm font-black text-white shadow-lg"
+      >
+        <span class="text-xl" aria-hidden="true">L</span>
+        LINE友だち追加はこちら！
+      </a>
+    </section>
+
+    <!-- ========== 入会までの流れ ========== -->
+    <section class="relative overflow-hidden bg-neon px-4 pb-32 pt-12 text-black">
+      <p
+        class="pointer-events-none absolute -top-4 left-1/2 w-[120%] -translate-x-1/2 text-center text-[4.5rem] font-black leading-none vgx-text-outline-flow opacity-40"
+      >
+        FLOW
+      </p>
+      <h2 class="relative z-10 text-center text-xl font-black">入会までの流れ</h2>
+
+      <div class="relative z-10 mx-auto mt-10 max-w-md space-y-2">
+        <article class="relative rounded-lg bg-white p-5 pl-24 shadow-md">
+          <span class="absolute -top-3 left-3 font-black italic text-neon" style="font-size: 2.25rem; line-height: 1"
+            >STEP<span class="text-black">1</span></span
+          >
+          <div class="absolute left-5 top-12 text-2xl" aria-hidden="true">👤＋</div>
+          <h3 class="font-black">LINE友達追加</h3>
+          <p class="mt-2 text-xs font-medium leading-relaxed text-zinc-700">
+            公式LINEを友だち追加。案内に沿って必要事項をご入力ください。
+          </p>
+        </article>
+        <div class="mx-auto h-0 w-0 border-l-[10px] border-r-[10px] border-t-[14px] border-l-transparent border-r-transparent border-t-black"></div>
+        <article class="relative rounded-lg bg-white p-5 pl-24 shadow-md">
+          <span class="absolute -top-3 left-3 font-black italic text-neon" style="font-size: 2.25rem; line-height: 1"
+            >STEP<span class="text-black">2</span></span
+          >
+          <div class="absolute left-5 top-12 text-2xl" aria-hidden="true">📝</div>
+          <h3 class="font-black">WEB入会申込</h3>
+          <p class="mt-2 text-xs font-medium leading-relaxed text-zinc-700">
+            プラン選択・決済までオンラインで完結。来店の必要はありません。
+          </p>
+        </article>
+        <div class="mx-auto h-0 w-0 border-l-[10px] border-r-[10px] border-t-[14px] border-l-transparent border-r-transparent border-t-black"></div>
+        <article class="relative rounded-lg bg-white p-5 pl-24 shadow-md">
+          <span class="absolute -top-3 left-3 font-black italic text-neon" style="font-size: 2.25rem; line-height: 1"
+            >STEP<span class="text-black">3</span></span
+          >
+          <div class="absolute left-5 top-12 text-2xl" aria-hidden="true">✉️</div>
+          <h3 class="font-black">ご利用開始</h3>
+          <p class="mt-2 text-xs font-medium leading-relaxed text-zinc-700">
+            登録完了後、すぐに24時間ジムをご利用いただけます。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== プロフィール ========== -->
+    <section
+      class="relative bg-cover bg-center px-5 py-12"
+      style="
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88)),
+          url(https://images.unsplash.com/photo-1517836357463-d25dfc4cfdd5?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <div class="mx-auto flex max-w-md gap-4">
+        <div
+          class="h-28 w-28 shrink-0 overflow-hidden rounded-full border-2 border-white bg-zinc-800 bg-cover bg-center shadow-lg"
+          style="
+            background-image: url(https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=400&q=80);
+          "
+        ></div>
+        <div>
+          <h2 class="text-xl font-black text-white">山本 義徳 氏</h2>
+          <p class="mt-1 text-[10px] font-bold tracking-widest text-white/80">YOSHINORI YAMAMOTO</p>
+        </div>
+      </div>
+      <p class="mx-auto mt-6 max-w-md text-sm leading-relaxed text-white/90">
+        YouTube登録者数69万人超。早稲田大学卒。ボディビル大会入賞歴多数。著書・メディア出演を通じ、科学的根拠に基づくトレーニングを発信。VALX
+        GYMの監修・ブランドの核となる存在です。
+      </p>
+      <div class="my-8 h-px w-full bg-gradient-to-r from-transparent via-neon to-transparent opacity-80"></div>
+      <div class="flex justify-center text-neon">
+        <svg width="80" height="72" viewBox="0 0 80 72" aria-hidden="true">
+          <path d="M10 8 L40 64 M25 8 L55 64" fill="none" stroke="currentColor" stroke-width="8" />
+        </svg>
+      </div>
+      <div
+        class="relative mt-6 min-h-[200px] overflow-hidden rounded-lg bg-cover bg-center"
+        style="
+          background-image: linear-gradient(105deg, rgba(0, 0, 0, 0.5), transparent),
+            url(https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1200&q=80);
+        "
+      >
+        <p
+          class="absolute bottom-4 right-3 max-w-[70%] text-right text-sm font-black leading-snug tracking-tight text-white drop-shadow-md"
+        >
+          FROM BEGINNER<br />TO PROFESSIONAL
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== PRICE + SERVICE ========== -->
+    <section
+      class="bg-zinc-950 bg-cover bg-center px-3 py-10"
+      style="
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.92)),
+          url(https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <h2
+        class="text-center text-3xl font-black tracking-tight vgx-text-outline-price md:text-4xl"
+        style="font-family: system-ui, sans-serif"
+      >
+        PRICE + SERVICE
+      </h2>
+      <div class="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div class="rounded-md bg-cyan-200/90 p-2 text-center text-[10px] font-black text-black">
+          伴走プラン
+          <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Intermediate</span>
+        </div>
+        <div class="rounded-md bg-cyan-400 p-2 text-center text-[10px] font-black text-black">
+          ウィークリー
+          <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Advanced</span>
+        </div>
+        <div class="rounded-md bg-sky-500 p-2 text-center text-[10px] font-black text-white">
+          フルサポート
+          <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Beginner to Advanced</span>
+        </div>
+        <div class="rounded-md bg-zinc-300 p-2 text-center text-[10px] font-black text-black">
+          セルフ
+          <span class="mt-1 block rounded-full bg-black px-1 py-0.5 text-[8px] text-white">Intermediate+</span>
+        </div>
+      </div>
+      <div class="mt-6 overflow-hidden rounded-xl bg-white text-black shadow-neon-lg">
+        <div class="grid grid-cols-3 bg-neon/20 text-center text-[10px] font-black">
+          <div class="p-2"></div>
+          <div class="border-l border-white/40 bg-cyan-100/80 p-2">伴走プラン</div>
+          <div class="border-l border-white/40 bg-cyan-200/80 p-2">ウィークリー</div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[11px]">
+          <div class="bg-zinc-100 p-3 text-left font-bold">月額料金</div>
+          <div class="border-l border-zinc-200 bg-cyan-50 p-3">
+            <span class="text-lg font-black text-red-600">9,000円</span>
+            <p class="text-[10px] text-red-600">(税込9,900円)</p>
+          </div>
+          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3">
+            <span class="text-lg font-black text-red-600">14,800円</span>
+            <p class="text-[10px] text-red-600">(税込16,280円)</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
+          <div class="bg-zinc-100 p-3 text-left text-[11px]">24時間ジム利用</div>
+          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[10px]">
+          <div class="bg-zinc-100 p-3 text-left font-bold">パーソナルトレーニング</div>
+          <div class="border-l border-cyan-50 bg-cyan-50 p-2">月1回（45分）</div>
+          <div class="border-l border-cyan-100 bg-cyan-100/60 p-2">月4回（45分）</div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
+          <div class="bg-zinc-100 p-3 text-left text-[11px]">初回カウンセリング</div>
+          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-xs font-bold">
+          <div class="bg-zinc-100 p-3 text-left text-[11px]">InBody測定</div>
+          <div class="border-l border-zinc-200 bg-cyan-50 p-3 text-2xl">○</div>
+          <div class="border-l border-zinc-200 bg-cyan-100/60 p-3 text-2xl">○</div>
+        </div>
+        <div class="grid grid-cols-3 border-t border-zinc-200 text-center text-[10px]">
+          <div class="bg-zinc-100 p-3 text-left font-bold">専用プラン作成</div>
+          <div class="border-l border-cyan-50 bg-cyan-50 p-2">○</div>
+          <div class="border-l border-cyan-100 bg-cyan-100/60 p-2">○</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ビジター ========== -->
+    <section
+      class="bg-cover bg-center px-4 py-12"
+      style="
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.9)),
+          url(https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <div class="mx-auto max-w-md overflow-hidden rounded-xl bg-zinc-200 shadow-xl">
+        <div
+          class="relative bg-black py-2 text-center text-sm font-black text-white after:absolute after:left-1/2 after:top-full after:h-0 after:w-0 after:-translate-x-1/2 after:border-l-8 after:border-r-8 after:border-t-8 after:border-l-transparent after:border-r-transparent after:border-t-black"
+        >
+          ビジター利用プラン
+        </div>
+        <div class="flex items-stretch gap-0 p-4">
+          <div class="flex w-24 items-center justify-center bg-black text-center text-[10px] font-black leading-tight text-white">
+            ビジター<br />利用
+          </div>
+          <div class="flex-1 pl-4">
+            <p class="text-2xl font-black text-black">3,000<span class="text-lg">円/回</span></p>
+            <p class="text-xs font-bold text-zinc-700">（税込 3,300 円 / 回）</p>
+            <p class="mt-1 text-[10px] text-zinc-600">※スタッフアワーのみのご利用になります。</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 divide-x divide-dotted divide-zinc-400 border-t border-zinc-300 px-4 py-3">
+          <div class="pr-2 text-center">
+            <p class="text-[10px] font-bold">入会金</p>
+            <p class="text-xl font-black">0円</p>
+          </div>
+          <div class="pl-2 text-center">
+            <p class="text-[10px] font-bold">施設メンテナンス料</p>
+            <p class="text-xl font-black">0円</p>
+          </div>
+        </div>
+        <div class="p-4 pt-0">
+          <a
+            href="#top"
+            class="flex items-center justify-center gap-2 rounded-xl border-2 border-white bg-gradient-to-b from-lime-400 to-lime-600 py-3 text-sm font-black text-white shadow-lg"
+          >
+            <span aria-hidden="true">L</span>
+            ビジター利用はこちらから
+          </a>
+        </div>
+      </div>
+      <div class="mx-auto mt-12 max-w-md">
+        <p class="text-2xl font-black tracking-widest text-white">OPTION</p>
+        <p class="text-sm font-bold text-white/90">オプションサービス</p>
+        <div class="my-4 border-t border-dotted border-white/40"></div>
+        <div class="flex gap-6">
+          <div class="text-center text-neon">
+            <div class="text-4xl" aria-hidden="true">🗝️</div>
+            <p class="mt-2 text-xs font-bold">レンタルロッカー</p>
+          </div>
+          <div class="flex-1 space-y-2 text-sm font-bold text-white">
+            <p>小：1,000 円 / 月<span class="block text-xs font-medium text-white/75">（税込 1,100 円 / 月）</span></p>
+            <p>大：1,500 円 / 月<span class="block text-xs font-medium text-white/75">（税込 1,650 円 / 月）</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FAQ ========== -->
+    <section class="bg-black px-4 py-12">
+      <div
+        class="bg-cover bg-center pb-8 pt-6"
+        style="
+          background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95)),
+            url(https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1000&q=80);
+        "
+      >
+        <h2 class="text-center text-5xl font-black vgx-text-outline-faq" style="font-family: system-ui, sans-serif">FAQ</h2>
+        <p class="mt-2 text-center text-sm font-bold text-white">よくある質問</p>
+      </div>
+      <h3 class="mt-6 text-sm font-black text-white">
+        <span class="border-b-4 border-neon pb-0.5">施設について</span>
+      </h3>
+      <ul class="mt-4 space-y-2">
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">どのような施設ですか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">
+            24時間365日利用可能なフィットネスジムです。最新マシンと清潔な空間を備えています。
+          </p>
+        </li>
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">店舗での受付は可能ですか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">基本は非接触運営のため、LINE・WEBでの手続きがスムーズです。</p>
+        </li>
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">入会前にジムを見学することはできますか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">店舗により異なります。LINEでお問い合わせください。</p>
+        </li>
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">レッスンプログラムはありますか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">プランに応じてパーソナルトレーニングやメニュー提案があります。</p>
+        </li>
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">更衣室はありますか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">はい、ロッカー・更衣室をご用意しています。</p>
+        </li>
+        <li class="border border-white/10 bg-black px-3 py-3">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neon text-xs font-black text-black"
+              >Q</span
+            >
+            <span class="text-sm font-bold text-white">レンタルロッカーはありますか？</span>
+          </div>
+          <p class="mt-2 pl-10 text-xs leading-relaxed text-white/75">サイズ別のレンタルロッカーをオプションでご利用いただけます。</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ========== 店舗：武蔵小山 ========== -->
+    <section class="bg-zinc-900 py-12">
+      <div class="px-6 text-center">
+        <h2 class="text-3xl font-black text-white">武蔵小山</h2>
+        <p class="mt-1 text-sm font-bold tracking-[0.2em] text-neon">MUSASHIKOYAMA</p>
+      </div>
+      <div
+        class="mx-auto mt-8 max-w-md rounded-lg border-2 border-neon p-4 shadow-neon-lg"
+        style="box-shadow: 0 0 20px rgba(0, 242, 255, 0.4)"
+      >
+        <div class="relative grid h-48 grid-cols-4 grid-rows-4 gap-1 bg-zinc-800 p-2 text-[7px] font-bold text-white">
+          <div class="col-span-2 row-span-2 flex items-center justify-center bg-zinc-600">CARDIO</div>
+          <div class="col-span-2 row-span-2 flex items-center justify-center bg-neon text-black">MACHINE</div>
+          <div class="flex items-center justify-center bg-zinc-700">FREE<br />WEIGHT</div>
+          <div class="col-span-2 flex items-center justify-center bg-zinc-600">PERSONAL</div>
+          <div class="flex items-center justify-center bg-zinc-700 text-[6px]">ロッカー</div>
+          <div class="col-span-2 flex items-center justify-center bg-zinc-600 text-[6px]">エントランス</div>
+        </div>
+      </div>
+      <div class="mt-10 grid grid-cols-2 gap-3 px-4">
+        <div class="aspect-square overflow-hidden rounded bg-zinc-800 bg-cover bg-center" style="background-image: url(https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=600&q=80)"></div>
+        <div class="aspect-square overflow-hidden rounded bg-zinc-800 bg-cover bg-center" style="background-image: url(https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80)"></div>
+        <div class="aspect-square overflow-hidden rounded bg-zinc-800 bg-cover bg-center" style="background-image: url(https://images.unsplash.com/photo-1517836357463-d25dfc4cfdd5?auto=format&fit=crop&w=600&q=80)"></div>
+        <div class="relative aspect-square overflow-hidden rounded bg-zinc-800 bg-cover bg-center" style="background-image: url(https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80)">
+          <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-40">
+            <svg width="100" height="100" viewBox="0 0 100 100" class="text-neon">
+              <path d="M15 10 L50 90 M35 10 L70 90" stroke="currentColor" stroke-width="12" fill="none" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FLOOR MAP / ヒーロー ========== -->
+    <section
+      class="relative min-h-[280px] bg-cover bg-center px-5 py-16 text-center"
+      style="
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.65)),
+          url(https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1200&q=80);
+      "
+    >
+      <h2 class="text-xl font-black leading-snug tracking-tight text-white drop-shadow-lg md:text-2xl">
+        CLEAN, COMFORTABLE<br />TRAINING
+      </h2>
+      <p class="mx-auto mt-4 max-w-sm text-sm font-bold text-white/95">
+        快適にフィットネスが楽しめる、広々としたトレーニング空間
+      </p>
+    </section>
+    <section class="bg-zinc-950 px-4 py-10">
+      <h2 class="text-center text-4xl font-black vgx-text-outline-floor" style="font-family: system-ui, sans-serif">
+        FLOOR MAP
+      </h2>
+      <ul class="mx-auto mt-8 max-w-md space-y-3">
+        <li class="border-b-2 border-neon pb-2 text-lg font-black text-white">武蔵小山</li>
+        <li class="border-b border-white/30 pb-2 text-lg font-black text-white">溝の口</li>
+        <li class="border-b border-white/30 pb-2 text-lg font-black text-white">調布</li>
+        <li class="border-b border-white/30 pb-2 text-lg font-black text-white">錦糸町</li>
+        <li class="border-b border-white/30 pb-2 text-lg font-black text-white">福岡天神</li>
+      </ul>
+    </section>
+
+    <!-- ========== 店舗カードグリッド ========== -->
+    <section class="bg-zinc-200 py-10">
+      <div class="mx-auto grid max-w-lg grid-cols-2 gap-4 px-4">
+        <article
+          class="flex flex-col items-center rounded-lg border border-neon bg-white p-4 text-center shadow-[0_0_16px_rgba(0,242,255,0.35)]"
+        >
+          <h3 class="text-lg font-black">武蔵小山</h3>
+          <p class="mt-1 text-[10px] font-bold tracking-widest text-zinc-800">MUSASHI-KOYAMA</p>
+          <p class="mt-3 text-[10px] font-medium leading-relaxed text-zinc-700">
+            東京都品川区<br />東急目黒線<br />武蔵小山駅
+          </p>
+          <p class="mt-2 text-xs font-black">から徒歩2分</p>
+          <a
+            href="#top"
+            class="mt-4 w-full rounded-lg bg-gradient-to-b from-lime-400 to-lime-700 py-2 text-xs font-black text-white shadow"
+            >入会登録はこちら</a
+          >
+        </article>
+        <article
+          class="flex flex-col items-center rounded-lg border border-neon bg-white p-4 text-center shadow-[0_0_16px_rgba(0,242,255,0.35)]"
+        >
+          <h3 class="text-lg font-black">溝の口</h3>
+          <p class="mt-1 text-[10px] font-bold tracking-widest text-zinc-800">MIZONOKUCHI</p>
+          <p class="mt-3 text-[10px] font-medium text-zinc-700">神奈川県川崎市<br />田園都市線・JR南武線</p>
+          <p class="mt-2 text-xs font-black">駅近アクセス</p>
+          <a
+            href="#top"
+            class="mt-4 w-full rounded-lg bg-gradient-to-b from-lime-400 to-lime-700 py-2 text-xs font-black text-white shadow"
+            >入会登録はこちら</a
+          >
+        </article>
+      </div>
+    </section>
+
+    <!-- 上へ（静的アンカーのみ） -->
+    <a
+      href="#top"
+      class="fixed bottom-[5.5rem] right-4 z-[55] flex h-11 w-11 items-center justify-center rounded-full bg-neon text-lg font-black text-black shadow-neon"
+      aria-label="ページ上部へ"
+      >^</a
+    >
+
+    <!-- ========== 固定フッター CTA ========== -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-500 px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.35)]"
+    >
+      <div class="mx-auto flex max-w-lg items-center justify-between gap-2">
+        <p class="text-left text-xs font-black leading-tight text-red-600">
+          24時間<br />受付可
+        </p>
+        <a
+          href="#top"
+          class="flex shrink-0 flex-col items-center rounded-lg border-2 border-white bg-line px-2 py-1.5 text-center shadow-md"
+        >
+          <span class="text-[10px] font-black text-white">入会はLINEから</span>
+          <span class="mt-1 flex items-center gap-1 rounded-full bg-black px-3 py-1 text-[10px] font-black text-white">
+            <span aria-hidden="true">L</span>
+            今すぐ友だち追加!
+          </span>
+        </a>
+      </div>
+      <div class="mt-2 flex justify-center pb-1">
+        <span class="rounded-full bg-cyan-100 px-6 py-1 text-[10px] font-bold text-zinc-900 shadow">gym.valx.jp</span>
+      </div>
+    </div>
+  </body>
+</html>

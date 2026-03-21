@@ -3,6 +3,7 @@ import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml.js';
 import { buildNavyDeliverableMainHtml } from './navyDeliverableClone.js';
+import { buildGymValxDeliverableMainHtml } from './gymValxDeliverableClone.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -131,6 +132,7 @@ const DEFAULT_NAV = {
     { label: 'FAQ', href: '#faq' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  gym_personal_neon: [{ label: 'トップ', href: '#top' }],
 };
 
 const DEFAULT_CTA = {
@@ -146,6 +148,7 @@ const DEFAULT_CTA = {
   pet_salon: { label: 'ご予約', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
+  gym_personal_neon: { label: 'LINEで入会', href: '#top' },
 };
 
 const defaultHeroImages = {
@@ -994,13 +997,20 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">`
+      : tid === 'gym_personal_neon'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
         : '';
   const a1Script = '';
-  const scrollInScript = `<script>
+  const scrollInScript =
+    tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
+      ? ''
+      : `<script>
 (function(){
 var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -28px 0px'});
@@ -1573,10 +1583,11 @@ ${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')
           content.navyDeliverableSlug || genOptions.navyDeliverableSlug
         )
       : '';
-  const embeddedDeliverableMainHtml = navyMainHtml;
+  const gymValxMainHtml = tid === 'gym_personal_neon' ? buildGymValxDeliverableMainHtml() : '';
+  const embeddedDeliverableMainHtml = navyMainHtml + gymValxMainHtml;
   const bodyInner = isBuilder
     ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-    : tid === 'navy_cyan_consult'
+    : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
       ? `${skipLink}
 ${embeddedDeliverableMainHtml}
   ${bookingOn ? renderBookingBodyWidget({ ctaLabel: cta.label || '予約する', siteName: content.siteName || content.title || '' }) : ''}`

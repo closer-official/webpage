@@ -465,6 +465,7 @@ export const TEMPLATE_IDS = [
   'ramen',              // 12. ラーメン
   'academy_lp',         // 13. 高CVセールスLP
   'navy_cyan_consult',  // 14. ダークネイビー×シアン（講座・コンサルLP）
+  'gym_personal_neon', // 15. パーソナルジム・ネオンシアン（gym-valx-intro 固定HTML）
 ];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
@@ -1095,10 +1096,21 @@ const NAVY_DELIVERABLE_PAGE_CSS =
   .page-wrapper.template-navy_cyan_consult .nc-jh-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 ` + NAVY_DELIVERABLE_SCOPED_CSS;
 
+/** 15. gym_personal_neon — deliverables/gym-valx-intro */
+const GYM_VALX_DELIVERABLE_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #000; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #00f2ff; outline-offset: 2px; }
+  .page-wrapper.template-gym_personal_neon main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-gym_personal_neon .vgx-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 export function getTemplateFullCss(templateId) {
   const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
   if (key === 'navy_cyan_consult') {
     return NAVY_DELIVERABLE_PAGE_CSS;
+  }
+  if (key === 'gym_personal_neon') {
+    return GYM_VALX_DELIVERABLE_PAGE_CSS;
   }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS

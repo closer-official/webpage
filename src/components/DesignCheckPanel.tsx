@@ -151,6 +151,7 @@ const PREVIEW_BG: Record<string, string> = {
   ramen: '#f8eeee',
   academy_lp: '#0f1115',
   navy_cyan_consult: '#0a0d14',
+  gym_personal_neon: '#0a0a0a',
 };
 
 const PREVIEW_COLOR: Record<string, string> = {
@@ -169,6 +170,7 @@ const PREVIEW_COLOR: Record<string, string> = {
   ramen: '#8B2E2E',
   academy_lp: '#f7b500',
   navy_cyan_consult: '#22d3ee',
+  gym_personal_neon: '#00f2ff',
   blueprint: '#f4f4f1',
 };
 

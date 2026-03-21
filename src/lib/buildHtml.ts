@@ -4,6 +4,7 @@ import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml';
 import { buildNavyDeliverableMainHtmlClient } from './navyDeliverableMainHtml';
+import { buildGymValxDeliverableMainHtmlClient } from './gymValxDeliverableMainHtml';
 
 function escapeHtml(s: string): string {
   return s
@@ -116,6 +117,7 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'FAQ', href: '#faq' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  gym_personal_neon: [{ label: 'トップ', href: '#top' }],
 };
 
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
@@ -133,6 +135,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   event: { label: 'お申し込み', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
+  gym_personal_neon: { label: 'LINEで入会', href: '#top' },
 };
 
 /** プレビュー・エクスポート用の完全なHTMLを生成 */
@@ -689,6 +692,8 @@ ${cafe1ShopLocationsHtml()}
     ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
     cafe_1: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
+    gym_personal_neon:
+      'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
   };
   const heroSlidesFiltered = (content.heroSlides ?? []).filter((u) => (u || '').trim());
   const heroImageUrl =
@@ -795,6 +800,10 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">`
+      : tid === 'gym_personal_neon'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -802,7 +811,7 @@ ${cafe1ShopLocationsHtml()}
         : '';
 
   const scrollInScript =
-    tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult'
+    tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
       ? ''
       : `<script>
 (function(){
@@ -1513,12 +1522,15 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
         )
       : '';
 
-  const embeddedDeliverableMainHtml = navyMainHtmlClient;
+  const gymValxMainHtmlClient =
+    tid === 'gym_personal_neon' ? buildGymValxDeliverableMainHtmlClient(escapeHtml) : '';
+
+  const embeddedDeliverableMainHtml = navyMainHtmlClient + gymValxMainHtmlClient;
 
   const bodyInner =
     tid === 'builder'
       ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-      : tid === 'navy_cyan_consult'
+      : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
         ? `${skipLink}
 ${embeddedDeliverableMainHtml}
   ${
