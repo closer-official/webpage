@@ -2,13 +2,19 @@
 
 テンプレ **`craft_editorial`（テンプレ16）** 用の固定 HTML。
 
+## スタイル（Tailwind）
+
+- **Tailwind CSS v3（CDN）** でレイアウト・余白・タイポ・質感をユーティリティクラスで指定しています（この納品フォルダ単体で `npm run build` は不要）。
+- ページ先頭の `<script>tailwind.config = { theme: { extend: { … } } }</script>` で色・フォント・ノイズ背景・アニメーション・`shadow-lift` などを定義しています。
+- `<style>` は **WebKit 用スクロールバー** のみ（Tailwind 標準外のため）。
+
 ## コンセプト（「ウェブの魅力30選」に対応する構成）
 
 - **没入FV**: 全画面ヒーロー＋動画（poster フォールバック）＋ビネット（森の写真はデモ用プレースホルダー）。
 - **ローディング**: 暗転→ロゴのフェード＋スケール（`prefers-reduced-motion` で短縮）。
 - **タイポ**: セリフ（Cormorant / Noto Serif JP）×筆風（Yuji Syuku）。
 - **縦書き**: `writing-mode: vertical-rl`（ヒーロー短句・素材見出し）。
-- **和紙テクスチャ**: SVG ノイズ＋ベージュ地（`--ced-paper`）。
+- **和紙テクスチャ**: SVG ノイズタイル＋ベージュ地（`bg-paper` / `bg-noise-tile`）。
 - **視差**: ヒーロー背景に `translateY`（スクロール連動）。
 - **スクロールイン**: `IntersectionObserver`＋ `cubic-bezier(0.25, 1, 0.5, 1)`。
 - **View More**: 赤ドット＋上下ライン（参照パターンの再現）。
