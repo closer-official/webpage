@@ -81,18 +81,5 @@ if (!run(`git push -u origin ${branch}`)) {
 console.log('プッシュ完了。');
 
 if (process.env.DEPLOY_USE_VERCEL_CLI === '1') {
-  console.log('');
-  console.log('DEPLOY_USE_VERCEL_CLI=1 のため npx vercel --prod を実行します（作業ツリーの内容が本番に載ります）。');
-  console.log('');
-  try {
-    execSync('npx vercel --prod --yes', { stdio: 'inherit', cwd: process.cwd() });
-  } catch {
-    console.log('');
-    console.log('Vercel CLI が失敗した場合はダッシュボードを確認: https://vercel.com/dashboard');
-  }
-} else {
-  console.log('');
-  console.log('ヒント: Vercel の Production Branch をこのブランチ（例: master）に合わせていれば、');
-  console.log('      この push で本番まで更新されます。production ブランチ運用は docs/本番ブランチ運用.md');
-  console.log('      CLI で本番直載せする場合のみ: DEPLOY_USE_VERCEL_CLI=1 npm run deploy');
+  execSync('npx vercel --prod --yes', { stdio: 'inherit', cwd: process.cwd() });
 }
