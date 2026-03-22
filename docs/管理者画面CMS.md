@@ -38,3 +38,52 @@
 ## 注意
 
 - 端末から選んだ画像は **Data URL** でダッシュボード JSON に保存されるため、**画像が大きいと保存データが肥大**します。本番運用では画像ホストにアップした **URL 指定**を推奨します。
+
+---
+
+## 店舗ドメイン（`*.store-official.net`）構成
+
+本リポジトリの **本番ビルド**では次の配置になります。
+
+| URL | 内容 |
+|-----|------|
+| `/` | 店舗向け静的LP（既定: `gym-valx-intro/index.html` をルートにコピー） |
+| `/admin/` | ウェブページ作成ツール（React） |
+| `/admin/gym-lp.html` | ジムLP専用の文言・キャンペーン・画像URL・閲覧数の管理 |
+
+### ジムLP（`gym-valx-intro`）API
+
+- `GET /api/lp-content/gym-valx-intro` … 公開LPが読み込み
+- `PUT /api/lp-content/gym-valx-intro` … CMS保存（LP用または全体ADMIN認証）
+- `POST /api/lp-analytics/gym-valx-intro/view` … 閲覧1回の加算（LPが自動送信）
+- `GET /api/lp-analytics/gym-valx-intro` … 累計閲覧数（認証が有効な環境ではログイン必須）
+
+### 店舗ごとのアカウント（推奨・100店舗でも Vercel に登録不要）
+
+- 認証情報は **Supabase の `app_store` キー `lpCmsAccounts`**（またはローカルの `lpCmsAccounts.json`）に保存します。
+- 運営が **全体管理者**（`ADMIN_USERNAME` / `ADMIN_PASSWORD`）でログインしたうえで、次の API を呼び出して店舗を1件ずつ作成します。
+
+```http
+POST /api/admin/lp-cms-provision
+Content-Type: application/json
+
+{
+  "siteKey": "shibuya-studio",
+  "username": "owner_shibuya",
+  "password": "8文字以上のパスワード",
+  "cloneFrom": "gym-valx-intro"
+}
+```
+
+- **`siteKey`**: 英小文字・数字・ハイフン（2〜64文字）。本番では **`https://{siteKey}.store-official.net`** のサブドメインと一致させる想定です。
+- **`cloneFrom`**: `gym-valx-intro` / `web-closer-intro` / `japanese-history-higashi` のいずれか（`lpContent.json` の初期本文をコピー）。
+- 店舗LP・管理画面はホスト名または `?siteKey=` から同じ `siteKey` を解決します。
+
+**Vercel に追加で置くとよいもの（全環境共通で1つずつ）**
+
+- `LP_CMS_SESSION_SECRET` … 店舗CMSクッキー署名用（未設定時はフォールバックあり。本番は必ずランダム文字列を推奨）。
+
+### 旧来の共通LP用ログイン（テンプレ3種のみ）
+
+- **JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD** は、上記テンプレキー専用の「全店共通1組」としてまだ使えます（移行中の互換用）。
+- 新規店舗は **プロビジョニングAPI** による **店舗別ユーザー** を推奨します。

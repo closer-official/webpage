@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/postbuild-storefront.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "cd server && npm run dev",
-    "deploy": "node scripts/deploy.js"
+    "deploy": "node scripts/deploy.js",
+    "deploy:prod": "node scripts/deploy-production.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

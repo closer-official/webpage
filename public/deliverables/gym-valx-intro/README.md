@@ -15,3 +15,17 @@
 ## プレビュー
 
 `index.html` をブラウザで直接開くか、アプリ内でテンプレ **テンプレ15（パーソナルジム・ネオン／固定LP）** を選択してプレビューしてください。
+
+## 店舗用 CMS・閲覧数
+
+- **API**: `GET/PUT /api/lp-content/gym-valx-intro`（保存は `JP_HISTORY_LP_CMS_USER` / `PASSWORD` または `ADMIN_USERNAME` / `PASSWORD` が必要）
+- **閲覧数**: `POST /api/lp-analytics/gym-valx-intro/view`（LP表示時に自動）／集計の確認は `GET /api/lp-analytics/gym-valx-intro`（ログイン時）
+- **管理画面**: 本番では **`/admin/gym-lp.html`**（サブドメイン＝`siteKey` を自動解決。別ドメイン時は `?siteKey=`）
+- **店舗発行**: 運営が `POST /api/admin/lp-cms-provision`（全体ADMIN）でユーザー作成 → Supabase `lpCmsAccounts` に保存（Vercel に店舗数のID/PWは不要）
+- 初期JSONは `server/data/json/lpContent.json` の `gym-valx-intro` キー
+
+## 公開URLの例（Vercel ビルド後）
+
+- 店舗サイト: `https://（店舗名）.store-official.net/`
+- 運営ツール: `https://（店舗名）.store-official.net/admin/`
+- ジムLP編集: `https://（店舗名）.store-official.net/admin/gym-lp.html`

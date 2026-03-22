@@ -17,7 +17,7 @@
 
 1. このフォルダごとコピーし、フォルダ名を英小文字・ハイフンのみにする（例: `my-brand-lp`）。
 2. `index.html` 末尾スクリプトの `fetch(.../lp-content/スラッグ)` を同じスラッグに合わせる。
-3. `server/index.js` の `LP_CONTENT_SLUGS` / `LP_CMS_SLUGS` にスラッグを追加。
+3. `server/index.js` の `LP_CMS_TEMPLATE_SLUGS` にスラッグを追加（同梱テンプレ用）。店舗別は `POST /api/admin/lp-cms-provision` で `siteKey` を発行。
 4. `lpContent.json` に同じキーで初期 JSON を追加。
 5. 案件で `navyDeliverableSlug` をそのスラッグに設定。
 

@@ -231,6 +231,30 @@ export const api = {
       body: JSON.stringify({ username, password }),
     }),
   logoutAdmin: () => fetchApi<{ ok: boolean }>('/api/admin-auth/logout', { method: 'POST' }),
+  /** 運営ADMINのみ: 店舗ごとのLP CMSユーザー作成（Supabase / ローカルJSON に保存。Vercelに店舗数の環境変数は不要） */
+  provisionLpCmsStore: (body: {
+    siteKey: string;
+    username: string;
+    password: string;
+    cloneFrom?: string;
+  }) =>
+    fetchApi<{ ok: boolean; siteKey: string }>('/api/admin/lp-cms-provision', {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(body),
+    }),
+  /** 納品用テンプレ一覧（公開API・ログイン不要） */
+  getProductLpTemplates: () =>
+    fetchApi<{
+      templates: Array<{
+        slug: string;
+        name: string;
+        description: string;
+        purchaserEditorPath: string;
+        purchaserEditorQuery: string;
+        liveDemoPath: string;
+      }>;
+    }>('/api/product-lp-templates'),
   getTemplateCandidates: () =>
     fetchApi<TemplateCandidate[]>('/api/template-candidates', { credentials: 'include' }),
   getTemplateCustomizations: () =>

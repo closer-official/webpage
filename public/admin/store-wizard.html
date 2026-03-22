@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>店舗セットアップ | テンプレ選択</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0c1220;
+        color: #e8edf5;
+      }
+      body {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      .note {
+        font-size: 0.88rem;
+        color: #9aacbf;
+        line-height: 1.6;
+        background: #151d2e;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #2a3b52;
+      }
+      .tpl {
+        border: 2px solid #2a3b52;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 10px 0;
+        cursor: pointer;
+        background: #121a2b;
+      }
+      .tpl:hover {
+        border-color: #38bdf8;
+      }
+      .tpl.selected {
+        border-color: #22d3ee;
+        box-shadow: 0 0 0 1px #22d3ee;
+      }
+      .tpl h3 {
+        margin: 0 0 6px;
+        font-size: 1rem;
+      }
+      .tpl p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #9aacbf;
+      }
+      label {
+        display: block;
+        margin-top: 14px;
+        font-size: 0.82rem;
+        color: #9aacbf;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+      }
+      button.primary {
+        margin-top: 20px;
+        width: 100%;
+        padding: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #22d3ee, #0891b2);
+        color: #0f172a;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      button.primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .err {
+        color: #f87171;
+        font-size: 0.88rem;
+        margin-top: 10px;
+      }
+      .ok {
+        background: #152a22;
+        border: 1px solid #22c55e;
+        color: #86efac;
+        padding: 14px;
+        border-radius: 10px;
+        margin-top: 16px;
+        font-size: 0.9rem;
+      }
+      .ok a {
+        color: #a7f3d0;
+      }
+      code {
+        font-size: 0.82rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>店舗セットアップ（標準フロー）</h1>
+    <p class="note">
+      <strong>流れ:</strong> テンプレを選ぶ → 店舗キーとログイン情報を決める →
+      <strong>この内容でサイトを作成</strong> → 表示された<strong>購入者用ページ</strong>で文章・写真を編集 → DNS で
+      <code>店舗キー.store-official.net</code> 等を向ける。<br />
+      実行には <strong>ツール管理者ログイン</strong>（このドメインで管理画面に入っている状態）か、環境変数
+      <code>STORE_SETUP_PROVISION_TOKEN</code> を下欄に入力してください。
+    </p>
+
+    <h2 style="font-size: 1rem; margin-top: 1.5rem">1. テンプレを選ぶ</h2>
+    <div id="tpl-list">読み込み中…</div>
+
+    <h2 style="font-size: 1rem; margin-top: 1.5rem">2. 店舗情報</h2>
+    <label>店舗キー（URLに使う英小文字・数字・ハイフン）</label>
+    <input type="text" id="siteKey" placeholder="例: shibuya-studio" autocomplete="off" />
+    <label>管理画面のユーザー名</label>
+    <input type="text" id="username" autocomplete="username" />
+    <label>管理画面のパスワード（8文字以上）</label>
+    <input type="password" id="password" autocomplete="new-password" />
+
+    <label>セットアップ用トークン（任意・管理者でログイン済みなら空でOK）</label>
+    <input type="password" id="setupToken" placeholder="STORE_SETUP_PROVISION_TOKEN を決済後メール等で渡す場合" autocomplete="off" />
+
+    <button type="button" class="primary" id="btnGo">この内容でサイトを作成</button>
+    <div class="err" id="err"></div>
+    <div id="ok" style="display: none" class="ok"></div>
+
+    <script>
+      var api = (function () {
+        var p = location.pathname.indexOf('/admin/');
+        if (p >= 0) return location.pathname.slice(0, p) + '/api';
+        return '/api';
+      })();
+
+      var selectedSlug = null;
+      var templates = [];
+
+      function esc(s) {
+        return String(s || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function renderList() {
+        var el = document.getElementById('tpl-list');
+        if (!templates.length) {
+          el.innerHTML = '<p class="err">テンプレ一覧を取得できません。</p>';
+          return;
+        }
+        el.innerHTML = templates
+          .map(function (t) {
+            return (
+              '<div class="tpl" data-slug="' +
+              esc(t.slug) +
+              '" role="button" tabindex="0"><h3>' +
+              esc(t.name) +
+              '</h3><p>' +
+              esc(t.description) +
+              '</p><p style="margin-top:8px;font-size:0.78rem;opacity:0.85">slug: <code>' +
+              esc(t.slug) +
+              '</code></p></div>'
+            );
+          })
+          .join('');
+        el.querySelectorAll('.tpl').forEach(function (node) {
+          node.addEventListener('click', function () {
+            el.querySelectorAll('.tpl').forEach(function (n) {
+              n.classList.remove('selected');
+            });
+            node.classList.add('selected');
+            selectedSlug = node.getAttribute('data-slug');
+          });
+        });
+        el.querySelector('.tpl').click();
+      }
+
+      fetch(api + '/product-lp-templates')
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          templates = data.templates || [];
+          renderList();
+        })
+        .catch(function () {
+          document.getElementById('tpl-list').innerHTML = '<p class="err">一覧の取得に失敗しました。</p>';
+        });
+
+      document.getElementById('btnGo').onclick = function () {
+        document.getElementById('err').textContent = '';
+        document.getElementById('ok').style.display = 'none';
+        if (!selectedSlug) {
+          document.getElementById('err').textContent = 'テンプレを選んでください。';
+          return;
+        }
+        var body = {
+          siteKey: document.getElementById('siteKey').value.trim(),
+          username: document.getElementById('username').value.trim(),
+          password: document.getElementById('password').value,
+          cloneFrom: selectedSlug,
+        };
+        var tok = document.getElementById('setupToken').value.trim();
+        var headers = { 'Content-Type': 'application/json' };
+        if (tok) headers['Authorization'] = 'Bearer ' + tok;
+        fetch(api + '/store-setup/provision', {
+          method: 'POST',
+          headers: headers,
+          credentials: 'include',
+          body: JSON.stringify(body),
+        })
+          .then(function (r) {
+            return r.json().then(function (j) {
+              return { ok: r.ok, j: j };
+            });
+          })
+          .then(function (_ref) {
+            var j = _ref.j;
+            if (!_ref.ok) throw new Error(j.error || '失敗');
+            var pe = j.purchaserEditorUrl || '';
+            var ps = j.publicSiteUrl || '';
+            document.getElementById('ok').style.display = 'block';
+            document.getElementById('ok').innerHTML =
+              '<strong>作成しました。</strong> siteKey: <code>' +
+              esc(j.siteKey) +
+              '</code><br /><br />' +
+              '<strong>購入者用（文章・写真の編集）</strong><br /><a href="' +
+              esc(pe) +
+              '" target="_blank" rel="noopener">' +
+              esc(pe) +
+              '</a><br /><br />' +
+              '<strong>公開ページ（同一オリジン上のプレビュー）</strong><br /><a href="' +
+              esc(ps) +
+              '" target="_blank" rel="noopener">' +
+              esc(ps) +
+              '</a><br /><br />' +
+              '本番は DNS で <code>' +
+              esc(j.siteKey) +
+              '.store-official.net</code> 等をこのプロジェクトに向けてください。';
+          })
+          .catch(function (e) {
+            document.getElementById('err').textContent = e.message || String(e);
+          });
+      };
+    </script>
+  </body>
+</html>

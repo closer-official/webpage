@@ -102,6 +102,14 @@ export function StoreCms({ items, onRefresh }: StoreCmsProps) {
         <p className="store-cms-hint">
           アクセス数の確認、文言・写真の差し替えができます。（現在は全店舗表示・のちにオプション加入店のみに制限予定）
         </p>
+        <p className="store-cms-hint" style={{ marginTop: 8 }}>
+          店舗ドメイン運用時は <strong>トップが店舗LP</strong>、ツールの管理画面は{' '}
+          <code>/admin/</code> です（例: <code>https://店舗名.store-official.net/admin/</code>）。ジムLP（gym-valx）専用の編集・閲覧数は{' '}
+          <a href="/admin/gym-lp.html" target="_blank" rel="noopener noreferrer">
+            /admin/gym-lp.html
+          </a>
+          からも行えます。
+        </p>
         {items.length === 0 ? (
           <p className="store-cms-empty">ダッシュボードに案件がありません。</p>
         ) : (

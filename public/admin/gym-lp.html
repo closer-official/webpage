@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>店舗LP管理 | VALX型ジム</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --accent: #f87171; --red: #f87171; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans JP", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 1.25rem; margin-bottom: 8px; }
+    .sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    section { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    section h2 { font-size: 0.95rem; margin-bottom: 12px; color: var(--accent); }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+    input[type="text"], input[type="url"], textarea { width: 100%; padding: 9px 11px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: var(--text); font-size: 0.88rem; margin-bottom: 10px; }
+    textarea { min-height: 72px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .locked { background: #1e293b; padding: 10px; border-radius: 8px; color: var(--muted); font-size: 0.85rem; }
+    .btn { display: inline-block; padding: 10px 18px; background: linear-gradient(135deg, #f87171, #dc2626); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.88rem; }
+    .btn:hover { opacity: 0.92; }
+    .btn-secondary { background: #334155; color: var(--text); text-decoration: none; text-align: center; }
+    .msg { padding: 10px; border-radius: 8px; margin-bottom: 12px; }
+    .msg.ok { background: rgba(248, 113, 113, 0.15); color: var(--accent); }
+    .msg.err { background: rgba(248, 113, 113, 0.2); color: #fecaca; }
+    .login-form { max-width: 320px; margin: 0 auto; padding: 36px 0; }
+    .stats { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .stats-meta { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+    .back { color: var(--accent); text-decoration: none; font-size: 0.86rem; margin-bottom: 14px; display: inline-block; }
+    .back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p id="currentSiteKeyLine" class="sub" style="margin-bottom:10px;"></p>
+    <a class="back" href="/">← 店舗ページ（トップ）へ</a>
+    <div id="loginArea" class="login-form" style="display:none;">
+      <h1 id="loginTitle">店舗管理者ログイン</h1>
+      <p id="loginHint" style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;line-height:1.55;"></p>
+      <form id="loginForm">
+        <label>ユーザー名</label>
+        <input type="text" name="username" autocomplete="username" required />
+        <label>パスワード</label>
+        <input type="password" name="password" autocomplete="current-password" required />
+        <button type="submit" class="btn">ログイン</button>
+      </form>
+    </div>
+    <div id="adminArea" style="display:none;">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
+        <h1 style="margin:0;">ジムLP · 店舗管理</h1>
+        <button type="button" class="btn btn-secondary" id="logoutBtn">ログアウト</button>
+      </div>
+      <p class="sub">
+        キャンペーン文言・写真URL・LINE申込先などを変更できます。サイトキーは
+        <strong id="siteKeyDisplay">—</strong>（サブドメインまたは <code>?siteKey=</code>）。
+        店舗ごとのログインは Supabase に保存され、Vercel へ店舗数分の環境変数は不要です。
+      </p>
+      <p id="authBanner" style="display:none;padding:10px;border-radius:8px;background:rgba(251,191,36,0.12);color:#fcd34d;font-size:0.82rem;margin-bottom:12px;line-height:1.55;"></p>
+      <div id="msg"></div>
+
+      <section>
+        <h2>アクセス数（このLP）</h2>
+        <p class="stats" id="viewCountDisplay">—</p>
+        <p class="stats-meta" id="viewCountMeta"></p>
+      </section>
+
+      <section>
+        <h2>ページ・SEO</h2>
+        <label>ページタイトル（&lt;title&gt;）</label>
+        <input type="text" id="page.title" />
+        <label>メタ説明</label>
+        <textarea id="page.description" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>ヘッダー</h2>
+        <div class="row">
+          <div><label>ブランド上段</label><input type="text" id="header.line1" /></div>
+          <div><label>ブランド下段</label><input type="text" id="header.line2" /></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>ヒーロー</h2>
+        <label>背景画像URL</label>
+        <input type="url" id="hero.bgUrl" />
+        <label>右上ラベル（LIFE MAKE…）</label>
+        <input type="text" id="hero.corner" />
+        <label>メイン名（HTML可）</label>
+        <textarea id="hero.nameHtml" rows="2"></textarea>
+        <label>タグライン</label>
+        <input type="text" id="hero.tagline" />
+        <label>価格上のリード文</label>
+        <input type="text" id="hero.priceLead" />
+        <label>価格行（HTML可・月額と金額）</label>
+        <textarea id="hero.priceLineHtml" rows="2"></textarea>
+        <label>税表記</label>
+        <input type="text" id="hero.priceTax" />
+        <div class="row">
+          <div><label>カード1バッジ（改行可）</label><textarea id="hero.card1badge" rows="2"></textarea></div>
+          <div><label>カード1説明</label><textarea id="hero.card1text" rows="2"></textarea></div>
+        </div>
+        <div class="row">
+          <div><label>カード2絵文字</label><input type="text" id="hero.card2emoji" /></div>
+          <div><label>カード2説明</label><textarea id="hero.card2text" rows="2"></textarea></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>イントロ</h2>
+        <label>背景画像URL</label>
+        <input type="url" id="intro.bgUrl" />
+        <label>キッカー（INTRODUCTION）</label>
+        <input type="text" id="intro.kicker" />
+        <label>見出し</label>
+        <input type="text" id="intro.title" />
+        <label>税表記</label>
+        <input type="text" id="intro.tax" />
+        <label>本文1</label>
+        <textarea id="intro.body1" rows="2"></textarea>
+        <label>本文2</label>
+        <textarea id="intro.body2" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>8つの理由</h2>
+        <label>ブロック見出し（HTML可）</label>
+        <textarea id="why.titleHtml" rows="2"></textarea>
+        <p style="font-size:0.78rem;color:var(--muted);margin:8px 0;">各カード：タイトルは &lt;br /&gt; 可</p>
+        <div id="whyCards"></div>
+      </section>
+
+      <section>
+        <h2>キャンペーン</h2>
+        <label>背景画像URL</label>
+        <input type="url" id="campaign.bgUrl" />
+        <div class="row">
+          <div><label>見出し1行目</label><input type="text" id="campaign.line1" /></div>
+          <div><label>見出し2行目</label><input type="text" id="campaign.line2" /></div>
+        </div>
+        <label>見出し3行目</label>
+        <input type="text" id="campaign.line3" />
+        <label>黒チップ文言</label>
+        <input type="text" id="campaign.chip" />
+        <div class="row">
+          <div><label>期限（上）</label><input type="text" id="campaign.date1" /></div>
+          <div><label>期限（下）</label><input type="text" id="campaign.date2" /></div>
+        </div>
+        <label>ピンクバー文言</label>
+        <input type="text" id="campaign.banner" />
+        <div class="row">
+          <div><label>入会金ラベル</label><input type="text" id="campaign.fee1label" /></div>
+          <div><label>入会金金額</label><input type="text" id="campaign.fee1val" /></div>
+        </div>
+        <div class="row">
+          <div><label>翌月会費ラベル</label><input type="text" id="campaign.fee2label" /></div>
+          <div><label>翌月会費金額</label><input type="text" id="campaign.fee2val" /></div>
+        </div>
+        <label>翌月会費注釈</label>
+        <input type="text" id="campaign.fee2note" />
+        <label>大きな「0円」周り（HTML可）</label>
+        <textarea id="campaign.zeroHtml" rows="2"></textarea>
+        <label>ギフトバナー文言</label>
+        <input type="text" id="campaign.gift" />
+        <label>免責・注釈</label>
+        <textarea id="campaign.disclaimer" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>LINE誘導ブロック</h2>
+        <label>上段</label>
+        <input type="text" id="line.lead" />
+        <label>ハイライト文</label>
+        <input type="text" id="line.highlight" />
+      </section>
+
+      <section>
+        <h2>プロフィール</h2>
+        <label>セクション背景画像URL</label>
+        <input type="url" id="profile.bgUrl" />
+        <label>顔写真URL（円形）</label>
+        <input type="url" id="profile.avatarUrl" />
+        <label>お名前</label>
+        <input type="text" id="profile.name" />
+        <label>ローマ字等</label>
+        <input type="text" id="profile.nameEn" />
+        <label>プロフィール文</label>
+        <textarea id="profile.bio" rows="3"></textarea>
+        <label>下段写真URL</label>
+        <input type="url" id="profile.shotBgUrl" />
+        <label>下段キャプション（HTML可）</label>
+        <textarea id="profile.shotCaptionHtml" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>料金ブロック背景</h2>
+        <label>背景画像URL（PRICE+SERVICE）</label>
+        <input type="url" id="price.bgUrl" />
+      </section>
+
+      <section>
+        <h2>アクセス</h2>
+        <label>スタジオ名</label>
+        <input type="text" id="access.name" />
+        <label>サブ（英字等）</label>
+        <input type="text" id="access.sub" />
+        <label>住所（HTML可・&lt;br /&gt;）</label>
+        <textarea id="access.addressHtml" rows="3"></textarea>
+        <label>駅からのアクセス</label>
+        <input type="text" id="access.station" />
+        <label>注釈</label>
+        <textarea id="access.note" rows="2"></textarea>
+      </section>
+
+      <section>
+        <h2>下部スティッキーCTA</h2>
+        <label>申込・LINE先URL（全緑・赤ボタン共通）</label>
+        <input type="text" id="applyUrl" placeholder="#top または https://..." />
+        <label>補足文</label>
+        <textarea id="sticky.note" rows="2"></textarea>
+        <label>ドメイン表記</label>
+        <input type="text" id="sticky.domain" />
+      </section>
+
+      <div class="locked" style="margin-bottom:14px;">
+        <strong>閲覧数</strong>は店舗ページを開いた回数をサーバーでカウントしています（管理画面ログイン中の表示はカウントに含まれません）。
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+        <button type="button" class="btn" id="saveBtn">保存する</button>
+        <a href="/" class="btn btn-secondary" target="_blank" rel="noopener">店舗ページを開く</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    /** 店舗キー: ?siteKey= または サブドメイン（例: shibuya.store-official.net → shibuya）。ローカルは gym-valx-intro */
+    function resolveLpSiteKey() {
+      const q = new URLSearchParams(location.search);
+      const fromQuery = q.get('site') || q.get('siteKey');
+      if (
+        fromQuery &&
+        /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(fromQuery) &&
+        fromQuery.length >= 2 &&
+        fromQuery.length <= 64
+      ) {
+        return fromQuery.toLowerCase();
+      }
+      const h = location.hostname;
+      const m = h.match(/^([a-z0-9][a-z0-9-]*[a-z0-9])\.store-official\.net$/i);
+      if (m) return m[1].toLowerCase();
+      return 'gym-valx-intro';
+    }
+    const SLUG = resolveLpSiteKey();
+    const skLine = document.getElementById('currentSiteKeyLine');
+    if (skLine) skLine.textContent = 'サイトキー: ' + SLUG + '（別店舗は ?siteKey= またはサブドメインで切替）';
+
+    function getApiBase() {
+      const p = location.pathname;
+      if (p.includes('/deliverables/')) {
+        const parts = p.split('/deliverables/')[0];
+        return parts ? parts + API : API;
+      }
+      return API;
+    }
+    const apiBase = getApiBase();
+
+    const wc = document.getElementById('whyCards');
+    for (let i = 0; i < 8; i++) {
+      const box = document.createElement('div');
+      box.style.cssText = 'border-top:1px solid #334155;padding-top:10px;margin-top:10px;';
+      box.innerHTML =
+        '<p style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">カード ' +
+        (i + 1) +
+        '</p>' +
+        '<label>タイトル</label><textarea id="why.' +
+        i +
+        '.title" rows="2"></textarea>' +
+        '<label>本文</label><textarea id="why.' +
+        i +
+        '.body" rows="2"></textarea>';
+      wc.appendChild(box);
+    }
+
+    let authState = { mode: 'none', authenticated: false };
+
+    function showMsg(text, ok) {
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function getByPath(obj, path) {
+      return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+    }
+
+    async function loadStats() {
+      const el = document.getElementById('viewCountDisplay');
+      const meta = document.getElementById('viewCountMeta');
+      try {
+        const r = await fetch(apiBase + '/lp-analytics/' + SLUG, { credentials: 'include' });
+        if (!r.ok) {
+          el.textContent = '取得できません（ログインが必要な場合があります）';
+          return;
+        }
+        const j = await r.json();
+        el.textContent = '累計 ' + (j.viewCount ?? 0) + ' 回';
+        meta.textContent = j.updatedAt ? '最終記録: ' + j.updatedAt : '';
+      } catch {
+        el.textContent = '取得エラー';
+      }
+    }
+
+    function fillForm(c) {
+      if (!c) return;
+      const sets = [
+        ['page.title', 'page.title'],
+        ['page.description', 'page.description'],
+        ['header.line1', 'header.line1'],
+        ['header.line2', 'header.line2'],
+        ['applyUrl', 'applyUrl'],
+        ['hero.bgUrl', 'hero.bgUrl'],
+        ['hero.corner', 'hero.corner'],
+        ['hero.nameHtml', 'hero.nameHtml'],
+        ['hero.tagline', 'hero.tagline'],
+        ['hero.priceLead', 'hero.priceLead'],
+        ['hero.priceLineHtml', 'hero.priceLineHtml'],
+        ['hero.priceTax', 'hero.priceTax'],
+        ['hero.card1badge', 'hero.card1badge'],
+        ['hero.card1text', 'hero.card1text'],
+        ['hero.card2emoji', 'hero.card2emoji'],
+        ['hero.card2text', 'hero.card2text'],
+        ['intro.bgUrl', 'intro.bgUrl'],
+        ['intro.kicker', 'intro.kicker'],
+        ['intro.title', 'intro.title'],
+        ['intro.tax', 'intro.tax'],
+        ['intro.body1', 'intro.body1'],
+        ['intro.body2', 'intro.body2'],
+        ['why.titleHtml', 'why.titleHtml'],
+        ['campaign.bgUrl', 'campaign.bgUrl'],
+        ['campaign.line1', 'campaign.line1'],
+        ['campaign.line2', 'campaign.line2'],
+        ['campaign.line3', 'campaign.line3'],
+        ['campaign.chip', 'campaign.chip'],
+        ['campaign.date1', 'campaign.date1'],
+        ['campaign.date2', 'campaign.date2'],
+        ['campaign.banner', 'campaign.banner'],
+        ['campaign.fee1label', 'campaign.fee1label'],
+        ['campaign.fee1val', 'campaign.fee1val'],
+        ['campaign.fee2label', 'campaign.fee2label'],
+        ['campaign.fee2val', 'campaign.fee2val'],
+        ['campaign.fee2note', 'campaign.fee2note'],
+        ['campaign.zeroHtml', 'campaign.zeroHtml'],
+        ['campaign.gift', 'campaign.gift'],
+        ['campaign.disclaimer', 'campaign.disclaimer'],
+        ['line.lead', 'line.lead'],
+        ['line.highlight', 'line.highlight'],
+        ['profile.bgUrl', 'profile.bgUrl'],
+        ['profile.avatarUrl', 'profile.avatarUrl'],
+        ['profile.name', 'profile.name'],
+        ['profile.nameEn', 'profile.nameEn'],
+        ['profile.bio', 'profile.bio'],
+        ['profile.shotBgUrl', 'profile.shotBgUrl'],
+        ['profile.shotCaptionHtml', 'profile.shotCaptionHtml'],
+        ['price.bgUrl', 'price.bgUrl'],
+        ['access.name', 'access.name'],
+        ['access.sub', 'access.sub'],
+        ['access.addressHtml', 'access.addressHtml'],
+        ['access.station', 'access.station'],
+        ['access.note', 'access.note'],
+        ['sticky.note', 'sticky.note'],
+        ['sticky.domain', 'sticky.domain'],
+      ];
+      sets.forEach(([id, path]) => {
+        const el = document.getElementById(id);
+        const v = getByPath(c, path);
+        if (el && v != null) el.value = v;
+      });
+      const cards = c.why && c.why.cards;
+      if (cards && cards.length) {
+        for (let i = 0; i < 8; i++) {
+          if (!cards[i]) continue;
+          const t = document.getElementById('why.' + i + '.title');
+          const b = document.getElementById('why.' + i + '.body');
+          if (t && cards[i].title != null) t.value = cards[i].title;
+          if (b && cards[i].body != null) b.value = cards[i].body;
+        }
+      }
+    }
+
+    function val(id) {
+      const el = document.getElementById(id);
+      return el ? String(el.value || '').trim() : '';
+    }
+
+    function collectFormData() {
+      const cards = [];
+      for (let i = 0; i < 8; i++) {
+        cards.push({
+          title: val('why.' + i + '.title'),
+          body: val('why.' + i + '.body'),
+        });
+      }
+      return {
+        page: { title: val('page.title'), description: val('page.description') },
+        header: { line1: val('header.line1'), line2: val('header.line2') },
+        applyUrl: val('applyUrl'),
+        hero: {
+          bgUrl: val('hero.bgUrl'),
+          corner: val('hero.corner'),
+          nameHtml: val('hero.nameHtml'),
+          tagline: val('hero.tagline'),
+          priceLead: val('hero.priceLead'),
+          priceLineHtml: val('hero.priceLineHtml'),
+          priceTax: val('hero.priceTax'),
+          card1badge: val('hero.card1badge'),
+          card1text: val('hero.card1text'),
+          card2emoji: val('hero.card2emoji'),
+          card2text: val('hero.card2text'),
+        },
+        intro: {
+          bgUrl: val('intro.bgUrl'),
+          kicker: val('intro.kicker'),
+          title: val('intro.title'),
+          tax: val('intro.tax'),
+          body1: val('intro.body1'),
+          body2: val('intro.body2'),
+        },
+        why: { titleHtml: val('why.titleHtml'), cards },
+        campaign: {
+          bgUrl: val('campaign.bgUrl'),
+          line1: val('campaign.line1'),
+          line2: val('campaign.line2'),
+          line3: val('campaign.line3'),
+          chip: val('campaign.chip'),
+          date1: val('campaign.date1'),
+          date2: val('campaign.date2'),
+          banner: val('campaign.banner'),
+          fee1label: val('campaign.fee1label'),
+          fee1val: val('campaign.fee1val'),
+          fee2label: val('campaign.fee2label'),
+          fee2val: val('campaign.fee2val'),
+          fee2note: val('campaign.fee2note'),
+          zeroHtml: val('campaign.zeroHtml'),
+          gift: val('campaign.gift'),
+          disclaimer: val('campaign.disclaimer'),
+        },
+        line: { lead: val('line.lead'), highlight: val('line.highlight') },
+        profile: {
+          bgUrl: val('profile.bgUrl'),
+          avatarUrl: val('profile.avatarUrl'),
+          name: val('profile.name'),
+          nameEn: val('profile.nameEn'),
+          bio: val('profile.bio'),
+          shotBgUrl: val('profile.shotBgUrl'),
+          shotCaptionHtml: val('profile.shotCaptionHtml'),
+        },
+        price: { bgUrl: val('price.bgUrl') },
+        access: {
+          name: val('access.name'),
+          sub: val('access.sub'),
+          addressHtml: val('access.addressHtml'),
+          station: val('access.station'),
+          note: val('access.note'),
+        },
+        sticky: { note: val('sticky.note'), domain: val('sticky.domain') },
+      };
+    }
+
+    async function init() {
+      const statusR = await fetch(apiBase + '/lp-cms/' + SLUG + '/status', { credentials: 'include' });
+      if (!statusR.ok) {
+        document.getElementById('loginArea').style.display = 'block';
+        document.getElementById('loginTitle').textContent = 'サイトキー未登録';
+        document.getElementById('loginHint').innerHTML =
+          'キー <strong>' +
+          SLUG +
+          '</strong> はまだサーバーにありません。運営が <code>POST /api/admin/lp-cms-provision</code> で店舗を作成するまで、ログインできません。';
+        const lf = document.getElementById('loginForm');
+        if (lf) lf.style.display = 'none';
+        return;
+      }
+      authState = await statusR.json();
+
+      const skd = document.getElementById('siteKeyDisplay');
+      if (skd) skd.textContent = SLUG;
+
+      if (authState.mode === 'lp_cms' && !authState.authenticated) {
+        document.getElementById('loginTitle').textContent = '店舗LP 管理者ログイン';
+        document.getElementById('loginHint').textContent =
+          'この店舗用に運営が発行したユーザー名・パスワードでログインしてください。（旧テンプレのみ共通の JP_HISTORY_LP_CMS_* も利用できます）';
+        document.getElementById('loginArea').style.display = 'block';
+        bindLoginForm('lp_cms');
+        return;
+      }
+      if (authState.mode === 'global_admin' && !authState.authenticated) {
+        document.getElementById('loginTitle').textContent = '運営管理者ログイン';
+        document.getElementById('loginHint').textContent = 'ADMIN_USERNAME / ADMIN_PASSWORD でログインしてください。';
+        document.getElementById('loginArea').style.display = 'block';
+        bindLoginForm('global_admin');
+        return;
+      }
+
+      document.getElementById('adminArea').style.display = 'block';
+      if (authState.mode === 'none') {
+        const b = document.getElementById('authBanner');
+        b.style.display = 'block';
+        b.textContent =
+          '※ 店舗アカウント未作成のときは運営が POST /api/admin/lp-cms-provision で作成してください。開発用には ADMIN_USERNAME / PASSWORD でも保存可能です。';
+      }
+
+      const r = await fetch(apiBase + '/lp-content/' + SLUG);
+      const c = await r.json();
+      fillForm(c);
+      await loadStats();
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch(apiBase + '/lp-cms/' + SLUG + '/logout', { method: 'POST', credentials: 'include' });
+        await fetch(apiBase + '/admin-auth/logout', { method: 'POST', credentials: 'include' });
+        location.reload();
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', async () => {
+        const data = collectFormData();
+        const res = await fetch(apiBase + '/lp-content/' + SLUG, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include',
+        });
+        if (res.ok) showMsg('保存しました。', true);
+        else {
+          let msg = '保存に失敗しました。';
+          try {
+            const j = await res.json();
+            if (j.error) msg = j.error;
+          } catch (e) {}
+          showMsg(msg, false);
+        }
+      });
+    }
+
+    function bindLoginForm(kind) {
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = { username: fd.get('username'), password: fd.get('password') };
+        const url =
+          kind === 'lp_cms'
+            ? apiBase + '/lp-cms/' + SLUG + '/login'
+            : apiBase + '/admin-auth/login';
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        });
+        if (r.ok) {
+          location.reload();
+          return;
+        }
+        let msg = 'ログインに失敗しました。';
+        try {
+          const j = await r.json();
+          if (j.error) msg = j.error;
+        } catch (e2) {}
+        const errEl = document.createElement('p');
+        errEl.className = 'msg err';
+        errEl.style.marginTop = '10px';
+        errEl.textContent = msg;
+        const form = document.getElementById('loginForm');
+        const old = form.querySelector('.msg.err');
+        if (old) old.remove();
+        form.appendChild(errEl);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 /**
  * npm run deploy 用スクリプト
- * - git add . → 変更があれば commit → git push
- * - プッシュで Vercel の Git 連携により本番デプロイが走る想定
+ * - git add . → 変更があれば commit → git push（いまのブランチ）
+ * - 本番ブランチ運用: Vercel の Production Branch を production にしたうえで、
+ *   本番反映は `npm run deploy:prod` を使う（main → production マージ＆push）
+ * - 末尾の `vercel --prod` はデフォルトオフ（ブランチと無関係に本番へ載る事故防止）。
+ *   どうしても使う場合: DEPLOY_USE_VERCEL_CLI=1 npm run deploy
  */
 import { execSync, spawnSync } from 'node:child_process';
 
@@ -75,15 +78,19 @@ if (!run(`git push -u origin ${branch}`)) {
 }
 
 console.log('プッシュ完了。');
-console.log('');
-console.log('本番デプロイを実行して URL を表示します...');
-console.log('');
 
-// execSync で実行するとターミナルに Inspect / Production の URL がそのまま出る（Windows でも表示される）
-try {
-  execSync('npx vercel --prod --yes', { stdio: 'inherit', cwd: process.cwd() });
-} catch (err) {
+if (process.env.DEPLOY_USE_VERCEL_CLI === '1') {
   console.log('');
-  console.log('本番URLは Vercel ダッシュボードで確認できます: https://vercel.com/dashboard');
-  // Git プッシュは成功しているので exit 0 のまま（デプロイは Vercel 側で進行中）
+  console.log('DEPLOY_USE_VERCEL_CLI=1 のため npx vercel --prod を実行します（作業ツリーの内容が本番に載ります）。');
+  console.log('');
+  try {
+    execSync('npx vercel --prod --yes', { stdio: 'inherit', cwd: process.cwd() });
+  } catch {
+    console.log('');
+    console.log('Vercel CLI が失敗した場合はダッシュボードを確認: https://vercel.com/dashboard');
+  }
+} else {
+  console.log('');
+  console.log('ヒント: 本番反映は `npm run deploy:prod`（production ブランチを push）を推奨。');
+  console.log('      旧来どおり CLI で本番に載せる場合: DEPLOY_USE_VERCEL_CLI=1 npm run deploy');
 }

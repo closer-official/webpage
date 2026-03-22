@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>VALX GYM | 24時間フィットネス（構成デモ）</title>
+    <title data-cid="page.title">VALX GYM | 24時間フィットネス（構成デモ）</title>
     <meta
       name="description"
+      data-cid="page.description"
       content="VALX GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
     />
   </head>
@@ -135,8 +136,8 @@
       aria-label="サイトヘッダー"
     >
       <div class="flex flex-col leading-none">
-        <span class="text-[1.05rem] font-black italic tracking-tight text-neon">VALX</span>
-        <span class="text-[0.72rem] font-bold tracking-[0.2em] text-neon">GYM</span>
+        <span class="text-[1.05rem] font-black italic tracking-tight text-neon" data-cid="header.line1">VALX</span>
+        <span class="text-[0.72rem] font-bold tracking-[0.2em] text-neon" data-cid="header.line2">GYM</span>
       </div>
       <div class="flex flex-col gap-[5px]" aria-hidden="true">
         <span class="h-[2px] w-6 bg-white"></span>
@@ -147,13 +148,17 @@
 
     <!-- ========== LIFE MAKE / トップヒーロー ========== -->
     <section
+      id="vgx-hero-section"
       class="relative isolate min-h-[92vh] overflow-hidden bg-zinc-950 bg-cover bg-center"
       style="
         background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82)),
           url(https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80);
       "
     >
-      <div class="pointer-events-none absolute right-6 top-24 text-[10px] font-bold tracking-[0.35em] text-neon">
+      <div
+        class="pointer-events-none absolute right-6 top-24 text-[10px] font-bold tracking-[0.35em] text-neon"
+        data-cid="hero.corner"
+      >
         LIFE MAKE STATION
       </div>
       <div class="relative mx-auto flex max-w-md flex-col px-5 pb-28 pt-10">
@@ -176,18 +181,18 @@
             />
           </svg>
         </div>
-        <p class="text-center text-xl font-black tracking-wide text-neon">
+        <p class="text-center text-xl font-black tracking-wide text-neon" data-cid="hero.nameHtml">
           VALX <span class="border-b-2 border-neon pb-0.5">GYM</span>
         </p>
-        <p class="mt-4 text-center text-sm font-bold text-white/95">
+        <p class="mt-4 text-center text-sm font-bold text-white/95" data-cid="hero.tagline">
           パーソナルトレーニング × 24時間フィットネス
         </p>
         <div class="mt-10 space-y-1 text-left">
-          <p class="text-2xl font-black leading-snug text-white">理想の空間を、</p>
-          <p class="text-2xl font-black leading-snug text-white">
+          <p class="text-2xl font-black leading-snug text-white" data-cid="hero.priceLead">理想の空間を、</p>
+          <p class="text-2xl font-black leading-snug text-white" data-cid="hero.priceLineHtml">
             月額<span class="text-5xl font-black text-neon">6,980</span>円で。
           </p>
-          <p class="text-sm font-medium text-white/80">（税込7,678円）</p>
+          <p class="text-sm font-medium text-white/80" data-cid="hero.priceTax">（税込7,678円）</p>
         </div>
         <div class="mt-8 grid grid-cols-2 gap-3">
           <div
@@ -195,16 +200,17 @@
           >
             <div
               class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-neon text-[9px] font-black leading-tight text-neon shadow-neon"
+              data-cid="hero.card1badge"
             >
               24H<br />OPEN
             </div>
-            <p class="text-[11px] font-black leading-snug text-black">いつでも通える<br />24時間営業！</p>
+            <p class="text-[11px] font-black leading-snug text-black" data-cid="hero.card1text">いつでも通える<br />24時間営業！</p>
           </div>
           <div
             class="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg bg-white/90 p-3 text-center shadow-lg"
           >
-            <div class="text-3xl text-neon" aria-hidden="true">💪</div>
-            <p class="text-[11px] font-black leading-snug text-black">トレーナーが伴走<br />パーソナル重視</p>
+            <div class="text-3xl text-neon" aria-hidden="true" data-cid="hero.card2emoji">💪</div>
+            <p class="text-[11px] font-black leading-snug text-black" data-cid="hero.card2text">トレーナーが伴走<br />パーソナル重視</p>
           </div>
         </div>
       </div>
@@ -212,21 +218,22 @@
 
     <!-- ========== INTRODUCTION ========== -->
     <section
+      id="vgx-intro-section"
       class="relative bg-zinc-950 bg-cover bg-center px-6 py-14"
       style="
         background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.55)),
           url(https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80);
       "
     >
-      <p class="mb-3 text-xs font-bold tracking-[0.25em] text-white/90">INTRODUCTION</p>
-      <h2 class="text-2xl font-black leading-snug text-white md:text-[1.65rem]">
+      <p class="mb-3 text-xs font-bold tracking-[0.25em] text-white/90" data-cid="intro.kicker">INTRODUCTION</p>
+      <h2 class="text-2xl font-black leading-snug text-white md:text-[1.65rem]" data-cid="intro.title">
         理想の空間を、月額6,980円で。
       </h2>
-      <p class="mt-1 text-sm text-white/85">（税込7,678円）</p>
-      <p class="mt-6 text-base font-bold leading-relaxed text-white">
+      <p class="mt-1 text-sm text-white/85" data-cid="intro.tax">（税込7,678円）</p>
+      <p class="mt-6 text-base font-bold leading-relaxed text-white" data-cid="intro.body1">
         ジム初心者の方からジムに通い慣れた方まで、全ての人が満足できるジム環境を妥協なく追求。
       </p>
-      <p class="mt-4 text-sm leading-relaxed text-white/85">
+      <p class="mt-4 text-sm leading-relaxed text-white/85" data-cid="intro.body2">
         メジャーリーガー監修のトレーニングメソッド。YouTube登録者数69万人超の発信力で、正しい知識と継続のサポートを提供します。
       </p>
     </section>
@@ -240,7 +247,7 @@
         >
           WHY<br />VALX<br />GYM?
         </p>
-        <h2 class="relative z-10 max-w-[78%] text-2xl font-black leading-tight">
+        <h2 class="relative z-10 max-w-[78%] text-2xl font-black leading-tight" data-cid="why.titleHtml">
           VALX GYMが選ばれる、<span class="border-b-[5px] border-neon pb-0.5">8つの理由</span>。
         </h2>
       </div>
@@ -250,8 +257,8 @@
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">1</span>
-          <h3 class="text-sm font-black text-white">24時間営業</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+          <h3 class="text-sm font-black text-white" data-cid="why.0.title">24時間営業</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.0.body">
             仕事帰りに、休みの日に、自分のペースで好きな時間に
           </p>
           <div
@@ -265,8 +272,8 @@
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">2</span>
-          <h3 class="text-sm font-black text-white">面倒なアプリ<br />ダウンロード不要！</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+          <h3 class="text-sm font-black text-white" data-cid="why.1.title">面倒なアプリ<br />ダウンロード不要！</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.1.body">
             LINE 友だち追加だけで全てのサービスが受けられます
           </p>
           <div class="text-2xl text-neon" aria-hidden="true">💬</div>
@@ -287,8 +294,8 @@
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">4</span>
-          <h3 class="text-sm font-black text-white">非接触型の<br />最新ジム運営</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">
+          <h3 class="text-sm font-black text-white" data-cid="why.3.title">非接触型の<br />最新ジム運営</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.3.body">
             来店不要、入会手続きはWEBで完結
           </p>
           <div class="text-2xl text-neon" aria-hidden="true">📱</div>
@@ -298,16 +305,16 @@
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">5</span>
-          <h3 class="text-sm font-black text-white">プロ監修<br />トレーニング</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">正しいフォームとメニューで効率よく結果へ</p>
+          <h3 class="text-sm font-black text-white" data-cid="why.4.title">プロ監修<br />トレーニング</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.4.body">正しいフォームとメニューで効率よく結果へ</p>
           <div class="text-2xl text-neon" aria-hidden="true">✓</div>
         </article>
         <article
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">6</span>
-          <h3 class="text-sm font-black text-white">清潔で快適な<br />トレーニング空間</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">広々フロアと最新空調で集中できる環境</p>
+          <h3 class="text-sm font-black text-white" data-cid="why.5.title">清潔で快適な<br />トレーニング空間</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.5.body">広々フロアと最新空調で集中できる環境</p>
           <div class="text-2xl text-neon" aria-hidden="true">✨</div>
         </article>
         <article
@@ -322,8 +329,8 @@
           class="flex flex-col items-center gap-3 rounded-lg border border-neon bg-[#1a1a1a] px-3 py-5 text-center shadow-neon"
         >
           <span class="text-4xl font-black text-neon">8</span>
-          <h3 class="text-sm font-black text-white">集中できる<br />プライベート空間</h3>
-          <p class="text-[11px] font-medium leading-relaxed text-white/90">一人ひとりに合わせたトレーニングに集中できる環境</p>
+          <h3 class="text-sm font-black text-white" data-cid="why.7.title">集中できる<br />プライベート空間</h3>
+          <p class="text-[11px] font-medium leading-relaxed text-white/90" data-cid="why.7.body">一人ひとりに合わせたトレーニングに集中できる環境</p>
           <div class="text-2xl text-neon" aria-hidden="true">◇</div>
         </article>
       </div>
@@ -332,6 +339,7 @@
     <!-- ========== 春のキャンペーン ========== -->
     <section class="relative overflow-hidden bg-black">
       <div
+        id="vgx-campaign-hero"
         class="relative min-h-[320px] bg-cover bg-center"
         style="
           background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.75)),
@@ -343,56 +351,62 @@
         <div class="vgx-petal absolute right-[12%] top-[22%] h-7 w-11 rotate-45 rounded-full opacity-75"></div>
         <div class="relative px-5 pb-8 pt-10">
           <p class="font-serif text-3xl font-bold leading-tight text-white drop-shadow-lg md:text-4xl">
-            <span class="block">春の</span>
-            <span class="block text-4xl md:text-5xl">新生活応援</span>
-            <span class="block text-3xl md:text-4xl">キャンペーン</span>
+            <span class="block" data-cid="campaign.line1">春の</span>
+            <span class="block text-4xl md:text-5xl" data-cid="campaign.line2">新生活応援</span>
+            <span class="block text-3xl md:text-4xl" data-cid="campaign.line3">キャンペーン</span>
           </p>
-          <div class="mt-4 inline-block bg-black/70 px-3 py-1 text-[10px] font-bold text-white">
+          <div class="mt-4 inline-block bg-black/70 px-3 py-1 text-[10px] font-bold text-white" data-cid="campaign.chip">
             24時間365日 フィットネスジム
           </div>
           <div
             class="absolute right-4 top-16 flex h-24 w-24 flex-col items-center justify-center rounded-full bg-pink-cmp text-center shadow-lg"
           >
-            <span class="text-xs font-bold text-white">4/30</span>
-            <span class="text-sm font-black text-white">まで</span>
+            <span class="text-xs font-bold text-white" data-cid="campaign.date1">4/30</span>
+            <span class="text-sm font-black text-white" data-cid="campaign.date2">まで</span>
           </div>
         </div>
       </div>
       <div class="bg-pink-cmp py-3 text-center">
-        <p class="text-base font-black text-white">最大15,400円(税込)お得！</p>
+        <p class="text-base font-black text-white" data-cid="campaign.banner">最大15,400円(税込)お得！</p>
       </div>
       <div class="bg-pink-soft px-4 py-8">
         <div class="relative mx-auto grid max-w-md grid-cols-[1fr_auto] gap-2">
           <div class="space-y-4">
             <div>
-              <span class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+              <span
+                class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+                data-cid="campaign.fee1label"
                 >入会金</span
               >
-              <p class="mt-1 text-2xl font-black text-white">5,500円(税込)</p>
+              <p class="mt-1 text-2xl font-black text-white" data-cid="campaign.fee1val">5,500円(税込)</p>
             </div>
             <div>
-              <span class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+              <span
+                class="inline-block rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-pink-deep"
+                data-cid="campaign.fee2label"
                 >入会翌月会費</span
               >
-              <p class="mt-1 text-xl font-black text-white">〜9,900円(税込)</p>
-              <p class="text-[10px] text-black/70">※伴走プランの場合</p>
+              <p class="mt-1 text-xl font-black text-white" data-cid="campaign.fee2val">〜9,900円(税込)</p>
+              <p class="text-[10px] text-black/70" data-cid="campaign.fee2note">※伴走プランの場合</p>
             </div>
           </div>
           <div class="relative flex flex-col items-center justify-center">
             <div class="absolute -left-2 top-1/2 h-0 w-0 -translate-y-1/2 border-y-8 border-l-12 border-y-transparent border-l-white"></div>
-            <p class="text-7xl font-black leading-none text-white">0<span class="text-4xl">円</span></p>
+            <p class="text-7xl font-black leading-none text-white" data-cid="campaign.zeroHtml">
+              0<span class="text-4xl">円</span>
+            </p>
           </div>
         </div>
         <div
           class="mx-auto mt-6 flex max-w-md items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-pink-deep"
         >
-          さらに！VALXオリジナルシェイカープレゼント！
+          <span data-cid="campaign.gift">さらに！VALXオリジナルシェイカープレゼント！</span>
           <span
             class="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-200 text-[8px] font-black text-zinc-600"
             >VALX</span
           >
         </div>
-        <p class="mx-auto mt-4 max-w-md text-[10px] leading-relaxed text-black/80">
+        <p class="mx-auto mt-4 max-w-md text-[10px] leading-relaxed text-black/80" data-cid="campaign.disclaimer">
           ※セルフ/伴走プランのみ適応です。※初回事務手数料5,500円(税込)がかかります。
         </p>
       </div>
@@ -400,13 +414,13 @@
 
     <!-- ========== LINE 誘導（白地） ========== -->
     <section class="bg-white px-5 py-10 text-black">
-      <p class="text-center text-sm font-bold">LINEからの入会手続きで</p>
+      <p class="text-center text-sm font-bold" data-cid="line.lead">LINEからの入会手続きで</p>
       <p class="mt-2 text-center text-lg font-black">
-        <span class="bg-yellow-300/90 px-1">お得なキャンペーンを適用する！</span>
+        <span class="bg-yellow-300/90 px-1" data-cid="line.highlight">お得なキャンペーンを適用する！</span>
       </p>
       <a
         href="#top"
-        class="mx-auto mt-6 flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#00b900] py-4 text-sm font-black text-white shadow-lg"
+        class="vgx-line-cta mx-auto mt-6 flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#00b900] py-4 text-sm font-black text-white shadow-lg"
       >
         <span class="text-xl" aria-hidden="true">L</span>
         LINE友だち追加はこちら！
@@ -460,6 +474,7 @@
 
     <!-- ========== プロフィール ========== -->
     <section
+      id="vgx-profile-section"
       class="relative bg-cover bg-center px-5 py-12"
       style="
         background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88)),
@@ -468,17 +483,18 @@
     >
       <div class="mx-auto flex max-w-md gap-4">
         <div
+          id="vgx-profile-avatar"
           class="h-28 w-28 shrink-0 overflow-hidden rounded-full border-2 border-white bg-zinc-800 bg-cover bg-center shadow-lg"
           style="
             background-image: url(https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=400&q=80);
           "
         ></div>
         <div>
-          <h2 class="text-xl font-black text-white">山本 義徳 氏</h2>
-          <p class="mt-1 text-[10px] font-bold tracking-widest text-white/80">YOSHINORI YAMAMOTO</p>
+          <h2 class="text-xl font-black text-white" data-cid="profile.name">山本 義徳 氏</h2>
+          <p class="mt-1 text-[10px] font-bold tracking-widest text-white/80" data-cid="profile.nameEn">YOSHINORI YAMAMOTO</p>
         </div>
       </div>
-      <p class="mx-auto mt-6 max-w-md text-sm leading-relaxed text-white/90">
+      <p class="mx-auto mt-6 max-w-md text-sm leading-relaxed text-white/90" data-cid="profile.bio">
         YouTube登録者数69万人超。早稲田大学卒。ボディビル大会入賞歴多数。著書・メディア出演を通じ、科学的根拠に基づくトレーニングを発信。VALX
         GYMの監修・ブランドの核となる存在です。
       </p>
@@ -489,6 +505,7 @@
         </svg>
       </div>
       <div
+        id="vgx-profile-shot"
         class="relative mt-6 min-h-[200px] overflow-hidden rounded-lg bg-cover bg-center"
         style="
           background-image: linear-gradient(105deg, rgba(0, 0, 0, 0.5), transparent),
@@ -497,6 +514,7 @@
       >
         <p
           class="absolute bottom-4 right-3 max-w-[70%] text-right text-sm font-black leading-snug tracking-tight text-white drop-shadow-md"
+          data-cid="profile.shotCaptionHtml"
         >
           FROM BEGINNER<br />TO PROFESSIONAL
         </p>
@@ -505,6 +523,7 @@
 
     <!-- ========== PRICE + SERVICE ========== -->
     <section
+      id="vgx-price-section"
       class="bg-zinc-950 bg-cover bg-center px-3 py-10"
       style="
         background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.92)),
@@ -617,7 +636,7 @@
         <div class="p-4 pt-0">
           <a
             href="#top"
-            class="flex items-center justify-center gap-2 rounded-xl border-2 border-white bg-gradient-to-b from-lime-400 to-lime-600 py-3 text-sm font-black text-white shadow-lg"
+            class="vgx-line-cta flex items-center justify-center gap-2 rounded-xl border-2 border-white bg-gradient-to-b from-lime-400 to-lime-600 py-3 text-sm font-black text-white shadow-lg"
           >
             <span aria-hidden="true">L</span>
             ビジター利用はこちらから
@@ -743,18 +762,21 @@
       <p class="text-center text-[10px] font-bold tracking-[0.35em] text-neon">ACCESS</p>
       <h2 class="mt-2 text-center text-2xl font-black text-white">アクセス</h2>
       <div class="mx-auto mt-8 max-w-md rounded-lg border border-neon bg-black/50 p-6 text-center shadow-neon">
-        <p class="text-lg font-black text-white">スタジオ名（差し替え）</p>
-        <p class="mt-1 text-[10px] font-bold tracking-widest text-neon">YOUR STUDIO</p>
-        <p class="mt-5 text-sm font-medium leading-relaxed text-white/90">
+        <p class="text-lg font-black text-white" data-cid="access.name">スタジオ名（差し替え）</p>
+        <p class="mt-1 text-[10px] font-bold tracking-widest text-neon" data-cid="access.sub">YOUR STUDIO</p>
+        <p class="mt-5 text-sm font-medium leading-relaxed text-white/90" data-cid="access.addressHtml">
           〒000-0000<br />
           東京都〇〇区〇〇 0-0-0<br />
           〇〇ビル 2F
         </p>
-        <p class="mt-3 text-sm font-bold text-white">〇〇駅 徒歩〇分</p>
-        <p class="mt-4 text-[11px] leading-relaxed text-white/55">
+        <p class="mt-3 text-sm font-bold text-white" data-cid="access.station">〇〇駅 徒歩〇分</p>
+        <p class="mt-4 text-[11px] leading-relaxed text-white/55" data-cid="access.note">
           ※郵便番号・住所・駅名は公開前に必ず実情報へ差し替えてください。
         </p>
       </div>
+      <p class="mx-auto mt-8 max-w-md text-center text-[11px] text-white/45">
+        <a href="/admin/gym-lp.html" class="text-neon underline-offset-2 hover:underline">店舗管理（キャンペーン編集・閲覧数）</a>
+      </p>
     </section>
 
     <!-- 上へ（静的アンカーのみ） -->
@@ -767,13 +789,213 @@
 
     <!-- テンプレ14相当: sticky-cta + ピル型「申し込む」（LINE 導線はバッジで明示） -->
     <div class="vgx-sticky-cta" role="region" aria-label="お申し込み">
-      <a href="#top" class="vgx-cta">
+      <a href="#top" class="vgx-cta vgx-apply-cta">
         <span class="vgx-cta__badge">LINE</span>
         <span>申し込む</span>
         <span class="vgx-cta__icon" aria-hidden="true">▶</span>
       </a>
-      <p class="vgx-cta-note">24時間受付可 · 公式LINEから入会・お問い合わせいただけます。</p>
-      <p class="vgx-cta-note opacity-80">gym.valx.jp</p>
+      <p class="vgx-cta-note" data-cid="sticky.note">24時間受付可 · 公式LINEから入会・お問い合わせいただけます。</p>
+      <p class="vgx-cta-note opacity-80" data-cid="sticky.domain">gym.valx.jp</p>
     </div>
+
+  <script>
+  (function () {
+    var qInit = new URLSearchParams(location.search);
+    var salesPreviewId = qInit.get('salesPreview');
+    if (salesPreviewId && /^pv[a-f0-9]{24}$/.test(salesPreviewId)) {
+      var mr = document.createElement('meta');
+      mr.setAttribute('name', 'robots');
+      mr.setAttribute('content', 'noindex, nofollow');
+      document.head.appendChild(mr);
+    }
+
+    function resolveLpSiteKey() {
+      var q = new URLSearchParams(location.search);
+      var fromQuery = q.get('site') || q.get('siteKey');
+      if (
+        fromQuery &&
+        /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(fromQuery) &&
+        fromQuery.length >= 2 &&
+        fromQuery.length <= 64
+      ) {
+        return fromQuery.toLowerCase();
+      }
+      var h = location.hostname;
+      var m = h.match(/^([a-z0-9][a-z0-9-]*[a-z0-9])\.store-official\.net$/i);
+      if (m) return m[1].toLowerCase();
+      return 'gym-valx-intro';
+    }
+    var SLUG = resolveLpSiteKey();
+    var api = '/api';
+    var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
+    if (base) api = base + api;
+
+    var contentUrl = api + '/lp-content/' + encodeURIComponent(SLUG);
+    if (salesPreviewId && /^pv[a-f0-9]{24}$/.test(salesPreviewId)) {
+      contentUrl = api + '/sales/preview-lp-content/' + encodeURIComponent(salesPreviewId);
+    }
+
+    var GRAD = {
+      hero: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82))',
+      intro: 'linear-gradient(90deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.55))',
+      campaign: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.75))',
+      profile: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.88))',
+      profileShot: 'linear-gradient(105deg, rgba(0, 0, 0, 0.5), transparent)',
+      price: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.92))',
+    };
+
+    var HTML_CIDS = {
+      'hero.nameHtml': 1,
+      'hero.priceLineHtml': 1,
+      'why.titleHtml': 1,
+      'campaign.zeroHtml': 1,
+      'access.addressHtml': 1,
+      'profile.shotCaptionHtml': 1,
+    };
+    for (var wi = 0; wi < 8; wi++) {
+      HTML_CIDS['why.' + wi + '.title'] = 1;
+      HTML_CIDS['why.' + wi + '.body'] = 1;
+    }
+    HTML_CIDS['hero.card1badge'] = 1;
+    HTML_CIDS['hero.card1text'] = 1;
+    HTML_CIDS['hero.card2text'] = 1;
+
+    function setTextOrHtml(cid, val) {
+      if (val == null || val === '') return;
+      var els = document.querySelectorAll('[data-cid="' + cid + '"]');
+      if (!els.length) return;
+      var asHtml = HTML_CIDS[cid];
+      els.forEach(function (el) {
+        if (el.tagName === 'META') {
+          el.setAttribute('content', String(val));
+          return;
+        }
+        if (el.tagName === 'TITLE') {
+          el.textContent = String(val);
+          return;
+        }
+        if (asHtml) el.innerHTML = String(val);
+        else el.textContent = String(val);
+      });
+    }
+
+    function setBg(el, gradient, url) {
+      if (!el || !url) return;
+      var u = String(url).trim();
+      if (!u) return;
+      el.style.backgroundImage = gradient + ', url(' + JSON.stringify(u) + ')';
+    }
+
+    function setAvatarUrl(url) {
+      if (!url) return;
+      var el = document.getElementById('vgx-profile-avatar');
+      if (!el) return;
+      var u = String(url).trim();
+      if (!u) return;
+      el.style.backgroundImage = 'url(' + JSON.stringify(u) + ')';
+    }
+
+    fetch(contentUrl)
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (c) {
+        if (!c || typeof c !== 'object') return;
+
+        if (c.page) {
+          if (c.page.title) setTextOrHtml('page.title', c.page.title);
+          if (c.page.description) setTextOrHtml('page.description', c.page.description);
+        }
+        if (c.header) {
+          if (c.header.line1) setTextOrHtml('header.line1', c.header.line1);
+          if (c.header.line2) setTextOrHtml('header.line2', c.header.line2);
+        }
+        if (c.hero) {
+          if (c.hero.bgUrl) setBg(document.getElementById('vgx-hero-section'), GRAD.hero, c.hero.bgUrl);
+          if (c.hero.corner) setTextOrHtml('hero.corner', c.hero.corner);
+          if (c.hero.nameHtml) setTextOrHtml('hero.nameHtml', c.hero.nameHtml);
+          if (c.hero.tagline) setTextOrHtml('hero.tagline', c.hero.tagline);
+          if (c.hero.priceLead) setTextOrHtml('hero.priceLead', c.hero.priceLead);
+          if (c.hero.priceLineHtml) setTextOrHtml('hero.priceLineHtml', c.hero.priceLineHtml);
+          if (c.hero.priceTax) setTextOrHtml('hero.priceTax', c.hero.priceTax);
+          if (c.hero.card1badge) setTextOrHtml('hero.card1badge', c.hero.card1badge);
+          if (c.hero.card1text) setTextOrHtml('hero.card1text', c.hero.card1text);
+          if (c.hero.card2emoji) setTextOrHtml('hero.card2emoji', c.hero.card2emoji);
+          if (c.hero.card2text) setTextOrHtml('hero.card2text', c.hero.card2text);
+        }
+        if (c.intro) {
+          if (c.intro.bgUrl) setBg(document.getElementById('vgx-intro-section'), GRAD.intro, c.intro.bgUrl);
+          if (c.intro.kicker) setTextOrHtml('intro.kicker', c.intro.kicker);
+          if (c.intro.title) setTextOrHtml('intro.title', c.intro.title);
+          if (c.intro.tax) setTextOrHtml('intro.tax', c.intro.tax);
+          if (c.intro.body1) setTextOrHtml('intro.body1', c.intro.body1);
+          if (c.intro.body2) setTextOrHtml('intro.body2', c.intro.body2);
+        }
+        if (c.why) {
+          if (c.why.titleHtml) setTextOrHtml('why.titleHtml', c.why.titleHtml);
+          var cards = c.why.cards;
+          if (cards && cards.length) {
+            for (var i = 0; i < 8; i++) {
+              if (!cards[i]) continue;
+              if (cards[i].title) setTextOrHtml('why.' + i + '.title', cards[i].title);
+              if (cards[i].body) setTextOrHtml('why.' + i + '.body', cards[i].body);
+            }
+          }
+        }
+        if (c.campaign) {
+          var ch = c.campaign;
+          if (ch.bgUrl) setBg(document.getElementById('vgx-campaign-hero'), GRAD.campaign, ch.bgUrl);
+          ['line1', 'line2', 'line3', 'chip', 'date1', 'date2', 'banner', 'fee1label', 'fee1val', 'fee2label', 'fee2val', 'fee2note', 'gift', 'disclaimer'].forEach(function (k) {
+            if (ch[k]) setTextOrHtml('campaign.' + k, ch[k]);
+          });
+          if (ch.zeroHtml) setTextOrHtml('campaign.zeroHtml', ch.zeroHtml);
+        }
+        if (c.line) {
+          if (c.line.lead) setTextOrHtml('line.lead', c.line.lead);
+          if (c.line.highlight) setTextOrHtml('line.highlight', c.line.highlight);
+        }
+        if (c.profile) {
+          var p = c.profile;
+          if (p.bgUrl) setBg(document.getElementById('vgx-profile-section'), GRAD.profile, p.bgUrl);
+          if (p.avatarUrl) setAvatarUrl(p.avatarUrl);
+          if (p.name) setTextOrHtml('profile.name', p.name);
+          if (p.nameEn) setTextOrHtml('profile.nameEn', p.nameEn);
+          if (p.bio) setTextOrHtml('profile.bio', p.bio);
+          if (p.shotBgUrl) setBg(document.getElementById('vgx-profile-shot'), GRAD.profileShot, p.shotBgUrl);
+          if (p.shotCaptionHtml) setTextOrHtml('profile.shotCaptionHtml', p.shotCaptionHtml);
+        }
+        if (c.price && c.price.bgUrl) {
+          setBg(document.getElementById('vgx-price-section'), GRAD.price, c.price.bgUrl);
+        }
+        if (c.access) {
+          var a = c.access;
+          if (a.name) setTextOrHtml('access.name', a.name);
+          if (a.sub) setTextOrHtml('access.sub', a.sub);
+          if (a.addressHtml) setTextOrHtml('access.addressHtml', a.addressHtml);
+          if (a.station) setTextOrHtml('access.station', a.station);
+          if (a.note) setTextOrHtml('access.note', a.note);
+        }
+        if (c.sticky) {
+          if (c.sticky.note) setTextOrHtml('sticky.note', c.sticky.note);
+          if (c.sticky.domain) setTextOrHtml('sticky.domain', c.sticky.domain);
+        }
+
+        var applyUrl = (c.applyUrl && String(c.applyUrl).trim()) || '#top';
+        document.querySelectorAll('.vgx-apply-cta, .vgx-line-cta').forEach(function (a) {
+          a.setAttribute('href', applyUrl);
+        });
+      })
+      .catch(function () {});
+
+    if (salesPreviewId && /^pv[a-f0-9]{24}$/.test(salesPreviewId)) {
+      fetch(api + '/sales/preview-public/' + encodeURIComponent(salesPreviewId) + '/view', {
+        method: 'POST',
+        credentials: 'omit',
+      }).catch(function () {});
+    } else {
+      fetch(api + '/lp-analytics/' + SLUG + '/view', { method: 'POST', credentials: 'omit' }).catch(function () {});
+    }
+  })();
+  </script>
   </body>
 </html>

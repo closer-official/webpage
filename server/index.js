@@ -7,6 +7,12 @@ import cors from 'cors';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { createHash, timingSafeEqual } from 'node:crypto';
+import {
+  isValidLpSiteKeyFormat,
+  verifyPasswordScrypt,
+  lpCmsSessionCookieValue,
+  verifyLpCmsSessionCookie,
+} from './lpCmsCrypto.js';
 import { collectPlaces } from './collect.js';
 import { processOne } from './process.js';
 import { store } from './data/store.js';
@@ -17,7 +23,29 @@ import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
 import { isReferralCodeActive } from './referralCodes.js';
+import QRCode from 'qrcode';
 import { createCheckoutSession, isStripeConfigured } from './stripeCheckout.js';
+import {
+  adminSeedSalesRep,
+  salesLogin,
+  salesRepCookieValue,
+  verifyRepSessionToken,
+  parseMapsUrlForSales,
+  salesPlacesAutocomplete,
+  salesPlacesDetails,
+  createSalesPreviewSession,
+  getSalesPreviewSnapshot,
+  getSalesPreviewSession,
+  listSalesPreviewSessionsForRep,
+  recordSalesPreviewView,
+  markSalesPreviewPaid,
+  publishSalesPreviewToProduction,
+  getSalesApiUsageSummary,
+  getRepProfile,
+  isValidSalesPreviewPublicId,
+} from './salesAgencyCore.js';
+import { runLpCmsProvision } from './lpCmsProvisionCore.js';
+import { getProductLpTemplatesList, getProductLpTemplateSlugSet } from './productLpTemplates.js';
 import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
@@ -144,51 +172,194 @@ function requireAdmin(req, res) {
   return false;
 }
 
-/** 日本史LPなど・納品LP専用CMS（Vercel: JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD） */
-const LP_CMS_SLUGS = new Set(['japanese-history-higashi', 'web-closer-intro']);
-function lpCmsCookieName(slug) {
-  return `lp_cms_${String(slug).replace(/[^a-zA-Z0-9_]/g, '_')}`;
-}
-function lpCmsAuthEnabledForSlug(slug) {
-  return (
-    LP_CMS_SLUGS.has(slug) &&
-    !!(process.env.JP_HISTORY_LP_CMS_USER && process.env.JP_HISTORY_LP_CMS_PASSWORD)
-  );
-}
-function lpCmsCookieValue(slug) {
-  const u = process.env.JP_HISTORY_LP_CMS_USER || '';
-  const p = process.env.JP_HISTORY_LP_CMS_PASSWORD || '';
-  return createHash('sha256').update(`lp-cms|${slug}|${u}|${p}`).digest('hex');
-}
-function isLpCmsAuthenticated(req, slug) {
-  if (!lpCmsAuthEnabledForSlug(slug)) return false;
-  const cookies = parseCookies(req);
-  const actual = Buffer.from(String(cookies[lpCmsCookieName(slug)] || ''));
-  const expected = Buffer.from(lpCmsCookieValue(slug));
-  if (actual.length !== expected.length) return false;
+/** 店舗セットアップ: 管理者Cookie または STORE_SETUP_PROVISION_TOKEN（Bearer） */
+function authorizeAdminOrProvisionToken(req) {
+  if (adminAuthEnabled() && isAdminAuthenticated(req)) return true;
+  const expected = String(process.env.STORE_SETUP_PROVISION_TOKEN || '').trim();
+  if (!expected) return false;
+  const hdr = String(req.headers.authorization || '');
+  const m = hdr.match(/^Bearer\s+(.+)$/i);
+  if (!m) return false;
+  const got = String(m[1] || '').trim();
   try {
-    return timingSafeEqual(actual, expected);
+    const a = Buffer.from(got, 'utf8');
+    const b = Buffer.from(expected, 'utf8');
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
   } catch {
     return false;
   }
 }
-/** LPコンテンツ保存: LP専用認証優先、なければ全体ADMIN、どちらもなければ503 */
-function requireLpContentWrite(req, res, slug) {
-  if (!LP_CONTENT_SLUGS.includes(slug)) {
+
+const SALES_REP_COOKIE = 'sales_rep_session';
+
+function getSalesRepIdFromRequest(req) {
+  const cookies = parseCookies(req);
+  let raw = String(cookies[SALES_REP_COOKIE] || '');
+  try {
+    raw = decodeURIComponent(raw);
+  } catch {
+    /*  */
+  }
+  return verifyRepSessionToken(raw);
+}
+
+async function requireSalesRep(req, res) {
+  const id = getSalesRepIdFromRequest(req);
+  if (!id) {
+    res.status(401).json({ error: '営業ログインが必要です。' });
+    return null;
+  }
+  const rep = await getRepProfile(id);
+  if (!rep) {
+    res.status(401).json({ error: 'セッションが無効です。再ログインしてください。' });
+    return null;
+  }
+  return rep;
+}
+
+/** 顧客が開くプレビューページの絶対URL（QR・Stripe return 用） */
+function resolveSalesPreviewPageUrl(req, publicId) {
+  const envBase = String(process.env.SALES_PREVIEW_PUBLIC_BASE || '').replace(/\/$/, '');
+  if (envBase.startsWith('http')) {
+    return `${envBase}/${publicId}`;
+  }
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.get('host') || 'localhost';
+  return `${proto}://${host}/deliverables/gym-valx-intro/index.html?salesPreview=${encodeURIComponent(publicId)}`;
+}
+
+/** Checkout API のオリジン（Stripe の cancel/success がこのホストに戻る） */
+function resolveSalesCheckoutApiOrigin(req) {
+  const env = String(process.env.SALES_CHECKOUT_API_ORIGIN || '').replace(/\/$/, '');
+  if (env.startsWith('http')) return env;
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.get('host') || 'localhost';
+  return `${proto}://${host}`;
+}
+
+/** 同梱テンプレのスラッグ（デフォルトJSON・旧来の共通 env 認証対象） */
+const LP_CMS_TEMPLATE_SLUGS = new Set(['japanese-history-higashi', 'web-closer-intro', 'gym-valx-intro']);
+
+function lpCmsCookieName(siteKey) {
+  return `lp_cms_${String(siteKey).replace(/[^a-zA-Z0-9_]/g, '_')}`;
+}
+
+function lpCmsLegacyEnvAuthEnabledForSlug(siteKey) {
+  return (
+    LP_CMS_TEMPLATE_SLUGS.has(siteKey) &&
+    !!(process.env.JP_HISTORY_LP_CMS_USER && process.env.JP_HISTORY_LP_CMS_PASSWORD)
+  );
+}
+
+function lpCmsCookieValueLegacy(siteKey) {
+  const u = process.env.JP_HISTORY_LP_CMS_USER || '';
+  const p = process.env.JP_HISTORY_LP_CMS_PASSWORD || '';
+  return createHash('sha256').update(`lp-cms|${siteKey}|${u}|${p}`).digest('hex');
+}
+
+function getLpContentDefault(slug) {
+  try {
+    const p = path.join(__dirname, 'data', 'json', 'lpContent.json');
+    if (fs.existsSync(p)) {
+      const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+      return raw[slug] ?? null;
+    }
+  } catch (e) {
+    console.error('[lpContent default]', e);
+  }
+  return null;
+}
+
+async function isLpSiteKeyRegistered(siteKey) {
+  if (!isValidLpSiteKeyFormat(siteKey)) return false;
+  if (LP_CMS_TEMPLATE_SLUGS.has(siteKey)) return true;
+  const acc = await store.getLpCmsAccount(siteKey);
+  if (acc) return true;
+  const c = await store.getLpContent(siteKey);
+  if (c && typeof c === 'object' && Object.keys(c).length > 0) return true;
+  return false;
+}
+
+async function isLpCmsAuthenticatedReq(req, siteKey) {
+  const cookies = parseCookies(req);
+  let raw = String(cookies[lpCmsCookieName(siteKey)] || '');
+  try {
+    raw = decodeURIComponent(raw);
+  } catch {
+    /* そのまま */
+  }
+  const acc = await store.getLpCmsAccount(siteKey);
+  if (acc) {
+    return verifyLpCmsSessionCookie(siteKey, raw, acc);
+  }
+  if (lpCmsLegacyEnvAuthEnabledForSlug(siteKey)) {
+    const expected = lpCmsCookieValueLegacy(siteKey);
+    const a = Buffer.from(raw, 'utf8');
+    const b = Buffer.from(expected, 'utf8');
+    if (a.length !== b.length) return false;
+    try {
+      return timingSafeEqual(a, b);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+async function requireLpContentWriteAsync(req, res, siteKey) {
+  if (!isValidLpSiteKeyFormat(siteKey)) {
+    res.status(400).json({ error: 'サイトキーが不正です。' });
+    return false;
+  }
+  if (!(await isLpSiteKeyRegistered(siteKey))) {
     res.status(404).json({ error: 'Not found' });
     return false;
   }
-  if (lpCmsAuthEnabledForSlug(slug)) {
-    if (isLpCmsAuthenticated(req, slug)) return true;
-    res.status(401).json({ error: '日本史LP管理者のログインが必要です。' });
+  const acc = await store.getLpCmsAccount(siteKey);
+  if (acc) {
+    if (await isLpCmsAuthenticatedReq(req, siteKey)) return true;
+    res.status(401).json({ error: '店舗LPのログインが必要です。' });
+    return false;
+  }
+  if (lpCmsLegacyEnvAuthEnabledForSlug(siteKey)) {
+    if (await isLpCmsAuthenticatedReq(req, siteKey)) return true;
+    res.status(401).json({ error: 'LP管理者のログインが必要です。' });
     return false;
   }
   if (adminAuthEnabled()) return requireAdmin(req, res);
   res.status(503).json({
     error:
-      '保存できません。Vercel（サーバー）に JP_HISTORY_LP_CMS_USER / JP_HISTORY_LP_CMS_PASSWORD を設定するか、ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。',
+      '保存できません。運営が POST /api/admin/lp-cms-provision で店舗アカウントを作成するか、ADMIN_USERNAME / ADMIN_PASSWORD を設定してください。',
   });
   return false;
+}
+
+async function requireLpStatsReadAsync(req, res, siteKey) {
+  if (!isValidLpSiteKeyFormat(siteKey)) {
+    res.status(404).json({ error: 'Not found' });
+    return false;
+  }
+  if (!(await isLpSiteKeyRegistered(siteKey))) {
+    res.status(404).json({ error: 'Not found' });
+    return false;
+  }
+  if (await store.getLpCmsAccount(siteKey)) {
+    if (await isLpCmsAuthenticatedReq(req, siteKey)) return true;
+    res.status(401).json({ error: '店舗LPのログインが必要です。' });
+    return false;
+  }
+  if (lpCmsLegacyEnvAuthEnabledForSlug(siteKey)) {
+    if (await isLpCmsAuthenticatedReq(req, siteKey)) return true;
+    res.status(401).json({ error: 'LP管理者のログインが必要です。' });
+    return false;
+  }
+  if (adminAuthEnabled()) {
+    if (isAdminAuthenticated(req)) return true;
+    res.status(401).json({ error: '管理者ログインが必要です。' });
+    return false;
+  }
+  return true;
 }
 
 function makeDraftToken() {
@@ -1384,83 +1555,372 @@ app.get('/api/lp-payment-form', (req, res) => {
 });
 
 /** LPの「購入」ボタン用: itemId と returnUrl で Checkout を作成し Stripe へリダイレクト。決済後は returnUrl?payment=success に戻る */
-// ---------- LP コンテンツ（日本史など納品LP用） ----------
-const LP_CONTENT_SLUGS = ['japanese-history-higashi', 'web-closer-intro'];
+// ---------- LP コンテンツ（siteKey＝店舗。認証は DB または旧テンプレ用 env） ----------
 
-app.get('/api/lp-cms/:slug/status', (req, res) => {
-  const slug = req.params.slug;
-  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
-  const lpConfigured = lpCmsAuthEnabledForSlug(slug);
-  const adminOn = adminAuthEnabled();
-  let mode = 'none';
-  if (lpConfigured) mode = 'lp_cms';
-  else if (adminOn) mode = 'global_admin';
-  let authenticated = false;
-  if (mode === 'lp_cms') authenticated = isLpCmsAuthenticated(req, slug);
-  else if (mode === 'global_admin') authenticated = isAdminAuthenticated(req);
-  else authenticated = true;
-  res.json({ mode, authenticated, lpConfigured });
+/** 公開: 納品用テンプレ一覧（購入者ウィザード・営業・ヒアリングの正） */
+app.get('/api/product-lp-templates', (req, res) => {
+  res.json({ templates: getProductLpTemplatesList() });
 });
 
-app.post('/api/lp-cms/:slug/login', (req, res) => {
-  const slug = req.params.slug;
-  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
-  if (!lpCmsAuthEnabledForSlug(slug)) {
-    return res.status(400).json({ error: 'LP用の認証がサーバーに未設定です（JP_HISTORY_LP_CMS_USER / PASSWORD）。' });
+/**
+ * 店舗の初回作成（標準テンプレのみ clone 可）。
+ * 管理者ログイン **または** `Authorization: Bearer <STORE_SETUP_PROVISION_TOKEN>`（決済後メール等で付与）
+ */
+app.post('/api/store-setup/provision', async (req, res) => {
+  if (!authorizeAdminOrProvisionToken(req)) {
+    return res.status(401).json({
+      error:
+        '管理者ログインが必要です。または環境変数 STORE_SETUP_PROVISION_TOKEN を設定し、Authorization: Bearer で渡してください。',
+    });
   }
+  try {
+    const out = await runLpCmsProvision(
+      store,
+      getLpContentDefault,
+      LP_CMS_TEMPLATE_SLUGS,
+      req.body,
+      getProductLpTemplateSlugSet()
+    );
+    const meta = getProductLpTemplatesList().find((t) => t.slug === String(req.body?.cloneFrom || '').trim());
+    res.json({
+      ...out,
+      purchaserEditorUrl: meta
+        ? `${meta.purchaserEditorPath}?${meta.purchaserEditorQuery || 'site'}=${encodeURIComponent(out.siteKey)}`
+        : null,
+      publicSiteUrl: meta
+        ? `${meta.liveDemoPath}?${meta.purchaserEditorQuery || 'site'}=${encodeURIComponent(out.siteKey)}`
+        : null,
+    });
+  } catch (e) {
+    const code = e.statusCode && Number(e.statusCode) >= 400 && Number(e.statusCode) < 500 ? e.statusCode : 500;
+    console.error('[store-setup/provision]', e);
+    res.status(code).json({ error: e?.message || 'failed' });
+  }
+});
+
+/** 運営のみ: 店舗ごとの CMS ユーザー作成＋初回LP本文クローン（レガシー含む全 LP_CMS スラッグ可・緊急用） */
+app.post('/api/admin/lp-cms-provision', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const out = await runLpCmsProvision(
+      store,
+      getLpContentDefault,
+      LP_CMS_TEMPLATE_SLUGS,
+      req.body,
+      null
+    );
+    res.json(out);
+  } catch (e) {
+    const code = e.statusCode && Number(e.statusCode) >= 400 && Number(e.statusCode) < 500 ? e.statusCode : 500;
+    console.error('[lp-cms-provision]', e);
+    res.status(code).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.get('/api/lp-cms/:slug/status', async (req, res) => {
+  const siteKey = req.params.slug;
+  if (!isValidLpSiteKeyFormat(siteKey)) return res.status(404).json({ error: 'Not found' });
+  if (!(await isLpSiteKeyRegistered(siteKey))) return res.status(404).json({ error: 'Not found' });
+  const hasStoreAccount = !!(await store.getLpCmsAccount(siteKey));
+  const legacyOn = lpCmsLegacyEnvAuthEnabledForSlug(siteKey);
+  const adminOn = adminAuthEnabled();
+  let mode = 'none';
+  let lpConfigured = false;
+  if (hasStoreAccount) {
+    mode = 'lp_cms';
+    lpConfigured = true;
+  } else if (legacyOn) {
+    mode = 'lp_cms';
+    lpConfigured = true;
+  } else if (adminOn) mode = 'global_admin';
+  let authenticated = false;
+  if (mode === 'lp_cms') authenticated = await isLpCmsAuthenticatedReq(req, siteKey);
+  else if (mode === 'global_admin') authenticated = isAdminAuthenticated(req);
+  else authenticated = true;
+  res.json({
+    mode,
+    authenticated,
+    lpConfigured,
+    storeAccount: hasStoreAccount,
+    legacyEnv: legacyOn,
+  });
+});
+
+app.post('/api/lp-cms/:slug/login', async (req, res) => {
+  const siteKey = req.params.slug;
+  if (!isValidLpSiteKeyFormat(siteKey)) return res.status(400).json({ error: 'Invalid site key' });
   const username = String(req.body?.username || '');
   const password = String(req.body?.password || '');
-  const ok =
-    username === process.env.JP_HISTORY_LP_CMS_USER && password === process.env.JP_HISTORY_LP_CMS_PASSWORD;
-  if (!ok) return res.status(401).json({ error: 'ユーザー名またはパスワードが違います。' });
+  const acc = await store.getLpCmsAccount(siteKey);
   const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
-  const name = lpCmsCookieName(slug);
-  const val = encodeURIComponent(lpCmsCookieValue(slug));
-  res.setHeader(
-    'Set-Cookie',
-    `${name}=${val}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
-  );
-  res.json({ ok: true });
+  const name = lpCmsCookieName(siteKey);
+
+  if (acc) {
+    if (username !== acc.username || !verifyPasswordScrypt(password, acc.passwordSalt, acc.passwordHash)) {
+      return res.status(401).json({ error: 'ユーザー名またはパスワードが違います。' });
+    }
+    const val = encodeURIComponent(lpCmsSessionCookieValue(siteKey, acc.username, acc.passwordHash));
+    res.setHeader(
+      'Set-Cookie',
+      `${name}=${val}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
+    );
+    return res.json({ ok: true, authKind: 'store' });
+  }
+
+  if (lpCmsLegacyEnvAuthEnabledForSlug(siteKey)) {
+    const ok =
+      username === process.env.JP_HISTORY_LP_CMS_USER && password === process.env.JP_HISTORY_LP_CMS_PASSWORD;
+    if (!ok) return res.status(401).json({ error: 'ユーザー名またはパスワードが違います。' });
+    const val = encodeURIComponent(lpCmsCookieValueLegacy(siteKey));
+    res.setHeader(
+      'Set-Cookie',
+      `${name}=${val}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
+    );
+    return res.json({ ok: true, authKind: 'legacy' });
+  }
+
+  return res.status(404).json({
+    error:
+      'このサイトキー用のアカウントがありません。運営に店舗作成（POST /api/admin/lp-cms-provision）を依頼するか、旧テンプレ向けに JP_HISTORY_LP_CMS_USER / PASSWORD を設定してください。',
+  });
 });
 
 app.post('/api/lp-cms/:slug/logout', (req, res) => {
-  const slug = req.params.slug;
-  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
+  const siteKey = req.params.slug;
+  if (!isValidLpSiteKeyFormat(siteKey)) return res.status(400).json({ error: 'Invalid site key' });
   const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
-  const name = lpCmsCookieName(slug);
+  const name = lpCmsCookieName(siteKey);
   res.setHeader(
     'Set-Cookie',
     `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`
   );
   res.json({ ok: true });
 });
-function getLpContentDefault(slug) {
-  try {
-    const p = path.join(__dirname, 'data', 'json', 'lpContent.json');
-    if (fs.existsSync(p)) {
-      const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
-      return raw[slug] ?? null;
-    }
-  } catch (e) {
-    console.error('[lpContent default]', e);
-  }
-  return null;
-}
 
 app.get('/api/lp-content/:slug', async (req, res) => {
-  const slug = req.params.slug;
-  if (!LP_CONTENT_SLUGS.includes(slug)) return res.status(404).json({ error: 'Not found' });
-  let content = await store.getLpContent(slug);
-  if (!content) content = getLpContentDefault(slug);
+  const siteKey = req.params.slug;
+  if (!isValidLpSiteKeyFormat(siteKey)) return res.status(404).json({ error: 'Not found' });
+  if (!(await isLpSiteKeyRegistered(siteKey))) return res.status(404).json({ error: 'Not found' });
+  let content = await store.getLpContent(siteKey);
+  if (!content) content = getLpContentDefault(siteKey);
   res.json(content || {});
 });
 
 app.put('/api/lp-content/:slug', async (req, res) => {
-  const slug = req.params.slug;
-  if (!requireLpContentWrite(req, res, slug)) return;
+  const siteKey = req.params.slug;
+  if (!(await requireLpContentWriteAsync(req, res, siteKey))) return;
   const content = req.body;
   if (!content || typeof content !== 'object') return res.status(400).json({ error: 'Invalid content' });
-  await store.setLpContent(slug, content);
+  await store.setLpContent(siteKey, content);
+  res.json({ ok: true });
+});
+
+/** 納品LPの閲覧計測（登録済み siteKey のみ） */
+app.post('/api/lp-analytics/:slug/view', async (req, res) => {
+  const siteKey = req.params.slug;
+  if (!isValidLpSiteKeyFormat(siteKey)) return res.status(404).json({ error: 'Not found' });
+  if (!(await isLpSiteKeyRegistered(siteKey))) return res.status(404).json({ error: 'Not found' });
+  try {
+    const viewCount = await store.incrementLpView(siteKey);
+    res.json({ ok: true, viewCount });
+  } catch (e) {
+    console.error('[lp-analytics view]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+/** 閲覧数の参照 */
+app.get('/api/lp-analytics/:slug', async (req, res) => {
+  const siteKey = req.params.slug;
+  if (!(await requireLpStatsReadAsync(req, res, siteKey))) return;
+  try {
+    const stats = await store.getLpViewStats(siteKey);
+    res.json(stats);
+  } catch (e) {
+    console.error('[lp-analytics get]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+// ---------- 営業代行: ログイン・プレビュー・Places プロキシ ----------
+app.post('/api/sales/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    const out = await salesLogin(email, password);
+    if (!out.ok) return res.status(401).json({ error: out.error });
+    const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+    const val = encodeURIComponent(salesRepCookieValue(out.repId));
+    res.setHeader(
+      'Set-Cookie',
+      `${SALES_REP_COOKIE}=${val}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure ? '; Secure' : ''}`
+    );
+    res.json({ ok: true, rep: out.rep });
+  } catch (e) {
+    console.error('[sales login]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.post('/api/sales/auth/logout', (req, res) => {
+  const secure = !!(req.headers['x-forwarded-proto'] === 'https' || req.protocol === 'https');
+  res.setHeader(
+    'Set-Cookie',
+    `${SALES_REP_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`
+  );
+  res.json({ ok: true });
+});
+
+app.get('/api/sales/auth/me', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  const summary = await getSalesApiUsageSummary(rep.id, 100);
+  res.json({ rep, apiUsage: summary });
+});
+
+app.post('/api/sales/parse-maps-url', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  const url = String(req.body?.url || '').trim();
+  const { placeId } = await parseMapsUrlForSales(url);
+  res.json({ placeId });
+});
+
+app.post('/api/sales/places/autocomplete', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  try {
+    const input = String(req.body?.input || '').trim();
+    const out = await salesPlacesAutocomplete(rep.id, input);
+    res.json(out);
+  } catch (e) {
+    console.error('[sales autocomplete]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.post('/api/sales/places/details', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  try {
+    const placeId = String(req.body?.placeId || '').trim();
+    const out = await salesPlacesDetails(rep.id, placeId, null);
+    res.json({ result: out.result, fromCache: out.fromCache });
+  } catch (e) {
+    console.error('[sales details]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.post('/api/sales/preview-sessions', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  try {
+    const templateSlug = String(req.body?.templateSlug || 'gym-valx-intro').trim();
+    let placeId = String(req.body?.placeId || '').trim();
+    const mapsUrl = String(req.body?.mapsUrl || '').trim();
+    if (!placeId && mapsUrl) {
+      const parsed = await parseMapsUrlForSales(mapsUrl);
+      placeId = parsed.placeId || '';
+    }
+    if (!placeId) {
+      return res.status(400).json({ error: 'place_id または解析可能な Google マップURLが必要です。' });
+    }
+    const checkoutApiOrigin = resolveSalesCheckoutApiOrigin(req);
+    const { publicId, previewUrl, applyUrl, previewPageUrl } = await createSalesPreviewSession(rep.id, {
+      templateSlug,
+      placeId,
+      checkoutApiOrigin,
+      buildPreviewPageUrl: (pid) => resolveSalesPreviewPageUrl(req, pid),
+    });
+    res.json({ publicId, previewUrl: previewUrl || previewPageUrl, applyUrl });
+  } catch (e) {
+    console.error('[sales preview-sessions]', e);
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.get('/api/sales/preview-sessions', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  const list = await listSalesPreviewSessionsForRep(rep.id);
+  res.json({ sessions: list });
+});
+
+app.get('/api/sales/preview-sessions/:publicId/qr.png', async (req, res) => {
+  const rep = await requireSalesRep(req, res);
+  if (!rep) return;
+  const pid = String(req.params.publicId || '');
+  if (!isValidSalesPreviewPublicId(pid)) return res.status(400).send('bad id');
+  const sess = await getSalesPreviewSession(pid);
+  if (!sess || sess.repId !== rep.id) return res.status(404).send('not found');
+  const url = resolveSalesPreviewPageUrl(req, pid);
+  try {
+    const buf = await QRCode.toBuffer(url, { type: 'png', width: 320, margin: 2 });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.send(buf);
+  } catch (e) {
+    console.error('[sales qr]', e);
+    res.status(500).send('error');
+  }
+});
+
+/** プレビューLPの JSON（認証なし・IDがバレれば閲覧可） */
+app.get('/api/sales/preview-lp-content/:publicId', async (req, res) => {
+  const pid = String(req.params.publicId || '');
+  if (!isValidSalesPreviewPublicId(pid)) return res.status(404).json({ error: 'Not found' });
+  const snap = await getSalesPreviewSnapshot(pid);
+  if (!snap) return res.status(404).json({ error: 'Not found' });
+  res.setHeader('Cache-Control', 'private, max-age=0');
+  res.json(snap);
+});
+
+app.post('/api/sales/preview-public/:publicId/view', async (req, res) => {
+  const pid = String(req.params.publicId || '');
+  if (!isValidSalesPreviewPublicId(pid)) return res.status(404).json({ error: 'Not found' });
+  await recordSalesPreviewView(pid);
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/sales-seed-rep', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const { orgName, repEmail, repPassword, repDisplayName } = req.body || {};
+    await adminSeedSalesRep({ orgName, repEmail, repPassword, repDisplayName });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[sales-seed]', e);
+    res.status(400).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.post('/api/admin/sales-publish-preview', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const publicId = String(req.body?.publicId || '').trim();
+    const siteKey = String(req.body?.siteKey || '').trim();
+    const username = String(req.body?.username || '').trim();
+    const password = String(req.body?.password || '');
+    const cloneFrom = String(req.body?.cloneFrom || 'gym-valx-intro').trim();
+    if (!LP_CMS_TEMPLATE_SLUGS.has(cloneFrom)) {
+      return res.status(400).json({ error: 'cloneFrom が不正です。' });
+    }
+    const out = await publishSalesPreviewToProduction({ publicId, siteKey, username, password, cloneFrom });
+    res.json(out);
+  } catch (e) {
+    console.error('[sales-publish]', e);
+    res.status(400).json({ error: e?.message || 'failed' });
+  }
+});
+
+app.post('/api/admin/sales-preview-mark-paid', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const publicId = String(req.body?.publicId || '').trim();
+  if (!isValidSalesPreviewPublicId(publicId)) {
+    return res.status(400).json({ error: 'publicId が不正です。' });
+  }
+  const ok = await markSalesPreviewPaid(publicId);
+  if (!ok) return res.status(404).json({ error: 'セッションが見つかりません。' });
   res.json({ ok: true });
 });
 
@@ -1474,6 +1934,18 @@ app.get('/api/checkout-redirect', async (req, res) => {
     return res.status(400).setHeader('Content-Type', 'text/html; charset=utf-8')
       .send('<p>returnUrl が不正です。</p>');
   }
+  const salesPreviewPublicId = String(req.query.salesPreviewPublicId || '').trim();
+  const stripeMeta = {};
+  if (isValidSalesPreviewPublicId(salesPreviewPublicId)) {
+    stripeMeta.sales_preview_public_id = salesPreviewPublicId;
+    try {
+      const sess = await getSalesPreviewSession(salesPreviewPublicId);
+      if (sess?.repId) stripeMeta.sales_rep_id = String(sess.repId);
+      if (sess?.orgId) stripeMeta.sales_org_id = String(sess.orgId);
+    } catch {
+      /* ignore */
+    }
+  }
   try {
     const billing = await store.getBilling();
     const referralValid = await isReferralCodeActive(billing.referralCode);
@@ -1483,7 +1955,7 @@ app.get('/api/checkout-redirect', async (req, res) => {
       return res.redirect(302, `${returnUrl}${sep}payment=not_required`);
     }
     const successUrl = returnUrl + (returnUrl.includes('?') ? '&' : '?') + 'payment=success';
-    const { url } = await createCheckoutSession(amountYen, items, successUrl, returnUrl, billing);
+    const { url } = await createCheckoutSession(amountYen, items, successUrl, returnUrl, billing, stripeMeta);
     if (url) return res.redirect(302, url);
   } catch (e) {
     console.error('[checkout-redirect]', e);

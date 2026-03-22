@@ -197,6 +197,11 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
   /** テンプレ／個別のLPクリック編集（ダッシュボードを経由しない） */
   const [inlineOpen, setInlineOpen] = useState(false);
   const [inlineSession, setInlineSession] = useState<InlineSession | null>(null);
+  /** 旧 buildHtml 系テンプレカード一覧。既定は非表示（納品標準は deliverables ＋ store-wizard） */
+  const SHOW_LEGACY_BUILDER_TEMPLATES = import.meta.env.VITE_SHOW_LEGACY_BUILDER_TEMPLATES === 'true';
+  const [legacyBuilderTemplatesVisible, setLegacyBuilderTemplatesVisible] = useState(
+    SHOW_LEGACY_BUILDER_TEMPLATES
+  );
 
   useEffect(() => {
     if (!isApiAvailable()) return;
@@ -557,12 +562,41 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
 
   return (
     <div className="panel theme-picker theme-picker-design design-check-panel">
+      <div
+        className="design-policy-banner"
+        style={{
+          marginBottom: 16,
+          padding: '12px 14px',
+          borderRadius: 10,
+          background: 'linear-gradient(135deg, rgba(34,211,238,0.12), rgba(8,145,178,0.08))',
+          border: '1px solid rgba(34,211,238,0.35)',
+          fontSize: '0.9rem',
+          lineHeight: 1.55,
+        }}
+      >
+        <strong>納品の標準フロー</strong>は{' '}
+        <a href="/admin/store-wizard.html" style={{ color: '#22d3ee', fontWeight: 700 }}>
+          店舗セットアップ（テンプレ選択 → 作成）
+        </a>
+        です。テンプレは <code>deliverables</code> のみ追加し、店舗ごとの文章・写真は購入者用CMSで差し替えます（リポジトリ内{' '}
+        <code>docs/テンプレ中心納品運用.md</code>）。
+        <br />
+        下のカード一覧は<strong>旧・自動生成LP（buildHtml）用</strong>です。必要なときだけ表示してください。
+      </div>
+      {!SHOW_LEGACY_BUILDER_TEMPLATES && !legacyBuilderTemplatesVisible && (
+        <p style={{ marginBottom: 12 }}>
+          <button type="button" className="small" onClick={() => setLegacyBuilderTemplatesVisible(true)}>
+            レガシー buildHtml テンプレ一覧を表示（非推奨）
+          </button>
+        </p>
+      )}
       <h2 className="design-step-label">⓪ デザイン</h2>
       <p className="design-step-desc">
         参考URLから<strong>新規専用の設計ブループリント</strong>（構成・余白・タイポ・配色の数値）を生成します。既存の美容室テンプレ等には当てず、別レイアウトでプレビュー・保存します。文章・写真はオリジナル素材です。
       </p>
       <div className="design-check-panel-grid">
         <div>
+          {(SHOW_LEGACY_BUILDER_TEMPLATES || legacyBuilderTemplatesVisible) && (
           <ul className="design-list" aria-label="デザインパターン一覧">
             {resolvedCandidates.map((tpl, i) => (
               <li key={tpl.id}>
@@ -617,6 +651,12 @@ export function DesignCheckPanel({ onGoDashboard }: DesignCheckPanelProps = {}) 
               </li>
             ))}
           </ul>
+          )}
+          {!SHOW_LEGACY_BUILDER_TEMPLATES && !legacyBuilderTemplatesVisible && (
+            <p className="design-check-panel-hint" style={{ color: 'var(--muted, #888)' }}>
+              レガシー一覧を折りたたんでいます。ヒアリングで旧テンプレを選ばせる場合は「表示」を押してください。
+            </p>
+          )}
         </div>
         <div id="design-check-panel-form" style={{ display: 'grid', gap: 8, alignContent: 'start' }}>
           <div className="design-check-panel-callout" role="note">

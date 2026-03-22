@@ -76,5 +76,92 @@
       "sub": "サイト制作・ランディングページ・保守",
       "copyright": "© ウェブ制作 / Closer"
     }
+  },
+  "gym-valx-intro": {
+    "page": {
+      "title": "VALX GYM | 24時間フィットネス（構成デモ）",
+      "description": "VALX GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
+    },
+    "header": { "line1": "VALX", "line2": "GYM" },
+    "applyUrl": "#top",
+    "hero": {
+      "bgUrl": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80",
+      "corner": "LIFE MAKE STATION",
+      "nameHtml": "VALX <span class=\"border-b-2 border-neon pb-0.5\">GYM</span>",
+      "tagline": "パーソナルトレーニング × 24時間フィットネス",
+      "priceLead": "理想の空間を、",
+      "priceLineHtml": "月額<span class=\"text-5xl font-black text-neon\">6,980</span>円で。",
+      "priceTax": "（税込7,678円）",
+      "card1badge": "24H<br />OPEN",
+      "card1text": "いつでも通える<br />24時間営業！",
+      "card2emoji": "💪",
+      "card2text": "トレーナーが伴走<br />パーソナル重視"
+    },
+    "intro": {
+      "bgUrl": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80",
+      "kicker": "INTRODUCTION",
+      "title": "理想の空間を、月額6,980円で。",
+      "tax": "（税込7,678円）",
+      "body1": "ジム初心者の方からジムに通い慣れた方まで、全ての人が満足できるジム環境を妥協なく追求。",
+      "body2": "メジャーリーガー監修のトレーニングメソッド。YouTube登録者数69万人超の発信力で、正しい知識と継続のサポートを提供します。"
+    },
+    "why": {
+      "titleHtml": "VALX GYMが選ばれる、<span class=\"border-b-[5px] border-neon pb-0.5\">8つの理由</span>。",
+      "cards": [
+        { "title": "24時間営業", "body": "仕事帰りに、休みの日に、自分のペースで好きな時間に" },
+        { "title": "面倒なアプリ<br />ダウンロード不要！", "body": "LINE 友だち追加だけで全てのサービスが受けられます" },
+        { "title": "充実の<br />マシンラインナップ", "body": "BULL / TORQUE / TECHNOGYM 本格マシンでトレーニング" },
+        { "title": "非接触型の<br />最新ジム運営", "body": "来店不要、入会手続きはWEBで完結" },
+        { "title": "プロ監修<br />トレーニング", "body": "正しいフォームとメニューで効率よく結果へ" },
+        { "title": "清潔で快適な<br />トレーニング空間", "body": "広々フロアと最新空調で集中できる環境" },
+        { "title": "初心者も安心<br />サポート体制", "body": "スタッフ・コンテンツで最初の一歩を後押し" },
+        { "title": "集中できる<br />プライベート空間", "body": "一人ひとりに合わせたトレーニングに集中できる環境" }
+      ]
+    },
+    "campaign": {
+      "bgUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
+      "line1": "春の",
+      "line2": "新生活応援",
+      "line3": "キャンペーン",
+      "chip": "24時間365日 フィットネスジム",
+      "date1": "4/30",
+      "date2": "まで",
+      "banner": "最大15,400円(税込)お得！",
+      "fee1label": "入会金",
+      "fee1val": "5,500円(税込)",
+      "fee2label": "入会翌月会費",
+      "fee2val": "〜9,900円(税込)",
+      "fee2note": "※伴走プランの場合",
+      "zeroHtml": "0<span class=\"text-4xl\">円</span>",
+      "gift": "さらに！VALXオリジナルシェイカープレゼント！",
+      "disclaimer": "※セルフ/伴走プランのみ適応です。※初回事務手数料5,500円(税込)がかかります。"
+    },
+    "line": {
+      "lead": "LINEからの入会手続きで",
+      "highlight": "お得なキャンペーンを適用する！"
+    },
+    "profile": {
+      "bgUrl": "https://images.unsplash.com/photo-1517836357463-d25dfc4cfdd5?auto=format&fit=crop&w=1200&q=80",
+      "avatarUrl": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=400&q=80",
+      "name": "山本 義徳 氏",
+      "nameEn": "YOSHINORI YAMAMOTO",
+      "bio": "YouTube登録者数69万人超。早稲田大学卒。ボディビル大会入賞歴多数。著書・メディア出演を通じ、科学的根拠に基づくトレーニングを発信。VALX GYMの監修・ブランドの核となる存在です。",
+      "shotBgUrl": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1200&q=80",
+      "shotCaptionHtml": "FROM BEGINNER<br />TO PROFESSIONAL"
+    },
+    "price": {
+      "bgUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=80"
+    },
+    "access": {
+      "name": "スタジオ名（差し替え）",
+      "sub": "YOUR STUDIO",
+      "addressHtml": "〒000-0000<br />東京都〇〇区〇〇 0-0-0<br />〇〇ビル 2F",
+      "station": "〇〇駅 徒歩〇分",
+      "note": "※郵便番号・住所・駅名は公開前に必ず実情報へ差し替えてください。"
+    },
+    "sticky": {
+      "note": "24時間受付可 · 公式LINEから入会・お問い合わせいただけます。",
+      "domain": "gym.valx.jp"
+    }
   }
 }

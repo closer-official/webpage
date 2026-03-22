@@ -1,8 +1,11 @@
 import { getSupabase, isSupabaseConfigured } from './supabaseClient.js';
+import { hashPasswordScrypt } from '../lpCmsCrypto.js';
 
 const KEYS = {
   queue: 'queue',
   lpContent: 'lpContent',
+  lpAnalytics: 'lpAnalytics',
+  lpCmsAccounts: 'lpCmsAccounts',
   dashboard: 'dashboard',
   options: 'options',
   billing: 'billing',
@@ -12,6 +15,7 @@ const KEYS = {
   designInsights: 'designInsights',
   learningJob: 'learningJob',
   autoProcessEnabled: 'autoProcessEnabled',
+  salesAgency: 'salesAgency',
 };
 
 function getDefault(name) {
@@ -21,7 +25,19 @@ function getDefault(name) {
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
   if (name === 'billing') return { plan: 'normal' };
   if (name === 'lpContent') return {};
+  if (name === 'lpAnalytics') return {};
+  if (name === 'lpCmsAccounts') return {};
   if (name === 'autoProcessEnabled') return false;
+  if (name === 'salesAgency') {
+    return {
+      orgs: {},
+      reps: {},
+      repByEmail: {},
+      sessions: {},
+      placeCache: {},
+      apiUsage: [],
+    };
+  }
   return {};
 }
 
@@ -53,6 +69,52 @@ export const storeSupabase = {
     obj[slug] = content;
     await set(KEYS.lpContent, obj);
   },
+  getLpAnalytics: async () => {
+    const data = await get(KEYS.lpAnalytics);
+    return data && typeof data === 'object' ? data : {};
+  },
+  incrementLpView: async (slug) => {
+    const data = (await get(KEYS.lpAnalytics)) || {};
+    const obj = typeof data === 'object' ? { ...data } : {};
+    const prev = obj[slug] && typeof obj[slug] === 'object' ? obj[slug] : { count: 0 };
+    const count = (Number(prev.count) || 0) + 1;
+    obj[slug] = { count, updatedAt: new Date().toISOString() };
+    await set(KEYS.lpAnalytics, obj);
+    return count;
+  },
+  getLpViewStats: async (slug) => {
+    const data = (await get(KEYS.lpAnalytics)) || {};
+    const obj = typeof data === 'object' ? data : {};
+    const rec = obj[slug];
+    if (!rec || typeof rec !== 'object') return { viewCount: 0, updatedAt: null };
+    return { viewCount: Number(rec.count) || 0, updatedAt: rec.updatedAt || null };
+  },
+  getLpCmsAccount: async (siteKey) => {
+    const data = (await get(KEYS.lpCmsAccounts)) || {};
+    const obj = typeof data === 'object' ? data : {};
+    const rec = obj[String(siteKey)];
+    if (!rec || typeof rec !== 'object') return null;
+    return rec;
+  },
+  setLpCmsAccount: async (siteKey, username, plainPassword) => {
+    const data = (await get(KEYS.lpCmsAccounts)) || {};
+    const obj = typeof data === 'object' ? { ...data } : {};
+    const h = hashPasswordScrypt(plainPassword);
+    obj[String(siteKey)] = {
+      username: String(username || '').trim(),
+      passwordSalt: h.passwordSalt,
+      passwordHash: h.passwordHash,
+      alg: h.alg,
+      updatedAt: new Date().toISOString(),
+    };
+    await set(KEYS.lpCmsAccounts, obj);
+  },
+  deleteLpCmsAccount: async (siteKey) => {
+    const data = (await get(KEYS.lpCmsAccounts)) || {};
+    const obj = typeof data === 'object' ? { ...data } : {};
+    delete obj[String(siteKey)];
+    await set(KEYS.lpCmsAccounts, obj);
+  },
   getDashboard: () => get(KEYS.dashboard),
   setDashboard: (arr) => set(KEYS.dashboard, arr),
   getOptions: () => get(KEYS.options),
@@ -74,6 +136,25 @@ export const storeSupabase = {
   setLearningJob: (data) => set(KEYS.learningJob, data),
   getAutoProcessEnabled: () => get(KEYS.autoProcessEnabled),
   setAutoProcessEnabled: (v) => set(KEYS.autoProcessEnabled, v),
+  getSalesAgency: async () => {
+    const data = await get(KEYS.salesAgency);
+    const d = data && typeof data === 'object' ? data : {};
+    const def = getDefault(KEYS.salesAgency);
+    return {
+      ...def,
+      ...d,
+      orgs: typeof d.orgs === 'object' ? d.orgs : {},
+      reps: typeof d.reps === 'object' ? d.reps : {},
+      repByEmail: typeof d.repByEmail === 'object' ? d.repByEmail : {},
+      sessions: typeof d.sessions === 'object' ? d.sessions : {},
+      placeCache: typeof d.placeCache === 'object' ? d.placeCache : {},
+      apiUsage: Array.isArray(d.apiUsage) ? d.apiUsage : [],
+    };
+  },
+  setSalesAgency: async (whole) => {
+    const base = getDefault(KEYS.salesAgency);
+    await set(KEYS.salesAgency, { ...base, ...whole, updatedAt: new Date().toISOString() });
+  },
 };
 
 export { isSupabaseConfigured };

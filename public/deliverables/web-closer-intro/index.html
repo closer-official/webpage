@@ -1038,10 +1038,27 @@
 
   <script>
   (function(){
+    function resolveLpSiteKey() {
+      var q = new URLSearchParams(location.search);
+      var fromQuery = q.get('site') || q.get('siteKey');
+      if (
+        fromQuery &&
+        /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(fromQuery) &&
+        fromQuery.length >= 2 &&
+        fromQuery.length <= 64
+      ) {
+        return fromQuery.toLowerCase();
+      }
+      var h = location.hostname;
+      var m = h.match(/^([a-z0-9][a-z0-9-]*[a-z0-9])\.store-official\.net$/i);
+      if (m) return m[1].toLowerCase();
+      return 'web-closer-intro';
+    }
+    var SLUG = resolveLpSiteKey();
     var api = '/api';
     var base = location.pathname.indexOf('/deliverables/') >= 0 ? location.pathname.split('/deliverables/')[0] : '';
     if (base) api = base + api;
-    fetch(api + '/lp-content/web-closer-intro').then(function(r){ return r.json(); }).then(function(c){
+    fetch(api + '/lp-content/' + encodeURIComponent(SLUG)).then(function(r){ return r.json(); }).then(function(c){
       if (!c || typeof c !== 'object') return;
       function g(o,p){ return p.split('.').reduce(function(a,k){ return a ? a[k] : undefined; }, o); }
       function set(id, val, attr){

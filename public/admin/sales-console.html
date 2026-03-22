@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>営業プレビュー | Closer</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0f1419;
+        color: #e7ecf3;
+      }
+      body {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 1.25rem;
+      }
+      h1 {
+        font-size: 1.15rem;
+      }
+      label {
+        display: block;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: #9fb0c3;
+      }
+      input,
+      textarea,
+      button,
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 0.35rem;
+        padding: 0.5rem 0.65rem;
+        border-radius: 8px;
+        border: 1px solid #2a3544;
+        background: #1a222d;
+        color: #e7ecf3;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+      button.secondary {
+        background: #2a3544;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .row button {
+        flex: 1;
+      }
+      pre,
+      .mono {
+        font-size: 0.75rem;
+        word-break: break-all;
+        background: #1a222d;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #2a3544;
+      }
+      .err {
+        color: #f87171;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+      }
+      .ok {
+        color: #4ade80;
+        font-size: 0.85rem;
+      }
+      img.qr {
+        display: block;
+        max-width: 280px;
+        margin: 1rem auto;
+        border-radius: 8px;
+      }
+      a {
+        color: #7dd3fc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>営業プレビュー（ログイン）</h1>
+    <p class="mono" style="margin-top: 0.5rem">
+      初回のみ管理者が <code>POST /api/admin/sales-seed-rep</code> でアカウント作成 → ここでログイン。
+    </p>
+
+    <div id="login-panel">
+      <label>メール</label>
+      <input type="email" id="email" autocomplete="username" />
+      <label>パスワード</label>
+      <input type="password" id="password" autocomplete="current-password" />
+      <button type="button" id="btn-login">ログイン</button>
+      <div id="login-err" class="err"></div>
+    </div>
+
+    <div id="app-panel" hidden>
+      <p class="ok" id="rep-label"></p>
+      <button type="button" class="secondary" id="btn-logout">ログアウト</button>
+
+      <h2 style="margin-top: 1.5rem; font-size: 1rem">1. Google マップ</h2>
+      <label>マップURL（共有リンクを貼り付け）</label>
+      <textarea id="maps-url" rows="3" placeholder="https://maps.app.goo.gl/..."></textarea>
+      <button type="button" id="btn-parse">URLから place_id を解析</button>
+      <label>または place_id 直接</label>
+      <input type="text" id="place-id" placeholder="ChIJ..." />
+      <label>店名検索（Autocomplete）</label>
+      <input type="text" id="ac-input" placeholder="渋谷 ジム" />
+      <button type="button" id="btn-ac">候補を取得</button>
+      <div id="ac-out" class="mono" style="margin-top: 0.5rem; display: none"></div>
+
+      <h2 style="margin-top: 1.5rem; font-size: 1rem">2. プレビュー生成</h2>
+      <label>テンプレ（納品標準リスト）</label>
+      <select id="template">
+        <option value="">読み込み中…</option>
+      </select>
+      <button type="button" id="btn-preview">プレビュー作成</button>
+      <div id="preview-err" class="err"></div>
+      <div id="preview-out" style="margin-top: 1rem; display: none">
+        <p><strong>プレビューURL</strong>（顧客に見せる・QRは下）</p>
+        <p class="mono" id="preview-url"></p>
+        <p><a id="preview-link" href="#" target="_blank" rel="noopener">新しいタブで開く</a></p>
+        <img class="qr" id="qr-img" alt="QR" />
+        <p class="mono" id="usage-hint"></p>
+      </div>
+
+      <h2 style="margin-top: 1.5rem; font-size: 1rem">直近のプレビュー</h2>
+      <pre id="sessions-list" style="white-space: pre-wrap"></pre>
+    </div>
+
+    <script>
+      const api = (function () {
+        var p = location.pathname.indexOf('/admin/');
+        if (p >= 0) return location.pathname.slice(0, p) + '/api';
+        return '/api';
+      })();
+
+      async function jfetch(path, opt) {
+        const r = await fetch(api + path, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...(opt && opt.headers) },
+          ...opt,
+        });
+        const t = await r.text();
+        let data;
+        try {
+          data = t ? JSON.parse(t) : {};
+        } catch {
+          data = { _raw: t };
+        }
+        if (!r.ok) throw new Error(data.error || data._raw || r.status);
+        return data;
+      }
+
+      async function refreshMe() {
+        try {
+          const data = await jfetch('/sales/auth/me');
+          document.getElementById('login-panel').hidden = true;
+          document.getElementById('app-panel').hidden = false;
+          document.getElementById('rep-label').textContent =
+            data.rep.displayName + ' (' + data.rep.email + ') · API units(直近100件): ' + (data.apiUsage.unitsTotal ?? '-');
+          const list = await jfetch('/sales/preview-sessions');
+          document.getElementById('sessions-list').textContent = JSON.stringify(list.sessions, null, 2);
+        } catch {
+          document.getElementById('login-panel').hidden = false;
+          document.getElementById('app-panel').hidden = true;
+        }
+      }
+
+      document.getElementById('btn-login').onclick = async function () {
+        document.getElementById('login-err').textContent = '';
+        try {
+          await jfetch('/sales/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: document.getElementById('email').value,
+              password: document.getElementById('password').value,
+            }),
+          });
+          await refreshMe();
+        } catch (e) {
+          document.getElementById('login-err').textContent = e.message || String(e);
+        }
+      };
+
+      document.getElementById('btn-logout').onclick = async function () {
+        await jfetch('/sales/auth/logout', { method: 'POST' });
+        location.reload();
+      };
+
+      document.getElementById('btn-parse').onclick = async function () {
+        document.getElementById('preview-err').textContent = '';
+        try {
+          const data = await jfetch('/sales/parse-maps-url', {
+            method: 'POST',
+            body: JSON.stringify({ url: document.getElementById('maps-url').value }),
+          });
+          if (data.placeId) document.getElementById('place-id').value = data.placeId;
+          else alert('URL から place_id を取れませんでした。検索または別のURLを試してください。');
+        } catch (e) {
+          alert(e.message);
+        }
+      };
+
+      document.getElementById('btn-ac').onclick = async function () {
+        document.getElementById('ac-out').style.display = 'block';
+        document.getElementById('ac-out').textContent = '取得中…';
+        try {
+          const data = await jfetch('/sales/places/autocomplete', {
+            method: 'POST',
+            body: JSON.stringify({ input: document.getElementById('ac-input').value }),
+          });
+          document.getElementById('ac-out').textContent = JSON.stringify(data.predictions, null, 2);
+        } catch (e) {
+          document.getElementById('ac-out').textContent = e.message;
+        }
+      };
+
+      document.getElementById('btn-preview').onclick = async function () {
+        document.getElementById('preview-err').textContent = '';
+        document.getElementById('preview-out').style.display = 'none';
+        try {
+          const body = {
+            templateSlug: document.getElementById('template').value,
+            placeId: document.getElementById('place-id').value.trim(),
+            mapsUrl: document.getElementById('maps-url').value.trim(),
+          };
+          const data = await jfetch('/sales/preview-sessions', { method: 'POST', body: JSON.stringify(body) });
+          document.getElementById('preview-out').style.display = 'block';
+          document.getElementById('preview-url').textContent = data.previewUrl;
+          document.getElementById('preview-link').href = data.previewUrl;
+          document.getElementById('qr-img').src =
+            api + '/sales/preview-sessions/' + encodeURIComponent(data.publicId) + '/qr.png';
+          document.getElementById('usage-hint').textContent = '申込URL（sticky CTA）: ' + (data.applyUrl || '');
+          await refreshMe();
+        } catch (e) {
+          document.getElementById('preview-err').textContent = e.message || String(e);
+        }
+      };
+
+      fetch(api + '/product-lp-templates')
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          var sel = document.getElementById('template');
+          var list = data.templates || [];
+          sel.innerHTML = list
+            .map(function (t) {
+              return '<option value="' + t.slug + '">' + t.name + '</option>';
+            })
+            .join('');
+          if (!list.length) sel.innerHTML = '<option value="">テンプレなし</option>';
+        })
+        .catch(function () {
+          document.getElementById('template').innerHTML =
+            '<option value="gym-valx-intro">gym-valx-intro（フォールバック）</option>';
+        });
+
+      refreshMe();
+    </script>
+  </body>
+</html>

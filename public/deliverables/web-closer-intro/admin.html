@@ -192,14 +192,31 @@
 
       <div style="display:flex;gap:12px;margin-top:24px;">
         <button type="button" class="btn" id="saveBtn">保存する</button>
-        <a href="index.html" class="btn btn-secondary" target="_blank">プレビューを開く</a>
+        <a href="index.html" class="btn btn-secondary" target="_blank" id="previewOpenLink">プレビューを開く</a>
       </div>
     </div>
   </div>
 
   <script>
     const API = '/api';
-    const SLUG = 'web-closer-intro';
+
+    function resolveLpSiteKey() {
+      const q = new URLSearchParams(location.search);
+      const fromQuery = q.get('site') || q.get('siteKey');
+      if (
+        fromQuery &&
+        /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(fromQuery) &&
+        fromQuery.length >= 2 &&
+        fromQuery.length <= 64
+      ) {
+        return fromQuery.toLowerCase();
+      }
+      const h = location.hostname;
+      const m = h.match(/^([a-z0-9][a-z0-9-]*[a-z0-9])\.store-official\.net$/i);
+      if (m) return m[1].toLowerCase();
+      return 'web-closer-intro';
+    }
+    const SLUG = resolveLpSiteKey();
 
     function getApiBase() {
       const p = location.pathname;
@@ -369,6 +386,8 @@
       const c = await loadContent();
       fillForm(c);
       setupPreviewHandlers();
+      const pol = document.getElementById('previewOpenLink');
+      if (pol) pol.href = 'index.html?site=' + encodeURIComponent(SLUG);
 
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch(apiBase + '/lp-cms/' + SLUG + '/logout', { method: 'POST', credentials: 'include' });

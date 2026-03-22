@@ -18,8 +18,9 @@ async function getStripe() {
  * @param {string} successUrl - 決済成功時のリダイレクトURL
  * @param {string} cancelUrl - キャンセル時のリダイレクトURL
  * @param {Record<string, unknown>} metadata - プラン・オプション（metadata に保存）
+ * @param {Record<string, string>} [stripeMeta] - Stripe Checkout の metadata に追加（営業プレビューID等）
  */
-export async function createCheckoutSession(amountYen, items, successUrl, cancelUrl, metadata = {}) {
+export async function createCheckoutSession(amountYen, items, successUrl, cancelUrl, metadata = {}, stripeMeta = {}) {
   const s = await getStripe();
   if (!s) throw new Error('Stripe is not configured. Set STRIPE_SECRET_KEY.');
 
@@ -35,6 +36,12 @@ export async function createCheckoutSession(amountYen, items, successUrl, cancel
     quantity: 1,
   }));
 
+  const extra = {};
+  for (const [k, v] of Object.entries(stripeMeta)) {
+    if (v == null) continue;
+    extra[String(k).slice(0, 40)] = String(v).slice(0, 450);
+  }
+
   const session = await s.checkout.sessions.create({
     mode: 'payment',
     line_items: lineItems,
@@ -42,6 +49,7 @@ export async function createCheckoutSession(amountYen, items, successUrl, cancel
     cancel_url: cancelUrl,
     metadata: {
       billing: JSON.stringify(metadata),
+      ...extra,
     },
   });
 
