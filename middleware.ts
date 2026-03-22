@@ -1,20 +1,25 @@
 /**
  * 1) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
  * 2) supernihonshi.store-official.net: 日本史LP をルートに返す
- * 3) webpage.closer-official.com: ルートは運営SPA（postbuild で dist ルートがジムLPになるのを上書き）
+ * 3) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
+ *    （運営SPA・テンプレ一覧は dist ルート。webpage.closer-official.com 等はビルド結果のまま）
  */
 import { next, rewrite } from '@vercel/edge';
-
-/** ルート `/` を Vite 管理画面（/admin/index.html）に内部リライトするホスト */
-const ADMIN_AT_ROOT_HOSTS = new Set(['webpage.closer-official.com', 'www.webpage.closer-official.com']);
 
 const LP_HOSTS = new Set(['supernihonshi.store-official.net', 'www.supernihonshi.store-official.net']);
 const LP_BASE = '/deliverables/japanese-history-higashi';
 
 const GYM_SALES_PREVIEW_PATH = '/deliverables/gym-valx-intro/index.html';
+const GYM_STOREFRONT_PATH = '/deliverables/gym-valx-intro/index.html';
 
 function previewHostname(): string {
   return (process.env.SALES_PREVIEW_HOSTNAME || 'preview.closer-official.com').toLowerCase();
+}
+
+function isStoreOfficialSubdomain(host: string): boolean {
+  const h = host.toLowerCase();
+  if (h === 'store-official.net' || h === 'www.store-official.net') return false;
+  return h.endsWith('.store-official.net');
 }
 
 export default function middleware(request: Request) {
@@ -41,28 +46,27 @@ export default function middleware(request: Request) {
     return next();
   }
 
-  if (ADMIN_AT_ROOT_HOSTS.has(host)) {
+  if (LP_HOSTS.has(host)) {
+    if (url.pathname.startsWith('/api')) {
+      return next();
+    }
+    const path = url.pathname === '/' || url.pathname === '' ? '/index.html' : url.pathname;
+    const dest = new URL(`${LP_BASE}${path}`, url.origin);
+    return rewrite(dest);
+  }
+
+  if (isStoreOfficialSubdomain(host)) {
     if (url.pathname.startsWith('/api')) {
       return next();
     }
     const p = url.pathname.replace(/\/$/, '') || '/';
     if (p === '/') {
-      return rewrite(new URL('/admin/index.html', url.origin));
+      return rewrite(new URL(GYM_STOREFRONT_PATH, url.origin));
     }
     return next();
   }
 
-  if (!LP_HOSTS.has(host)) {
-    return next();
-  }
-
-  if (url.pathname.startsWith('/api')) {
-    return next();
-  }
-
-  const path = url.pathname === '/' || url.pathname === '' ? '/index.html' : url.pathname;
-  const dest = new URL(`${LP_BASE}${path}`, url.origin);
-  return rewrite(dest);
+  return next();
 }
 
 export const config = {

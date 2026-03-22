@@ -104,7 +104,9 @@ export function StoreCms({ items, onRefresh }: StoreCmsProps) {
         </p>
         <p className="store-cms-hint" style={{ marginTop: 8 }}>
           店舗ドメイン運用時は <strong>トップが店舗LP</strong>、ツールの管理画面は{' '}
-          <code>/admin/</code> です（例: <code>https://店舗名.store-official.net/admin/</code>）。ジムLP（gym-valx）専用の編集・閲覧数は{' '}
+          店舗ドメインではトップはジムLP、運営ツールは <code>/</code> または <code>/admin/</code>（例:{' '}
+          <code>https://店舗名.store-official.net/admin/</code>
+          ）。ジムLP（gym-valx）専用の編集・閲覧数は{' '}
           <a href="/admin/gym-lp.html" target="_blank" rel="noopener noreferrer">
             /admin/gym-lp.html
           </a>

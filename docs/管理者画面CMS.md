@@ -48,7 +48,7 @@
 | URL | 内容 |
 |-----|------|
 | `/` | 店舗向け静的LP（既定: `gym-valx-intro/index.html` をルートにコピー） |
-| `/admin/` | ウェブページ作成ツール（React） |
+| `/`（および互換で `/admin/`） | ウェブページ作成ツール（React・運営SPA） |
 | `/admin/gym-lp.html` | ジムLP専用の文言・キャンペーン・画像URL・閲覧数の管理 |
 
 ### ジムLP（`gym-valx-intro`）API
