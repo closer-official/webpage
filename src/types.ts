@@ -149,7 +149,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** 15種類テンプレートID（業種別+LP） */
+/** テンプレートID（運用ビルトインは3種。旧IDは保存済みLP・buildHtml互換のため型に残す） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -203,23 +203,11 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
   { id: 'retail', name: '小売・EC' },
 ];
 
+/** 新規選択UIに出すビルトイン（運営⓪デザインの3種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
 export const STYLES: { id: StyleId; name: string }[] = [
-  { id: 'salon_barber', name: '個人美容室・理容室' },
-  { id: 'cafe_tea', name: 'カフェ・喫茶・パン・スイーツ' },
-  { id: 'cafe_1', name: 'カフェ（複数店舗・ミニマル）' },
-  { id: 'clinic_chiropractic', name: '整骨院・整体・鍼灸' },
-  { id: 'gym_yoga', name: 'パーソナルジム・ヨガ' },
-  { id: 'builder', name: '工務店・リノベ' },
-  { id: 'professional', name: '士業' },
-  { id: 'cram_school', name: '塾・習い事教室' },
-  { id: 'izakaya', name: 'こだわり居酒屋・バー' },
-  { id: 'pet_salon', name: 'ペットサロン・ドッグ' },
-  { id: 'apparel', name: 'アパレル' },
-  { id: 'event', name: 'イベント' },
-  { id: 'ramen', name: 'ラーメン' },
-  { id: 'academy_lp', name: 'ハイコンバージョンLP' },
-  { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web制作・LP）' },
-  { id: 'gym_personal_neon', name: 'パーソナルジム・ネオン（固定LP）' },
+  { id: 'cafe_1', name: '複数店舗・ミニマル' },
+  { id: 'academy_lp', name: '高CVセールスLP' },
+  { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web/LP）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

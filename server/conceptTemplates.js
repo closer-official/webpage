@@ -449,24 +449,8 @@ const TEMPLATE_CSS_RAW = {
   `,
 };
 
-export const TEMPLATE_IDS = [
-  'salon_barber',       // 1. 個人美容室・理容室
-  'cafe_tea',           // 2. カフェ・喫茶・パン・スイーツ
-  'cafe_1',             // 2b. カフェ（複数店舗・ミニマル）
-  'clinic_chiropractic', // 3. 整骨院・整体・鍼灸
-  'gym_yoga',           // 4. パーソナルジム・ヨガ
-  'builder',            // 5. 工務店・リノベ
-  'professional',       // 6. 士業
-  'cram_school',        // 7. 塾・習い事教室
-  'izakaya',            // 8. こだわり居酒屋・バー
-  'pet_salon',          // 9. ペットサロン・ドッグ
-  'apparel',            // 10. アパレル
-  'event',              // 11. イベント
-  'ramen',              // 12. ラーメン
-  'academy_lp',         // 13. 高CVセールスLP
-  'navy_cyan_consult',  // 14. ダークネイビー×シアン（講座・コンサルLP）
-  'gym_personal_neon', // 15. パーソナルジム・ネオンシアン（gym-valx-intro 固定HTML）
-];
+/** templatePreview.TEMPLATE_CANDIDATES と同一（運営デザイン選択・業種キュー順の基準） */
+export const TEMPLATE_IDS = ['cafe_1', 'academy_lp', 'navy_cyan_consult'];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
 export const CONCEPT_TEMPLATES = {

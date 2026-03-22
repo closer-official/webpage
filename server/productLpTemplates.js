@@ -2,9 +2,13 @@
  * 納品用 LP テンプレ（deliverables + lpContent）の正。
  * 新規納品・購入者ウィザード・営業プレビューはここを参照する。
  *
- * 環境変数 PRODUCT_LP_TEMPLATE_SLUGS（カンマ区切り）で上書き可。
- * 既定から省く・順序変更したい場合に使用。
+ * 新規で「商品テンプレ」として出すスラッグは {@link STANDARD_PRODUCT_LP_SLUGS} のみ（環境変数では上書きしない）。
+ * 運営画面の「⓪ デザイン」と同じラインナップにしたい場合は、この配列と META をメンテし、
+ * デザインタブ側の案内・カードもそれに揃える。
  */
+
+/** 新規納品・ウィザード・営業で選べる deliverables の slug（順序あり） */
+export const STANDARD_PRODUCT_LP_SLUGS = Object.freeze(['gym-valx-intro', 'web-closer-intro']);
 
 /** コード上まだ存在しうるが「新規納品の選択肢に出さない」例（納品済み専用など） */
 export const LP_CMS_ALL_KNOWN_SLUGS = ['gym-valx-intro', 'web-closer-intro', 'japanese-history-higashi'];
@@ -38,14 +42,7 @@ const META = {
  * 新規納品・ウィザードで選べる slug の配列
  */
 export function getProductLpTemplateSlugs() {
-  const raw = String(process.env.PRODUCT_LP_TEMPLATE_SLUGS || '').trim();
-  if (raw) {
-    return raw
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-  return ['gym-valx-intro', 'web-closer-intro'];
+  return [...STANDARD_PRODUCT_LP_SLUGS];
 }
 
 /**

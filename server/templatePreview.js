@@ -1,23 +1,11 @@
 import { buildHtml } from './buildHtml.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 
+/** 運営「⓪ デザイン」等で選べるビルトインはこの3種のみ（旧1〜13・15は一覧から除外。buildHtml はレガシーIDの描画用に残す） */
 export const TEMPLATE_CANDIDATES = [
-  { id: 'salon_barber', name: 'テンプレ1（ミニマル）' },
-  { id: 'cafe_tea', name: 'テンプレ2（ナチュラル）' },
-  { id: 'cafe_1', name: 'テンプレ2b（複数店舗・ミニマル）' },
-  { id: 'clinic_chiropractic', name: 'テンプレ3（信頼感）' },
-  { id: 'gym_yoga', name: 'テンプレ4（力強い）' },
-  { id: 'builder', name: 'テンプレ5（直線的）' },
-  { id: 'professional', name: 'テンプレ6（上品）' },
-  { id: 'cram_school', name: 'テンプレ7（親しみ）' },
-  { id: 'izakaya', name: 'テンプレ8（ダーク）' },
-  { id: 'pet_salon', name: 'テンプレ9（やわらかい）' },
-  { id: 'apparel', name: 'テンプレ10（洗練）' },
-  { id: 'event', name: 'テンプレ11（躍動感）' },
-  { id: 'ramen', name: 'テンプレ12（和モダン）' },
-  { id: 'academy_lp', name: 'テンプレ13（高CVセールスLP）' },
-  { id: 'navy_cyan_consult', name: 'テンプレ14（ネイビー×シアン・Web/LP）' },
-  { id: 'gym_personal_neon', name: 'テンプレ15（パーソナルジム・ネオン／固定LP）' },
+  { id: 'cafe_1', name: 'テンプレ1（複数店舗・ミニマル）' },
+  { id: 'academy_lp', name: 'テンプレ2（高CVセールスLP）' },
+  { id: 'navy_cyan_consult', name: 'テンプレ3（ネイビー×シアン・Web/LP）' },
 ];
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
