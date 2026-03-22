@@ -39,8 +39,12 @@ export function findTemplateCandidate(id, customizations = []) {
   return getTemplateCandidates(customizations).find((t) => t.id === tid) || null;
 }
 
+/** ヒアリング「テンプレに当てはまらない・1から製作」（叩き台は buildHtml で navy にマップ） */
+export const INTAKE_BESPOKE_TEMPLATE_ID = 'intake_bespoke';
+
 export function isValidTemplateId(id, customizations = []) {
   const tid = String(id || '');
+  if (tid === INTAKE_BESPOKE_TEMPLATE_ID) return true;
   if (TEMPLATE_IDS.has(tid)) return true;
   return !!findTemplateCandidate(tid, customizations);
 }
@@ -100,7 +104,8 @@ export function renderTemplatePreview(templateId, customization = null) {
     return renderBlueprintHtml(cust.blueprint, { override: ov });
   }
 
-  const id = String(templateId || '');
+  let id = String(templateId || '');
+  if (id === INTAKE_BESPOKE_TEMPLATE_ID) id = 'navy_cyan_consult';
   if (!TEMPLATE_IDS.has(id)) return null;
 
   const ov = resolveTemplateOverride(customization);

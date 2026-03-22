@@ -444,7 +444,9 @@ function intakeToPageDraft(intake) {
     siteName,
     title: siteName,
     headline: `${siteName} 公式サイト案`,
-    subheadline: `ヒアリング回答をもとに作成した叩き台です（ベーステンプレ: ${intake.chosenTemplateId}）。`,
+    subheadline: `ヒアリング回答をもとに作成した叩き台です（ベース: ${
+      intake.chosenTemplateId === 'intake_bespoke' ? 'オーダーメイド（テンプレなし）' : intake.chosenTemplateId
+    }）。`,
     ctaLabel: 'お問い合わせ',
     ctaHref: '#contact',
     sections,
@@ -986,6 +988,7 @@ app.post('/api/customer-intake', async (req, res) => {
   const templateCustoms = await store.getTemplateCustomizations();
   const publicCandidates = getTemplateCandidates(templateCustoms, { forPublicSelection: true });
   const allowedTemplateIds = new Set(publicCandidates.map((c) => c.id));
+  allowedTemplateIds.add('intake_bespoke');
   if (!allowedTemplateIds.has(String(body.chosenTemplateId || '').trim())) {
     return res.status(400).json({ error: 'chosenTemplateId is invalid' });
   }
@@ -1101,10 +1104,16 @@ app.get('/api/customer-intake/:id/preview', async (req, res) => {
   if (!isValidTemplateId(row.chosenTemplateId, templateCustoms)) {
     return res.status(400).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Invalid template');
   }
-  const candidate = findTemplateCandidate(row.chosenTemplateId, templateCustoms);
   const { content, seo } = intakeToPageDraft(row);
-  const baseTemplateId = candidate?.baseTemplateId || row.chosenTemplateId;
-  const mergedContent = applyTemplateCustomization(content, candidate?.customization?.override || null);
+  let mergedContent = content;
+  let baseTemplateId = row.chosenTemplateId;
+  if (row.chosenTemplateId !== 'intake_bespoke') {
+    const candidate = findTemplateCandidate(row.chosenTemplateId, templateCustoms);
+    baseTemplateId = candidate?.baseTemplateId || row.chosenTemplateId;
+    mergedContent = applyTemplateCustomization(content, candidate?.customization?.override || null);
+  } else {
+    baseTemplateId = 'navy_cyan_consult';
+  }
   const html = buildHtml(mergedContent, seo, baseTemplateId, {
     contactForm: false,
     instagramLine: false,

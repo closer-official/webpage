@@ -3,18 +3,29 @@ import { publicLangBarHtml, publicLangBarStyles, publicLangToggleInlineScript } 
 
 export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
   const list = Array.isArray(candidates) && candidates.length ? candidates : TEMPLATE_CANDIDATES;
-  const templateCards = list.map(
-    (t) => `<label class="style-card">
+  const templateCards = list
+    .map(
+      (t) => `<label class="style-card">
       <div class="style-card-preview" aria-hidden="true">
         <iframe src="/api/template-preview/${t.id}" title="${String(t.name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" loading="lazy"></iframe>
       </div>
       <div class="style-card-meta">
-        <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
+        <div><input type="radio" name="intakePickTemplate" value="${t.id}"><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
         <p class="sub" data-i18n="intake.tpl.sub">上はページの見た目（縮小）。別タブで全画面も開けます。</p>
         <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer"><span data-i18n="intake.tpl.preview">別タブで全画面</span></a>
       </div>
-    </label>`
-  ).join('');
+    </label>`,
+    )
+    .join('');
+  const bespokeCard = `<label class="style-card style-card-bespoke">
+      <div class="style-card-bespoke-visual" aria-hidden="true">
+        <span data-i18n="intake.bespoke.badge">参考テンプレなし<br />フルオーダーメイド</span>
+      </div>
+      <div class="style-card-meta">
+        <div><input type="radio" name="intakePickTemplate" value="intake_bespoke"><span class="ttl" data-i18n="intake.bespoke.title">テンプレに当てはまらない・1から製作</span></div>
+        <p class="sub" data-i18n="intake.bespoke.sub">イメージに合うテンプレがない場合はこちら。参考URLやご要望に沿って構成します。</p>
+      </div>
+    </label>`;
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -173,6 +184,57 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
     .style-card .ttl { font-weight: 700; }
     .style-card .sub { color: var(--text-muted); font-size: .84rem; line-height: 1.6; margin-top: 4px; }
     .style-card a { color: var(--sage); font-size: .82rem; text-underline-offset: 2px; }
+    .h-step2 {
+      margin: 0 0 10px;
+      font-size: 1.35rem;
+      line-height: 1.45;
+      font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+      font-weight: 600;
+    }
+    .intake-step-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .link-back {
+      background: transparent !important;
+      color: var(--sage) !important;
+      padding: 6px 0 !important;
+      border-radius: 0 !important;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .link-back:hover { transform: none; opacity: 0.85; }
+    .picked-line { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+    .picked-line strong { color: var(--text); font-weight: 700; }
+    .btn-intake-next {
+      margin-top: 14px;
+      width: 100%;
+      max-width: 420px;
+      display: block;
+    }
+    .style-card-bespoke-visual {
+      height: 180px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px dashed var(--terracotta-soft);
+      background: linear-gradient(145deg, rgba(184, 149, 111, 0.12), rgba(139, 154, 122, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
     @media (max-width: 680px) {
       .wrap { padding-top: 48px; }
       .grid { grid-template-columns: 1fr; }
@@ -191,15 +253,31 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       <span style="color: var(--text-muted);" data-i18n="intake.nav.nopw">パスワード不要</span>
     </p>
     <div class="card">
-      <h1 data-i18n="intake.h1">制作前ヒアリングフォーム</h1>
-      <p class="lead" data-i18n="intake.lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>
-      <p class="micro-copy" data-i18n="intake.micro">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
+      <div id="intake-step-pick">
+        <h1 data-i18n="intake.step1.h1">ステップ1：ベースとなるデザインを選ぶ</h1>
+        <p class="lead" data-i18n="intake.step1.lead">縮小プレビューで雰囲気を比べ、近いものを1つ選ぶか、該当がなければ「1から製作」を選んでください。</p>
+        <div class="style-cards">
+          ${templateCards}
+          ${bespokeCard}
+        </div>
+        <p class="micro-copy" data-i18n="intake.step1.nextHint">選択後、「次へ」からヒアリングの詳細入力に進みます。</p>
+        <p id="ng-step1" class="err" style="margin-top:10px;min-height:0;"></p>
+        <button type="button" id="btn-intake-step-next" class="btn-intake-next" data-i18n="intake.step1.btnNext">次へ：ヒアリング内容を入力</button>
+      </div>
 
-      <form id="intake-form" novalidate>
+      <form id="intake-form" style="display:none" novalidate>
+        <div class="intake-step-banner">
+          <button type="button" id="btn-intake-step-back" class="link-back" data-i18n="intake.step2.back">← デザイン選択に戻る</button>
+          <p class="picked-line"><span data-i18n="intake.picked.prefix">選択中：</span><strong id="picked-template-label"></strong></p>
+        </div>
+        <input type="hidden" name="chosenTemplateId" id="field-chosen-template" value="" />
         <div class="intake-i18n-js-src" hidden aria-hidden="true">
           <span data-i18n="intake.js.draft">途中保存</span>
           <span data-i18n="intake.js.submit">ヒアリングを送信</span>
         </div>
+        <h2 class="h-step2" data-i18n="intake.step2.h2">ステップ2：ヒアリング内容の入力</h2>
+        <p class="lead" data-i18n="intake.lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>
+        <p class="micro-copy" data-i18n="intake.micro">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
         <p class="section-title" data-i18n="intake.sec.basic">基本情報</p>
         <div class="grid">
           <div>
@@ -265,12 +343,6 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
             <input id="mainColor" name="mainColor" required maxlength="120" data-i18n-placeholder="intake.ph.mainColor" placeholder="例）ネイビー＋ゴールド、くすみグリーン など" />
           </div>
           <div class="full">
-            <label data-i18n="intake.lbl.templatePick">テンプレ候補（今あるテンプレページから1つ選択）*</label>
-            <div class="style-cards">
-              ${templateCards}
-            </div>
-          </div>
-          <div class="full">
             <label for="styleDetail" data-i18n="intake.lbl.styleDetail">「もっとこうしてほしい」があれば（任意）</label>
             <textarea id="styleDetail" name="styleDetail" maxlength="3000" data-i18n-placeholder="intake.ph.styleDetail" placeholder="例）Aが近いが、文字はもう少し太め。写真は暖色寄りにしたい"></textarea>
           </div>
@@ -308,7 +380,13 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
 
   <script>
     (function () {
+      var stepPick = document.getElementById('intake-step-pick');
       var form = document.getElementById('intake-form');
+      var btnNext = document.getElementById('btn-intake-step-next');
+      var btnBack = document.getElementById('btn-intake-step-back');
+      var ngStep1 = document.getElementById('ng-step1');
+      var hiddenTpl = document.getElementById('field-chosen-template');
+      var pickedLabel = document.getElementById('picked-template-label');
       var btn = document.getElementById('submit-btn');
       var draftBtn = document.createElement('button');
       draftBtn.type = 'button';
@@ -323,7 +401,83 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       var draftId = '';
       var draftToken = '';
 
+      function getCheckedPickTemplate() {
+        var el = document.querySelector('input[name="intakePickTemplate"]:checked');
+        return el ? el.value : '';
+      }
+
+      function updatePickedLabel() {
+        var el = document.querySelector('input[name="intakePickTemplate"]:checked');
+        if (!pickedLabel) return;
+        if (!el) {
+          pickedLabel.textContent = '';
+          return;
+        }
+        var lab = el.closest('label');
+        var ttl = lab ? lab.querySelector('.ttl') : null;
+        pickedLabel.textContent = ttl ? String(ttl.textContent || '').trim() : el.value;
+      }
+
+      function showStep2() {
+        if (stepPick) stepPick.style.display = 'none';
+        if (form) form.style.display = '';
+        updatePickedLabel();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showStep1() {
+        if (form) form.style.display = 'none';
+        if (stepPick) stepPick.style.display = '';
+        if (ngStep1) ngStep1.textContent = '';
+      }
+
+      function applyTemplateFromPick() {
+        var v = getCheckedPickTemplate();
+        if (hiddenTpl) hiddenTpl.value = v;
+      }
+
+      if (btnNext) {
+        btnNext.addEventListener('click', function () {
+          if (ngStep1) ngStep1.textContent = '';
+          if (!getCheckedPickTemplate()) {
+            if (ngStep1) ngStep1.textContent = 'テンプレ（または1から製作）を1つ選んでください。';
+            return;
+          }
+          applyTemplateFromPick();
+          showStep2();
+        });
+      }
+
+      if (btnBack) {
+        btnBack.addEventListener('click', function () {
+          showStep1();
+        });
+      }
+
+      function setPickTemplateByValue(val) {
+        if (!val) return false;
+        var radios = document.querySelectorAll('input[name="intakePickTemplate"]');
+        for (var i = 0; i < radios.length; i++) {
+          if (radios[i].value === val) {
+            radios[i].checked = true;
+            if (hiddenTpl) hiddenTpl.value = val;
+            return true;
+          }
+        }
+        return false;
+      }
+
       var q = new URLSearchParams(window.location.search);
+      var tplParam = q.get('template');
+      if (tplParam) {
+        try {
+          tplParam = decodeURIComponent(tplParam);
+        } catch (e) {}
+        if (setPickTemplateByValue(tplParam) && q.get('autostep') !== '0') {
+          showStep2();
+        }
+      }
+
       if (q.get('draft')) {
         draftId = q.get('draft') || '';
         draftToken = q.get('token') || '';
@@ -331,6 +485,10 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           .then(function (r) { return r.json(); })
           .then(function (d) {
             if (!d || !d.id) return;
+            if (d.chosenTemplateId) {
+              setPickTemplateByValue(String(d.chosenTemplateId));
+              showStep2();
+            }
             form.storeName.value = d.storeName || '';
             form.contactName.value = d.contactName || '';
             form.contactMethod.value = d.contactMethod || '';
@@ -342,10 +500,6 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
             Array.prototype.slice.call(form.querySelectorAll('input[name="designTaste"]')).forEach(function (el) {
               el.checked = (d.designTastes || []).indexOf(el.value) >= 0;
             });
-            if (d.chosenTemplateId) {
-              var radio = form.querySelector('input[name="chosenTemplateId"][value="' + d.chosenTemplateId + '"]');
-              if (radio) radio.checked = true;
-            }
             form.mainColor.value = d.mainColor || '';
             form.styleDetail.value = d.styleDetail || '';
             form.favoriteSiteUrl.value = d.favoriteSiteUrl || '';
@@ -354,12 +508,14 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
             form.mustHaveContent.value = d.mustHaveContent || '';
             form.currentActivityUrl.value = d.currentActivityUrl || '';
             form.requestSummary.value = d.requestSummary || '';
+            updatePickedLabel();
             ok.textContent = '途中保存データを読み込みました。';
           })
           .catch(function () {});
       }
 
       function collectPayload() {
+        var chosen = (hiddenTpl && hiddenTpl.value) || getCheckedPickTemplate() || '';
         return {
           draftId: draftId || undefined,
           draftToken: draftToken || undefined,
@@ -373,7 +529,7 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
           targetAudience: form.targetAudience.value.trim(),
           designTastes: Array.prototype.slice.call(form.querySelectorAll('input[name="designTaste"]:checked')).map(function (el) { return el.value; }),
           mainColor: form.mainColor.value.trim(),
-          chosenTemplateId: (form.querySelector('input[name="chosenTemplateId"]:checked') || {}).value || '',
+          chosenTemplateId: chosen,
           styleDetail: form.styleDetail.value.trim(),
           favoriteSiteUrl: form.favoriteSiteUrl.value.trim(),
           mustHaveContent: form.mustHaveContent.value.trim(),
@@ -387,6 +543,7 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       draftBtn.addEventListener('click', function () {
         ok.textContent = '';
         ng.textContent = '';
+        applyTemplateFromPick();
         var payload = collectPayload();
         fetch('/api/customer-intake-draft', {
           method: 'POST',
@@ -412,10 +569,17 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
         e.preventDefault();
         ok.textContent = '';
         ng.textContent = '';
+        applyTemplateFromPick();
         if (!form.reportValidity()) return;
         btn.disabled = true;
 
         var payload = collectPayload();
+        if (!payload.chosenTemplateId) {
+          ng.textContent = '先にデザインを選び、「次へ」からヒアリング入力に進んでください。';
+          showStep1();
+          btn.disabled = false;
+          return;
+        }
         if (!payload.designTastes.length) {
           ng.textContent = 'デザインの希望テイストを1つ以上選択してください。';
           btn.disabled = false;
@@ -434,6 +598,9 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
                 '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。叩き台プレビューは運営（管理者ログイン）のみ閲覧できます。' +
                 draftNote;
               form.reset();
+              if (hiddenTpl) hiddenTpl.value = '';
+              Array.prototype.slice.call(document.querySelectorAll('input[name="intakePickTemplate"]')).forEach(function (x) { x.checked = false; });
+              showStep1();
             } else {
               ng.textContent = (data && data.error) ? data.error : '送信に失敗しました。';
             }

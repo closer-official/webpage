@@ -203,7 +203,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const bookingOn = !!(bookingEnabled && bookingItemId && bookingApiOrigin);
 
-  const tid = (templateId === 'bakery' ? 'cafe_tea' : templateId);
+  let tid = templateId === 'bakery' ? 'cafe_tea' : templateId;
+  if (tid === 'intake_bespoke') tid = 'navy_cyan_consult';
   const envCanonicalHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
   const effectiveCanonical = resolveEffectiveCanonicalUrl(
     seo,
