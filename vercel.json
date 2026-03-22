@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" },
+    { "source": "/template-gallery", "destination": "/api?_vp=template-gallery" },
     { "source": "/api/(.*)", "destination": "/api?_vp=$1" }
   ],
   "functions": {

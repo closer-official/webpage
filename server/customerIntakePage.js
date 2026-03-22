@@ -155,6 +155,11 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
 <body>
   <div class="wrap">
     <p class="brand">Tadanosuke Closer</p>
+    <p class="intake-nav-extra" style="margin:0 0 14px;font-size:0.9rem;">
+      <a href="/template-gallery" style="color: var(--sage); text-underline-offset: 3px;">テンプレート一覧を見る</a>
+      <span style="color: var(--text-muted); margin: 0 0.5rem;">·</span>
+      <span style="color: var(--text-muted);">パスワード不要</span>
+    </p>
     <div class="card">
       <h1>制作前ヒアリングフォーム</h1>
       <p class="lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>

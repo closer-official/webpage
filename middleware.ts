@@ -1,6 +1,6 @@
 /**
  * 1) webpage.closer-official.com: HTTP Basic（WEBPAGE_BASIC_AUTH_* 必須・未設定は503）。
- *    ヒアリング用パスだけ Basic なし（middleware 内 isPublicHearingPath）。
+ *    ヒアリング・テンプレギャラリー等の公開パスだけ Basic なし（isPublicHearingPath）。
  * 2) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
  * 3) supernihonshi.store-official.net: 日本史LP をルートに返す
  * 4) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
@@ -25,19 +25,24 @@ function isStoreOfficialSubdomain(host: string): boolean {
   return h.endsWith('.store-official.net');
 }
 
-/** ヒアリングフォーム・送信・テンプレプレビュー・下書き再開のみ Basic なしで通す（/api/customer-intake-list は含めない） */
+/** ヒアリング・テンプレギャラリー・テンプレプレビュー等（/api/customer-intake-list は含めない） */
 function isPublicHearingPath(method: string, pathname: string): boolean {
   const p = pathname.replace(/\/$/, '') || '/';
   const m = method.toUpperCase();
   const isIntakeForm = p === '/api/customer-intake' || p === '/customer-intake';
   const isDraftApi = p === '/api/customer-intake-draft' || p.startsWith('/api/customer-intake-draft/');
   const isTemplatePreview = p.startsWith('/api/template-preview/');
+  const isTemplateGallery =
+    p === '/api/template-gallery' ||
+    p === '/template-gallery' ||
+    p === '/api/public/template-catalog';
 
   if (m === 'OPTIONS') {
-    return isIntakeForm || isDraftApi || isTemplatePreview;
+    return isIntakeForm || isDraftApi || isTemplatePreview || isTemplateGallery;
   }
   if (isIntakeForm && (m === 'GET' || m === 'POST')) return true;
   if (m === 'GET' && isTemplatePreview) return true;
+  if (m === 'GET' && isTemplateGallery) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
   if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;
   return false;

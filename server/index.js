@@ -50,6 +50,8 @@ import { getFullAutoStatus, startFullAutoRun } from './fullAutoJob.js';
 import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
+import { renderTemplateGalleryPage } from './templateGalleryPage.js';
+import { buildPublicTemplateCatalog } from './publicTemplateCatalog.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -621,6 +623,24 @@ app.get(['/customer-intake', '/api/customer-intake'], async (req, res) => {
   const candidates = getTemplateCandidates(customs, { forPublicSelection: true });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(renderCustomerIntakePage(candidates));
+});
+
+app.get('/api/public/template-catalog', async (req, res) => {
+  try {
+    const customs = await store.getTemplateCustomizations();
+    const catalog = buildPublicTemplateCatalog(customs);
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
+    res.json(catalog);
+  } catch (e) {
+    console.error('[public/template-catalog]', e);
+    res.status(500).json({ error: 'catalog failed' });
+  }
+});
+
+app.get(['/template-gallery', '/api/template-gallery'], (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'private, max-age=120');
+  res.send(renderTemplateGalleryPage());
 });
 
 app.get('/api/template-preview/:templateId', (req, res) => {
