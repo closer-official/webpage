@@ -52,6 +52,7 @@ import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
 import { renderTemplateGalleryPage } from './templateGalleryPage.js';
 import { buildPublicTemplateCatalog } from './publicTemplateCatalog.js';
+import { translatePublicUiEntries } from './publicUiTranslate.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -67,6 +68,20 @@ import {
   BOOKING_SLOT_DURATION_MIN,
 } from './bookingUtil.js';
 import { sendBookingNotification } from './bookingEmail.js';
+
+/** 公開ページ UI 翻訳（Gemini） */
+const publicTranslateHits = new Map();
+function allowPublicTranslate(ip) {
+  const key = ip || 'unknown';
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000;
+  const max = 32;
+  const arr = (publicTranslateHits.get(key) || []).filter((t) => now - t < windowMs);
+  if (arr.length >= max) return false;
+  arr.push(now);
+  publicTranslateHits.set(key, arr);
+  return true;
+}
 
 /** 参考URL抽出の簡易レート制限（メモリ保持・サーバーレスではインスタンス単位） */
 const styleExtractHits = new Map();
@@ -634,6 +649,47 @@ app.get('/api/public/template-catalog', async (req, res) => {
   } catch (e) {
     console.error('[public/template-catalog]', e);
     res.status(500).json({ error: 'catalog failed' });
+  }
+});
+
+app.post('/api/public/translate-ui', async (req, res) => {
+  const ip = clientIp(req);
+  if (!allowPublicTranslate(ip)) {
+    return res.status(429).json({ error: 'しばらく時間をおいて再度お試しください。' });
+  }
+  try {
+    const body = req.body || {};
+    const entries = body.entries;
+    if (!Array.isArray(entries) || entries.length === 0 || entries.length > 120) {
+      return res.status(400).json({ error: 'invalid entries' });
+    }
+    let total = 0;
+    const cleaned = [];
+    const seenKeys = new Set();
+    for (const e of entries) {
+      const key = String(e.key || '').trim().slice(0, 160);
+      const text = String(e.text || '').trim().slice(0, 2500);
+      if (!key || seenKeys.has(key)) continue;
+      seenKeys.add(key);
+      total += text.length;
+      if (total > 14000) {
+        return res.status(400).json({ error: 'payload too large' });
+      }
+      cleaned.push({ key, text });
+    }
+    if (!cleaned.length) {
+      return res.status(400).json({ error: 'invalid entries' });
+    }
+    const out = await translatePublicUiEntries(cleaned);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ ok: true, entries: out });
+  } catch (e) {
+    console.error('[public/translate-ui]', e?.message || e);
+    const msg =
+      String(e?.message || '').includes('GEMINI_API_KEY') || String(e?.message || '').includes('not set')
+        ? '翻訳サービスが設定されていません'
+        : 'translation failed';
+    res.status(503).json({ error: msg });
   }
 });
 

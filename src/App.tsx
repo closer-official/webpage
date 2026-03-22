@@ -15,6 +15,7 @@ import type { QueueTarget } from './types';
 import { isApiAvailable, api } from './lib/api';
 import { getQueue, getDashboard } from './lib/queueStorage';
 import './App.css';
+import './App.operator.css';
 
 type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
   contentVariants?: { templateId: string; html: string }[];
@@ -125,7 +126,7 @@ function App() {
 
   if (authEnabled && !authed) {
     return (
-      <div className="app admin-auth-screen">
+      <div className="app app--operator admin-auth-screen">
         <div className="admin-auth-card">
           <h2>管理ページ ログイン</h2>
           <p>このページは管理者のみ閲覧できます。</p>
@@ -155,9 +156,9 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app app--operator">
       <header className="app-header">
-        <h1>ウェブページ作成ツール</h1>
+        <h1>ウェブページ作成ツール（運営）</h1>
         <p className="app-flow-desc">
           <span className="flow-main">フルオート</span>
           <span className="flow-arrow" aria-hidden>

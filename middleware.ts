@@ -36,13 +36,15 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
     p === '/api/template-gallery' ||
     p === '/template-gallery' ||
     p === '/api/public/template-catalog';
+  const isPublicTranslate = p === '/api/public/translate-ui';
 
   if (m === 'OPTIONS') {
-    return isIntakeForm || isDraftApi || isTemplatePreview || isTemplateGallery;
+    return isIntakeForm || isDraftApi || isTemplatePreview || isTemplateGallery || isPublicTranslate;
   }
   if (isIntakeForm && (m === 'GET' || m === 'POST')) return true;
   if (m === 'GET' && isTemplatePreview) return true;
   if (m === 'GET' && isTemplateGallery) return true;
+  if (m === 'POST' && isPublicTranslate) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
   if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;
   return false;

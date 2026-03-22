@@ -1,6 +1,8 @@
 /**
  * パスワードなしで閲覧できるテンプレートギャラリー（静的シェル + JSON API で描画）
  */
+import { publicLangBarHtml, publicLangBarStyles, publicLangToggleInlineScript } from './publicLangAssets.js';
+
 export function renderTemplateGalleryPage() {
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -13,6 +15,7 @@ export function renderTemplateGalleryPage() {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
+    ${publicLangBarStyles()}
     :root {
       --void: #0c0c0f;
       --surface: #14141a;
@@ -363,49 +366,51 @@ export function renderTemplateGalleryPage() {
   </style>
 </head>
 <body>
+  ${publicLangBarHtml({ variant: 'dark' })}
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">Closer Webpage</div>
+      <div class="brand" data-i18n="gallery.brand">Closer Webpage</div>
       <nav class="nav-links" aria-label="関連ページ">
-        <a href="/customer-intake">ヒアリング・お申し込み</a>
-        <a href="/api/customer-intake">ヒアリング（別URL）</a>
+        <a href="/customer-intake"><span data-i18n="gallery.nav.intake">ヒアリング・お申し込み</span></a>
+        <a href="/api/customer-intake"><span data-i18n="gallery.nav.intakeAlt">ヒアリング（別URL）</span></a>
       </nav>
     </div>
-    <h1>テンプレートギャラリー</h1>
-    <p class="lead">業種や雰囲気からテンプレートを選べます。検索・カテゴリ・並び順を切り替えて、気に入ったデザインを別タブでプレビューできます。</p>
+    <h1 data-i18n="gallery.title">テンプレートギャラリー</h1>
+    <p class="lead" data-i18n="gallery.lead">業種や雰囲気からテンプレートを選べます。検索・カテゴリ・並び順を切り替えて、気に入ったデザインを別タブでプレビューできます。</p>
 
-    <div id="state-loading" class="loading">読み込み中…</div>
+    <div id="state-loading" class="loading" data-i18n="gallery.loading">読み込み中…</div>
     <div id="state-err" class="err" style="display:none;"></div>
     <div id="app" style="display:none;">
       <div class="controls">
         <div class="search-wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="search" id="q" placeholder="名前・タグ・カテゴリで検索" autocomplete="off" />
+          <input type="search" id="q" data-i18n-placeholder="gallery.searchPh" placeholder="名前・タグ・カテゴリで検索" autocomplete="off" />
         </div>
         <div class="sort-row">
-          <label for="sort">並び順</label>
+          <label for="sort" data-i18n="gallery.sortLabel">並び順</label>
           <select id="sort" aria-label="並び順">
-            <option value="popular">人気順</option>
-            <option value="name">名前（あいうえお）</option>
-            <option value="category">カテゴリ別</option>
+            <option value="popular" data-i18n="gallery.sort.popular">人気順</option>
+            <option value="name" data-i18n="gallery.sort.name">名前（あいうえお）</option>
+            <option value="category" data-i18n="gallery.sort.category">カテゴリ別</option>
           </select>
         </div>
       </div>
       <div class="chips" id="chips" role="group" aria-label="カテゴリ"></div>
 
       <section class="pickup-strip" aria-labelledby="pickup-h">
-        <h2 class="section-title" id="pickup-h"><span class="badge">Weekly</span> <span id="week-label">今週のピックアップ</span></h2>
+        <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">週間</span> <span id="week-label" data-i18n="gallery.weekDefault">今週のピックアップ</span></h2>
         <div class="pickup-track" id="pickup-track"></div>
       </section>
 
       <section aria-labelledby="all-h">
-        <h2 class="section-title" id="all-h">すべてのテンプレート</h2>
+        <h2 class="section-title" id="all-h" data-i18n="gallery.allTitle">すべてのテンプレート</h2>
         <div id="list-root"></div>
       </section>
     </div>
 
     <footer>
-      デザインの最終形はヒアリング後に調整されます。<a href="/customer-intake">お申し込み・ヒアリングフォーム</a>
+      <span data-i18n="gallery.footer.main">デザインの最終形はヒアリング後に調整されます。</span>
+      <a href="/customer-intake"><span data-i18n="gallery.footer.link">お申し込み・ヒアリングフォーム</span></a>
     </footer>
   </div>
   <script>
@@ -462,15 +467,16 @@ export function renderTemplateGalleryPage() {
     var track = $('pickup-track');
     var pickups = state.raw.pickups || [];
     if (!pickups.length) {
-      track.innerHTML = '<p class="empty" style="padding:20px;">ピックアップは準備中です。</p>';
+      track.innerHTML = '<p class="empty" style="padding:20px;" data-i18n="gallery.empty.pickup">ピックアップは準備中です。</p>';
       return;
     }
     track.innerHTML = pickups.map(function (t) {
+      var id = esc(t.id);
       return '<article class="pickup-card"><div class="pickup-card-inner">' +
-        '<span class="cat">' + esc(t.category) + '</span>' +
-        '<h3 class="name">' + esc(t.name) + '</h3>' +
-        '<p class="pop">人気スコア ' + esc(String(t.popularity)) + '</p>' +
-        '<a href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer">プレビューを開く →</a>' +
+        '<span class="cat" data-i18n="tcat.' + id + '">' + esc(t.category) + '</span>' +
+        '<h3 class="name" data-i18n="cat.' + id + '">' + esc(t.name) + '</h3>' +
+        '<p class="pop" data-i18n="tpop.' + id + '">人気スコア ' + esc(String(t.popularity)) + '</p>' +
+        '<a href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">プレビューを開く →</span></a>' +
         '</div></article>';
     }).join('');
   }
@@ -479,7 +485,7 @@ export function renderTemplateGalleryPage() {
     var root = $('list-root');
     var list = sorted(filtered());
     if (!list.length) {
-      root.innerHTML = '<p class="empty">条件に一致するテンプレートがありません。</p>';
+      root.innerHTML = '<p class="empty" data-i18n="gallery.empty.filter">条件に一致するテンプレートがありません。</p>';
       return;
     }
     if (state.sort === 'category') {
@@ -501,14 +507,15 @@ export function renderTemplateGalleryPage() {
 
   function cardHtml(t) {
     var tags = (t.tags || []).slice(0, 5).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
+    var id = esc(t.id);
+    var customJa = t.isCustom ? ' · カスタム' : '';
     return '<article class="t-card">' +
-      '<h3>' + esc(t.name) + '</h3>' +
-      '<p class="meta">' + esc(t.category) + ' · スコア ' + esc(String(t.popularity)) +
-      (t.isCustom ? ' · カスタム' : '') + '</p>' +
+      '<h3 data-i18n="cat.' + id + '">' + esc(t.name) + '</h3>' +
+      '<p class="meta" data-i18n="tmeta.' + id + '">' + esc(t.category) + ' · スコア ' + esc(String(t.popularity)) + customJa + '</p>' +
       (tags ? '<div class="tags">' + tags + '</div>' : '') +
       '<div class="actions">' +
-      '<a class="btn btn-primary" href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer">プレビュー</a>' +
-      '<a class="btn btn-ghost" href="/customer-intake">この系統で相談</a>' +
+      '<a class="btn btn-primary" href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.card.preview">プレビュー</span></a>' +
+      '<a class="btn btn-ghost" href="/customer-intake"><span data-i18n="gallery.card.consult">この系統で相談</span></a>' +
       '</div></article>';
   }
 
@@ -535,6 +542,9 @@ export function renderTemplateGalleryPage() {
     renderPickups();
     buildChips();
     renderList();
+    if (document.documentElement.lang === 'en' && window.__publicUiGoEn) {
+      window.__publicUiGoEn();
+    }
   }
 
   fetch(API)
@@ -565,6 +575,7 @@ export function renderTemplateGalleryPage() {
   });
 })();
   <\/script>
+  <script>${publicLangToggleInlineScript()}<\/script>
 </body>
 </html>`;
 }

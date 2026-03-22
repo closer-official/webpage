@@ -1,12 +1,13 @@
 import { TEMPLATE_CANDIDATES } from './templatePreview.js';
+import { publicLangBarHtml, publicLangBarStyles, publicLangToggleInlineScript } from './publicLangAssets.js';
 
 export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
   const list = Array.isArray(candidates) && candidates.length ? candidates : TEMPLATE_CANDIDATES;
   const templateCards = list.map(
     (t) => `<label class="style-card">
-      <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl">${t.name}</span></div>
-      <p class="sub">既存のテンプレページを別タブで確認できます。</p>
-      <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer">このテンプレをプレビュー</a>
+      <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
+      <p class="sub" data-i18n="intake.tpl.sub">既存のテンプレページを別タブで確認できます。</p>
+      <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer"><span data-i18n="intake.tpl.preview">このテンプレをプレビュー</span></a>
     </label>`
   ).join('');
   return `<!DOCTYPE html>
@@ -153,122 +154,127 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
   </style>
 </head>
 <body>
+  ${publicLangBarHtml()}
   <div class="wrap">
-    <p class="brand">Tadanosuke Closer</p>
+    <p class="brand" data-i18n="intake.brand">Tadanosuke Closer</p>
     <p class="intake-nav-extra" style="margin:0 0 14px;font-size:0.9rem;">
-      <a href="/template-gallery" style="color: var(--sage); text-underline-offset: 3px;">テンプレート一覧を見る</a>
+      <a href="/template-gallery" style="color: var(--sage); text-underline-offset: 3px;"><span data-i18n="intake.nav.gallery">テンプレート一覧を見る</span></a>
       <span style="color: var(--text-muted); margin: 0 0.5rem;">·</span>
-      <span style="color: var(--text-muted);">パスワード不要</span>
+      <span style="color: var(--text-muted);" data-i18n="intake.nav.nopw">パスワード不要</span>
     </p>
     <div class="card">
-      <h1>制作前ヒアリングフォーム</h1>
-      <p class="lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>
-      <p class="micro-copy">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
+      <h1 data-i18n="intake.h1">制作前ヒアリングフォーム</h1>
+      <p class="lead" data-i18n="intake.lead">Webを、もっと自由な遊び場に。ご依頼内容を丁寧に確認するための入力フォームです。</p>
+      <p class="micro-copy" data-i18n="intake.micro">情報だけのサイトは、もういらない。事業の魅力が伝わる構成にするため、分かる範囲で具体的にご記入ください。</p>
 
       <form id="intake-form" novalidate>
-        <p class="section-title">基本情報</p>
+        <div class="intake-i18n-js-src" hidden aria-hidden="true">
+          <span data-i18n="intake.js.draft">途中保存</span>
+          <span data-i18n="intake.js.submit">ヒアリングを送信</span>
+        </div>
+        <p class="section-title" data-i18n="intake.sec.basic">基本情報</p>
         <div class="grid">
           <div>
-            <label for="storeName">店舗名 / 事業名 *</label>
+            <label for="storeName" data-i18n="intake.lbl.storeName">店舗名 / 事業名 *</label>
             <input id="storeName" name="storeName" required maxlength="120" />
           </div>
           <div>
-            <label for="contactName">ご担当者名 *</label>
+            <label for="contactName" data-i18n="intake.lbl.contactName">ご担当者名 *</label>
             <input id="contactName" name="contactName" required maxlength="80" />
           </div>
           <div>
-            <label for="contactMethod">主な連絡方法 *</label>
+            <label for="contactMethod" data-i18n="intake.lbl.contactMethod">主な連絡方法 *</label>
             <select id="contactMethod" name="contactMethod" required>
-              <option value="">選択してください</option>
-              <option value="email">メール</option>
+              <option value="" data-i18n="intake.opt.select">選択してください</option>
+              <option value="email" data-i18n="intake.opt.email">メール</option>
               <option value="line">LINE</option>
-              <option value="phone">電話</option>
+              <option value="phone" data-i18n="intake.opt.phone">電話</option>
             </select>
           </div>
           <div>
-            <label for="contactValue">連絡先（メールアドレス/LINE ID/電話番号） *</label>
+            <label for="contactValue" data-i18n="intake.lbl.contactValue">連絡先（メールアドレス/LINE ID/電話番号） *</label>
             <input id="contactValue" name="contactValue" required maxlength="160" />
           </div>
           <div>
-            <label for="plan">希望プラン *</label>
+            <label for="plan" data-i18n="intake.lbl.plan">希望プラン *</label>
             <select id="plan" name="plan" required>
-              <option value="">選択してください</option>
-              <option value="normal">通常プラン</option>
-              <option value="student">学割プラン</option>
+              <option value="" data-i18n="intake.opt.select2">選択してください</option>
+              <option value="normal" data-i18n="intake.opt.planNormal">通常プラン</option>
+              <option value="student" data-i18n="intake.opt.planStudent">学割プラン</option>
             </select>
           </div>
           <div>
-            <label for="referralCode">紹介コード（任意）</label>
-            <input id="referralCode" name="referralCode" maxlength="200" placeholder="お持ちの場合のみ入力" />
+            <label for="referralCode" data-i18n="intake.lbl.referral">紹介コード（任意）</label>
+            <input id="referralCode" name="referralCode" maxlength="200" data-i18n-placeholder="intake.ph.referral" placeholder="お持ちの場合のみ入力" />
           </div>
           <div class="full">
-            <label for="websiteGoal">Webサイトの最大の目的 *</label>
+            <label for="websiteGoal" data-i18n="intake.lbl.websiteGoal">Webサイトの最大の目的 *</label>
             <select id="websiteGoal" name="websiteGoal" required>
-              <option value="">選択してください</option>
-              <option value="business_card">名刺代わり</option>
-              <option value="sales">商品の販売</option>
-              <option value="inquiry">お問い合わせの増加</option>
-              <option value="recruit">採用強化</option>
-              <option value="other">その他</option>
+              <option value="" data-i18n="intake.opt.select3">選択してください</option>
+              <option value="business_card" data-i18n="intake.opt.goalCard">名刺代わり</option>
+              <option value="sales" data-i18n="intake.opt.goalSales">商品の販売</option>
+              <option value="inquiry" data-i18n="intake.opt.goalInquiry">お問い合わせの増加</option>
+              <option value="recruit" data-i18n="intake.opt.goalRecruit">採用強化</option>
+              <option value="other" data-i18n="intake.opt.goalOther">その他</option>
             </select>
           </div>
           <div class="full">
-            <label for="targetAudience">メインターゲット層 *</label>
-            <textarea id="targetAudience" name="targetAudience" required maxlength="3000" placeholder="例）30代女性、仕事と育児で疲れていて、短時間で効果を感じたい人"></textarea>
+            <label for="targetAudience" data-i18n="intake.lbl.targetAudience">メインターゲット層 *</label>
+            <textarea id="targetAudience" name="targetAudience" required maxlength="3000" data-i18n-placeholder="intake.ph.targetAudience" placeholder="例）30代女性、仕事と育児で疲れていて、短時間で効果を感じたい人"></textarea>
           </div>
           <div class="full">
-            <label>デザインの希望テイスト（複数選択可）*</label>
+            <label data-i18n="intake.lbl.designTaste">デザインの希望テイスト（複数選択可）*</label>
             <div class="chips">
-              <label class="chip"><input type="checkbox" name="designTaste" value="シンプル">シンプル</label>
-              <label class="chip"><input type="checkbox" name="designTaste" value="高級感">高級感</label>
-              <label class="chip"><input type="checkbox" name="designTaste" value="ポップ">ポップ</label>
-              <label class="chip"><input type="checkbox" name="designTaste" value="スタイリッシュ">スタイリッシュ</label>
-              <label class="chip"><input type="checkbox" name="designTaste" value="親しみやすい">親しみやすい</label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="シンプル"><span data-i18n="intake.taste.simple">シンプル</span></label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="高級感"><span data-i18n="intake.taste.lux">高級感</span></label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="ポップ"><span data-i18n="intake.taste.pop">ポップ</span></label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="スタイリッシュ"><span data-i18n="intake.taste.stylish">スタイリッシュ</span></label>
+              <label class="chip"><input type="checkbox" name="designTaste" value="親しみやすい"><span data-i18n="intake.taste.friendly">親しみやすい</span></label>
             </div>
           </div>
           <div class="full">
-            <label for="mainColor">コーポレートカラー / 希望メインカラー *</label>
-            <input id="mainColor" name="mainColor" required maxlength="120" placeholder="例）ネイビー＋ゴールド、くすみグリーン など" />
+            <label for="mainColor" data-i18n="intake.lbl.mainColor">コーポレートカラー / 希望メインカラー *</label>
+            <input id="mainColor" name="mainColor" required maxlength="120" data-i18n-placeholder="intake.ph.mainColor" placeholder="例）ネイビー＋ゴールド、くすみグリーン など" />
           </div>
           <div class="full">
-            <label>テンプレ候補（今あるテンプレページから1つ選択）*</label>
+            <label data-i18n="intake.lbl.templatePick">テンプレ候補（今あるテンプレページから1つ選択）*</label>
             <div class="style-cards">
               ${templateCards}
             </div>
           </div>
           <div class="full">
-            <label for="styleDetail">「もっとこうしてほしい」があれば（任意）</label>
-            <textarea id="styleDetail" name="styleDetail" maxlength="3000" placeholder="例）Aが近いが、文字はもう少し太め。写真は暖色寄りにしたい"></textarea>
+            <label for="styleDetail" data-i18n="intake.lbl.styleDetail">「もっとこうしてほしい」があれば（任意）</label>
+            <textarea id="styleDetail" name="styleDetail" maxlength="3000" data-i18n-placeholder="intake.ph.styleDetail" placeholder="例）Aが近いが、文字はもう少し太め。写真は暖色寄りにしたい"></textarea>
           </div>
           <div class="full">
-            <label for="favoriteSiteUrl">参考にしたい / 好きな雰囲気のWebサイトURL *</label>
-            <textarea id="favoriteSiteUrl" name="favoriteSiteUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）。先頭のURLをスタイル解析に使います。"></textarea>
+            <label for="favoriteSiteUrl" data-i18n="intake.lbl.favoriteUrl">参考にしたい / 好きな雰囲気のWebサイトURL *</label>
+            <textarea id="favoriteSiteUrl" name="favoriteSiteUrl" required maxlength="5000" data-i18n-placeholder="intake.ph.favoriteUrl" placeholder="URLを改行で入力（複数可）。先頭のURLをスタイル解析に使います。"></textarea>
             <label class="chip full" style="margin-top:10px; border-radius:12px; padding:10px 12px;">
               <input type="checkbox" name="extractStyleToDraft" id="extractStyleToDraft" value="on" />
-              先頭の参考URLから配色などを自動抽出し、<strong>カスタムテンプレの下書き</strong>を作成する（管理者が公開承認するまでヒアリングの候補には出ません）
+              <span data-i18n="intake.lbl.extractStyle">先頭の参考URLから配色などを自動抽出し、カスタムテンプレの下書きを作成する（管理者が公開承認するまでヒアリングの候補には出ません）</span>
             </label>
           </div>
           <div class="full">
-            <label for="mustHaveContent">絶対に載せたいコンテンツ *</label>
-            <textarea id="mustHaveContent" name="mustHaveContent" required maxlength="5000" placeholder="例）事業内容、料金表、実績、代表挨拶、SNSリンク"></textarea>
+            <label for="mustHaveContent" data-i18n="intake.lbl.mustHave">絶対に載せたいコンテンツ *</label>
+            <textarea id="mustHaveContent" name="mustHaveContent" required maxlength="5000" data-i18n-placeholder="intake.ph.mustHave" placeholder="例）事業内容、料金表、実績、代表挨拶、SNSリンク"></textarea>
           </div>
           <div class="full">
-            <label for="currentActivityUrl">現在の活動がわかるURL（SNS / YouTube / 既存資料など）*</label>
-            <textarea id="currentActivityUrl" name="currentActivityUrl" required maxlength="5000" placeholder="URLを改行で入力（複数可）"></textarea>
+            <label for="currentActivityUrl" data-i18n="intake.lbl.activityUrl">現在の活動がわかるURL（SNS / YouTube / 既存資料など）*</label>
+            <textarea id="currentActivityUrl" name="currentActivityUrl" required maxlength="5000" data-i18n-placeholder="intake.ph.urls" placeholder="URLを改行で入力（複数可）"></textarea>
           </div>
           <div class="full">
-            <label for="requestSummary">その他ご要望・補足（任意）</label>
-            <textarea id="requestSummary" name="requestSummary" maxlength="5000" placeholder="運用面の希望、納期感、NG表現など"></textarea>
+            <label for="requestSummary" data-i18n="intake.lbl.requestSummary">その他ご要望・補足（任意）</label>
+            <textarea id="requestSummary" name="requestSummary" maxlength="5000" data-i18n-placeholder="intake.ph.requestSummary" placeholder="運用面の希望、納期感、NG表現など"></textarea>
           </div>
         </div>
-        <p class="note">※ 送信内容は制作の事前確認にのみ利用します。紹介コードの照合・ご案内は運営側で手動対応します。</p>
+        <p class="note" data-i18n="intake.note">※ 送信内容は制作の事前確認にのみ利用します。紹介コードの照合・ご案内は運営側で手動対応します。</p>
         <div class="actions">
           <button id="submit-btn" type="submit">ヒアリングを送信</button>
           <span id="ok" class="msg"></span>
           <span id="ng" class="err"></span>
         </div>
       </form>
-      <p class="footer-link">送信後、確認のうえ <a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">closer-official.com</a> よりメールまたはLINEでご連絡します。</p>
+      <p class="footer-link"><span data-i18n="intake.footer.before">送信後、確認のうえ </span><a href="https://closer-official.com" target="_blank" rel="noopener noreferrer">closer-official.com</a><span data-i18n="intake.footer.after"> よりメールまたはLINEでご連絡します。</span></p>
     </div>
   </div>
 
@@ -411,6 +417,7 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       });
     })();
   </script>
+  <script>${publicLangToggleInlineScript()}<\/script>
 </body>
 </html>`;
 }

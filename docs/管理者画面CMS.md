@@ -66,6 +66,7 @@
 | `POST /api/customer-intake-draft`・`GET /api/customer-intake-draft/:id?token=` | 途中保存・再開 |
 | `GET /template-gallery` または `GET /api/template-gallery` | **テンプレートギャラリー**（一覧・検索・カテゴリ・人気順・週次ピックアップ） |
 | `GET /api/public/template-catalog` | ギャラリー用JSON（カスタム本文は含めない） |
+| `POST /api/public/translate-ui` | 顧客向けページの **日→英 UI 翻訳**（Gemini。レート制限あり） |
 | `GET /api/template-preview/:templateId` | テンプレプレビューHTML |
 
 **回答データ・叩き台HTML**は **`GET /api/customer-intake/:id/preview` を管理者Cookie必須**にしてあり、URLを知っていても未ログインでは閲覧できません。一覧は従来どおり `GET /api/customer-intake-list` が管理者のみ。
