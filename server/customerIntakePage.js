@@ -390,9 +390,10 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
         }).then(function (r) { return r.json(); })
           .then(function (data) {
             if (data && data.ok) {
-              var previewLink = (data.previewUrl ? ' 叩き台プレビュー: ' + data.previewUrl : '');
               var draftNote = (data.styleDraftTemplateId ? ' テンプレ下書きID: ' + data.styleDraftTemplateId + '（運営が確認・公開します）' : '');
-              ok.textContent = '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。' + previewLink + draftNote;
+              ok.textContent =
+                '送信ありがとうございます。確認後、メールまたはLINEでご連絡します。叩き台プレビューは運営（管理者ログイン）のみ閲覧できます。' +
+                draftNote;
               form.reset();
             } else {
               ng.textContent = (data && data.error) ? data.error : '送信に失敗しました。';

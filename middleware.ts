@@ -1,5 +1,6 @@
 /**
- * 1) webpage.closer-official.com: HTTP Basic 認証（環境変数 WEBPAGE_BASIC_AUTH_*）
+ * 1) webpage.closer-official.com: HTTP Basic（WEBPAGE_BASIC_AUTH_* 必須・未設定は503）。
+ *    ヒアリング用パスだけ Basic なし（middleware 内 isPublicHearingPath）。
  * 2) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
  * 3) supernihonshi.store-official.net: 日本史LP をルートに返す
  * 4) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
@@ -24,20 +25,48 @@ function isStoreOfficialSubdomain(host: string): boolean {
   return h.endsWith('.store-official.net');
 }
 
-/** @returns 401 Response or null（通過） */
+/** ヒアリングフォーム・送信・テンプレプレビュー・下書き再開のみ Basic なしで通す（/api/customer-intake-list は含めない） */
+function isPublicHearingPath(method: string, pathname: string): boolean {
+  const p = pathname.replace(/\/$/, '') || '/';
+  const m = method.toUpperCase();
+  const isIntakeForm = p === '/api/customer-intake' || p === '/customer-intake';
+  const isDraftApi = p === '/api/customer-intake-draft' || p.startsWith('/api/customer-intake-draft/');
+  const isTemplatePreview = p.startsWith('/api/template-preview/');
+
+  if (m === 'OPTIONS') {
+    return isIntakeForm || isDraftApi || isTemplatePreview;
+  }
+  if (isIntakeForm && (m === 'GET' || m === 'POST')) return true;
+  if (m === 'GET' && isTemplatePreview) return true;
+  if (m === 'POST' && p === '/api/customer-intake-draft') return true;
+  if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;
+  return false;
+}
+
+/** @returns 401 / 503 Response or null（通過） */
 function gateWebpageBasicAuth(request: Request, host: string): Response | null {
   if (!WEBPAGE_BASIC_HOSTS.has(host)) return null;
 
   const url = new URL(request.url);
+  const method = request.method;
+  const path = url.pathname;
+
   // Vercel Cron: サーバー側で CRON_SECRET を検証するため Basic 認証は不要
-  if (url.pathname === '/api/auto-process/tick') {
+  if (path === '/api/auto-process/tick' || path === '/api/auto-process/tick/') {
+    return null;
+  }
+
+  if (isPublicHearingPath(method, path)) {
     return null;
   }
 
   const user = (process.env.WEBPAGE_BASIC_AUTH_USER || '').trim();
   const pass = (process.env.WEBPAGE_BASIC_AUTH_PASSWORD || '').trim();
   if (!user || !pass) {
-    return null;
+    return new Response(
+      'このドメインでは WEBPAGE_BASIC_AUTH_USER と WEBPAGE_BASIC_AUTH_PASSWORD を Vercel の環境変数に設定してください。',
+      { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
+    );
   }
 
   const auth = request.headers.get('authorization');

@@ -43,15 +43,27 @@
 
 ## 運営ドメイン（`webpage.closer-official.com`）
 
-**HTTP Basic 認証**（ブラウザのユーザー名・パスワードダイアログ）を Edge `middleware.ts` でかけています。
+**HTTP Basic 認証**（ブラウザのユーザー名・パスワード）を Edge `middleware.ts` でかけています。
 
 | Vercel 環境変数 | 内容 |
 |-----------------|------|
 | `WEBPAGE_BASIC_AUTH_USER` | Basic 認証のユーザー名 |
 | `WEBPAGE_BASIC_AUTH_PASSWORD` | Basic 認証のパスワード |
 
-**両方とも未設定のときは認証をかけません**（設定し忘れに注意）。  
-`/api/auto-process/tick`（Vercel Cron）だけは従来どおり Basic なし（サーバー側 `CRON_SECRET` で保護）。
+**両方必須**です。未設定のときは運営SPA・`/assets` などは **503**（ヒアリング用URLだけは開けます）。
+
+### Basic なしで開けるもの（ヒアリング専用）
+
+| パス | 内容 |
+|------|------|
+| `GET /api/customer-intake` または `GET /customer-intake` | ヒアリングフォームHTML |
+| `POST /api/customer-intake` | 送信 |
+| `POST /api/customer-intake-draft`・`GET /api/customer-intake-draft/:id?token=` | 途中保存・再開 |
+| `GET /api/template-preview/:templateId` | フォーム内「テンプレをプレビュー」 |
+
+**回答データ・叩き台HTML**は **`GET /api/customer-intake/:id/preview` を管理者Cookie必須**にしてあり、URLを知っていても未ログインでは閲覧できません。一覧は従来どおり `GET /api/customer-intake-list` が管理者のみ。
+
+`/api/auto-process/tick`（Vercel Cron）は Basic なし（`CRON_SECRET` で保護）。
 
 ---
 

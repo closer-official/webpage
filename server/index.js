@@ -1015,6 +1015,7 @@ app.post('/api/customer-intake', async (req, res) => {
 });
 
 app.get('/api/customer-intake/:id/preview', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
   const list = await store.getCustomerIntake();
   const row = (list || []).find((v) => v.id === req.params.id);
   if (!row) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Intake not found');
