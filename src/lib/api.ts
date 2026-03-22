@@ -138,9 +138,11 @@ export function getPreviewPublicUrl(id: string): string {
 }
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
+  const { headers: optHeaders, credentials: optCred, ...rest } = options || {};
   const res = await fetch(`${BASE}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...rest,
+    credentials: optCred ?? 'include',
+    headers: { 'Content-Type': 'application/json', ...optHeaders },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -357,7 +359,9 @@ export const api = {
 
   getReferenceSites: () => fetchApi<ReferenceSite[]>('/api/reference-sites'),
   deleteReferenceSites: () =>
-    fetch(`${BASE}/api/reference-sites`, { method: 'DELETE' }).then((r) => { if (!r.ok) throw new Error(r.statusText); }),
+    fetch(`${BASE}/api/reference-sites`, { method: 'DELETE', credentials: 'include' }).then((r) => {
+      if (!r.ok) throw new Error(r.statusText);
+    }),
   fetchReferenceMeta: () =>
     fetchApi<{ updated: number }>('/api/reference-sites/fetch-meta', { method: 'POST' }),
   analyzeReferenceSites: () =>
@@ -431,6 +435,7 @@ export const api = {
   }) => {
     const res = await fetch(`${BASE}/api/full-auto/start`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });

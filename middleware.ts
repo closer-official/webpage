@@ -1,10 +1,12 @@
 /**
- * 1) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
- * 2) supernihonshi.store-official.net: 日本史LP をルートに返す
- * 3) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
- *    （運営SPA・テンプレ一覧は dist ルート。webpage.closer-official.com 等はビルド結果のまま）
+ * 1) webpage.closer-official.com: HTTP Basic 認証（環境変数 WEBPAGE_BASIC_AUTH_*）
+ * 2) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
+ * 3) supernihonshi.store-official.net: 日本史LP をルートに返す
+ * 4) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
  */
 import { next, rewrite } from '@vercel/edge';
+
+const WEBPAGE_BASIC_HOSTS = new Set(['webpage.closer-official.com', 'www.webpage.closer-official.com']);
 
 const LP_HOSTS = new Set(['supernihonshi.store-official.net', 'www.supernihonshi.store-official.net']);
 const LP_BASE = '/deliverables/japanese-history-higashi';
@@ -22,9 +24,63 @@ function isStoreOfficialSubdomain(host: string): boolean {
   return h.endsWith('.store-official.net');
 }
 
+/** @returns 401 Response or null（通過） */
+function gateWebpageBasicAuth(request: Request, host: string): Response | null {
+  if (!WEBPAGE_BASIC_HOSTS.has(host)) return null;
+
+  const url = new URL(request.url);
+  // Vercel Cron: サーバー側で CRON_SECRET を検証するため Basic 認証は不要
+  if (url.pathname === '/api/auto-process/tick') {
+    return null;
+  }
+
+  const user = (process.env.WEBPAGE_BASIC_AUTH_USER || '').trim();
+  const pass = (process.env.WEBPAGE_BASIC_AUTH_PASSWORD || '').trim();
+  if (!user || !pass) {
+    return null;
+  }
+
+  const auth = request.headers.get('authorization');
+  if (!auth || !auth.startsWith('Basic ')) {
+    return new Response('認証が必要です', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="Closer Webpage"',
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
+  }
+
+  let decoded = '';
+  try {
+    decoded = atob(auth.slice(6).trim());
+  } catch {
+    return new Response('認証が不正です', { status: 401 });
+  }
+
+  const colon = decoded.indexOf(':');
+  const u = colon >= 0 ? decoded.slice(0, colon) : decoded;
+  const p = colon >= 0 ? decoded.slice(colon + 1) : '';
+
+  if (u !== user || p !== pass) {
+    return new Response('認証が不正です', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="Closer Webpage"',
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
+  }
+
+  return null;
+}
+
 export default function middleware(request: Request) {
   const url = new URL(request.url);
   const host = url.hostname.toLowerCase();
+
+  const basicBlock = gateWebpageBasicAuth(request, host);
+  if (basicBlock) return basicBlock;
 
   if (host === previewHostname()) {
     if (url.pathname.startsWith('/api')) {
@@ -69,6 +125,7 @@ export default function middleware(request: Request) {
   return next();
 }
 
+/** /api を含む全パスで Basic 認証をかけられるようにする（旧設定は api を除外していた） */
 export const config = {
-  matcher: ['/', '/((?!api/).*)'],
+  matcher: ['/', '/((?!_next).*)'],
 };

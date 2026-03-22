@@ -41,14 +41,28 @@
 
 ---
 
+## 運営ドメイン（`webpage.closer-official.com`）
+
+**HTTP Basic 認証**（ブラウザのユーザー名・パスワードダイアログ）を Edge `middleware.ts` でかけています。
+
+| Vercel 環境変数 | 内容 |
+|-----------------|------|
+| `WEBPAGE_BASIC_AUTH_USER` | Basic 認証のユーザー名 |
+| `WEBPAGE_BASIC_AUTH_PASSWORD` | Basic 認証のパスワード |
+
+**両方とも未設定のときは認証をかけません**（設定し忘れに注意）。  
+`/api/auto-process/tick`（Vercel Cron）だけは従来どおり Basic なし（サーバー側 `CRON_SECRET` で保護）。
+
+---
+
 ## 店舗ドメイン（`*.store-official.net`）構成
 
-本リポジトリの **本番ビルド**では次の配置になります。
+本リポジトリの **本番**では middleware により次のようになります。
 
 | URL | 内容 |
 |-----|------|
-| `/` | 店舗向け静的LP（既定: `gym-valx-intro/index.html` をルートにコピー） |
-| `/`（および互換で `/admin/`） | ウェブページ作成ツール（React・運営SPA） |
+| `/` | 店舗向けジムLPテンプレ（`deliverables/gym-valx-intro` へリライト） |
+| `/admin/`（および互換） | ウェブページ作成ツール（React・運営SPA） |
 | `/admin/gym-lp.html` | ジムLP専用の文言・キャンペーン・画像URL・閲覧数の管理 |
 
 ### ジムLP（`gym-valx-intro`）API

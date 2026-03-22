@@ -513,7 +513,7 @@
           '※ 店舗アカウント未作成のときは運営が POST /api/admin/lp-cms-provision で作成してください。開発用には ADMIN_USERNAME / PASSWORD でも保存可能です。';
       }
 
-      const r = await fetch(apiBase + '/lp-content/' + SLUG);
+      const r = await fetch(apiBase + '/lp-content/' + SLUG, { credentials: 'include' });
       const c = await r.json();
       fillForm(c);
       await loadStats();

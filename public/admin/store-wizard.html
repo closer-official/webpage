@@ -183,7 +183,7 @@
         el.querySelector('.tpl').click();
       }
 
-      fetch(api + '/product-lp-templates')
+      fetch(api + '/product-lp-templates', { credentials: 'include' })
         .then(function (r) {
           return r.json();
         })
