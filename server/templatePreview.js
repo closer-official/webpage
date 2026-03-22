@@ -8,7 +8,7 @@ export const TEMPLATE_CANDIDATES = [...BUILTIN_BUILD_HTML_TEMPLATES];
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 
 /** 旧ビルトイン。一覧には出さないが buildHtml・過去データの検証用 */
-const LEGACY_TEMPLATE_IDS = new Set(['academy_lp']);
+const LEGACY_TEMPLATE_IDS = new Set(['academy_lp', 'gym_yoga']);
 
 /**
  * @param {unknown[]} customizations
@@ -89,6 +89,7 @@ function injectThemeCss(html, css) {
 
 function labelOf(id) {
   if (id === 'academy_lp') return '高CVセールスLP（レガシー）';
+  if (id === 'gym_yoga') return 'ジム・フィットネスLP（レガシー・gym_yoga）';
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
 }
 

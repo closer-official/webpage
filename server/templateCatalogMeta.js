@@ -11,11 +11,18 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 94,
     tags: ['カフェ', 'レストラン', 'シンプル', '複数店舗'],
   }),
-  gym_yoga: Object.freeze({
-    category: 'ジム・フィットネス',
-    categories: ['ジム', 'フィットネス', 'LP'],
+  gym_personal_neon: Object.freeze({
+    category: 'ジム・フィットネス（Valx）',
+    categories: ['ジム', 'パーソナル', 'LP', 'Valx'],
     popularity: 91,
-    tags: ['パーソナル', 'ヨガ', 'トレーニング', '体験予約', 'ダーク'],
+    tags: ['無料体験', 'LINE', 'ネオン', '販売LP', 'gym-valx-intro'],
+  }),
+  /** 旧ビルトイン（一覧には出ない） */
+  gym_yoga: Object.freeze({
+    category: 'ジム・フィットネス（レガシー）',
+    categories: ['ジム', 'フィットネス', 'LP'],
+    popularity: 68,
+    tags: ['パーソナル', 'ヨガ', 'トレーニング', 'レガシー'],
   }),
   /** 旧ビルトイン（カスタムの base や過去ヒアリング用。ギャラリーには出ない） */
   academy_lp: Object.freeze({

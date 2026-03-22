@@ -1,7 +1,7 @@
 import type { QueueTarget, StyleId } from '../types';
 
 /**
- * 検索クエリと Maps の category からテンプレを推定（運用ビルトイン3種: cafe_1 / gym_yoga / navy_cyan_consult）。
+ * 検索クエリと Maps の category からテンプレを推定（運用ビルトイン3種: cafe_1 / gym_personal_neon / navy_cyan_consult）。
  */
 const RULES: { style: StyleId; re: RegExp }[] = [
   {
@@ -9,8 +9,8 @@ const RULES: { style: StyleId; re: RegExp }[] = [
     re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro|パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー|ラーメン|らーめん|ramen|つけ麺|油そば|支那そば|中華そば|居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge|ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i,
   },
   {
-    style: 'gym_yoga',
-    re: /ジム|\bgym\b|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates|24時間365日|伴走プラン|フルサポートプラン|ビジター利用プラン|ネオン.?ジム|サイバー.?フィットネス|LINE.?友だち追加だけ/i,
+    style: 'gym_personal_neon',
+    re: /ジム|\bgym\b|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates|24時間365日|伴走プラン|フルサポートプラン|ビジター利用プラン|ネオン.?ジム|サイバー.?フィットネス|LINE.?友だち追加だけ|valx|gym-valx/i,
   },
   {
     style: 'navy_cyan_consult',

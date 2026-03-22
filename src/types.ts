@@ -206,7 +206,7 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
 /** 新規選択UIに出すビルトイン（運営⓪デザインの3種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
 export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'cafe_1', name: '複数店舗・ミニマル' },
-  { id: 'gym_yoga', name: 'ジム・フィットネスLP' },
+  { id: 'gym_personal_neon', name: 'Valx・ジム販売LP（gym-valx）' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web/LP）' },
 ];
 
