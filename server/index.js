@@ -711,6 +711,8 @@ app.get('/api/template-preview/:templateId', (req, res) => {
     if (!html) return res.status(500).json({ error: 'failed to render preview' });
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'private, max-age=60');
+    /* 同一オリジンからの iframe 埋め込み（ギャラリー・ヒアリング）を許可。他ドメインからの埋め込みは不可 */
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.send(html);
   }).catch((e) => {
     console.error('[template-preview]', e);

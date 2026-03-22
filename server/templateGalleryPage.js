@@ -235,6 +235,26 @@ export function renderTemplateGalleryPage() {
       transition: transform 0.25s ease;
     }
     .pickup-card:hover { transform: translateY(-4px); }
+    .preview-embed {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .preview-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 390px;
+      height: 720px;
+      border: 0;
+      transform: scale(0.52);
+      transform-origin: top left;
+      pointer-events: none;
+    }
     .pickup-card-inner {
       background: var(--elevated);
       border-radius: var(--radius);
@@ -290,14 +310,17 @@ export function renderTemplateGalleryPage() {
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 18px;
     }
+    .t-card .preview-embed {
+      margin: 0 0 4px;
+    }
     .t-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       transition: border-color 0.2s, transform 0.2s;
     }
     .t-card:hover {
@@ -376,7 +399,7 @@ export function renderTemplateGalleryPage() {
       </nav>
     </div>
     <h1 data-i18n="gallery.title">テンプレートギャラリー</h1>
-    <p class="lead" data-i18n="gallery.lead">業種や雰囲気からテンプレートを選べます。検索・カテゴリ・並び順を切り替えて、気に入ったデザインを別タブでプレビューできます。</p>
+    <p class="lead" data-i18n="gallery.lead">各カードにページの見た目（縮小）を表示しています。検索・カテゴリ・並び順を切り替えて選べます。全画面は「別タブで全画面」から開けます。</p>
 
     <div id="state-loading" class="loading" data-i18n="gallery.loading">読み込み中…</div>
     <div id="state-err" class="err" style="display:none;"></div>
@@ -472,11 +495,16 @@ export function renderTemplateGalleryPage() {
     }
     track.innerHTML = pickups.map(function (t) {
       var id = esc(t.id);
-      return '<article class="pickup-card"><div class="pickup-card-inner">' +
+      var purl = esc(t.previewUrl);
+      var tname = esc(t.name);
+      return '<article class="pickup-card">' +
+        '<div class="pickup-card-inner">' +
+        '<div class="preview-embed" aria-hidden="true">' +
+        '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
         '<span class="cat" data-i18n="tcat.' + id + '">' + esc(t.category) + '</span>' +
-        '<h3 class="name" data-i18n="cat.' + id + '">' + esc(t.name) + '</h3>' +
+        '<h3 class="name" data-i18n="cat.' + id + '">' + tname + '</h3>' +
         '<p class="pop" data-i18n="tpop.' + id + '">人気スコア ' + esc(String(t.popularity)) + '</p>' +
-        '<a href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">プレビューを開く →</span></a>' +
+        '<a href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">別タブで全画面</span></a>' +
         '</div></article>';
     }).join('');
   }
@@ -509,12 +537,16 @@ export function renderTemplateGalleryPage() {
     var tags = (t.tags || []).slice(0, 5).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
     var id = esc(t.id);
     var customJa = t.isCustom ? ' · カスタム' : '';
+    var purl = esc(t.previewUrl);
+    var tname = esc(t.name);
     return '<article class="t-card">' +
-      '<h3 data-i18n="cat.' + id + '">' + esc(t.name) + '</h3>' +
+      '<div class="preview-embed" aria-hidden="true">' +
+      '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
+      '<h3 data-i18n="cat.' + id + '">' + tname + '</h3>' +
       '<p class="meta" data-i18n="tmeta.' + id + '">' + esc(t.category) + ' · スコア ' + esc(String(t.popularity)) + customJa + '</p>' +
       (tags ? '<div class="tags">' + tags + '</div>' : '') +
       '<div class="actions">' +
-      '<a class="btn btn-primary" href="' + esc(t.previewUrl) + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.card.preview">プレビュー</span></a>' +
+      '<a class="btn btn-primary" href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.card.preview">別タブで全画面</span></a>' +
       '<a class="btn btn-ghost" href="/customer-intake"><span data-i18n="gallery.card.consult">この系統で相談</span></a>' +
       '</div></article>';
   }

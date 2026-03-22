@@ -5,9 +5,14 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
   const list = Array.isArray(candidates) && candidates.length ? candidates : TEMPLATE_CANDIDATES;
   const templateCards = list.map(
     (t) => `<label class="style-card">
-      <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
-      <p class="sub" data-i18n="intake.tpl.sub">既存のテンプレページを別タブで確認できます。</p>
-      <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer"><span data-i18n="intake.tpl.preview">このテンプレをプレビュー</span></a>
+      <div class="style-card-preview" aria-hidden="true">
+        <iframe src="/api/template-preview/${t.id}" title="${String(t.name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" loading="lazy"></iframe>
+      </div>
+      <div class="style-card-meta">
+        <div><input type="radio" name="chosenTemplateId" value="${t.id}" required><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
+        <p class="sub" data-i18n="intake.tpl.sub">上はページの見た目（縮小）。別タブで全画面も開けます。</p>
+        <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer"><span data-i18n="intake.tpl.preview">別タブで全画面</span></a>
+      </div>
     </label>`
   ).join('');
   return `<!DOCTYPE html>
@@ -140,7 +145,30 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       padding: 10px;
       background: var(--bg-base);
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
     }
+    .style-card-preview {
+      height: 180px;
+      overflow: hidden;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      position: relative;
+    }
+    .style-card-preview iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 390px;
+      height: 720px;
+      border: 0;
+      transform: scale(0.5);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .style-card-meta { min-width: 0; }
     .style-card input { width: auto; margin-right: 6px; accent-color: var(--terracotta); }
     .style-card .ttl { font-weight: 700; }
     .style-card .sub { color: var(--text-muted); font-size: .84rem; line-height: 1.6; margin-top: 4px; }
