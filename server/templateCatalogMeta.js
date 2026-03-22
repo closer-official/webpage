@@ -11,11 +11,18 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 94,
     tags: ['カフェ', 'レストラン', 'シンプル', '複数店舗'],
   }),
-  academy_lp: Object.freeze({
-    category: 'セールス・教室',
-    categories: ['セールス', '教育', 'LP'],
+  gym_yoga: Object.freeze({
+    category: 'ジム・フィットネス',
+    categories: ['ジム', 'フィットネス', 'LP'],
     popularity: 91,
-    tags: ['ランディングページ', '講座', '集客', '高CV'],
+    tags: ['パーソナル', 'ヨガ', 'トレーニング', '体験予約', 'ダーク'],
+  }),
+  /** 旧ビルトイン（カスタムの base や過去ヒアリング用。ギャラリーには出ない） */
+  academy_lp: Object.freeze({
+    category: 'セールス・教室（レガシー）',
+    categories: ['セールス', '教育', 'LP'],
+    popularity: 70,
+    tags: ['ランディングページ', '講座', '集客', '高CV', 'レガシー'],
   }),
   navy_cyan_consult: Object.freeze({
     category: '法人・相談',

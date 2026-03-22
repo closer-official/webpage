@@ -7,6 +7,9 @@ export const TEMPLATE_CANDIDATES = [...BUILTIN_BUILD_HTML_TEMPLATES];
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 
+/** 旧ビルトイン。一覧には出さないが buildHtml・過去データの検証用 */
+const LEGACY_TEMPLATE_IDS = new Set(['academy_lp']);
+
 /**
  * @param {unknown[]} customizations
  * @param {{ forPublicSelection?: boolean }} [options] forPublicSelection=true のとき下書き（draft）は一覧に含めない（ヒアリング・一般向け）
@@ -85,6 +88,7 @@ function injectThemeCss(html, css) {
 }
 
 function labelOf(id) {
+  if (id === 'academy_lp') return '高CVセールスLP（レガシー）';
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
 }
 
@@ -106,7 +110,7 @@ export function renderTemplatePreview(templateId, customization = null) {
 
   let id = String(templateId || '');
   if (id === INTAKE_BESPOKE_TEMPLATE_ID) id = 'navy_cyan_consult';
-  if (!TEMPLATE_IDS.has(id)) return null;
+  if (!TEMPLATE_IDS.has(id) && !LEGACY_TEMPLATE_IDS.has(id)) return null;
 
   const ov = resolveTemplateOverride(customization);
 
