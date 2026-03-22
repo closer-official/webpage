@@ -1,4 +1,5 @@
 import { NAVY_DELIVERABLE_SCOPED_CSS } from './navyDeliverableScopedCss.js';
+import { BUILTIN_BUILD_HTML_TEMPLATE_IDS } from './templateRegistry.js';
 
 /**
  * 6パターンテンプレート（絶対ルール準拠）
@@ -449,8 +450,8 @@ const TEMPLATE_CSS_RAW = {
   `,
 };
 
-/** templatePreview.TEMPLATE_CANDIDATES と同一（運営デザイン選択・業種キュー順の基準） */
-export const TEMPLATE_IDS = ['cafe_1', 'academy_lp', 'navy_cyan_consult'];
+/** 運営デザイン・業種キュー順。ID 一覧の正は templateRegistry.js */
+export const TEMPLATE_IDS = [...BUILTIN_BUILD_HTML_TEMPLATE_IDS];
 
 /** 業種別のテンプレート候補（表示順は inferTemplatePriority を使用） */
 export const CONCEPT_TEMPLATES = {

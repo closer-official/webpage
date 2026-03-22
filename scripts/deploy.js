@@ -1,9 +1,10 @@
 /**
- * npm run deploy 用スクリプト
- * - git add . → 変更があれば commit → git push（いまのブランチ）
- * - 本番ブランチ運用: Vercel の Production Branch を production にしたうえで、
- *   本番反映は `npm run deploy:prod` を使う（main → production マージ＆push）
- * - 末尾の `vercel --prod` はデフォルトオフ（ブランチと無関係に本番へ載る事故防止）。
+ * npm run deploy 用スクリプト（標準運用）
+ * - git add . → 変更があれば commit → git push（いまのブランチ、多くは master）
+ * - Vercel の Production Branch をこのブランチ（例: master）に合わせておけば、
+ *   この push だけで本番デプロイまで完結する。
+ * - production ブランチを挟む運用は任意: `npm run deploy:prod`（docs/本番ブランチ運用.md）
+ * - 末尾の `vercel --prod` はデフォルトオフ（CLI 直載せの事故防止）。
  *   どうしても使う場合: DEPLOY_USE_VERCEL_CLI=1 npm run deploy
  */
 import { execSync, spawnSync } from 'node:child_process';
@@ -91,6 +92,7 @@ if (process.env.DEPLOY_USE_VERCEL_CLI === '1') {
   }
 } else {
   console.log('');
-  console.log('ヒント: 本番反映は `npm run deploy:prod`（production ブランチを push）を推奨。');
-  console.log('      旧来どおり CLI で本番に載せる場合: DEPLOY_USE_VERCEL_CLI=1 npm run deploy');
+  console.log('ヒント: Vercel の Production Branch をこのブランチ（例: master）に合わせていれば、');
+  console.log('      この push で本番まで更新されます。production ブランチ運用は docs/本番ブランチ運用.md');
+  console.log('      CLI で本番直載せする場合のみ: DEPLOY_USE_VERCEL_CLI=1 npm run deploy');
 }

@@ -1,5 +1,7 @@
 /**
- * 本番反映: main を production にマージして push するだけ。
+ * 【任意】production ブランチ運用向け。標準は master + npm run deploy だけ（docs/開発から納品までの流れ.md）。
+ *
+ * main を production にマージして push する。
  * Vercel の Production Branch が production のとき、ここで本番デプロイが走る。
  *
  * 使い方:

@@ -1,12 +1,9 @@
 import { buildHtml } from './buildHtml.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
+import { BUILTIN_BUILD_HTML_TEMPLATES } from './templateRegistry.js';
 
-/** 運営「⓪ デザイン」等で選べるビルトインはこの3種のみ（旧1〜13・15は一覧から除外。buildHtml はレガシーIDの描画用に残す） */
-export const TEMPLATE_CANDIDATES = [
-  { id: 'cafe_1', name: 'テンプレ1（複数店舗・ミニマル）' },
-  { id: 'academy_lp', name: 'テンプレ2（高CVセールスLP）' },
-  { id: 'navy_cyan_consult', name: 'テンプレ3（ネイビー×シアン・Web/LP）' },
-];
+/** 運営「⓪ デザイン」等。ビルトイン定義の正は templateRegistry.js（旧IDの描画は server/buildHtml.js に残る） */
+export const TEMPLATE_CANDIDATES = [...BUILTIN_BUILD_HTML_TEMPLATES];
 
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 

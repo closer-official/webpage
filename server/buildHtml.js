@@ -1,3 +1,9 @@
+/**
+ * 自動生成LPの HTML 組み立て（Node）。レガシー templateId の分岐がここに集約されている。
+ * 運営が選べる「ビルトイン」の ID・名前の正は templateRegistry.js。
+ * フロントのプレビューは src/lib/buildHtml.ts / templates.ts。全体マップは
+ * docs/テンプレまわりの置き場とデプロイ.md。
+ */
 import { getTemplateFullCss } from './conceptTemplates.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
