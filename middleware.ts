@@ -70,7 +70,13 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
   if (!user || !pass) {
     return new Response(
       'このドメインでは WEBPAGE_BASIC_AUTH_USER と WEBPAGE_BASIC_AUTH_PASSWORD を Vercel の環境変数に設定してください。',
-      { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
+      {
+        status: 503,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, private',
+        },
+      },
     );
   }
 
@@ -81,6 +87,8 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
       headers: {
         'WWW-Authenticate': 'Basic realm="Closer Webpage"',
         'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store, private',
+        Pragma: 'no-cache',
       },
     });
   }
@@ -89,7 +97,15 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
   try {
     decoded = atob(auth.slice(6).trim());
   } catch {
-    return new Response('認証が不正です', { status: 401 });
+    return new Response('認証が不正です', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="Closer Webpage"',
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store, private',
+        Pragma: 'no-cache',
+      },
+    });
   }
 
   const colon = decoded.indexOf(':');
@@ -102,6 +118,8 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
       headers: {
         'WWW-Authenticate': 'Basic realm="Closer Webpage"',
         'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store, private',
+        Pragma: 'no-cache',
       },
     });
   }
@@ -109,7 +127,20 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
   return null;
 }
 
-export default function middleware(request: Request) {
+/** CDN が Authorization を無視して認証済み HTML を共有キャッシュしないよう付与 */
+function withWebpageAuthVary(host: string, response: Response): Response {
+  if (!WEBPAGE_BASIC_HOSTS.has(host)) return response;
+  const h = new Headers(response.headers);
+  const prev = h.get('Vary');
+  h.set('Vary', prev ? `${prev}, Authorization` : 'Authorization');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: h,
+  });
+}
+
+export default async function middleware(request: Request) {
   const url = new URL(request.url);
   const host = url.hostname.toLowerCase();
 
@@ -156,7 +187,8 @@ export default function middleware(request: Request) {
     return next();
   }
 
-  return next();
+  const res = await next();
+  return withWebpageAuthVary(host, res);
 }
 
 /** /api を含む全パスで Basic 認証をかけられるようにする（旧設定は api を除外していた） */
