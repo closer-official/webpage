@@ -42,6 +42,27 @@
         border-color: #22d3ee;
         box-shadow: 0 0 0 1px #22d3ee;
       }
+      .tpl-preview-row {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid #2a3b52;
+      }
+      a.tpl-preview {
+        display: inline-block;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: #67e8f9;
+        text-decoration: none;
+      }
+      a.tpl-preview:hover {
+        text-decoration: underline;
+      }
+      .field-hint {
+        font-size: 0.8rem;
+        color: #7d8fa3;
+        line-height: 1.55;
+        margin: 6px 0 0;
+      }
       .tpl h3 {
         margin: 0 0 6px;
         font-size: 1rem;
@@ -108,11 +129,10 @@
   <body>
     <h1>店舗セットアップ（標準フロー）</h1>
     <p class="note">
-      <strong>流れ:</strong> テンプレを選ぶ → 店舗キーとログイン情報を決める →
+      <strong>流れ:</strong> テンプレを選ぶ（<strong>見た目を見る</strong>で中身を確認）→ 店舗キーとログイン情報を決める →
       <strong>この内容でサイトを作成</strong> → 表示された<strong>購入者用ページ</strong>で文章・写真を編集 → DNS で
-      <code>店舗キー.store-official.net</code> 等を向ける。<br />
-      実行には <strong>ツール管理者ログイン</strong>（このドメインで管理画面に入っている状態）か、環境変数
-      <code>STORE_SETUP_PROVISION_TOKEN</code> を下欄に入力してください。
+      <code>店舗キー.store-official.net</code> を本番プロジェクトに向ける。<br />
+      実行には、このサイトの<strong>管理ログイン済み</strong>のブラウザで開いてください（セッション Cookie が送られます）。
     </p>
 
     <h2 style="font-size: 1rem; margin-top: 1.5rem">1. テンプレを選ぶ</h2>
@@ -125,9 +145,6 @@
     <input type="text" id="username" autocomplete="username" />
     <label>管理画面のパスワード（8文字以上）</label>
     <input type="password" id="password" autocomplete="new-password" />
-
-    <label>セットアップ用トークン（任意・管理者でログイン済みなら空でOK）</label>
-    <input type="password" id="setupToken" placeholder="STORE_SETUP_PROVISION_TOKEN を決済後メール等で渡す場合" autocomplete="off" />
 
     <button type="button" class="primary" id="btnGo">この内容でサイトを作成</button>
     <div class="err" id="err"></div>
@@ -156,8 +173,15 @@
           el.innerHTML = '<p class="err">テンプレ一覧を取得できません。</p>';
           return;
         }
+        var origin = window.location.origin;
         el.innerHTML = templates
           .map(function (t) {
+            var demoPath = String(t.liveDemoPath || '').trim();
+            var previewHtml = demoPath
+              ? '<p class="tpl-preview-row"><a class="tpl-preview" href="' +
+                esc(origin + demoPath) +
+                '" target="_blank" rel="noopener">テンプレの見た目を見る（新しいタブ）</a></p>'
+              : '';
             return (
               '<div class="tpl" data-slug="' +
               esc(t.slug) +
@@ -167,12 +191,20 @@
               esc(t.description) +
               '</p><p style="margin-top:8px;font-size:0.78rem;opacity:0.85">slug: <code>' +
               esc(t.slug) +
-              '</code></p></div>'
+              '</code></p>' +
+              previewHtml +
+              '</div>'
             );
           })
           .join('');
+        el.querySelectorAll('a.tpl-preview').forEach(function (a) {
+          a.addEventListener('click', function (e) {
+            e.stopPropagation();
+          });
+        });
         el.querySelectorAll('.tpl').forEach(function (node) {
-          node.addEventListener('click', function () {
+          node.addEventListener('click', function (e) {
+            if (e.target && e.target.closest && e.target.closest('a.tpl-preview')) return;
             el.querySelectorAll('.tpl').forEach(function (n) {
               n.classList.remove('selected');
             });
@@ -208,12 +240,9 @@
           password: document.getElementById('password').value,
           cloneFrom: selectedSlug,
         };
-        var tok = document.getElementById('setupToken').value.trim();
-        var headers = { 'Content-Type': 'application/json' };
-        if (tok) headers['Authorization'] = 'Bearer ' + tok;
         fetch(api + '/store-setup/provision', {
           method: 'POST',
-          headers: headers,
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(body),
         })

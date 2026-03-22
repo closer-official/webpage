@@ -9,7 +9,6 @@ import { GenerationOptions } from './components/GenerationOptions';
 import { StripePayment } from './components/StripePayment';
 import { QueueLocalSync } from './components/QueueLocalSync';
 import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
-import { DesignCheckPanel } from './components/DesignCheckPanel';
 import { FullAutoMain } from './components/FullAutoMain';
 import { StoreCms } from './components/StoreCms';
 import { CustomerIntakePanel } from './components/CustomerIntakePanel';
@@ -22,7 +21,7 @@ type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
   contentVariants?: { templateId: string; html: string }[];
 };
 
-type TabId = 'auto' | 'design' | 'queue' | 'dashboard' | 'admin' | 'intake' | 'settings';
+type TabId = 'auto' | 'queue' | 'dashboard' | 'admin' | 'intake' | 'settings';
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -94,7 +93,6 @@ function App() {
     { id: 'dashboard', label: 'ダッシュボード' },
     { id: 'intake', label: 'ヒアリング回答' },
     { id: 'admin', label: '管理者' },
-    { id: 'design', label: 'デザイン確認' },
     { id: 'queue', label: '手動・詳細' },
     { id: 'settings', label: '設定' },
   ];
@@ -168,7 +166,7 @@ function App() {
             →
           </span>
           <span className="flow-main">ダッシュボードで確認・送信</span>
-          <span className="flow-sub">　デザイン確認・手動キュー・設定</span>
+          <span className="flow-sub">　手動キュー・設定／納品テンプレは店舗セットアップページ</span>
         </p>
         <nav className="app-tabs" aria-label="メインメニュー">
           {flowSteps.map(({ id, label }) => (
@@ -193,12 +191,6 @@ function App() {
             }}
             onRefreshDashboard={refreshDashboard}
           />
-        )}
-
-        {tab === 'design' && (
-          <section className="tab-content">
-            <DesignCheckPanel onGoDashboard={() => setTab('dashboard')} />
-          </section>
         )}
 
         {tab === 'queue' && (
@@ -243,6 +235,11 @@ function App() {
           <section className="tab-content">
             <p className="tab-hint">
               オプション「管理者画面」加入店向け。アクセス数・文言・写真の編集ができます。（一時的に全件表示）
+            </p>
+            <p className="tab-hint">
+              <strong>納品テンプレで新店舗を作る:</strong>{' '}
+              <a href="/admin/store-wizard.html">店舗セットアップ（テンプレ選択・店舗キー）</a>
+              — 各テンプレの見た目はそこから「テンプレの見た目を見る」で確認できます。
             </p>
             <StoreCms items={dashboardItems} onRefresh={refreshDashboard} />
           </section>
