@@ -10,7 +10,6 @@ import { StripePayment } from './components/StripePayment';
 import { QueueLocalSync } from './components/QueueLocalSync';
 import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
 import { FullAutoMain } from './components/FullAutoMain';
-import { StoreCms } from './components/StoreCms';
 import { CustomerIntakePanel } from './components/CustomerIntakePanel';
 import type { QueueTarget } from './types';
 import { isApiAvailable, api } from './lib/api';
@@ -21,7 +20,7 @@ type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
   contentVariants?: { templateId: string; html: string }[];
 };
 
-type TabId = 'auto' | 'queue' | 'dashboard' | 'admin' | 'intake' | 'settings';
+type TabId = 'auto' | 'queue' | 'dashboard' | 'intake' | 'settings';
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -85,14 +84,13 @@ function App() {
     if (tab === 'queue') refreshQueue();
   }, [tab, refreshQueue]);
   useEffect(() => {
-    if (tab === 'dashboard' || tab === 'admin') refreshDashboard();
+    if (tab === 'dashboard') refreshDashboard();
   }, [tab, refreshDashboard]);
 
   const flowSteps: { id: TabId; label: string }[] = [
     { id: 'auto', label: 'フルオート' },
     { id: 'dashboard', label: 'ダッシュボード' },
     { id: 'intake', label: 'ヒアリング回答' },
-    { id: 'admin', label: '管理者' },
     { id: 'queue', label: '手動・詳細' },
     { id: 'settings', label: '設定' },
   ];
@@ -231,25 +229,19 @@ function App() {
           </section>
         )}
 
-        {tab === 'admin' && (
-          <section className="tab-content">
-            <p className="tab-hint">
-              オプション「管理者画面」加入店向け。アクセス数・文言・写真の編集ができます。（一時的に全件表示）
-            </p>
-            <p className="tab-hint">
-              <strong>納品テンプレで新店舗を作る:</strong>{' '}
-              <a href="/admin/store-wizard.html">店舗セットアップ（テンプレ選択・店舗キー）</a>
-              — 各テンプレの見た目はそこから「テンプレの見た目を見る」で確認できます。
-            </p>
-            <StoreCms items={dashboardItems} onRefresh={refreshDashboard} />
-          </section>
-        )}
-
         {tab === 'intake' && <CustomerIntakePanel />}
 
         {tab === 'settings' && (
           <section className="tab-content settings-tab">
             <p className="tab-hint">生成するLPのオプション・決済・AI利用の予算を設定します。</p>
+            <div className="settings-block">
+              <h3 className="settings-block-title">納品テンプレ・新店舗</h3>
+              <p className="tab-hint">
+                テンプレ選択・店舗キー・購入者用CMSの発行は{' '}
+                <a href="/admin/store-wizard.html">店舗セットアップ</a>
+                から行います（各テンプレの「見た目を見る」あり）。
+              </p>
+            </div>
             <div className="settings-block">
               <h3 className="settings-block-title">LP生成オプション</h3>
               <GenerationOptions />
