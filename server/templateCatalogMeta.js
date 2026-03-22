@@ -37,12 +37,6 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 88,
     tags: ['コーポレート', '信頼感', 'コンサル'],
   }),
-  studio_blush_editorial: Object.freeze({
-    category: 'クリエイティブ・撮影',
-    categories: ['スタジオ', 'フォト', 'ポートフォリオ'],
-    popularity: 86,
-    tags: ['アトリエ', '撮影', 'レンタルスペース', 'デザイナー', 'ポートレート'],
-  }),
 });
 
 function simpleHash(str) {

@@ -16,6 +16,7 @@ const KEYS = {
   learningJob: 'learningJob',
   autoProcessEnabled: 'autoProcessEnabled',
   salesAgency: 'salesAgency',
+  galleryDraftBuiltins: 'galleryDraftBuiltins',
 };
 
 function getDefault(name) {
@@ -38,6 +39,7 @@ function getDefault(name) {
       apiUsage: [],
     };
   }
+  if (name === 'galleryDraftBuiltins') return { draftBuiltinIds: [] };
   return {};
 }
 
@@ -154,6 +156,23 @@ export const storeSupabase = {
   setSalesAgency: async (whole) => {
     const base = getDefault(KEYS.salesAgency);
     await set(KEYS.salesAgency, { ...base, ...whole, updatedAt: new Date().toISOString() });
+  },
+  getGalleryDraftBuiltins: async () => {
+    const data = await get(KEYS.galleryDraftBuiltins);
+    const d = data && typeof data === 'object' ? data : {};
+    const ids = Array.isArray(d.draftBuiltinIds) ? d.draftBuiltinIds : [];
+    return { draftBuiltinIds: ids.map((x) => String(x || '').trim()).filter(Boolean) };
+  },
+  setGalleryDraftBuiltins: async (obj) => {
+    const curRaw = await get(KEYS.galleryDraftBuiltins);
+    const cur = curRaw && typeof curRaw === 'object' ? curRaw : getDefault(KEYS.galleryDraftBuiltins);
+    const curIds = Array.isArray(cur.draftBuiltinIds) ? cur.draftBuiltinIds : [];
+    const next = {
+      draftBuiltinIds: Array.isArray(obj?.draftBuiltinIds)
+        ? obj.draftBuiltinIds.map((x) => String(x || '').trim()).filter(Boolean)
+        : curIds.map((x) => String(x || '').trim()).filter(Boolean),
+    };
+    await set(KEYS.galleryDraftBuiltins, next);
   },
 };
 

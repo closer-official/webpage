@@ -51,7 +51,8 @@ import { buildHtml } from './buildHtml.js';
 import { renderLpPaymentForm } from './lpPaymentForm.js';
 import { renderCustomerIntakePage } from './customerIntakePage.js';
 import { renderTemplateGalleryPage } from './templateGalleryPage.js';
-import { buildPublicTemplateCatalog } from './publicTemplateCatalog.js';
+import { buildPublicTemplateCatalog, buildAdminTemplateCatalog } from './publicTemplateCatalog.js';
+import { BUILTIN_BUILD_HTML_TEMPLATE_IDS } from './templateRegistry.js';
 import { translatePublicUiEntries } from './publicUiTranslate.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
@@ -637,7 +638,9 @@ app.post('/api/queue', async (req, res) => {
 // ---------- 顧客ヒアリング ----------
 app.get(['/customer-intake', '/api/customer-intake'], async (req, res) => {
   const customs = await store.getTemplateCustomizations();
-  const candidates = getTemplateCandidates(customs, { forPublicSelection: true });
+  const draftRec = await store.getGalleryDraftBuiltins();
+  const galleryDraftBuiltinIds = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
+  const candidates = getTemplateCandidates(customs, { forPublicSelection: true, galleryDraftBuiltinIds });
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(renderCustomerIntakePage(candidates));
 });
@@ -645,12 +648,61 @@ app.get(['/customer-intake', '/api/customer-intake'], async (req, res) => {
 app.get('/api/public/template-catalog', async (req, res) => {
   try {
     const customs = await store.getTemplateCustomizations();
-    const catalog = buildPublicTemplateCatalog(customs);
+    const catalog = await buildPublicTemplateCatalog(customs);
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
     res.json(catalog);
   } catch (e) {
     console.error('[public/template-catalog]', e);
     res.status(500).json({ error: 'catalog failed' });
+  }
+});
+
+app.get('/api/admin/template-catalog', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const customs = await store.getTemplateCustomizations();
+    const catalog = await buildAdminTemplateCatalog(customs);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(catalog);
+  } catch (e) {
+    console.error('[admin/template-catalog]', e);
+    res.status(500).json({ error: 'catalog failed' });
+  }
+});
+
+app.post('/api/admin/gallery-draft-builtins/publish', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const id = String(req.body?.id || '').trim();
+  if (!BUILTIN_BUILD_HTML_TEMPLATE_IDS.includes(id)) {
+    return res.status(400).json({ error: 'ビルトインIDのみ公開できます' });
+  }
+  try {
+    const rec = await store.getGalleryDraftBuiltins();
+    const cur = Array.isArray(rec?.draftBuiltinIds) ? rec.draftBuiltinIds : [];
+    const next = cur.filter((x) => String(x) !== id);
+    await store.setGalleryDraftBuiltins({ draftBuiltinIds: next });
+    res.json({ ok: true, draftBuiltinIds: next });
+  } catch (e) {
+    console.error('[gallery-draft-builtins/publish]', e);
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+app.post('/api/admin/gallery-draft-builtins/mark-draft', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const id = String(req.body?.id || '').trim();
+  if (!BUILTIN_BUILD_HTML_TEMPLATE_IDS.includes(id)) {
+    return res.status(400).json({ error: 'ビルトインIDのみ下書きにできます' });
+  }
+  try {
+    const rec = await store.getGalleryDraftBuiltins();
+    const cur = Array.isArray(rec?.draftBuiltinIds) ? [...rec.draftBuiltinIds] : [];
+    if (!cur.includes(id)) cur.push(id);
+    await store.setGalleryDraftBuiltins({ draftBuiltinIds: cur });
+    res.json({ ok: true, draftBuiltinIds: cur });
+  } catch (e) {
+    console.error('[gallery-draft-builtins/mark-draft]', e);
+    res.status(500).json({ error: 'failed' });
   }
 });
 
@@ -703,29 +755,41 @@ app.get(['/template-gallery', '/api/template-gallery'], (req, res) => {
 
 app.get('/api/template-preview/:templateId', (req, res) => {
   const templateId = String(req.params.templateId || '');
-  Promise.resolve(store.getTemplateCustomizations()).then((customs) => {
-    const candidate = findTemplateCandidate(templateId, customs);
-    if (!candidate) {
-      return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
-    }
-    const baseId = candidate.baseTemplateId || candidate.id;
-    const html = renderTemplatePreview(baseId, candidate.customization || null);
-    if (!html) return res.status(500).json({ error: 'failed to render preview' });
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'private, max-age=60');
-    /* 同一オリジンからの iframe 埋め込み（ギャラリー・ヒアリング）を許可。他ドメインからの埋め込みは不可 */
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.send(html);
-  }).catch((e) => {
-    console.error('[template-preview]', e);
-    res.status(500).json({ error: 'template preview failed' });
-  });
+  Promise.all([store.getTemplateCustomizations(), store.getGalleryDraftBuiltins()])
+    .then(([customs, draftRec]) => {
+      const candidate = findTemplateCandidate(templateId, customs);
+      if (!candidate) {
+        return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
+      }
+      const draftSet = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
+      const isGalleryDraftBuiltin = !candidate.isCustom && draftSet.has(candidate.id);
+      if (isGalleryDraftBuiltin && adminAuthEnabled() && !isAdminAuthenticated(req)) {
+        return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
+      }
+      const baseId = candidate.baseTemplateId || candidate.id;
+      const html = renderTemplatePreview(baseId, candidate.customization || null);
+      if (!html) return res.status(500).json({ error: 'failed to render preview' });
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'private, max-age=60');
+      /* 同一オリジンからの iframe 埋め込み（ギャラリー・ヒアリング）を許可。他ドメインからの埋め込みは不可 */
+      res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+      res.send(html);
+    })
+    .catch((e) => {
+      console.error('[template-preview]', e);
+      res.status(500).json({ error: 'template preview failed' });
+    });
 });
 
 app.get('/api/template-candidates', async (req, res) => {
   const customs = await store.getTemplateCustomizations();
+  const draftRec = await store.getGalleryDraftBuiltins();
+  const galleryDraftBuiltinIds = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
   const includeDrafts = adminAuthEnabled() ? isAdminAuthenticated(req) : true;
-  res.json(getTemplateCandidates(customs, { forPublicSelection: !includeDrafts }));
+  const opts = includeDrafts
+    ? { forPublicSelection: false }
+    : { forPublicSelection: true, galleryDraftBuiltinIds };
+  res.json(getTemplateCandidates(customs, opts));
 });
 
 /** 参考URLからスタイル指紋を取得（レート制限あり）。管理者画面・ヒアリング送信前のプレビュー用 */
@@ -986,7 +1050,12 @@ app.post('/api/customer-intake', async (req, res) => {
     return res.status(400).json({ error: 'designTastes is required' });
   }
   const templateCustoms = await store.getTemplateCustomizations();
-  const publicCandidates = getTemplateCandidates(templateCustoms, { forPublicSelection: true });
+  const draftRec = await store.getGalleryDraftBuiltins();
+  const galleryDraftBuiltinIds = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
+  const publicCandidates = getTemplateCandidates(templateCustoms, {
+    forPublicSelection: true,
+    galleryDraftBuiltinIds,
+  });
   const allowedTemplateIds = new Set(publicCandidates.map((c) => c.id));
   allowedTemplateIds.add('intake_bespoke');
   if (!allowedTemplateIds.has(String(body.chosenTemplateId || '').trim())) {

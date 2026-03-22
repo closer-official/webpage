@@ -204,12 +204,11 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
   { id: 'retail', name: '小売・EC' },
 ];
 
-/** 新規選択UIに出すビルトイン（運営⓪デザインの4種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
+/** 新規選択UIに出すビルトイン（公開ギャラリー掲載の3種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
 export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'cafe_1', name: '複数店舗・ミニマル' },
   { id: 'gym_personal_neon', name: 'Valx・ジム販売LP（gym-valx）' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web/LP）' },
-  { id: 'studio_blush_editorial', name: 'ブラッシュ・創作スタジオ' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

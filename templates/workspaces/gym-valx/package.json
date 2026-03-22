@@ -1,0 +1,12 @@
+{
+  "name": "@webpage-ws-gym-valx",
+  "private": true,
+  "type": "module",
+  "description": "テンプレ2 gym_personal_neon 作業用。deploy / build はリポジトリルートの npm スクリプトを実行します。",
+  "scripts": {
+    "deploy": "npm --prefix ../../.. run deploy",
+    "build": "npm --prefix ../../.. run build",
+    "dev": "npm --prefix ../../.. run dev",
+    "server": "npm --prefix ../../.. run server"
+  }
+}

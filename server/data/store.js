@@ -20,6 +20,7 @@ const FILES = {
   lpContent: 'lpContent.json',
   lpAnalytics: 'lpAnalytics.json',
   salesAgency: 'salesAgency.json',
+  galleryDraftBuiltins: 'galleryDraftBuiltins.json',
 };
 
 function ensureDir() {
@@ -49,6 +50,7 @@ function getDefault(name) {
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
   if (name === 'billing') return { plan: 'normal' };
   if (name === 'lpCmsAccounts') return {};
+  if (name === 'galleryDraftBuiltins') return { draftBuiltinIds: [] };
   return {};
 }
 
@@ -137,6 +139,19 @@ const fileStore = {
   setSalesAgency: async (whole) => {
     const base = getDefault('salesAgency');
     write('salesAgency', { ...base, ...whole, updatedAt: new Date().toISOString() });
+  },
+  getGalleryDraftBuiltins: () => Promise.resolve(read('galleryDraftBuiltins')),
+  setGalleryDraftBuiltins: (obj) => {
+    const cur = read('galleryDraftBuiltins');
+    const next = {
+      draftBuiltinIds: Array.isArray(obj?.draftBuiltinIds)
+        ? obj.draftBuiltinIds.map((x) => String(x || '').trim()).filter(Boolean)
+        : Array.isArray(cur?.draftBuiltinIds)
+          ? cur.draftBuiltinIds
+          : [],
+    };
+    write('galleryDraftBuiltins', next);
+    return Promise.resolve();
   },
 };
 

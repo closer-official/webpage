@@ -19,7 +19,6 @@ export const BUILTIN_BUILD_HTML_TEMPLATES = Object.freeze([
   Object.freeze({ id: 'cafe_1', name: 'テンプレ1（複数店舗・ミニマル）' }),
   Object.freeze({ id: 'gym_personal_neon', name: 'テンプレ2（Valx・ジム販売LP）' }),
   Object.freeze({ id: 'navy_cyan_consult', name: 'テンプレ3（ネイビー×シアン・Web/LP）' }),
-  Object.freeze({ id: 'studio_blush_editorial', name: 'テンプレ4（ブラッシュ・創作スタジオ）' }),
 ]);
 
 /** @type {readonly string[]} */

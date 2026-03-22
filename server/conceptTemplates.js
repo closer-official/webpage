@@ -1146,7 +1146,12 @@ const GYM_VALX_DELIVERABLE_PAGE_CSS = `
 `;
 
 export function getTemplateFullCss(templateId) {
-  const key = TEMPLATE_IDS.includes(templateId) ? templateId : TEMPLATE_IDS[0];
+  const tid = String(templateId || '');
+  /** ギャラリー非掲載のレガシーID（既存店舗の HTML 生成用） */
+  if (tid === 'studio_blush_editorial') {
+    return COMMON_BASE + STUDIO_BLUSH_EDITORIAL_CSS;
+  }
+  const key = TEMPLATE_IDS.includes(tid) ? tid : TEMPLATE_IDS[0];
   if (key === 'navy_cyan_consult') {
     return NAVY_DELIVERABLE_PAGE_CSS;
   }

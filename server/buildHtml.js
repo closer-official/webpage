@@ -8,8 +8,8 @@ import { getTemplateFullCss } from './conceptTemplates.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss.js';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml.js';
-import { buildNavyDeliverableMainHtml } from './navyDeliverableClone.js';
-import { buildGymValxDeliverableMainHtml } from './gymValxDeliverableClone.js';
+import { buildNavyDeliverableMainHtml } from '../templates/workspaces/navy-cyan-web/server/navyDeliverableClone.js';
+import { buildGymValxDeliverableMainHtml } from '../templates/workspaces/gym-valx/server/gymValxDeliverableClone.js';
 
 function escapeHtml(s) {
   if (!s) return '';

@@ -8,14 +8,17 @@ export const TEMPLATE_CANDIDATES = [...BUILTIN_BUILD_HTML_TEMPLATES];
 const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 
 /** 旧ビルトイン。一覧には出さないが buildHtml・過去データの検証用 */
-const LEGACY_TEMPLATE_IDS = new Set(['academy_lp', 'gym_yoga']);
+const LEGACY_TEMPLATE_IDS = new Set(['academy_lp', 'gym_yoga', 'studio_blush_editorial']);
 
 /**
  * @param {unknown[]} customizations
- * @param {{ forPublicSelection?: boolean }} [options] forPublicSelection=true のとき下書き（draft）は一覧に含めない（ヒアリング・一般向け）
+ * @param {{ forPublicSelection?: boolean, galleryDraftBuiltinIds?: Set<string> }} [options]
+ *   forPublicSelection=true … カスタムの draft 非表示 + galleryDraftBuiltinIds に含まれるビルトインを非表示（公開ギャラリー・ヒアリング）
  */
 export function getTemplateCandidates(customizations = [], options = {}) {
   const forPublic = options.forPublicSelection !== false;
+  const galleryDraftSet =
+    options.galleryDraftBuiltinIds instanceof Set ? options.galleryDraftBuiltinIds : null;
   const custom = (Array.isArray(customizations) ? customizations : [])
     .filter((c) => {
       if (!forPublic) return true;
@@ -33,13 +36,16 @@ export function getTemplateCandidates(customizations = [], options = {}) {
       status: c.status || 'published',
       kind: c.blueprint ? 'blueprint' : 'skin',
     }));
-  const builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
+  let builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
+  if (forPublic && galleryDraftSet && galleryDraftSet.size > 0) {
+    builtin = builtin.filter((t) => !galleryDraftSet.has(t.id));
+  }
   return [...builtin, ...custom];
 }
 
 export function findTemplateCandidate(id, customizations = []) {
   const tid = String(id || '');
-  return getTemplateCandidates(customizations).find((t) => t.id === tid) || null;
+  return getTemplateCandidates(customizations, { forPublicSelection: false }).find((t) => t.id === tid) || null;
 }
 
 /** ヒアリング「テンプレに当てはまらない・1から製作」（叩き台は buildHtml で navy にマップ） */
@@ -90,6 +96,7 @@ function injectThemeCss(html, css) {
 function labelOf(id) {
   if (id === 'academy_lp') return '高CVセールスLP（レガシー）';
   if (id === 'gym_yoga') return 'ジム・フィットネスLP（レガシー・gym_yoga）';
+  if (id === 'studio_blush_editorial') return 'ブラッシュ・創作スタジオ（レガシー・ギャラリー非掲載）';
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
 }
 

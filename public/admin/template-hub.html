@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>テンプレ・ギャラリーハブ | Closer</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0b1020;
+        color: #e8edf5;
+        line-height: 1.55;
+      }
+      body {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        margin: 0 0 0.35rem;
+      }
+      .sub {
+        color: #8b9cb3;
+        font-size: 0.9rem;
+        margin: 0 0 1.25rem;
+      }
+      .panel {
+        background: #121a2e;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .panel h2 {
+        font-size: 0.95rem;
+        margin: 0 0 0.5rem;
+        color: #a5d8ff;
+      }
+      .panel p,
+      .panel li {
+        font-size: 0.86rem;
+        color: #b8c5d6;
+        margin: 0.35rem 0;
+      }
+      .panel ul {
+        margin: 0.35rem 0 0 1.1rem;
+        padding: 0;
+      }
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.65rem;
+      }
+      a.btn,
+      button.btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid #3d5675;
+        background: #1c2940;
+        color: #e0f2fe;
+        cursor: pointer;
+      }
+      a.btn:hover,
+      button.btn:hover {
+        border-color: #38bdf8;
+        color: #fff;
+      }
+      a.btn.primary {
+        background: #0c4a6e;
+        border-color: #22d3ee;
+      }
+      a.btn.warn {
+        border-color: #b45309;
+        color: #fdba74;
+      }
+      a.btn.ghost {
+        background: transparent;
+        color: #93c5fd;
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+      .card {
+        background: #121a2e;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .card.draft {
+        border-color: #854d0e;
+        box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.15);
+      }
+      .card-head {
+        padding: 10px 12px;
+        border-bottom: 1px solid #2a3b52;
+      }
+      .card-head h3 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+      .card-meta {
+        font-size: 0.75rem;
+        color: #7d8fa3;
+        margin-top: 4px;
+        word-break: break-all;
+      }
+      .badge-draft {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(250, 204, 21, 0.12);
+        color: #fde68a;
+        border: 1px solid rgba(250, 204, 21, 0.35);
+      }
+      .card iframe {
+        width: 100%;
+        height: 220px;
+        border: 0;
+        background: #fff;
+      }
+      .card-foot {
+        padding: 10px 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .err {
+        color: #fca5a5;
+        font-size: 0.88rem;
+      }
+      .ok {
+        color: #86efac;
+        font-size: 0.88rem;
+      }
+      code {
+        font-size: 0.8em;
+        background: #0f172a;
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+      #login-box {
+        display: none;
+        margin-bottom: 1rem;
+      }
+      #login-box.is-visible {
+        display: block;
+      }
+      #login-box label {
+        display: block;
+        font-size: 0.8rem;
+        color: #9aacbf;
+        margin-top: 8px;
+      }
+      #login-box input {
+        width: 100%;
+        max-width: 280px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+        margin-top: 4px;
+      }
+      #scaffold-box label {
+        display: block;
+        font-size: 0.8rem;
+        color: #9aacbf;
+        margin-top: 10px;
+      }
+      #scaffold-box input {
+        width: 100%;
+        max-width: 420px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+        margin-top: 4px;
+      }
+      .instruction-wrap {
+        display: none;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid #2a3b52;
+      }
+      .instruction-wrap.is-visible {
+        display: block;
+      }
+      .instruction-wrap h3 {
+        font-size: 0.88rem;
+        margin: 0 0 8px;
+        color: #7dd3fc;
+        font-weight: 600;
+      }
+      .instruction-wrap textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 240px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #334155;
+        background: #0a0f1a;
+        color: #e2e8f0;
+        font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        resize: vertical;
+      }
+      .instruction-wrap .hint {
+        font-size: 0.75rem;
+        color: #7d8fa3;
+        margin: 8px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>テンプレ・ギャラリーハブ</h1>
+    <p class="sub" id="sub-intro">
+      運営向け: <strong>下書き中のビルトイン</strong>もここでプレビューできます。<strong>公開ギャラリー・ヒアリングには出ません</strong>（完成ボタンで表示）。<br />
+      本番では Basic 認証下の <code>/admin/</code> から開き、さらに <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> で API ログインしてください。
+    </p>
+
+    <div class="panel" id="login-box">
+      <h2>管理者ログイン</h2>
+      <p>下書きテンプレの一覧・プレビュー・公開ボタンには Cookie ログインが必要です。</p>
+      <label>ユーザー名 <input type="text" id="adm-user" autocomplete="username" /></label>
+      <label>パスワード <input type="password" id="adm-pass" autocomplete="current-password" /></label>
+      <div class="row-actions" style="margin-top: 12px">
+        <button type="button" class="btn primary" id="adm-login-btn">ログイン</button>
+      </div>
+      <p id="adm-login-err" class="err" style="display: none; margin-top: 8px"></p>
+    </div>
+
+    <div class="panel" id="scaffold-box">
+      <h2>新規ビルトイン：固定手順の指示文（毎回ここから）</h2>
+      <p style="font-size: 0.86rem; color: #b8c5d6; margin: 0 0 6px">
+        下の3つを入力し <strong>「指示文を表示」</strong>を押すと、<strong>このページ内に同じ型の手順全文</strong>が出ます（運用ブレ防止）。そのまま読むか <strong>「表示中の文をコピー」</strong>で Cursor に貼ってください。
+      </p>
+      <label>ワークスペースフォルダ名（英小文字・ハイフン） <input type="text" id="sc-slug" placeholder="例: my-salon-neon" autocomplete="off" /></label>
+      <label>テンプレ ID（英小文字・アンダースコア） <input type="text" id="sc-id" placeholder="例: my_salon_neon" autocomplete="off" /></label>
+      <label>表示名（日本語） <input type="text" id="sc-name" placeholder="例: サロン・ネオンLP" autocomplete="off" /></label>
+      <div class="row-actions" style="margin-top: 12px">
+        <button type="button" class="btn primary" id="sc-show-btn">指示文を表示</button>
+        <button type="button" class="btn" id="sc-copy-btn">表示中の文をコピー</button>
+      </div>
+      <div class="instruction-wrap" id="sc-instruction-wrap">
+        <h3>▼ 新規ビルトイン用・固定手順（この内容を毎回踏襲してください）</h3>
+        <textarea id="sc-instruction-text" readonly spellcheck="false" aria-label="新規テンプレ手順"></textarea>
+        <p class="hint">※ テンプレIDが <code>server/templateRegistry.js</code> に載るまで、下の運営カタログにはカードは出ません。</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>公開の流れ（ビルトイン）</h2>
+      <ul>
+        <li><code>templateRegistry.js</code> に ID を追加し、<code>buildHtml</code> 等を実装（§4a）。</li>
+        <li>新規 ID を <strong>下書き</strong>に: <code>galleryDraftBuiltins</code>（Supabase <code>app_store</code> またはローカル JSON）の <code>draftBuiltinIds</code> に追加 → 一般ギャラリー非表示。またはデプロイ後このページのカードで <strong>ギャラリーを非表示</strong>。</li>
+        <li>下の <strong>「ギャラリーに公開」</strong>で非表示解除 → 一般向けカタログ・ヒアリングに載ります。</li>
+      </ul>
+      <div class="row-actions">
+        <a class="btn primary" href="/admin/store-wizard.html">店舗ウィザード</a>
+        <a class="btn" href="/template-gallery" target="_blank" rel="noopener">公開ギャラリー</a>
+        <button type="button" class="btn" id="s4a-show-btn">§4a 固定依頼文を表示</button>
+        <button type="button" class="btn" id="s4a-copy-btn">§4a 表示中をコピー</button>
+      </div>
+      <div class="instruction-wrap" id="s4a-instruction-wrap">
+        <h3>▼ 汎用 §4a 依頼文（テンプレID・表示名は手入力で埋めてから Cursor に貼る）</h3>
+        <textarea id="s4a-instruction-text" readonly spellcheck="false" aria-label="§4a 依頼文"></textarea>
+      </div>
+    </div>
+
+    <h2 style="font-size: 1.05rem; margin: 1.5rem 0 0.65rem">テンプレ一覧（運営カタログ）</h2>
+    <p class="sub" id="sub-status">読み込み中…</p>
+    <p id="msg-bar" class="ok" style="display: none; margin: 0 0 8px"></p>
+    <div id="root" class="grid"></div>
+    <p id="load-err" class="err" style="display: none"></p>
+
+    <script>
+      (function () {
+        var subStatus = document.getElementById('sub-status');
+        var root = document.getElementById('root');
+        var errEl = document.getElementById('load-err');
+        var loginBox = document.getElementById('login-box');
+        var msgBar = document.getElementById('msg-bar');
+
+        function showMsg(text, isErr) {
+          msgBar.style.display = 'block';
+          msgBar.textContent = text;
+          msgBar.className = isErr ? 'err' : 'ok';
+        }
+
+        function credFetch(url, opts) {
+          var o = opts || {};
+          o.credentials = 'same-origin';
+          o.headers = o.headers || {};
+          if (o.body && typeof o.body === 'string' && !o.headers['Content-Type']) {
+            o.headers['Content-Type'] = 'application/json';
+          }
+          return fetch(url, o);
+        }
+
+        function copyToClipboard(text, okMsg) {
+          return navigator.clipboard.writeText(text).then(
+            function () {
+              alert(okMsg || 'クリップボードにコピーしました。');
+            },
+            function () {
+              window.prompt('コピーできない環境です。手動でコピーしてください:', text);
+            },
+          );
+        }
+
+        /** 汎用 §4a（ID 未埋めテンプレ）。毎回同じ文面。 */
+        var STANDARD_S4A_PROMPT =
+          '以下を厳守してリポジトリ webpage にビルトインを1件追加してください。\n\n' +
+          '参照ドキュメント: docs/テンプレ制作ワークスペース要件書.md の「§4a ギャラリー掲載までの実装順」\n\n' +
+          '【先に決める（このまま Cursor に貼る前に埋める）】\n' +
+          '- テンプレID（英小文字・アンダースコア・既存と重複なし）: （ここに書く）\n' +
+          '- 表示名（日本語）: （ここに書く）\n' +
+          '- ワークスペース: templates/workspaces/_template/ をコピーし、templates/workspaces/（英小文字・ハイフン）/ にリネーム\n\n' +
+          '【実装順（§4a と同一）】\n' +
+          '1. server/templateRegistry.js … BUILTIN_BUILD_HTML_TEMPLATES に { id, name } を1行追加\n' +
+          '2. server/templateCatalogMeta.js … BUILTIN_CATALOG_META に同じ id キーで category / tags 等\n' +
+          '3. server/buildHtml.js … 当該 id で HTML が組み立がること\n' +
+          '4. src/lib/buildHtml.ts + src/lib/templates.ts … プレビューと本番の見た目を一致\n' +
+          '5. （任意）src/types.ts の STYLES、server/inferTemplatePriority.js、src/lib/inferTemplateFromSearch.ts\n' +
+          '6. 一般ギャラリーに出す前に下書き: galleryDraftBuiltins（Supabase の app_store キー galleryDraftBuiltins、または server/data/json/galleryDraftBuiltins.json）の draftBuiltinIds にテンプレIDを追加\n' +
+          '7. リポジトリルートで npm run build が通ることを確認し、npm run deploy（または git push）\n' +
+          '8. /admin/template-hub.html でプレビュー確認後「ギャラリーに公開」\n\n' +
+          '※ 手順を省略・順序変更しないでください。\n';
+
+        function buildScaffoldInstructionText(slug, tid, jp) {
+          return (
+            '【新規ビルトイン・固定手順】リポジトリ webpage（同一 clone）で次を、この順番どおり実行してください。省略や順番の入れ替えはしないでください。\n\n' +
+            '─ ワークスペースフォルダ名: ' +
+            slug +
+            '\n' +
+            '─ テンプレID: ' +
+            tid +
+            '\n' +
+            '─ 表示名（日本語）: ' +
+            jp +
+            '\n\n' +
+            '1) 作業フォルダ: `templates/workspaces/_template/` をコピーし、`templates/workspaces/' +
+            slug +
+            '/` にリネームする。\n\n' +
+            '2) docs/テンプレ制作ワークスペース要件書.md の §4a に従い、ビルトイン `' +
+            tid +
+            '` を追加する（表示名は上記）。触るファイルは次のとおり:\n' +
+            '   - server/templateRegistry.js\n' +
+            '   - server/templateCatalogMeta.js\n' +
+            '   - server/buildHtml.js\n' +
+            '   - src/lib/buildHtml.ts\n' +
+            '   - src/lib/templates.ts\n' +
+            '   （必要なら）src/types.ts / server/inferTemplatePriority.js / src/lib/inferTemplateFromSearch.ts\n\n' +
+            '3) 一般ギャラリーに出す前に下書きにする（必ずどちらか）:\n' +
+            '   - Supabase: テーブル app_store、キー `galleryDraftBuiltins` の JSON の `draftBuiltinIds` 配列に `' +
+            tid +
+            '` を追加する\n' +
+            '   - またはローカル: server/data/json/galleryDraftBuiltins.json を同様に編集する\n\n' +
+            '4) リポジトリルートで `npm run build` が通ることを確認し、`npm run deploy`（または git push）する。\n\n' +
+            '5) ブラウザで `/admin/template-hub.html` に管理者ログインし、当該テンプレのプレビューを確認したうえで「ギャラリーに公開」を押す。\n\n' +
+            '※ テンプレIDが server/templateRegistry.js に載るまで、このページの運営カタログにはカードは表示されない（先に 2) と 4) を完了すること）。\n'
+          );
+        }
+
+        function renderCatalog(data) {
+          var list = (data.templates || []).slice();
+          var draftCount = list.filter(function (t) {
+            return t.galleryDraft && !t.isCustom;
+          }).length;
+          subStatus.textContent =
+            '週次ピック: ' +
+            (data.weekLabel || '—') +
+            ' · 全 ' +
+            list.length +
+            ' 件 · ギャラリー下書きビルトイン ' +
+            draftCount +
+            ' 件';
+          root.innerHTML = '';
+          list.forEach(function (t) {
+            var id = t.id;
+            var name = t.name || id;
+            var kind = t.isCustom ? 'カスタム' : 'ビルトイン';
+            var prev = t.previewUrl || '/api/template-preview/' + encodeURIComponent(id);
+            var isDraft = !!t.galleryDraft && !t.isCustom;
+            var card = document.createElement('div');
+            card.className = 'card' + (isDraft ? ' draft' : '');
+            card.innerHTML =
+              '<div class="card-head">' +
+              '<h3></h3>' +
+              '<div class="card-meta"></div>' +
+              (isDraft ? '<span class="badge-draft">ギャラリー下書き</span>' : '') +
+              '</div>' +
+              '<iframe title="preview" loading="lazy" src=""></iframe>' +
+              '<div class="card-foot">' +
+              '<a class="btn primary" href="" target="_blank" rel="noopener">全画面</a>' +
+              '<button type="button" class="btn btn-publish" style="display:none">ギャラリーに公開</button>' +
+              '<button type="button" class="btn btn-unpublish warn" style="display:none">ギャラリーを非表示</button>' +
+              '</div>';
+            card.querySelector('h3').textContent = name;
+            card.querySelector('.card-meta').textContent = kind + ' · id: ' + id;
+            var ifr = card.querySelector('iframe');
+            ifr.src = prev;
+            card.querySelector('a.primary').href = prev;
+
+            if (!t.isCustom) {
+              var pub = card.querySelector('.btn-publish');
+              var un = card.querySelector('.btn-unpublish');
+              if (isDraft) {
+                pub.style.display = 'inline-flex';
+                pub.addEventListener('click', function () {
+                  credFetch('/api/admin/gallery-draft-builtins/publish', {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id }),
+                  })
+                    .then(function (r) {
+                      return r.json().then(function (j) {
+                        if (!r.ok) throw new Error(j.error || r.status);
+                        return j;
+                      });
+                    })
+                    .then(function () {
+                      showMsg('公開しました: ' + id);
+                      loadAdminCatalog();
+                    })
+                    .catch(function (e) {
+                      alert('公開に失敗: ' + (e.message || e));
+                    });
+                });
+              } else {
+                un.style.display = 'inline-flex';
+                un.addEventListener('click', function () {
+                  if (!confirm('このビルトインを一般ギャラリー・ヒアリングから非表示にしますか？')) return;
+                  credFetch('/api/admin/gallery-draft-builtins/mark-draft', {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id }),
+                  })
+                    .then(function (r) {
+                      return r.json().then(function (j) {
+                        if (!r.ok) throw new Error(j.error || r.status);
+                        return j;
+                      });
+                    })
+                    .then(function () {
+                      showMsg('下書き（非表示）にしました: ' + id);
+                      loadAdminCatalog();
+                    })
+                    .catch(function (e) {
+                      alert('更新に失敗: ' + (e.message || e));
+                    });
+                });
+              }
+            }
+            root.appendChild(card);
+          });
+        }
+
+        function loadAdminCatalog() {
+          errEl.style.display = 'none';
+          credFetch('/api/admin/template-catalog')
+            .then(function (r) {
+              if (r.status === 401) {
+                loginBox.classList.add('is-visible');
+                subStatus.textContent = '管理者ログインが必要です（上のフォーム）。';
+                root.innerHTML = '';
+                throw new Error('401');
+              }
+              loginBox.classList.remove('is-visible');
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              return r.json();
+            })
+            .then(function (data) {
+              renderCatalog(data);
+            })
+            .catch(function (e) {
+              if (String(e.message) === '401') return;
+              errEl.style.display = 'block';
+              errEl.textContent = 'カタログ取得に失敗: ' + (e && e.message ? e.message : e);
+              subStatus.textContent = '';
+            });
+        }
+
+        document.getElementById('s4a-show-btn').addEventListener('click', function () {
+          var wrap = document.getElementById('s4a-instruction-wrap');
+          var ta = document.getElementById('s4a-instruction-text');
+          ta.value = STANDARD_S4A_PROMPT;
+          wrap.classList.add('is-visible');
+          ta.focus();
+          ta.select();
+          try {
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } catch (e) {}
+        });
+
+        document.getElementById('s4a-copy-btn').addEventListener('click', function () {
+          var ta = document.getElementById('s4a-instruction-text');
+          var v = (ta && ta.value) || '';
+          if (!v.trim()) {
+            alert('先に「§4a 固定依頼文を表示」を押してください。');
+            return;
+          }
+          copyToClipboard(v, '§4a 依頼文をコピーしました。');
+        });
+
+        document.getElementById('sc-show-btn').addEventListener('click', function () {
+          var slug = (document.getElementById('sc-slug').value || '').trim();
+          var tid = (document.getElementById('sc-id').value || '').trim();
+          var jp = (document.getElementById('sc-name').value || '').trim();
+          if (!slug || !tid || !jp) {
+            alert('フォルダ名・テンプレID・表示名の3つを入力してください。');
+            return;
+          }
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+            alert('フォルダ名は英小文字・数字・ハイフンのみにしてください。');
+            return;
+          }
+          if (!/^[a-z][a-z0-9_]*$/.test(tid)) {
+            alert('テンプレIDは英小文字で始まり、英数字とアンダースコアのみにしてください。');
+            return;
+          }
+          var text = buildScaffoldInstructionText(slug, tid, jp);
+          var wrap = document.getElementById('sc-instruction-wrap');
+          var ta = document.getElementById('sc-instruction-text');
+          ta.value = text;
+          wrap.classList.add('is-visible');
+          ta.focus();
+          ta.select();
+          try {
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } catch (e) {}
+        });
+
+        document.getElementById('sc-copy-btn').addEventListener('click', function () {
+          var ta = document.getElementById('sc-instruction-text');
+          var v = (ta && ta.value) || '';
+          if (!v.trim()) {
+            alert('先に「指示文を表示」を押して手順を生成してください。');
+            return;
+          }
+          copyToClipboard(v, '表示中の手順をコピーしました。Cursor に貼ってください。');
+        });
+
+        document.getElementById('adm-login-btn').addEventListener('click', function () {
+          var u = document.getElementById('adm-user').value;
+          var p = document.getElementById('adm-pass').value;
+          var err = document.getElementById('adm-login-err');
+          err.style.display = 'none';
+          credFetch('/api/admin-auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username: u, password: p }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                if (!r.ok) throw new Error(j.error || 'login failed');
+                return j;
+              });
+            })
+            .then(function () {
+              loadAdminCatalog();
+            })
+            .catch(function (e) {
+              err.style.display = 'block';
+              err.textContent = e.message || String(e);
+            });
+        });
+
+        credFetch('/api/admin-auth/status')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (st) {
+            if (st.enabled && !st.authenticated) {
+              loginBox.classList.add('is-visible');
+            }
+            loadAdminCatalog();
+          })
+          .catch(function () {
+            loadAdminCatalog();
+          });
+      })();
+    </script>
+  </body>
+</html>
