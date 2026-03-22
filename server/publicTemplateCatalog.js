@@ -3,6 +3,7 @@ import {
   getMetaForCandidate,
   weekSeedFromDate,
   formatWeekPickupLabel,
+  formatWeekPickupLabelEn,
   pickWeeklyShowcase,
 } from './templateCatalogMeta.js';
 
@@ -42,6 +43,7 @@ export function buildPublicTemplateCatalog(customizations = [], now = new Date()
   return {
     weekKey,
     weekLabel: formatWeekPickupLabel(now),
+    weekLabelEn: formatWeekPickupLabelEn(now),
     pickups,
     templates: templates.map((t) => ({
       ...t,

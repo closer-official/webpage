@@ -2,14 +2,20 @@
  * 顧客向けページ共通：言語切替バー + クライアントスクリプト（data-i18n 要素を Gemini 経由で英訳）
  */
 /**
- * @param {{ variant?: 'light' | 'dark' }} [opts]
+ * @param {{ variant?: 'light' | 'dark'; enFirst?: boolean; defaultLang?: 'ja' | 'en' }} [opts]
  */
 export function publicLangBarHtml(opts = {}) {
   const variant = opts.variant === 'dark' ? 'public-lang-bar--dark' : '';
-  return `<div class="public-lang-bar ${variant}" id="public-lang-bar" role="navigation" aria-label="言語 / Language">
-  <button type="button" class="public-lang-btn is-active" data-lang="ja" id="public-lang-ja">日本語</button>
-  <span class="public-lang-sep" aria-hidden="true">|</span>
-  <button type="button" class="public-lang-btn" data-lang="en" id="public-lang-en">English</button>
+  const enFirst = opts.enFirst === true;
+  const def = opts.defaultLang === 'en' ? 'en' : 'ja';
+  const jaActive = def === 'ja' ? ' is-active' : '';
+  const enActive = def === 'en' ? ' is-active' : '';
+  const jaBtn = `<button type="button" class="public-lang-btn${jaActive}" data-lang="ja" id="public-lang-ja">日本語</button>`;
+  const enBtn = `<button type="button" class="public-lang-btn${enActive}" data-lang="en" id="public-lang-en">English</button>`;
+  const sep = '<span class="public-lang-sep" aria-hidden="true">|</span>';
+  const pair = enFirst ? `${enBtn}${sep}${jaBtn}` : `${jaBtn}${sep}${enBtn}`;
+  return `<div class="public-lang-bar ${variant}" id="public-lang-bar" role="navigation" aria-label="Language / 言語">
+  ${pair}
   <span class="public-lang-status" id="public-lang-status" aria-live="polite"></span>
 </div>`;
 }

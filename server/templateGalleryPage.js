@@ -1,16 +1,21 @@
 /**
  * パスワードなしで閲覧できるテンプレートギャラリー（静的シェル + JSON API で描画）
+ * 既定言語: 英語（静的二言語、API 翻訳なし）
  */
-import { publicLangBarHtml, publicLangBarStyles, publicLangToggleInlineScript } from './publicLangAssets.js';
+import { publicLangBarHtml, publicLangBarStyles } from './publicLangAssets.js';
+import { GALLERY_STATIC_STRINGS, GALLERY_LANG_STORAGE_KEY } from './galleryPageI18n.js';
 
 export function renderTemplateGalleryPage() {
+  const G_EMBED = JSON.stringify(GALLERY_STATIC_STRINGS).replace(/</g, '\\u003c');
+  const SK_EMBED = JSON.stringify(GALLERY_LANG_STORAGE_KEY);
+
   return `<!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LPテンプレート一覧。カテゴリ・人気順で探せます。" />
-  <title>テンプレートギャラリー | Closer</title>
+  <meta name="description" content="Browse LP templates with live previews. Sort, search, and open full pages in a new tab." />
+  <title>Template gallery | Closer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -26,8 +31,8 @@ export function renderTemplateGalleryPage() {
       --gold: #d4a574;
       --gold-dim: rgba(212, 165, 116, 0.35);
       --accent: #7eb8a8;
-      --radius: 14px;
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      --radius: 10px;
+      --shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -38,7 +43,7 @@ export function renderTemplateGalleryPage() {
       color: var(--text);
       font-family: "Outfit", system-ui, sans-serif;
       font-weight: 400;
-      line-height: 1.6;
+      line-height: 1.5;
       overflow-x: hidden;
     }
     body::before {
@@ -46,49 +51,49 @@ export function renderTemplateGalleryPage() {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.4;
+      opacity: 0.35;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
       z-index: 0;
     }
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 48px 20px 80px;
+      padding: 14px 10px 28px;
     }
     .topbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 40px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
     .brand {
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--muted);
     }
     .nav-links {
       display: flex;
-      gap: 20px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .nav-links a {
       color: var(--muted);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.86rem;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--gold); }
     h1 {
       font-family: "Fraunces", Georgia, serif;
       font-weight: 700;
-      font-size: clamp(2rem, 5vw, 3rem);
-      line-height: 1.15;
-      margin: 0 0 12px;
+      font-size: clamp(1.65rem, 4vw, 2.35rem);
+      line-height: 1.12;
+      margin: 0 0 6px;
       letter-spacing: -0.02em;
       background: linear-gradient(120deg, var(--text) 0%, var(--gold) 100%);
       -webkit-background-clip: text;
@@ -96,15 +101,15 @@ export function renderTemplateGalleryPage() {
       background-clip: text;
     }
     .lead {
-      margin: 0 0 36px;
+      margin: 0 0 12px;
       color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 36em;
+      font-size: 0.95rem;
+      max-width: 40em;
     }
     .controls {
       display: grid;
-      gap: 16px;
-      margin-bottom: 36px;
+      gap: 8px;
+      margin-bottom: 10px;
     }
     @media (min-width: 720px) {
       .controls {
@@ -112,136 +117,126 @@ export function renderTemplateGalleryPage() {
         align-items: end;
       }
     }
-    .search-wrap {
-      position: relative;
-    }
+    .search-wrap { position: relative; }
     .search-wrap svg {
       position: absolute;
-      left: 14px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       opacity: 0.45;
     }
     .search-wrap input {
       width: 100%;
-      padding: 14px 16px 14px 44px;
+      padding: 10px 12px 10px 40px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-family: inherit;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .search-wrap input:focus {
       border-color: var(--gold-dim);
-      box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.12);
+      box-shadow: 0 0 0 2px rgba(212, 165, 116, 0.1);
     }
     .sort-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
     .sort-row label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      margin-right: 4px;
+      margin-right: 2px;
     }
     select {
-      padding: 12px 36px 12px 14px;
-      border-radius: 10px;
+      padding: 10px 32px 10px 12px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--elevated);
       color: var(--text);
       font-family: inherit;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%239a9590'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 12px center;
+      background-position: right 10px center;
     }
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 28px;
+      gap: 6px;
+      margin-bottom: 8px;
     }
     .chip {
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
-      padding: 8px 14px;
+      padding: 6px 12px;
       border-radius: 999px;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       cursor: pointer;
       font-family: inherit;
       transition: all 0.2s;
     }
     .chip:hover { color: var(--text); border-color: var(--muted); }
     .chip.active {
-      background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(126, 184, 168, 0.12));
+      background: linear-gradient(135deg, rgba(212, 165, 116, 0.18), rgba(126, 184, 168, 0.1));
       border-color: var(--gold-dim);
       color: var(--text);
     }
     .section-title {
       font-family: "Fraunces", Georgia, serif;
-      font-size: 1.35rem;
-      margin: 0 0 16px;
+      font-size: 1.05rem;
+      margin: 0 0 8px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 500;
     }
     .section-title span.badge {
       font-family: "Outfit", sans-serif;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 3px 8px;
+      border-radius: 4px;
       background: var(--gold-dim);
       color: var(--gold);
     }
-    .pickup-strip {
-      margin: 4px 0 36px;
-      padding-bottom: 8px;
-    }
-    .pickup-strip .section-title {
-      margin-bottom: 14px;
-    }
+    .pickup-strip { margin: 0 0 12px; padding: 0; }
+    .pickup-strip .section-title { margin-bottom: 6px; }
     .pickup-marquee-viewport {
       overflow: hidden;
       width: 100%;
       max-width: 100%;
-      margin: 0 -8px;
-      padding: 0 8px;
-      mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-      -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+      margin: 0 -4px;
+      padding: 0 4px;
+      mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
     }
     #pickup-track.pickup-marquee-track {
       display: flex;
       width: max-content;
-      animation: pickup-marquee-scroll 55s linear infinite;
+      animation: pickup-marquee-scroll 50s linear infinite;
       will-change: transform;
     }
-    #pickup-track.pickup-marquee-track:hover {
-      animation-play-state: paused;
-    }
+    #pickup-track.pickup-marquee-track:hover { animation-play-state: paused; }
     .pickup-marquee-group {
       display: flex;
       flex-shrink: 0;
-      gap: 18px;
-      padding: 8px 9px 22px;
+      gap: 8px;
+      padding: 4px 6px 10px;
       align-items: stretch;
     }
-    .pickup-marquee-group .pickup-card {
-      flex: 0 0 min(300px, 78vw);
-    }
+    .pickup-marquee-group .pickup-card { flex: 0 0 min(280px, 72vw); }
     @keyframes pickup-marquee-scroll {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
@@ -254,167 +249,95 @@ export function renderTemplateGalleryPage() {
         max-width: 100%;
         justify-content: center;
       }
-      .pickup-marquee-duplicate {
-        display: none !important;
-      }
+      .pickup-marquee-duplicate { display: none !important; }
     }
     .pickup-card {
-      flex: 0 0 min(300px, 82vw);
-      scroll-snap-align: start;
-      border-radius: calc(var(--radius) + 4px);
-      padding: 2px;
-      background: linear-gradient(135deg, var(--gold), var(--accent), rgba(212, 165, 116, 0.3));
+      flex: 0 0 min(280px, 72vw);
+      border-radius: calc(var(--radius) + 2px);
+      padding: 1px;
+      background: linear-gradient(135deg, var(--gold), var(--accent), rgba(212, 165, 116, 0.25));
       box-shadow: var(--shadow);
-      transition: transform 0.25s ease;
+      transition: transform 0.2s ease;
     }
-    .pickup-card:hover { transform: translateY(-4px); }
-    .preview-embed {
+    .pickup-card:hover { transform: translateY(-2px); }
+    .gallery-preview-embed {
+      position: relative;
       width: 100%;
-      height: 200px;
+      height: 220px;
       overflow: hidden;
       border-radius: var(--radius);
-      background: #fff;
+      background: #0a0a0c;
       border: 1px solid var(--border);
-      position: relative;
     }
-    .preview-embed iframe {
+    .gallery-preview-embed iframe {
       position: absolute;
       top: 0;
       left: 0;
       width: 390px;
       height: 720px;
       border: 0;
-      transform: scale(0.52);
+      transform: scale(0.56);
       transform-origin: top left;
-      pointer-events: none;
+      pointer-events: auto;
     }
-    .pickup-card-inner {
-      background: var(--elevated);
-      border-radius: var(--radius);
-      padding: 20px;
-      height: 100%;
+    .gallery-open-full {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      z-index: 4;
+      width: 30px;
+      height: 30px;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
-      border: 1px solid var(--border);
-    }
-    .pickup-card .name {
-      font-family: "Fraunces", Georgia, serif;
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin: 0;
-      line-height: 1.3;
-    }
-    .pickup-card .cat {
-      font-size: 0.78rem;
-      color: var(--accent);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .pickup-card .pop {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .pickup-card a {
-      margin-top: auto;
-      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px 18px;
-      border-radius: 10px;
-      background: var(--text);
-      color: var(--void);
+      border-radius: 8px;
+      background: rgba(12, 12, 15, 0.72);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.92);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: opacity 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
-    .pickup-card a:hover { opacity: 0.9; }
-    .grid-section h2 {
-      font-family: "Fraunces", Georgia, serif;
-      font-size: 1.25rem;
-      margin: 36px 0 18px;
-      color: var(--muted);
-      font-weight: 500;
+    .gallery-open-full:hover {
+      background: rgba(212, 165, 116, 0.35);
+      color: #fff;
     }
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
     }
-    .t-card .preview-embed {
-      margin: 0 0 4px;
+    @media (min-width: 520px) {
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
     }
     .t-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: transparent;
+      border: none;
       border-radius: var(--radius);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-    .t-card:hover {
-      border-color: rgba(212, 165, 116, 0.25);
-      transform: translateY(-2px);
-    }
-    .t-card h3 {
+      padding: 0;
       margin: 0;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .t-card:hover { transform: translateY(-2px); }
+    .grid-section h2 {
       font-family: "Fraunces", Georgia, serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-    }
-    .t-card .meta {
-      font-size: 0.8rem;
+      font-size: 1rem;
+      margin: 10px 0 6px;
       color: var(--muted);
-    }
-    .t-card .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .t-card .tags span {
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: var(--elevated);
-      color: var(--muted);
-    }
-    .t-card .actions {
-      margin-top: auto;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .t-card a.btn {
-      padding: 10px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.85rem;
       font-weight: 500;
     }
-    .t-card a.btn-primary {
-      background: var(--gold);
-      color: var(--void);
-    }
-    .t-card a.btn-ghost {
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .t-card a.btn-ghost:hover { color: var(--text); }
     .empty, .err, .loading {
       text-align: center;
-      padding: 48px 20px;
+      padding: 28px 12px;
       color: var(--muted);
+      font-size: 0.9rem;
     }
     .err { color: #e8a0a0; }
     footer {
-      margin-top: 64px;
-      padding-top: 28px;
+      margin-top: 20px;
+      padding-top: 14px;
       border-top: 1px solid var(--border);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--muted);
       text-align: center;
     }
@@ -422,90 +345,169 @@ export function renderTemplateGalleryPage() {
   </style>
 </head>
 <body>
-  ${publicLangBarHtml({ variant: 'dark' })}
+  ${publicLangBarHtml({ variant: 'dark', enFirst: true, defaultLang: 'en' })}
   <div class="wrap">
     <div class="topbar">
       <div class="brand" data-i18n="gallery.brand">Closer Webpage</div>
-      <nav class="nav-links" aria-label="関連ページ">
-        <a href="/customer-intake"><span data-i18n="gallery.nav.intake">ヒアリング・お申し込み</span></a>
-        <a href="/api/customer-intake"><span data-i18n="gallery.nav.intakeAlt">ヒアリング（別URL）</span></a>
+      <nav class="nav-links" aria-label="Related links">
+        <a href="/customer-intake"><span data-i18n="gallery.nav.intake">Apply / inquiry</span></a>
+        <a href="/api/customer-intake"><span data-i18n="gallery.nav.intakeAlt">Inquiry (alt URL)</span></a>
       </nav>
     </div>
-    <h1 data-i18n="gallery.title">テンプレートギャラリー</h1>
-    <p class="lead" data-i18n="gallery.lead">各カードにページの見た目（縮小）を表示しています。検索・カテゴリ・並び順を切り替えて選べます。全画面は「別タブで全画面」から開けます。</p>
+    <h1 data-i18n="gallery.title">Template gallery</h1>
+    <p class="lead" data-i18n="gallery.lead">Live previews below—scroll inside a tile to explore the page. Use the corner control to open the full template in a new tab.</p>
 
     <section id="pickup-section" class="pickup-strip" style="display:none" aria-hidden="true" aria-labelledby="pickup-h">
-      <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">週間</span> <span id="week-label" data-i18n="gallery.weekDefault">今週のピックアップ</span></h2>
+      <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">Week</span> <span id="week-label">Weekly picks</span></h2>
       <div class="pickup-marquee-viewport">
         <div class="pickup-marquee-track" id="pickup-track"></div>
       </div>
     </section>
 
-    <div id="state-loading" class="loading" data-i18n="gallery.loading">読み込み中…</div>
-    <div id="state-err" class="err" style="display:none;"></div>
+    <div id="state-loading" class="loading" data-i18n="gallery.loading">Loading…</div>
+    <div id="state-err" class="err" style="display:none;" data-i18n="gallery.err.load">Could not load the catalog. Please try again later.</div>
     <div id="app" style="display:none;">
       <div class="controls">
         <div class="search-wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="search" id="q" data-i18n-placeholder="gallery.searchPh" placeholder="名前・タグ・カテゴリで検索" autocomplete="off" />
+          <input type="search" id="q" data-i18n-placeholder="gallery.searchPh" placeholder="Search by name, tag, or category" autocomplete="off" />
         </div>
         <div class="sort-row">
-          <label for="sort" data-i18n="gallery.sortLabel">並び順</label>
-          <select id="sort" aria-label="並び順">
-            <option value="popular" data-i18n="gallery.sort.popular">人気順</option>
-            <option value="name" data-i18n="gallery.sort.name">名前（あいうえお）</option>
-            <option value="category" data-i18n="gallery.sort.category">カテゴリ別</option>
+          <label for="sort" data-i18n="gallery.sortLabel">Sort</label>
+          <select id="sort" aria-label="Sort order">
+            <option value="popular" data-i18n="gallery.sort.popular">Popularity</option>
+            <option value="name" data-i18n="gallery.sort.name">Name (A–Z)</option>
+            <option value="category" data-i18n="gallery.sort.category">Category</option>
           </select>
         </div>
       </div>
-      <div class="chips" id="chips" role="group" aria-label="カテゴリ"></div>
+      <div class="chips" id="chips" role="group" aria-label="Category"></div>
 
       <section aria-labelledby="all-h">
-        <h2 class="section-title" id="all-h" data-i18n="gallery.allTitle">すべてのテンプレート</h2>
+        <h2 class="section-title" id="all-h" data-i18n="gallery.allTitle">All templates</h2>
         <div id="list-root"></div>
       </section>
     </div>
 
     <footer>
-      <span data-i18n="gallery.footer.main">デザインの最終形はヒアリング後に調整されます。</span>
-      <a href="/customer-intake"><span data-i18n="gallery.footer.link">お申し込み・ヒアリングフォーム</span></a>
+      <span data-i18n="gallery.footer.main">Final design is tuned after your inquiry.</span>
+      <a href="/customer-intake"><span data-i18n="gallery.footer.link">Apply / inquiry form</span></a>
     </footer>
   </div>
   <script>
 (function () {
   var API = '/api/public/template-catalog';
+  var G = ${G_EMBED};
+  var SK = ${SK_EMBED};
+  var OPEN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
   var state = { raw: null, q: '', sort: 'popular', category: '' };
 
   function $(id) { return document.getElementById(id); }
 
+  function lang() {
+    try {
+      var s = localStorage.getItem(SK);
+      if (s === 'ja' || s === 'en') return s;
+    } catch (e) {}
+    return 'en';
+  }
+
+  function t(key) {
+    var l = lang();
+    var pack = G[l] || G.en;
+    return pack[key] != null ? pack[key] : (G.en[key] != null ? G.en[key] : key);
+  }
+
+  function applyShellI18n() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (key && t(key)) el.textContent = t(key);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-placeholder]'), function (el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (key && t(key)) el.setAttribute('placeholder', t(key));
+    });
+    var opts = document.querySelectorAll('#sort option[data-i18n]');
+    Array.prototype.forEach.call(opts, function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (key && t(key)) el.textContent = t(key);
+    });
+    var sortEl = $('sort');
+    if (sortEl) sortEl.setAttribute('aria-label', t('gallery.sortAria'));
+    var errEl = $('state-err');
+    if (errEl && errEl.style.display !== 'none') errEl.textContent = t('gallery.err.load');
+  }
+
+  function setLang(next) {
+    try { localStorage.setItem(SK, next); } catch (e) {}
+    document.documentElement.lang = next === 'ja' ? 'ja' : 'en';
+    var ja = document.getElementById('public-lang-ja');
+    var en = document.getElementById('public-lang-en');
+    if (ja) ja.classList.toggle('is-active', next === 'ja');
+    if (en) en.classList.toggle('is-active', next === 'en');
+    applyShellI18n();
+    syncWeekLabel();
+    if (state.raw) {
+      buildChips();
+      renderList();
+    }
+    syncOpenAria();
+  }
+
+  function syncWeekLabel() {
+    var el = $('week-label');
+    if (!el) return;
+    if (!state.raw) {
+      el.textContent = t('gallery.weekDefault');
+      return;
+    }
+    el.textContent = lang() === 'en'
+      ? (state.raw.weekLabelEn || state.raw.weekLabel || t('gallery.weekDefault'))
+      : (state.raw.weekLabel || t('gallery.weekDefault'));
+  }
+
+  function syncOpenAria() {
+    var lab = t('gallery.openFullAria');
+    Array.prototype.forEach.call(document.querySelectorAll('.gallery-open-full'), function (a) {
+      a.setAttribute('aria-label', lab);
+    });
+  }
+
+  document.getElementById('public-lang-ja').addEventListener('click', function () { setLang('ja'); });
+  document.getElementById('public-lang-en').addEventListener('click', function () { setLang('en'); });
+
+  function locStr() { return lang() === 'en' ? 'en' : 'ja'; }
+
   function norm(s) { return (s || '').toLowerCase(); }
 
-  function matches(t) {
+  function matches(tpl) {
     if (!state.q.trim()) return true;
     var n = norm(state.q);
-    if (norm(t.name).indexOf(n) >= 0) return true;
-    if (norm(t.category).indexOf(n) >= 0) return true;
-    if ((t.tags || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
-    if ((t.categories || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
+    if (norm(tpl.name).indexOf(n) >= 0) return true;
+    if (norm(tpl.category).indexOf(n) >= 0) return true;
+    if ((tpl.tags || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
+    if ((tpl.categories || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
     return false;
   }
 
   function filtered() {
-    return (state.raw.templates || []).filter(function (t) {
-      if (state.category && t.category !== state.category) return false;
-      return matches(t);
+    return (state.raw.templates || []).filter(function (tpl) {
+      if (state.category && tpl.category !== state.category) return false;
+      return matches(tpl);
     });
   }
 
   function sorted(list) {
     var arr = list.slice();
+    var loc = locStr();
     if (state.sort === 'name') {
-      arr.sort(function (a, b) { return a.name.localeCompare(b.name, 'ja'); });
+      arr.sort(function (a, b) { return a.name.localeCompare(b.name, loc); });
     } else if (state.sort === 'popular') {
       arr.sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); });
     } else {
       arr.sort(function (a, b) {
-        var c = a.category.localeCompare(b.category, 'ja');
+        var c = a.category.localeCompare(b.category, loc);
         if (c !== 0) return c;
         return (b.popularity || 0) - (a.popularity || 0);
       });
@@ -521,19 +523,18 @@ export function renderTemplateGalleryPage() {
       .replace(/"/g, '&quot;');
   }
 
-  function pickupCardHtml(t) {
-    var id = esc(t.id);
-    var purl = esc(t.previewUrl);
-    var tname = esc(t.name);
-    return '<article class="pickup-card">' +
-      '<div class="pickup-card-inner">' +
-      '<div class="preview-embed" aria-hidden="true">' +
-      '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
-      '<span class="cat" data-i18n="tcat.' + id + '">' + esc(t.category) + '</span>' +
-      '<h3 class="name" data-i18n="cat.' + id + '">' + tname + '</h3>' +
-      '<p class="pop" data-i18n="tpop.' + id + '">人気スコア ' + esc(String(t.popularity)) + '</p>' +
-      '<a href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">別タブで全画面</span></a>' +
-      '</div></article>';
+  function previewBlock(purl, title) {
+    var lab = t('gallery.openFullAria');
+    return '<div class="gallery-preview-embed">' +
+      '<iframe src="' + esc(purl) + '" title="' + esc(title) + '" loading="lazy"></iframe>' +
+      '<a class="gallery-open-full" href="' + esc(purl) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(lab) + '">' + OPEN_SVG + '</a>' +
+      '</div>';
+  }
+
+  function pickupCardHtml(tpl) {
+    var purl = esc(tpl.previewUrl);
+    var tname = esc(tpl.name);
+    return '<article class="pickup-card"><div class="gallery-thumb">' + previewBlock(purl, tname) + '</div></article>';
   }
 
   function renderPickups() {
@@ -541,7 +542,7 @@ export function renderTemplateGalleryPage() {
     var pickups = state.raw.pickups || [];
     if (!pickups.length) {
       track.classList.remove('pickup-marquee-track');
-      track.innerHTML = '<p class="empty" style="padding:20px;text-align:center;" data-i18n="gallery.empty.pickup">ピックアップは準備中です。</p>';
+      track.innerHTML = '<p class="empty">' + esc(t('gallery.empty.pickup')) + '</p>';
       return;
     }
     var cards = pickups.map(pickupCardHtml).join('');
@@ -549,57 +550,49 @@ export function renderTemplateGalleryPage() {
     track.innerHTML =
       '<div class="pickup-marquee-group" role="list">' + cards + '</div>' +
       '<div class="pickup-marquee-group pickup-marquee-duplicate" aria-hidden="true">' + cards + '</div>';
+    syncOpenAria();
   }
 
   function renderList() {
     var root = $('list-root');
     var list = sorted(filtered());
     if (!list.length) {
-      root.innerHTML = '<p class="empty" data-i18n="gallery.empty.filter">条件に一致するテンプレートがありません。</p>';
+      root.innerHTML = '<p class="empty">' + esc(t('gallery.empty.filter')) + '</p>';
       return;
     }
+    var loc = locStr();
     if (state.sort === 'category') {
       var byCat = {};
-      list.forEach(function (t) {
-        var k = t.category || 'その他';
+      list.forEach(function (tpl) {
+        var k = tpl.category || (lang() === 'en' ? 'Other' : 'その他');
         if (!byCat[k]) byCat[k] = [];
-        byCat[k].push(t);
+        byCat[k].push(tpl);
       });
-      var keys = Object.keys(byCat).sort(function (a, b) { return a.localeCompare(b, 'ja'); });
+      var keys = Object.keys(byCat).sort(function (a, b) { return a.localeCompare(b, loc); });
       root.innerHTML = keys.map(function (cat) {
         return '<h2>' + esc(cat) + '</h2><div class="card-grid">' +
           byCat[cat].map(cardHtml).join('') + '</div>';
       }).join('');
+      syncOpenAria();
       return;
     }
     root.innerHTML = '<div class="card-grid">' + list.map(cardHtml).join('') + '</div>';
+    syncOpenAria();
   }
 
-  function cardHtml(t) {
-    var tags = (t.tags || []).slice(0, 5).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
-    var id = esc(t.id);
-    var customJa = t.isCustom ? ' · カスタム' : '';
-    var purl = esc(t.previewUrl);
-    var tname = esc(t.name);
-    return '<article class="t-card">' +
-      '<div class="preview-embed" aria-hidden="true">' +
-      '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
-      '<h3 data-i18n="cat.' + id + '">' + tname + '</h3>' +
-      '<p class="meta" data-i18n="tmeta.' + id + '">' + esc(t.category) + ' · スコア ' + esc(String(t.popularity)) + customJa + '</p>' +
-      (tags ? '<div class="tags">' + tags + '</div>' : '') +
-      '<div class="actions">' +
-      '<a class="btn btn-primary" href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.card.preview">別タブで全画面</span></a>' +
-      '<a class="btn btn-ghost" href="/customer-intake"><span data-i18n="gallery.card.consult">この系統で相談</span></a>' +
-      '</div></article>';
+  function cardHtml(tpl) {
+    var purl = esc(tpl.previewUrl);
+    var tname = esc(tpl.name);
+    return '<article class="t-card">' + previewBlock(purl, tname) + '</article>';
   }
 
   function buildChips() {
     var templates = state.raw.templates || [];
     var set = {};
-    templates.forEach(function (t) { set[t.category] = true; });
-    var cats = Object.keys(set).sort(function (a, b) { return a.localeCompare(b, 'ja'); });
+    templates.forEach(function (tpl) { set[tpl.category] = true; });
+    var cats = Object.keys(set).sort(function (a, b) { return a.localeCompare(b, locStr()); });
     var chips = $('chips');
-    chips.innerHTML = '<button type="button" class="chip active" data-cat="">すべて</button>' +
+    chips.innerHTML = '<button type="button" class="chip active" data-cat="">' + esc(t('gallery.chipAll')) + '</button>' +
       cats.map(function (c) {
         return '<button type="button" class="chip" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
       }).join('');
@@ -616,9 +609,9 @@ export function renderTemplateGalleryPage() {
     renderPickups();
     buildChips();
     renderList();
-    if (document.documentElement.lang === 'en' && window.__publicUiGoEn) {
-      window.__publicUiGoEn();
-    }
+    applyShellI18n();
+    syncWeekLabel();
+    syncOpenAria();
   }
 
   fetch(API)
@@ -635,13 +628,13 @@ export function renderTemplateGalleryPage() {
         ps.setAttribute('aria-hidden', 'false');
       }
       $('app').style.display = 'block';
-      $('week-label').textContent = data.weekLabel || '今週のピックアップ';
       refresh();
     })
-    .catch(function (e) {
+    .catch(function () {
       $('state-loading').style.display = 'none';
-      $('state-err').style.display = 'block';
-      $('state-err').textContent = '一覧を読み込めませんでした。しばらくしてから再度お試しください。';
+      var err = $('state-err');
+      err.style.display = 'block';
+      err.textContent = t('gallery.err.load');
     });
 
   $('q').addEventListener('input', function () {
@@ -652,9 +645,10 @@ export function renderTemplateGalleryPage() {
     state.sort = $('sort').value;
     renderList();
   });
+
+  applyShellI18n();
 })();
   <\/script>
-  <script>${publicLangToggleInlineScript()}<\/script>
 </body>
 </html>`;
 }

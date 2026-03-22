@@ -75,6 +75,13 @@ export function formatWeekPickupLabel(d = new Date()) {
   return `${y}年 第${w}週のピックアップ`;
 }
 
+/** ギャラリー用（英語 UI） */
+export function formatWeekPickupLabelEn(d = new Date()) {
+  const y = d.getFullYear();
+  const w = getISOWeek(d);
+  return `Weekly picks · ${y} · Week ${w}`;
+}
+
 /**
  * Mulberry32
  * @param {number} seed
