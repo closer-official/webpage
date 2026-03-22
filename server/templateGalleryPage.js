@@ -208,22 +208,55 @@ export function renderTemplateGalleryPage() {
       color: var(--gold);
     }
     .pickup-strip {
-      margin-bottom: 52px;
+      margin: 4px 0 36px;
+      padding-bottom: 8px;
     }
-    .pickup-track {
+    .pickup-strip .section-title {
+      margin-bottom: 14px;
+    }
+    .pickup-marquee-viewport {
+      overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 -8px;
+      padding: 0 8px;
+      mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    }
+    #pickup-track.pickup-marquee-track {
       display: flex;
-      gap: 18px;
-      overflow-x: auto;
-      padding: 8px 4px 24px;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: thin;
-      scrollbar-color: var(--gold-dim) transparent;
-      -webkit-overflow-scrolling: touch;
+      width: max-content;
+      animation: pickup-marquee-scroll 55s linear infinite;
+      will-change: transform;
     }
-    .pickup-track::-webkit-scrollbar { height: 6px; }
-    .pickup-track::-webkit-scrollbar-thumb {
-      background: var(--gold-dim);
-      border-radius: 99px;
+    #pickup-track.pickup-marquee-track:hover {
+      animation-play-state: paused;
+    }
+    .pickup-marquee-group {
+      display: flex;
+      flex-shrink: 0;
+      gap: 18px;
+      padding: 8px 9px 22px;
+      align-items: stretch;
+    }
+    .pickup-marquee-group .pickup-card {
+      flex: 0 0 min(300px, 78vw);
+    }
+    @keyframes pickup-marquee-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #pickup-track.pickup-marquee-track {
+        animation: none !important;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
+      }
+      .pickup-marquee-duplicate {
+        display: none !important;
+      }
     }
     .pickup-card {
       flex: 0 0 min(300px, 82vw);
@@ -401,6 +434,13 @@ export function renderTemplateGalleryPage() {
     <h1 data-i18n="gallery.title">テンプレートギャラリー</h1>
     <p class="lead" data-i18n="gallery.lead">各カードにページの見た目（縮小）を表示しています。検索・カテゴリ・並び順を切り替えて選べます。全画面は「別タブで全画面」から開けます。</p>
 
+    <section id="pickup-section" class="pickup-strip" style="display:none" aria-hidden="true" aria-labelledby="pickup-h">
+      <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">週間</span> <span id="week-label" data-i18n="gallery.weekDefault">今週のピックアップ</span></h2>
+      <div class="pickup-marquee-viewport">
+        <div class="pickup-marquee-track" id="pickup-track"></div>
+      </div>
+    </section>
+
     <div id="state-loading" class="loading" data-i18n="gallery.loading">読み込み中…</div>
     <div id="state-err" class="err" style="display:none;"></div>
     <div id="app" style="display:none;">
@@ -419,11 +459,6 @@ export function renderTemplateGalleryPage() {
         </div>
       </div>
       <div class="chips" id="chips" role="group" aria-label="カテゴリ"></div>
-
-      <section class="pickup-strip" aria-labelledby="pickup-h">
-        <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">週間</span> <span id="week-label" data-i18n="gallery.weekDefault">今週のピックアップ</span></h2>
-        <div class="pickup-track" id="pickup-track"></div>
-      </section>
 
       <section aria-labelledby="all-h">
         <h2 class="section-title" id="all-h" data-i18n="gallery.allTitle">すべてのテンプレート</h2>
@@ -486,27 +521,34 @@ export function renderTemplateGalleryPage() {
       .replace(/"/g, '&quot;');
   }
 
+  function pickupCardHtml(t) {
+    var id = esc(t.id);
+    var purl = esc(t.previewUrl);
+    var tname = esc(t.name);
+    return '<article class="pickup-card">' +
+      '<div class="pickup-card-inner">' +
+      '<div class="preview-embed" aria-hidden="true">' +
+      '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
+      '<span class="cat" data-i18n="tcat.' + id + '">' + esc(t.category) + '</span>' +
+      '<h3 class="name" data-i18n="cat.' + id + '">' + tname + '</h3>' +
+      '<p class="pop" data-i18n="tpop.' + id + '">人気スコア ' + esc(String(t.popularity)) + '</p>' +
+      '<a href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">別タブで全画面</span></a>' +
+      '</div></article>';
+  }
+
   function renderPickups() {
     var track = $('pickup-track');
     var pickups = state.raw.pickups || [];
     if (!pickups.length) {
-      track.innerHTML = '<p class="empty" style="padding:20px;" data-i18n="gallery.empty.pickup">ピックアップは準備中です。</p>';
+      track.classList.remove('pickup-marquee-track');
+      track.innerHTML = '<p class="empty" style="padding:20px;text-align:center;" data-i18n="gallery.empty.pickup">ピックアップは準備中です。</p>';
       return;
     }
-    track.innerHTML = pickups.map(function (t) {
-      var id = esc(t.id);
-      var purl = esc(t.previewUrl);
-      var tname = esc(t.name);
-      return '<article class="pickup-card">' +
-        '<div class="pickup-card-inner">' +
-        '<div class="preview-embed" aria-hidden="true">' +
-        '<iframe src="' + purl + '" title="' + tname + '" loading="lazy"></iframe></div>' +
-        '<span class="cat" data-i18n="tcat.' + id + '">' + esc(t.category) + '</span>' +
-        '<h3 class="name" data-i18n="cat.' + id + '">' + tname + '</h3>' +
-        '<p class="pop" data-i18n="tpop.' + id + '">人気スコア ' + esc(String(t.popularity)) + '</p>' +
-        '<a href="' + purl + '" target="_blank" rel="noopener noreferrer"><span data-i18n="gallery.pick.preview">別タブで全画面</span></a>' +
-        '</div></article>';
-    }).join('');
+    var cards = pickups.map(pickupCardHtml).join('');
+    track.classList.add('pickup-marquee-track');
+    track.innerHTML =
+      '<div class="pickup-marquee-group" role="list">' + cards + '</div>' +
+      '<div class="pickup-marquee-group pickup-marquee-duplicate" aria-hidden="true">' + cards + '</div>';
   }
 
   function renderList() {
@@ -587,6 +629,11 @@ export function renderTemplateGalleryPage() {
     .then(function (data) {
       state.raw = data;
       $('state-loading').style.display = 'none';
+      var ps = $('pickup-section');
+      if (ps) {
+        ps.style.display = '';
+        ps.setAttribute('aria-hidden', 'false');
+      }
       $('app').style.display = 'block';
       $('week-label').textContent = data.weekLabel || '今週のピックアップ';
       refresh();
