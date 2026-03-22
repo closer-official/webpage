@@ -1072,6 +1072,62 @@ const CRAM_SCHOOL_CSS = `
   @media (max-width: 768px) { .page-wrapper.template-cram_school .qr-block .qr-block-img { display: none; } }
 `;
 
+/** 16. studio_blush_editorial — 温かみのあるクリーム地×テラコッタ（創作・撮影・ポートフォリオ向け） */
+const STUDIO_BLUSH_EDITORIAL_CSS = `
+  .page-wrapper.template-studio_blush_editorial {
+    --tp-bg: #faf6f1;
+    --tp-heading: #2a1f18;
+    --tp-text: #4a3f36;
+    --tp-accent: #c45846;
+    --tp-border: rgba(42,31,24,0.12);
+    --tp-bg-footer: #f2ebe4;
+    background: var(--tp-bg);
+    color: var(--tp-text);
+  }
+  .page-wrapper.template-studio_blush_editorial header {
+    background: rgba(250,246,241,0.88);
+    backdrop-filter: blur(10px);
+    border-bottom-color: var(--tp-border);
+  }
+  .page-wrapper.template-studio_blush_editorial header.scrolled {
+    box-shadow: 0 4px 24px rgba(42,31,24,0.06);
+  }
+  .page-wrapper.template-studio_blush_editorial .logo {
+    font-family: "Fraunces", "Yu Mincho", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-bg-overlay {
+    background: linear-gradient(155deg, rgba(42,31,24,0.55) 0%, rgba(196,88,70,0.28) 48%, rgba(250,246,241,0.12) 100%);
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-inner .subheadline {
+    color: rgba(255,252,248,0.94);
+    max-width: 36rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-inner .cta-btn {
+    background: var(--tp-accent);
+    color: #fff;
+    border-radius: 999px;
+    border: none;
+    padding: 0.9rem 2rem;
+  }
+  .page-wrapper.template-studio_blush_editorial .section h2 {
+    border-left: 3px solid var(--tp-accent);
+    padding-left: 0.85rem;
+    margin-bottom: var(--space-md);
+  }
+  .page-wrapper.template-studio_blush_editorial .cta-block {
+    border-radius: 16px;
+    border: 1px solid var(--tp-border);
+    background: linear-gradient(145deg, #fffefb, #f7eee8);
+  }
+  .page-wrapper.template-studio_blush_editorial footer {
+    background: var(--tp-bg-footer);
+  }
+`;
+
 /** 14. navy_cyan_consult — LP（既定: web-closer-intro）の style をスコープしたCSSのみ（COMMON_BASE は付けない） */
 const NAVY_DELIVERABLE_PAGE_CSS =
   `
@@ -1107,6 +1163,7 @@ export function getTemplateFullCss(templateId) {
     : key === 'pet_salon' ? PET_SALON_CSS
     : key === 'professional' ? PROFESSIONAL_CSS
     : key === 'ramen' ? RAMEN_CSS
+    : key === 'studio_blush_editorial' ? STUDIO_BLUSH_EDITORIAL_CSS
     : GENERIC_CSS;
   return COMMON_BASE + css;
 }

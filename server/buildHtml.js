@@ -142,6 +142,13 @@ const DEFAULT_NAV = {
     { label: 'トップ', href: '#top' },
     { label: 'アクセス', href: '#access' },
   ],
+  studio_blush_editorial: [
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'サービス', href: '#menu' },
+    { label: '時間・料金', href: '#hours' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA = {
@@ -158,6 +165,7 @@ const DEFAULT_CTA = {
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
+  studio_blush_editorial: { label: '相談する', href: '#contact' },
 };
 
 const defaultHeroImages = {
@@ -175,6 +183,8 @@ const defaultHeroImages = {
   event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
   ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
   navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
+  studio_blush_editorial:
+    'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
 };
 
 /**
@@ -977,7 +987,7 @@ ${cafe1ShopLocationsHtml()}
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary gym-hero-cta">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
-        : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'builder' || tid === 'cram_school' || tid === 'izakaya' || tid === 'apparel' || tid === 'event'
+        : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'builder' || tid === 'cram_school' || tid === 'izakaya' || tid === 'apparel' || tid === 'event' || tid === 'studio_blush_editorial'
         ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
@@ -1015,7 +1025,11 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
-        : '';
+        : tid === 'studio_blush_editorial'
+          ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">`
+          : '';
   const a1Script = '';
   const scrollInScript =
     tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'

@@ -149,7 +149,7 @@ export interface SEOData {
 /** 業界カテゴリ */
 export type IndustryId = 'general' | 'restaurant' | 'medical' | 'salon' | 'tech' | 'realestate' | 'education' | 'retail';
 
-/** テンプレートID（運用ビルトインは3種。旧IDは保存済みLP・buildHtml互換のため型に残す） */
+/** テンプレートID（運用ビルトインは4種。旧IDは保存済みLP・buildHtml互換のため型に残す） */
 export type StyleId =
   | 'salon_barber'       // 1. 個人美容室・理容室
   | 'cafe_tea'           // 2. カフェ・喫茶・パン・スイーツ
@@ -166,7 +166,8 @@ export type StyleId =
   | 'ramen'              // 12. ラーメン
   | 'academy_lp'         // 13. 高CVセールスLP
   | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
-  | 'gym_personal_neon'; // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
+  | 'gym_personal_neon' // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
+  | 'studio_blush_editorial'; // 16. ブラッシュ・創作スタジオ（撮影・ポートフォリオ）
 
 /** テンプレートあたりのバリアント数（現状 1） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -203,11 +204,12 @@ export const INDUSTRIES: { id: IndustryId; name: string }[] = [
   { id: 'retail', name: '小売・EC' },
 ];
 
-/** 新規選択UIに出すビルトイン（運営⓪デザインの3種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
+/** 新規選択UIに出すビルトイン（運営⓪デザインの4種と一致。StyleId 型はレガシーJSON用に旧IDも残す） */
 export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'cafe_1', name: '複数店舗・ミニマル' },
   { id: 'gym_personal_neon', name: 'Valx・ジム販売LP（gym-valx）' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web/LP）' },
+  { id: 'studio_blush_editorial', name: 'ブラッシュ・創作スタジオ' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

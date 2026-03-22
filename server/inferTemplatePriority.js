@@ -4,7 +4,7 @@
  */
 import { TEMPLATE_IDS } from './conceptTemplates.js';
 
-/** ビルトイン3種（templatePreview.TEMPLATE_CANDIDATES と一致） */
+/** ビルトイン（templatePreview.TEMPLATE_CANDIDATES と一致。先頭一致優先） */
 const RULES = [
   {
     style: 'cafe_1',
@@ -13,6 +13,10 @@ const RULES = [
   {
     style: 'gym_personal_neon',
     re: /ジム|\bgym\b|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates|24時間365日|伴走プラン|フルサポートプラン|ビジター利用プラン|ネオン.?ジム|サイバー.?フィットネス|LINE.?友だち追加だけ|valx|gym-valx/i,
+  },
+  {
+    style: 'studio_blush_editorial',
+    re: /フォトスタジオ|撮影スタジオ|レンタルスタジオ|ポートレート|ポートフォリオサイト|クリエイター向け|\bphoto\s*studio\b|レンタル.?スペース|スタジオ.?ホワイト|動画制作|映像制作|youtube|ユーチューバー/i,
   },
   {
     style: 'navy_cyan_consult',

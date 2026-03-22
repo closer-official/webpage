@@ -121,6 +121,13 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'トップ', href: '#top' },
     { label: 'アクセス', href: '#access' },
   ],
+  studio_blush_editorial: [
+    { label: 'コンセプト', href: '#concept' },
+    { label: 'サービス', href: '#menu' },
+    { label: '時間・料金', href: '#hours' },
+    { label: 'アクセス', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
 };
 
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
@@ -139,6 +146,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
+  studio_blush_editorial: { label: '相談する', href: '#contact' },
 };
 
 /** プレビュー・エクスポート用の完全なHTMLを生成 */
@@ -697,6 +705,8 @@ ${cafe1ShopLocationsHtml()}
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
     gym_personal_neon:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
+    studio_blush_editorial:
+      'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
   };
   const heroSlidesFiltered = (content.heroSlides ?? []).filter((u) => (u || '').trim());
   const heroImageUrl =
@@ -811,7 +821,11 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
-        : '';
+        : tid === 'studio_blush_editorial'
+          ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">`
+          : '';
 
   const scrollInScript =
     tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'

@@ -676,6 +676,56 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  studio_blush_editorial: {
+    content: {
+      siteName: 'LUMEN STUDIO',
+      title: 'LUMEN STUDIO | 自然光フォトスタジオ',
+      headline: '光と余白で、想いを形に。',
+      subheadline: 'ポートレート・商品撮影・レンタルスペース。都心からアクセスしやすいホワイトスタジオです。',
+      ctaLabel: '空き状況を問い合わせ',
+      ctaHref: '#contact',
+      sections: [
+        {
+          id: 'concept',
+          title: 'コンセプト',
+          content:
+            '大きな窓から入る自然光と、無垢の床・白壁が被写体を引き立てます。小規模撮影からブランド用ビジュアルまで、用途に合わせてレイアウトをご提案します。',
+          imageUrl:
+            'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900',
+        },
+        {
+          id: 'menu',
+          title: 'サービス',
+          content:
+            '・ポートレート（1h〜）\n・商品・ルック撮影（半日〜）\n・レンタルスペース（イベント・収録）\nお見積りは内容に応じてご案内します。',
+        },
+        {
+          id: 'gallery',
+          title: 'ギャラリー',
+          content: '実際の光の入り方やセット例の参考画像です。撮影前のイメージ共有にご利用ください。',
+          imageUrl:
+            'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900',
+        },
+        { id: 'hours', title: '利用時間・料金目安', content: '平日 9:00–21:00 / 土日祝 8:00–22:00（要予約）\n基本プラン：¥8,800〜 / h（税別・照明セット別途）' },
+        { id: 'access', title: 'アクセス', content: '東京都〇〇区〇〇 1-2-3（最寄駅 徒歩6分）\nエレベーターあり・荷物搬入可' },
+        { id: 'contact', title: 'お問い合わせ', content: 'フォームまたはInstagramのDMからご予約・お問い合わせを承ります。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} LUMEN STUDIO`,
+      footerAddress: '東京都〇〇区〇〇 1-2-3',
+      footerEmail: 'hello@example.com',
+      heroSlides: [
+        'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
+      ],
+    },
+    seo: {
+      metaTitle: 'LUMEN STUDIO | 自然光フォトスタジオ・レンタル',
+      metaDescription: '自然光とホワイト空間の撮影スタジオ。ポートレート・商品撮影・レンタルスペース。',
+      keywords: 'フォトスタジオ, 自然光, ポートレート, レンタルスペース, 撮影',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=85',
+      canonicalUrl: '',
+    },
+  },
   ramen: {
     content: {
       siteName: '麺屋 こだわり',

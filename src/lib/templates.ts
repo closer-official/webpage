@@ -167,6 +167,62 @@ function makeTemplate(
   };
 }
 
+/** テンプレ16 — server/conceptTemplates.js の STUDIO_BLUSH_EDITORIAL_CSS と同等（プレビュー一致用） */
+const STUDIO_BLUSH_EDITORIAL_CSS = `
+  .page-wrapper.template-studio_blush_editorial {
+    --tp-bg: #faf6f1;
+    --tp-heading: #2a1f18;
+    --tp-text: #4a3f36;
+    --tp-accent: #c45846;
+    --tp-border: rgba(42,31,24,0.12);
+    --tp-bg-footer: #f2ebe4;
+    background: var(--tp-bg);
+    color: var(--tp-text);
+  }
+  .page-wrapper.template-studio_blush_editorial header {
+    background: rgba(250,246,241,0.88);
+    backdrop-filter: blur(10px);
+    border-bottom-color: var(--tp-border);
+  }
+  .page-wrapper.template-studio_blush_editorial header.scrolled {
+    box-shadow: 0 4px 24px rgba(42,31,24,0.06);
+  }
+  .page-wrapper.template-studio_blush_editorial .logo {
+    font-family: "Fraunces", "Yu Mincho", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-bg-overlay {
+    background: linear-gradient(155deg, rgba(42,31,24,0.55) 0%, rgba(196,88,70,0.28) 48%, rgba(250,246,241,0.12) 100%);
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-inner .subheadline {
+    color: rgba(255,252,248,0.94);
+    max-width: 36rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .page-wrapper.template-studio_blush_editorial .hero-inner .cta-btn {
+    background: var(--tp-accent);
+    color: #fff;
+    border-radius: 999px;
+    border: none;
+    padding: 0.9rem 2rem;
+  }
+  .page-wrapper.template-studio_blush_editorial .section h2 {
+    border-left: 3px solid var(--tp-accent);
+    padding-left: 0.85rem;
+    margin-bottom: var(--space-md);
+  }
+  .page-wrapper.template-studio_blush_editorial .cta-block {
+    border-radius: 16px;
+    border: 1px solid var(--tp-border);
+    background: linear-gradient(145deg, #fffefb, #f7eee8);
+  }
+  .page-wrapper.template-studio_blush_editorial footer {
+    background: var(--tp-bg-footer);
+  }
+`;
+
 const NAVY_DELIVERABLE_PAGE_CSS =
   `
   .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -833,5 +889,11 @@ export const TEMPLATES: TemplateOption[] = [
     'テンプレ15：黒×赤ネオン・テンプレ14型スティッキー申し込み・キャンペーン／料金／FAQ 等の縦長静的LP（gym-valx-intro）',
     GYM_VALX_DELIVERABLE_PAGE_CSS,
     { omitCommonBase: true }
+  ),
+  makeTemplate(
+    'studio_blush_editorial',
+    'ブラッシュ・創作スタジオ',
+    'テンプレ16：クリーム地×テラコッタ。撮影スタジオ・ポートフォリオ・レンタルスペース向け',
+    STUDIO_BLUSH_EDITORIAL_CSS
   ),
 ];
