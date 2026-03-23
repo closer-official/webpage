@@ -12,8 +12,8 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     tags: ['カフェ', 'レストラン', 'シンプル', '複数店舗'],
   }),
   gym_personal_neon: Object.freeze({
-    category: 'ジム・フィットネス（Valx）',
-    categories: ['ジム', 'パーソナル', 'LP', 'Valx'],
+    category: 'ジム・フィットネス（CLOSER）',
+    categories: ['ジム', 'パーソナル', 'LP', 'CLOSER'],
     popularity: 91,
     tags: ['無料体験', 'LINE', 'ネオン', '販売LP', 'gym-valx-intro'],
   }),

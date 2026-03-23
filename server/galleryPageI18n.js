@@ -9,7 +9,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.nav.intakeAlt': 'Inquiry (alt URL)',
     'gallery.title': 'Template gallery',
     'gallery.lead':
-      'Live previews below—scroll inside a tile to explore the page. Use the corner control to open the full template in a new tab.',
+      'Live previews below—click any preview to open the full template in a new tab (you can scroll there). Category chips follow the language you select.',
     'gallery.badge': 'Week',
     'gallery.weekDefault': 'Weekly picks',
     'gallery.loading': 'Loading…',
@@ -34,7 +34,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.nav.intakeAlt': 'ヒアリング（別URL）',
     'gallery.title': 'テンプレートギャラリー',
     'gallery.lead':
-      '各タイルはライブプレビューです。枠内をスクロールしてページを読めます。右下のアイコンから別タブで全画面を開けます。',
+      '各タイルはライブプレビューです。プレビュー枠のどこを押しても別タブで全画面を開けます（開いたページでスクロールできます）。カテゴリの表示は選択した言語に合わせます。',
     'gallery.badge': '週間',
     'gallery.weekDefault': '今週のピックアップ',
     'gallery.loading': '読み込み中…',

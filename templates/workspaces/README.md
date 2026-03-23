@@ -11,7 +11,7 @@
 | フォルダ | 内部テンプレ ID | 表示名の目安 |
 |----------|-----------------|--------------|
 | `cafe-multistore/` | `cafe_1` | テンプレ1（複数店舗・ミニマル） |
-| `gym-valx/` | `gym_personal_neon` | テンプレ2（Valx・ジム販売LP） |
+| `gym-valx/` | `gym_personal_neon` | テンプレ2（CLOSER・ジム販売LP） |
 | `navy-cyan-web/` | `navy_cyan_consult` | テンプレ3（ネイビー×シアン・Web/LP） |
 
 各フォルダに **`package.json`** があり、**このフォルダをカレントにしたまま**次が実行できます。

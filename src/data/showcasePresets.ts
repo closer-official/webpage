@@ -653,8 +653,8 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   gym_personal_neon: {
     content: {
-      siteName: 'VALX GYM',
-      title: 'VALX GYM | 24時間フィットネス',
+      siteName: 'CLOSER GYM',
+      title: 'CLOSER GYM | 24時間フィットネス',
       headline: '理想の空間を、月額6,980円で。',
       subheadline: 'テンプレ15は gym-valx-intro の固定HTMLを埋め込みます（単一店舗想定・黒×赤ネオン・テンプレ14型スティッキー申し込み・料金・FAQ・アクセス）。',
       ctaLabel: 'LINEで入会',
@@ -662,13 +662,13 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       sections: [
         { id: 'concept', title: 'このテンプレについて', content: '参照スクリーンショットに基づく静的レイアウトです。文言・画像は本番前に差し替えてください。' },
       ],
-      footerText: `© ${new Date().getFullYear()} VALX GYM（構成デモ）`,
+      footerText: `© ${new Date().getFullYear()} CLOSER GYM（構成デモ）`,
       heroSlides: [
         'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
       ],
     },
     seo: {
-      metaTitle: 'VALX GYM | 24時間フィットネス（テンプレデモ）',
+      metaTitle: 'CLOSER GYM | 24時間フィットネス（テンプレデモ）',
       metaDescription: 'パーソナルジム・ネオンシアン系モバイルLPの固定HTMLテンプレート。',
       keywords: 'ジム, フィットネス, パーソナル, 24時間, LP',
       ogImageUrl:

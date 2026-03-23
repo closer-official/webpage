@@ -79,15 +79,15 @@
   },
   "gym-valx-intro": {
     "page": {
-      "title": "VALX GYM | 24時間フィットネス（構成デモ）",
-      "description": "VALX GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
+      "title": "CLOSER GYM | 24時間フィットネス（構成デモ）",
+      "description": "CLOSER GYM モバイルLPの静的再現デモ。ブランド・価格は参照デザインに基づくプレースホルダです。"
     },
-    "header": { "line1": "VALX", "line2": "GYM" },
+    "header": { "line1": "CLOSER", "line2": "GYM" },
     "applyUrl": "#top",
     "hero": {
       "bgUrl": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80",
       "corner": "LIFE MAKE STATION",
-      "nameHtml": "VALX <span class=\"border-b-2 border-neon pb-0.5\">GYM</span>",
+      "nameHtml": "CLOSER <span class=\"border-b-2 border-neon pb-0.5\">GYM</span>",
       "tagline": "パーソナルトレーニング × 24時間フィットネス",
       "priceLead": "理想の空間を、",
       "priceLineHtml": "月額<span class=\"text-5xl font-black text-neon\">6,980</span>円で。",
@@ -106,7 +106,7 @@
       "body2": "メジャーリーガー監修のトレーニングメソッド。YouTube登録者数69万人超の発信力で、正しい知識と継続のサポートを提供します。"
     },
     "why": {
-      "titleHtml": "VALX GYMが選ばれる、<span class=\"border-b-[5px] border-neon pb-0.5\">8つの理由</span>。",
+      "titleHtml": "CLOSER GYMが選ばれる、<span class=\"border-b-[5px] border-neon pb-0.5\">8つの理由</span>。",
       "cards": [
         { "title": "24時間営業", "body": "仕事帰りに、休みの日に、自分のペースで好きな時間に" },
         { "title": "面倒なアプリ<br />ダウンロード不要！", "body": "LINE 友だち追加だけで全てのサービスが受けられます" },
@@ -133,7 +133,7 @@
       "fee2val": "〜9,900円(税込)",
       "fee2note": "※伴走プランの場合",
       "zeroHtml": "0<span class=\"text-4xl\">円</span>",
-      "gift": "さらに！VALXオリジナルシェイカープレゼント！",
+      "gift": "さらに！CLOSERオリジナルシェイカープレゼント！",
       "disclaimer": "※セルフ/伴走プランのみ適応です。※初回事務手数料5,500円(税込)がかかります。"
     },
     "line": {
@@ -145,7 +145,7 @@
       "avatarUrl": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=400&q=80",
       "name": "山本 義徳 氏",
       "nameEn": "YOSHINORI YAMAMOTO",
-      "bio": "YouTube登録者数69万人超。早稲田大学卒。ボディビル大会入賞歴多数。著書・メディア出演を通じ、科学的根拠に基づくトレーニングを発信。VALX GYMの監修・ブランドの核となる存在です。",
+      "bio": "YouTube登録者数69万人超。早稲田大学卒。ボディビル大会入賞歴多数。著書・メディア出演を通じ、科学的根拠に基づくトレーニングを発信。CLOSER GYMの監修・ブランドの核となる存在です。",
       "shotBgUrl": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1200&q=80",
       "shotCaptionHtml": "FROM BEGINNER<br />TO PROFESSIONAL"
     },
@@ -161,7 +161,7 @@
     },
     "sticky": {
       "note": "24時間受付可 · 公式LINEから入会・お問い合わせいただけます。",
-      "domain": "gym.valx.jp"
+      "domain": "gym.closer.jp"
     }
   }
 }

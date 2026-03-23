@@ -11,12 +11,20 @@ const TEMPLATE_IDS = new Set(TEMPLATE_CANDIDATES.map((t) => t.id));
 const LEGACY_TEMPLATE_IDS = new Set(['academy_lp', 'gym_yoga', 'studio_blush_editorial']);
 
 /**
+ * ギャラリー・ヒアリング・運営カタログの一覧から除外する ID。
+ * baseTemplateId がここに含まれるカスタムも除外（プレビュー直 URL は findTemplateCandidate で可）。
+ */
+export const EXCLUDED_FROM_TEMPLATE_CATALOG_IDS = new Set(['studio_blush_editorial']);
+
+/**
  * @param {unknown[]} customizations
- * @param {{ forPublicSelection?: boolean, galleryDraftBuiltinIds?: Set<string> }} [options]
+ * @param {{ forPublicSelection?: boolean, galleryDraftBuiltinIds?: Set<string>, includeCatalogExcluded?: boolean }} [options]
  *   forPublicSelection=true … カスタムの draft 非表示 + galleryDraftBuiltinIds に含まれるビルトインを非表示（公開ギャラリー・ヒアリング）
+ *   includeCatalogExcluded=true … EXCLUDED_FROM_TEMPLATE_CATALOG_IDS を一覧に含める（findTemplateCandidate・プレビュー解決用）
  */
 export function getTemplateCandidates(customizations = [], options = {}) {
   const forPublic = options.forPublicSelection !== false;
+  const includeCatalogExcluded = options.includeCatalogExcluded === true;
   const galleryDraftSet =
     options.galleryDraftBuiltinIds instanceof Set ? options.galleryDraftBuiltinIds : null;
   const custom = (Array.isArray(customizations) ? customizations : [])
@@ -40,12 +48,23 @@ export function getTemplateCandidates(customizations = [], options = {}) {
   if (forPublic && galleryDraftSet && galleryDraftSet.size > 0) {
     builtin = builtin.filter((t) => !galleryDraftSet.has(t.id));
   }
-  return [...builtin, ...custom];
+  const merged = [...builtin, ...custom];
+  if (includeCatalogExcluded) return merged;
+  return merged.filter((c) => {
+    if (EXCLUDED_FROM_TEMPLATE_CATALOG_IDS.has(c.id)) return false;
+    const base = c.baseTemplateId || '';
+    if (base && EXCLUDED_FROM_TEMPLATE_CATALOG_IDS.has(base)) return false;
+    return true;
+  });
 }
 
 export function findTemplateCandidate(id, customizations = []) {
   const tid = String(id || '');
-  return getTemplateCandidates(customizations, { forPublicSelection: false }).find((t) => t.id === tid) || null;
+  return (
+    getTemplateCandidates(customizations, { forPublicSelection: false, includeCatalogExcluded: true }).find(
+      (t) => t.id === tid,
+    ) || null
+  );
 }
 
 /** ヒアリング「テンプレに当てはまらない・1から製作」（叩き台は buildHtml で navy にマップ） */

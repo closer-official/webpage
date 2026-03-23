@@ -1,4 +1,4 @@
-# ワークスペース: テンプレ2（Valx・ジム販売LP）
+# ワークスペース: テンプレ2（CLOSER・ジム販売LP）
 
 **内部テンプレ ID:** `gym_personal_neon`
 

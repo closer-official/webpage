@@ -14,7 +14,7 @@ export function renderTemplateGalleryPage() {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Browse LP templates with live previews. Sort, search, and open full pages in a new tab." />
+  <meta name="description" content="Browse LP templates with live previews. Sort, search, and click a preview to open the full page in a new tab." />
   <title>Template gallery | Closer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -69,6 +69,27 @@ export function renderTemplateGalleryPage() {
       justify-content: space-between;
       gap: 10px;
       margin-bottom: 10px;
+    }
+    .topbar-end {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 18px;
+    }
+    /* 言語バーを fixed から外し、ナビと重ならないようにする */
+    .topbar .public-lang-bar {
+      position: static;
+      top: auto;
+      right: auto;
+      margin: 0;
+      flex-shrink: 0;
+      z-index: auto;
+    }
+    @media (max-width: 520px) {
+      .topbar .public-lang-bar {
+        width: 100%;
+        justify-content: center;
+      }
     }
     .brand {
       font-size: 0.72rem;
@@ -170,7 +191,7 @@ export function renderTemplateGalleryPage() {
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px 10px;
       margin-bottom: 8px;
     }
     .chip {
@@ -268,38 +289,45 @@ export function renderTemplateGalleryPage() {
       border-radius: var(--radius);
       background: #0a0a0c;
       border: 1px solid var(--border);
+      --pv-scale: 0.56;
     }
     .gallery-preview-embed iframe {
       position: absolute;
       top: 0;
-      left: 0;
+      left: 50%;
       width: 390px;
       height: 720px;
       border: 0;
-      transform: scale(0.56);
-      transform-origin: top left;
-      pointer-events: auto;
+      transform: translateX(-50%) scale(var(--pv-scale));
+      transform-origin: top center;
+      pointer-events: none;
     }
-    .gallery-open-full {
+    .gallery-preview-hit {
       position: absolute;
-      bottom: 5px;
-      right: 5px;
+      inset: 0;
       z-index: 4;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      background: rgba(12, 12, 15, 0.72);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.92);
       text-decoration: none;
-      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      background: transparent;
+      border-radius: inherit;
     }
-    .gallery-open-full:hover {
-      background: rgba(212, 165, 116, 0.35);
-      color: #fff;
+    .gallery-preview-hit:hover {
+      background: rgba(212, 165, 116, 0.06);
+    }
+    .gallery-preview-hit:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .card-grid {
       display: grid;
@@ -345,17 +373,19 @@ export function renderTemplateGalleryPage() {
   </style>
 </head>
 <body>
-  ${publicLangBarHtml({ variant: 'dark', enFirst: true, defaultLang: 'en' })}
   <div class="wrap">
     <div class="topbar">
       <div class="brand" data-i18n="gallery.brand">Closer Webpage</div>
-      <nav class="nav-links" aria-label="Related links">
-        <a href="/customer-intake"><span data-i18n="gallery.nav.intake">Apply / inquiry</span></a>
-        <a href="/api/customer-intake"><span data-i18n="gallery.nav.intakeAlt">Inquiry (alt URL)</span></a>
-      </nav>
+      <div class="topbar-end">
+        <nav class="nav-links" aria-label="Related links">
+          <a href="/customer-intake"><span data-i18n="gallery.nav.intake">Apply / inquiry</span></a>
+          <a href="/api/customer-intake"><span data-i18n="gallery.nav.intakeAlt">Inquiry (alt URL)</span></a>
+        </nav>
+        ${publicLangBarHtml({ variant: 'dark', enFirst: true, defaultLang: 'en' })}
+      </div>
     </div>
     <h1 data-i18n="gallery.title">Template gallery</h1>
-    <p class="lead" data-i18n="gallery.lead">Live previews below—scroll inside a tile to explore the page. Use the corner control to open the full template in a new tab.</p>
+    <p class="lead" data-i18n="gallery.lead">Live previews below—click any preview to open the full template in a new tab (you can scroll there). Category chips follow the language you select.</p>
 
     <section id="pickup-section" class="pickup-strip" style="display:none" aria-hidden="true" aria-labelledby="pickup-h">
       <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">Week</span> <span id="week-label">Weekly picks</span></h2>
@@ -399,7 +429,18 @@ export function renderTemplateGalleryPage() {
   var API = '/api/public/template-catalog';
   var G = ${G_EMBED};
   var SK = ${SK_EMBED};
-  var OPEN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  /** API の category（日本語）→ 英語 UI 用ラベル（templateCatalogMeta と整合） */
+  var CATEGORY_LABEL_EN = {
+    '飲食・複数店舗': 'Food & dining · multi-location',
+    'ジム・フィットネス（Valx）': 'Gym · fitness (Valx)',
+    'ジム・フィットネス（CLOSER）': 'Gym · fitness (Closer)',
+    'ジム・フィットネス（レガシー）': 'Gym · fitness (legacy)',
+    'セールス・教室（レガシー）': 'Sales · courses (legacy)',
+    '法人・相談': 'Business · consultation',
+    '参考デザイン': 'Reference designs',
+    'カスタムテンプレート': 'Custom templates',
+    'その他': 'Other',
+  };
 
   var state = { raw: null, q: '', sort: 'popular', category: '' };
 
@@ -451,6 +492,7 @@ export function renderTemplateGalleryPage() {
     if (state.raw) {
       buildChips();
       renderList();
+      syncPreviewScales();
     }
     syncOpenAria();
   }
@@ -469,8 +511,42 @@ export function renderTemplateGalleryPage() {
 
   function syncOpenAria() {
     var lab = t('gallery.openFullAria');
-    Array.prototype.forEach.call(document.querySelectorAll('.gallery-open-full'), function (a) {
+    Array.prototype.forEach.call(document.querySelectorAll('.gallery-preview-hit'), function (a) {
       a.setAttribute('aria-label', lab);
+    });
+  }
+
+  function categoryDisplay(raw) {
+    if (!raw) return lang() === 'en' ? 'Other' : 'その他';
+    if (lang() !== 'en') return raw;
+    var customJa = /^(.*)（カスタム）$/.exec(raw);
+    if (customJa) {
+      var baseJa = customJa[1];
+      var baseEn = CATEGORY_LABEL_EN[baseJa] || baseJa;
+      return baseEn + ' (custom)';
+    }
+    return CATEGORY_LABEL_EN[raw] || raw;
+  }
+
+  function categoryMatchesQuery(tpl, n) {
+    var c = tpl.category || '';
+    if (norm(c).indexOf(n) >= 0) return true;
+    var disp = categoryDisplay(c);
+    if (lang() === 'en' && norm(disp).indexOf(n) >= 0) return true;
+    if (lang() === 'ja' && CATEGORY_LABEL_EN[c] && norm(CATEGORY_LABEL_EN[c]).indexOf(n) >= 0) return true;
+    return false;
+  }
+
+  function syncPreviewScales() {
+    Array.prototype.forEach.call(document.querySelectorAll('.gallery-preview-embed'), function (el) {
+      var w = el.clientWidth || 200;
+      var h = 220;
+      var sx = w / 390;
+      var sy = h / 720;
+      var s = sx < sy ? sx : sy;
+      if (s < 0.18) s = 0.18;
+      if (s > 1) s = 1;
+      el.style.setProperty('--pv-scale', String(s));
     });
   }
 
@@ -485,7 +561,7 @@ export function renderTemplateGalleryPage() {
     if (!state.q.trim()) return true;
     var n = norm(state.q);
     if (norm(tpl.name).indexOf(n) >= 0) return true;
-    if (norm(tpl.category).indexOf(n) >= 0) return true;
+    if (categoryMatchesQuery(tpl, n)) return true;
     if ((tpl.tags || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
     if ((tpl.categories || []).some(function (x) { return norm(x).indexOf(n) >= 0; })) return true;
     return false;
@@ -527,7 +603,8 @@ export function renderTemplateGalleryPage() {
     var lab = t('gallery.openFullAria');
     return '<div class="gallery-preview-embed">' +
       '<iframe src="' + esc(purl) + '" title="' + esc(title) + '" loading="lazy"></iframe>' +
-      '<a class="gallery-open-full" href="' + esc(purl) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(lab) + '">' + OPEN_SVG + '</a>' +
+      '<a class="gallery-preview-hit" href="' + esc(purl) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(lab) + '">' +
+      '<span class="sr-only">' + esc(lab) + '</span></a>' +
       '</div>';
   }
 
@@ -570,7 +647,7 @@ export function renderTemplateGalleryPage() {
       });
       var keys = Object.keys(byCat).sort(function (a, b) { return a.localeCompare(b, loc); });
       root.innerHTML = keys.map(function (cat) {
-        return '<h2>' + esc(cat) + '</h2><div class="card-grid">' +
+        return '<h2>' + esc(categoryDisplay(cat)) + '</h2><div class="card-grid">' +
           byCat[cat].map(cardHtml).join('') + '</div>';
       }).join('');
       syncOpenAria();
@@ -594,13 +671,14 @@ export function renderTemplateGalleryPage() {
     var chips = $('chips');
     chips.innerHTML = '<button type="button" class="chip active" data-cat="">' + esc(t('gallery.chipAll')) + '</button>' +
       cats.map(function (c) {
-        return '<button type="button" class="chip" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+        return '<button type="button" class="chip" data-cat="' + esc(c) + '">' + esc(categoryDisplay(c)) + '</button>';
       }).join('');
     chips.querySelectorAll('.chip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.category = btn.getAttribute('data-cat') || '';
         chips.querySelectorAll('.chip').forEach(function (b) { b.classList.toggle('active', b === btn); });
         renderList();
+        syncPreviewScales();
       });
     });
   }
@@ -612,6 +690,7 @@ export function renderTemplateGalleryPage() {
     applyShellI18n();
     syncWeekLabel();
     syncOpenAria();
+    syncPreviewScales();
   }
 
   fetch(API)
@@ -640,10 +719,19 @@ export function renderTemplateGalleryPage() {
   $('q').addEventListener('input', function () {
     state.q = $('q').value;
     renderList();
+    syncPreviewScales();
   });
   $('sort').addEventListener('change', function () {
     state.sort = $('sort').value;
     renderList();
+    syncPreviewScales();
+    syncOpenAria();
+  });
+
+  var pvResizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(pvResizeTimer);
+    pvResizeTimer = setTimeout(syncPreviewScales, 120);
   });
 
   applyShellI18n();

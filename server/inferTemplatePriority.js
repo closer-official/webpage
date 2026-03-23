@@ -12,7 +12,7 @@ const RULES = [
   },
   {
     style: 'gym_personal_neon',
-    re: /ジム|\bgym\b|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates|24時間365日|伴走プラン|フルサポートプラン|ビジター利用プラン|ネオン.?ジム|サイバー.?フィットネス|LINE.?友だち追加だけ|valx|gym-valx/i,
+    re: /ジム|\bgym\b|フィットネス|fitness|パーソナル|トレーニング|ヨガ|\byoga\b|ピラティス|pilates|24時間365日|伴走プラン|フルサポートプラン|ビジター利用プラン|ネオン.?ジム|サイバー.?フィットネス|LINE.?友だち追加だけ|closer|gym-valx/i,
   },
   {
     style: 'navy_cyan_consult',
