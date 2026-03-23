@@ -244,6 +244,7 @@
         <p
           class="absolute -right-1 top-0 max-w-[40%] text-right text-[2.5rem] font-black leading-none vgx-text-outline-light opacity-90"
           style="font-family: system-ui, sans-serif"
+          data-cid="why.outlineHtml"
         >
           WHY<br />CLOSER<br />GYM?
         </p>
@@ -847,6 +848,7 @@
     var HTML_CIDS = {
       'hero.nameHtml': 1,
       'hero.priceLineHtml': 1,
+      'why.outlineHtml': 1,
       'why.titleHtml': 1,
       'campaign.zeroHtml': 1,
       'access.addressHtml': 1,
@@ -932,6 +934,10 @@
           if (c.intro.body2) setTextOrHtml('intro.body2', c.intro.body2);
         }
         if (c.why) {
+          if (c.why.outlineHtml)
+            setTextOrHtml('why.outlineHtml', c.why.outlineHtml);
+          else if (!Object.prototype.hasOwnProperty.call(c.why, 'outlineHtml'))
+            setTextOrHtml('why.outlineHtml', 'WHY<br />CLOSER<br />GYM?');
           if (c.why.titleHtml) setTextOrHtml('why.titleHtml', c.why.titleHtml);
           var cards = c.why.cards;
           if (cards && cards.length) {

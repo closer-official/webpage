@@ -9,7 +9,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.nav.intakeAlt': 'Inquiry (alt URL)',
     'gallery.title': 'Template gallery',
     'gallery.lead':
-      'Live previews below—click any preview to open the full template in a new tab (you can scroll there). Category chips follow the language you select.',
+      'Live previews fill each card—scroll inside the frame to explore the page. Use the link under each preview to open the full template in a new tab. Category chips follow the language you select.',
     'gallery.badge': 'Week',
     'gallery.weekDefault': 'Weekly picks',
     'gallery.loading': 'Loading…',
@@ -27,6 +27,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.err.load': 'Could not load the catalog. Please try again later.',
     'gallery.chipAll': 'All',
     'gallery.openFullAria': 'Open full preview in new tab',
+    'gallery.openFullLink': 'Open full page in new tab',
   },
   ja: {
     'gallery.brand': 'Closer Webpage',
@@ -34,7 +35,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.nav.intakeAlt': 'ヒアリング（別URL）',
     'gallery.title': 'テンプレートギャラリー',
     'gallery.lead':
-      '各タイルはライブプレビューです。プレビュー枠のどこを押しても別タブで全画面を開けます（開いたページでスクロールできます）。カテゴリの表示は選択した言語に合わせます。',
+      'プレビューはカード幅いっぱいに表示されます。枠内を上下にスクロールしてページを確認できます。別タブで全体を開くには、各プレビュー下のリンクを使ってください。カテゴリ表示は選択した言語に合わせます。',
     'gallery.badge': '週間',
     'gallery.weekDefault': '今週のピックアップ',
     'gallery.loading': '読み込み中…',
@@ -52,6 +53,7 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.err.load': '一覧を読み込めませんでした。しばらくしてから再度お試しください。',
     'gallery.chipAll': 'すべて',
     'gallery.openFullAria': '別タブで全画面プレビューを開く',
+    'gallery.openFullLink': '別タブで全体を開く',
   },
 };
 

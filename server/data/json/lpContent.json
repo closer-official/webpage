@@ -106,6 +106,7 @@
       "body2": "メジャーリーガー監修のトレーニングメソッド。YouTube登録者数69万人超の発信力で、正しい知識と継続のサポートを提供します。"
     },
     "why": {
+      "outlineHtml": "WHY<br />CLOSER<br />GYM?",
       "titleHtml": "CLOSER GYMが選ばれる、<span class=\"border-b-[5px] border-neon pb-0.5\">8つの理由</span>。",
       "cards": [
         { "title": "24時間営業", "body": "仕事帰りに、休みの日に、自分のペースで好きな時間に" },

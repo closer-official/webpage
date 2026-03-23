@@ -126,6 +126,8 @@
 
       <section>
         <h2>8つの理由</h2>
+        <label>背景の大きなアウトライン文字（HTML可・例: WHY&lt;br /&gt;CLOSER&lt;br /&gt;GYM?）</label>
+        <textarea id="why.outlineHtml" rows="3"></textarea>
         <label>ブロック見出し（HTML可）</label>
         <textarea id="why.titleHtml" rows="2"></textarea>
         <p style="font-size:0.78rem;color:var(--muted);margin:8px 0;">各カード：タイトルは &lt;br /&gt; 可</p>
@@ -340,6 +342,7 @@
         ['intro.tax', 'intro.tax'],
         ['intro.body1', 'intro.body1'],
         ['intro.body2', 'intro.body2'],
+        ['why.outlineHtml', 'why.outlineHtml'],
         ['why.titleHtml', 'why.titleHtml'],
         ['campaign.bgUrl', 'campaign.bgUrl'],
         ['campaign.line1', 'campaign.line1'],
@@ -430,7 +433,7 @@
           body1: val('intro.body1'),
           body2: val('intro.body2'),
         },
-        why: { titleHtml: val('why.titleHtml'), cards },
+        why: { outlineHtml: val('why.outlineHtml'), titleHtml: val('why.titleHtml'), cards },
         campaign: {
           bgUrl: val('campaign.bgUrl'),
           line1: val('campaign.line1'),
