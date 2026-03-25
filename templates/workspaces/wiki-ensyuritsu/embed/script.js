@@ -1,16 +1,15 @@
 /**
  * wiki-ensyuritsu · 円周率ページ
- * - イントロ（load 後に回転 → 拡大フェードアウト）
- * - カーソルに π 桁の軌跡（canvas）
- * - スクロール表示（IntersectionObserver）
- * - 図版ライトボックス
- * - 数式ホバーで視覚化パネル表示（CSS 連動）
+ * - イントロ → ヒーロー円のシームレス接続
+ * - 背景桁のパララックス（2層）
+ * - サイド目次スクロールスパイ
+ * - KaTeX 数式レンダリング
+ * - カーソル軌跡 / ライトボックス
  */
 
 (function () {
   'use strict';
 
-  /** 背景・トレイル用の π 桁（十分な長さ） */
   var PI_DIGITS =
     '3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271209091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554686484949392246172147838334914658105760992';
 
@@ -26,7 +25,17 @@
     return [].slice.call((root || document).querySelectorAll(sel));
   }
 
-  /* --- 流れる背景テキスト --- */
+  function shuffleDigits(str) {
+    var a = str.split('');
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i];
+      a[i] = a[j];
+      a[j] = t;
+    }
+    return a.join('');
+  }
+
   function fillFlowBg() {
     var el = $('#pi-flow-text');
     if (!el) return;
@@ -38,7 +47,17 @@
     el.textContent = repeated;
   }
 
-  /* --- イントロ SVG に π 桁を流し込む（textPath） --- */
+  function fillFlowBg2() {
+    var el = $('#pi-flow-text-2');
+    if (!el) return;
+    var s = shuffleDigits(PI_DIGITS + PI_DIGITS);
+    var repeated = '';
+    while (repeated.length < 10000) {
+      repeated += s + ' ';
+    }
+    el.textContent = repeated;
+  }
+
   function fillLoaderTextPath() {
     var tp = $('#pi-textpath-digits');
     if (!tp) return;
@@ -47,24 +66,112 @@
     tp.textContent = s.slice(0, 2800);
   }
 
+  /** スクロールに応じて桁レイヤーを視差移動（滝のように流れるベースアニメーションは CSS） */
+  function initParallaxDigits() {
+    if (prefersReduced) return;
+    var t1 = $('#pi-flow-text');
+    var t2 = $('#pi-flow-text-2');
+    var ticking = false;
+    function apply() {
+      var y = window.scrollY || window.pageYOffset || 0;
+      if (t1) t1.style.transform = 'translateY(' + -0.12 * y + 'px)';
+      if (t2) t2.style.transform = 'translateY(' + 0.1 * y + 'px)';
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(apply);
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    apply();
+  }
+
+  /** サイド目次：現在の章をハイライト */
+  function initTocSpy() {
+    var aside = $('.pi-toc-aside');
+    if (!aside) return;
+    var links = $all('.pi-toc-aside a[href^="#"]');
+    if (!links.length) return;
+    var sections = [];
+    links.forEach(function (a) {
+      var id = a.getAttribute('href').replace(/^#/, '');
+      var el = document.getElementById(id);
+      if (el) sections.push({ id: id, el: el, a: a });
+    });
+    if (!sections.length) return;
+
+    function update() {
+      var mid = window.scrollY + window.innerHeight * 0.33;
+      var current = sections[0];
+      sections.forEach(function (s) {
+        var rect = s.el.getBoundingClientRect();
+        var top = rect.top + window.scrollY;
+        if (top <= mid) current = s;
+      });
+      sections.forEach(function (s) {
+        s.a.classList.toggle('is-active', s.id === current.id);
+        if (s.id === current.id) s.a.setAttribute('aria-current', 'location');
+        else s.a.removeAttribute('aria-current');
+      });
+    }
+
+    var t = null;
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (t) return;
+        t = requestAnimationFrame(function () {
+          update();
+          t = null;
+        });
+      },
+      { passive: true }
+    );
+    window.addEventListener('resize', update, { passive: true });
+    update();
+  }
+
+  /** KaTeX: data-tex を持つ .pi-math-render を描画 */
+  function initKaTeX() {
+    if (typeof katex === 'undefined') return;
+    $all('.pi-math-render').forEach(function (el) {
+      var tex = el.getAttribute('data-tex');
+      if (!tex) return;
+      try {
+        katex.render(tex, el, {
+          displayMode: true,
+          throwOnError: false,
+          output: 'html',
+        });
+      } catch (e) {
+        el.textContent = tex;
+      }
+    });
+  }
+
   function runIntro() {
     var loader = $('#pi-loader');
     var main = $('#pi-main');
+    var hero = $('#hero');
     if (!loader || !main) return;
 
     if (prefersReduced) {
       loader.style.display = 'none';
       main.classList.add('pi-main--visible');
+      if (hero) hero.classList.add('pi-hero--ring-handoff');
       document.body.style.overflow = '';
+      initKaTeX();
       return;
     }
 
-    /** 回転を見せたあと、ローダー全体を拡大フェード（CSS #pi-loader.pi-loader--exit） */
     var EXIT_MS = 2800;
     var EXIT_ANIM_MS = 1150;
 
     window.setTimeout(function () {
       loader.classList.add('pi-loader--exit');
+      if (hero) hero.classList.add('pi-hero--ring-handoff');
     }, EXIT_MS);
 
     window.setTimeout(function () {
@@ -72,12 +179,14 @@
       loader.setAttribute('aria-hidden', 'true');
       main.classList.add('pi-main--visible');
       document.body.style.overflow = '';
+      initKaTeX();
     }, EXIT_MS + EXIT_ANIM_MS + 40);
   }
 
   function onLoad() {
     document.body.style.overflow = 'hidden';
     fillFlowBg();
+    fillFlowBg2();
     fillLoaderTextPath();
     runIntro();
   }
@@ -88,7 +197,8 @@
     window.addEventListener('load', onLoad);
   }
 
-  /* --- カーソル軌跡（canvas） --- */
+  initParallaxDigits();
+
   function initCursorTrail() {
     if (prefersReduced) return;
     var canvas = $('#pi-cursor-canvas');
@@ -134,7 +244,7 @@
       ctx.globalCompositeOperation = 'lighter';
       for (var i = 0; i < points.length; i++) {
         var p = points[i];
-        var alpha = (i + 1) / points.length * 0.45;
+        var alpha = ((i + 1) / points.length) * 0.45;
         ctx.font = '11px "Source Code Pro", monospace';
         ctx.fillStyle = 'rgba(163, 230, 53, ' + alpha + ')';
         ctx.fillText(p.d, p.x + (i % 5) * 0.6, p.y + (i % 3) * 0.4);
@@ -155,7 +265,6 @@
 
   initCursorTrail();
 
-  /* --- スクロールイン --- */
   function initReveal() {
     var els = $all('.pi-reveal');
     if (!els.length || !('IntersectionObserver' in window)) {
@@ -186,7 +295,12 @@
     initReveal();
   }
 
-  /* --- ライトボックス --- */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTocSpy);
+  } else {
+    initTocSpy();
+  }
+
   function initLightbox() {
     var root = $('#pi-lightbox');
     var panel = $('#pi-lightbox__panel');
@@ -239,7 +353,6 @@
     initLightbox();
   }
 
-  /* --- 数式のマウス位置（グラデーション） --- */
   function initFormulaGlow() {
     $all('.pi-formula').forEach(function (f) {
       f.addEventListener('mousemove', function (e) {

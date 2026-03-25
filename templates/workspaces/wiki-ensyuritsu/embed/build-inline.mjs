@@ -13,6 +13,7 @@ const wikiArticle = fs.readFileSync(path.join(__dirname, 'wikipedia-article.html
 
 const MARKUP = `
 <div class="pi-flow-bg" aria-hidden="true"><span id="pi-flow-text"></span></div>
+<div class="pi-flow-bg pi-flow-bg--layer2" aria-hidden="true"><span id="pi-flow-text-2"></span></div>
 <canvas id="pi-cursor-canvas" width="400" height="300" aria-hidden="true"></canvas>
 
 <div id="pi-loader" role="alert" aria-live="polite" aria-busy="true">
@@ -53,6 +54,7 @@ const MARKUP = `
   </header>
 
   <section id="hero" class="pi-skip-target" aria-labelledby="hero-title">
+    <div class="pi-hero__continuity-ring" aria-hidden="true"></div>
     <p class="pi-hero__pi" aria-hidden="true">π</p>
     <h1 id="hero-title" class="pi-hero__title">円周率（えんしゅうりつ）</h1>
     <p class="pi-hero__lead">
@@ -171,7 +173,8 @@ const out = `<!DOCTYPE html>
   <title>円周率 π — ENSYRITSU</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&family=Source+Code+Pro:wght@400;600&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&family=Source+Code+Pro:wght@400;600&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
 </head>
 <body>
 <style>
@@ -180,6 +183,7 @@ ${css}
 <div class="wes-deliverable pi-page">
 ${MARKUP}
 </div>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
 <script>
 ${js}
 </script>

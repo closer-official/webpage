@@ -16,6 +16,7 @@
   --pi-blue-dim: rgba(56, 189, 248, 0.35);
   --pi-font-display: "Playfair Display", "Noto Serif JP", Georgia, serif;
   --pi-font-body: "Lato", "Noto Sans JP", system-ui, sans-serif;
+  --pi-font-serif: "Noto Serif JP", "Source Han Serif JP", "Hiragino Mincho ProN", Georgia, serif;
   --pi-font-mono: "Source Code Pro", ui-monospace, monospace;
   --pi-ring: rgba(163, 230, 53, 0.08);
   --pi-loader-z: 100000;
@@ -46,22 +47,37 @@
   text-decoration: underline;
 }
 
-/* --- 流れる π 背景（メインエリア） --- */
+/* --- 流れる π 背景（2層・パララックス・薄いグレー系） --- */
 .pi-flow-bg {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.12;
+  opacity: 0.14;
   font-family: var(--pi-font-mono);
-  font-size: clamp(10px, 1.2vw, 14px);
-  line-height: 1.35;
-  color: var(--pi-accent);
+  font-size: clamp(9px, 1.15vw, 13px);
+  line-height: 1.4;
+  color: rgba(160, 170, 188, 0.22);
   white-space: pre-wrap;
   word-break: break-all;
   transform: rotate(-4deg) scale(1.08);
-  animation: pi-flow-drift 180s linear infinite;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 72%);
+  animation: pi-flow-drift 220s linear infinite;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 42%, #000 18%, transparent 70%);
+}
+
+.pi-flow-bg #pi-flow-text,
+.pi-flow-bg--layer2 #pi-flow-text-2 {
+  display: block;
+  will-change: transform;
+}
+
+.pi-flow-bg--layer2 {
+  opacity: 0.1;
+  color: rgba(130, 140, 158, 0.18);
+  font-size: clamp(8px, 1vw, 12px);
+  transform: rotate(5deg) scale(1.15);
+  animation: pi-flow-drift2 260s linear infinite reverse;
+  mask-image: radial-gradient(ellipse 70% 60% at 60% 55%, #000 25%, transparent 68%);
 }
 
 @keyframes pi-flow-drift {
@@ -69,7 +85,16 @@
     transform: rotate(-4deg) scale(1.08) translateY(0);
   }
   100% {
-    transform: rotate(-4deg) scale(1.08) translateY(-12%);
+    transform: rotate(-4deg) scale(1.08) translateY(-8%);
+  }
+}
+
+@keyframes pi-flow-drift2 {
+  0% {
+    transform: rotate(5deg) scale(1.15) translateY(0);
+  }
+  100% {
+    transform: rotate(5deg) scale(1.15) translateY(6%);
   }
 }
 
@@ -248,6 +273,32 @@
   padding: clamp(3rem, 10vw, 5.5rem) 1.25rem 3rem;
   text-align: center;
   overflow: hidden;
+  isolation: isolate;
+}
+
+/* イントロの円と視覚的に連続する大きな環（ローダー終了時に拡大・重なる） */
+.pi-hero__continuity-ring {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(72vmin, 420px);
+  height: min(72vmin, 420px);
+  transform: translate(-50%, -50%) scale(0.88);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.07) 0%, transparent 62%);
+  box-shadow:
+    inset 0 0 0 1px rgba(163, 230, 53, 0.22),
+    inset 0 0 48px rgba(56, 189, 248, 0.06),
+    0 0 100px rgba(56, 189, 248, 0.12);
+  transition: opacity 0.35s ease, transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#hero.pi-hero--ring-handoff .pi-hero__continuity-ring {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.85);
 }
 
 #hero::before {
@@ -256,15 +307,29 @@
   inset: 10% 15%;
   border-radius: 50%;
   border: 1px solid var(--pi-ring);
-  opacity: 0.9;
+  opacity: 0.85;
   pointer-events: none;
   animation: pi-hero-ring 24s linear infinite;
+  z-index: 0;
+  transition: opacity 0.8s ease;
+}
+
+#hero.pi-hero--ring-handoff::before {
+  opacity: 0.2;
 }
 
 @keyframes pi-hero-ring {
   to {
     transform: rotate(360deg);
   }
+}
+
+.pi-hero__pi,
+.pi-hero__title,
+.pi-hero__lead,
+.pi-hero__meta {
+  position: relative;
+  z-index: 1;
 }
 
 .pi-hero__pi {
@@ -486,13 +551,96 @@
   font-weight: 600;
 }
 
+/* --- Wikipedia: 2カラム（サイド目次）＋論文調セリフ --- */
+.pi-wiki-layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  max-width: 92rem;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+@media (min-width: 1100px) {
+  .pi-wiki-layout {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+}
+
+@media (max-width: 1099px) {
+  .pi-wiki-layout {
+    padding: 0 0.75rem 2rem;
+  }
+  .pi-toc-aside {
+    margin-bottom: 1.25rem;
+    order: -1;
+  }
+  .pi-toc--sticky {
+    position: relative;
+    top: auto;
+    max-height: none;
+  }
+}
+
+.pi-toc-aside {
+  position: relative;
+  z-index: 3;
+}
+
+@media (min-width: 1100px) {
+  .pi-toc-aside {
+    position: sticky;
+    top: 5.25rem;
+    align-self: start;
+    max-height: calc(100vh - 5.5rem);
+    overflow: auto;
+    padding-right: 0.25rem;
+  }
+}
+
+.pi-toc--sticky {
+  margin: 0;
+}
+
+.pi-toc--sticky .pi-toc-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.pi-toc--sticky a {
+  display: inline-block;
+  padding: 0.12rem 0;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.pi-toc--sticky a.is-active {
+  color: var(--pi-accent);
+  background: rgba(163, 230, 53, 0.1);
+  font-weight: 600;
+}
+
+.pi-wiki-maincol {
+  min-width: 0;
+}
+
 /* --- Wikipedia 全文（長文） --- */
 .pi-wiki-article {
   position: relative;
   z-index: 2;
   max-width: 52rem;
-  margin: 0 auto;
-  padding: 0 1.25rem 4rem;
+  margin: 0;
+  padding: 0 0.25rem 3rem;
+  font-family: var(--pi-font-serif);
+  font-size: 1.02rem;
+  line-height: 2;
+  letter-spacing: 0.04em;
+  font-feature-settings: "palt" 1;
+  color: #d4dbe8;
 }
 
 .pi-wiki-article h2 {
@@ -500,8 +648,19 @@
   font-size: clamp(1.25rem, 2.8vw, 1.65rem);
   margin: 2.25rem 0 1rem;
   padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
-  scroll-margin-top: 5rem;
+  border-bottom: none;
+  scroll-margin-top: 5.5rem;
+  position: relative;
+}
+
+.pi-wiki-article h2::after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 0.5rem;
+  max-width: 8rem;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.45), transparent);
+  border-radius: 1px;
 }
 
 .pi-wiki-article h3 {
@@ -509,23 +668,41 @@
   font-size: 1.12rem;
   margin: 1.75rem 0 0.65rem;
   color: var(--pi-ink);
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 5.5rem;
+  letter-spacing: 0.06em;
 }
 
 .pi-wiki-article h4 {
   font-size: 1rem;
   margin: 1.25rem 0 0.5rem;
   color: #b8c4d4;
+  letter-spacing: 0.04em;
 }
 
 .pi-wiki-article .pi-wiki-lead {
-  font-size: 1.02rem;
-  line-height: 1.85;
-  color: #d1dae8;
+  font-size: 1.05rem;
+  line-height: 2.05;
+  color: #dce3ef;
 }
 
 .pi-wiki-article .pi-wiki-lead p + p {
-  margin-top: 1rem;
+  margin-top: 1.1rem;
+}
+
+/* 弧のセクション区切り（巨大な円の一部） */
+.pi-arc-divider {
+  height: 56px;
+  margin: 2rem auto 2.25rem;
+  max-width: min(52rem, 100%);
+  color: rgba(56, 189, 248, 0.28);
+  background: radial-gradient(ellipse 120% 100% at 50% 0%, transparent 58%, currentColor 59%, currentColor 60%, transparent 61%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* KaTeX */
+.pi-wiki-article .katex {
+  font-size: 1em;
 }
 
 .pi-wiki-article .pi-math-block {
@@ -541,6 +718,57 @@
   white-space: pre-wrap;
   word-break: break-word;
   color: #b8e986;
+}
+
+.pi-math-render {
+  min-height: 2.5rem;
+}
+
+/* 数式＋ホバーで図解 */
+.pi-math-art {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 12px;
+  background: linear-gradient(165deg, rgba(0, 0, 0, 0.42), rgba(18, 22, 35, 0.5));
+  border: 1px solid rgba(163, 230, 53, 0.18);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.pi-math-art:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.pi-math-art__body {
+  overflow-x: auto;
+}
+
+.pi-math-art__hint {
+  font-family: var(--pi-font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--pi-muted);
+  margin-top: 0.5rem;
+}
+
+.pi-math-art__viz {
+  margin-top: 0.75rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+.pi-math-art:hover .pi-math-art__viz,
+.pi-math-art:focus-within .pi-math-art__viz {
+  max-height: 140px;
+  opacity: 1;
+}
+
+.pi-math-art__viz svg {
+  display: block;
+  width: 100%;
+  max-height: 120px;
 }
 
 .pi-wiki-article .pi-ref-list,
@@ -697,6 +925,7 @@
 /* --- アクセシビリティ: 動きを減らす --- */
 @media (prefers-reduced-motion: reduce) {
   .pi-flow-bg,
+  .pi-flow-bg--layer2,
   #pi-loader__ring-wrap,
   #hero::before,
   .pi-reveal {
@@ -712,5 +941,8 @@
   }
   #pi-cursor-canvas {
     display: none !important;
+  }
+  .pi-hero__continuity-ring {
+    transition: none !important;
   }
 }
