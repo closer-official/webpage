@@ -53,16 +53,40 @@ const MARKUP = `
     </nav>
   </header>
 
-  <section id="hero" class="pi-skip-target" aria-labelledby="hero-title">
+  <section id="hero" class="pi-skip-target pi-hero pi-hero--cinematic" aria-labelledby="hero-title">
+    <div class="pi-hero__media" aria-hidden="true">
+      <video
+        class="pi-hero__video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="https://images.pexels.com/photos/167684/pexels-photo-167684.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1920"
+      >
+        <source src="https://videos.pexels.com/video-files/3045163/3045163-hd_1920_1080_30fps.mp4" type="video/mp4" />
+      </video>
+      <div class="pi-hero__scrim"></div>
+    </div>
     <div class="pi-hero__continuity-ring" aria-hidden="true"></div>
-    <p class="pi-hero__pi" aria-hidden="true">π</p>
-    <h1 id="hero-title" class="pi-hero__title">円周率（えんしゅうりつ）</h1>
-    <p class="pi-hero__lead">
-      以下にウィキペディア日本語版「円周率」の記事本文を収録しています（サイトの枠組み・ナビは除く）。装飾・イントロはこのテンプレート側のデザインです。
-    </p>
-    <div class="pi-hero__meta" aria-hidden="true">
-      <span>C = πd = 2πr</span>
-      <span>CC BY-SA 3.0</span>
+    <div class="pi-hero__stage">
+      <h1 id="hero-title" class="pi-hero__title-sr">円周率（えんしゅうりつ）</h1>
+      <div class="pi-hero__vj-wrap" aria-hidden="true">
+        <p class="pi-hero__vj pi-hero__vj--1">円周率は</p>
+        <p class="pi-hero__vj pi-hero__vj--2">直径に対する</p>
+        <p class="pi-hero__vj pi-hero__vj--3">円周の比</p>
+        <p class="pi-hero__vj pi-hero__vj--4">スケールを</p>
+        <p class="pi-hero__vj pi-hero__vj--5">変えない</p>
+      </div>
+      <p class="pi-hero__en" lang="en">
+        Pi is the ratio of a circle's circumference to its diameter — unchanged by scale.
+      </p>
+      <p class="pi-hero__lead">
+        以下にウィキペディア日本語版「円周率」の記事本文を収録しています（サイトの枠組み・ナビは除く）。装飾・イントロはこのテンプレート側のデザインです。
+      </p>
+      <div class="pi-hero__meta" aria-hidden="true">
+        <span>C = πd = 2πr</span>
+        <span>CC BY-SA 3.0</span>
+      </div>
     </div>
   </section>
 

@@ -151,6 +151,31 @@
     });
   }
 
+  /** ヒーロー動画: 読み込み失敗時は MDN の CC0 サンプルへ差し替え（Pexels は環境により 403 のことがある） */
+  function initHeroVideo() {
+    var v = $('.pi-hero__video');
+    if (!v) return;
+    var fallbackMp4 = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+    if (prefersReduced) {
+      v.removeAttribute('autoplay');
+      try {
+        v.pause();
+      } catch (e) {
+        /* ignore */
+      }
+      return;
+    }
+    function onErr() {
+      v.removeEventListener('error', onErr);
+      var src = v.querySelector('source');
+      if (src && src.getAttribute('src') !== fallbackMp4) {
+        src.setAttribute('src', fallbackMp4);
+        v.load();
+      }
+    }
+    v.addEventListener('error', onErr);
+  }
+
   function runIntro() {
     var loader = $('#pi-loader');
     var main = $('#pi-main');
@@ -188,6 +213,7 @@
     fillFlowBg();
     fillFlowBg2();
     fillLoaderTextPath();
+    initHeroVideo();
     runIntro();
   }
 
