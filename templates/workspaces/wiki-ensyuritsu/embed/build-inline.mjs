@@ -90,66 +90,6 @@ const MARKUP = `
     </div>
   </section>
 
-  <section class="pi-section pi-reveal" id="visual-demos" style="--reveal-delay:0.04s" aria-label="図版デモ">
-    <header class="pi-section__head">
-      <span class="pi-section__label">VISUAL</span>
-      <h2 class="pi-section__title">図版（拡大表示）</h2>
-    </header>
-    <div class="pi-grid pi-grid--3">
-      <article class="pi-card">
-        <h3>直径と円周</h3>
-        <button type="button" class="pi-art" data-art="diameter" aria-label="直径と円周の関係を拡大表示">
-          <svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
-                <stop offset="100%" stop-color="#a3e635" stop-opacity="0.7"/>
-              </linearGradient>
-            </defs>
-            <circle cx="200" cy="120" r="88" fill="none" stroke="url(#g1)" stroke-width="2.5"/>
-            <line x1="112" y1="120" x2="288" y2="120" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 6"/>
-            <text x="200" y="108" text-anchor="middle" fill="#a3e635" font-size="14" font-family="Source Code Pro, monospace">d</text>
-            <path d="M 200 32 A 88 88 0 0 1 288 120" fill="none" stroke="#38bdf8" stroke-width="2"/>
-            <text x="252" y="58" fill="#e8edf5" font-size="12" font-family="Source Code Pro, monospace">C = πd</text>
-          </svg>
-          <p class="pi-art__cap">直径 <em>d</em> と円周 <em>C</em></p>
-        </button>
-      </article>
-      <article class="pi-card">
-        <h3>正多角形</h3>
-        <button type="button" class="pi-art" data-art="polygon" aria-label="正多角形による近似を拡大表示">
-          <svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="200" cy="120" r="90" fill="none" stroke="#38bdf8" stroke-opacity="0.35" stroke-width="1"/>
-            <polygon points="200,40 278,75 278,165 200,200 122,165 122,75" fill="none" stroke="#a3e635" stroke-width="2.5" stroke-linejoin="round"/>
-            <circle cx="200" cy="120" r="3" fill="#a3e635"/>
-          </svg>
-          <p class="pi-art__cap">内接正多角形</p>
-        </button>
-      </article>
-      <article class="pi-card">
-        <h3>桁の分布</h3>
-        <button type="button" class="pi-art" data-art="digits" aria-label="桁の分布イメージを拡大表示">
-          <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <g transform="translate(40,20)">
-              <rect x="0" y="120" width="24" height="40" fill="#38bdf8" opacity="0.5"/>
-              <rect x="32" y="100" width="24" height="60" fill="#a3e635" opacity="0.55"/>
-              <rect x="64" y="110" width="24" height="50" fill="#38bdf8" opacity="0.45"/>
-              <rect x="96" y="90" width="24" height="70" fill="#a3e635" opacity="0.6"/>
-              <rect x="128" y="105" width="24" height="55" fill="#38bdf8" opacity="0.5"/>
-              <rect x="160" y="95" width="24" height="65" fill="#a3e635" opacity="0.55"/>
-              <rect x="192" y="115" width="24" height="45" fill="#38bdf8" opacity="0.48"/>
-              <rect x="224" y="85" width="24" height="75" fill="#a3e635" opacity="0.62"/>
-              <rect x="256" y="108" width="24" height="52" fill="#38bdf8" opacity="0.5"/>
-              <rect x="288" y="98" width="24" height="62" fill="#a3e635" opacity="0.58"/>
-            </g>
-            <text x="200" y="190" text-anchor="middle" fill="#8b96a8" font-size="11">0–9（概念図）</text>
-          </svg>
-          <p class="pi-art__cap">クリックで拡大</p>
-        </button>
-      </article>
-    </div>
-  </section>
-
 ${wikiArticle}
 
   <footer class="pi-footer" id="contact">
@@ -198,7 +138,17 @@ const out = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&family=Source+Code+Pro:wght@400;600&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]],
+      },
+      chtml: { scale: 0.94, matchFontHeight: false },
+      options: { enableMenu: false },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" defer></script>
 </head>
 <body>
 <style>
@@ -207,8 +157,7 @@ ${css}
 <div class="wes-deliverable pi-page">
 ${MARKUP}
 </div>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
-<script>
+<script defer>
 ${js}
 </script>
 </body>

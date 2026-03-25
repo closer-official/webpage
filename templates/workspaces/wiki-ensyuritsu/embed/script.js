@@ -1,9 +1,9 @@
 /**
  * wiki-ensyuritsu · 円周率ページ
  * - イントロ → ヒーロー円のシームレス接続
- * - 背景桁のパララックス（2層）
+ * - 背景桁のパララックス（スクロール連動・2層）
  * - サイド目次スクロールスパイ
- * - KaTeX 数式レンダリング
+ * - MathJax 数式組版
  * - カーソル軌跡 / ライトボックス
  */
 
@@ -66,7 +66,7 @@
     tp.textContent = s.slice(0, 2800);
   }
 
-  /** スクロールに応じて桁レイヤーを視差移動（滝のように流れるベースアニメーションは CSS） */
+  /** スクロールに応じて桁レイヤーを視差移動（本文の「無限」演出と連動） */
   function initParallaxDigits() {
     if (prefersReduced) return;
     var t1 = $('#pi-flow-text');
@@ -74,8 +74,15 @@
     var ticking = false;
     function apply() {
       var y = window.scrollY || window.pageYOffset || 0;
-      if (t1) t1.style.transform = 'translateY(' + -0.12 * y + 'px)';
-      if (t2) t2.style.transform = 'translateY(' + 0.1 * y + 'px)';
+      var phase = (y * 0.003) % 6.28318;
+      if (t1) {
+        t1.style.transform =
+          'translateY(' + (-0.16 * y + Math.sin(phase) * 8) + 'px) translateX(' + (-0.02 * y + Math.cos(phase * 0.7) * 6) + 'px)';
+      }
+      if (t2) {
+        t2.style.transform =
+          'translateY(' + (0.14 * y + Math.cos(phase * 1.1) * 10) + 'px) translateX(' + (0.025 * y) + 'px)';
+      }
       ticking = false;
     }
     function onScroll() {
@@ -133,22 +140,30 @@
     update();
   }
 
-  /** KaTeX: data-tex を持つ .pi-math-render を描画 */
-  function initKaTeX() {
-    if (typeof katex === 'undefined') return;
-    $all('.pi-math-render').forEach(function (el) {
-      var tex = el.getAttribute('data-tex');
-      if (!tex) return;
-      try {
-        katex.render(tex, el, {
-          displayMode: true,
-          throwOnError: false,
-          output: 'html',
-        });
-      } catch (e) {
-        el.textContent = tex;
+  /** MathJax 3: data-tex を持つ .pi-math-render を表示数式として組版 */
+  function initMathJax() {
+    var nodes = $all('.pi-math-render[data-tex]');
+    if (!nodes.length) return;
+    var tries = 0;
+    function apply() {
+      if (!window.MathJax || !window.MathJax.typesetPromise) {
+        tries++;
+        if (tries < 120) window.setTimeout(apply, 50);
+        return;
       }
-    });
+      nodes.forEach(function (el) {
+        var tex = el.getAttribute('data-tex');
+        if (!tex) return;
+        el.textContent = '\\[' + tex + '\\]';
+      });
+      MathJax.typesetPromise(nodes).catch(function () {
+        nodes.forEach(function (el) {
+          var t = el.getAttribute('data-tex');
+          if (t) el.textContent = t;
+        });
+      });
+    }
+    apply();
   }
 
   /** ヒーロー動画: 読み込み失敗時は MDN の CC0 サンプルへ差し替え（Pexels は環境により 403 のことがある） */
@@ -187,7 +202,7 @@
       main.classList.add('pi-main--visible');
       if (hero) hero.classList.add('pi-hero--ring-handoff');
       document.body.style.overflow = '';
-      initKaTeX();
+      initMathJax();
       return;
     }
 
@@ -204,7 +219,7 @@
       loader.setAttribute('aria-hidden', 'true');
       main.classList.add('pi-main--visible');
       document.body.style.overflow = '';
-      initKaTeX();
+      initMathJax();
     }, EXIT_MS + EXIT_ANIM_MS + 40);
   }
 

@@ -53,7 +53,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.14;
+  opacity: 0.2;
   font-family: var(--pi-font-mono);
   font-size: clamp(9px, 1.15vw, 13px);
   line-height: 1.4;
@@ -72,7 +72,7 @@
 }
 
 .pi-flow-bg--layer2 {
-  opacity: 0.1;
+  opacity: 0.14;
   color: rgba(130, 140, 158, 0.18);
   font-size: clamp(8px, 1vw, 12px);
   transform: rotate(5deg) scale(1.15);
@@ -670,22 +670,22 @@
   font-weight: 600;
 }
 
-/* --- Wikipedia: 2カラム（サイド目次）＋論文調セリフ --- */
+/* --- Wikipedia: 2カラム（サイド目次）＋パネル化・ダークモダン --- */
 .pi-wiki-layout {
   position: relative;
   z-index: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
-  max-width: 92rem;
+  max-width: calc(280px + min(1000px, 100vw - 2rem) + 3rem);
   margin: 0 auto;
-  padding: 0 1rem 3rem;
+  padding: 0 clamp(0.75rem, 2vw, 1.25rem) 3.5rem;
 }
 
 @media (min-width: 1100px) {
   .pi-wiki-layout {
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-    gap: 2rem;
+    gap: clamp(1.25rem, 2vw, 2.25rem);
     align-items: start;
   }
 }
@@ -745,31 +745,211 @@
 
 .pi-wiki-maincol {
   min-width: 0;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-/* --- Wikipedia 全文（長文） --- */
+/* --- Wikipedia 全文（本文サンセリフ・見出しセリフ） --- */
 .pi-wiki-article {
   position: relative;
   z-index: 2;
-  max-width: 52rem;
-  margin: 0;
-  padding: 0 0.25rem 3rem;
-  font-family: var(--pi-font-serif);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 0 3rem;
+  font-family: var(--pi-font-body);
   font-size: 1.02rem;
-  line-height: 2;
-  letter-spacing: 0.04em;
+  line-height: 1.95;
+  letter-spacing: 0.03em;
   font-feature-settings: "palt" 1;
   color: #d4dbe8;
 }
 
+/* --- 記事パネル（目次単位のカード） --- */
+.pi-wiki-panel {
+  position: relative;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: clamp(1.35rem, 2.8vw, 2.5rem);
+  padding: clamp(1.35rem, 2.8vw, 2.1rem) clamp(1.2rem, 2.5vw, 2rem);
+  border-radius: 20px;
+  background: linear-gradient(158deg, rgba(24, 28, 40, 0.94) 0%, rgba(10, 12, 20, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.14);
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  overflow: hidden;
+}
+
+.pi-wiki-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto -30% -40% auto;
+  width: min(52vw, 420px);
+  height: min(52vw, 420px);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.07;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, transparent 68%);
+  z-index: 0;
+}
+
+.pi-wiki-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pi-wiki-panel--lead::after {
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.22) 0%, transparent 65%);
+  opacity: 0.09;
+}
+
+.pi-wiki-panel--basic::after {
+  inset: -20% auto auto -25%;
+  background: radial-gradient(circle at 30% 30%, rgba(163, 230, 53, 0.15) 0%, transparent 55%),
+    conic-gradient(from 210deg, transparent, rgba(56, 189, 248, 0.08), transparent);
+}
+
+.pi-wiki-panel--history::after {
+  opacity: 0.06;
+  background: conic-gradient(from 90deg, rgba(56, 189, 248, 0.12), transparent 40%, rgba(163, 230, 53, 0.08), transparent 75%);
+}
+
+.pi-wiki-panel--properties::after {
+  background: repeating-conic-gradient(from 0deg, rgba(56, 189, 248, 0.04) 0deg 8deg, transparent 8deg 16deg);
+}
+
+.pi-wiki-panel--formulas::after {
+  background: radial-gradient(ellipse 80% 60% at 80% 20%, rgba(163, 230, 53, 0.12), transparent);
+}
+
+.pi-wiki-panel--value::after {
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.1) 0%, transparent 60%);
+}
+
+.pi-wiki-panel h2:first-of-type,
+.pi-wiki-panel > h2:first-child {
+  margin-top: 0;
+}
+
+.pi-wiki-subcard {
+  margin-top: 1.25rem;
+  padding: 1.1rem 1.15rem 1.2rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pi-wiki-subcard:first-of-type {
+  margin-top: 0.75rem;
+}
+
+/* 図版サムネ（本文近傍） */
+.pi-inline-viz {
+  margin: 1.15rem 0;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px dashed rgba(56, 189, 248, 0.22);
+}
+
+.pi-inline-viz--float {
+  float: right;
+  max-width: min(200px, 38vw);
+  margin: 0 0 0.75rem 1rem;
+}
+
+@media (max-width: 719px) {
+  .pi-inline-viz--float {
+    float: none;
+    max-width: none;
+    margin: 1rem 0;
+  }
+}
+
+.pi-inline-viz__label {
+  margin: 0 0 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pi-accent);
+  font-weight: 700;
+}
+
+.pi-inline-viz__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.pi-viz-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.65rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 14, 22, 0.65);
+  color: var(--pi-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  cursor: zoom-in;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.pi-viz-thumb:hover {
+  border-color: rgba(163, 230, 53, 0.35);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.12);
+  transform: translateY(-2px);
+  color: var(--pi-ink);
+}
+
+.pi-viz-thumb__svg {
+  width: 72px;
+  height: auto;
+  display: block;
+  opacity: 0.9;
+}
+
+.pi-viz-thumb__cap {
+  text-align: center;
+  line-height: 1.35;
+  max-width: 7rem;
+}
+
+/* π 1000桁：全文保持・スクロール内に収容 */
+.pi-wiki-digits-scroll {
+  max-height: 15rem;
+  overflow-y: auto;
+  margin: 0.85rem 0 1.1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(163, 230, 53, 0.16);
+  background: rgba(0, 0, 0, 0.4);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
+}
+
+.pi-wiki-digits-scroll:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.5);
+  outline-offset: 2px;
+}
+
+.pi-wiki-digits-scroll .pi-math-block {
+  margin: 0;
+}
+
 .pi-wiki-article h2 {
   font-family: var(--pi-font-display);
-  font-size: clamp(1.25rem, 2.8vw, 1.65rem);
-  margin: 2.25rem 0 1rem;
+  font-size: clamp(1.28rem, 2.8vw, 1.72rem);
+  margin: 2rem 0 1rem;
   padding-bottom: 0.35rem;
   border-bottom: none;
   scroll-margin-top: 5.5rem;
   position: relative;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
 .pi-wiki-article h2::after {
@@ -784,11 +964,12 @@
 
 .pi-wiki-article h3 {
   font-family: var(--pi-font-display);
-  font-size: 1.12rem;
-  margin: 1.75rem 0 0.65rem;
+  font-size: 1.14rem;
+  margin: 1.5rem 0 0.65rem;
   color: var(--pi-ink);
   scroll-margin-top: 5.5rem;
   letter-spacing: 0.06em;
+  font-weight: 700;
 }
 
 .pi-wiki-article h4 {
@@ -808,20 +989,13 @@
   margin-top: 1.1rem;
 }
 
-/* 弧のセクション区切り（巨大な円の一部） */
-.pi-arc-divider {
-  height: 56px;
-  margin: 2rem auto 2.25rem;
-  max-width: min(52rem, 100%);
-  color: rgba(56, 189, 248, 0.28);
-  background: radial-gradient(ellipse 120% 100% at 50% 0%, transparent 58%, currentColor 59%, currentColor 60%, transparent 61%);
-  opacity: 0.85;
-  pointer-events: none;
+/* MathJax */
+.pi-wiki-article mjx-container {
+  color: #e8edf5 !important;
 }
 
-/* KaTeX */
-.pi-wiki-article .katex {
-  font-size: 1em;
+.pi-wiki-article mjx-container[display="true"] {
+  margin: 0.85rem 0 !important;
 }
 
 .pi-wiki-article .pi-math-block {
@@ -1028,15 +1202,35 @@
   color: var(--pi-accent);
 }
 
-/* --- スクロールイン（円弧風） --- */
-.pi-reveal {
+/* --- スクロールイン：円形クリップ＋光彩（圧迫感の緩和） --- */
+.pi-reveal.pi-reveal--orbit {
+  opacity: 0;
+  transform: scale(0.96) rotate(-1deg);
+  filter: blur(5px);
+  clip-path: circle(0% at 50% 38%);
+  transition:
+    opacity 0.88s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.75s ease;
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.pi-reveal.pi-reveal--orbit.is-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  filter: blur(0);
+  clip-path: circle(155% at 50% 38%);
+}
+
+.pi-reveal:not(.pi-reveal--orbit) {
   opacity: 0;
   transform: translateY(36px) rotate(-2deg);
   transition: opacity 0.75s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0s);
 }
 
-.pi-reveal.is-visible {
+.pi-reveal:not(.pi-reveal--orbit).is-visible {
   opacity: 1;
   transform: translateY(0) rotate(0deg);
 }
@@ -1048,9 +1242,16 @@
   #pi-loader__ring-wrap,
   #hero.pi-hero--cinematic::before,
   #hero::before,
-  .pi-reveal {
+  .pi-reveal,
+  .pi-reveal.pi-reveal--orbit {
     animation: none !important;
     transition: none !important;
+  }
+  .pi-reveal.pi-reveal--orbit {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
   }
   #hero.pi-hero--cinematic .pi-hero__video {
     display: none !important;
