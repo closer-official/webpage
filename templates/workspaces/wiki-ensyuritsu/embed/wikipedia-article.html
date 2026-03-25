@@ -38,18 +38,18 @@
 <article class="pi-wiki-article" lang="ja">
   <p class="pi-note" role="note">出典: フリー百科事典『ウィキペディア（Wikipedia）』日本語版「円周率」。サイトUI・フッター等のナビゲーション文言は除き、記事本文・注釈・出典・参考文献・関連項目・外部リンクを収録しています。</p>
 
-  <section class="pi-wiki-panel pi-wiki-panel--lead pi-reveal pi-reveal--orbit" style="--reveal-delay:0s" aria-label="リード文">
+  <section class="pi-wiki-panel pi-wiki-panel--lead pi-reveal pi-reveal--orbit" style="--reveal-delay:0s" aria-label="リード文" data-pi-label="リード">
   <div class="pi-wiki-lead">
-    <p>曖昧さ回避 — 「3.14」はこの項目へ転送されています。日付については「3月14日」をご覧ください。</p>
-    <p>円周率（えんしゅうりつ、英: Pi、独: Kreiszahl、中: 圓周率）とは、円の直径に対する円周の長さの比率のことをいい[1]、数学定数の一つである。通常、円周率はギリシア文字である π[注 1]で表される。円の直径から円周の長さや円の面積を求めるときに用いる[1]。また、数学をはじめ、物理学、工学といった科学の様々な理論の計算式にも出現し、最も重要な数学定数とも言われる[4]。</p>
-    <p>円周率は無理数であり、超越数でもある。</p>
+    <p class="pi-lead-meta">曖昧さ回避 — 「3.14」はこの項目へ転送されています。日付については「3月14日」をご覧ください。</p>
+    <p class="pi-lead-hero"><strong>円周率</strong>（えんしゅうりつ、英: Pi、独: Kreiszahl、中: 圓周率）とは、円の直径に対する円周の長さの比率のことをいい[1]、数学定数の一つである。通常、円周率はギリシア文字である <strong>π</strong>[注 1]で表される。円の直径から円周の長さや円の面積を求めるときに用いる[1]。また、数学をはじめ、物理学、工学といった科学の様々な理論の計算式にも出現し、最も重要な数学定数とも言われる[4]。</p>
+    <p class="pi-lead-punch">円周率は<strong>無理数</strong>であり、<strong>超越数</strong>でもある。</p>
     <p>円周率の計算において功績のあったルドルフ・ファン・クーレンに因み、ルドルフ数とも呼ばれる。ルドルフは小数点以下35桁まで計算した[5]。小数点以下35桁までの値は次の通りである。</p>
     <div class="pi-math-block pi-math-render" data-tex="\pi = 3.14159\,26535\,89793\,23846\,26433\,83279\,50288\ldots"></div>
     <p>ギリシャ文字の π は円周率に代表される。</p>
   </div>
   </section>
 
-  <section id="wiki-basic" class="pi-wiki-panel pi-wiki-panel--basic pi-reveal pi-reveal--orbit" style="--reveal-delay:0.05s">
+  <section id="wiki-basic" class="pi-wiki-panel pi-wiki-panel--basic pi-reveal pi-reveal--orbit" style="--reveal-delay:0.05s" data-pi-label="基礎">
     <h2>基礎</h2>
 
     <section id="wiki-names" class="pi-wiki-subcard">
@@ -88,7 +88,7 @@
     </section>
   </section>
 
-  <section id="wiki-history" class="pi-wiki-panel pi-wiki-panel--history pi-reveal pi-reveal--orbit" style="--reveal-delay:0.07s">
+  <section id="wiki-history" class="pi-wiki-panel pi-wiki-panel--history pi-reveal pi-reveal--orbit" style="--reveal-delay:0.07s" data-pi-label="歴史">
     <h2>歴史</h2>
     <p>→「円周率の歴史」も参照</p>
 
@@ -160,7 +160,7 @@
     <p>2025年12月11日にテクノロジーレビューサイトのStorageReviewが円周率を314兆桁まで計算したと公表した[36]。</p>
   </section>
 
-  <section id="wiki-properties" class="pi-wiki-panel pi-wiki-panel--properties pi-reveal pi-reveal--orbit" style="--reveal-delay:0.09s">
+  <section id="wiki-properties" class="pi-wiki-panel pi-wiki-panel--properties pi-reveal pi-reveal--orbit" style="--reveal-delay:0.09s" data-pi-label="性質">
     <h2>性質</h2>
 
     <section id="wiki-irrational" class="pi-wiki-subcard">
@@ -217,15 +217,21 @@
     </section>
   </section>
 
-  <section id="wiki-formulas" class="pi-wiki-panel pi-wiki-panel--formulas pi-reveal pi-reveal--orbit" style="--reveal-delay:0.11s">
+  <section id="wiki-formulas" class="pi-wiki-panel pi-wiki-panel--formulas pi-reveal pi-reveal--orbit" style="--reveal-delay:0.11s" data-pi-label="公式">
     <h2>円周率に関する式</h2>
     <p class="pi-note">原文では各数式が LaTeX 形式で多数掲載されています。当ページでは本文の言語的部分を省略せず、数式は MathJax による組版・プレーンテキスト（モノスペース）の併用で表現しています。記号の完全な組版は <a href="https://ja.wikipedia.org/wiki/%E5%86%86%E5%91%A8%E7%8E%87" rel="noopener noreferrer">ウィキペディア該当節</a> を参照してください。</p>
-    <p>π は重要な数学定数であるため、関係する定理・公式の数は膨大である。ここではπ の近似値の計算に使われる式を中心に一部を解説する。 数式によってはそれ自体が π の定義になり得る。</p>
+    <p class="pi-formulas-intro">π は重要な数学定数であるため、関係する定理・公式の数は膨大である。ここではπ の近似値の計算に使われる式を中心に一部を解説する。 数式によってはそれ自体が π の定義になり得る。</p>
 
-    <h3>幾何</h3>
+    <details class="pi-formula-fold">
+    <summary>幾何</summary>
+    <div class="pi-formula-fold__inner">
     <p>半径 r の円の周長：2πr。半径 r の円の面積：πr²。半径 r の球の体積：(4/3)πr³。半径 r の球の表面積：4πr²。長半径 a, 短半径 b の楕円の面積：πab。180° = π rad。</p>
+    </div>
+    </details>
 
-    <h3>解析（特殊関数と虚数を除く）</h3>
+    <details class="pi-formula-fold">
+    <summary>解析（特殊関数と虚数を除く）</summary>
+    <div class="pi-formula-fold__inner">
     <p>ライプニッツの公式：Σ(n=0..∞) (−1)ⁿ/(2n+1) = π/4。</p>
     <p>マーダヴァの公式：√12 Σ(n=0..∞) (−1)ⁿ/(3ⁿ(2n+1)) = π。</p>
     <p>ウォリスの公式：∏(n=1..∞) (2n)²/((2n−1)(2n+1)) = π/2。</p>
@@ -244,30 +250,58 @@
     <p>スターリングの近似：n! ∼ √(2πn) (n/e)ⁿ。</p>
     <p>ラマヌジャン型：1/π = (2√2/99²) Σ (26390n+1103)(4n)! / ((4ⁿ 99ⁿ n!)⁴) 等。</p>
     <p>チュドノフスキー兄弟、Borwein 兄弟、BBP 公式、Fabrice Bellard 等については原文の記述どおり「あまりに高度なため割愛する」[47][44]。</p>
+    </div>
+    </details>
 
-    <h3>複素解析</h3>
+    <details class="pi-formula-fold">
+    <summary>複素解析</summary>
+    <div class="pi-formula-fold__inner">
     <p>e^(iπ) + 1 = 0（オイラーの等式）。Σ(k=0..n−1) e^(i·2πk/n) = 0（n は 2 以上の整数）。後者はオイラーの等式の一般化であり、1 の n乗根の総和は 0 になることを示している。n = 2 とするとオイラーの等式になる。</p>
     <p>Aninda Sinha, Arnab Saha による式（λ は特定の条件を満たす適当な複素数）と超弦理論の文脈（原文の記述を含む）。</p>
+    </div>
+    </details>
 
-    <h3>特殊関数</h3>
+    <details class="pi-formula-fold">
+    <summary>特殊関数</summary>
+    <div class="pi-formula-fold__inner">
     <p>ζ(2) = π²/6（バーゼル問題）。ζ(4) = π⁴/90。ζ(2n) = (−1)^(n−1) 2^(2n−1) B₂ₙ / (2n)! · π^(2n)。Γ(1/2) = √π。</p>
+    </div>
+    </details>
 
-    <h3>数論</h3>
+    <details class="pi-formula-fold">
+    <summary>数論</summary>
+    <div class="pi-formula-fold__inner">
     <p>整数全体から無作為に2つ取り出すとき、その2つが互いに素である確率は 6/π² である（互いに素_(整数論)#互いに素である確率を参照）。</p>
+    </div>
+    </details>
 
-    <h3>力学系・エルゴード理論</h3>
+    <details class="pi-formula-fold">
+    <summary>力学系・エルゴード理論</summary>
+    <div class="pi-formula-fold__inner">
     <p>ロジスティック写像 xᵢ₊₁ = 4xᵢ(1 − xᵢ) により帰納的に定まる数列 {xᵢ} を考える。初期値 x₀ を 0 以上 1 以下に取るとき、そのほとんど全てで lim(n→∞) (1/n) Σ xᵢ^(1/2) = 2/π。</p>
+    </div>
+    </details>
 
-    <h3>統計</h3>
+    <details class="pi-formula-fold">
+    <summary>統計</summary>
+    <div class="pi-formula-fold__inner">
     <p>正規分布の確率密度関数 f(x) = (1/(σ√(2π))) exp[−(x−μ)²/(2σ²)]（ビュフォンの針等の記述は原文参照）。</p>
+    </div>
+    </details>
 
-    <h3>その他</h3>
+    <details class="pi-formula-fold">
+    <summary>その他</summary>
+    <div class="pi-formula-fold__inner">
     <p>河川の長さの水源・河口間の直線距離に対する比率は、平均すると円周率に近い[50]。</p>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-memorization" class="pi-wiki-panel pi-wiki-panel--mem pi-reveal pi-reveal--orbit" style="--reveal-delay:0.12s">
+  <section id="wiki-memorization" class="pi-wiki-panel pi-wiki-panel--mem pi-reveal pi-reveal--orbit" style="--reveal-delay:0.12s" data-pi-label="暗唱">
     <h2>暗唱</h2>
-    <h3>語呂合わせ</h3>
+    <details class="pi-formula-fold">
+    <summary>語呂合わせ</summary>
+    <div class="pi-formula-fold__inner">
     <p>→詳細は「Piphilology（英語版）」を参照</p>
     <p>π の桁を記憶術に頼らずに暗記する方法が各種存在している。</p>
     <p>日本語では、語呂合わせにより、長い桁を暗記するのも比較的簡単である。有名なものとして、以下がある。</p>
@@ -276,13 +310,19 @@
     <p>身一つ、宵、獄に向こう。惨たるかな医薬なく（小数以下14桁）[53]</p>
     <p>身ひとつよ人の、いづこに婿見、いつ、厄なく見つ、文や読むらん（小数以下20桁）[54]</p>
     <p>英語圏では語呂合わせがうまくいかないため、単語の文字数で覚える方法がある。Yes, I have a number. → 3.1416（4桁までで四捨五入）。Can I find a trick recalling Pi easily? → 7桁。How I like a drink, alcoholic of course, after the heavy lectures involving quantum mechanics! → 14桁。And if the lectures were boring or tiring, then any odd thinking was on quartic equations again. → 上に続けて31桁（S. ボトムリー）。</p>
+    </div>
+    </details>
 
-    <h3>暗唱記録</h3>
+    <details class="pi-formula-fold">
+    <summary>暗唱記録</summary>
+    <div class="pi-formula-fold__inner">
     <p>2004年9月25日、原口證が8時間45分かけて円周率5万4000桁の暗唱に成功し、従来の世界記録を更新した。しかしながら、実際はより多くの桁を覚えていたため、2005年7月1日 - 7月2日に再挑戦し、8万3431桁までの暗唱に成功した。2006年10月3日午前9時 - 10月4日午前1時30分（16時間30分）の挑戦で円周率10万桁の暗唱に成功した[要出典]。</p>
     <p>2022年2月現在で『ギネス世界記録』に認定されている円周率暗唱の世界記録は、2015年3月21日にRajveer Meenaが10時間近くかけて暗唱した7万桁である[56]。</p>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-culture" class="pi-wiki-panel pi-wiki-panel--culture pi-reveal pi-reveal--orbit" style="--reveal-delay:0.13s">
+  <section id="wiki-culture" class="pi-wiki-panel pi-wiki-panel--culture pi-reveal pi-reveal--orbit" style="--reveal-delay:0.13s" data-pi-label="文化">
     <h2>文化的影響</h2>
     <p class="pi-note">この節の加筆が望まれています。</p>
     <p>円という日常でもよく知られた図形についての単純な定義でありながら、小数部分が循環せずに無限に続くという不可思議さから、数学における概念の中で最もよく知られたものの一つである。</p>
@@ -293,22 +333,30 @@
     <p>組版処理ソフトウェア TeX のバージョン番号は、3.14, 3.141, 3.1415, … というように、更新の度に円周率に近づいていくように一桁ずつ増やされる。</p>
   </section>
 
-  <section id="wiki-practical" class="pi-wiki-panel pi-wiki-panel--practical pi-reveal pi-reveal--orbit" style="--reveal-delay:0.14s">
+  <section id="wiki-practical" class="pi-wiki-panel pi-wiki-panel--practical pi-reveal pi-reveal--orbit" style="--reveal-delay:0.14s" data-pi-label="実務">
     <h2>実務上の近似値</h2>
     <p>円弧の長さの計算など、実務上の数値計算では、その用途に応じて必要な桁数の円周率が計算に用いられる。例として、指輪などの小さなものでは、3.14で設計している。[要出典] 公認陸上競技場の曲走路の計算では、3.1416を用いている[64]。NASAのJPLの惑星間航行システムにおける最高精度の計算では、小数点以下15桁までの3.141592653589793を用いている[65]。観測可能な宇宙が球体だとして、その円周の誤差が水素原子程度になるためには、小数点以下40桁程度を使えば足りる[66]。</p>
   </section>
 
-  <section id="wiki-value" class="pi-wiki-panel pi-wiki-panel--value pi-reveal pi-reveal--orbit" style="--reveal-delay:0.15s">
+  <section id="wiki-value" class="pi-wiki-panel pi-wiki-panel--value pi-reveal pi-reveal--orbit" style="--reveal-delay:0.15s" data-pi-label="値">
     <h2>値</h2>
     <p>小数点以下1000桁までの値を示す。</p>
+    <details class="pi-details">
+    <summary class="pi-details__summary">π の小数点以下1000桁（全文）を展開する</summary>
+    <div class="pi-details__body">
     <div class="pi-wiki-digits-scroll" role="region" aria-label="πの小数点以下1000桁（全文）" tabindex="0">
     <p class="pi-math-block">π = 3.&#10;1415926535 8979323846 2643383279 5028841971 6939937510 5820974944 5923078164 0628620899 8628034825 3421170679 8214808651 3282306647 0938446095 5058223172 5359408128 4811174502 8410270193 8521105559 6446229489 5493038196 4428810975 6659334461 2847564823 3786783165 2712019091 4564856692 3460348610 4543266482 1339360726 0249141273 7245870066 0631558817 4881520920 9628292540 9171536436 7892590360 0113305305 4882046652 1384146951 9415116094 3305727036 5759591953 0921861173 8193261179 3105118548 0744623799 6274956735 1885752724 8912279381 8301194912 9833673362 4406566430 8602139494 6395224737 1907021798 6094370277 0539217176 2931767523 8467481846 7669405132 0005681271 4526356082 7785771342 7577896091 7363717872 1468440901 2249534301 4654958537 1050792279 6892589235 4201995611 2129021960 8640344181 5981362977 4771309960 5187072113 4999999837 2978049951 0597317328 1609631859 5024459455 3469083026 4252230825 3344685035 2619311881 7101000313 7838752886 5875332083 8142061717 7669147303 5982534904 2875546873 1159562863 8823537875 9375195778 1857780532 1712268066 1300192787 6611195909 2164201989 … （オンライン整数列大辞典の数列 A000796）[67]</p>
     </div>
+    </div>
+    </details>
     <p>十進記数法以外の表記法による表現：二進記数法による最初の48桁は 11.001001000011111101101010100010001000010110100011...（A004601）。三進記数法による最初の38桁は 10.0102110122220102110021111102212222201...（A004602）。十六進記数法による最初の20桁は3.243F6A8885A308D31319...[68]（A062964）。六十進記数法による最初の5桁は 3;8,29,44,0,47[69]（A060707）。</p>
   </section>
 
-  <section id="wiki-footnotes" class="pi-wiki-panel pi-wiki-panel--notes pi-reveal pi-reveal--orbit" style="--reveal-delay:0.16s">
+  <section id="wiki-footnotes" class="pi-wiki-panel pi-wiki-panel--notes pi-reveal pi-reveal--orbit" style="--reveal-delay:0.16s" data-pi-label="注釈">
     <h2>注釈</h2>
+    <details class="pi-details">
+    <summary class="pi-details__summary">注釈の全文を展開する</summary>
+    <div class="pi-details__body">
     <p>^ 古代ギリシア語読み：πεῖ [pêː, pi]、中世ギリシア語読み：πῖ [piː, pi]、現代ギリシア語読み：πι [pi]。日本語読み：パイ[2]、ピー[3] ラテン文字表記：pi, Pi 英語発音: [pai], ドイツ語発音: [piː], フランス語発音: [pi], オランダ語発音: [pi]</p>
     <p>^ ただし、これは明らかな根拠がない話であり、適切に表現すれば定まらないというのが正しい、という主張も見られる[9]。</p>
     <p>^ これは、円周はそれに内接する正六角形の周より大きいことと同値である。</p>
@@ -316,10 +364,15 @@
     <p>^ 「宅間流」は関西地方の和算の一会派で、鎌田俊清だけは、他の和算家とは違う道を追求していた。宅間流は和算家の中では小会派であったが、一門の中から高橋至時 (1764-1804)、間重富 (1756-1816) などの暦学関係の主要な人物を輩出し、寛政暦の編纂に従事した[25]。</p>
     <p>^ 3回の反復で小数18位まで求めることができる</p>
     <p>^ 3月14日はアルベルト・アインシュタインの誕生日でもあり、日本数学技能検定協会によって数学の日に指定されている。→詳細は「3月14日」を参照</p>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-refs" class="pi-wiki-panel pi-wiki-panel--refs pi-reveal pi-reveal--orbit" style="--reveal-delay:0.17s">
+  <section id="wiki-refs" class="pi-wiki-panel pi-wiki-panel--refs pi-reveal pi-reveal--orbit" style="--reveal-delay:0.17s" data-pi-label="出典">
     <h2>出典</h2>
+    <details class="pi-details">
+    <summary class="pi-details__summary">出典一覧を展開する</summary>
+    <div class="pi-details__body">
     <ol class="pi-ref-list">
       <li>^ a b 板倉聖宣 2009, p. 94.</li>
       <li>^ 『π』 - コトバンク</li>
@@ -389,11 +442,16 @@
       <li>^ Arndt &amp; Haenel 2006, p. 242.</li>
       <li>^ Kennedy, E.S. (1978), “Abu-r-Raihan al-Biruni, 973–1048”, Journal for the History of Astronomy 9: 65, Bibcode: 1978JHA.....9...65K, doi:10.1177/002182867800900106. Ptolemy used a three-sexagesimal-digit approximation, and Jamshīd al-Kāshī expanded this to nine digits; see Aaboe, Asger (1964), Episodes from the Early History of Mathematics, New Mathematical Library, 13, New York: Random House, p. 125, ISBN 978-0-88385-613-0, オリジナルの2016-11-29時点におけるアーカイブ。</li>
     </ol>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-bib" class="pi-wiki-panel pi-wiki-panel--bib pi-reveal pi-reveal--orbit" style="--reveal-delay:0.18s">
+  <section id="wiki-bib" class="pi-wiki-panel pi-wiki-panel--bib pi-reveal pi-reveal--orbit" style="--reveal-delay:0.18s" data-pi-label="文献">
     <h2>参考文献</h2>
     <p class="pi-note">出典は列挙するだけでなく、脚注などを用いてどの記述の情報源であるかを明記してください。 記事の信頼性向上にご協力をお願いいたします。（2016年1月）</p>
+    <details class="pi-details">
+    <summary class="pi-details__summary">参考文献・関連書籍の一覧を展開する</summary>
+    <div class="pi-details__body">
     <ul class="pi-bib-list">
       <li>上野健爾『円周率πをめぐって』日本評論社〈はじめよう数学 1 / 上野健爾浪川幸彦高橋陽一郎編集〉、1999年3月。ISBN 4535608407。 NCID BA41156434。全国書誌番号:99079085。</li>
       <li>黒田成俊『微分積分』共立出版〈共立講座21世紀の数学 第1巻〉、2002年9月。ISBN 978-4320015531。</li>
@@ -408,15 +466,25 @@
       <li>板倉聖宣『新総合読本 2種類あった江戸時代の円周率－〈3.16〉と〈3.14〉のなぞ』 356巻、9号、仮説社〈たのしい授業〉、2009年、92-115頁。</li>
     </ul>
     <p>関連書籍（『円周率πの不思議』『πのはなし』『πの公式をデザインする』『π-魅惑の数』『πの歴史』『π ― πの計算アルキメデスから現代まで』『円周率が歩んだ道』『円周率 ―歴史と数理―』『円周率1000000桁表』『月刊円周率』『円周率100,000,000桁表 縮刷版』、Pi: A Source Book 3rd ed., Pi: The Next Generation 等）は原文の一覧に従う。</p>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-related" class="pi-wiki-panel pi-wiki-panel--related pi-reveal pi-reveal--orbit" style="--reveal-delay:0.19s">
+  <section id="wiki-related" class="pi-wiki-panel pi-wiki-panel--related pi-reveal pi-reveal--orbit" style="--reveal-delay:0.19s" data-pi-label="関連">
     <h2>関連項目</h2>
+    <details class="pi-details">
+    <summary class="pi-details__summary">関連項目の一覧を展開する</summary>
+    <div class="pi-details__body">
     <p>Project:数学 / プロジェクト 数学 / Portal:数学 / 数学に関するもの / 円周率の歴史 / 円周率の近似 / 円周率の無理性の証明 / τ (数学定数) - 円の半径に対する周長の比 / リンデマンの定理 / ファインマン・ポイント / 数学定数 / 教育に関するもの / 円周率は3 / 社会に関するもの / 円周率の日 / インディアナ州円周率法案</p>
+    </div>
+    </details>
   </section>
 
-  <section id="wiki-external" class="pi-wiki-panel pi-wiki-panel--external pi-reveal pi-reveal--orbit" style="--reveal-delay:0.2s">
+  <section id="wiki-external" class="pi-wiki-panel pi-wiki-panel--external pi-reveal pi-reveal--orbit" style="--reveal-delay:0.2s" data-pi-label="外部">
     <h2>外部リンク</h2>
+    <details class="pi-details">
+    <summary class="pi-details__summary">外部リンク一覧を展開する</summary>
+    <div class="pi-details__body">
     <ul class="pi-link-list">
       <li>ウィキメディア・コモンズには、円周率に関連するカテゴリがあります。</li>
       <li>ウィクショナリーに関連の辞書項目があります。 円周率</li>
@@ -430,9 +498,11 @@
       <li>Nayandeep Deka Baruah, Bruce C. Berndt and Heng Huat Chan: "Ramanujan's Series for 1/π: A Survey", The American Mathematical Monthly, v116(7) (Aug-Sep.,2009),pp.567-587.</li>
       <li>円周率に関する公式 http://www.pluto.ai.kyutech.ac.jp/~matumoto/dvi/pi.pdf</li>
     </ul>
+    </div>
+    </details>
   </section>
 
-  <section class="pi-wiki-panel pi-wiki-panel--credit pi-reveal pi-reveal--orbit" style="--reveal-delay:0.21s" aria-label="ライセンス・帰属">
+  <section class="pi-wiki-panel pi-wiki-panel--credit pi-reveal pi-reveal--orbit" style="--reveal-delay:0.21s" aria-label="ライセンス・帰属" data-pi-label="帰属">
   <div class="pi-credit-box">
     <p><strong>ライセンス・帰属</strong></p>
     <p>本文はウィキペディア日本語版「<a href="https://ja.wikipedia.org/wiki/%E5%86%86%E5%91%A8%E7%8E%87" rel="noopener noreferrer">円周率</a>」の記事を、<a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" rel="noopener noreferrer">Creative Commons 表示-継承 3.0 非移植</a>（CC BY-SA 3.0）の条件に基づき再掲しています。記事の著作者はウィキペディアの寄稿者です。改変（本ページのスタイル・レイアウトの適用）はあります。最新版はウィキペディアでご確認ください。</p>

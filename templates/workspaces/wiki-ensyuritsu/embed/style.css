@@ -17,7 +17,9 @@
   --pi-font-display: "Playfair Display", "Noto Serif JP", Georgia, serif;
   --pi-font-body: "Lato", "Noto Sans JP", system-ui, sans-serif;
   --pi-font-serif: "Noto Serif JP", "Source Han Serif JP", "Hiragino Mincho ProN", Georgia, serif;
+  --pi-font-mincho: "Shippori Mincho", "Noto Serif JP", Georgia, serif;
   --pi-font-mono: "Source Code Pro", ui-monospace, monospace;
+  --pi-prose-max: 65ch;
   --pi-ring: rgba(163, 230, 53, 0.08);
   --pi-loader-z: 100000;
 
@@ -767,7 +769,188 @@
   line-height: 1.95;
   letter-spacing: 0.03em;
   font-feature-settings: "palt" 1;
-  color: #e8edf5;
+  color: #f1f5f9;
+}
+
+/* --- 記事タイポ：可読性＋メリハリ（サイズ・書体・太字の階層） --- */
+.pi-wiki-panel p:not(.pi-note):not(.pi-math-block):not(.pi-lead-meta):not(.pi-inline-viz__label) {
+  max-width: var(--pi-prose-max);
+  color: #eef2f7;
+}
+
+.pi-wiki-lead {
+  font-family: var(--pi-font-mincho);
+}
+
+.pi-wiki-lead .pi-lead-meta {
+  font-family: var(--pi-font-body);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: none;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 1.15rem;
+  padding: 0.5rem 0 0.65rem;
+  border-bottom: 1px dashed rgba(56, 189, 248, 0.28);
+}
+
+.pi-wiki-lead p:not(.pi-lead-meta) {
+  font-size: 1.05rem;
+  line-height: 2.05;
+  max-width: var(--pi-prose-max);
+}
+
+.pi-wiki-lead p.pi-lead-hero {
+  font-size: clamp(1.12rem, 2.4vw, 1.28rem);
+  line-height: 2.1;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.pi-wiki-lead p.pi-lead-punch {
+  font-family: var(--pi-font-body);
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #d8f99b;
+  border-left: 3px solid var(--pi-accent);
+  padding: 0.35rem 0 0.35rem 1rem;
+  margin: 1rem 0;
+  max-width: var(--pi-prose-max);
+}
+
+.pi-wiki-article strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* 折りたたみ（注釈・出典など全文保持） */
+.pi-details {
+  margin: 1rem 0 1.25rem;
+  border-radius: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(6, 8, 14, 0.55);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.pi-details__summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.05rem;
+  font-family: var(--pi-font-body);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: #e2e8f0;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.12), transparent);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.pi-details__summary::-webkit-details-marker {
+  display: none;
+}
+
+.pi-details__summary::before {
+  content: "▸";
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--pi-accent);
+  transition: transform 0.25s ease;
+}
+
+details.pi-details[open] > .pi-details__summary::before {
+  transform: rotate(90deg);
+}
+
+.pi-details__summary:hover {
+  background: linear-gradient(90deg, rgba(163, 230, 53, 0.14), transparent);
+  color: #fff;
+}
+
+.pi-details__body {
+  padding: 0.35rem 1.05rem 1.15rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pi-details__body p,
+.pi-details__body li {
+  font-size: 0.96rem;
+  line-height: 1.82;
+  color: #dce3ef;
+  max-width: none;
+}
+
+.pi-formula-fold {
+  margin: 0.65rem 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.pi-formula-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.65rem 0.9rem;
+  font-family: var(--pi-font-mincho);
+  font-weight: 600;
+  font-size: 1.02rem;
+  letter-spacing: 0.12em;
+  color: #a5f3fc;
+}
+
+.pi-formula-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pi-formula-fold > summary::after {
+  content: "＋ 展開";
+  float: right;
+  font-family: var(--pi-font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--pi-muted);
+}
+
+details.pi-formula-fold[open] > summary::after {
+  content: "－ 閉じる";
+}
+
+.pi-formula-fold__inner {
+  padding: 0 0.9rem 0.95rem;
+  border-top: 1px solid rgba(56, 189, 248, 0.12);
+}
+
+.pi-formula-fold__inner p {
+  max-width: none;
+  font-size: 0.94rem;
+  line-height: 1.78;
+  margin: 0.65rem 0 0;
+}
+
+.pi-formulas-intro {
+  font-family: var(--pi-font-display);
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.85;
+  color: #bae6fd;
+  max-width: var(--pi-prose-max);
+  margin: 0 0 1.25rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(163, 230, 53, 0.4);
+}
+
+@media (max-width: 640px) {
+  .pi-wiki-panel[data-pi-label]::before {
+    display: none;
+  }
+  .pi-wiki-panel[data-pi-label] {
+    padding-left: clamp(1.2rem, 2.5vw, 2rem);
+  }
 }
 
 /* --- 記事パネル（目次単位のカード） --- */
@@ -805,6 +988,31 @@
   z-index: 1;
 }
 
+.pi-wiki-panel[data-pi-label] {
+  padding-left: clamp(2.4rem, 5vw, 3.4rem);
+}
+
+.pi-wiki-panel[data-pi-label]::before {
+  content: attr(data-pi-label);
+  position: absolute;
+  left: 0.55rem;
+  top: 1.2rem;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: var(--pi-font-mincho);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.45em;
+  line-height: 1.25;
+  color: rgba(163, 230, 53, 0.65);
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+  padding: 0.15rem 0;
+  border-right: 1px solid rgba(56, 189, 248, 0.28);
+  max-height: min(18rem, 55vh);
+  pointer-events: none;
+}
+
 .pi-wiki-panel--lead::after {
   background: radial-gradient(circle, rgba(163, 230, 53, 0.22) 0%, transparent 65%);
   opacity: 0.09;
@@ -840,14 +1048,25 @@
 
 .pi-wiki-subcard {
   margin-top: 1.25rem;
-  padding: 1.1rem 1.15rem 1.2rem;
+  padding: 1.15rem 1.2rem 1.25rem;
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  border-left: 3px solid rgba(163, 230, 53, 0.35);
 }
 
 .pi-wiki-subcard:first-of-type {
   margin-top: 0.75rem;
+}
+
+.pi-wiki-subcard h3 {
+  font-family: var(--pi-font-display);
+  font-size: 1.08rem;
+  letter-spacing: 0.05em;
+  color: #fef9c3;
+  margin-top: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* 図版サムネ（本文近傍） */
@@ -948,47 +1167,49 @@
 
 .pi-wiki-article h2 {
   font-family: var(--pi-font-display);
-  font-size: clamp(1.28rem, 2.8vw, 1.72rem);
-  margin: 2rem 0 1rem;
-  padding-bottom: 0.35rem;
+  font-size: clamp(1.45rem, 3.2vw, 1.95rem);
+  margin: 1.5rem 0 1.1rem;
+  padding: 0 0 0.5rem 0.85rem;
+  border-left: 4px solid var(--pi-accent);
   border-bottom: none;
   scroll-margin-top: 5.5rem;
   position: relative;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  line-height: 1.35;
 }
 
 .pi-wiki-article h2::after {
   content: "";
   display: block;
-  height: 1px;
-  margin-top: 0.5rem;
-  max-width: 8rem;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.45), transparent);
+  height: 2px;
+  margin-top: 0.65rem;
+  max-width: 10rem;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.75), rgba(163, 230, 53, 0.35), transparent);
   border-radius: 1px;
 }
 
 .pi-wiki-article h3 {
-  font-family: var(--pi-font-display);
-  font-size: 1.14rem;
-  margin: 1.5rem 0 0.65rem;
-  color: var(--pi-ink);
+  font-family: var(--pi-font-mincho);
+  font-size: 1.18rem;
+  margin: 1.65rem 0 0.75rem;
+  color: #f8fafc;
   scroll-margin-top: 5.5rem;
-  letter-spacing: 0.06em;
-  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  max-width: var(--pi-prose-max);
 }
 
 .pi-wiki-article h4 {
-  font-size: 1rem;
-  margin: 1.25rem 0 0.5rem;
-  color: #b8c4d4;
-  letter-spacing: 0.04em;
-}
-
-.pi-wiki-article .pi-wiki-lead {
-  font-size: 1.05rem;
-  line-height: 2.05;
-  color: #dce3ef;
+  font-family: var(--pi-font-mincho);
+  font-size: 0.98rem;
+  margin: 1.35rem 0 0.55rem;
+  color: #c8e8fc;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
 .pi-wiki-article .pi-wiki-lead p + p {
@@ -1115,11 +1336,14 @@
 }
 
 .pi-toc__title {
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--pi-accent);
-  margin: 0 0 0.75rem;
+  font-family: var(--pi-font-mincho);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: rgba(190, 242, 100, 0.9);
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .pi-toc ol {
