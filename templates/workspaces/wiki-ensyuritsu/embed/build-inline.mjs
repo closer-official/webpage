@@ -22,9 +22,10 @@ const MARKUP = `
     <svg id="pi-svg-ring" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <linearGradient id="piDigitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#a3e635;stop-opacity:1" />
-          <stop offset="50%" style="stop-color:#38bdf8;stop-opacity:0.75" />
-          <stop offset="100%" style="stop-color:#38bdf8;stop-opacity:0.04" />
+          <stop offset="0%" style="stop-color:#d8f99b;stop-opacity:1" />
+          <stop offset="40%" style="stop-color:#7dd3fc;stop-opacity:1" />
+          <stop offset="72%" style="stop-color:#a3e635;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#f0f9ff;stop-opacity:0.95" />
         </linearGradient>
         <path id="piCirclePath" fill="none" d="M200,200 m-155,0 a155,155 0 1,1 310,0 a155,155 0 1,1 -310,0" />
       </defs>

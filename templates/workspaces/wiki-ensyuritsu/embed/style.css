@@ -57,7 +57,7 @@
   font-family: var(--pi-font-mono);
   font-size: clamp(9px, 1.15vw, 13px);
   line-height: 1.4;
-  color: rgba(160, 170, 188, 0.22);
+  color: rgba(180, 195, 215, 0.32);
   white-space: pre-wrap;
   word-break: break-all;
   transform: rotate(-4deg) scale(1.08);
@@ -73,7 +73,7 @@
 
 .pi-flow-bg--layer2 {
   opacity: 0.14;
-  color: rgba(130, 140, 158, 0.18);
+  color: rgba(150, 165, 188, 0.26);
   font-size: clamp(8px, 1vw, 12px);
   transform: rotate(5deg) scale(1.15);
   animation: pi-flow-drift2 260s linear infinite reverse;
@@ -160,8 +160,12 @@
 #pi-svg-ring .pi-digit-path {
   fill: url(#piDigitGrad);
   font-family: var(--pi-font-mono);
-  font-size: 11px;
+  font-size: clamp(11px, 2.6vmin, 14px);
   letter-spacing: 0.02em;
+  paint-order: stroke fill;
+  stroke: rgba(0, 0, 0, 0.82);
+  stroke-width: 0.45px;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.35));
 }
 
 #pi-loader__glow {
@@ -193,8 +197,9 @@
   font-size: 0.72rem;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: var(--pi-muted);
-  opacity: 0.85;
+  color: #cbd5e1;
+  opacity: 0.95;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
 }
 
 /* メイン（イントロ後に表示） */

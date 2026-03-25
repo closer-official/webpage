@@ -285,13 +285,16 @@
       ctx.globalCompositeOperation = 'lighter';
       for (var i = 0; i < points.length; i++) {
         var p = points[i];
-        var alpha = ((i + 1) / points.length) * 0.45;
-        ctx.font = '11px "Source Code Pro", monospace';
-        ctx.fillStyle = 'rgba(163, 230, 53, ' + alpha + ')';
+        var alpha = 0.22 + ((i + 1) / points.length) * 0.68;
+        ctx.font = '12px "Source Code Pro", monospace';
+        ctx.fillStyle = 'rgba(216, 249, 155, ' + alpha + ')';
+        ctx.strokeStyle = 'rgba(0, 0, 0, ' + (alpha * 0.55) + ')';
+        ctx.lineWidth = 2;
+        ctx.strokeText(p.d, p.x + (i % 5) * 0.6, p.y + (i % 3) * 0.4);
         ctx.fillText(p.d, p.x + (i % 5) * 0.6, p.y + (i % 3) * 0.4);
       }
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
       ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.28)';
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       for (var j = 1; j < points.length; j++) {
