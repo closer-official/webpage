@@ -18,6 +18,7 @@
   --pi-font-body: "Lato", "Noto Sans JP", system-ui, sans-serif;
   --pi-font-serif: "Noto Serif JP", "Source Han Serif JP", "Hiragino Mincho ProN", Georgia, serif;
   --pi-font-mincho: "Shippori Mincho", "Noto Serif JP", Georgia, serif;
+  --pi-font-stone: "Zen Antique Soft", "Shippori Mincho", "Noto Serif JP", serif;
   --pi-font-mono: "Source Code Pro", ui-monospace, monospace;
   --pi-prose-max: 65ch;
   --pi-ring: rgba(163, 230, 53, 0.08);
@@ -735,7 +736,44 @@
 
 .pi-toc--sticky .pi-toc-list {
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: pi-toc;
+}
+
+.pi-toc--sticky .pi-toc-list > li {
+  position: relative;
+  counter-increment: pi-toc;
+  padding-left: 2.15rem;
+  margin-bottom: 0.35rem;
+}
+
+.pi-toc--sticky .pi-toc-list > li::before {
+  content: counter(pi-toc, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  font-family: var(--pi-font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(163, 230, 53, 0.55);
+}
+
+.pi-toc--sticky .pi-toc-sub {
+  list-style: none;
+  padding-left: 1.5rem;
+  margin: 0.25rem 0 0.15rem;
+  counter-reset: none;
+}
+
+.pi-toc--sticky .pi-toc-sub > li {
+  padding-left: 0;
+  margin-bottom: 0.2rem;
+}
+
+.pi-toc--sticky .pi-toc-sub > li::before {
+  content: none;
 }
 
 .pi-toc--sticky a {
@@ -759,6 +797,7 @@
 
 /* --- Wikipedia 全文（本文サンセリフ・見出しセリフ） --- */
 .pi-wiki-article {
+  --pi-section-num: rgba(163, 230, 53, 0.24);
   position: relative;
   z-index: 1;
   max-width: 1000px;
@@ -770,6 +809,65 @@
   letter-spacing: 0.03em;
   font-feature-settings: "palt" 1;
   color: #f1f5f9;
+  counter-reset: pi-section;
+}
+
+/* 主要パネルに通し番号（リード・帰属は除外）：見出し左に大きな桁を置き「章立て」の意味を付与 */
+.pi-wiki-panel:not(.pi-wiki-panel--lead):not(.pi-wiki-panel--credit) {
+  counter-increment: pi-section;
+}
+
+.pi-wiki-article > .pi-note:first-of-type {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1.7;
+  color: #8b96a8;
+  border-left: none;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: rgba(8, 10, 16, 0.72);
+  padding: 0.7rem 1rem 0.75rem;
+  margin-bottom: 1.5rem;
+  max-width: none;
+}
+
+.pi-editorial-see {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  font-family: var(--pi-font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #93c5fd;
+  margin: 0 0 1.05rem;
+  padding: 0.45rem 0.95rem 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(105deg, rgba(56, 189, 248, 0.12), rgba(163, 230, 53, 0.06));
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  max-width: none;
+}
+
+.pi-editorial-see::before {
+  content: "参照";
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--pi-accent);
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* 見出し直後の第1段落＝その節の「リード」としてわずかに立てる（参照キッカーは除外） */
+.pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type + p:not(.pi-editorial-see),
+.pi-wiki-article .pi-prose-opener {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #e8eef7;
+  max-width: 60ch;
+  line-height: 2;
 }
 
 /* --- 記事タイポ：可読性＋メリハリ（サイズ・書体・太字の階層） --- */
@@ -807,16 +905,61 @@
   color: #ffffff;
 }
 
-.pi-wiki-lead p.pi-lead-punch {
-  font-family: var(--pi-font-body);
-  font-size: 1.02rem;
+/* 和文でも効く初字：定義の入口を視覚的に固定 */
+.pi-wiki-lead p.pi-lead-hero::first-letter {
+  font-family: var(--pi-font-display);
+  font-size: 3.15em;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #d8f99b;
-  border-left: 3px solid var(--pi-accent);
-  padding: 0.35rem 0 0.35rem 1rem;
-  margin: 1rem 0;
-  max-width: var(--pi-prose-max);
+  line-height: 0.92;
+  float: left;
+  margin: 0.06em 0.14em 0 0;
+  color: var(--pi-accent);
+  text-shadow: 0 0 28px rgba(163, 230, 53, 0.35);
+}
+
+.pi-wiki-lead p.pi-lead-punch {
+  position: relative;
+  font-family: var(--pi-font-display);
+  font-size: clamp(1.14rem, 2.6vw, 1.38rem);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.65;
+  color: #ecfccb;
+  margin: 1.35rem 0;
+  padding: 1.2rem 1.35rem 1.2rem 2.85rem;
+  max-width: 42ch;
+  border-left: none;
+  border-radius: 4px 18px 18px 4px;
+  background:
+    linear-gradient(165deg, rgba(163, 230, 53, 0.11) 0%, transparent 52%),
+    rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pi-wiki-lead p.pi-lead-punch::before {
+  content: "π";
+  position: absolute;
+  left: 0.55rem;
+  top: 0.35rem;
+  font-family: var(--pi-font-display);
+  font-style: normal;
+  font-size: clamp(2.4rem, 6vw, 3.25rem);
+  line-height: 1;
+  color: rgba(163, 230, 53, 0.18);
+  pointer-events: none;
+  user-select: none;
+}
+
+.pi-wiki-lead p.pi-lead-punch::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--pi-accent), var(--pi-blue));
 }
 
 .pi-wiki-article strong {
@@ -951,6 +1094,17 @@ details.pi-formula-fold[open] > summary::after {
   .pi-wiki-panel[data-pi-label] {
     padding-left: clamp(1.2rem, 2.5vw, 2rem);
   }
+
+  .pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type {
+    padding-left: 3.5rem;
+    min-height: 2.25rem;
+  }
+
+  .pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type::before {
+    font-size: clamp(1.65rem, 11vw, 2.35rem);
+    left: 0.05rem;
+    top: 0.1rem;
+  }
 }
 
 /* --- 記事パネル（目次単位のカード） --- */
@@ -1024,9 +1178,198 @@ details.pi-formula-fold[open] > summary::after {
     conic-gradient(from 210deg, transparent, rgba(56, 189, 248, 0.08), transparent);
 }
 
-.pi-wiki-panel--history::after {
+.pi-wiki-panel--history:not(.pi-history-stone)::after {
   opacity: 0.06;
   background: conic-gradient(from 90deg, rgba(56, 189, 248, 0.12), transparent 40%, rgba(163, 230, 53, 0.08), transparent 75%);
+}
+
+/* --- 歴史：石碑（彫刻タイポ・石板質感） --- */
+.pi-history-stone {
+  --stone-slab: #c9c0b4;
+  --stone-highlight: #e8e2d8;
+  --stone-shadow: #8a8278;
+  --stone-raw: #bfb6aa;
+  --stone-ink: #2e2822;
+  --stone-ink-dim: #4a4238;
+  --stone-accent: #6b5340;
+
+  font-family: var(--pi-font-stone);
+  color: var(--stone-ink);
+  border-color: rgba(74, 60, 48, 0.35) !important;
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%),
+    radial-gradient(ellipse 90% 55% at 18% 12%, rgba(255, 255, 255, 0.22), transparent 52%),
+    radial-gradient(ellipse 70% 45% at 88% 88%, rgba(0, 0, 0, 0.08), transparent 50%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 3px
+    ),
+    linear-gradient(168deg, var(--stone-highlight) 0%, var(--stone-slab) 48%, #b0a69a 100%) !important;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.42),
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.pi-history-stone::after {
+  opacity: 0.14 !important;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.06), transparent 45%) !important;
+}
+
+.pi-history-stone[data-pi-label]::before {
+  color: rgba(74, 58, 42, 0.72);
+  border-right-color: rgba(74, 58, 42, 0.32);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.pi-history-stone > h2:first-of-type {
+  border-left-color: var(--stone-accent) !important;
+  color: var(--stone-ink) !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.pi-history-stone > h2:first-of-type::before {
+  color: rgba(74, 58, 42, 0.28) !important;
+}
+
+.pi-history-stone > h2:first-of-type::after {
+  background: linear-gradient(90deg, rgba(74, 58, 42, 0.55), rgba(107, 83, 64, 0.35), transparent) !important;
+}
+
+.pi-history-stone h3,
+.pi-history-stone h4 {
+  font-family: var(--pi-font-stone);
+  color: var(--stone-ink-dim);
+  border-bottom-color: rgba(74, 58, 42, 0.22) !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.pi-history-stone a {
+  color: #5c442e;
+  font-weight: 600;
+  text-decoration-color: rgba(92, 68, 46, 0.45);
+}
+
+.pi-history-stone a:hover {
+  color: #3d2a1a;
+}
+
+.pi-history-stone .pi-editorial-see {
+  background: rgba(255, 252, 245, 0.55);
+  border-color: rgba(74, 58, 42, 0.28);
+  color: var(--stone-ink-dim);
+}
+
+.pi-history-stone .pi-editorial-see::before {
+  color: var(--stone-accent);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.pi-history-stone .pi-note {
+  background: rgba(255, 248, 230, 0.65);
+  border-left-color: rgba(180, 120, 40, 0.55);
+  color: #4a3d32;
+}
+
+.pi-history-stone .pi-prose-opener {
+  color: var(--stone-ink);
+}
+
+.pi-history-stone .pi-math-block {
+  font-family: var(--pi-font-mono);
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(74, 58, 42, 0.22);
+  color: #252018;
+}
+
+.pi-history-stone .pi-math-art {
+  background: linear-gradient(165deg, rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.08));
+  border-color: rgba(74, 58, 42, 0.28);
+}
+
+.pi-history-stone .pi-math-art__hint {
+  color: var(--stone-ink-dim);
+}
+
+.pi-history-stone mjx-container {
+  color: var(--stone-ink) !important;
+}
+
+.pi-history-stone .pi-wiki-subcard:nth-of-type(even) {
+  margin-left: 0;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(74, 58, 42, 0.15);
+  border-left-color: rgba(74, 58, 42, 0.4);
+}
+
+.pi-history-stone .pi-stone-skip {
+  background: rgba(255, 250, 240, 0.5);
+  border: 1px solid rgba(74, 58, 42, 0.22);
+  border-style: solid;
+}
+
+.pi-history-stone .pi-stone-skip .pi-inline-viz__label {
+  color: var(--stone-accent);
+}
+
+/* 彫刻前：石板と同色に近い「未彫り」 */
+.pi-history-stone .pi-stone-char {
+  display: inline;
+  font-family: inherit;
+  color: var(--stone-raw);
+  text-shadow: none;
+  opacity: 0.92;
+  transition:
+    color 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    text-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(0.04em) scale(0.98);
+}
+
+.pi-history-stone .pi-stone-char.is-carved {
+  color: var(--stone-ink);
+  opacity: 1;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 -1px 2px rgba(0, 0, 0, 0.35);
+  transform: translateY(0) scale(1);
+}
+
+/* 動きを減らす設定：スパン化なしでも彫刻風タイポを当てる */
+.pi-history-stone.pi-history-stone--static p,
+.pi-history-stone.pi-history-stone--static h3,
+.pi-history-stone.pi-history-stone--static h4,
+.pi-history-stone.pi-history-stone--static .pi-editorial-see {
+  color: var(--stone-ink);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 2px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pi-history-stone .pi-stone-char {
+    transition: none;
+    transform: none;
+  }
+}
+
+.pi-history-stone.pi-wiki-panel p:not(.pi-note):not(.pi-math-block):not(.pi-inline-viz__label) {
+  color: var(--stone-ink);
+}
+
+.pi-history-stone strong {
+  color: var(--stone-ink);
+}
+
+.pi-history-stone.pi-wiki-panel > h2:first-of-type + p:not(.pi-editorial-see),
+.pi-history-stone .pi-prose-opener {
+  color: var(--stone-ink);
 }
 
 .pi-wiki-panel--properties::after {
@@ -1053,6 +1396,20 @@ details.pi-formula-fold[open] > summary::after {
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(56, 189, 248, 0.1);
   border-left: 3px solid rgba(163, 230, 53, 0.35);
+  transform-origin: left center;
+}
+
+/* 交互にわずかにインデント：長文ブロックにリズム（意味は「欄の切り替え」） */
+.pi-wiki-panel .pi-wiki-subcard:nth-of-type(even) {
+  margin-left: clamp(0px, 2vw, 1.25rem);
+  border-left-color: rgba(56, 189, 248, 0.45);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.04), rgba(0, 0, 0, 0.28));
+}
+
+@media (max-width: 640px) {
+  .pi-wiki-panel .pi-wiki-subcard:nth-of-type(even) {
+    margin-left: 0;
+  }
 }
 
 .pi-wiki-subcard:first-of-type {
@@ -1180,6 +1537,27 @@ details.pi-formula-fold[open] > summary::after {
   line-height: 1.35;
 }
 
+.pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type {
+  padding-left: 4.75rem;
+  border-left-width: 3px;
+  border-left-color: rgba(163, 230, 53, 0.75);
+  min-height: 2.85rem;
+}
+
+.pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type::before {
+  content: counter(pi-section, decimal-leading-zero);
+  position: absolute;
+  left: 0.2rem;
+  top: -0.15rem;
+  font-family: var(--pi-font-mono);
+  font-size: clamp(2.15rem, 5vw, 3.15rem);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: var(--pi-section-num);
+  pointer-events: none;
+}
+
 .pi-wiki-article h2::after {
   content: "";
   display: block;
@@ -1188,6 +1566,11 @@ details.pi-formula-fold[open] > summary::after {
   max-width: 10rem;
   background: linear-gradient(90deg, rgba(56, 189, 248, 0.75), rgba(163, 230, 53, 0.35), transparent);
   border-radius: 1px;
+}
+
+.pi-wiki-panel:not(.pi-wiki-panel--lead) > h2:first-of-type::after {
+  margin-left: 0;
+  max-width: min(14rem, 55%);
 }
 
 .pi-wiki-article h3 {

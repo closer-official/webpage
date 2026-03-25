@@ -4,6 +4,7 @@
  * - 背景桁のパララックス（スクロール連動・2層）
  * - サイド目次スクロールスパイ
  * - MathJax 数式組版
+ * - 歴史セクション：石碑風タイポ＋1字ずつ彫刻表示（スクロールで開始）
  * - カーソル軌跡 / ライトボックス
  */
 
@@ -140,6 +141,151 @@
     update();
   }
 
+  /** 歴史セクション：テキストノードを1字ずつ包み、石碑彫刻アニメ用にする */
+  function wrapHistoryStoneCharNodes(panel) {
+    if (!panel || !panel.classList.contains('pi-history-stone') || prefersReduced) return;
+
+    var walker = document.createTreeWalker(
+      panel,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function (node) {
+          var val = node.nodeValue;
+          if (!val || !/\S/.test(val)) return NodeFilter.FILTER_REJECT;
+          var el = node.parentElement;
+          if (!el) return NodeFilter.FILTER_REJECT;
+          var tag = el.tagName;
+          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+          if (el.closest('.pi-stone-skip')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('button')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('.pi-math-art')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('.pi-math-block')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('.pi-math-render')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('mjx-container')) return NodeFilter.FILTER_REJECT;
+          if (el.closest('mjx-assistive-mml')) return NodeFilter.FILTER_REJECT;
+          if (el.classList && el.classList.contains('pi-stone-char')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      }
+    );
+
+    var textNodes = [];
+    var cur;
+    while ((cur = walker.nextNode())) {
+      textNodes.push(cur);
+    }
+
+    textNodes.forEach(function (textNode) {
+      var s = textNode.nodeValue;
+      var parent = textNode.parentNode;
+      if (!parent) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < s.length; i++) {
+        var span = document.createElement('span');
+        span.className = 'pi-stone-char';
+        span.textContent = s.charAt(i);
+        frag.appendChild(span);
+      }
+      parent.replaceChild(frag, textNode);
+    });
+  }
+
+  function carveHistoryStone(panel) {
+    var chars = panel.querySelectorAll('.pi-stone-char');
+    var total = chars.length;
+    if (!total) {
+      panel.classList.remove('is-stone-carving');
+      panel.setAttribute('aria-busy', 'false');
+      return;
+    }
+    var i = 0;
+    var perFrame = total > 12000 ? 56 : total > 7000 ? 40 : 22;
+
+    function frame() {
+      var end = Math.min(i + perFrame, total);
+      for (; i < end; i++) {
+        chars[i].classList.add('is-carved');
+      }
+      if (i < total) {
+        requestAnimationFrame(frame);
+      } else {
+        panel.classList.add('is-stone-done');
+        panel.setAttribute('aria-busy', 'false');
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function startHistoryStoneCarve(panel) {
+    if (!panel || panel.classList.contains('pi-history-stone--static')) return;
+    if (panel.classList.contains('is-stone-carving')) return;
+    if (!panel.querySelectorAll('.pi-stone-char').length) return;
+    panel.classList.add('is-stone-carving');
+    panel.setAttribute('aria-busy', 'true');
+    window.setTimeout(function () {
+      carveHistoryStone(panel);
+    }, 220);
+  }
+
+  function bindHistoryStoneReveal(panel) {
+    function tryCarve() {
+      if (panel.classList.contains('is-stone-carving') || panel.classList.contains('is-stone-done')) return;
+      if (!panel.classList.contains('is-visible')) return;
+      if (!panel.querySelectorAll('.pi-stone-char').length) {
+        wrapHistoryStoneCharNodes(panel);
+      }
+      if (!panel.querySelectorAll('.pi-stone-char').length) return;
+      startHistoryStoneCarve(panel);
+    }
+
+    var mo = new MutationObserver(tryCarve);
+    mo.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    tryCarve();
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) tryCarve();
+          });
+        },
+        { root: null, rootMargin: '0px 0px 12% 0px', threshold: 0.05 }
+      );
+      io.observe(panel);
+    }
+
+    window.setTimeout(function () {
+      if (!panel.classList.contains('is-stone-done') && !panel.classList.contains('is-stone-carving')) {
+        tryCarve();
+      }
+    }, 4800);
+  }
+
+  function initHistoryStone() {
+    var panel = document.getElementById('wiki-history');
+    if (!panel || !panel.classList.contains('pi-history-stone')) return;
+
+    if (prefersReduced) {
+      panel.classList.add('pi-history-stone--static');
+      return;
+    }
+
+    function prepare() {
+      wrapHistoryStoneCharNodes(panel);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', prepare);
+    } else {
+      prepare();
+    }
+    window.addEventListener('load', function () {
+      window.setTimeout(prepare, 400);
+    });
+
+    bindHistoryStoneReveal(panel);
+  }
+
   /** MathJax 3: data-tex を持つ .pi-math-render を表示数式として組版 */
   function initMathJax() {
     var nodes = $all('.pi-math-render[data-tex]');
@@ -156,12 +302,19 @@
         if (!tex) return;
         el.textContent = '\\[' + tex + '\\]';
       });
-      MathJax.typesetPromise(nodes).catch(function () {
-        nodes.forEach(function (el) {
-          var t = el.getAttribute('data-tex');
-          if (t) el.textContent = t;
+      MathJax.typesetPromise(nodes)
+        .then(function () {
+          var hp = document.getElementById('wiki-history');
+          if (hp && hp.classList.contains('pi-history-stone')) {
+            wrapHistoryStoneCharNodes(hp);
+          }
+        })
+        .catch(function () {
+          nodes.forEach(function (el) {
+            var t = el.getAttribute('data-tex');
+            if (t) el.textContent = t;
+          });
         });
-      });
     }
     apply();
   }
@@ -432,5 +585,11 @@
     document.addEventListener('DOMContentLoaded', initFormulaGlow);
   } else {
     initFormulaGlow();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHistoryStone);
+  } else {
+    initHistoryStone();
   }
 })();
