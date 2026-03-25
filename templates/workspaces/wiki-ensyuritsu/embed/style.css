@@ -486,6 +486,130 @@
   font-weight: 600;
 }
 
+/* --- Wikipedia 全文（長文） --- */
+.pi-wiki-article {
+  position: relative;
+  z-index: 2;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+.pi-wiki-article h2 {
+  font-family: var(--pi-font-display);
+  font-size: clamp(1.25rem, 2.8vw, 1.65rem);
+  margin: 2.25rem 0 1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  scroll-margin-top: 5rem;
+}
+
+.pi-wiki-article h3 {
+  font-family: var(--pi-font-display);
+  font-size: 1.12rem;
+  margin: 1.75rem 0 0.65rem;
+  color: var(--pi-ink);
+  scroll-margin-top: 5rem;
+}
+
+.pi-wiki-article h4 {
+  font-size: 1rem;
+  margin: 1.25rem 0 0.5rem;
+  color: #b8c4d4;
+}
+
+.pi-wiki-article .pi-wiki-lead {
+  font-size: 1.02rem;
+  line-height: 1.85;
+  color: #d1dae8;
+}
+
+.pi-wiki-article .pi-wiki-lead p + p {
+  margin-top: 1rem;
+}
+
+.pi-wiki-article .pi-math-block {
+  font-family: var(--pi-font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  padding: 0.85rem 1rem;
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(163, 230, 53, 0.12);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #b8e986;
+}
+
+.pi-wiki-article .pi-ref-list,
+.pi-wiki-article .pi-bib-list,
+.pi-wiki-article .pi-link-list {
+  font-size: 0.88rem;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0 1rem;
+  color: #aeb9ca;
+}
+
+.pi-wiki-article .pi-ref-list li,
+.pi-wiki-article .pi-bib-list li {
+  margin-bottom: 0.4rem;
+}
+
+.pi-wiki-article .pi-note {
+  font-size: 0.82rem;
+  color: var(--pi-muted);
+  margin: 0.5rem 0 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(56, 189, 248, 0.35);
+}
+
+.pi-wiki-article .pi-credit-box {
+  margin-top: 3rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  font-size: 0.82rem;
+  color: var(--pi-muted);
+  line-height: 1.65;
+}
+
+.pi-toc {
+  margin: 1.5rem 0 2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  background: rgba(18, 22, 31, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pi-toc__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pi-accent);
+  margin: 0 0 0.75rem;
+}
+
+.pi-toc ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.pi-toc a {
+  color: var(--pi-blue);
+}
+
+.pi-toc .pi-toc-sub {
+  list-style: none;
+  padding-left: 1rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+}
+
 /* --- フッター --- */
 .pi-footer {
   position: relative;
