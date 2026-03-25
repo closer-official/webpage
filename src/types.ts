@@ -167,7 +167,8 @@ export type StyleId =
   | 'academy_lp'         // 13. 高CVセールスLP
   | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
   | 'gym_personal_neon' // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
-  | 'studio_blush_editorial'; // 16. ブラッシュ・創作スタジオ（撮影・ポートフォリオ）
+  | 'wiki_ensyuritsu' // 16. wiki円室律・オリジナル（embed 固定HTML）
+  | 'studio_blush_editorial'; // 17. ブラッシュ・創作スタジオ（撮影・ポートフォリオ）
 
 /** テンプレートあたりのバリアント数（現状 1） */
 export const SHOWCASE_VARIANT_COUNT = 1;
@@ -209,6 +210,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'cafe_1', name: '複数店舗・ミニマル' },
   { id: 'gym_personal_neon', name: 'CLOSER・ジム販売LP（gym-valx）' },
   { id: 'navy_cyan_consult', name: 'ネイビー×シアン（Web/LP）' },
+  { id: 'wiki_ensyuritsu', name: 'wiki円室律（オリジナル・ナレッジ）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

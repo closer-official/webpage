@@ -238,6 +238,14 @@ const GYM_VALX_DELIVERABLE_PAGE_CSS = `
   .page-wrapper.template-gym_personal_neon .vgx-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+/** wiki_ensyuritsu — server/conceptTemplates の WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS と同等（embed 本体は HTML 側） */
+const WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #0e1218; color: #f3efe6; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #a3e635; outline-offset: 2px; }
+  .page-wrapper.template-wiki_ensyuritsu main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-wiki_ensyuritsu .wes-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 /** テンプレ3〜11用の共通CSS（プレビュー用・professional・pet_salon・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
   .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
@@ -891,9 +899,16 @@ export const TEMPLATES: TemplateOption[] = [
     { omitCommonBase: true }
   ),
   makeTemplate(
+    'wiki_ensyuritsu',
+    'wiki円室律（オリジナル・ナレッジ）',
+    'テンプレ16：ワークスペース embed 固定HTML・銅×墨色（wiki-ensyuritsu）',
+    WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS,
+    { omitCommonBase: true }
+  ),
+  makeTemplate(
     'studio_blush_editorial',
     'ブラッシュ・創作スタジオ',
-    'テンプレ16：クリーム地×テラコッタ。撮影スタジオ・ポートフォリオ・レンタルスペース向け',
+    'テンプレ17：クリーム地×テラコッタ。撮影スタジオ・ポートフォリオ・レンタルスペース向け',
     STUDIO_BLUSH_EDITORIAL_CSS
   ),
 ];

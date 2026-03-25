@@ -37,6 +37,12 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 88,
     tags: ['コーポレート', '信頼感', 'コンサル'],
   }),
+  wiki_ensyuritsu: Object.freeze({
+    category: 'オリジナル・ナレッジ',
+    categories: ['Wiki', 'ナレッジ', '編集', 'クローズド'],
+    popularity: 86,
+    tags: ['wiki-ensyuritsu', '円室律', 'ENSYRITSU', 'オリジナル', '記事'],
+  }),
 });
 
 function simpleHash(str) {

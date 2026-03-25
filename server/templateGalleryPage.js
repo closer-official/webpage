@@ -449,6 +449,7 @@ export function renderTemplateGalleryPage() {
     'ジム・フィットネス（レガシー）': 'Gym · fitness (legacy)',
     'セールス・教室（レガシー）': 'Sales · courses (legacy)',
     '法人・相談': 'Business · consultation',
+    'オリジナル・ナレッジ': 'Original · knowledge layout',
     '参考デザイン': 'Reference designs',
     'カスタムテンプレート': 'Custom templates',
     'その他': 'Other',

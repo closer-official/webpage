@@ -1145,6 +1145,14 @@ const GYM_VALX_DELIVERABLE_PAGE_CSS = `
   .page-wrapper.template-gym_personal_neon .vgx-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+/** wiki_ensyuritsu — templates/workspaces/wiki-ensyuritsu/embed/index.html（固定HTML埋め込み） */
+const WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #0e1218; color: #f3efe6; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #a3e635; outline-offset: 2px; }
+  .page-wrapper.template-wiki_ensyuritsu main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-wiki_ensyuritsu .wes-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 export function getTemplateFullCss(templateId) {
   const tid = String(templateId || '');
   /** ギャラリー非掲載のレガシーID（既存店舗の HTML 生成用） */
@@ -1157,6 +1165,9 @@ export function getTemplateFullCss(templateId) {
   }
   if (key === 'gym_personal_neon') {
     return GYM_VALX_DELIVERABLE_PAGE_CSS;
+  }
+  if (key === 'wiki_ensyuritsu') {
+    return WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS;
   }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS

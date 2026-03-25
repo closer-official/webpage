@@ -13,6 +13,7 @@
 | `cafe-multistore/` | `cafe_1` | テンプレ1（複数店舗・ミニマル） |
 | `gym-valx/` | `gym_personal_neon` | テンプレ2（CLOSER・ジム販売LP） |
 | `navy-cyan-web/` | `navy_cyan_consult` | テンプレ3（ネイビー×シアン・Web/LP） |
+| `wiki-ensyuritsu/` | `wiki_ensyuritsu` | wiki円室律（オリジナル・ナレッジ・embed 固定HTML） |
 
 各フォルダに **`package.json`** があり、**このフォルダをカレントにしたまま**次が実行できます。
 

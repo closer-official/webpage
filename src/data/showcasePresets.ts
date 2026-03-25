@@ -651,6 +651,41 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  wiki_ensyuritsu: {
+    content: {
+      siteName: '円室律 ENSYRITSU',
+      title: '円室律 ENSYRITSU | オリジナル・ナレッジ',
+      headline: '私人のための、静かなクローズドWiki。',
+      subheadline:
+        '本体レイアウトは templates/workspaces/wiki-ensyuritsu/embed/index.html（wiki-ensyuritsu）。完全オリジナルブランドのデモです。',
+      ctaLabel: '設計を見る',
+      ctaHref: '#top',
+      sections: [
+        {
+          id: 'concept',
+          title: 'このテンプレについて',
+          content: 'ビルトインは固定 HTML 埋め込み。編集はワークスペースの embed を開いてください。',
+        },
+        { id: 'menu', title: 'トピック', content: 'トピック・ストック・公開設計の3カード構成です。' },
+        { id: 'hours', title: 'メタ', content: 'このテキストはメタ用。画面は embed が表示されます。' },
+        { id: 'access', title: 'フォルダ', content: 'templates/workspaces/wiki-ensyuritsu/' },
+        { id: 'contact', title: 'お問い合わせ', content: '本番ではフォームを接続してください。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} 円室律 ENSYRITSU（サンプル）`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1400',
+      ],
+    },
+    seo: {
+      metaTitle: '円室律 ENSYRITSU | オリジナル・ナレッジ（wiki-ensyuritsu）',
+      metaDescription:
+        '銅×墨色のオリジナル・ナレッジレイアウト。クローズドWiki向けの静的デモ（ワークスペース embed）。',
+      keywords: 'wiki,ensyuritsu,円室律,ENSYRITSU,ナレッジ,オリジナル',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   gym_personal_neon: {
     content: {
       siteName: 'CLOSER GYM',

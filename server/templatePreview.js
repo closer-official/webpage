@@ -143,23 +143,49 @@ export function renderTemplatePreview(templateId, customization = null) {
 
   const now = new Date().getFullYear();
   const name = labelOf(id);
-  let content = {
-    siteName: `${name} サンプル`,
-    title: `${name} サンプル`,
-    headline: `${name} サンプル`,
-    subheadline: 'デザイン確認用のサンプルです。実際の制作時には内容を差し替えます。',
-    sections: [
-      { id: 'concept', title: 'コンセプト', content: 'このテンプレートの見え方を確認するためのサンプル文です。' },
-      { id: 'menu', title: 'サービス', content: '提供サービスの概要が入ります。' },
-      { id: 'hours', title: '営業時間', content: '平日 10:00-19:00 / 土日祝 9:00-18:00' },
-      { id: 'access', title: 'アクセス', content: '東京都〇〇区〇〇 1-2-3' },
-      { id: 'contact', title: 'お問い合わせ', content: 'お問い合わせはフォームまたはSNSからご連絡ください。' },
-    ],
-    ctaLabel: 'お問い合わせ',
-    ctaHref: '#contact',
-    footerText: `© ${now} ${name} Sample`,
-    heroSlides: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400'],
-  };
+  let content =
+    id === 'wiki_ensyuritsu'
+      ? {
+          siteName: '円室律 ENSYRITSU',
+          title: '円室律 ENSYRITSU | オリジナル・ナレッジ',
+          headline: '私人のための、静かなクローズドWiki。',
+          subheadline:
+            '見た目の本体は templates/workspaces/wiki-ensyuritsu/embed/index.html です（wiki-ensyuritsu・完全オリジナルブランドのデモ）。',
+          sections: [
+            {
+              id: 'concept',
+              title: 'このテンプレについて',
+              content: 'buildHtml はワークスペースの固定 HTML を埋め込みます。文言・配色は embed を編集してください。',
+            },
+            { id: 'menu', title: 'トピック', content: 'カードと帯のリズムで、長文サイトの下準備に使えます。' },
+            { id: 'hours', title: 'メタ情報', content: 'このブロックは API メタ用です。プレビュー画面は embed が優先されます。' },
+            { id: 'access', title: '置き場', content: 'templates/workspaces/wiki-ensyuritsu/' },
+            { id: 'contact', title: 'お問い合わせ', content: 'フォーム連携は本番実装時に接続してください。' },
+          ],
+          ctaLabel: '設計を見る',
+          ctaHref: '#top',
+          footerText: `© ${now} 円室律 ENSYRITSU（サンプル）`,
+          heroSlides: [
+            'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1400',
+          ],
+        }
+      : {
+          siteName: `${name} サンプル`,
+          title: `${name} サンプル`,
+          headline: `${name} サンプル`,
+          subheadline: 'デザイン確認用のサンプルです。実際の制作時には内容を差し替えます。',
+          sections: [
+            { id: 'concept', title: 'コンセプト', content: 'このテンプレートの見え方を確認するためのサンプル文です。' },
+            { id: 'menu', title: 'サービス', content: '提供サービスの概要が入ります。' },
+            { id: 'hours', title: '営業時間', content: '平日 10:00-19:00 / 土日祝 9:00-18:00' },
+            { id: 'access', title: 'アクセス', content: '東京都〇〇区〇〇 1-2-3' },
+            { id: 'contact', title: 'お問い合わせ', content: 'お問い合わせはフォームまたはSNSからご連絡ください。' },
+          ],
+          ctaLabel: 'お問い合わせ',
+          ctaHref: '#contact',
+          footerText: `© ${now} ${name} Sample`,
+          heroSlides: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400'],
+        };
   const seo = {
     metaTitle: `${name} テンプレート確認`,
     metaDescription: `${name} テンプレートの確認用ページです。`,

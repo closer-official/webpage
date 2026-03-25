@@ -5,6 +5,7 @@ import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml';
 import { buildNavyDeliverableMainHtmlClient } from './navyDeliverableMainHtml';
 import { buildGymValxDeliverableMainHtmlClient } from './gymValxDeliverableMainHtml';
+import { buildWikiEnsyuritsuDeliverableMainHtmlClient } from './wikiEnsyuritsuDeliverableMainHtml';
 
 function escapeHtml(s: string): string {
   return s
@@ -121,6 +122,13 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'トップ', href: '#top' },
     { label: 'アクセス', href: '#access' },
   ],
+  wiki_ensyuritsu: [
+    { label: '概要', href: '#concept' },
+    { label: 'トピック', href: '#menu' },
+    { label: '更新・免責', href: '#hours' },
+    { label: '事務所', href: '#access' },
+    { label: 'お問い合わせ', href: '#contact' },
+  ],
   studio_blush_editorial: [
     { label: 'コンセプト', href: '#concept' },
     { label: 'サービス', href: '#menu' },
@@ -146,6 +154,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   ramen: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
+  wiki_ensyuritsu: { label: '相談する', href: '#contact' },
   studio_blush_editorial: { label: '相談する', href: '#contact' },
 };
 
@@ -705,6 +714,7 @@ ${cafe1ShopLocationsHtml()}
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
     gym_personal_neon:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
+    wiki_ensyuritsu: 'https://images.unsplash.com/photo-1589829547916-cbfea2230cfe?auto=format&fit=crop&w=1400',
     studio_blush_editorial:
       'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
   };
@@ -817,6 +827,10 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">`
+      : tid === 'wiki_ensyuritsu'
+        ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -828,7 +842,11 @@ ${cafe1ShopLocationsHtml()}
           : '';
 
   const scrollInScript =
-    tid === 'cafe_tea' || tid === 'cafe_1' || tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
+    tid === 'cafe_tea' ||
+    tid === 'cafe_1' ||
+    tid === 'navy_cyan_consult' ||
+    tid === 'gym_personal_neon' ||
+    tid === 'wiki_ensyuritsu'
       ? ''
       : `<script>
 (function(){
@@ -1542,12 +1560,16 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
   const gymValxMainHtmlClient =
     tid === 'gym_personal_neon' ? buildGymValxDeliverableMainHtmlClient(escapeHtml) : '';
 
-  const embeddedDeliverableMainHtml = navyMainHtmlClient + gymValxMainHtmlClient;
+  const wikiEnsyuritsuMainHtmlClient =
+    tid === 'wiki_ensyuritsu' ? buildWikiEnsyuritsuDeliverableMainHtmlClient(escapeHtml) : '';
+
+  const embeddedDeliverableMainHtml =
+    navyMainHtmlClient + gymValxMainHtmlClient + wikiEnsyuritsuMainHtmlClient;
 
   const bodyInner =
     tid === 'builder'
       ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-      : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon'
+      : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon' || tid === 'wiki_ensyuritsu'
         ? `${skipLink}
 ${embeddedDeliverableMainHtml}
   ${

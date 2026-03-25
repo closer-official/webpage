@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>円周率 π — ENSYRITSU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&family=Source+Code+Pro:wght@400;600&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+<style>
+/**
+ * wiki-ensyuritsu · 円周率（π）テーマ — ダークモード・幾何学
+ * 変数・リセット・セクション・アニメーション（パフォーマンス: transform / opacity を優先）
+ */
+
+.wes-deliverable.pi-page {
+  --pi-black: #000000;
+  --pi-bg: #0a0c12;
+  --pi-surface: #12161f;
+  --pi-surface2: #1a2030;
+  --pi-ink: #e8edf5;
+  --pi-muted: #8b96a8;
+  --pi-accent: #a3e635;
+  --pi-accent-soft: rgba(163, 230, 53, 0.45);
+  --pi-blue: #38bdf8;
+  --pi-blue-dim: rgba(56, 189, 248, 0.35);
+  --pi-font-display: "Playfair Display", "Noto Serif JP", Georgia, serif;
+  --pi-font-body: "Lato", "Noto Sans JP", system-ui, sans-serif;
+  --pi-font-mono: "Source Code Pro", ui-monospace, monospace;
+  --pi-ring: rgba(163, 230, 53, 0.08);
+  --pi-loader-z: 100000;
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--pi-bg);
+  color: var(--pi-ink);
+  font-family: var(--pi-font-body);
+  font-size: 16px;
+  line-height: 1.75;
+  overflow-x: clip;
+}
+
+.wes-deliverable.pi-page *,
+.wes-deliverable.pi-page *::before,
+.wes-deliverable.pi-page *::after {
+  box-sizing: border-box;
+}
+
+.wes-deliverable.pi-page a {
+  color: var(--pi-blue);
+  text-decoration: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.wes-deliverable.pi-page a:hover {
+  color: var(--pi-accent);
+  text-decoration: underline;
+}
+
+/* --- 流れる π 背景（メインエリア） --- */
+.pi-flow-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+  font-family: var(--pi-font-mono);
+  font-size: clamp(10px, 1.2vw, 14px);
+  line-height: 1.35;
+  color: var(--pi-accent);
+  white-space: pre-wrap;
+  word-break: break-all;
+  transform: rotate(-4deg) scale(1.08);
+  animation: pi-flow-drift 180s linear infinite;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 72%);
+}
+
+@keyframes pi-flow-drift {
+  0% {
+    transform: rotate(-4deg) scale(1.08) translateY(0);
+  }
+  100% {
+    transform: rotate(-4deg) scale(1.08) translateY(-12%);
+  }
+}
+
+/* --- カーソル用キャンバス --- */
+#pi-cursor-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: screen;
+}
+
+/* --- イントロローダー --- */
+#pi-loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pi-loader-z);
+  display: grid;
+  place-items: center;
+  background: var(--pi-black);
+  overflow: hidden;
+  transition: opacity 0.05s linear;
+}
+
+#pi-loader.pi-loader--exit {
+  animation: pi-grow-out 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes pi-grow-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+#pi-loader__ring-wrap {
+  position: relative;
+  width: min(72vmin, 420px);
+  height: min(72vmin, 420px);
+  animation: pi-spin 48s linear infinite;
+  will-change: transform;
+}
+
+@keyframes pi-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#pi-svg-ring {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#pi-svg-ring .pi-digit-path {
+  fill: url(#piDigitGrad);
+  font-family: var(--pi-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+#pi-loader__glow {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.12) 0%, transparent 65%);
+  pointer-events: none;
+  animation: pi-pulse 4s ease-in-out infinite;
+}
+
+@keyframes pi-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+#pi-loader__caption {
+  position: absolute;
+  bottom: max(8vh, 48px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--pi-muted);
+  opacity: 0.85;
+}
+
+/* メイン（イントロ後に表示） */
+#pi-main {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#pi-main.pi-main--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pi-skip-target {
+  scroll-margin-top: 1rem;
+}
+
+/* --- ヘッダー --- */
+.pi-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(10, 12, 18, 0.82);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.12);
+}
+
+.pi-header__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pi-header__brand-en {
+  font-size: 0.62rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--pi-muted);
+  font-weight: 600;
+}
+
+.pi-header__brand-ja {
+  font-family: var(--pi-font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.pi-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  justify-content: flex-end;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.pi-nav a {
+  color: var(--pi-muted);
+}
+.pi-nav a:hover {
+  color: var(--pi-accent);
+}
+
+/* --- Hero --- */
+#hero {
+  position: relative;
+  padding: clamp(3rem, 10vw, 5.5rem) 1.25rem 3rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+#hero::before {
+  content: "";
+  position: absolute;
+  inset: 10% 15%;
+  border-radius: 50%;
+  border: 1px solid var(--pi-ring);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: pi-hero-ring 24s linear infinite;
+}
+
+@keyframes pi-hero-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pi-hero__pi {
+  font-family: var(--pi-font-display);
+  font-size: clamp(4.5rem, 18vw, 9rem);
+  line-height: 1;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, var(--pi-accent) 0%, var(--pi-blue) 55%, #fff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 60px var(--pi-accent-soft);
+  filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.35));
+}
+
+.pi-hero__title {
+  font-family: var(--pi-font-display);
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0 0 1rem;
+}
+
+.pi-hero__lead {
+  max-width: 38rem;
+  margin: 0 auto;
+  color: var(--pi-muted);
+  font-size: 0.95rem;
+}
+
+.pi-hero__meta {
+  margin-top: 1.75rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: center;
+  font-family: var(--pi-font-mono);
+  font-size: 0.78rem;
+  color: var(--pi-blue);
+  opacity: 0.9;
+}
+
+/* --- セクション共通 --- */
+.pi-section {
+  position: relative;
+  z-index: 2;
+  padding: 2.5rem 1.25rem 3rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.pi-section__head {
+  margin-bottom: 1.75rem;
+}
+
+.pi-section__label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pi-accent);
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.pi-section__title {
+  font-family: var(--pi-font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+/* --- カードグリッド --- */
+.pi-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 720px) {
+  .pi-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pi-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pi-card {
+  background: linear-gradient(145deg, var(--pi-surface), var(--pi-surface2));
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  border-radius: 16px;
+  padding: 1.35rem 1.25rem 1.5rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.pi-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(163, 230, 53, 0.25);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45);
+}
+
+.pi-card h3 {
+  font-family: var(--pi-font-display);
+  font-size: 1.1rem;
+  margin: 0 0 0.65rem;
+}
+
+.pi-card p {
+  margin: 0;
+  color: #c5cedd;
+  font-size: 0.92rem;
+}
+
+/* --- 図版（クリックでライトボックス） --- */
+.pi-art {
+  margin-top: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: zoom-in;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pi-art:hover {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 1px var(--pi-accent-soft);
+}
+
+.pi-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pi-art__cap {
+  font-size: 0.72rem;
+  color: var(--pi-muted);
+  padding: 0.5rem 0.75rem 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+/* --- 数式 --- */
+.pi-formula-block {
+  margin-top: 1rem;
+}
+
+.pi-formula {
+  display: block;
+  font-family: var(--pi-font-mono);
+  font-size: clamp(0.85rem, 2.1vw, 1rem);
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(163, 230, 53, 0.2);
+  color: var(--pi-accent);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pi-formula::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--fx, 50%) var(--fy, 50%), rgba(56, 189, 248, 0.18), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.pi-formula:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.12);
+}
+
+.pi-formula:hover::after {
+  opacity: 1;
+}
+
+.pi-formula__viz {
+  margin-top: 0.85rem;
+  height: 120px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.45s ease, max-height 0.45s ease;
+  pointer-events: none;
+}
+
+.pi-formula:hover .pi-formula__viz,
+.pi-formula:focus-within .pi-formula__viz {
+  opacity: 1;
+  max-height: 200px;
+}
+
+.pi-formula__viz svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- 歴史・長文 --- */
+.pi-prose {
+  color: #c5cedd;
+  font-size: 0.95rem;
+}
+
+.pi-prose p + p {
+  margin-top: 1rem;
+}
+
+.pi-prose strong {
+  color: var(--pi-ink);
+  font-weight: 600;
+}
+
+/* --- フッター --- */
+.pi-footer {
+  position: relative;
+  z-index: 2;
+  padding: 3rem 1.25rem 4rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--pi-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- ライトボックス --- */
+#pi-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+#pi-lightbox.pi-lightbox--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+#pi-lightbox__panel {
+  max-width: min(92vw, 720px);
+  max-height: 86vh;
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(163, 230, 53, 0.25);
+  background: var(--pi-surface);
+  padding: 1rem;
+  transform: scale(0.92) rotate(-2deg);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+}
+
+#pi-lightbox.pi-lightbox--open #pi-lightbox__panel {
+  transform: scale(1) rotate(0deg);
+}
+
+#pi-lightbox__close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200001;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+#pi-lightbox__close:hover {
+  border-color: var(--pi-accent);
+  color: var(--pi-accent);
+}
+
+/* --- スクロールイン（円弧風） --- */
+.pi-reveal {
+  opacity: 0;
+  transform: translateY(36px) rotate(-2deg);
+  transition: opacity 0.75s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.pi-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) rotate(0deg);
+}
+
+/* --- アクセシビリティ: 動きを減らす --- */
+@media (prefers-reduced-motion: reduce) {
+  .pi-flow-bg,
+  #pi-loader__ring-wrap,
+  #hero::before,
+  .pi-reveal {
+    animation: none !important;
+    transition: none !important;
+  }
+  #pi-loader {
+    display: none !important;
+  }
+  #pi-main {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  #pi-cursor-canvas {
+    display: none !important;
+  }
+}
+
+</style>
+<div class="wes-deliverable pi-page">
+<div class="pi-flow-bg" aria-hidden="true"><span id="pi-flow-text"></span></div>
+<canvas id="pi-cursor-canvas" width="400" height="300" aria-hidden="true"></canvas>
+
+<div id="pi-loader" role="alert" aria-live="polite" aria-busy="true">
+  <div id="pi-loader__ring-wrap">
+    <div id="pi-loader__glow" aria-hidden="true"></div>
+    <svg id="pi-svg-ring" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="piDigitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#a3e635;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#38bdf8;stop-opacity:0.75" />
+          <stop offset="100%" style="stop-color:#38bdf8;stop-opacity:0.04" />
+        </linearGradient>
+        <path id="piCirclePath" fill="none" d="M200,200 m-155,0 a155,155 0 1,1 310,0 a155,155 0 1,1 -310,0" />
+      </defs>
+      <text class="pi-digit-path" xml:space="preserve">
+        <textPath id="pi-textpath-digits" href="#piCirclePath" startOffset="0%"></textPath>
+      </text>
+    </svg>
+  </div>
+  <p id="pi-loader__caption">LOADING · π</p>
+</div>
+
+<div id="pi-main">
+  <header class="pi-header">
+    <div class="pi-header__brand">
+      <span class="pi-header__brand-en">ENSYRITSU</span>
+      <span class="pi-header__brand-ja">円室律 · 円周率</span>
+    </div>
+    <nav class="pi-nav" aria-label="ページ内">
+      <a href="#hero">トップ</a>
+      <a href="#section-definition">定義</a>
+      <a href="#section-formulas">公式</a>
+      <a href="#section-history">歴史</a>
+      <a href="#section-digits">桁</a>
+    </nav>
+  </header>
+
+  <section id="hero" class="pi-skip-target" aria-labelledby="hero-title">
+    <p class="pi-hero__pi" aria-hidden="true">π</p>
+    <h1 id="hero-title" class="pi-hero__title">円周率（えんしゅうりつ）</h1>
+    <p class="pi-hero__lead">
+      円の周長とその直径との比として定まる正の実数。円の大きさに依らない不変量であり、記号はギリシャ文字の <strong>π</strong>（パイ）で表す。
+    </p>
+    <div class="pi-hero__meta" aria-hidden="true">
+      <span>C = πd = 2πr</span>
+      <span>超越数 · 無理数</span>
+    </div>
+  </section>
+
+  <section id="section-definition" class="pi-section pi-reveal" style="--reveal-delay:0.05s">
+    <header class="pi-section__head">
+      <span class="pi-section__label">DEFINITION</span>
+      <h2 class="pi-section__title">定義と性質</h2>
+    </header>
+    <div class="pi-grid pi-grid--2">
+      <article class="pi-card">
+        <h3>π とは</h3>
+        <p>平面上の任意の円について、周長 <em>C</em> と直径 <em>d</em> の比 <em>C/d</em> は常に同じ値に等しい。その値を円周率といい、π で表す。</p>
+        <button type="button" class="pi-art" data-art="diameter" aria-label="直径と円周の関係を拡大表示">
+          <svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#a3e635" stop-opacity="0.7"/>
+              </linearGradient>
+            </defs>
+            <circle cx="200" cy="120" r="88" fill="none" stroke="url(#g1)" stroke-width="2.5"/>
+            <line x1="112" y1="120" x2="288" y2="120" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 6"/>
+            <text x="200" y="108" text-anchor="middle" fill="#a3e635" font-size="14" font-family="Source Code Pro, monospace">d</text>
+            <path d="M 200 32 A 88 88 0 0 1 288 120" fill="none" stroke="#38bdf8" stroke-width="2"/>
+            <text x="252" y="58" fill="#e8edf5" font-size="12" font-family="Source Code Pro, monospace">C = πd</text>
+          </svg>
+          <p class="pi-art__cap">直径 <em>d</em> と円周 <em>C</em> — 比が π</p>
+        </button>
+      </article>
+      <article class="pi-card">
+        <h3>特性</h3>
+        <p>π は無理数であり、また超越数である。十進展開は非循環で続き、計算機科学や暗号の擬似乱数源の話題とも結びつく。</p>
+        <button type="button" class="pi-art" data-art="polygon" aria-label="正多角形による近似を拡大表示">
+          <svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="200" cy="120" r="90" fill="none" stroke="#38bdf8" stroke-opacity="0.35" stroke-width="1"/>
+            <polygon points="200,40 278,75 278,165 200,200 122,165 122,75" fill="none" stroke="#a3e635" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="200" cy="120" r="3" fill="#a3e635"/>
+          </svg>
+          <p class="pi-art__cap">内接正多角形 — アルキメデス的近似のイメージ</p>
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <section id="section-formulas" class="pi-section pi-reveal" style="--reveal-delay:0.1s">
+    <header class="pi-section__head">
+      <span class="pi-section__label">FORMULAS</span>
+      <h2 class="pi-section__title">代表的な公式</h2>
+    </header>
+    <div class="pi-grid pi-grid--2">
+      <article class="pi-card">
+        <h3>ライプニッツ級数</h3>
+        <p>交互級数として π を与える古典的な表現。項が増えるほど、部分和は π/4 に近づく。</p>
+        <div class="pi-formula-block">
+          <div class="pi-formula" tabindex="0">
+            π/4 = 1 − 1/3 + 1/5 − 1/7 + …
+            <div class="pi-formula__viz" aria-hidden="true">
+              <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="20,100 80,35 140,95 200,25 260,88 320,18 380,80" fill="none" stroke="#a3e635" stroke-width="2"/>
+                <line x1="20" y1="60" x2="380" y2="60" stroke="#38bdf8" stroke-opacity="0.35" stroke-dasharray="6 8"/>
+                <text x="200" y="112" text-anchor="middle" fill="#8b96a8" font-size="11">項数を増やすほど π/4 に収束（模式図）</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="pi-card">
+        <h3>オイラーの等式</h3>
+        <p>複素指数と三角関数を結び、五つの基本定数を一つの等式にまとめる。</p>
+        <div class="pi-formula-block">
+          <div class="pi-formula" tabindex="0">
+            e<sup>iπ</sup> + 1 = 0
+            <div class="pi-formula__viz" aria-hidden="true">
+              <svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="200" cy="60" r="48" fill="none" stroke="#38bdf8" stroke-opacity="0.6"/>
+                <line x1="200" y1="60" x2="248" y2="60" stroke="#a3e635" stroke-width="2"/>
+                <circle cx="248" cy="60" r="4" fill="#a3e635"/>
+                <text x="200" y="105" text-anchor="middle" fill="#8b96a8" font-size="11">単位円上の角度 π（模式図）</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="section-history" class="pi-section pi-reveal" style="--reveal-delay:0.12s">
+    <header class="pi-section__head">
+      <span class="pi-section__label">HISTORY</span>
+      <h2 class="pi-section__title">計算の歴史（概略）</h2>
+    </header>
+    <div class="pi-prose">
+      <p>古代メソポタミアやエジプトでは円周率の近似値が文書に見られる。ギリシャのアルキメデスは内接・外接の正多角形から π を評価し、幾何と数の橋をかけた。</p>
+      <p>近代以降は無限級数・無限積・モンテカルロ法など多様なアルゴリズムで桁が伸び、スーパーコンピュータを用いた記録競争は計算数学の象徴的存在となった。</p>
+    </div>
+    <button type="button" class="pi-art pi-reveal" style="--reveal-delay:0.15s;margin-top:1.25rem" data-art="digits" aria-label="桁の分布イメージを拡大表示">
+      <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g transform="translate(40,20)">
+          <rect x="0" y="120" width="24" height="40" fill="#38bdf8" opacity="0.5"/>
+          <rect x="32" y="100" width="24" height="60" fill="#a3e635" opacity="0.55"/>
+          <rect x="64" y="110" width="24" height="50" fill="#38bdf8" opacity="0.45"/>
+          <rect x="96" y="90" width="24" height="70" fill="#a3e635" opacity="0.6"/>
+          <rect x="128" y="105" width="24" height="55" fill="#38bdf8" opacity="0.5"/>
+          <rect x="160" y="95" width="24" height="65" fill="#a3e635" opacity="0.55"/>
+          <rect x="192" y="115" width="24" height="45" fill="#38bdf8" opacity="0.48"/>
+          <rect x="224" y="85" width="24" height="75" fill="#a3e635" opacity="0.62"/>
+          <rect x="256" y="108" width="24" height="52" fill="#38bdf8" opacity="0.5"/>
+          <rect x="288" y="98" width="24" height="62" fill="#a3e635" opacity="0.58"/>
+        </g>
+        <text x="200" y="190" text-anchor="middle" fill="#8b96a8" font-size="11">0–9 の出現（概念的な棒グラフ）</text>
+      </svg>
+      <p class="pi-art__cap">クリックで拡大 — 一様な出現のイメージ</p>
+    </button>
+  </section>
+
+  <section id="section-digits" class="pi-section pi-reveal" style="--reveal-delay:0.08s">
+    <header class="pi-section__head">
+      <span class="pi-section__label">VALUE</span>
+      <h2 class="pi-section__title">桁と無限</h2>
+    </header>
+    <p class="pi-prose">画面奥に流れる数字は π の十進桁をテクスチャとして用いたものです。可視化は装飾であり、検算や公式の定義には代わりません。</p>
+  </section>
+
+  <footer class="pi-footer" id="contact">
+    <p><strong>円室律 ENSYRITSU</strong> — 静的デモ（円周率をテーマにしたオリジナル構成）</p>
+    <p>数値・図は説明用の模式表現です。</p>
+  </footer>
+</div>
+
+<div id="pi-lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="図の拡大表示">
+  <button type="button" id="pi-lightbox__close" aria-label="閉じる">×</button>
+  <div id="pi-lightbox__panel"></div>
+</div>
+
+<div hidden>
+  <svg id="pi-art-store-diameter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" aria-hidden="true">
+    <circle cx="200" cy="120" r="88" fill="none" stroke="#38bdf8" stroke-width="3"/>
+    <line x1="112" y1="120" x2="288" y2="120" stroke="#e8edf5" stroke-width="2"/>
+    <path d="M 200 32 A 88 88 0 0 1 288 120" fill="none" stroke="#a3e635" stroke-width="3"/>
+    <text x="200" y="105" text-anchor="middle" fill="#a3e635" font-size="18" font-family="Source Code Pro, monospace">C = πd</text>
+  </svg>
+  <svg id="pi-art-store-polygon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" aria-hidden="true">
+    <circle cx="200" cy="120" r="95" fill="none" stroke="#38bdf8" stroke-opacity="0.4"/>
+    <polygon points="200,30 285,70 285,170 200,210 115,170 115,70" fill="none" stroke="#a3e635" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="200,45 270,78 270,162 200,195 130,162 130,78" fill="none" stroke="#38bdf8" stroke-opacity="0.6" stroke-dasharray="4 6"/>
+  </svg>
+  <svg id="pi-art-store-digits" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" aria-hidden="true">
+    <rect x="40" y="40" width="320" height="120" fill="rgba(0,0,0,0.35)" rx="12"/>
+    <g transform="translate(60,140)">
+      <rect x="0" y="0" width="22" height="50" fill="#38bdf8" opacity="0.55"/><rect x="28" y="-10" width="22" height="60" fill="#a3e635" opacity="0.6"/>
+      <rect x="56" y="5" width="22" height="45" fill="#38bdf8" opacity="0.45"/><rect x="84" y="-15" width="22" height="65" fill="#a3e635" opacity="0.65"/>
+      <rect x="112" y="0" width="22" height="50" fill="#38bdf8" opacity="0.5"/><rect x="140" y="-8" width="22" height="58" fill="#a3e635" opacity="0.58"/>
+      <rect x="168" y="8" width="22" height="42" fill="#38bdf8" opacity="0.48"/><rect x="196" y="-12" width="22" height="62" fill="#a3e635" opacity="0.62"/>
+      <rect x="224" y="3" width="22" height="47" fill="#38bdf8" opacity="0.52"/><rect x="252" y="-6" width="22" height="56" fill="#a3e635" opacity="0.56"/>
+    </g>
+    <text x="200" y="30" text-anchor="middle" fill="#e8edf5" font-size="14">桁分布（模式図 · 拡大）</text>
+  </svg>
+</div>
+</div>
+<script>
+/**
+ * wiki-ensyuritsu · 円周率ページ
+ * - イントロ（load 後に回転 → 拡大フェードアウト）
+ * - カーソルに π 桁の軌跡（canvas）
+ * - スクロール表示（IntersectionObserver）
+ * - 図版ライトボックス
+ * - 数式ホバーで視覚化パネル表示（CSS 連動）
+ */
+
+(function () {
+  'use strict';
+
+  /** 背景・トレイル用の π 桁（十分な長さ） */
+  var PI_DIGITS =
+    '3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271209091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554686484949392246172147838334914658105760992';
+
+  var prefersReduced =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function $(sel, root) {
+    return (root || document).querySelector(sel);
+  }
+
+  function $all(sel, root) {
+    return [].slice.call((root || document).querySelectorAll(sel));
+  }
+
+  /* --- 流れる背景テキスト --- */
+  function fillFlowBg() {
+    var el = $('#pi-flow-text');
+    if (!el) return;
+    var chunk = PI_DIGITS;
+    var repeated = '';
+    while (repeated.length < 12000) {
+      repeated += chunk + ' ';
+    }
+    el.textContent = repeated;
+  }
+
+  /* --- イントロ SVG に π 桁を流し込む（textPath） --- */
+  function fillLoaderTextPath() {
+    var tp = $('#pi-textpath-digits');
+    if (!tp) return;
+    var s = PI_DIGITS;
+    while (s.length < 2800) s += PI_DIGITS;
+    tp.textContent = s.slice(0, 2800);
+  }
+
+  function runIntro() {
+    var loader = $('#pi-loader');
+    var main = $('#pi-main');
+    if (!loader || !main) return;
+
+    if (prefersReduced) {
+      loader.style.display = 'none';
+      main.classList.add('pi-main--visible');
+      document.body.style.overflow = '';
+      return;
+    }
+
+    /** 回転を見せたあと、ローダー全体を拡大フェード（CSS #pi-loader.pi-loader--exit） */
+    var EXIT_MS = 2800;
+    var EXIT_ANIM_MS = 1150;
+
+    window.setTimeout(function () {
+      loader.classList.add('pi-loader--exit');
+    }, EXIT_MS);
+
+    window.setTimeout(function () {
+      loader.style.display = 'none';
+      loader.setAttribute('aria-hidden', 'true');
+      main.classList.add('pi-main--visible');
+      document.body.style.overflow = '';
+    }, EXIT_MS + EXIT_ANIM_MS + 40);
+  }
+
+  function onLoad() {
+    document.body.style.overflow = 'hidden';
+    fillFlowBg();
+    fillLoaderTextPath();
+    runIntro();
+  }
+
+  if (document.readyState === 'complete') {
+    onLoad();
+  } else {
+    window.addEventListener('load', onLoad);
+  }
+
+  /* --- カーソル軌跡（canvas） --- */
+  function initCursorTrail() {
+    if (prefersReduced) return;
+    var canvas = $('#pi-cursor-canvas');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var points = [];
+    var maxPts = 36;
+    var idx = 0;
+
+    function resize() {
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    window.addEventListener(
+      'mousemove',
+      function (e) {
+        points.push({
+          x: e.clientX,
+          y: e.clientY,
+          d: PI_DIGITS[idx % PI_DIGITS.length],
+        });
+        idx++;
+        if (points.length > maxPts) points.shift();
+      },
+      { passive: true }
+    );
+
+    function tick() {
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      if (points.length < 2) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+        var alpha = (i + 1) / points.length * 0.45;
+        ctx.font = '11px "Source Code Pro", monospace';
+        ctx.fillStyle = 'rgba(163, 230, 53, ' + alpha + ')';
+        ctx.fillText(p.d, p.x + (i % 5) * 0.6, p.y + (i % 3) * 0.4);
+      }
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (var j = 1; j < points.length; j++) {
+        ctx.lineTo(points[j].x, points[j].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  initCursorTrail();
+
+  /* --- スクロールイン --- */
+  function initReveal() {
+    var els = $all('.pi-reveal');
+    if (!els.length || !('IntersectionObserver' in window)) {
+      els.forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            en.target.classList.add('is-visible');
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { root: null, rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+    );
+    els.forEach(function (el) {
+      io.observe(el);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReveal);
+  } else {
+    initReveal();
+  }
+
+  /* --- ライトボックス --- */
+  function initLightbox() {
+    var root = $('#pi-lightbox');
+    var panel = $('#pi-lightbox__panel');
+    var closeBtn = $('#pi-lightbox__close');
+    if (!root || !panel) return;
+
+    function openClone(svgHtml, title) {
+      var safe = String(title || '図')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+      panel.innerHTML =
+        '<svg role="img" aria-label="' +
+        safe +
+        '" viewBox="0 0 400 400" width="100%" height="auto">' +
+        svgHtml +
+        '</svg>';
+      root.classList.add('pi-lightbox--open');
+      root.setAttribute('aria-hidden', 'false');
+      closeBtn && closeBtn.focus();
+    }
+
+    function close() {
+      root.classList.remove('pi-lightbox--open');
+      root.setAttribute('aria-hidden', 'true');
+      panel.innerHTML = '';
+    }
+
+    $all('[data-art]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-art');
+        var svgInner = $('#pi-art-store-' + id);
+        if (!svgInner) return;
+        openClone(svgInner.innerHTML, btn.getAttribute('aria-label') || '');
+      });
+    });
+
+    closeBtn && closeBtn.addEventListener('click', close);
+    root.addEventListener('click', function (e) {
+      if (e.target === root) close();
+    });
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && root.classList.contains('pi-lightbox--open')) close();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightbox);
+  } else {
+    initLightbox();
+  }
+
+  /* --- 数式のマウス位置（グラデーション） --- */
+  function initFormulaGlow() {
+    $all('.pi-formula').forEach(function (f) {
+      f.addEventListener('mousemove', function (e) {
+        var r = f.getBoundingClientRect();
+        var x = ((e.clientX - r.left) / r.width) * 100;
+        var y = ((e.clientY - r.top) / r.height) * 100;
+        f.style.setProperty('--fx', x + '%');
+        f.style.setProperty('--fy', y + '%');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFormulaGlow);
+  } else {
+    initFormulaGlow();
+  }
+})();
+
+</script>
+</body>
+</html>

@@ -7,6 +7,10 @@ import { TEMPLATE_IDS } from './conceptTemplates.js';
 /** ビルトイン（templatePreview.TEMPLATE_CANDIDATES と一致。先頭一致優先） */
 const RULES = [
   {
+    style: 'wiki_ensyuritsu',
+    re: /wiki[\s_-]?ensyuritsu|円室律|ENSYRITSU|wiki.?円室|クローズド.?wiki|ナレッジ.?ベース/i,
+  },
+  {
     style: 'cafe_1',
     re: /カフェ|\bcafe\b|coffee|コーヒー|喫茶|レストラン|restaurant|brunch|bistro|パン屋|ベーカリー|bakery|ケーキ|スイーツ|パティスリー|ラーメン|らーめん|ramen|つけ麺|油そば|支那そば|中華そば|居酒屋|バー|\bbar\b|ダイニングバー|pub|ワインバー|ナイト|lounge|ペット|ドッグ|犬|トリミング|pet|dog|dog_training/i,
   },
