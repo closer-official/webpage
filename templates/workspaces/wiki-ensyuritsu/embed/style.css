@@ -47,22 +47,22 @@
   text-decoration: underline;
 }
 
-/* --- 流れる π 背景（2層・パララックス・薄いグレー系） --- */
+/* --- 流れる π 背景（2層・パララックス・本文の下で極薄） --- */
 .pi-flow-bg {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.2;
+  opacity: 0.07;
   font-family: var(--pi-font-mono);
-  font-size: clamp(9px, 1.15vw, 13px);
-  line-height: 1.4;
-  color: rgba(180, 195, 215, 0.32);
+  font-size: clamp(8px, 1vw, 11px);
+  line-height: 1.45;
+  color: rgba(140, 155, 175, 0.14);
   white-space: pre-wrap;
   word-break: break-all;
   transform: rotate(-4deg) scale(1.08);
   animation: pi-flow-drift 220s linear infinite;
-  mask-image: radial-gradient(ellipse 85% 75% at 50% 42%, #000 18%, transparent 70%);
+  mask-image: radial-gradient(ellipse 72% 65% at 50% 45%, #000 12%, transparent 62%);
 }
 
 .pi-flow-bg #pi-flow-text,
@@ -72,12 +72,12 @@
 }
 
 .pi-flow-bg--layer2 {
-  opacity: 0.14;
-  color: rgba(150, 165, 188, 0.26);
-  font-size: clamp(8px, 1vw, 12px);
+  opacity: 0.055;
+  color: rgba(120, 135, 155, 0.12);
+  font-size: clamp(7px, 0.9vw, 10px);
   transform: rotate(5deg) scale(1.15);
   animation: pi-flow-drift2 260s linear infinite reverse;
-  mask-image: radial-gradient(ellipse 70% 60% at 60% 55%, #000 25%, transparent 68%);
+  mask-image: radial-gradient(ellipse 65% 55% at 58% 52%, #000 15%, transparent 58%);
 }
 
 @keyframes pi-flow-drift {
@@ -98,12 +98,12 @@
   }
 }
 
-/* --- カーソル用キャンバス --- */
+/* --- カーソル用キャンバス（本文より下：ブレンドで文字が消えないように） --- */
 #pi-cursor-canvas {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 50;
+  z-index: 1;
   mix-blend-mode: screen;
 }
 
@@ -202,10 +202,11 @@
   text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
 }
 
-/* メイン（イントロ後に表示） */
+/* メイン（イントロ後に表示・背景桁・カーソルより手前） */
 #pi-main {
   position: relative;
-  z-index: 2;
+  z-index: 4;
+  isolation: isolate;
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
@@ -757,7 +758,7 @@
 /* --- Wikipedia 全文（本文サンセリフ・見出しセリフ） --- */
 .pi-wiki-article {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 0 3rem;
@@ -766,7 +767,7 @@
   line-height: 1.95;
   letter-spacing: 0.03em;
   font-feature-settings: "palt" 1;
-  color: #d4dbe8;
+  color: #e8edf5;
 }
 
 /* --- 記事パネル（目次単位のカード） --- */
@@ -778,7 +779,7 @@
   margin-bottom: clamp(1.35rem, 2.8vw, 2.5rem);
   padding: clamp(1.35rem, 2.8vw, 2.1rem) clamp(1.2rem, 2.5vw, 2rem);
   border-radius: 20px;
-  background: linear-gradient(158deg, rgba(24, 28, 40, 0.94) 0%, rgba(10, 12, 20, 0.9) 100%);
+  background: linear-gradient(158deg, rgba(22, 26, 36, 0.97) 0%, rgba(12, 14, 22, 0.96) 100%);
   border: 1px solid rgba(56, 189, 248, 0.14);
   box-shadow:
     0 28px 72px rgba(0, 0, 0, 0.48),
@@ -1084,11 +1085,14 @@
 }
 
 .pi-wiki-article .pi-note {
-  font-size: 0.82rem;
-  color: var(--pi-muted);
-  margin: 0.5rem 0 1rem;
-  padding-left: 0.75rem;
-  border-left: 2px solid rgba(56, 189, 248, 0.35);
+  font-size: 0.85rem;
+  color: #c5d0e0;
+  margin: 0.5rem 0 1.25rem;
+  padding: 0.85rem 1rem 0.9rem 1rem;
+  border-left: 3px solid rgba(56, 189, 248, 0.5);
+  border-radius: 0 10px 10px 0;
+  background: rgba(8, 10, 16, 0.88);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .pi-wiki-article .pi-credit-box {
@@ -1207,25 +1211,21 @@
   color: var(--pi-accent);
 }
 
-/* --- スクロールイン：円形クリップ＋光彩（圧迫感の緩和） --- */
+/* --- スクロールイン：常に本文は読める（opacity 0 は使わない） --- */
 .pi-reveal.pi-reveal--orbit {
-  opacity: 0;
-  transform: scale(0.96) rotate(-1deg);
-  filter: blur(5px);
-  clip-path: circle(0% at 50% 38%);
+  opacity: 1;
+  transform: translateY(22px) scale(0.992);
+  filter: none;
+  clip-path: none;
   transition:
-    opacity 0.88s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.75s ease;
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.75s ease;
   transition-delay: var(--reveal-delay, 0s);
 }
 
 .pi-reveal.pi-reveal--orbit.is-visible {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
-  filter: blur(0);
-  clip-path: circle(155% at 50% 38%);
+  transform: translateY(0) scale(1);
 }
 
 .pi-reveal:not(.pi-reveal--orbit) {
@@ -1257,6 +1257,7 @@
     transform: none !important;
     filter: none !important;
     clip-path: none !important;
+    transition: none !important;
   }
   #hero.pi-hero--cinematic .pi-hero__video {
     display: none !important;

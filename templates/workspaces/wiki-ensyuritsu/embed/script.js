@@ -326,11 +326,30 @@
           }
         });
       },
-      { root: null, rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+      { root: null, rootMargin: '0px 0px 12% 0px', threshold: 0 }
     );
     els.forEach(function (el) {
       io.observe(el);
     });
+    requestAnimationFrame(function () {
+      els.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight + 80 && r.bottom > -120) {
+          el.classList.add('is-visible');
+          io.unobserve(el);
+        }
+      });
+    });
+    window.setTimeout(function () {
+      els.forEach(function (el) {
+        el.classList.add('is-visible');
+        try {
+          io.unobserve(el);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }, 4000);
   }
 
   if (document.readyState === 'loading') {
