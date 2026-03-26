@@ -795,7 +795,7 @@
   margin: 0 auto;
 }
 
-.pi-wiki-maincol--tunnel {
+.pi-wiki-maincol--corridor {
   max-width: none;
   width: 100%;
   margin: 0;
@@ -1902,19 +1902,14 @@ details.pi-formula-fold[open] > summary::after {
     transition: none !important;
   }
 
-  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-scene {
-    perspective: none !important;
-  }
-
-  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-camera,
-  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-helix,
-  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-slab {
-    transform: none !important;
+  .pi-corridor .pi-corridor-orbit__spin,
+  .pi-corridor .pi-corridor-ziggurat {
+    animation: none !important;
   }
 }
 
 /* ========== 3D 円筒トンネル（ウィキ本文は一字一句そのまま・螺旋配置） ========== */
-.pi-page.pi-page--tunnel-mode #hero {
+.pi-page.pi-page--corridor-mode #hero {
   max-height: 0;
   min-height: 0;
   opacity: 0;
@@ -1928,420 +1923,306 @@ details.pi-formula-fold[open] > summary::after {
     margin 0.5s ease;
 }
 
-.pi-page.pi-page--tunnel-mode #hero .pi-hero__media,
-.pi-page.pi-page--tunnel-mode #hero .pi-hero__stage {
+.pi-page.pi-page--corridor-mode #hero .pi-hero__media,
+.pi-page.pi-page--corridor-mode #hero .pi-hero__stage {
   visibility: hidden;
 }
 
-.pi-tunnel-root {
+/* ========== 知の回廊（固定背景の回転・円周π装飾・本文は通常スクロール・CSS中心） ========== */
+.pi-corridor {
   position: relative;
   width: 100%;
-  min-height: min(100vh, 920px);
-  height: calc(100vh - 5.5rem);
-  max-height: min(100vh - 5rem, 980px);
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(56, 189, 248, 0.14);
-  background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(18, 22, 35, 0.97), #06080f);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  min-height: 100%;
+  padding-bottom: 2rem;
 }
 
-.pi-tunnel-ziggurat {
+.pi-corridor-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pi-corridor-ziggurat {
   position: absolute;
-  inset: -35%;
+  inset: -28%;
   background:
     center / cover no-repeat
     url("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Chogha_Zanbil_DSC02394.jpg/1280px-Chogha_Zanbil_DSC02394.jpg");
-  opacity: 0.11;
-  filter: sepia(0.75) saturate(0.45) brightness(0.55) contrast(1.05);
-  animation: pi-tunnel-zig-rotate 140s linear infinite;
-  pointer-events: none;
-  z-index: 0;
+  opacity: 0.14;
+  filter: sepia(0.72) saturate(0.42) brightness(0.5) contrast(1.06);
+  transform-origin: 50% 55%;
+  animation: pi-corridor-ziggurat-drift 480s linear infinite;
 }
 
-@keyframes pi-tunnel-zig-rotate {
+@keyframes pi-corridor-ziggurat-drift {
   from {
-    transform: rotate(0deg) scale(1.08);
+    transform: rotate(0deg) scale(1.05);
   }
   to {
-    transform: rotate(360deg) scale(1.08);
+    transform: rotate(360deg) scale(1.05);
   }
 }
 
-.pi-tunnel-vortex {
+.pi-corridor-fog {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.35;
-}
-
-.pi-tunnel-vortex__morph {
-  width: min(120vmin, 720px);
-  height: min(120vmin, 720px);
-  margin: auto;
-  background: radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.12), transparent 58%),
-    radial-gradient(circle at 50% 50%, rgba(163, 230, 53, 0.06), transparent 52%);
-  border: 1px solid rgba(56, 189, 248, 0.1);
-  animation: pi-tunnel-poly-morph 22s ease-in-out infinite;
-  filter: blur(0.5px);
-}
-
-@keyframes pi-tunnel-poly-morph {
-  0%,
-  100% {
-    clip-path: polygon(50% 4%, 94% 76%, 6% 76%);
-    border-radius: 0;
-  }
-  20% {
-    clip-path: polygon(50% 2%, 98% 38%, 80% 98%, 20% 98%, 2% 38%);
-  }
-  40% {
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  }
-  60% {
-    clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
-  }
-  80% {
-    clip-path: ellipse(46% 46% at 50% 50%);
-  }
-}
-
-.pi-tunnel-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  touch-action: none;
-}
-
-.pi-tunnel-scene {
-  position: absolute;
-  inset: 0;
-  perspective: 1100px;
-  perspective-origin: 50% 42%;
-  overflow: hidden;
-}
-
-.pi-tunnel-fog {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 55% at 50% 48%, transparent 0%, transparent 32%, rgba(6, 8, 14, 0.55) 100%),
-    linear-gradient(180deg, rgba(6, 8, 14, 0.2) 0%, transparent 35%, transparent 65%, rgba(6, 8, 14, 0.45) 100%);
-  mix-blend-mode: multiply;
+    radial-gradient(ellipse 78% 62% at 50% 42%, transparent 0%, transparent 32%, rgba(6, 8, 14, 0.88) 92%),
+    radial-gradient(circle at 50% 50%, rgba(8, 12, 20, 0.2), transparent 55%);
+  opacity: 1;
 }
 
-.pi-tunnel-mouth {
+.pi-corridor-orbit {
   position: absolute;
   left: 50%;
-  top: 44%;
-  width: min(72vmin, 420px);
-  height: min(72vmin, 420px);
+  top: 42%;
+  width: min(140vmin, 920px);
+  height: min(140vmin, 920px);
   transform: translate(-50%, -50%);
-  z-index: 5;
-  pointer-events: none;
-  display: grid;
-  place-items: center;
-  opacity: 0;
+  opacity: 0.22;
 }
 
-.pi-tunnel-root.pi-tunnel--entered .pi-tunnel-mouth {
-  animation: pi-tunnel-mouth-handoff 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes pi-tunnel-mouth-handoff {
-  0% {
-    opacity: 0.95;
-    transform: translate(-50%, -50%) scale(2.4);
-  }
-  55% {
-    opacity: 0.65;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.35);
-    visibility: hidden;
-  }
-}
-
-.pi-tunnel-mouth__svg {
+.pi-corridor-orbit__svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.45));
-}
-
-.pi-tunnel-gear-hud {
-  position: absolute;
-  left: 50%;
-  top: 10%;
-  transform: translateX(-50%);
-  z-index: 6;
-  width: min(280px, 52vw);
-  text-align: center;
-  pointer-events: none;
-}
-
-.pi-tunnel-gear-hud__svg {
-  width: 100%;
-  height: auto;
   display: block;
-  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.25));
 }
 
-.pi-tunnel-gear-hud__spin {
-  transform-origin: 160px 100px;
-  animation: pi-tunnel-gear-spin 36s linear infinite;
+.pi-corridor-orbit__spin {
+  transform-origin: 200px 200px;
+  animation: pi-corridor-orbit-spin 400s linear infinite;
 }
 
-@keyframes pi-tunnel-gear-spin {
+@keyframes pi-corridor-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
   to {
     transform: rotate(360deg);
   }
 }
 
-.pi-tunnel-gear-hud__label {
-  margin: 0.35rem 0 0;
-  font-family: var(--pi-font-mincho);
-  font-size: clamp(0.82rem, 2.2vw, 0.98rem);
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  color: #bae6fd;
-  text-shadow: 0 0 18px rgba(56, 189, 248, 0.55), 0 0 36px rgba(163, 230, 53, 0.2);
+.pi-corridor-orbit__text {
+  fill: rgba(56, 189, 248, 0.14);
+  font-family: var(--pi-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  paint-order: stroke fill;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 0.35px;
 }
 
-.pi-tunnel-hint {
-  position: absolute;
-  bottom: 0.65rem;
+.pi-corridor-content {
+  position: relative;
+  z-index: 2;
+  max-width: min(1000px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(0.75rem, 2.5vw, 1.25rem) 3rem;
+  padding-right: max(clamp(0.75rem, 2.5vw, 1.25rem), 5.5rem);
+}
+
+.pi-wiki-article--corridor {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+/* グラスモーフィズム・螺旋的に立ち上がる（本文は常に正面・3Dなし） */
+.pi-corridor:not(.pi-corridor--reduced) .pi-wiki-article--corridor .pi-wiki-panel {
+  border-radius: 18px;
+  padding: clamp(1rem, 2vw, 1.35rem) clamp(1rem, 2.5vw, 1.5rem) clamp(1.2rem, 2.5vw, 1.65rem);
+  background: rgba(6, 8, 14, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+}
+
+@media (max-width: 768px) {
+  .pi-corridor:not(.pi-corridor--reduced) .pi-wiki-article--corridor .pi-wiki-panel {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+.pi-corridor:not(.pi-corridor--reduced) .pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit {
+  opacity: 1;
+  filter: none;
+  clip-path: none;
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pi-corridor:not(.pi-corridor--reduced) .pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit:not(.is-corridor-spiral) {
+  opacity: 0.38;
+  transform: translateY(42px) translateX(var(--corridor-spiral-x, 0px)) scale(0.985);
+}
+
+.pi-corridor:not(.pi-corridor--reduced) .pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit.is-corridor-spiral {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+.pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit:nth-of-type(4n + 1) {
+  --corridor-spiral-x: -22px;
+}
+.pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit:nth-of-type(4n + 2) {
+  --corridor-spiral-x: 18px;
+}
+.pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit:nth-of-type(4n + 3) {
+  --corridor-spiral-x: -14px;
+}
+.pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit:nth-of-type(4n) {
+  --corridor-spiral-x: 20px;
+}
+
+.pi-corridor-hint {
+  position: fixed;
+  bottom: max(5.5rem, calc(env(safe-area-inset-bottom, 0px) + 4.5rem));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 7;
+  z-index: 40;
   margin: 0;
-  max-width: min(36rem, 92vw);
+  max-width: min(32rem, calc(100vw - 7rem));
   padding: 0.35rem 0.75rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
   color: rgba(186, 230, 253, 0.55);
   text-align: center;
   pointer-events: none;
 }
 
-.pi-tunnel-footer-btn {
-  position: absolute;
-  bottom: 2.35rem;
-  right: 0.75rem;
-  z-index: 8;
+.pi-corridor-footer-btn {
+  position: fixed;
+  bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  background: rgba(8, 12, 20, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  background: rgba(8, 12, 20, 0.82);
   color: #bae6fd;
   cursor: pointer;
   transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.pi-tunnel-footer-btn:hover {
+.pi-corridor-footer-btn:hover {
   border-color: rgba(163, 230, 53, 0.45);
   color: var(--pi-accent);
 }
 
-.pi-tunnel-camera {
+/* 円形目次（ドットは常に正面を向く） */
+.pi-corridor-compass {
+  position: fixed;
+  right: max(10px, env(safe-area-inset-right, 0px));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  width: min(200px, 38vw);
+  height: min(200px, 38vw);
+  min-width: 120px;
+  min-height: 120px;
+  pointer-events: none;
+}
+
+.pi-corridor-compass__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  background: radial-gradient(circle at 50% 50%, rgba(8, 12, 20, 0.5), rgba(6, 8, 14, 0.2));
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.pi-corridor-compass__dot {
   position: absolute;
   left: 50%;
-  top: 48%;
-  width: 1px;
-  height: 1px;
-  transform-style: preserve-3d;
-  transform: translate3d(0, 0, 520px) rotateY(0deg);
-  z-index: 3;
-  will-change: transform;
-}
-
-.pi-tunnel-helix {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform-style: preserve-3d;
-  transform: translate(-50%, -50%);
-}
-
-.pi-wiki-article--tunnel {
-  position: relative;
-  transform-style: preserve-3d;
-  max-width: none;
-  width: 1px;
-  height: 1px;
-  margin: 0;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5px 0 0 -5px;
   padding: 0;
-}
-
-.pi-tunnel-slab {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: min(88vw, 720px);
-  max-height: min(72vh, 620px);
-  transform-style: preserve-3d;
-  transform-origin: center center;
-  will-change: transform, opacity, filter;
-}
-
-.pi-tunnel-slab__poly {
-  position: absolute;
-  inset: -8%;
-  z-index: 0;
+  border: none;
   border-radius: 50%;
-  background: conic-gradient(from 120deg, rgba(56, 189, 248, 0.08), transparent, rgba(163, 230, 53, 0.06), transparent);
-  opacity: 0.45;
-  animation: pi-tunnel-slab-poly 14s ease-in-out infinite;
-  pointer-events: none;
-  filter: blur(1px);
-}
-
-@keyframes pi-tunnel-slab-poly {
-  0%,
-  100% {
-    clip-path: polygon(50% 6%, 91% 78%, 9% 78%);
-    transform: rotate(0deg) scale(1);
-  }
-  33% {
-    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-    transform: rotate(120deg) scale(1.04);
-  }
-  66% {
-    clip-path: ellipse(48% 48% at 50% 50%);
-    transform: rotate(240deg) scale(1.02);
-  }
-}
-
-.pi-tunnel-slab__face {
-  position: relative;
-  z-index: 1;
-  max-height: min(72vh, 620px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0.85rem 1rem 1.1rem;
-  border-radius: 16px;
-  background: linear-gradient(165deg, rgba(18, 22, 32, 0.92), rgba(8, 10, 16, 0.94));
-  border: 1px solid rgba(56, 189, 248, 0.12);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-  scrollbar-width: thin;
+  background: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: rotate(var(--compass-a, 0deg)) translateY(calc(-1 * var(--compass-r, 86px)))
+    rotate(calc(-1 * var(--compass-a, 0deg)));
   transition:
-    opacity 0.45s ease,
-    filter 0.5s ease,
-    box-shadow 0.45s ease,
-    border-color 0.45s ease;
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.pi-tunnel-slab:not(.pi-tunnel-slab--focus) .pi-tunnel-slab__face {
-  opacity: 0.28;
-  filter: blur(4px) saturate(0.35) brightness(0.65);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+.pi-corridor-compass__dot--sub {
+  width: 7px;
+  height: 7px;
+  margin: -3px 0 0 -3px;
+  opacity: 0.75;
+  --compass-r: 72px;
 }
 
-.pi-tunnel-slab--focus .pi-tunnel-slab__face {
-  opacity: 1;
-  filter: none;
-  border-color: rgba(56, 189, 248, 0.42);
-  box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.2),
-    0 0 48px rgba(56, 189, 248, 0.18),
-    0 0 80px rgba(186, 230, 253, 0.08),
-    0 20px 56px rgba(0, 0, 0, 0.55);
+.pi-corridor-compass__dot:hover,
+.pi-corridor-compass__dot:focus-visible {
+  background: rgba(163, 230, 53, 0.55);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.35);
 }
 
-.pi-tunnel-helix .pi-reveal,
-.pi-tunnel-helix .pi-reveal.pi-reveal--orbit {
+.pi-corridor-compass__dot.is-active {
+  background: var(--pi-accent);
+  box-shadow: 0 0 14px rgba(163, 230, 53, 0.45);
+}
+
+.pi-corridor--reduced .pi-corridor-orbit,
+.pi-corridor--reduced .pi-corridor-ziggurat {
+  animation: none !important;
+}
+
+.pi-corridor--reduced .pi-corridor-hint {
+  display: none;
+}
+
+.pi-corridor--reduced .pi-wiki-article--corridor .pi-reveal.pi-reveal--orbit {
   opacity: 1 !important;
   transform: none !important;
-  filter: none !important;
-  clip-path: none !important;
   transition: none !important;
 }
 
-.pi-tunnel-helix .pi-wiki-panel {
-  margin-bottom: 0;
+.pi-corridor--reduced .pi-wiki-article--corridor .pi-wiki-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(8, 10, 16, 0.78);
 }
 
-.pi-tunnel--reduced .pi-tunnel-ziggurat,
-.pi-tunnel--reduced .pi-tunnel-vortex,
-.pi-tunnel--reduced .pi-tunnel-mouth,
-.pi-tunnel--reduced .pi-tunnel-fog {
-  display: none;
-}
+@media (max-width: 720px) {
+  .pi-corridor-content {
+    padding-right: max(clamp(0.75rem, 2.5vw, 1.25rem), 4.25rem);
+  }
 
-.pi-tunnel--reduced {
-  min-height: 0;
-  height: auto;
-  max-height: none;
-  overflow: visible;
-  border: none;
-  box-shadow: none;
-  background: transparent;
-}
+  .pi-corridor-compass {
+    width: min(160px, 34vw);
+    height: min(160px, 34vw);
+    min-width: 100px;
+    min-height: 100px;
+  }
 
-.pi-tunnel--reduced .pi-tunnel-stage {
-  position: relative;
-  touch-action: auto;
-}
+  .pi-corridor-compass__dot {
+    --compass-r: 70px;
+  }
 
-.pi-tunnel--reduced .pi-tunnel-scene {
-  position: relative;
-  overflow: visible;
-}
-
-.pi-tunnel--reduced .pi-tunnel-camera {
-  position: static;
-  transform: none !important;
-  width: auto;
-  height: auto;
-}
-
-.pi-tunnel--reduced .pi-tunnel-helix {
-  position: static;
-  transform: none !important;
-}
-
-.pi-tunnel--reduced .pi-wiki-article--tunnel {
-  width: auto;
-  height: auto;
-}
-
-.pi-tunnel--reduced .pi-tunnel-slab {
-  position: relative;
-  left: auto;
-  top: auto;
-  width: auto;
-  max-height: none;
-  transform: none !important;
-  margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
-}
-
-.pi-tunnel--reduced .pi-tunnel-slab__poly {
-  display: none;
-}
-
-.pi-tunnel--reduced .pi-tunnel-slab__face {
-  max-height: none;
-  overflow: visible;
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-.pi-tunnel--reduced .pi-tunnel-gear-hud,
-.pi-tunnel--reduced .pi-tunnel-hint,
-.pi-tunnel--reduced .pi-tunnel-footer-btn {
-  display: none;
-}
-
-@media (max-width: 1099px) {
-  .pi-tunnel-root {
-    height: min(88vh, 820px);
-    max-height: none;
+  .pi-corridor-compass__dot--sub {
+    --compass-r: 58px;
   }
 }

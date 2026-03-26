@@ -5,7 +5,7 @@
  * - サイド目次スクロールスパイ
  * - MathJax 数式組版
  * - 歴史セクション：石碑風タイポ＋1字ずつ彫刻表示（スクロールで開始）
- * - 3D 円筒トンネル：ホイールで奥行き＋回転、中央スラブがフォーカス（本文は省略なし）
+ * - 知の回廊：固定ジッグラト背景の CSS 回転・円周 π 装飾・スクロール連動の螺旋 reveal・円形目次
  * - カーソル軌跡 / ライトボックス
  */
 
@@ -68,6 +68,14 @@
     tp.textContent = s.slice(0, 2800);
   }
 
+  function fillCorridorOrbitText() {
+    var tp = $('#pi-corridor-textpath');
+    if (!tp) return;
+    var s = PI_DIGITS;
+    while (s.length < 2400) s += PI_DIGITS;
+    tp.textContent = s.slice(0, 2400);
+  }
+
   /** スクロールに応じて桁レイヤーを視差移動（本文の「無限」演出と連動） */
   function initParallaxDigits() {
     if (prefersReduced) return;
@@ -97,214 +105,97 @@
     apply();
   }
 
-  /** 3D 円筒トンネル：ホイール＝奥へ進行＋回転、中央スラブがフォーカス（本文 DOM は一字一句維持） */
-  function initTunnel() {
-    var root = $('#pi-tunnel-root');
-    var helix = $('#pi-tunnel-helix');
-    var camera = $('#pi-tunnel-camera');
-    var scene = $('#pi-tunnel-scene');
-    var stage = $('#pi-tunnel-stage');
-    var article = $('.pi-wiki-article--tunnel');
+  /** 知の回廊：本文 DOM は一字一句そのまま・背景のみ回転・スクロール連動の螺旋 reveal・円形目次 */
+  function initCorridor() {
+    var root = $('#pi-corridor-root');
     var page = $('.wes-deliverable.pi-page');
-    if (!root || !helix || !camera || !article) return;
-    if (root.getAttribute('data-tunnel-init') === '1') return;
-    root.setAttribute('data-tunnel-init', '1');
+    if (!root) return;
+    if (root.getAttribute('data-corridor-init') === '1') return;
+    root.setAttribute('data-corridor-init', '1');
 
     if (prefersReduced) {
-      root.classList.add('pi-tunnel--reduced');
-      return;
+      root.classList.add('pi-corridor--reduced');
     }
 
-    window.addEventListener('pi-tunnel-enter', function () {
-      root.classList.add('pi-tunnel--entered');
+    window.addEventListener('pi-corridor-enter', function () {
+      root.classList.add('pi-corridor--entered');
     });
 
-    var children = [].slice.call(article.children);
-    var frag = document.createDocumentFragment();
-    children.forEach(function (node, i) {
-      var slab = document.createElement('div');
-      slab.className = 'pi-tunnel-slab';
-      slab.dataset.tunnelIndex = String(i);
-      var poly = document.createElement('div');
-      poly.className = 'pi-tunnel-slab__poly';
-      poly.setAttribute('aria-hidden', 'true');
-      var face = document.createElement('div');
-      face.className = 'pi-tunnel-slab__face';
-      slab.appendChild(poly);
-      slab.appendChild(face);
-      face.appendChild(node);
-      frag.appendChild(slab);
-    });
-    article.appendChild(frag);
+    function initCorridorCompass() {
+      var nav = $('#pi-corridor-compass');
+      if (!nav) return;
+      var aside = $('.pi-toc-aside');
+      var links = aside ? $all('.pi-toc-aside a[href^="#"]') : [];
+      if (!links.length) return;
+      nav.innerHTML = '';
+      var ring = document.createElement('div');
+      ring.className = 'pi-corridor-compass__ring';
+      nav.appendChild(ring);
 
-    var slabs = $all('.pi-tunnel-slab', helix);
-    slabs.forEach(function (s) {
-      s.classList.add('is-visible');
-    });
+      var n = links.length;
+      links.forEach(function (a, i) {
+        var id = a.getAttribute('href').replace(/^#/, '');
+        var isSub = !!(a.closest && a.closest('.pi-toc-sub'));
+        var angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+        var deg = (angle * 180) / Math.PI;
+        var rPx = isSub ? 78 : 92;
 
-    var camZ = 520;
-    var minZ = -8000;
-    var maxZ = 720;
-    var gearLabel = $('#pi-tunnel-gear-label');
-
-    function layoutHelix() {
-      var R = Math.min(560, Math.max(300, window.innerWidth * 0.34));
-      var zStep = Math.min(430, Math.max(300, window.innerHeight * 0.48));
-      var angleStep = (Math.PI * 2) / 8.2;
-      var n = slabs.length;
-      slabs.forEach(function (slab, i) {
-        var theta = i * angleStep;
-        var x = R * Math.sin(theta);
-        var z = -i * zStep + R * Math.cos(theta) * 0.32;
-        var y = -i * (zStep * 0.07);
-        var deg = (-theta * 180) / Math.PI + 180;
-        slab.style.transform =
-          'translate(-50%, -50%) translate3d(' +
-          x.toFixed(1) +
-          'px,' +
-          y.toFixed(1) +
-          'px,' +
-          z.toFixed(1) +
-          'px) rotateY(' +
-          deg.toFixed(2) +
-          'deg)';
-        slab._idealCamZ = 500 - i * zStep * 0.88 + R * 0.08;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pi-corridor-compass__dot' + (isSub ? ' pi-corridor-compass__dot--sub' : '');
+        btn.setAttribute('aria-label', (a.textContent || '').replace(/\s+/g, ' ').trim() + 'へ移動');
+        btn.dataset.corridorTarget = id;
+        btn.style.setProperty('--compass-a', deg + 'deg');
+        btn.style.setProperty('--compass-r', rPx + 'px');
+        btn.addEventListener('click', function () {
+          var el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        nav.appendChild(btn);
       });
-      minZ = -(n * zStep * 0.92 + 420);
-      maxZ = 680;
     }
 
-    layoutHelix();
-
-    function applyCamera() {
-      camZ = Math.max(minZ, Math.min(maxZ, camZ));
-      var ry = camZ * -0.048;
-      camera.style.transform = 'translate3d(0, 0,' + camZ + 'px) rotateY(' + ry + 'deg)';
-    }
-
-    applyCamera();
-
-    if (stage) {
-      stage.addEventListener(
-        'wheel',
-        function (e) {
-          e.preventDefault();
-          camZ += e.deltaY * 0.9;
-          applyCamera();
+    function initCorridorSpiral() {
+      if (root.classList.contains('pi-corridor--reduced')) {
+        $all('.pi-corridor .pi-reveal', root).forEach(function (el) {
+          el.classList.add('is-corridor-spiral');
+        });
+        return;
+      }
+      if (!('IntersectionObserver' in window)) {
+        $all('.pi-corridor .pi-reveal', root).forEach(function (el) {
+          el.classList.add('is-corridor-spiral');
+        });
+        return;
+      }
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add('is-corridor-spiral');
+              io.unobserve(en.target);
+            }
+          });
         },
-        { passive: false }
+        { root: null, rootMargin: '-10% 0px -18% 0px', threshold: 0 }
       );
-
-      var ty = 0;
-      stage.addEventListener(
-        'touchstart',
-        function (e) {
-          if (e.touches[0]) ty = e.touches[0].clientY;
-        },
-        { passive: true }
-      );
-      stage.addEventListener(
-        'touchmove',
-        function (e) {
-          if (!e.touches[0]) return;
-          var y = e.touches[0].clientY;
-          var dy = ty - y;
-          ty = y;
-          camZ += dy * 1.35;
-          applyCamera();
-        },
-        { passive: true }
-      );
-
-      stage.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-          e.preventDefault();
-          camZ -= 280;
-          applyCamera();
-        } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-          e.preventDefault();
-          camZ += 280;
-          applyCamera();
-        }
+      $all('.pi-corridor .pi-reveal', root).forEach(function (el) {
+        io.observe(el);
       });
-      stage.setAttribute('tabindex', '0');
     }
 
-    window.addEventListener(
-      'resize',
-      function () {
-        layoutHelix();
-        applyCamera();
-      },
-      { passive: true }
-    );
+    initCorridorCompass();
+    initCorridorSpiral();
 
-    var fb = $('#pi-tunnel-footer-btn');
+    var fb = $('#pi-corridor-footer-btn');
     if (fb) {
       fb.addEventListener('click', function () {
         document.body.style.overflow = '';
-        if (page) page.classList.remove('pi-page--tunnel-mode');
+        if (page) page.classList.remove('pi-page--corridor-mode');
         var ft = $('#contact');
         if (ft) ft.scrollIntoView({ behavior: 'smooth' });
       });
     }
-
-    var aside = $('.pi-toc-aside');
-    if (aside) {
-      aside.addEventListener('click', function (e) {
-        var a = e.target.closest && e.target.closest('a[href^="#"]');
-        if (!a || root.classList.contains('pi-tunnel--reduced')) return;
-        var id = a.getAttribute('href').replace(/^#/, '');
-        var target = document.getElementById(id);
-        if (!target) return;
-        var slab = target.closest('.pi-tunnel-slab');
-        if (!slab || typeof slab._idealCamZ !== 'number') return;
-        e.preventDefault();
-        camZ = slab._idealCamZ;
-        applyCamera();
-      });
-    }
-
-    function tickFocus() {
-      var cx = window.innerWidth / 2;
-      var cy = window.innerHeight / 2;
-      var best = null;
-      var bestD = Infinity;
-      for (var i = 0; i < slabs.length; i++) {
-        var slab = slabs[i];
-        var r = slab.getBoundingClientRect();
-        var mx = r.left + r.width / 2;
-        var my = r.top + r.height / 2;
-        var d = (mx - cx) * (mx - cx) + (my - cy) * (my - cy);
-        if (d < bestD) {
-          bestD = d;
-          best = slab;
-        }
-      }
-      for (var j = 0; j < slabs.length; j++) {
-        slabs[j].classList.toggle('pi-tunnel-slab--focus', slabs[j] === best);
-      }
-      if (best && gearLabel) {
-        var h2 = best.querySelector('h2');
-        var lbl = '';
-        if (h2 && h2.textContent) lbl = h2.textContent.replace(/\s+/g, ' ').trim();
-        if (!lbl) {
-          var wire = best.querySelector('[data-pi-label]');
-          if (wire) lbl = wire.getAttribute('data-pi-label') || '';
-        }
-        if (!lbl) {
-          var ar = best.getAttribute('aria-label');
-          if (ar) lbl = ar;
-        }
-        if (!lbl) {
-          var note = best.querySelector('.pi-note');
-          if (note) lbl = '出典・凡例';
-        }
-        gearLabel.textContent = lbl || '—';
-      }
-      requestAnimationFrame(tickFocus);
-    }
-    requestAnimationFrame(tickFocus);
   }
 
   /** サイド目次：現在の章をハイライト */
@@ -321,10 +212,6 @@
     });
     if (!sections.length) return;
 
-    var tunnelRoot = $('#pi-tunnel-root');
-    var useTunnel =
-      tunnelRoot && !tunnelRoot.classList.contains('pi-tunnel--reduced') && document.querySelector('.pi-tunnel-slab');
-
     function setActive(currentId) {
       sections.forEach(function (s) {
         var on = s.id === currentId;
@@ -332,25 +219,13 @@
         if (on) s.a.setAttribute('aria-current', 'location');
         else s.a.removeAttribute('aria-current');
       });
-    }
-
-    function updateTunnelToc() {
-      var focus = document.querySelector('.pi-tunnel-slab--focus');
-      if (!focus) return;
-      var sec = focus.querySelector('section[id^="wiki-"]');
-      if (!sec) sec = focus.querySelector('section[id]');
-      var sid = sec ? sec.id : '';
-      if (!sid) {
-        var inner = focus.querySelector('[id^="wiki-"]');
-        if (inner) sid = inner.id;
-      }
-      var currentId = sections[0].id;
-      if (sid) {
-        sections.forEach(function (s) {
-          if (s.id === sid) currentId = s.id;
-        });
-      }
-      setActive(currentId);
+      $all('.pi-corridor-compass__dot').forEach(function (btn) {
+        var tid = btn.getAttribute('data-corridor-target');
+        var on = tid === currentId;
+        btn.classList.toggle('is-active', on);
+        if (on) btn.setAttribute('aria-current', 'true');
+        else btn.removeAttribute('aria-current');
+      });
     }
 
     function updateScrollToc() {
@@ -362,15 +237,6 @@
         if (top <= mid) current = s;
       });
       setActive(current.id);
-    }
-
-    if (useTunnel) {
-      function loop() {
-        updateTunnelToc();
-        requestAnimationFrame(loop);
-      }
-      requestAnimationFrame(loop);
-      return;
     }
 
     var t = null;
@@ -628,8 +494,10 @@
       main.classList.add('pi-main--visible');
       if (hero) hero.classList.add('pi-hero--ring-handoff');
       document.body.style.overflow = '';
+      var delReduced = document.querySelector('.wes-deliverable.pi-page');
+      if (delReduced) delReduced.classList.add('pi-page--corridor-mode');
       initMathJax();
-      window.dispatchEvent(new CustomEvent('pi-tunnel-enter'));
+      window.dispatchEvent(new CustomEvent('pi-corridor-enter'));
       return;
     }
 
@@ -645,11 +513,11 @@
       loader.style.display = 'none';
       loader.setAttribute('aria-hidden', 'true');
       main.classList.add('pi-main--visible');
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = '';
       var del = document.querySelector('.wes-deliverable.pi-page');
-      if (del) del.classList.add('pi-page--tunnel-mode');
+      if (del) del.classList.add('pi-page--corridor-mode');
       initMathJax();
-      window.dispatchEvent(new CustomEvent('pi-tunnel-enter'));
+      window.dispatchEvent(new CustomEvent('pi-corridor-enter'));
     }, EXIT_MS + EXIT_ANIM_MS + 40);
   }
 
@@ -658,6 +526,7 @@
     fillFlowBg();
     fillFlowBg2();
     fillLoaderTextPath();
+    fillCorridorOrbitText();
     initHeroVideo();
     runIntro();
   }
@@ -740,9 +609,9 @@
   initCursorTrail();
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTunnel);
+    document.addEventListener('DOMContentLoaded', initCorridor);
   } else {
-    initTunnel();
+    initCorridor();
   }
 
   function initReveal() {
