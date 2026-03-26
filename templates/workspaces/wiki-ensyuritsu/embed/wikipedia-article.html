@@ -34,8 +34,45 @@
     </nav>
   </aside>
 
-  <div class="pi-wiki-maincol">
-<article class="pi-wiki-article" lang="ja">
+  <div class="pi-wiki-maincol pi-wiki-maincol--tunnel">
+    <div class="pi-tunnel-root" id="pi-tunnel-root">
+      <div class="pi-tunnel-ziggurat" aria-hidden="true"></div>
+      <div class="pi-tunnel-vortex" aria-hidden="true"><div class="pi-tunnel-vortex__morph"></div></div>
+      <div class="pi-tunnel-stage" id="pi-tunnel-stage">
+        <div class="pi-tunnel-scene" id="pi-tunnel-scene">
+          <div class="pi-tunnel-fog" aria-hidden="true"></div>
+          <div class="pi-tunnel-mouth" id="pi-tunnel-mouth" aria-hidden="true">
+            <svg class="pi-tunnel-mouth__svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="piMouthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#d8f99b;stop-opacity:0.95" />
+                  <stop offset="50%" style="stop-color:#7dd3fc;stop-opacity:0.9" />
+                  <stop offset="100%" style="stop-color:#a3e635;stop-opacity:0.85" />
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="200" r="158" fill="none" stroke="url(#piMouthGrad)" stroke-width="2.5" opacity="0.9" />
+            </svg>
+          </div>
+          <div class="pi-tunnel-gear-hud" id="pi-tunnel-gear-hud" aria-hidden="true">
+            <svg class="pi-tunnel-gear-hud__svg" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+              <g class="pi-tunnel-gear-hud__spin">
+                <circle cx="160" cy="100" r="94" fill="none" stroke="rgba(56,189,248,0.35)" stroke-width="1.2" stroke-dasharray="5 12"/>
+                <circle cx="160" cy="100" r="68" fill="rgba(8,12,20,0.72)" stroke="rgba(163,230,53,0.45)" stroke-width="1.5"/>
+                <text x="160" y="108" text-anchor="middle" fill="#a3e635" font-size="38" font-family='Playfair Display, "Noto Serif JP", serif'>π</text>
+              </g>
+              <g fill="none" stroke="rgba(56,189,248,0.45)" stroke-width="1.2" transform="translate(160,100)">
+                <line x1="0" y1="-58" x2="0" y2="-42"/><line x1="50" y1="-29" x2="36" y2="-21"/>
+                <line x1="50" y1="29" x2="36" y2="21"/><line x1="0" y1="58" x2="0" y2="42"/>
+                <line x1="-50" y1="29" x2="-36" y2="21"/><line x1="-50" y1="-29" x2="-36" y2="-21"/>
+              </g>
+            </svg>
+            <p class="pi-tunnel-gear-hud__label" id="pi-tunnel-gear-label">—</p>
+          </div>
+          <p class="pi-tunnel-hint" id="pi-tunnel-hint">マウスホイールで円筒の奥へ進みます（視点が回転し、中央の章が鮮明になります）。</p>
+          <button type="button" class="pi-tunnel-footer-btn" id="pi-tunnel-footer-btn">ページ末尾（フッター）へ</button>
+          <div class="pi-tunnel-camera" id="pi-tunnel-camera">
+            <div class="pi-tunnel-helix" id="pi-tunnel-helix">
+<article class="pi-wiki-article pi-wiki-article--tunnel" lang="ja">
   <p class="pi-note" role="note">出典: フリー百科事典『ウィキペディア（Wikipedia）』日本語版「円周率」。サイトUI・フッター等のナビゲーション文言は除き、記事本文・注釈・出典・参考文献・関連項目・外部リンクを収録しています。</p>
 
   <section class="pi-wiki-panel pi-wiki-panel--lead pi-reveal pi-reveal--orbit" style="--reveal-delay:0s" aria-label="リード文" data-pi-label="リード">
@@ -510,5 +547,10 @@
   </section>
 
 </article>
-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

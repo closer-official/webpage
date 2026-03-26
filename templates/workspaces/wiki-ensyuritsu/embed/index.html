@@ -818,6 +818,12 @@
   margin: 0 auto;
 }
 
+.pi-wiki-maincol--tunnel {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
 /* --- Wikipedia 全文（本文サンセリフ・見出しセリフ） --- */
 .pi-wiki-article {
   --pi-section-num: rgba(163, 230, 53, 0.24);
@@ -988,6 +994,11 @@
 .pi-wiki-article strong {
   font-weight: 700;
   color: #ffffff;
+}
+
+/* 歴史・石碑：strong の白を継承で打ち消し、彫刻スパンの色が効くようにする */
+.pi-wiki-article .pi-history-stone strong {
+  color: inherit;
 }
 
 /* 折りたたみ（注釈・出典など全文保持） */
@@ -1206,193 +1217,195 @@ details.pi-formula-fold[open] > summary::after {
   background: conic-gradient(from 90deg, rgba(56, 189, 248, 0.12), transparent 40%, rgba(163, 230, 53, 0.08), transparent 75%);
 }
 
-/* --- 歴史：石碑（彫刻タイポ・石板質感） --- */
+/* --- 歴史：暗色石碑（サイト全体と統一・未彫りはほぼ非表示） --- */
 .pi-history-stone {
-  --stone-slab: #c9c0b4;
-  --stone-highlight: #e8e2d8;
-  --stone-shadow: #8a8278;
-  --stone-raw: #bfb6aa;
-  --stone-ink: #2e2822;
-  --stone-ink-dim: #4a4238;
-  --stone-accent: #6b5340;
+  --stone-char-dim: rgba(232, 237, 245, 0.04);
+  --stone-char-lit: #e8edf5;
 
   font-family: var(--pi-font-stone);
-  color: var(--stone-ink);
-  border-color: rgba(74, 60, 48, 0.35) !important;
+  color: rgba(232, 237, 245, 0.06);
+  border-color: rgba(56, 189, 248, 0.16) !important;
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%),
-    radial-gradient(ellipse 90% 55% at 18% 12%, rgba(255, 255, 255, 0.22), transparent 52%),
-    radial-gradient(ellipse 70% 45% at 88% 88%, rgba(0, 0, 0, 0.08), transparent 50%),
-    repeating-linear-gradient(
-      -12deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.02) 2px,
-      rgba(0, 0, 0, 0.02) 3px
-    ),
-    linear-gradient(168deg, var(--stone-highlight) 0%, var(--stone-slab) 48%, #b0a69a 100%) !important;
+    linear-gradient(168deg, rgba(255, 255, 255, 0.045) 0%, transparent 46%),
+    radial-gradient(ellipse 78% 48% at 14% 8%, rgba(163, 230, 53, 0.055), transparent 52%),
+    radial-gradient(ellipse 55% 38% at 92% 96%, rgba(56, 189, 248, 0.05), transparent 48%),
+    repeating-linear-gradient(-11deg, transparent, transparent 3px, rgba(0, 0, 0, 0.04) 3px, rgba(0, 0, 0, 0.04) 4px),
+    linear-gradient(162deg, #171b26 0%, #12161f 52%, #0e1118 100%) !important;
   box-shadow:
-    0 28px 72px rgba(0, 0, 0, 0.42),
-    inset 0 2px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -4px 12px rgba(0, 0, 0, 0.12) !important;
+    0 28px 72px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 -8px 28px rgba(0, 0, 0, 0.28) !important;
 }
 
 .pi-history-stone::after {
-  opacity: 0.14 !important;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25), transparent 55%),
-    radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.06), transparent 45%) !important;
+  opacity: 0.1 !important;
+  background: radial-gradient(circle at 28% 18%, rgba(163, 230, 53, 0.08), transparent 56%),
+    radial-gradient(circle at 78% 82%, rgba(56, 189, 248, 0.07), transparent 46%) !important;
 }
 
 .pi-history-stone[data-pi-label]::before {
-  color: rgba(74, 58, 42, 0.72);
-  border-right-color: rgba(74, 58, 42, 0.32);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: rgba(163, 230, 53, 0.58);
+  border-right-color: rgba(56, 189, 248, 0.28);
+  text-shadow: none;
 }
 
 .pi-history-stone > h2:first-of-type {
-  border-left-color: var(--stone-accent) !important;
-  color: var(--stone-ink) !important;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-left-color: rgba(163, 230, 53, 0.75) !important;
+  color: rgba(255, 255, 255, 0.04) !important;
+  text-shadow: none;
 }
 
 .pi-history-stone > h2:first-of-type::before {
-  color: rgba(74, 58, 42, 0.28) !important;
+  color: rgba(163, 230, 53, 0.22) !important;
 }
 
 .pi-history-stone > h2:first-of-type::after {
-  background: linear-gradient(90deg, rgba(74, 58, 42, 0.55), rgba(107, 83, 64, 0.35), transparent) !important;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.65), rgba(163, 230, 53, 0.35), transparent) !important;
 }
 
 .pi-history-stone h3,
 .pi-history-stone h4 {
   font-family: var(--pi-font-stone);
-  color: var(--stone-ink-dim);
-  border-bottom-color: rgba(74, 58, 42, 0.22) !important;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: rgba(248, 250, 252, 0.05);
+  border-bottom-color: rgba(56, 189, 248, 0.2) !important;
+  text-shadow: none;
 }
 
 .pi-history-stone a {
-  color: #5c442e;
+  color: var(--pi-blue);
   font-weight: 600;
-  text-decoration-color: rgba(92, 68, 46, 0.45);
 }
 
 .pi-history-stone a:hover {
-  color: #3d2a1a;
+  color: var(--pi-accent);
 }
 
 .pi-history-stone .pi-editorial-see {
-  background: rgba(255, 252, 245, 0.55);
-  border-color: rgba(74, 58, 42, 0.28);
-  color: var(--stone-ink-dim);
+  background: rgba(8, 12, 20, 0.55);
+  border-color: rgba(56, 189, 248, 0.22);
+  color: rgba(232, 237, 245, 0.05);
 }
 
 .pi-history-stone .pi-editorial-see::before {
-  color: var(--stone-accent);
-  background: rgba(255, 255, 255, 0.5);
+  color: var(--pi-accent);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .pi-history-stone .pi-note {
-  background: rgba(255, 248, 230, 0.65);
-  border-left-color: rgba(180, 120, 40, 0.55);
-  color: #4a3d32;
+  background: rgba(8, 10, 16, 0.88);
+  border-left-color: rgba(56, 189, 248, 0.45);
+  color: #c5d0e0;
 }
 
 .pi-history-stone .pi-prose-opener {
-  color: var(--stone-ink);
+  color: rgba(232, 237, 245, 0.06);
 }
 
 .pi-history-stone .pi-math-block {
   font-family: var(--pi-font-mono);
-  background: rgba(0, 0, 0, 0.06);
-  border-color: rgba(74, 58, 42, 0.22);
-  color: #252018;
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(163, 230, 53, 0.14);
+  color: #b8e986;
 }
 
 .pi-history-stone .pi-math-art {
-  background: linear-gradient(165deg, rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.08));
-  border-color: rgba(74, 58, 42, 0.28);
+  background: linear-gradient(165deg, rgba(0, 0, 0, 0.38), rgba(18, 22, 35, 0.45));
+  border-color: rgba(163, 230, 53, 0.16);
 }
 
 .pi-history-stone .pi-math-art__hint {
-  color: var(--stone-ink-dim);
+  color: var(--pi-muted);
 }
 
 .pi-history-stone mjx-container {
-  color: var(--stone-ink) !important;
+  color: #e8edf5 !important;
 }
 
 .pi-history-stone .pi-wiki-subcard:nth-of-type(even) {
   margin-left: 0;
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(74, 58, 42, 0.15);
-  border-left-color: rgba(74, 58, 42, 0.4);
+  background: rgba(0, 0, 0, 0.22);
+  border-color: rgba(56, 189, 248, 0.12);
+  border-left-color: rgba(163, 230, 53, 0.28);
 }
 
 .pi-history-stone .pi-stone-skip {
-  background: rgba(255, 250, 240, 0.5);
-  border: 1px solid rgba(74, 58, 42, 0.22);
+  background: rgba(10, 14, 22, 0.72);
+  border: 1px solid rgba(56, 189, 248, 0.18);
   border-style: solid;
 }
 
 .pi-history-stone .pi-stone-skip .pi-inline-viz__label {
-  color: var(--stone-accent);
+  color: var(--pi-accent);
 }
 
-/* 彫刻前：石板と同色に近い「未彫り」 */
-.pi-history-stone .pi-stone-char {
+/* 未彫り：継承・strong・p より確実に勝つ */
+.pi-wiki-article .pi-history-stone .pi-stone-char:not(.is-carved) {
   display: inline;
   font-family: inherit;
-  color: var(--stone-raw);
-  text-shadow: none;
-  opacity: 0.92;
+  color: var(--stone-char-dim) !important;
+  opacity: 1;
+  text-shadow: none !important;
+  transform: translateY(0.04em) scale(0.985);
   transition:
-    color 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    text-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.35s ease,
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  transform: translateY(0.04em) scale(0.98);
+    color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    text-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.pi-history-stone .pi-stone-char.is-carved {
-  color: var(--stone-ink);
-  opacity: 1;
+.pi-wiki-article .pi-history-stone .pi-stone-char.is-carved {
+  color: var(--stone-char-lit) !important;
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.22),
-    0 2px 3px rgba(0, 0, 0, 0.45),
-    0 -1px 2px rgba(0, 0, 0, 0.35);
+    0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.72),
+    0 -1px 3px rgba(0, 0, 0, 0.5) !important;
   transform: translateY(0) scale(1);
 }
 
-/* 動きを減らす設定：スパン化なしでも彫刻風タイポを当てる */
-.pi-history-stone.pi-history-stone--static p,
+.pi-wiki-article .pi-history-stone a .pi-stone-char.is-carved {
+  color: #7dd3fc !important;
+}
+
+.pi-wiki-article .pi-history-stone a:hover .pi-stone-char.is-carved {
+  color: #d8f99b !important;
+}
+
+/* ラップ済み本文のベース（スパンが色を持つまでのフォールバック） */
+.pi-wiki-article .pi-history-stone.pi-wiki-panel p:not(.pi-note):not(.pi-math-block):not(.pi-inline-viz__label) {
+  color: rgba(232, 237, 245, 0.06);
+}
+
+.pi-wiki-article .pi-history-stone.pi-wiki-panel > h2:first-of-type + p:not(.pi-editorial-see) {
+  color: rgba(232, 237, 245, 0.06);
+}
+
+/* 動きを減らす：通常可読・彫刻風の軽い陰影のみ */
+.pi-history-stone.pi-history-stone--static {
+  color: var(--pi-ink);
+}
+
+.pi-history-stone.pi-history-stone--static > h2:first-of-type {
+  color: #fff !important;
+  text-shadow: 0 0 32px rgba(56, 189, 248, 0.12);
+}
+
 .pi-history-stone.pi-history-stone--static h3,
-.pi-history-stone.pi-history-stone--static h4,
-.pi-history-stone.pi-history-stone--static .pi-editorial-see {
-  color: var(--stone-ink);
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.2),
-    0 2px 2px rgba(0, 0, 0, 0.35);
+.pi-history-stone.pi-history-stone--static h4 {
+  color: #f8fafc;
+}
+
+.pi-history-stone.pi-history-stone--static p,
+.pi-history-stone.pi-history-stone--static .pi-editorial-see,
+.pi-history-stone.pi-history-stone--static .pi-prose-opener {
+  color: #e8edf5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pi-history-stone .pi-stone-char {
+  .pi-wiki-article .pi-history-stone .pi-stone-char:not(.is-carved),
+  .pi-wiki-article .pi-history-stone .pi-stone-char.is-carved {
     transition: none;
     transform: none;
   }
-}
-
-.pi-history-stone.pi-wiki-panel p:not(.pi-note):not(.pi-math-block):not(.pi-inline-viz__label) {
-  color: var(--stone-ink);
-}
-
-.pi-history-stone strong {
-  color: var(--stone-ink);
-}
-
-.pi-history-stone.pi-wiki-panel > h2:first-of-type + p:not(.pi-editorial-see),
-.pi-history-stone .pi-prose-opener {
-  color: var(--stone-ink);
 }
 
 .pi-wiki-panel--properties::after {
@@ -1911,6 +1924,449 @@ details.pi-formula-fold[open] > summary::after {
   .pi-hero__continuity-ring {
     transition: none !important;
   }
+
+  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-scene {
+    perspective: none !important;
+  }
+
+  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-camera,
+  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-helix,
+  .pi-tunnel-root:not(.pi-tunnel--reduced) .pi-tunnel-slab {
+    transform: none !important;
+  }
+}
+
+/* ========== 3D 円筒トンネル（ウィキ本文は一字一句そのまま・螺旋配置） ========== */
+.pi-page.pi-page--tunnel-mode #hero {
+  max-height: 0;
+  min-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  transition:
+    max-height 0.65s ease,
+    opacity 0.4s ease,
+    margin 0.5s ease;
+}
+
+.pi-page.pi-page--tunnel-mode #hero .pi-hero__media,
+.pi-page.pi-page--tunnel-mode #hero .pi-hero__stage {
+  visibility: hidden;
+}
+
+.pi-tunnel-root {
+  position: relative;
+  width: 100%;
+  min-height: min(100vh, 920px);
+  height: calc(100vh - 5.5rem);
+  max-height: min(100vh - 5rem, 980px);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.14);
+  background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(18, 22, 35, 0.97), #06080f);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.pi-tunnel-ziggurat {
+  position: absolute;
+  inset: -35%;
+  background:
+    center / cover no-repeat
+    url("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Chogha_Zanbil_DSC02394.jpg/1280px-Chogha_Zanbil_DSC02394.jpg");
+  opacity: 0.11;
+  filter: sepia(0.75) saturate(0.45) brightness(0.55) contrast(1.05);
+  animation: pi-tunnel-zig-rotate 140s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes pi-tunnel-zig-rotate {
+  from {
+    transform: rotate(0deg) scale(1.08);
+  }
+  to {
+    transform: rotate(360deg) scale(1.08);
+  }
+}
+
+.pi-tunnel-vortex {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.35;
+}
+
+.pi-tunnel-vortex__morph {
+  width: min(120vmin, 720px);
+  height: min(120vmin, 720px);
+  margin: auto;
+  background: radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.12), transparent 58%),
+    radial-gradient(circle at 50% 50%, rgba(163, 230, 53, 0.06), transparent 52%);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  animation: pi-tunnel-poly-morph 22s ease-in-out infinite;
+  filter: blur(0.5px);
+}
+
+@keyframes pi-tunnel-poly-morph {
+  0%,
+  100% {
+    clip-path: polygon(50% 4%, 94% 76%, 6% 76%);
+    border-radius: 0;
+  }
+  20% {
+    clip-path: polygon(50% 2%, 98% 38%, 80% 98%, 20% 98%, 2% 38%);
+  }
+  40% {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  60% {
+    clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
+  }
+  80% {
+    clip-path: ellipse(46% 46% at 50% 50%);
+  }
+}
+
+.pi-tunnel-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  touch-action: none;
+}
+
+.pi-tunnel-scene {
+  position: absolute;
+  inset: 0;
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+  overflow: hidden;
+}
+
+.pi-tunnel-fog {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 48%, transparent 0%, transparent 32%, rgba(6, 8, 14, 0.55) 100%),
+    linear-gradient(180deg, rgba(6, 8, 14, 0.2) 0%, transparent 35%, transparent 65%, rgba(6, 8, 14, 0.45) 100%);
+  mix-blend-mode: multiply;
+}
+
+.pi-tunnel-mouth {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(72vmin, 420px);
+  height: min(72vmin, 420px);
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+
+.pi-tunnel-root.pi-tunnel--entered .pi-tunnel-mouth {
+  animation: pi-tunnel-mouth-handoff 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes pi-tunnel-mouth-handoff {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(2.4);
+  }
+  55% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    visibility: hidden;
+  }
+}
+
+.pi-tunnel-mouth__svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.45));
+}
+
+.pi-tunnel-gear-hud {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(280px, 52vw);
+  text-align: center;
+  pointer-events: none;
+}
+
+.pi-tunnel-gear-hud__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.25));
+}
+
+.pi-tunnel-gear-hud__spin {
+  transform-origin: 160px 100px;
+  animation: pi-tunnel-gear-spin 36s linear infinite;
+}
+
+@keyframes pi-tunnel-gear-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pi-tunnel-gear-hud__label {
+  margin: 0.35rem 0 0;
+  font-family: var(--pi-font-mincho);
+  font-size: clamp(0.82rem, 2.2vw, 0.98rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: #bae6fd;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.55), 0 0 36px rgba(163, 230, 53, 0.2);
+}
+
+.pi-tunnel-hint {
+  position: absolute;
+  bottom: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  margin: 0;
+  max-width: min(36rem, 92vw);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: rgba(186, 230, 253, 0.55);
+  text-align: center;
+  pointer-events: none;
+}
+
+.pi-tunnel-footer-btn {
+  position: absolute;
+  bottom: 2.35rem;
+  right: 0.75rem;
+  z-index: 8;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(8, 12, 20, 0.75);
+  color: #bae6fd;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.pi-tunnel-footer-btn:hover {
+  border-color: rgba(163, 230, 53, 0.45);
+  color: var(--pi-accent);
+}
+
+.pi-tunnel-camera {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 1px;
+  height: 1px;
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, 520px) rotateY(0deg);
+  z-index: 3;
+  will-change: transform;
+}
+
+.pi-tunnel-helix {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%);
+}
+
+.pi-wiki-article--tunnel {
+  position: relative;
+  transform-style: preserve-3d;
+  max-width: none;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+}
+
+.pi-tunnel-slab {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: min(88vw, 720px);
+  max-height: min(72vh, 620px);
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+}
+
+.pi-tunnel-slab__poly {
+  position: absolute;
+  inset: -8%;
+  z-index: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 120deg, rgba(56, 189, 248, 0.08), transparent, rgba(163, 230, 53, 0.06), transparent);
+  opacity: 0.45;
+  animation: pi-tunnel-slab-poly 14s ease-in-out infinite;
+  pointer-events: none;
+  filter: blur(1px);
+}
+
+@keyframes pi-tunnel-slab-poly {
+  0%,
+  100% {
+    clip-path: polygon(50% 6%, 91% 78%, 9% 78%);
+    transform: rotate(0deg) scale(1);
+  }
+  33% {
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    transform: rotate(120deg) scale(1.04);
+  }
+  66% {
+    clip-path: ellipse(48% 48% at 50% 50%);
+    transform: rotate(240deg) scale(1.02);
+  }
+}
+
+.pi-tunnel-slab__face {
+  position: relative;
+  z-index: 1;
+  max-height: min(72vh, 620px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.85rem 1rem 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(165deg, rgba(18, 22, 32, 0.92), rgba(8, 10, 16, 0.94));
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  scrollbar-width: thin;
+  transition:
+    opacity 0.45s ease,
+    filter 0.5s ease,
+    box-shadow 0.45s ease,
+    border-color 0.45s ease;
+}
+
+.pi-tunnel-slab:not(.pi-tunnel-slab--focus) .pi-tunnel-slab__face {
+  opacity: 0.28;
+  filter: blur(4px) saturate(0.35) brightness(0.65);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.pi-tunnel-slab--focus .pi-tunnel-slab__face {
+  opacity: 1;
+  filter: none;
+  border-color: rgba(56, 189, 248, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.2),
+    0 0 48px rgba(56, 189, 248, 0.18),
+    0 0 80px rgba(186, 230, 253, 0.08),
+    0 20px 56px rgba(0, 0, 0, 0.55);
+}
+
+.pi-tunnel-helix .pi-reveal,
+.pi-tunnel-helix .pi-reveal.pi-reveal--orbit {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  clip-path: none !important;
+  transition: none !important;
+}
+
+.pi-tunnel-helix .pi-wiki-panel {
+  margin-bottom: 0;
+}
+
+.pi-tunnel--reduced .pi-tunnel-ziggurat,
+.pi-tunnel--reduced .pi-tunnel-vortex,
+.pi-tunnel--reduced .pi-tunnel-mouth,
+.pi-tunnel--reduced .pi-tunnel-fog {
+  display: none;
+}
+
+.pi-tunnel--reduced {
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.pi-tunnel--reduced .pi-tunnel-stage {
+  position: relative;
+  touch-action: auto;
+}
+
+.pi-tunnel--reduced .pi-tunnel-scene {
+  position: relative;
+  overflow: visible;
+}
+
+.pi-tunnel--reduced .pi-tunnel-camera {
+  position: static;
+  transform: none !important;
+  width: auto;
+  height: auto;
+}
+
+.pi-tunnel--reduced .pi-tunnel-helix {
+  position: static;
+  transform: none !important;
+}
+
+.pi-tunnel--reduced .pi-wiki-article--tunnel {
+  width: auto;
+  height: auto;
+}
+
+.pi-tunnel--reduced .pi-tunnel-slab {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  max-height: none;
+  transform: none !important;
+  margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.pi-tunnel--reduced .pi-tunnel-slab__poly {
+  display: none;
+}
+
+.pi-tunnel--reduced .pi-tunnel-slab__face {
+  max-height: none;
+  overflow: visible;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.pi-tunnel--reduced .pi-tunnel-gear-hud,
+.pi-tunnel--reduced .pi-tunnel-hint,
+.pi-tunnel--reduced .pi-tunnel-footer-btn {
+  display: none;
+}
+
+@media (max-width: 1099px) {
+  .pi-tunnel-root {
+    height: min(88vh, 820px);
+    max-height: none;
+  }
 }
 
 </style>
@@ -2030,8 +2486,45 @@ details.pi-formula-fold[open] > summary::after {
     </nav>
   </aside>
 
-  <div class="pi-wiki-maincol">
-<article class="pi-wiki-article" lang="ja">
+  <div class="pi-wiki-maincol pi-wiki-maincol--tunnel">
+    <div class="pi-tunnel-root" id="pi-tunnel-root">
+      <div class="pi-tunnel-ziggurat" aria-hidden="true"></div>
+      <div class="pi-tunnel-vortex" aria-hidden="true"><div class="pi-tunnel-vortex__morph"></div></div>
+      <div class="pi-tunnel-stage" id="pi-tunnel-stage">
+        <div class="pi-tunnel-scene" id="pi-tunnel-scene">
+          <div class="pi-tunnel-fog" aria-hidden="true"></div>
+          <div class="pi-tunnel-mouth" id="pi-tunnel-mouth" aria-hidden="true">
+            <svg class="pi-tunnel-mouth__svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="piMouthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#d8f99b;stop-opacity:0.95" />
+                  <stop offset="50%" style="stop-color:#7dd3fc;stop-opacity:0.9" />
+                  <stop offset="100%" style="stop-color:#a3e635;stop-opacity:0.85" />
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="200" r="158" fill="none" stroke="url(#piMouthGrad)" stroke-width="2.5" opacity="0.9" />
+            </svg>
+          </div>
+          <div class="pi-tunnel-gear-hud" id="pi-tunnel-gear-hud" aria-hidden="true">
+            <svg class="pi-tunnel-gear-hud__svg" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+              <g class="pi-tunnel-gear-hud__spin">
+                <circle cx="160" cy="100" r="94" fill="none" stroke="rgba(56,189,248,0.35)" stroke-width="1.2" stroke-dasharray="5 12"/>
+                <circle cx="160" cy="100" r="68" fill="rgba(8,12,20,0.72)" stroke="rgba(163,230,53,0.45)" stroke-width="1.5"/>
+                <text x="160" y="108" text-anchor="middle" fill="#a3e635" font-size="38" font-family='Playfair Display, "Noto Serif JP", serif'>π</text>
+              </g>
+              <g fill="none" stroke="rgba(56,189,248,0.45)" stroke-width="1.2" transform="translate(160,100)">
+                <line x1="0" y1="-58" x2="0" y2="-42"/><line x1="50" y1="-29" x2="36" y2="-21"/>
+                <line x1="50" y1="29" x2="36" y2="21"/><line x1="0" y1="58" x2="0" y2="42"/>
+                <line x1="-50" y1="29" x2="-36" y2="21"/><line x1="-50" y1="-29" x2="-36" y2="-21"/>
+              </g>
+            </svg>
+            <p class="pi-tunnel-gear-hud__label" id="pi-tunnel-gear-label">—</p>
+          </div>
+          <p class="pi-tunnel-hint" id="pi-tunnel-hint">マウスホイールで円筒の奥へ進みます（視点が回転し、中央の章が鮮明になります）。</p>
+          <button type="button" class="pi-tunnel-footer-btn" id="pi-tunnel-footer-btn">ページ末尾（フッター）へ</button>
+          <div class="pi-tunnel-camera" id="pi-tunnel-camera">
+            <div class="pi-tunnel-helix" id="pi-tunnel-helix">
+<article class="pi-wiki-article pi-wiki-article--tunnel" lang="ja">
   <p class="pi-note" role="note">出典: フリー百科事典『ウィキペディア（Wikipedia）』日本語版「円周率」。サイトUI・フッター等のナビゲーション文言は除き、記事本文・注釈・出典・参考文献・関連項目・外部リンクを収録しています。</p>
 
   <section class="pi-wiki-panel pi-wiki-panel--lead pi-reveal pi-reveal--orbit" style="--reveal-delay:0s" aria-label="リード文" data-pi-label="リード">
@@ -2506,7 +2999,12 @@ details.pi-formula-fold[open] > summary::after {
   </section>
 
 </article>
-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -2553,6 +3051,8 @@ details.pi-formula-fold[open] > summary::after {
  * - 背景桁のパララックス（スクロール連動・2層）
  * - サイド目次スクロールスパイ
  * - MathJax 数式組版
+ * - 歴史セクション：石碑風タイポ＋1字ずつ彫刻表示（スクロールで開始）
+ * - 3D 円筒トンネル：ホイールで奥行き＋回転、中央スラブがフォーカス（本文は省略なし）
  * - カーソル軌跡 / ライトボックス
  */
 
@@ -2644,6 +3144,216 @@ details.pi-formula-fold[open] > summary::after {
     apply();
   }
 
+  /** 3D 円筒トンネル：ホイール＝奥へ進行＋回転、中央スラブがフォーカス（本文 DOM は一字一句維持） */
+  function initTunnel() {
+    var root = $('#pi-tunnel-root');
+    var helix = $('#pi-tunnel-helix');
+    var camera = $('#pi-tunnel-camera');
+    var scene = $('#pi-tunnel-scene');
+    var stage = $('#pi-tunnel-stage');
+    var article = $('.pi-wiki-article--tunnel');
+    var page = $('.wes-deliverable.pi-page');
+    if (!root || !helix || !camera || !article) return;
+    if (root.getAttribute('data-tunnel-init') === '1') return;
+    root.setAttribute('data-tunnel-init', '1');
+
+    if (prefersReduced) {
+      root.classList.add('pi-tunnel--reduced');
+      return;
+    }
+
+    window.addEventListener('pi-tunnel-enter', function () {
+      root.classList.add('pi-tunnel--entered');
+    });
+
+    var children = [].slice.call(article.children);
+    var frag = document.createDocumentFragment();
+    children.forEach(function (node, i) {
+      var slab = document.createElement('div');
+      slab.className = 'pi-tunnel-slab';
+      slab.dataset.tunnelIndex = String(i);
+      var poly = document.createElement('div');
+      poly.className = 'pi-tunnel-slab__poly';
+      poly.setAttribute('aria-hidden', 'true');
+      var face = document.createElement('div');
+      face.className = 'pi-tunnel-slab__face';
+      slab.appendChild(poly);
+      slab.appendChild(face);
+      face.appendChild(node);
+      frag.appendChild(slab);
+    });
+    article.appendChild(frag);
+
+    var slabs = $all('.pi-tunnel-slab', helix);
+    slabs.forEach(function (s) {
+      s.classList.add('is-visible');
+    });
+
+    var camZ = 520;
+    var minZ = -8000;
+    var maxZ = 720;
+    var gearLabel = $('#pi-tunnel-gear-label');
+
+    function layoutHelix() {
+      var R = Math.min(560, Math.max(300, window.innerWidth * 0.34));
+      var zStep = Math.min(430, Math.max(300, window.innerHeight * 0.48));
+      var angleStep = (Math.PI * 2) / 8.2;
+      var n = slabs.length;
+      slabs.forEach(function (slab, i) {
+        var theta = i * angleStep;
+        var x = R * Math.sin(theta);
+        var z = -i * zStep + R * Math.cos(theta) * 0.32;
+        var y = -i * (zStep * 0.07);
+        var deg = (-theta * 180) / Math.PI + 180;
+        slab.style.transform =
+          'translate(-50%, -50%) translate3d(' +
+          x.toFixed(1) +
+          'px,' +
+          y.toFixed(1) +
+          'px,' +
+          z.toFixed(1) +
+          'px) rotateY(' +
+          deg.toFixed(2) +
+          'deg)';
+        slab._idealCamZ = 500 - i * zStep * 0.88 + R * 0.08;
+      });
+      minZ = -(n * zStep * 0.92 + 420);
+      maxZ = 680;
+    }
+
+    layoutHelix();
+
+    function applyCamera() {
+      camZ = Math.max(minZ, Math.min(maxZ, camZ));
+      var ry = camZ * -0.048;
+      camera.style.transform = 'translate3d(0, 0,' + camZ + 'px) rotateY(' + ry + 'deg)';
+    }
+
+    applyCamera();
+
+    if (stage) {
+      stage.addEventListener(
+        'wheel',
+        function (e) {
+          e.preventDefault();
+          camZ += e.deltaY * 0.9;
+          applyCamera();
+        },
+        { passive: false }
+      );
+
+      var ty = 0;
+      stage.addEventListener(
+        'touchstart',
+        function (e) {
+          if (e.touches[0]) ty = e.touches[0].clientY;
+        },
+        { passive: true }
+      );
+      stage.addEventListener(
+        'touchmove',
+        function (e) {
+          if (!e.touches[0]) return;
+          var y = e.touches[0].clientY;
+          var dy = ty - y;
+          ty = y;
+          camZ += dy * 1.35;
+          applyCamera();
+        },
+        { passive: true }
+      );
+
+      stage.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+          e.preventDefault();
+          camZ -= 280;
+          applyCamera();
+        } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault();
+          camZ += 280;
+          applyCamera();
+        }
+      });
+      stage.setAttribute('tabindex', '0');
+    }
+
+    window.addEventListener(
+      'resize',
+      function () {
+        layoutHelix();
+        applyCamera();
+      },
+      { passive: true }
+    );
+
+    var fb = $('#pi-tunnel-footer-btn');
+    if (fb) {
+      fb.addEventListener('click', function () {
+        document.body.style.overflow = '';
+        if (page) page.classList.remove('pi-page--tunnel-mode');
+        var ft = $('#contact');
+        if (ft) ft.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    var aside = $('.pi-toc-aside');
+    if (aside) {
+      aside.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href^="#"]');
+        if (!a || root.classList.contains('pi-tunnel--reduced')) return;
+        var id = a.getAttribute('href').replace(/^#/, '');
+        var target = document.getElementById(id);
+        if (!target) return;
+        var slab = target.closest('.pi-tunnel-slab');
+        if (!slab || typeof slab._idealCamZ !== 'number') return;
+        e.preventDefault();
+        camZ = slab._idealCamZ;
+        applyCamera();
+      });
+    }
+
+    function tickFocus() {
+      var cx = window.innerWidth / 2;
+      var cy = window.innerHeight / 2;
+      var best = null;
+      var bestD = Infinity;
+      for (var i = 0; i < slabs.length; i++) {
+        var slab = slabs[i];
+        var r = slab.getBoundingClientRect();
+        var mx = r.left + r.width / 2;
+        var my = r.top + r.height / 2;
+        var d = (mx - cx) * (mx - cx) + (my - cy) * (my - cy);
+        if (d < bestD) {
+          bestD = d;
+          best = slab;
+        }
+      }
+      for (var j = 0; j < slabs.length; j++) {
+        slabs[j].classList.toggle('pi-tunnel-slab--focus', slabs[j] === best);
+      }
+      if (best && gearLabel) {
+        var h2 = best.querySelector('h2');
+        var lbl = '';
+        if (h2 && h2.textContent) lbl = h2.textContent.replace(/\s+/g, ' ').trim();
+        if (!lbl) {
+          var wire = best.querySelector('[data-pi-label]');
+          if (wire) lbl = wire.getAttribute('data-pi-label') || '';
+        }
+        if (!lbl) {
+          var ar = best.getAttribute('aria-label');
+          if (ar) lbl = ar;
+        }
+        if (!lbl) {
+          var note = best.querySelector('.pi-note');
+          if (note) lbl = '出典・凡例';
+        }
+        gearLabel.textContent = lbl || '—';
+      }
+      requestAnimationFrame(tickFocus);
+    }
+    requestAnimationFrame(tickFocus);
+  }
+
   /** サイド目次：現在の章をハイライト */
   function initTocSpy() {
     var aside = $('.pi-toc-aside');
@@ -2658,7 +3368,39 @@ details.pi-formula-fold[open] > summary::after {
     });
     if (!sections.length) return;
 
-    function update() {
+    var tunnelRoot = $('#pi-tunnel-root');
+    var useTunnel =
+      tunnelRoot && !tunnelRoot.classList.contains('pi-tunnel--reduced') && document.querySelector('.pi-tunnel-slab');
+
+    function setActive(currentId) {
+      sections.forEach(function (s) {
+        var on = s.id === currentId;
+        s.a.classList.toggle('is-active', on);
+        if (on) s.a.setAttribute('aria-current', 'location');
+        else s.a.removeAttribute('aria-current');
+      });
+    }
+
+    function updateTunnelToc() {
+      var focus = document.querySelector('.pi-tunnel-slab--focus');
+      if (!focus) return;
+      var sec = focus.querySelector('section[id^="wiki-"]');
+      if (!sec) sec = focus.querySelector('section[id]');
+      var sid = sec ? sec.id : '';
+      if (!sid) {
+        var inner = focus.querySelector('[id^="wiki-"]');
+        if (inner) sid = inner.id;
+      }
+      var currentId = sections[0].id;
+      if (sid) {
+        sections.forEach(function (s) {
+          if (s.id === sid) currentId = s.id;
+        });
+      }
+      setActive(currentId);
+    }
+
+    function updateScrollToc() {
       var mid = window.scrollY + window.innerHeight * 0.33;
       var current = sections[0];
       sections.forEach(function (s) {
@@ -2666,11 +3408,16 @@ details.pi-formula-fold[open] > summary::after {
         var top = rect.top + window.scrollY;
         if (top <= mid) current = s;
       });
-      sections.forEach(function (s) {
-        s.a.classList.toggle('is-active', s.id === current.id);
-        if (s.id === current.id) s.a.setAttribute('aria-current', 'location');
-        else s.a.removeAttribute('aria-current');
-      });
+      setActive(current.id);
+    }
+
+    if (useTunnel) {
+      function loop() {
+        updateTunnelToc();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+      return;
     }
 
     var t = null;
@@ -2679,14 +3426,14 @@ details.pi-formula-fold[open] > summary::after {
       function () {
         if (t) return;
         t = requestAnimationFrame(function () {
-          update();
+          updateScrollToc();
           t = null;
         });
       },
       { passive: true }
     );
-    window.addEventListener('resize', update, { passive: true });
-    update();
+    window.addEventListener('resize', updateScrollToc, { passive: true });
+    updateScrollToc();
   }
 
   /** 歴史セクション：テキストノードを1字ずつ包み、石碑彫刻アニメ用にする */
@@ -2736,6 +3483,17 @@ details.pi-formula-fold[open] > summary::after {
       }
       parent.replaceChild(frag, textNode);
     });
+
+    if (textNodes.length) {
+      panel.classList.add('is-stone-ready');
+    }
+    if (panel.__piStoneTryCarve) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          panel.__piStoneTryCarve();
+        });
+      });
+    }
   }
 
   function carveHistoryStone(panel) {
@@ -2747,7 +3505,7 @@ details.pi-formula-fold[open] > summary::after {
       return;
     }
     var i = 0;
-    var perFrame = total > 12000 ? 56 : total > 7000 ? 40 : 22;
+    var perFrame = total > 12000 ? 28 : total > 7000 ? 18 : 12;
 
     function frame() {
       var end = Math.min(i + perFrame, total);
@@ -2777,7 +3535,13 @@ details.pi-formula-fold[open] > summary::after {
 
   function bindHistoryStoneReveal(panel) {
     function tryCarve() {
-      if (panel.classList.contains('is-stone-carving') || panel.classList.contains('is-stone-done')) return;
+      var uncarved = panel.querySelectorAll('.pi-stone-char:not(.is-carved)').length;
+      if (panel.classList.contains('is-stone-done') && uncarved === 0) return;
+      if (panel.classList.contains('is-stone-done') && uncarved > 0) {
+        panel.classList.remove('is-stone-done');
+        panel.classList.remove('is-stone-carving');
+      }
+      if (panel.classList.contains('is-stone-carving')) return;
       if (!panel.classList.contains('is-visible')) return;
       if (!panel.querySelectorAll('.pi-stone-char').length) {
         wrapHistoryStoneCharNodes(panel);
@@ -2785,6 +3549,8 @@ details.pi-formula-fold[open] > summary::after {
       if (!panel.querySelectorAll('.pi-stone-char').length) return;
       startHistoryStoneCarve(panel);
     }
+
+    panel.__piStoneTryCarve = tryCarve;
 
     var mo = new MutationObserver(tryCarve);
     mo.observe(panel, { attributes: true, attributeFilter: ['class'] });
@@ -2818,6 +3584,8 @@ details.pi-formula-fold[open] > summary::after {
       return;
     }
 
+    bindHistoryStoneReveal(panel);
+
     function prepare() {
       wrapHistoryStoneCharNodes(panel);
     }
@@ -2829,9 +3597,8 @@ details.pi-formula-fold[open] > summary::after {
     }
     window.addEventListener('load', function () {
       window.setTimeout(prepare, 400);
+      window.setTimeout(prepare, 1200);
     });
-
-    bindHistoryStoneReveal(panel);
   }
 
   /** MathJax 3: data-tex を持つ .pi-math-render を表示数式として組版 */
@@ -2855,6 +3622,11 @@ details.pi-formula-fold[open] > summary::after {
           var hp = document.getElementById('wiki-history');
           if (hp && hp.classList.contains('pi-history-stone')) {
             wrapHistoryStoneCharNodes(hp);
+            if (hp.__piStoneTryCarve) {
+              requestAnimationFrame(function () {
+                hp.__piStoneTryCarve();
+              });
+            }
           }
         })
         .catch(function () {
@@ -2904,6 +3676,7 @@ details.pi-formula-fold[open] > summary::after {
       if (hero) hero.classList.add('pi-hero--ring-handoff');
       document.body.style.overflow = '';
       initMathJax();
+      window.dispatchEvent(new CustomEvent('pi-tunnel-enter'));
       return;
     }
 
@@ -2919,8 +3692,11 @@ details.pi-formula-fold[open] > summary::after {
       loader.style.display = 'none';
       loader.setAttribute('aria-hidden', 'true');
       main.classList.add('pi-main--visible');
-      document.body.style.overflow = '';
+      document.body.style.overflow = 'hidden';
+      var del = document.querySelector('.wes-deliverable.pi-page');
+      if (del) del.classList.add('pi-page--tunnel-mode');
       initMathJax();
+      window.dispatchEvent(new CustomEvent('pi-tunnel-enter'));
     }, EXIT_MS + EXIT_ANIM_MS + 40);
   }
 
@@ -3009,6 +3785,12 @@ details.pi-formula-fold[open] > summary::after {
   }
 
   initCursorTrail();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTunnel);
+  } else {
+    initTunnel();
+  }
 
   function initReveal() {
     var els = $all('.pi-reveal');
