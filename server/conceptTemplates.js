@@ -1153,6 +1153,14 @@ const WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS = `
   .page-wrapper.template-wiki_ensyuritsu .wes-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+/** wiki_sauna — React（src/wikiSauna/KodoApp.tsx）+ embed/react-body.html から script 差し込み */
+const WIKI_SAUNA_DELIVERABLE_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #2a1810; color: #faf6f0; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #f97316; outline-offset: 2px; }
+  .page-wrapper.template-wiki_sauna main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-wiki_sauna .wss-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 export function getTemplateFullCss(templateId) {
   const tid = String(templateId || '');
   /** ギャラリー非掲載のレガシーID（既存店舗の HTML 生成用） */
@@ -1168,6 +1176,9 @@ export function getTemplateFullCss(templateId) {
   }
   if (key === 'wiki_ensyuritsu') {
     return WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS;
+  }
+  if (key === 'wiki_sauna') {
+    return WIKI_SAUNA_DELIVERABLE_PAGE_CSS;
   }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS

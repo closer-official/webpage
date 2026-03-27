@@ -246,6 +246,14 @@ const WIKI_ENSYURITSU_DELIVERABLE_PAGE_CSS = `
   .page-wrapper.template-wiki_ensyuritsu .wes-deliverable { position: relative; overflow-x: hidden; width: 100%; }
 `;
 
+/** wiki_sauna — server/conceptTemplates の WIKI_SAUNA_DELIVERABLE_PAGE_CSS と同等（本体は React / src/wikiSauna） */
+const WIKI_SAUNA_DELIVERABLE_PAGE_CSS = `
+  .skip-link { position: absolute; top: -4rem; left: 16px; z-index: 10001; padding: 8px 16px; background: #2a1810; color: #faf6f0; text-decoration: none; border-radius: 0.25rem; font-size: 0.875rem; transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .skip-link:focus { top: 16px; outline: 2px solid #f97316; outline-offset: 2px; }
+  .page-wrapper.template-wiki_sauna main#main-content { padding: 0; margin: 0; max-width: none; }
+  .page-wrapper.template-wiki_sauna .wss-deliverable { position: relative; overflow-x: hidden; width: 100%; }
+`;
+
 /** テンプレ3〜11用の共通CSS（プレビュー用・professional・pet_salon・builder・clinic・gym 除く） */
 const GENERIC_TEMPLATE_CSS = `
   .page-wrapper.template-cram_school, .page-wrapper.template-izakaya, .page-wrapper.template-apparel, .page-wrapper.template-event { --tp-bg: #F9F9F7; --tp-heading: #1A1A1A; --tp-text: #333; --tp-accent: #666; --tp-border: #e8e8e8; --tp-bg-footer: #F5F5F2; --hero-min-h: 75vh; background: var(--tp-bg); color: var(--tp-heading); }
@@ -906,9 +914,16 @@ export const TEMPLATES: TemplateOption[] = [
     { omitCommonBase: true }
   ),
   makeTemplate(
+    'wiki_sauna',
+    'wiki湯環（ウェルネス・サウナWiki）',
+    'テンプレ17：ワークスペース embed 固定HTML・木×アンバー（wiki-sauna）',
+    WIKI_SAUNA_DELIVERABLE_PAGE_CSS,
+    { omitCommonBase: true }
+  ),
+  makeTemplate(
     'studio_blush_editorial',
     'ブラッシュ・創作スタジオ',
-    'テンプレ17：クリーム地×テラコッタ。撮影スタジオ・ポートフォリオ・レンタルスペース向け',
+    'テンプレ18：クリーム地×テラコッタ。撮影スタジオ・ポートフォリオ・レンタルスペース向け',
     STUDIO_BLUSH_EDITORIAL_CSS
   ),
 ];

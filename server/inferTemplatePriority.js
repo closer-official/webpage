@@ -7,6 +7,10 @@ import { TEMPLATE_IDS } from './conceptTemplates.js';
 /** ビルトイン（templatePreview.TEMPLATE_CANDIDATES と一致。先頭一致優先） */
 const RULES = [
   {
+    style: 'wiki_sauna',
+    re: /wiki[\s_-]?sauna|湯環|TOWAN|サウナ.?wiki|wiki.?サウナ|ロウリュ|ウェルネス.?wiki/i,
+  },
+  {
     style: 'wiki_ensyuritsu',
     re: /wiki[\s_-]?ensyuritsu|円室律|ENSYRITSU|wiki.?円室|クローズド.?wiki|ナレッジ.?ベース/i,
   },

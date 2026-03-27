@@ -11,6 +11,7 @@ import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetH
 import { buildNavyDeliverableMainHtml } from '../templates/workspaces/navy-cyan-web/server/navyDeliverableClone.js';
 import { buildGymValxDeliverableMainHtml } from '../templates/workspaces/gym-valx/server/gymValxDeliverableClone.js';
 import { buildWikiEnsyuritsuDeliverableMainHtml } from '../templates/workspaces/wiki-ensyuritsu/server/wikiEnsyuritsuDeliverableClone.js';
+import { buildWikiSaunaDeliverableMainHtml } from '../templates/workspaces/wiki-sauna/server/wikiSaunaDeliverableClone.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -150,6 +151,12 @@ const DEFAULT_NAV = {
     { label: '事務所', href: '#access' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
+  wiki_sauna: [
+    { label: 'Elements', href: '#elements' },
+    { label: 'Gallery', href: '#gallery' },
+    { label: 'Membership', href: '#membership' },
+    { label: 'Access', href: '#access' },
+  ],
   studio_blush_editorial: [
     { label: 'コンセプト', href: '#concept' },
     { label: 'サービス', href: '#menu' },
@@ -174,6 +181,7 @@ const DEFAULT_CTA = {
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
   wiki_ensyuritsu: { label: '相談する', href: '#contact' },
+  wiki_sauna: { label: 'Elements', href: '#elements' },
   studio_blush_editorial: { label: '相談する', href: '#contact' },
 };
 
@@ -193,6 +201,7 @@ const defaultHeroImages = {
   ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
   navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
   wiki_ensyuritsu: 'https://images.unsplash.com/photo-1589829547916-cbfea2230cfe?auto=format&fit=crop&w=1400',
+  wiki_sauna: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
   studio_blush_editorial:
     'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
 };
@@ -1031,8 +1040,12 @@ ${cafe1ShopLocationsHtml()}
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">`
-      : tid === 'wiki_ensyuritsu'
+      : tid === 'wiki_sauna'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Zen+Old+Mincho&display=swap" rel="stylesheet">`
+        : tid === 'wiki_ensyuritsu'
+          ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet">`
       : tid === 'cafe_1'
@@ -1046,7 +1059,7 @@ ${cafe1ShopLocationsHtml()}
           : '';
   const a1Script = '';
   const scrollInScript =
-    tid === 'navy_cyan_consult' || tid === 'gym_personal_neon' || tid === 'wiki_ensyuritsu'
+    tid === 'navy_cyan_consult' || tid === 'gym_personal_neon' || tid === 'wiki_ensyuritsu' || tid === 'wiki_sauna'
       ? ''
       : `<script>
 (function(){
@@ -1623,10 +1636,11 @@ ${paymentIframeBootJs('payment-iframe-builder', 'payment-fallback-link-builder')
       : '';
   const gymValxMainHtml = tid === 'gym_personal_neon' ? buildGymValxDeliverableMainHtml() : '';
   const wikiEnsyuritsuMainHtml = tid === 'wiki_ensyuritsu' ? buildWikiEnsyuritsuDeliverableMainHtml() : '';
-  const embeddedDeliverableMainHtml = navyMainHtml + gymValxMainHtml + wikiEnsyuritsuMainHtml;
+  const wikiSaunaMainHtml = tid === 'wiki_sauna' ? buildWikiSaunaDeliverableMainHtml() : '';
+  const embeddedDeliverableMainHtml = navyMainHtml + gymValxMainHtml + wikiEnsyuritsuMainHtml + wikiSaunaMainHtml;
   const bodyInner = isBuilder
     ? `${skipLink}${builderViewsHtml}${builderViewScript}`
-    : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon' || tid === 'wiki_ensyuritsu'
+    : tid === 'navy_cyan_consult' || tid === 'gym_personal_neon' || tid === 'wiki_ensyuritsu' || tid === 'wiki_sauna'
       ? `${skipLink}
 ${embeddedDeliverableMainHtml}
   ${bookingOn ? renderBookingBodyWidget({ ctaLabel: cta.label || '予約する', siteName: content.siteName || content.title || '' }) : ''}`

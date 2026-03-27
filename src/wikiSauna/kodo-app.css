@@ -1,0 +1,1345 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap");
+
+/* KODŌ — scoped under ancestor .wss-deliverable (buildHtml wrapper) */
+.wss-deliverable .wss-kodo-mount {
+  --wss-night: #070d18;
+  --wss-night-mid: #0f1a2e;
+  --wss-night-soft: #162236;
+  --wss-copper: #b87333;
+  --wss-copper-bright: #d4915a;
+  font-family: "Zen Old Mincho", serif;
+  background: var(--wss-night);
+  color: #e8edf5;
+  line-height: 1.65;
+  font-size: 15px;
+  overflow-x: clip;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.wss-deliverable .wss-kodo-mount * {
+  box-sizing: border-box;
+}
+.wss-deliverable .wss-kodo-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.wss-deliverable .wss-kodo-mount a {
+  color: var(--wss-copper-bright);
+  text-decoration: none;
+  font-weight: 600;
+}
+.wss-deliverable .wss-kodo-mount a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wss-deliverable .wss-kodo-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  transition:
+    background 0.45s ease,
+    border-color 0.45s ease,
+    backdrop-filter 0.45s ease;
+  border-bottom: 1px solid transparent;
+}
+.wss-deliverable .wss-kodo-nav--solid {
+  background: rgba(7, 13, 24, 0.82);
+  backdrop-filter: blur(14px);
+  border-bottom-color: rgba(184, 115, 51, 0.15);
+}
+.wss-deliverable .wss-kodo-nav__mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.wss-deliverable .wss-kodo-nav__glyph {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+.wss-deliverable .wss-kodo-nav__word {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #f2f4f8;
+}
+.wss-deliverable .wss-kodo-nav__sub {
+  display: none;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: rgba(232, 237, 245, 0.45);
+  text-transform: uppercase;
+}
+@media (min-width: 720px) {
+  .wss-deliverable .wss-kodo-nav__sub {
+    display: block;
+  }
+}
+.wss-deliverable .wss-kodo-nav__links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.wss-deliverable .wss-kodo-nav__links a {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(232, 237, 245, 0.72);
+  font-weight: 600;
+}
+.wss-deliverable .wss-kodo-nav__links a:hover {
+  color: var(--wss-copper-bright);
+  text-decoration: none;
+}
+
+.wss-deliverable .wss-kodo-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+  pointer-events: none;
+}
+.wss-deliverable .wss-kodo-splash__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity;
+}
+.wss-deliverable .wss-kodo-splash__word {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.2rem, 10vw, 4rem);
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  text-transform: uppercase;
+  color: #f5f6fa;
+  text-shadow: 0 0 60px rgba(212, 145, 90, 0.15);
+}
+
+.wss-deliverable .wss-kodo-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 100px 20px 48px;
+  overflow: hidden;
+}
+.wss-deliverable .wss-kodo-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.wss-deliverable .wss-kodo-hero__media video,
+.wss-deliverable .wss-kodo-hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-hero__media video,
+  .wss-deliverable .wss-kodo-hero__media img {
+    transform: none;
+  }
+}
+.wss-deliverable .wss-kodo-hero__mist {
+  position: absolute;
+  inset: -8% -12%;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 45% at 25% 55%, rgba(245, 220, 190, 0.14), transparent 52%),
+    radial-gradient(ellipse 55% 40% at 78% 38%, rgba(232, 200, 160, 0.1), transparent 48%),
+    radial-gradient(ellipse 50% 35% at 52% 72%, rgba(255, 235, 210, 0.08), transparent 50%);
+  background-size: 115% 115%;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  animation: wss-kodo-mist-drift 36s ease-in-out infinite;
+}
+@keyframes wss-kodo-mist-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    background-position: 0% 50%;
+  }
+  33% {
+    transform: translate3d(1.8%, -0.8%, 0) scale(1.02);
+    background-position: 8% 44%;
+  }
+  66% {
+    transform: translate3d(-1.2%, 1%, 0) scale(1.01);
+    background-position: -6% 58%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-hero__mist {
+    animation: none;
+    transform: none;
+  }
+}
+.wss-deliverable .wss-kodo-hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, 0.5) 0%, rgba(5, 5, 5, 0.62) 38%, rgba(5, 5, 5, 0.94) 100%),
+    linear-gradient(105deg, rgba(5, 5, 5, 0.35) 0%, transparent 42%, rgba(5, 5, 5, 0.28) 100%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(184, 115, 51, 0.12), transparent 55%),
+    radial-gradient(ellipse 48% 55% at 18% 62%, rgba(255, 190, 120, 0.14), transparent 50%),
+    radial-gradient(ellipse 35% 45% at 22% 58%, rgba(255, 220, 170, 0.08), transparent 45%);
+  pointer-events: none;
+}
+.wss-deliverable .wss-kodo-hero__content {
+  position: relative;
+  z-index: 3;
+  width: min(920px, 100%);
+  text-align: center;
+}
+.wss-deliverable .wss-kodo-hero__logo {
+  width: min(200px, 48vw);
+  height: auto;
+  margin: 0 auto 20px;
+  filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.45));
+}
+.wss-deliverable .wss-kodo-hero__title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.6rem, 9vw, 4.8rem);
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  color: #fafbfe;
+  text-indent: 0.42em;
+}
+.wss-deliverable .wss-kodo-hero__ja {
+  font-size: 1rem;
+  letter-spacing: 0.55em;
+  color: var(--wss-copper-bright);
+  margin: 0 0 14px;
+}
+.wss-deliverable .wss-kodo-hero__tag {
+  font-size: clamp(0.68rem, 1.8vw, 0.8rem);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(250, 251, 254, 0.92);
+  margin: 0 0 32px;
+  font-weight: 500;
+}
+.wss-deliverable .wss-kodo-scroll {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(232, 237, 245, 0.38);
+}
+.wss-deliverable .wss-kodo-scroll__line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(180deg, var(--wss-copper), transparent);
+  animation: wss-kodo-pulse 2.4s ease-in-out infinite;
+}
+@keyframes wss-kodo-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleY(0.85);
+    transform-origin: top;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-scroll__line {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.wss-deliverable .wss-kodo-philosophy {
+  margin-top: 15vh;
+  padding: 0 clamp(20px, 5vw, 72px) clamp(96px, 14vw, 140px);
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+  background: #050505;
+}
+.wss-deliverable .wss-kodo-philosophy__intro {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 0 clamp(56px, 10vw, 96px);
+  text-align: center;
+}
+.wss-deliverable .wss-kodo-philosophy__eyebrow {
+  margin: 0 0 14px;
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--wss-copper-bright);
+}
+.wss-deliverable .wss-kodo-philosophy h2 {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 200;
+  letter-spacing: 0.1em;
+  margin: 0 0 28px;
+  color: #f4f6fb;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.wss-deliverable .wss-kodo-philosophy__lead {
+  margin: 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: clamp(0.98rem, 2.1vw, 1.08rem);
+  color: rgba(236, 240, 248, 0.86);
+  line-height: 2.2;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-wrap: pretty;
+}
+@media (min-width: 720px) {
+  .wss-deliverable .wss-kodo-philosophy__lead {
+    text-align: justify;
+  }
+}
+
+.wss-deliverable .wss-kodo-philosophy__segment {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(64px, 12vw, 120px) 0;
+  min-height: min(72vh, 720px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wss-deliverable .wss-kodo-philosophy__bgword-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.wss-deliverable .wss-kodo-philosophy__bgword {
+  display: block;
+  opacity: 0.14;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(4.2rem, 14vw, 16rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.01);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  text-stroke: 1px rgba(255, 255, 255, 0.08);
+  user-select: none;
+  white-space: nowrap;
+}
+.wss-deliverable .wss-kodo-philosophy__segment-text {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+.wss-deliverable .wss-kodo-philosophy__segment-text p {
+  margin: 0;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 2.2;
+  color: rgba(224, 231, 242, 0.82);
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-wrap: pretty;
+}
+@media (min-width: 720px) {
+  .wss-deliverable .wss-kodo-philosophy__segment-text p {
+    text-align: justify;
+  }
+}
+
+.wss-deliverable .wss-kodo-story {
+  padding: 72px 0 88px;
+  text-align: center;
+  border-top: 1px solid rgba(184, 115, 51, 0.2);
+  background: linear-gradient(180deg, rgba(184, 115, 51, 0.04), transparent 42%);
+  max-width: none;
+  margin: 0;
+}
+.wss-deliverable .wss-kodo-story__inner {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 0 28px 52px;
+}
+.wss-deliverable .wss-kodo-story__inner--wide {
+  max-width: min(46rem, 100%);
+}
+.wss-deliverable .wss-kodo-story__prose {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+.wss-deliverable .wss-kodo-story__prose .wss-kodo-story__body {
+  margin: 0;
+}
+.wss-deliverable .wss-kodo-story__intro {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.wss-deliverable .wss-kodo-story__ja {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.45em;
+  color: var(--wss-copper-bright);
+}
+.wss-deliverable .wss-kodo-story__body {
+  margin: 0;
+  font-size: clamp(0.92rem, 2.1vw, 1.02rem);
+  line-height: 2;
+  color: rgba(220, 227, 239, 0.76);
+  text-align: left;
+  letter-spacing: 0.02em;
+}
+.wss-deliverable .wss-kodo-story__strip__text .wss-kodo-story__body {
+  text-align: left;
+  text-wrap: pretty;
+}
+.wss-deliverable .wss-kodo-story__strips {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.wss-deliverable .wss-kodo-story__strip {
+  display: grid;
+  gap: 28px 44px;
+  align-items: center;
+  margin: 0 0 clamp(52px, 9vw, 96px);
+}
+.wss-deliverable .wss-kodo-story__strip:last-child {
+  margin-bottom: 0;
+}
+@media (min-width: 880px) {
+  .wss-deliverable .wss-kodo-story__strip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px 52px;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-right .wss-kodo-story__strip__text {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-right .wss-kodo-story__strip__track {
+    order: 2;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-left .wss-kodo-story__strip__track {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-left .wss-kodo-story__strip__text {
+    order: 2;
+  }
+}
+@media (max-width: 879px) {
+  .wss-deliverable .wss-kodo-story__strip--img-right .wss-kodo-story__strip__text {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-right .wss-kodo-story__strip__track {
+    order: 2;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-left .wss-kodo-story__strip__track {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-story__strip--img-left .wss-kodo-story__strip__text {
+    order: 2;
+  }
+}
+.wss-deliverable .wss-kodo-story__strip__text {
+  text-align: left;
+}
+.wss-deliverable .wss-kodo-story__strip__track {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+.wss-deliverable .wss-kodo-story__strip__float {
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-story__strip__float {
+    will-change: auto;
+  }
+}
+.wss-deliverable .wss-kodo-story__figure {
+  margin: 0;
+  width: 100%;
+}
+.wss-deliverable .wss-kodo-story__imgwrap {
+  position: relative;
+  width: 100%;
+  min-height: min(52vw, 520px);
+  max-height: 78vh;
+  overflow: hidden;
+  border-block: 1px solid rgba(184, 115, 51, 0.18);
+}
+.wss-deliverable .wss-kodo-story__imgwrap--strip {
+  min-height: min(42vw, 380px);
+  max-height: none;
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 14px;
+  border: 1px solid rgba(184, 115, 51, 0.16);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.35);
+}
+.wss-deliverable .wss-kodo-story__imgwrap picture,
+.wss-deliverable .wss-kodo-story__imgwrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.wss-deliverable .wss-kodo-section {
+  padding: 96px 28px 104px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.wss-deliverable .wss-kodo-section__head {
+  max-width: 32rem;
+  margin-bottom: 36px;
+}
+.wss-deliverable .wss-kodo-section__eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--wss-copper-bright);
+  margin: 0 0 12px;
+}
+.wss-deliverable .wss-kodo-section__eyebrow--ja {
+  text-transform: none;
+  letter-spacing: 0.35em;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.wss-deliverable .wss-kodo-section h2 {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: clamp(1.6rem, 4vw, 2.35rem);
+  font-weight: 600;
+  margin: 0 0 14px;
+  letter-spacing: 0.04em;
+  color: #f4f6fb;
+}
+.wss-deliverable .wss-kodo-section__lead {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(220, 227, 239, 0.62);
+  line-height: 1.9;
+}
+
+.wss-deliverable .wss-kodo-specs .wss-kodo-section__head {
+  margin-bottom: 28px;
+}
+.wss-deliverable .wss-kodo-specs__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+}
+.wss-deliverable .wss-kodo-specs__row {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5rem) 1fr;
+  gap: 16px 24px;
+  align-items: baseline;
+  padding: 18px 0;
+  border-bottom: 2px solid rgba(196, 164, 132, 0.3);
+}
+.wss-deliverable .wss-kodo-specs__row:last-of-type {
+  border-bottom: 2px solid rgba(196, 164, 132, 0.3);
+}
+@media (max-width: 560px) {
+  .wss-deliverable .wss-kodo-specs__row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+.wss-deliverable .wss-kodo-specs__cat {
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--wss-copper-bright);
+  font-weight: 700;
+}
+.wss-deliverable .wss-kodo-specs__vals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+.wss-deliverable .wss-kodo-specs__vals span {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  color: rgba(232, 237, 245, 0.82);
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+  padding: 6px 16px 6px 0;
+  border-right: 1px solid rgba(196, 164, 132, 0.2);
+  margin-right: 2px;
+}
+.wss-deliverable .wss-kodo-specs__vals span:last-child {
+  border-right: none;
+  padding-right: 0;
+  margin-right: 0;
+}
+.wss-deliverable .wss-kodo-specs__premium {
+  font-weight: 600;
+  color: rgba(236, 224, 208, 0.96) !important;
+  text-shadow: 0 0 12px rgba(196, 164, 132, 0.28);
+}
+@media (max-width: 560px) {
+  .wss-deliverable .wss-kodo-specs__vals span {
+    border-right: none;
+    padding-right: 0;
+    flex: 1 1 100%;
+  }
+}
+.wss-deliverable .wss-kodo-specs__note {
+  margin: 20px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  color: rgba(200, 210, 225, 0.45);
+  max-width: 40rem;
+}
+
+.wss-deliverable .wss-kodo-core {
+  padding-top: 70px;
+  border-top: 1px solid rgba(184, 115, 51, 0.14);
+  background: linear-gradient(180deg, rgba(5, 8, 14, 0.35), transparent 48%);
+}
+.wss-deliverable .wss-kodo-core .wss-kodo-section__head {
+  margin-bottom: 28px;
+}
+.wss-deliverable .wss-kodo-core .wss-kodo-section__lead {
+  max-width: 700px;
+  margin-top: 8px;
+  line-height: 2.1;
+  color: rgba(230, 236, 246, 0.78);
+}
+.wss-deliverable .wss-kodo-core__bands {
+  display: grid;
+  gap: clamp(54px, 9vw, 96px);
+}
+.wss-deliverable .wss-kodo-core-band {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(12px, 2.4vw, 20px) 0;
+}
+.wss-deliverable .wss-kodo-core-band__bgword {
+  position: absolute;
+  z-index: 1;
+  left: clamp(-10px, 1.4vw, 18px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(5.2rem, 17vw, 20rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.01);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  text-stroke: 1px rgba(255, 255, 255, 0.08);
+  paint-order: stroke fill;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.wss-deliverable .wss-kodo-core-band__float {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  gap: 28px 56px;
+  padding: clamp(20px, 3.2vw, 40px);
+  border-radius: 18px;
+  background-color: rgba(10, 10, 10, 0.5);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+.wss-deliverable .wss-kodo-core-band__text,
+.wss-deliverable .wss-kodo-core-band__media-track {
+  position: relative;
+}
+.wss-deliverable .wss-kodo-core-band__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--wss-copper-bright);
+}
+.wss-deliverable .wss-kodo-core-band__title {
+  margin: 0 0 14px;
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: clamp(1.7rem, 4.1vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #f4f6fb;
+}
+.wss-deliverable .wss-kodo-core-band__title--copper {
+  color: #c4a484;
+  letter-spacing: 0.25em;
+}
+.wss-deliverable .wss-kodo-core-band__body {
+  margin: 0;
+  max-width: 52ch;
+  font-size: clamp(0.95rem, 2vw, 1.06rem);
+  line-height: 2;
+  color: rgba(224, 231, 242, 0.82);
+  letter-spacing: 0.02em;
+}
+.wss-deliverable .wss-kodo-core-band__media-track {
+  overflow: visible;
+}
+.wss-deliverable .wss-kodo-core-band__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  z-index: 3;
+}
+.wss-deliverable .wss-kodo-core-band__media picture,
+.wss-deliverable .wss-kodo-core-band__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.05);
+}
+.wss-deliverable .wss-kodo-core-band--ice .wss-kodo-core-band__media img,
+.wss-deliverable .wss-kodo-core-band--air .wss-kodo-core-band__media img {
+  filter: saturate(0.82) contrast(1.16) brightness(0.8);
+}
+@media (min-width: 960px) {
+  .wss-deliverable .wss-kodo-core-band__float {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  }
+  .wss-deliverable .wss-kodo-core-band--img-left .wss-kodo-core-band__media-track {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-left .wss-kodo-core-band__text {
+    order: 2;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-right .wss-kodo-core-band__text {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-right .wss-kodo-core-band__media-track {
+    order: 2;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-right .wss-kodo-core-band__bgword {
+    left: auto;
+    right: 0;
+  }
+}
+@media (max-width: 959px) {
+  .wss-deliverable .wss-kodo-core-band__bgword {
+    top: 36%;
+    left: 0;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-left .wss-kodo-core-band__media-track {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-left .wss-kodo-core-band__text {
+    order: 2;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-right .wss-kodo-core-band__text {
+    order: 1;
+  }
+  .wss-deliverable .wss-kodo-core-band--img-right .wss-kodo-core-band__media-track {
+    order: 2;
+  }
+}
+
+.wss-deliverable .wss-kodo-lounge {
+  padding: 0 28px 96px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.wss-deliverable .wss-kodo-lounge__frame {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(184, 115, 51, 0.16);
+  background: var(--wss-night-mid);
+  min-height: min(58vw, 560px);
+  max-height: 85vh;
+  aspect-ratio: 16 / 9;
+}
+.wss-deliverable .wss-kodo-lounge__frame picture,
+.wss-deliverable .wss-kodo-lounge__frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.wss-deliverable .wss-kodo-section--membership .wss-kodo-section__head {
+  max-width: 40rem;
+  margin-bottom: 30px;
+}
+.wss-deliverable .wss-kodo-section--membership {
+  padding-bottom: 72px;
+  position: relative;
+}
+.wss-deliverable .wss-kodo-section--membership h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(1.65rem, 3.5vw, 2.15rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: none;
+}
+.wss-deliverable .wss-kodo-privileges {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 18px;
+}
+.wss-deliverable .wss-kodo-privileges__bgword {
+  position: absolute;
+  inset: -8% auto auto 0;
+  z-index: 1;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(4.8rem, 16vw, 14rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.01);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  text-stroke: 1px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.wss-deliverable .wss-kodo-privileges__grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+.wss-deliverable .wss-kodo-privilege {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(8, 12, 20, 0.55);
+  border-radius: 14px;
+  padding: 14px 14px;
+  min-height: 112px;
+}
+.wss-deliverable .wss-kodo-privilege svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 12px;
+  fill: none;
+  stroke: rgba(248, 250, 255, 0.86);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wss-deliverable .wss-kodo-privilege h3 {
+  margin: 0 0 8px;
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
+  color: #f4f6fb;
+}
+.wss-deliverable .wss-kodo-privilege p {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.56;
+  color: rgba(220, 227, 239, 0.74);
+}
+@media (min-width: 760px) {
+  .wss-deliverable .wss-kodo-privileges__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1160px) {
+  .wss-deliverable .wss-kodo-privileges__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.wss-deliverable .wss-kodo-tier-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.wss-deliverable .wss-kodo-tier-card {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 18px 20px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.wss-deliverable .wss-kodo-tier-card--founder {
+  border: 1px solid rgba(228, 198, 140, 0.5);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(255, 238, 186, 0.26), transparent 46%),
+    linear-gradient(160deg, rgba(142, 102, 36, 0.92), rgba(99, 66, 20, 0.9) 52%, rgba(52, 32, 12, 0.92));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 233, 178, 0.22),
+    0 14px 34px rgba(24, 16, 8, 0.42);
+}
+.wss-deliverable .wss-kodo-tier-card--monthly {
+  background: linear-gradient(165deg, rgba(23, 28, 38, 0.94), rgba(12, 16, 24, 0.92));
+}
+.wss-deliverable .wss-kodo-tier-card--founder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 241, 204, 0.15) 0%,
+    rgba(255, 241, 204, 0.9) 18%,
+    rgba(255, 209, 120, 0.95) 34%,
+    rgba(255, 241, 204, 0.18) 48%,
+    rgba(255, 241, 204, 0.15) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: wss-kodo-founder-border-glint 3.6s linear infinite;
+  background-size: 250% 250%;
+}
+.wss-deliverable .wss-kodo-tier-card--founder::after {
+  content: "";
+  position: absolute;
+  inset: -40% -20%;
+  background: linear-gradient(
+    112deg,
+    rgba(255, 255, 255, 0) 36%,
+    rgba(255, 241, 197, 0.22) 48%,
+    rgba(255, 231, 171, 0.45) 50%,
+    rgba(255, 241, 197, 0.2) 52%,
+    rgba(255, 255, 255, 0) 64%
+  );
+  transform: translateX(-52%) rotate(7deg);
+  animation: wss-kodo-founder-light-sweep 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes wss-kodo-founder-border-glint {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 180% 50%;
+  }
+}
+@keyframes wss-kodo-founder-light-sweep {
+  0%,
+  14% {
+    transform: translateX(-62%) rotate(7deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateX(62%) rotate(7deg);
+    opacity: 0.88;
+  }
+  100% {
+    transform: translateX(62%) rotate(7deg);
+    opacity: 0;
+  }
+}
+.wss-deliverable .wss-kodo-tier-card__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(244, 246, 251, 0.72);
+}
+.wss-deliverable .wss-kodo-tier-card h3 {
+  margin: 0 0 12px;
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: 1.34rem;
+  letter-spacing: 0.06em;
+  color: #f7f8fb;
+}
+.wss-deliverable .wss-kodo-tier-card__price {
+  margin: 0 0 10px;
+}
+.wss-deliverable .wss-kodo-tier-card__price strong {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-size: clamp(2rem, 4.8vw, 2.6rem);
+  color: #f5ede4;
+  letter-spacing: 0.04em;
+}
+.wss-deliverable .wss-kodo-tier-card__price span {
+  font-size: 0.84rem;
+  color: rgba(236, 242, 252, 0.72);
+}
+.wss-deliverable .wss-kodo-tier-card__lead {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #e8d3be;
+}
+.wss-deliverable .wss-kodo-tier-card__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.wss-deliverable .wss-kodo-tier-card__list li {
+  position: relative;
+  padding-left: 16px;
+  line-height: 1.5;
+  font-size: 0.74rem;
+  color: rgba(229, 235, 246, 0.82);
+}
+.wss-deliverable .wss-kodo-tier-card__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 6px;
+  height: 1px;
+  background: rgba(196, 164, 132, 0.65);
+}
+.wss-deliverable .wss-kodo-tier-card:hover,
+.wss-deliverable .wss-kodo-tier-card:focus-within {
+  border-color: rgba(196, 164, 132, 0.52);
+  box-shadow:
+    inset 0 0 0 1px rgba(196, 164, 132, 0.3),
+    0 14px 32px rgba(0, 0, 0, 0.32);
+}
+.wss-deliverable .wss-kodo-tier-card--founder:hover,
+.wss-deliverable .wss-kodo-tier-card--founder:focus-within {
+  border-color: rgba(255, 227, 166, 0.75);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 236, 190, 0.34),
+    0 16px 34px rgba(32, 22, 8, 0.38),
+    0 0 30px rgba(222, 173, 83, 0.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-tier-card--founder::before,
+  .wss-deliverable .wss-kodo-tier-card--founder::after {
+    animation: none;
+  }
+}
+@media (min-width: 900px) {
+  .wss-deliverable .wss-kodo-tier-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+@media (min-width: 1180px) and (min-height: 760px) {
+  .wss-deliverable .wss-kodo-section--membership {
+    min-height: calc(100vh - 72px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 28px;
+    padding-bottom: 32px;
+  }
+}
+@media (min-width: 980px) and (max-height: 760px) {
+  .wss-deliverable .wss-kodo-section--membership {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 14px;
+    padding-bottom: 18px;
+  }
+  .wss-deliverable .wss-kodo-section--membership .wss-kodo-section__head {
+    margin-bottom: 16px;
+  }
+  .wss-deliverable .wss-kodo-privileges {
+    margin-bottom: 12px;
+  }
+  .wss-deliverable .wss-kodo-privileges__bgword {
+    opacity: 0.6;
+    transform: scale(0.9);
+    transform-origin: left top;
+  }
+}
+
+.wss-deliverable .wss-kodo-specs h2,
+.wss-deliverable .wss-kodo-section--membership h2,
+.wss-deliverable .wss-kodo-access__panel h2 {
+  font-family: "Playfair Display", "Cormorant Garamond", serif;
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+.wss-deliverable .wss-kodo-access__panel h2 {
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+}
+
+.wss-deliverable .wss-kodo-core-band__media::after,
+.wss-deliverable .wss-kodo-lounge__frame::after,
+.wss-deliverable .wss-kodo-member-card__media::after,
+.wss-deliverable .wss-kodo-access::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    linear-gradient(180deg, rgba(6, 12, 24, 0.22), rgba(6, 12, 24, 0.28));
+}
+.wss-deliverable .wss-kodo-member-note {
+  margin: 22px 0 0;
+  font-size: 0.78rem;
+  color: rgba(220, 227, 239, 0.55);
+  text-align: center;
+}
+.wss-deliverable .wss-kodo-member-note--emphasis {
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 18px 22px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.65;
+  color: rgba(244, 246, 251, 0.9);
+  border: 1px solid rgba(184, 115, 51, 0.28);
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(184, 115, 51, 0.08), rgba(7, 13, 24, 0.5));
+}
+.wss-deliverable .wss-kodo-member-cta {
+  margin: 20px 0 0;
+  text-align: center;
+}
+.wss-deliverable .wss-kodo-btn-tour {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 28px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--wss-night);
+  background: linear-gradient(135deg, var(--wss-copper-bright), var(--wss-copper));
+  border-radius: 999px;
+  border: none;
+  text-decoration: none;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.wss-deliverable .wss-kodo-btn-tour:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(184, 115, 51, 0.25);
+  animation: wss-kodo-tour-pulse 2s ease-in-out infinite;
+}
+@keyframes wss-kodo-tour-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(212, 145, 90, 0.24),
+      0 10px 24px rgba(184, 115, 51, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(212, 145, 90, 0.45),
+      0 0 22px rgba(212, 145, 90, 0.35),
+      0 14px 30px rgba(184, 115, 51, 0.28);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-btn-tour:hover {
+    animation: none;
+  }
+}
+
+.wss-deliverable .wss-kodo-access {
+  position: relative;
+  min-height: min(72vh, 640px);
+  margin: 0 20px 80px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(184, 115, 51, 0.16);
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.wss-deliverable .wss-kodo-access picture,
+.wss-deliverable .wss-kodo-access img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wss-deliverable .wss-kodo-access__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(7, 13, 24, 0.2) 0%, transparent 40%, rgba(7, 13, 24, 0.5) 100%);
+  pointer-events: none;
+}
+.wss-deliverable .wss-kodo-access__panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  padding: 28px 24px 32px;
+  background: linear-gradient(180deg, transparent, rgba(7, 13, 24, 0.92));
+}
+.wss-deliverable .wss-kodo-access__panel h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  margin: 0 0 10px;
+  letter-spacing: 0.08em;
+}
+.wss-deliverable .wss-kodo-access__address {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  font-style: normal;
+  color: rgba(232, 237, 245, 0.82);
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.wss-deliverable .wss-kodo-access__note {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(232, 237, 245, 0.5);
+  line-height: 1.85;
+}
+
+.wss-deliverable .wss-kodo-footer {
+  padding: 48px 20px 56px;
+  text-align: center;
+  border-top: 1px solid rgba(184, 115, 51, 0.12);
+  font-size: 0.72rem;
+  color: rgba(200, 210, 225, 0.45);
+  line-height: 1.85;
+}
+.wss-deliverable .wss-kodo-footer__pulse {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto 20px;
+  padding: 16px 28px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.35s ease;
+}
+.wss-deliverable .wss-kodo-footer__pulse:hover {
+  text-decoration: none;
+  animation: wss-kodo-footer-glow 2.2s ease-in-out infinite;
+}
+@keyframes wss-kodo-footer-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(184, 115, 51, 0.15),
+      0 0 24px rgba(212, 145, 90, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(212, 145, 90, 0.35),
+      0 0 40px rgba(212, 145, 90, 0.22);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wss-deliverable .wss-kodo-footer__pulse:hover {
+    animation: none;
+    box-shadow: 0 0 0 1px rgba(184, 115, 51, 0.22);
+  }
+}
+.wss-deliverable .wss-kodo-footer__logo {
+  width: 56px;
+  height: auto;
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.35));
+}
+.wss-deliverable .wss-kodo-footer__word {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(244, 246, 251, 0.9);
+}
+.wss-deliverable .wss-kodo-footer__addr {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: rgba(200, 210, 225, 0.55);
+  max-width: 22rem;
+  line-height: 1.65;
+}
+.wss-deliverable .wss-kodo-footer__copy {
+  margin: 0 0 12px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: rgba(200, 210, 225, 0.5);
+}
+.wss-deliverable .wss-kodo-footer__demo {
+  margin: 0 0 8px;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.wss-deliverable .wss-kodo-footer__credits {
+  margin: 16px 0 0;
+}

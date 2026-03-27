@@ -450,6 +450,7 @@ export function renderTemplateGalleryPage() {
     'セールス・教室（レガシー）': 'Sales · courses (legacy)',
     '法人・相談': 'Business · consultation',
     'オリジナル・ナレッジ': 'Original · knowledge layout',
+    'ウェルネス・サウナ（wiki）': 'Wellness · sauna wiki',
     '参考デザイン': 'Reference designs',
     'カスタムテンプレート': 'Custom templates',
     'その他': 'Other',

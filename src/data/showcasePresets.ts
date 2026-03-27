@@ -686,6 +686,41 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  wiki_sauna: {
+    content: {
+      siteName: '湯環 TOWAN',
+      title: '湯環 TOWAN | wiki-sauna',
+      headline: 'サウナの知識を、ひとつの輪に。',
+      subheadline:
+        '本体レイアウトは templates/workspaces/wiki-sauna/embed/index.html（wiki-sauna）。施設運用向け Wiki の静的デモです。',
+      ctaLabel: '記事一覧へ',
+      ctaHref: '#topics',
+      sections: [
+        {
+          id: 'concept',
+          title: 'このテンプレについて',
+          content: 'ビルトインは固定 HTML 埋め込み。編集はワークスペースの embed を開いてください。',
+        },
+        { id: 'menu', title: 'トピック', content: 'GUIDE / OPS / WIKI の3カード（embed 内）。' },
+        { id: 'hours', title: 'メタ', content: 'このテキストはメタ用。画面は embed が表示されます。' },
+        { id: 'access', title: 'フォルダ', content: 'templates/workspaces/wiki-sauna/' },
+        { id: 'contact', title: 'お問い合わせ', content: '本番ではフォームを接続してください。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} 湯環 TOWAN（サンプル）`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
+      ],
+    },
+    seo: {
+      metaTitle: '湯環 TOWAN | wiki-sauna（テンプレデモ）',
+      metaDescription:
+        '木×アンバーのサウナ・ウェルネス向け Wiki レイアウト。静的デモ（ワークスペース embed）。',
+      keywords: 'wiki,sauna,湯環,TOWAN,サウナ,ウェルネス,ナレッジ',
+      ogImageUrl:
+        'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
   gym_personal_neon: {
     content: {
       siteName: 'CLOSER GYM',

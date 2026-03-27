@@ -43,6 +43,12 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 86,
     tags: ['wiki-ensyuritsu', '円室律', 'ENSYRITSU', 'オリジナル', '記事'],
   }),
+  wiki_sauna: Object.freeze({
+    category: 'ウェルネス・サウナ（wiki）',
+    categories: ['Wiki', 'サウナ', 'ウェルネス', '施設'],
+    popularity: 85,
+    tags: ['wiki-sauna', '湯環', 'TOWAN', 'サウナ', 'オリジナル', '記事'],
+  }),
 });
 
 function simpleHash(str) {
