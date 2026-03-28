@@ -12,16 +12,18 @@ const HERO_STATIC_FALLBACK = P('36554101', 1920, 'webp');
 const easeOut = [0.22, 1, 0.36, 1] as const;
 const revealTransition = { duration: 0.95, ease: easeOut };
 type DemoProfile = 'tiktok' | 'youtube';
+type DemoCue = { id: string; travelMs: number; holdMs: number; offsetPx?: number };
 
-const DEMO_TIMELINES: Record<DemoProfile, { id: string; travelMs: number; holdMs: number }[]> = {
+const DEMO_TIMELINES: Record<DemoProfile, DemoCue[]> = {
   tiktok: [
-    { id: 'ritual', travelMs: 2400, holdMs: 3600 },
-    { id: 'element-fire', travelMs: 2100, holdMs: 3200 },
-    { id: 'element-ice', travelMs: 2100, holdMs: 3200 },
-    { id: 'element-air', travelMs: 2100, holdMs: 3600 },
-    { id: 'specs', travelMs: 2000, holdMs: 5200 },
-    { id: 'membership', travelMs: 2000, holdMs: 5000 },
-    { id: 'access', travelMs: 1700, holdMs: 2200 },
+    { id: 'ritual', travelMs: 1800, holdMs: 2200 },
+    { id: 'elements', travelMs: 1700, holdMs: 2200 },
+    { id: 'element-fire', travelMs: 1600, holdMs: 2200 },
+    { id: 'element-ice', travelMs: 1600, holdMs: 2200 },
+    { id: 'element-air', travelMs: 1600, holdMs: 2200 },
+    { id: 'specs', travelMs: 1700, holdMs: 2600 },
+    { id: 'membership-cards', travelMs: 1700, holdMs: 2800 },
+    { id: 'contact', travelMs: 1600, holdMs: 2000 },
   ],
   youtube: [
     { id: 'ritual', travelMs: 2600, holdMs: 11000 },
@@ -29,10 +31,33 @@ const DEMO_TIMELINES: Record<DemoProfile, { id: string; travelMs: number; holdMs
     { id: 'element-ice', travelMs: 2200, holdMs: 12000 },
     { id: 'element-air', travelMs: 2200, holdMs: 12000 },
     { id: 'specs', travelMs: 2000, holdMs: 12000 },
-    { id: 'membership', travelMs: 2300, holdMs: 13000 },
-    { id: 'access', travelMs: 1800, holdMs: 9000 },
+    { id: 'membership-cards', travelMs: 2300, holdMs: 13000 },
+    { id: 'contact', travelMs: 1800, holdMs: 9000 },
   ],
 };
+
+function computeDemoTargetY(el: HTMLElement, offsetPx = 0) {
+  const navOffset = 72;
+  const bleedPad = 12;
+  const absTop = el.getBoundingClientRect().top + window.scrollY;
+  const elHeight = el.offsetHeight;
+  const viewport = window.innerHeight;
+  const fitsViewport = elHeight <= viewport * 0.96;
+  const centeredY = absTop - (viewport - elHeight) / 2 + offsetPx;
+  const topAlignedY = absTop - navOffset + offsetPx;
+  const raw = fitsViewport ? centeredY : topAlignedY;
+  const minY = Math.max(0, absTop - bleedPad);
+  const maxY = Math.max(minY, absTop + elHeight - viewport + bleedPad);
+  return Math.max(minY, Math.min(maxY, raw));
+}
+
+function computeBottomLockedTargetY(el: HTMLElement, offsetPx = 0) {
+  const absTop = el.getBoundingClientRect().top + window.scrollY;
+  const elHeight = el.offsetHeight;
+  const viewport = window.innerHeight;
+  const pad = 10;
+  return Math.max(0, absTop + elHeight - viewport + pad + offsetPx);
+}
 
 function sectionReveal(delay = 0, reduceMotion: boolean | null) {
   if (reduceMotion) {
@@ -256,12 +281,39 @@ export default function KodoApp() {
     const profile = qs.get('profile') === 'youtube' ? 'youtube' : 'tiktok';
     const loopParam = qs.get('loop');
     const loop = loopParam === '1' || (loopParam == null && profile === 'youtube');
-    return { enabled, profile: profile as DemoProfile, loop };
+    const tune = qs.get('tune') === '1';
+    return { enabled, profile: profile as DemoProfile, loop, tune };
   })();
   const [splashDone, setSplashDone] = useState(!!reduceMotion || demoConfig.enabled);
   const [navSolid, setNavSolid] = useState(false);
+  const [demoOffsets, setDemoOffsets] = useState<Record<string, number>>({});
+  const [demoPaused, setDemoPaused] = useState(false);
+  const [activeCueIdx, setActiveCueIdx] = useState(0);
   const lenisRef = useRef<Lenis | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const demoOffsetsRef = useRef<Record<string, number>>({});
+  const demoPausedRef = useRef(false);
+
+  useEffect(() => {
+    demoOffsetsRef.current = demoOffsets;
+  }, [demoOffsets]);
+
+  useEffect(() => {
+    demoPausedRef.current = demoPaused;
+  }, [demoPaused]);
+
+  useEffect(() => {
+    if (!demoConfig.enabled || !demoConfig.tune) return;
+    const key = `kodo-demo-offsets-${demoConfig.profile}`;
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') setDemoOffsets(parsed as Record<string, number>);
+    } catch {
+      // ignore parse errors
+    }
+  }, [demoConfig.enabled, demoConfig.profile, demoConfig.tune]);
 
   useEffect(() => {
     if (demoConfig.enabled) {
@@ -318,6 +370,7 @@ export default function KodoApp() {
     let cancelled = false;
     let rafId = 0;
     let timer: number | null = null;
+    const timeline = DEMO_TIMELINES[demoConfig.profile];
 
     const sleep = (ms: number) =>
       new Promise<void>((resolve) => {
@@ -330,6 +383,12 @@ export default function KodoApp() {
           resolve();
         }, ms);
       });
+
+    const waitWhilePaused = async () => {
+      while (!cancelled && demoPausedRef.current) {
+        await sleep(100);
+      }
+    };
 
     const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -362,21 +421,28 @@ export default function KodoApp() {
         rafId = requestAnimationFrame(tick);
       });
 
-    const getTargetY = (id: string) => {
-      const el = document.getElementById(id);
+    const getTargetY = (cue: DemoCue) => {
+      const el = document.getElementById(cue.id);
       if (!(el instanceof HTMLElement)) return 0;
-      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - 72);
+      const base = cue.offsetPx ?? 0;
+      const tune = demoOffsetsRef.current[cue.id] ?? 0;
+      if (cue.id === 'membership-cards') return computeBottomLockedTargetY(el, base + tune);
+      return computeDemoTargetY(el, base + tune);
     };
 
     const run = async () => {
-      const timeline = DEMO_TIMELINES[demoConfig.profile];
       do {
-        for (const cue of timeline) {
+        for (let i = 0; i < timeline.length; i++) {
+          const cue = timeline[i];
           if (cancelled) return;
-          await animateTo(getTargetY(cue.id), cue.travelMs);
+          setActiveCueIdx(i);
+          await waitWhilePaused();
+          await animateTo(getTargetY(cue), cue.travelMs);
+          await waitWhilePaused();
           await sleep(cue.holdMs);
         }
         if (!demoConfig.loop || cancelled) break;
+        setActiveCueIdx(0);
         await animateTo(0, demoConfig.profile === 'youtube' ? 2600 : 1800);
         await sleep(demoConfig.profile === 'youtube' ? 2200 : 1200);
       } while (!cancelled);
@@ -389,6 +455,76 @@ export default function KodoApp() {
       if (timer != null) window.clearTimeout(timer);
     };
   }, [demoConfig.enabled, demoConfig.loop, demoConfig.profile, splashDone]);
+
+  useEffect(() => {
+    if (!demoConfig.enabled || !demoConfig.tune || !splashDone) return;
+    const timeline = DEMO_TIMELINES[demoConfig.profile];
+    const key = `kodo-demo-offsets-${demoConfig.profile}`;
+
+    const getTargetY = (cue: DemoCue) => {
+      const el = document.getElementById(cue.id);
+      if (!(el instanceof HTMLElement)) return 0;
+      const base = cue.offsetPx ?? 0;
+      const tune = demoOffsetsRef.current[cue.id] ?? 0;
+      if (cue.id === 'membership-cards') return computeBottomLockedTargetY(el, base + tune);
+      return computeDemoTargetY(el, base + tune);
+    };
+
+    const saveOffsets = (next: Record<string, number>) => {
+      setDemoOffsets(next);
+      demoOffsetsRef.current = next;
+      try {
+        window.localStorage.setItem(key, JSON.stringify(next));
+      } catch {
+        // ignore storage errors
+      }
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        setDemoPaused((v) => !v);
+        return;
+      }
+      const cue = timeline[activeCueIdx];
+      if (!cue) return;
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const step = e.shiftKey ? 2 : 10;
+        const delta = e.key === 'ArrowDown' ? step : -step;
+        const next = {
+          ...demoOffsetsRef.current,
+          [cue.id]: (demoOffsetsRef.current[cue.id] ?? 0) + delta,
+        };
+        saveOffsets(next);
+        window.scrollTo({ top: getTargetY(cue), behavior: 'auto' });
+        return;
+      }
+      if (e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        const next = { ...demoOffsetsRef.current };
+        delete next[cue.id];
+        saveOffsets(next);
+        window.scrollTo({ top: getTargetY(cue), behavior: 'auto' });
+        return;
+      }
+      if (e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        const idx = Math.min(timeline.length - 1, activeCueIdx + 1);
+        setActiveCueIdx(idx);
+        window.scrollTo({ top: getTargetY(timeline[idx]), behavior: 'auto' });
+        return;
+      }
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        const idx = Math.max(0, activeCueIdx - 1);
+        setActiveCueIdx(idx);
+        window.scrollTo({ top: getTargetY(timeline[idx]), behavior: 'auto' });
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeCueIdx, demoConfig.enabled, demoConfig.profile, demoConfig.tune, splashDone]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -465,7 +601,6 @@ export default function KodoApp() {
           <a href="#elements">Elements</a>
           <a href="#specs">Specs</a>
           <a href="#membership">Membership</a>
-          <a href="#access">Access</a>
         </nav>
       </motion.header>
 
@@ -601,12 +736,10 @@ export default function KodoApp() {
         {...rev(0.04)}
       >
         <div className="wss-kodo-section__head">
-          <p className="wss-kodo-section__eyebrow wss-kodo-section__eyebrow--ja" lang="ja">
-            料金・会員
-          </p>
-          <h2 id="kodo-member-heading">Exclusive Membership</h2>
+          <p className="wss-kodo-section__eyebrow">Membership</p>
+          <h2 id="kodo-member-heading">Membership</h2>
         </div>
-        <div className="wss-kodo-privileges">
+        <div className="wss-kodo-privileges" id="membership-focus">
           <motion.span
             className="wss-kodo-privileges__bgword"
             aria-hidden
@@ -648,7 +781,7 @@ export default function KodoApp() {
             </article>
           </div>
         </div>
-        <div className="wss-kodo-tier-cards">
+        <div className="wss-kodo-tier-cards" id="membership-cards">
           <article className="wss-kodo-tier-card wss-kodo-tier-card--founder">
             <p className="wss-kodo-tier-card__eyebrow">Founder</p>
             <h3>Legacy Tier</h3>
@@ -676,26 +809,6 @@ export default function KodoApp() {
             </ul>
           </article>
         </div>
-        <p className="wss-kodo-member-note wss-kodo-member-note--emphasis">
-          Admission is granted only after a personal interview and recommendation by two existing members.
-        </p>
-        <p className="wss-kodo-member-cta">
-          <a href="#access" className="wss-kodo-btn-tour">
-            Book A Tour
-          </a>
-        </p>
-      </motion.section>
-
-      <motion.section className="wss-kodo-access" id="access" aria-labelledby="kodo-access-heading" {...rev(0.03)}>
-        <PexImg photoId="6044198" w={1600} width={1600} height={1067} alt="" />
-        <div className="wss-kodo-access__veil" aria-hidden />
-        <div className="wss-kodo-access__panel">
-          <h2 id="kodo-access-heading">Minami-Aoyama</h2>
-          <address className="wss-kodo-access__address">
-            Minami-Aoyama, Minato-ku, Tokyo 107-0062
-          </address>
-          <p className="wss-kodo-access__note">By Appointment Only. Discreet Entrance.</p>
-        </div>
       </motion.section>
 
       <motion.footer className="wss-kodo-footer" id="contact" {...rev(0.02)}>
@@ -715,6 +828,31 @@ export default function KodoApp() {
           </a>
         </p>
       </motion.footer>
+      {demoConfig.enabled && demoConfig.tune && (
+        <div
+          style={{
+            position: 'fixed',
+            right: 12,
+            bottom: 12,
+            zIndex: 120,
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(5,8,14,0.85)',
+            color: '#e8edf5',
+            fontSize: 12,
+            lineHeight: 1.5,
+            letterSpacing: '0.02em',
+          }}
+        >
+          <div>
+            demo tune: <strong>{demoConfig.profile}</strong> [{activeCueIdx + 1}/{DEMO_TIMELINES[demoConfig.profile].length}]
+          </div>
+          <div>cue: {DEMO_TIMELINES[demoConfig.profile][activeCueIdx]?.id}</div>
+          <div>offset: {(demoOffsets[DEMO_TIMELINES[demoConfig.profile][activeCueIdx]?.id] ?? 0).toString()}px</div>
+          <div>Space: pause | Up/Down: move | Shift: fine | N/P: cue | R: reset cue</div>
+        </div>
+      )}
     </div>
   );
 }

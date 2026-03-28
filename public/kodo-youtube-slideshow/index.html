@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KODŌ — YouTube background (Pexels)</title>
+    <style>
+      :root {
+        --bg: #050505;
+        --fade: 2s;
+        --slide-sec: 48;
+        --zoom-to: 1.06;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: rgba(240, 244, 252, 0.45);
+        font-family: system-ui, sans-serif;
+      }
+
+      #stage {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      /* 16:9 letterbox on ultrawide / portrait */
+      #stage-inner {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: min(100vw, calc(100vh * 16 / 9));
+        height: min(100vh, calc(100vw * 9 / 16));
+        background: #000;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        z-index: 0;
+        pointer-events: none;
+        transition: opacity var(--fade) ease-in-out;
+      }
+
+      .slide.is-on {
+        opacity: 1;
+        z-index: 2;
+      }
+
+      .slide.is-under {
+        opacity: 0;
+        z-index: 1;
+        transition: opacity var(--fade) ease-in-out;
+      }
+
+      /* トーン統一: KODŌ サイトの画像処理に近いスタック */
+      .grade {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .grade__media {
+        position: absolute;
+        inset: -6%;
+        width: 112%;
+        height: 112%;
+        object-fit: cover;
+        transform-origin: 50% 45%;
+        filter: saturate(0.86) contrast(1.1) brightness(0.84);
+      }
+
+      .grade__media--air {
+        filter: saturate(0.82) contrast(1.14) brightness(0.8);
+      }
+
+      .grade__scrim {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        background:
+          linear-gradient(rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.36)),
+          linear-gradient(180deg, rgba(6, 12, 24, 0.2), rgba(6, 12, 24, 0.26));
+      }
+
+      .grade__vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+        background: radial-gradient(ellipse 72% 68% at 50% 48%, transparent 22%, rgba(0, 0, 0, 0.38) 100%);
+      }
+
+      video.grade__media {
+        width: 112%;
+        height: 112%;
+        left: -6%;
+        top: -6%;
+      }
+
+      #hud {
+        position: fixed;
+        left: 12px;
+        bottom: 10px;
+        right: 12px;
+        font-size: 11px;
+        line-height: 1.45;
+        z-index: 99;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+      }
+
+      #hud[hidden] {
+        display: none;
+      }
+
+      #hud kbd {
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.65);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage" role="presentation">
+      <div id="stage-inner"></div>
+    </div>
+    <div id="hud">
+      1周 <span id="cycleLabel"></span> · スライド <span id="slideLabel"></span><br />
+      <kbd>?</kbd> ヘルプ · <kbd>H</kbd> HUD表示切替 · PexelsクレジットはHTMLソース先頭コメント参照
+    </div>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(location.search);
+        /* 既定: 48秒×5枚＝4分/周。編集で約0.1×にすると全体約40分相当 */
+        var eachSec = parseFloat(params.get('each') || '48', 10);
+        if (!Number.isFinite(eachSec) || eachSec < 5) eachSec = 48;
+
+        var fadeSec = parseFloat(params.get('fade') || '2', 10);
+        if (!Number.isFinite(fadeSec) || fadeSec < 0.5) fadeSec = 2;
+        if (fadeSec > eachSec * 0.25) fadeSec = eachSec * 0.25;
+
+        var zoomTo = parseFloat(params.get('zoom') || '1.06', 10);
+        if (!Number.isFinite(zoomTo) || zoomTo < 1.01) zoomTo = 1.06;
+        if (zoomTo > 1.15) zoomTo = 1.15;
+
+        var hideHud = params.get('hud') === '0';
+
+        function pexelsPhoto(id, w, ext) {
+          ext = ext || 'jpeg';
+          return (
+            'https://images.pexels.com/photos/' +
+            id +
+            '/pexels-photo-' +
+            id +
+            '.' +
+            ext +
+            '?auto=compress&cs=tinysrgb&w=' +
+            w
+          );
+        }
+
+        var slides = [
+          {
+            label: 'Löyly / heater (reference)',
+            type: 'img',
+            src: pexelsPhoto('18285439', 2560, 'jpeg'),
+            air: false,
+          },
+          {
+            label: 'Fire (site)',
+            type: 'img',
+            src: pexelsPhoto('35894903', 2560, 'jpeg'),
+            air: false,
+          },
+          {
+            label: 'Ice (site)',
+            type: 'img',
+            src: pexelsPhoto('36650041', 2560, 'jpeg'),
+            air: false,
+          },
+          {
+            label: 'Air (site)',
+            type: 'img',
+            src: pexelsPhoto('36099638', 2560, 'png'),
+            air: true,
+          },
+          {
+            label: 'Mist loop (site hero)',
+            type: 'video',
+            src: 'https://videos.pexels.com/video-files/856973/856973-hd_1920_1080_25fps.mp4',
+            air: false,
+          },
+        ];
+
+        document.documentElement.style.setProperty('--fade', fadeSec + 's');
+        document.documentElement.style.setProperty('--slide-sec', String(eachSec));
+        document.documentElement.style.setProperty('--zoom-to', String(zoomTo));
+
+        var inner = document.getElementById('stage-inner');
+        var hud = document.getElementById('hud');
+        var cycleLabel = document.getElementById('cycleLabel');
+        var slideLabel = document.getElementById('slideLabel');
+
+        if (hideHud) hud.hidden = true;
+
+        var cycleMin = (eachSec * slides.length) / 60;
+        cycleLabel.textContent =
+          (Math.round(cycleMin * 10) / 10) + '分（×' + slides.length + '枚）';
+
+        slides.forEach(function (s, i) {
+          var el = document.createElement('div');
+          el.className = 'slide';
+          el.dataset.index = String(i);
+
+          var grade = document.createElement('div');
+          grade.className = 'grade';
+
+          var media;
+          if (s.type === 'video') {
+            media = document.createElement('video');
+            media.className = 'grade__media' + (s.air ? ' grade__media--air' : '');
+            media.src = s.src;
+            media.muted = true;
+            media.loop = true;
+            media.playsInline = true;
+            media.setAttribute('playsinline', '');
+            media.preload = 'auto';
+          } else {
+            media = document.createElement('img');
+            media.className = 'grade__media' + (s.air ? ' grade__media--air' : '');
+            media.src = s.src;
+            media.alt = '';
+            media.decoding = 'async';
+          }
+
+          var scrim = document.createElement('div');
+          scrim.className = 'grade__scrim';
+          var vig = document.createElement('div');
+          vig.className = 'grade__vignette';
+
+          grade.appendChild(media);
+          grade.appendChild(scrim);
+          grade.appendChild(vig);
+          el.appendChild(grade);
+          inner.appendChild(el);
+        });
+
+        var slideEls = inner.querySelectorAll('.slide');
+        var idx = 0;
+
+        function setKen(el, run) {
+          var img = el.querySelector('img.grade__media');
+          var vid = el.querySelector('video.grade__media');
+          var m = img || vid;
+          if (!m) return;
+          m.style.transition = 'none';
+          m.style.transform = 'scale(1) translate3d(0,0,0)';
+          if (!run) return;
+          void m.offsetWidth;
+          m.style.transition =
+            'transform ' + eachSec + 's cubic-bezier(0.4, 0, 0.2, 1)';
+          m.style.transform = 'scale(' + zoomTo + ') translate3d(-0.35%, -0.25%, 0)';
+        }
+
+        function go(i) {
+          var prev = idx;
+          idx = i;
+          slideEls[prev].classList.remove('is-on');
+          slideEls[prev].classList.add('is-under');
+          slideEls[idx].classList.remove('is-under');
+          slideEls[idx].classList.add('is-on');
+
+          setKen(slideEls[prev], false);
+          setKen(slideEls[idx], true);
+
+          var vPrev = slideEls[prev].querySelector('video');
+          if (vPrev) vPrev.pause();
+
+          var v = slideEls[idx].querySelector('video');
+          if (v) {
+            v.currentTime = 0;
+            v.play().catch(function () {});
+          }
+
+          slideLabel.textContent = idx + 1 + '/' + slides.length + ' · ' + slides[idx].label;
+
+          window.setTimeout(function () {
+            slideEls[prev].classList.remove('is-under');
+          }, fadeSec * 1000 + 80);
+        }
+
+        go(0);
+
+        window.setInterval(function () {
+          var n = (idx + 1) % slides.length;
+          go(n);
+        }, eachSec * 1000);
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'h' || e.key === 'H') {
+            hud.hidden = !hud.hidden;
+          }
+          if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+            alert(
+              'クエリ例:\n' +
+                '?each=48   各スライド秒数（既定48×5＝4分で1周）\n' +
+                '?fade=2    クロスフェード秒\n' +
+                '?zoom=1.06 Ken Burns最大拡大率\n' +
+                '?hud=0     左下HUD非表示（録画用）\n\n' +
+                '編集で約10分の1の速度にすると、1周がおおよそ40分相当になります。'
+            );
+          }
+        });
+      })();
+    </script>
+    <!--
+      Pexels（YouTube概要欄用・例）
+      Photo 18285439 — HUUM / sauna heaters — https://www.pexels.com/photo/18285439/
+      Photo 35894903 — https://www.pexels.com/photo/35894903/
+      Photo 36650041 — https://www.pexels.com/photo/36650041/
+      Photo 36099638 — https://www.pexels.com/photo/36099638/
+      Video 856973 — https://www.pexels.com/video/856973/
+      License: https://www.pexels.com/license/
+    -->
+  </body>
+</html>

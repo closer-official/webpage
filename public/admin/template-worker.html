@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>店舗ドラフト編集（作業者用）| Closer</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0c1220;
+        color: #e8edf5;
+        line-height: 1.55;
+      }
+      body {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+      h1 {
+        font-size: 1.3rem;
+        margin: 0 0 0.35rem;
+      }
+      .sub {
+        color: #8b9cb3;
+        font-size: 0.88rem;
+        margin: 0 0 1rem;
+      }
+      .panel {
+        background: #121a2e;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .panel h2 {
+        font-size: 0.95rem;
+        margin: 0 0 0.65rem;
+        color: #a5d8ff;
+      }
+      label {
+        display: block;
+        font-size: 0.78rem;
+        color: #9aacbf;
+        margin-top: 10px;
+      }
+      input[type='text'],
+      input[type='url'],
+      textarea,
+      select {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+        font-size: 0.88rem;
+      }
+      textarea {
+        min-height: 72px;
+        font-family: inherit;
+      }
+      textarea.mono {
+        font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+        font-size: 0.78rem;
+        min-height: 140px;
+      }
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      button.btn,
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #3d5675;
+        background: #1c2940;
+        color: #e0f2fe;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      button.btn:hover,
+      a.btn:hover {
+        border-color: #38bdf8;
+        color: #fff;
+      }
+      button.btn.primary,
+      a.btn.primary {
+        background: #0c4a6e;
+        border-color: #22d3ee;
+      }
+      #login-box label {
+        max-width: 320px;
+      }
+      .err {
+        color: #fca5a5;
+        font-size: 0.86rem;
+        margin-top: 8px;
+      }
+      .ok {
+        color: #86efac;
+        font-size: 0.86rem;
+        margin-top: 8px;
+      }
+      .preview-url {
+        word-break: break-all;
+        font-size: 0.8rem;
+        background: #0f172a;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        margin-top: 8px;
+      }
+      iframe#preview {
+        width: 100%;
+        height: 420px;
+        border: 1px solid #2a3b52;
+        border-radius: 10px;
+        background: #fff;
+        margin-top: 10px;
+      }
+      code {
+        font-size: 0.85em;
+        background: #0f172a;
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>店舗ドラフト編集（作業者用）</h1>
+    <p class="sub">
+      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
+      で変えてください）。<br />
+      保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
+      <code>/api/template-preview/&lt;カスタムID&gt;</code> です。
+    </p>
+
+    <div class="panel" id="login-box">
+      <h2>管理者ログイン</h2>
+      <label>ユーザー名 <input type="text" id="adm-user" autocomplete="username" /></label>
+      <label>パスワード <input type="password" id="adm-pass" autocomplete="current-password" /></label>
+      <div class="row-actions">
+        <button type="button" class="btn primary" id="adm-login-btn">ログイン</button>
+        <button type="button" class="btn" id="adm-logout-btn">ログアウト</button>
+      </div>
+      <p id="adm-login-err" class="err" style="display: none"></p>
+    </div>
+
+    <div class="panel" id="work-box" style="display: none">
+      <h2>1. ドラフトの選択</h2>
+      <label>
+        モード
+        <select id="mode-select">
+          <option value="new">新規ドラフト（ベーステンプレから）</option>
+          <option value="edit">既存のカスタムを編集</option>
+        </select>
+      </label>
+      <label id="wrap-base" style="display: block">
+        ベーステンプレ（ビルトイン）
+        <select id="base-template"></select>
+      </label>
+      <label id="wrap-existing" style="display: none">
+        既存カスタム
+        <select id="existing-id"></select>
+      </label>
+      <label>
+        ドラフト名（管理用・80文字以内）
+        <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
+      </label>
+      <div class="row-actions">
+        <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
+        <button type="button" class="btn primary" id="btn-save">保存</button>
+      </div>
+      <p id="save-msg" class="ok" style="display: none"></p>
+      <p id="save-err" class="err" style="display: none"></p>
+    </div>
+
+    <div class="panel" id="form-box" style="display: none">
+      <h2>2. 本文・画像・URL</h2>
+      <label>サイト名（店名） <input type="text" id="f-siteName" /></label>
+      <label>ページタイトル <input type="text" id="f-title" /></label>
+      <label>メイン見出し <input type="text" id="f-headline" /></label>
+      <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
+      <label>フッター文言 <input type="text" id="f-footerText" /></label>
+      <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
+      <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
+      <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
+      <label>
+        ヒーロー・メイン画像 URL（1行1URL・http(s)・最大10件）
+        <textarea id="f-heroSlides" class="mono" rows="5" placeholder="https://..."></textarea>
+      </label>
+      <label>
+        セクション JSON（任意・上級者）
+        <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px"
+          >配列形式 <code>[{&quot;id&quot;:&quot;concept&quot;,&quot;title&quot;:&quot;…&quot;,&quot;content&quot;:&quot;…&quot;}]</code> 。空欄ならテンプレ既定。</span
+        >
+        <textarea id="f-sections" class="mono" spellcheck="false"></textarea>
+      </label>
+
+      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
+      <label>meta title <input type="text" id="f-metaTitle" /></label>
+      <label>meta description <textarea id="f-metaDescription" rows="2"></textarea></label>
+      <label>OG 画像 URL（https） <input type="url" id="f-ogImageUrl" /></label>
+      <label>canonical URL <input type="text" id="f-canonicalUrl" /></label>
+      <label>keywords <input type="text" id="f-keywords" /></label>
+    </div>
+
+    <div class="panel" id="share-box" style="display: none">
+      <h2>4. プレビュー・共有（送信）</h2>
+      <p style="font-size: 0.84rem; color: #b8c5d6; margin: 0 0 8px">
+        保存後にカスタム ID が確定します。<strong>プレビュー URL</strong>をコピーするか、メール作成画面を開いて本文に貼って送ってください（メールはブラウザの
+        mailto）。
+      </p>
+      <p class="preview-url" id="preview-url-text">（保存後に表示）</p>
+      <div class="row-actions">
+        <button type="button" class="btn primary" id="btn-open-preview" disabled>プレビューを別タブで開く</button>
+        <button type="button" class="btn" id="btn-copy-url" disabled>プレビューURLをコピー</button>
+        <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
+      </div>
+      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">下の枠を再読み込み</button>
+      <iframe id="preview" title="プレビュー" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+    </div>
+
+    <p class="sub" style="margin-top: 1.5rem">
+      <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">← テンプレ・ギャラリーハブ</a>
+    </p>
+
+    <script>
+      (function () {
+        var api = (function () {
+          var p = location.pathname.indexOf('/admin/');
+          if (p >= 0) return location.pathname.slice(0, p) + '/api';
+          return '/api';
+        })();
+
+        var currentCustomId = null;
+
+        function credFetch(url, opts) {
+          var o = opts || {};
+          o.credentials = 'same-origin';
+          o.headers = o.headers || {};
+          if (o.body && typeof o.body === 'string' && !o.headers['Content-Type']) {
+            o.headers['Content-Type'] = 'application/json';
+          }
+          return fetch(url, o);
+        }
+
+        function setAuthUi(authenticated) {
+          document.getElementById('work-box').style.display = authenticated ? 'block' : 'none';
+          document.getElementById('form-box').style.display = authenticated ? 'block' : 'none';
+          document.getElementById('share-box').style.display = authenticated ? 'block' : 'none';
+        }
+
+        function showErr(elId, text) {
+          var el = document.getElementById(elId);
+          el.style.display = text ? 'block' : 'none';
+          el.textContent = text || '';
+        }
+
+        function buildOverrideFromForm() {
+          var heroRaw = document.getElementById('f-heroSlides').value.trim();
+          var heroLines = heroRaw
+            ? heroRaw
+                .split(/\n+/)
+                .map(function (s) {
+                  return s.trim();
+                })
+                .filter(Boolean)
+            : [];
+          var sectionsText = document.getElementById('f-sections').value.trim();
+          var sections = undefined;
+          if (sectionsText) {
+            try {
+              sections = JSON.parse(sectionsText);
+              if (!Array.isArray(sections)) throw new Error('sections は配列');
+            } catch (e) {
+              throw new Error('セクション JSON が不正です: ' + (e.message || e));
+            }
+          }
+          var ov = {
+            siteName: document.getElementById('f-siteName').value.trim(),
+            title: document.getElementById('f-title').value.trim(),
+            headline: document.getElementById('f-headline').value.trim(),
+            subheadline: document.getElementById('f-subheadline').value.trim(),
+            footerText: document.getElementById('f-footerText').value.trim(),
+            ctaLabel: document.getElementById('f-ctaLabel').value.trim(),
+            ctaHref: document.getElementById('f-ctaHref').value.trim(),
+            navLabels: document.getElementById('f-navLabels').value.trim(),
+            metaTitle: document.getElementById('f-metaTitle').value.trim(),
+            metaDescription: document.getElementById('f-metaDescription').value.trim(),
+            ogImageUrl: document.getElementById('f-ogImageUrl').value.trim(),
+            canonicalUrl: document.getElementById('f-canonicalUrl').value.trim(),
+            keywords: document.getElementById('f-keywords').value.trim(),
+          };
+          if (heroLines.length) ov.heroSlides = heroLines;
+          if (sections && sections.length) ov.sections = sections;
+          return ov;
+        }
+
+        function fillFormFromOverride(ov) {
+          ov = ov || {};
+          document.getElementById('f-siteName').value = ov.siteName || '';
+          document.getElementById('f-title').value = ov.title || '';
+          document.getElementById('f-headline').value = ov.headline || '';
+          document.getElementById('f-subheadline').value = ov.subheadline || '';
+          document.getElementById('f-footerText').value = ov.footerText || '';
+          document.getElementById('f-ctaLabel').value = ov.ctaLabel || '';
+          document.getElementById('f-ctaHref').value = ov.ctaHref || '';
+          document.getElementById('f-navLabels').value = ov.navLabels || '';
+          document.getElementById('f-metaTitle').value = ov.metaTitle || '';
+          document.getElementById('f-metaDescription').value = ov.metaDescription || '';
+          document.getElementById('f-ogImageUrl').value = ov.ogImageUrl || '';
+          document.getElementById('f-canonicalUrl').value = ov.canonicalUrl || '';
+          document.getElementById('f-keywords').value = ov.keywords || '';
+          document.getElementById('f-heroSlides').value = Array.isArray(ov.heroSlides) ? ov.heroSlides.join('\n') : '';
+          document.getElementById('f-sections').value =
+            Array.isArray(ov.sections) && ov.sections.length ? JSON.stringify(ov.sections, null, 2) : '';
+        }
+
+        function updatePreviewUrl() {
+          var path = currentCustomId ? '/api/template-preview/' + encodeURIComponent(currentCustomId) : '';
+          var full = path ? window.location.origin + path : '';
+          document.getElementById('preview-url-text').textContent = full || '（保存後に表示）';
+          var has = !!full;
+          document.getElementById('btn-open-preview').disabled = !has;
+          document.getElementById('btn-copy-url').disabled = !has;
+          document.getElementById('btn-mailto').disabled = !has;
+          var iframe = document.getElementById('preview');
+          if (has) iframe.src = path;
+        }
+
+        credFetch(api + '/admin-auth/status')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            document.getElementById('login-box').style.display = d.enabled ? 'block' : 'none';
+            var authed = !d.enabled || d.authenticated;
+            setAuthUi(authed);
+            if (authed) loadBasesAndCustoms();
+          })
+          .catch(function () {
+            setAuthUi(false);
+          });
+
+        document.getElementById('adm-login-btn').onclick = function () {
+          showErr('adm-login-err', '');
+          credFetch(api + '/admin-auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: document.getElementById('adm-user').value,
+              password: document.getElementById('adm-pass').value,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'ログイン失敗');
+              setAuthUi(true);
+              loadBasesAndCustoms();
+            })
+            .catch(function (e) {
+              showErr('adm-login-err', e.message || String(e));
+            });
+        };
+
+        document.getElementById('adm-logout-btn').onclick = function () {
+          credFetch(api + '/admin-auth/logout', { method: 'POST', body: '{}' }).finally(function () {
+            setAuthUi(false);
+            currentCustomId = null;
+          });
+        };
+
+        document.getElementById('mode-select').onchange = function () {
+          var edit = document.getElementById('mode-select').value === 'edit';
+          document.getElementById('wrap-base').style.display = edit ? 'none' : 'block';
+          document.getElementById('wrap-existing').style.display = edit ? 'block' : 'none';
+          if (!edit) currentCustomId = null;
+        };
+
+        function loadBasesAndCustoms() {
+          return credFetch(api + '/template-candidates')
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              var templates = Array.isArray(data) ? data : data.templates || [];
+              var baseSel = document.getElementById('base-template');
+              baseSel.innerHTML = '';
+              templates.forEach(function (t) {
+                if (t.isCustom) return;
+                var o = document.createElement('option');
+                o.value = t.id;
+                o.textContent = t.name + ' (' + t.id + ')';
+                baseSel.appendChild(o);
+              });
+              return credFetch(api + '/template-customizations');
+            })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (list) {
+              var ex = document.getElementById('existing-id');
+              ex.innerHTML = '';
+              (list || []).forEach(function (item) {
+                var o = document.createElement('option');
+                o.value = item.id;
+                o.textContent = (item.name || item.id) + ' · ' + item.id + ' · base:' + (item.baseTemplateId || '');
+                ex.appendChild(o);
+              });
+            })
+            .catch(function () {
+              showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');
+            });
+        }
+
+        document.getElementById('btn-load').onclick = function () {
+          showErr('save-err', '');
+          showErr('save-msg', '');
+          if (document.getElementById('mode-select').value === 'edit') {
+            var id = document.getElementById('existing-id').value;
+            if (!id) {
+              showErr('save-err', '既存カスタムを選んでください。');
+              return;
+            }
+            credFetch(api + '/template-customizations')
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (list) {
+                var item = (list || []).find(function (x) {
+                  return x.id === id;
+                });
+                if (!item) throw new Error('見つかりません');
+                currentCustomId = item.id;
+                document.getElementById('draft-name').value = item.name || '';
+                fillFormFromOverride(item.override);
+                updatePreviewUrl();
+                showErr('save-msg', '読み込みました。');
+              })
+              .catch(function (e) {
+                showErr('save-err', e.message || String(e));
+              });
+          } else {
+            currentCustomId = null;
+            document.getElementById('draft-name').value = '';
+            fillFormFromOverride({});
+            updatePreviewUrl();
+            showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
+          }
+        };
+
+        document.getElementById('btn-save').onclick = function () {
+          showErr('save-err', '');
+          showErr('save-msg', '');
+          var override;
+          try {
+            override = buildOverrideFromForm();
+          } catch (e) {
+            showErr('save-err', e.message || String(e));
+            return;
+          }
+          var name = document.getElementById('draft-name').value.trim();
+          if (!name) {
+            showErr('save-err', 'ドラフト名を入れてください。');
+            return;
+          }
+
+          if (document.getElementById('mode-select').value === 'edit' && !currentCustomId) {
+            showErr('save-err', '既存カスタムを選び「フォームに読み込む」を押すか、新規モードで保存してください。');
+            return;
+          }
+
+          if (document.getElementById('mode-select').value === 'edit' && currentCustomId) {
+            credFetch(api + '/template-customizations/save', {
+              method: 'POST',
+              body: JSON.stringify({
+                mode: 'update',
+                id: currentCustomId,
+                name: name,
+                override: override,
+                replaceOverride: true,
+                status: 'draft',
+              }),
+            })
+              .then(function (r) {
+                return r.json().then(function (j) {
+                  return { ok: r.ok, j: j };
+                });
+              })
+              .then(function (x) {
+                if (!x.ok) throw new Error(x.j.error || '保存失敗');
+                updatePreviewUrl();
+                showErr('save-msg', '保存しました（下書き）。');
+              })
+              .catch(function (e) {
+                showErr('save-err', e.message || String(e));
+              });
+          } else {
+            var baseTemplateId = document.getElementById('base-template').value;
+            if (!baseTemplateId) {
+              showErr('save-err', 'ベーステンプレを選んでください。');
+              return;
+            }
+            credFetch(api + '/template-customizations/save', {
+              method: 'POST',
+              body: JSON.stringify({
+                mode: 'create',
+                baseTemplateId: baseTemplateId,
+                name: name,
+                override: override,
+                status: 'draft',
+              }),
+            })
+              .then(function (r) {
+                return r.json().then(function (j) {
+                  return { ok: r.ok, j: j };
+                });
+              })
+              .then(function (x) {
+                if (!x.ok) throw new Error(x.j.error || '保存失敗');
+                currentCustomId = x.j.item.id;
+                document.getElementById('mode-select').value = 'edit';
+                document.getElementById('mode-select').dispatchEvent(new Event('change'));
+                loadBasesAndCustoms().then(function () {
+                  document.getElementById('existing-id').value = currentCustomId;
+                });
+                updatePreviewUrl();
+                showErr('save-msg', '新規ドラフトを保存しました。以降は「既存のカスタムを編集」で開けます。');
+              })
+              .catch(function (e) {
+                showErr('save-err', e.message || String(e));
+              });
+          }
+        };
+
+        document.getElementById('btn-open-preview').onclick = function () {
+          if (currentCustomId) {
+            window.open('/api/template-preview/' + encodeURIComponent(currentCustomId), '_blank', 'noopener');
+          }
+        };
+
+        document.getElementById('btn-copy-url').onclick = function () {
+          var t = document.getElementById('preview-url-text').textContent.trim();
+          if (!t || t.indexOf('http') !== 0) return;
+          navigator.clipboard.writeText(t).then(
+            function () {
+              alert('コピーしました。');
+            },
+            function () {
+              window.prompt('コピー:', t);
+            },
+          );
+        };
+
+        document.getElementById('btn-mailto').onclick = function () {
+          var url = document.getElementById('preview-url-text').textContent.trim();
+          var name = document.getElementById('draft-name').value.trim() || '店舗ドラフト';
+          var body =
+            'プレビューURL（社内確認用）:\n' +
+            url +
+            '\n\n---\n編集画面: ' +
+            window.location.origin +
+            '/admin/template-worker.html';
+          window.location.href =
+            'mailto:?subject=' + encodeURIComponent('[店舗ドラフト] ' + name) + '&body=' + encodeURIComponent(body);
+        };
+
+        document.getElementById('btn-refresh-iframe').onclick = function () {
+          updatePreviewUrl();
+        };
+      })();
+    </script>
+  </body>
+</html>

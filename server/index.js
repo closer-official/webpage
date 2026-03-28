@@ -465,17 +465,84 @@ function intakeToPageDraft(intake) {
   return { content, seo, templateId: intake.chosenTemplateId };
 }
 
+function sanitizeOverrideHeroSlides(raw) {
+  let list = [];
+  if (Array.isArray(raw)) list = raw.map((s) => String(s).trim()).filter(Boolean);
+  else if (typeof raw === 'string') {
+    list = raw
+      .split(/[\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  } else return undefined;
+  const urls = list
+    .slice(0, 10)
+    .map((s) => s.slice(0, 2000))
+    .filter((s) => /^https?:\/\//i.test(s));
+  return urls.length ? urls : undefined;
+}
+
+function sanitizeOverrideSections(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 15)) {
+    if (!row || typeof row !== 'object') continue;
+    let id = String(row.id || '')
+      .trim()
+      .slice(0, 40)
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (!id) id = `sec-${out.length}`;
+    const title = String(row.title || '').trim().slice(0, 120);
+    const content = String(row.content || '').trim().slice(0, 8000);
+    out.push({ id, title, content });
+  }
+  return out.length ? out : undefined;
+}
+
+/** カスタム override の正規化（空はキーごと省略。theme は1つでも値があればだけ載せる） */
 function normalizeCustomizationInput(body = {}) {
-  return {
-    headline: String(body.headline || '').trim().slice(0, 200),
-    subheadline: String(body.subheadline || '').trim().slice(0, 400),
-    navLabels: String(body.navLabels || '').trim().slice(0, 600),
-    theme: {
-      bg: String(body.theme?.bg || '').trim().slice(0, 30),
-      text: String(body.theme?.text || '').trim().slice(0, 30),
-      accent: String(body.theme?.accent || '').trim().slice(0, 30),
-    },
+  const out = {};
+  const headline = String(body.headline || '').trim().slice(0, 200);
+  if (headline) out.headline = headline;
+  const subheadline = String(body.subheadline || '').trim().slice(0, 400);
+  if (subheadline) out.subheadline = subheadline;
+  const navLabels = String(body.navLabels || '').trim().slice(0, 600);
+  if (navLabels) out.navLabels = navLabels;
+  const siteName = String(body.siteName || '').trim().slice(0, 120);
+  if (siteName) out.siteName = siteName;
+  const title = String(body.title || '').trim().slice(0, 200);
+  if (title) out.title = title;
+  const footerText = String(body.footerText || '').trim().slice(0, 500);
+  if (footerText) out.footerText = footerText;
+  const ctaLabel = String(body.ctaLabel || '').trim().slice(0, 80);
+  if (ctaLabel) out.ctaLabel = ctaLabel;
+  const ctaHref = String(body.ctaHref || '').trim().slice(0, 500);
+  if (ctaHref) out.ctaHref = ctaHref;
+  const metaTitle = String(body.metaTitle || '').trim().slice(0, 120);
+  if (metaTitle) out.metaTitle = metaTitle;
+  const metaDescription = String(body.metaDescription || '').trim().slice(0, 320);
+  if (metaDescription) out.metaDescription = metaDescription;
+  const ogImageUrl = String(body.ogImageUrl || '').trim().slice(0, 2000);
+  if (ogImageUrl && /^https?:\/\//i.test(ogImageUrl)) out.ogImageUrl = ogImageUrl;
+  const canonicalUrl = String(body.canonicalUrl || '').trim().slice(0, 2000);
+  if (canonicalUrl) out.canonicalUrl = canonicalUrl;
+  const keywords = String(body.keywords || '').trim().slice(0, 500);
+  if (keywords) out.keywords = keywords;
+
+  const theme = {
+    bg: String(body.theme?.bg || '').trim().slice(0, 30),
+    text: String(body.theme?.text || '').trim().slice(0, 30),
+    accent: String(body.theme?.accent || '').trim().slice(0, 30),
   };
+  if (theme.bg || theme.text || theme.accent) out.theme = theme;
+
+  const heroSlides = sanitizeOverrideHeroSlides(body.heroSlides);
+  if (heroSlides) out.heroSlides = heroSlides;
+
+  const sections = sanitizeOverrideSections(body.sections);
+  if (sections) out.sections = sections;
+
+  return out;
 }
 
 function sanitizeFingerprint(fp) {
@@ -833,10 +900,14 @@ app.post('/api/template-customizations/save', async (req, res) => {
         ? body.status
         : customizations[i].status || 'published';
     const nextBp = body.blueprint != null ? sanitizeBlueprint(body.blueprint) : null;
+    const normalizedOv = normalizeCustomizationInput(body.override || {});
+    const nextOverride = body.replaceOverride
+      ? normalizedOv
+      : { ...customizations[i].override, ...normalizedOv };
     customizations[i] = {
       ...customizations[i],
       name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
-      override: normalizeCustomizationInput(body.override || {}),
+      override: nextOverride,
       status: nextStatus,
       ...(body.sourceUrl != null
         ? { sourceUrl: String(body.sourceUrl || '').trim().slice(0, 5000) }

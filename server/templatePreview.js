@@ -96,6 +96,48 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (customization.subheadline) out.subheadline = String(customization.subheadline).slice(0, 400);
   const navItems = makeNavItems(customization.navLabels);
   if (navItems) out.navItems = navItems;
+  if (String(customization.siteName || '').trim()) {
+    out.siteName = String(customization.siteName).trim().slice(0, 120);
+  }
+  if (String(customization.title || '').trim()) {
+    out.title = String(customization.title).trim().slice(0, 200);
+  }
+  if (String(customization.footerText || '').trim()) {
+    out.footerText = String(customization.footerText).trim().slice(0, 500);
+  }
+  if (String(customization.ctaLabel || '').trim()) {
+    out.ctaLabel = String(customization.ctaLabel).trim().slice(0, 80);
+  }
+  if (String(customization.ctaHref || '').trim()) {
+    out.ctaHref = String(customization.ctaHref).trim().slice(0, 500);
+  }
+  if (Array.isArray(customization.heroSlides) && customization.heroSlides.length > 0) {
+    out.heroSlides = customization.heroSlides.slice(0, 10);
+  }
+  if (Array.isArray(customization.sections) && customization.sections.length > 0) {
+    out.sections = customization.sections.slice(0, 15);
+  }
+  return out;
+}
+
+/** override の SEO 系フィールドを既定 seo に上書き（空は無視） */
+export function applySeoCustomization(seo, customization = {}) {
+  const out = { ...seo };
+  if (String(customization.metaTitle || '').trim()) {
+    out.metaTitle = String(customization.metaTitle).trim().slice(0, 120);
+  }
+  if (String(customization.metaDescription || '').trim()) {
+    out.metaDescription = String(customization.metaDescription).trim().slice(0, 320);
+  }
+  if (String(customization.ogImageUrl || '').trim()) {
+    out.ogImageUrl = String(customization.ogImageUrl).trim().slice(0, 2000);
+  }
+  if (String(customization.canonicalUrl || '').trim()) {
+    out.canonicalUrl = String(customization.canonicalUrl).trim().slice(0, 2000);
+  }
+  if (String(customization.keywords || '').trim()) {
+    out.keywords = String(customization.keywords).trim().slice(0, 500);
+  }
   return out;
 }
 
@@ -213,7 +255,7 @@ export function renderTemplatePreview(templateId, customization = null) {
       heroSlides: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400'],
     };
   }
-  const seo = {
+  let seo = {
     metaTitle: `${name} テンプレート確認`,
     metaDescription: `${name} テンプレートの確認用ページです。`,
     keywords: '',
@@ -222,6 +264,7 @@ export function renderTemplatePreview(templateId, customization = null) {
   };
 
   content = applyTemplateCustomization(content, ov);
+  seo = applySeoCustomization(seo, ov);
   let html = buildHtml(content, seo, id, {
     contactForm: true,
     formActionUrl: '#',

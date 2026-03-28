@@ -3,6 +3,8 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    { "source": "/kodo-youtube-slideshow", "destination": "/kodo-youtube-slideshow/index.html" },
+    { "source": "/kodo-youtube-slideshow/", "destination": "/kodo-youtube-slideshow/index.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" },
     { "source": "/template-gallery", "destination": "/api?_vp=template-gallery" },
