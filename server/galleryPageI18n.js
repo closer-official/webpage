@@ -7,6 +7,8 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.brand': 'Closer Webpage',
     'gallery.nav.intake': 'Apply / inquiry',
     'gallery.nav.intakeAlt': 'Inquiry (alt URL)',
+    'gallery.deployCanary':
+      'If this page looks red, the latest production deploy reached you. (Temporary check — revert theme after confirming.)',
     'gallery.title': 'Template gallery',
     'gallery.lead':
       'Live previews fill each card—scroll inside the frame to explore the page. Use the link under each preview to open the full template in a new tab. Find templates with the keyword search (name, tags, or category text).',
@@ -31,6 +33,8 @@ export const GALLERY_STATIC_STRINGS = {
     'gallery.brand': 'Closer Webpage',
     'gallery.nav.intake': 'ヒアリング・お申し込み',
     'gallery.nav.intakeAlt': 'ヒアリング（別URL）',
+    'gallery.deployCanary':
+      'このページ全体が赤系なら、本番への最新デプロイがブラウザまで届いています。（確認後、テーマは元に戻してください）',
     'gallery.title': 'テンプレートギャラリー',
     'gallery.lead':
       'プレビューはカード幅いっぱいに表示されます。枠内を上下にスクロールしてページを確認できます。別タブで全体を開くには、各プレビュー下のリンクを使ってください。テンプレの絞り込みはキーワード検索のみです（名前・タグ・カテゴリ名の文字列にもマッチ）。',

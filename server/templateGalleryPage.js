@@ -1,6 +1,8 @@
 /**
  * パスワードなしで閲覧できるテンプレートギャラリー（静的シェル + JSON API で描画）
  * 既定言語: 英語（静的二言語、API 翻訳なし）
+ *
+ * NOTE: 下の :root は「本番に反映されたか目視確認」用の赤テーマ。確認後、元のダークに戻すこと。
  */
 import { publicLangBarHtml, publicLangBarStyles } from './publicLangAssets.js';
 import { GALLERY_STATIC_STRINGS, GALLERY_LANG_STORAGE_KEY } from './galleryPageI18n.js';
@@ -22,17 +24,18 @@ export function renderTemplateGalleryPage() {
   <style>
     ${publicLangBarStyles()}
     :root {
-      --void: #0c0c0f;
-      --surface: #14141a;
-      --elevated: #1c1c24;
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #f4f2ed;
-      --muted: #9a9590;
-      --gold: #d4a574;
-      --gold-dim: rgba(212, 165, 116, 0.35);
-      --accent: #7eb8a8;
+      /* デプロイ確認用（目立つ赤）。本番デザインに戻すときはここを元のダーク値に戻す */
+      --void: #7f1d1d;
+      --surface: #991b1b;
+      --elevated: #b91c1c;
+      --border: rgba(255, 255, 255, 0.18);
+      --text: #fff7f7;
+      --muted: #fecaca;
+      --gold: #fde68a;
+      --gold-dim: rgba(253, 230, 138, 0.45);
+      --accent: #bbf7d0;
       --radius: 10px;
-      --shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      --shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -51,7 +54,7 @@ export function renderTemplateGalleryPage() {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.35;
+      opacity: 0.2;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
       z-index: 0;
     }
@@ -372,6 +375,17 @@ export function renderTemplateGalleryPage() {
       text-align: center;
     }
     footer a { color: var(--gold); }
+    .deploy-canary-banner {
+      margin: 0 0 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 2px solid var(--gold);
+      background: rgba(0, 0, 0, 0.25);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+    }
   </style>
 </head>
 <body>
@@ -387,7 +401,10 @@ export function renderTemplateGalleryPage() {
       </div>
     </div>
     <h1 data-i18n="gallery.title">Template gallery</h1>
-    <p class="lead" data-i18n="gallery.lead">Live previews fill each card—scroll inside the frame to explore the page. Use the link under each preview to open the full template in a new tab. Category chips follow the language you select.</p>
+    <p class="deploy-canary-banner" data-i18n="gallery.deployCanary" role="status">
+      If this page looks red, the latest production deploy reached you. (Temporary check — revert theme after confirming.)
+    </p>
+    <p class="lead" data-i18n="gallery.lead">Live previews fill each card—scroll inside the frame to explore the page. Use the link under each preview to open the full template in a new tab. Find templates with the keyword search (name, tags, or category text).</p>
 
     <section id="pickup-section" class="pickup-strip" style="display:none" aria-hidden="true" aria-labelledby="pickup-h">
       <h2 class="section-title" id="pickup-h"><span class="badge" data-i18n="gallery.badge">Week</span> <span id="week-label">Weekly picks</span></h2>
