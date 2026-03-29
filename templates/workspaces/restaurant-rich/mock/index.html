@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>テンプレプロトタイプ | restaurant-rich</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --text: #e8eaef;
+      --accent: #c9a227;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 3rem 1.25rem; }
+    h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+    p.lead { opacity: 0.85; margin: 0 0 2rem; }
+    .hint {
+      font-size: 0.875rem;
+      padding: 1rem;
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.75);
+    }
+    code { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>飲食店（リッチ）テンプレ（プロトタイプ）</h1>
+    <p class="lead">このファイルは <code>templates/workspaces/restaurant-rich/mock/</code> の出発点です。<code>SPEC.md</code> を確定してからデザインを上書きしてください。</p>
+    <div class="hint">
+      ブラウザで確認: リポジトリルートからローカルサーバを立てるか、この HTML を直接開いてください。<br />
+      本体への取り込み後は <code>buildHtml</code> が正です（プレビューとサーバーで二重実装に注意）。
+    </div>
+  </div>
+</body>
+</html>

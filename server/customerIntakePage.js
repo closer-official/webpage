@@ -11,7 +11,7 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       </div>
       <div class="style-card-meta">
         <div><input type="radio" name="intakePickTemplate" value="${t.id}"><span class="ttl" data-i18n="intake.tpl.${t.id}">${t.name}</span></div>
-        <p class="sub" data-i18n="intake.tpl.sub">上はページの見た目（縮小）。別タブで全画面も開けます。</p>
+        <p class="sub" data-i18n="intake.tpl.sub">枠内はスクロールして全体を確認できます。テンプレの選択は下のラジオから。別タブで全画面も開けます。</p>
         <a href="/api/template-preview/${t.id}" target="_blank" rel="noopener noreferrer"><span data-i18n="intake.tpl.preview">別タブで全画面</span></a>
       </div>
     </label>`,
@@ -160,13 +160,14 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       flex-direction: column;
     }
     .style-card-preview {
-      height: 180px;
+      height: 200px;
       overflow: hidden;
       border-radius: 10px;
       margin-bottom: 10px;
       border: 1px solid var(--border);
       background: #fff;
       position: relative;
+      touch-action: manipulation;
     }
     .style-card-preview iframe {
       position: absolute;
@@ -177,7 +178,8 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
       border: 0;
       transform: scale(0.5);
       transform-origin: top left;
-      pointer-events: none;
+      /* スクロール・タップはプレビュー内で処理（従来の none だと枠内操作不可） */
+      pointer-events: auto;
     }
     .style-card-meta { min-width: 0; }
     .style-card input { width: auto; margin-right: 6px; accent-color: var(--terracotta); }
@@ -255,7 +257,7 @@ export function renderCustomerIntakePage(candidates = TEMPLATE_CANDIDATES) {
     <div class="card">
       <div id="intake-step-pick">
         <h1 data-i18n="intake.step1.h1">ステップ1：ベースとなるデザインを選ぶ</h1>
-        <p class="lead" data-i18n="intake.step1.lead">縮小プレビューで雰囲気を比べ、近いものを1つ選ぶか、該当がなければ「1から製作」を選んでください。</p>
+        <p class="lead" data-i18n="intake.step1.lead">プレビュー枠内をスクロールして雰囲気を比べ、近いものをラジオで1つ選ぶか、該当がなければ「1から製作」を選んでください。</p>
         <div class="style-cards">
           ${templateCards}
           ${bespokeCard}

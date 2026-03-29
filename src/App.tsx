@@ -1,27 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { MapsCollect } from './components/MapsCollect';
-import { ManualAddTarget } from './components/ManualAddTarget';
-import { QueueList } from './components/QueueList';
-import { ResearchForm } from './components/ResearchForm';
-import { ReviewDashboard } from './components/ReviewDashboard';
-import { AIBudgetSettings } from './components/AIBudgetSettings';
-import { GenerationOptions } from './components/GenerationOptions';
-import { StripePayment } from './components/StripePayment';
-import { QueueLocalSync } from './components/QueueLocalSync';
-import { ReferenceSitesPanel } from './components/ReferenceSitesPanel';
-import { FullAutoMain } from './components/FullAutoMain';
-import { CustomerIntakePanel } from './components/CustomerIntakePanel';
-import type { QueueTarget } from './types';
 import { isApiAvailable, api } from './lib/api';
-import { getQueue, getDashboard } from './lib/queueStorage';
 import './App.css';
 import './App.operator.css';
-
-type DashboardItemLike = ReturnType<typeof getDashboard>[number] & {
-  contentVariants?: { templateId: string; html: string }[];
-};
-
-type TabId = 'auto' | 'queue' | 'dashboard' | 'intake' | 'settings';
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -31,37 +11,6 @@ function App() {
   const [loginPass, setLoginPass] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  const [tab, setTab] = useState<TabId>('auto');
-  const [queue, setQueue] = useState<QueueTarget[]>([]);
-  const [dashboardItems, setDashboardItems] = useState(getDashboard());
-  const [researchTarget, setResearchTarget] = useState<QueueTarget | null>(null);
-
-  const refreshQueue = useCallback(async () => {
-    if (isApiAvailable()) {
-      try {
-        const data = await api.getQueue();
-        setQueue((data as QueueTarget[]) || []);
-      } catch {
-        setQueue(getQueue());
-      }
-    } else {
-      setQueue(getQueue());
-    }
-  }, []);
-
-  const refreshDashboard = useCallback(async () => {
-    if (isApiAvailable()) {
-      try {
-        const data = await api.getDashboard();
-        setDashboardItems((data as DashboardItemLike[]) || []);
-      } catch {
-        setDashboardItems(getDashboard());
-      }
-    } else {
-      setDashboardItems(getDashboard());
-    }
-  }, []);
 
   useEffect(() => {
     if (!isApiAvailable()) {
@@ -80,21 +29,6 @@ function App() {
       })
       .finally(() => setAuthChecked(true));
   }, []);
-
-  useEffect(() => {
-    if (tab === 'queue') refreshQueue();
-  }, [tab, refreshQueue]);
-  useEffect(() => {
-    if (tab === 'dashboard') refreshDashboard();
-  }, [tab, refreshDashboard]);
-
-  const flowSteps: { id: TabId; label: string }[] = [
-    { id: 'auto', label: 'フルオート' },
-    { id: 'dashboard', label: 'ダッシュボード' },
-    { id: 'intake', label: 'ヒアリング回答' },
-    { id: 'queue', label: '手動・詳細' },
-    { id: 'settings', label: '設定' },
-  ];
 
   const handleLogin = useCallback(async () => {
     if (!loginUser.trim() || !loginPass.trim()) {
@@ -158,118 +92,52 @@ function App() {
   return (
     <div className="app app--operator">
       <header className="app-header">
-        <h1>ウェブページ作成ツール（運営）</h1>
-        <p className="app-flow-desc">
-          <span className="flow-main">フルオート</span>
-          <span className="flow-arrow" aria-hidden>
-            →
-          </span>
-          <span className="flow-main">ダッシュボードで確認・送信</span>
-          <span className="flow-sub">　手動キュー・設定／納品テンプレは店舗セットアップページ</span>
+        <h1>運営メニュー</h1>
+        <p className="operator-hub-lead">
+          テンプレのプレビュー・店舗ドラフト・ウィザードは下のリンクから開きます。旧「フルオート／ダッシュボード／手動キュー／ヒアリング一覧／設定」タブは整理のためここから外しています（サーバーAPIは互換のため残っています）。
         </p>
-        <nav className="app-tabs" aria-label="メインメニュー">
-          {flowSteps.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={tab === id ? 'active' : ''}
-              onClick={() => setTab(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
       </header>
 
-      <div className="app-steps">
-        {tab === 'auto' && (
-          <FullAutoMain
-            onOpenDashboard={() => {
-              setTab('dashboard');
-              refreshDashboard();
-            }}
-            onRefreshDashboard={refreshDashboard}
-          />
-        )}
-
-        {tab === 'queue' && (
-          <section className="tab-content queue-tab">
-            <p className="tab-hint">
-              個別に Maps から追加したい場合・参照サイト学習はこちら。メインの一括作成は<strong>フルオート</strong>タブを使ってください。
-            </p>
-            <div className="queue-section queue-section-list">
-              <QueueList
-                queue={queue}
-                onRefresh={refreshQueue}
-                onResearch={(t) => setResearchTarget(t)}
-                useApi={isApiAvailable()}
-              />
-            </div>
-            <div className="queue-section">
-              <h3 className="queue-section-title">候補を手動で追加</h3>
-              {isApiAvailable() && <QueueLocalSync onSynced={refreshQueue} />}
-              <MapsCollect onAdded={refreshQueue} />
-              <ManualAddTarget onAdded={refreshQueue} />
-            </div>
-            <div className="queue-section">
-              <ReferenceSitesPanel />
-            </div>
-          </section>
-        )}
-
-        {tab === 'dashboard' && (
-          <section className="tab-content">
-            <p className="tab-hint">
-              フルオートの結果がここに並びます。LPプレビュー・DM文の編集・承認・送信前の最終確認を行います。
-            </p>
-            <ReviewDashboard
-              items={dashboardItems}
-              onRefresh={refreshDashboard}
-              useApi={isApiAvailable()}
-            />
-          </section>
-        )}
-
-        {tab === 'intake' && <CustomerIntakePanel />}
-
-        {tab === 'settings' && (
-          <section className="tab-content settings-tab">
-            <p className="tab-hint">生成するLPのオプション・決済・AI利用の予算を設定します。</p>
-            <div className="settings-block">
-              <h3 className="settings-block-title">納品テンプレ・新店舗</h3>
-              <p className="tab-hint">
-                テンプレ選択・店舗キー・購入者用CMSの発行は{' '}
-                <a href="/admin/store-wizard.html">店舗セットアップ</a>
-                から行います（各テンプレの「見た目を見る」あり）。
-              </p>
-            </div>
-            <div className="settings-block">
-              <h3 className="settings-block-title">LP生成オプション</h3>
-              <GenerationOptions />
-            </div>
-            <div className="settings-block">
-              <h3 className="settings-block-title">決済・料金</h3>
-              <StripePayment />
-            </div>
-            <div className="settings-block">
-              <h3 className="settings-block-title">AI予算</h3>
-              <AIBudgetSettings />
-            </div>
-          </section>
-        )}
-      </div>
-
-      {researchTarget && (
-        <ResearchForm
-          target={researchTarget}
-          onClose={() => setResearchTarget(null)}
-          onDone={() => {
-            refreshQueue();
-            refreshDashboard();
-            setTab('dashboard');
-          }}
-        />
-      )}
+      <main className="operator-hub">
+        <ul className="operator-hub-grid">
+          <li>
+            <a className="operator-hub-card" href="/admin/template-hub.html">
+              <span className="operator-hub-card-title">テンプレ・ギャラリーハブ</span>
+              <span className="operator-hub-card-desc">ビルトインのプレビュー・ギャラリー公開の切替・手順文のコピー</span>
+            </a>
+          </li>
+          <li>
+            <a className="operator-hub-card" href="/admin/template-worker.html">
+              <span className="operator-hub-card-title">店舗ドラフト編集（作業者用）</span>
+              <span className="operator-hub-card-desc">ベーステンプレ＋文章・画像URL・SEO を保存（要 API ログイン）</span>
+            </a>
+          </li>
+          <li>
+            <a className="operator-hub-card" href="/admin/store-wizard.html">
+              <span className="operator-hub-card-title">店舗セットアップ</span>
+              <span className="operator-hub-card-desc">納品テンプレ選択・店舗キー・購入者用編集URLの発行</span>
+            </a>
+          </li>
+          <li>
+            <a className="operator-hub-card" href="/admin/sales-console.html">
+              <span className="operator-hub-card-title">売上コンソール</span>
+              <span className="operator-hub-card-desc">販売・決済まわり（利用している場合）</span>
+            </a>
+          </li>
+          <li>
+            <a className="operator-hub-card" href="/admin/gym-lp.html">
+              <span className="operator-hub-card-title">ジムLP 管理</span>
+              <span className="operator-hub-card-desc">gym LP 用ツール（利用している場合）</span>
+            </a>
+          </li>
+          <li>
+            <a className="operator-hub-card" href="/template-gallery" target="_blank" rel="noopener noreferrer">
+              <span className="operator-hub-card-title">公開テンプレギャラリー</span>
+              <span className="operator-hub-card-desc">一般向けカタログ（別タブ）</span>
+            </a>
+          </li>
+        </ul>
+      </main>
     </div>
   );
 }

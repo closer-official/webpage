@@ -14,7 +14,7 @@ export function renderTemplateGalleryPage() {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Browse LP templates with live previews. Scroll inside each card, sort and search, or open the full page in a new tab." />
+  <meta name="description" content="Browse LP templates with live previews. Scroll inside each card, search by keyword, sort, or open the full page in a new tab." />
   <title>Template gallery | Closer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -188,29 +188,6 @@ export function renderTemplateGalleryPage() {
       background-repeat: no-repeat;
       background-position: right 10px center;
     }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 10px;
-      margin-bottom: 8px;
-    }
-    .chip {
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .chip:hover { color: var(--text); border-color: var(--muted); }
-    .chip.active {
-      background: linear-gradient(135deg, rgba(212, 165, 116, 0.18), rgba(126, 184, 168, 0.1));
-      border-color: var(--gold-dim);
-      color: var(--text);
-    }
     .section-title {
       font-family: "Fraunces", Georgia, serif;
       font-size: 1.05rem;
@@ -272,6 +249,17 @@ export function renderTemplateGalleryPage() {
       }
       .pickup-marquee-duplicate { display: none !important; }
     }
+    /* タッチ端末: 横スクロールアニメ中に iframe 操作しづらいためピックアップは静止表示 */
+    @media (hover: none) {
+      #pickup-track.pickup-marquee-track {
+        animation: none !important;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
+      }
+      .pickup-marquee-duplicate { display: none !important; }
+    }
     .pickup-card {
       flex: 0 0 min(280px, 72vw);
       border-radius: calc(var(--radius) + 2px);
@@ -307,6 +295,8 @@ export function renderTemplateGalleryPage() {
       position: relative;
       width: 100%;
       overflow: hidden;
+      overscroll-behavior: contain;
+      touch-action: manipulation;
     }
     .gallery-preview-embed iframe {
       position: absolute;
@@ -412,18 +402,16 @@ export function renderTemplateGalleryPage() {
       <div class="controls">
         <div class="search-wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="search" id="q" data-i18n-placeholder="gallery.searchPh" placeholder="Search by name, tag, or category" autocomplete="off" />
+          <input type="search" id="q" data-i18n-placeholder="gallery.searchPh" placeholder="Search by keyword" autocomplete="off" enterkeyhint="search" />
         </div>
         <div class="sort-row">
           <label for="sort" data-i18n="gallery.sortLabel">Sort</label>
           <select id="sort" aria-label="Sort order">
             <option value="popular" data-i18n="gallery.sort.popular">Popularity</option>
             <option value="name" data-i18n="gallery.sort.name">Name (A–Z)</option>
-            <option value="category" data-i18n="gallery.sort.category">Category</option>
           </select>
         </div>
       </div>
-      <div class="chips" id="chips" role="group" aria-label="Category"></div>
 
       <section aria-labelledby="all-h">
         <h2 class="section-title" id="all-h" data-i18n="gallery.allTitle">All templates</h2>
@@ -456,7 +444,7 @@ export function renderTemplateGalleryPage() {
     'その他': 'Other',
   };
 
-  var state = { raw: null, q: '', sort: 'popular', category: '' };
+  var state = { raw: null, q: '', sort: 'popular' };
 
   function $(id) { return document.getElementById(id); }
 
@@ -504,7 +492,6 @@ export function renderTemplateGalleryPage() {
     applyShellI18n();
     syncWeekLabel();
     if (state.raw) {
-      buildChips();
       renderPickups();
       renderList();
     }
@@ -569,10 +556,7 @@ export function renderTemplateGalleryPage() {
   }
 
   function filtered() {
-    return (state.raw.templates || []).filter(function (tpl) {
-      if (state.category && tpl.category !== state.category) return false;
-      return matches(tpl);
-    });
+    return (state.raw.templates || []).filter(matches);
   }
 
   function sorted(list) {
@@ -580,14 +564,8 @@ export function renderTemplateGalleryPage() {
     var loc = locStr();
     if (state.sort === 'name') {
       arr.sort(function (a, b) { return a.name.localeCompare(b.name, loc); });
-    } else if (state.sort === 'popular') {
-      arr.sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); });
     } else {
-      arr.sort(function (a, b) {
-        var c = a.category.localeCompare(b.category, loc);
-        if (c !== 0) return c;
-        return (b.popularity || 0) - (a.popularity || 0);
-      });
+      arr.sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); });
     }
     return arr;
   }
@@ -642,22 +620,6 @@ export function renderTemplateGalleryPage() {
       root.innerHTML = '<p class="empty">' + esc(t('gallery.empty.filter')) + '</p>';
       return;
     }
-    var loc = locStr();
-    if (state.sort === 'category') {
-      var byCat = {};
-      list.forEach(function (tpl) {
-        var k = tpl.category || (lang() === 'en' ? 'Other' : 'その他');
-        if (!byCat[k]) byCat[k] = [];
-        byCat[k].push(tpl);
-      });
-      var keys = Object.keys(byCat).sort(function (a, b) { return a.localeCompare(b, loc); });
-      root.innerHTML = keys.map(function (cat) {
-        return '<h2>' + esc(categoryDisplay(cat)) + '</h2><div class="card-grid">' +
-          byCat[cat].map(cardHtml).join('') + '</div>';
-      }).join('');
-      syncOpenAria();
-      return;
-    }
     root.innerHTML = '<div class="card-grid">' + list.map(cardHtml).join('') + '</div>';
     syncOpenAria();
   }
@@ -668,28 +630,8 @@ export function renderTemplateGalleryPage() {
     return '<article class="t-card">' + previewBlock(purl, tname) + '</article>';
   }
 
-  function buildChips() {
-    var templates = state.raw.templates || [];
-    var set = {};
-    templates.forEach(function (tpl) { set[tpl.category] = true; });
-    var cats = Object.keys(set).sort(function (a, b) { return a.localeCompare(b, locStr()); });
-    var chips = $('chips');
-    chips.innerHTML = '<button type="button" class="chip active" data-cat="">' + esc(t('gallery.chipAll')) + '</button>' +
-      cats.map(function (c) {
-        return '<button type="button" class="chip" data-cat="' + esc(c) + '">' + esc(categoryDisplay(c)) + '</button>';
-      }).join('');
-    chips.querySelectorAll('.chip').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        state.category = btn.getAttribute('data-cat') || '';
-        chips.querySelectorAll('.chip').forEach(function (b) { b.classList.toggle('active', b === btn); });
-        renderList();
-      });
-    });
-  }
-
   function refresh() {
     renderPickups();
-    buildChips();
     renderList();
     applyShellI18n();
     syncWeekLabel();

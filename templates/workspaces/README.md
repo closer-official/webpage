@@ -16,6 +16,16 @@
 | `wiki-ensyuritsu/` | `wiki_ensyuritsu` | wiki円室律（オリジナル・ナレッジ・embed 固定HTML） |
 | `wiki-sauna/` | `wiki_sauna` | wiki湯環（ウェルネス・サウナWiki・embed 固定HTML） |
 
+## 制作予定・作業中ワークスペース（本体未登録）
+
+**`server/templateRegistry.js` への登録前**の置き場です。内部 ID は確定後に `SPEC.md` と下表を更新してください。
+
+| フォルダ | 提案内部 ID（仮） | 表示名の目安 |
+|----------|-------------------|--------------|
+| `salon-beauty/` | `salon_beauty` | 美容室 |
+| `restaurant-rich/` | `dining_rich` | 飲食店（リッチ） |
+| `apparel-retail/` | `apparel_retail` | アパレル |
+
 各フォルダに **`package.json`** があり、**このフォルダをカレントにしたまま**次が実行できます。
 
 - **`npm run deploy`** → リポジトリルートの `deploy`（コミット・push・本番反映）
