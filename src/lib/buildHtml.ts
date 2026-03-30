@@ -32,12 +32,15 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
     { label: 'お問い合わせ', href: '#contact' },
   ],
   cafe_1: [
-    { label: 'About', href: '#concept' },
-    { label: 'Menu', href: '#menu' },
-    { label: 'Recruit', href: '#recruit' },
-    { label: 'Business', href: '#business' },
-    { label: 'Shop', href: '#access' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'こだわり', href: '#concept' },
+    { label: '店主', href: '#staff' },
+    { label: 'メニュー', href: '#menu' },
+    { label: '営業時間', href: '#hours' },
+    { label: 'Q&A', href: '#faq' },
+    { label: '店舗詳細', href: '#shop' },
+    { label: '店舗・地図', href: '#access' },
+    { label: 'Instagram', href: '#sns' },
+    { label: 'お問い合わせ', href: '#contact' },
   ],
   clinic_chiropractic: [
     { label: 'プログラム', href: '#program' },
@@ -148,7 +151,7 @@ const DEFAULT_NAV: Record<string, NavItem[]> = {
 const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   salon_barber: { label: 'オンライン予約', href: '#contact' },
   cafe_tea: { label: '予約する', href: '#reserve' },
-  cafe_1: { label: 'お問い合わせ', href: '#contact' },
+  cafe_1: { label: '地図を開く', href: '#access' },
   clinic_chiropractic: { label: '体験予約', href: '#contact' },
   gym_yoga: { label: '予約・相談', href: '#reserve' },
   builder: { label: 'お問い合わせ', href: '#contact' },
@@ -212,7 +215,7 @@ export function buildHtml(
   const overrides = options?.genOptions?.styleOverrides;
   const useDrawerNav = (tid === 'cafe_tea' && overrides?.navStyle !== 'sticky') || tid === 'cafe_1';
   let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);
-  if (tid !== 'event') {
+  if (tid !== 'event' && tid !== 'cafe_1') {
     navItems = [...navItems, { label: '料金・お支払', href: '#payment' }];
   }
   const cta = content.ctaLabel && content.ctaHref
@@ -270,7 +273,7 @@ export function buildHtml(
         ? `<footer class="footer-c1">
     <div class="container footer-c1-inner">
       ${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-ig" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>` : ''}
-      <p class="footer-c1-text">${escapeHtml(content.footerText)}</p>
+      <p class="footer-c1-text">${escapeHtml(content.footerText).replace(/\n/g, '<br>')}</p>
       ${footerLegal}
     </div>
   </footer>
@@ -401,6 +404,28 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
     }
     return chunks.join('\n        ');
   };
+  const cafe1MenuTextHtml = (): string => {
+    const rows = content.cafeMenuTextRows ?? [];
+    if (!rows.length) return '';
+    let lastG = '\0';
+    const parts: string[] = [];
+    for (const row of rows) {
+      const g = (row.groupLabel ?? '').trim();
+      if (g && g !== lastG) {
+        parts.push(`<h3 class="c1-menu-text-zone">${escapeHtml(g)}</h3>`);
+        lastG = g;
+      }
+      parts.push(
+        `<div class="c1-menu-text-row"><span class="c1-menu-text-name">${escapeHtml(row.name)}${row.badge ? `<em class="c1-menu-badge">${escapeHtml(row.badge)}</em>` : ''}</span>` +
+          (row.price ? `<span class="c1-menu-text-price">${escapeHtml(row.price)}</span>` : '') +
+          `</div>`
+      );
+      if (row.description) {
+        parts.push(`<p class="c1-menu-text-desc">${escapeHtml(row.description)}</p>`);
+      }
+    }
+    return `<div class="c1-menu-text-block">${parts.join('\n        ')}</div>`;
+  };
   const cafe1ShopLocationsHtml = (): string => {
     const locs = content.cafeShopLocations ?? [];
     return locs
@@ -435,20 +460,36 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       ? content.sections
           .map((s, i) => {
             const rhythm = getSectionRhythmClass(i, content.sections.length);
+            const imgScroll = tid === 'cafe_1' && s.imageUrl ? ' data-scroll-in' : '';
             const imgWrapClass = s.imageUrl ? (i % 3 === 0 ? ' wo-img-wide' : i % 3 === 1 ? ' wo-img-tall' : ' wo-img-square') : '';
             const img = s.imageUrl
-              ? `<div class="section-img-wrap${imgWrapClass}"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`
+              ? (() => {
+                  const base = `<div class="section-img-wrap${imgWrapClass}"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`;
+                  if (tid === 'cafe_1' && s.id === 'gallery' && content.footerInstagramUrl) {
+                    return `<a href="${escapeHtml(content.footerInstagramUrl)}" target="_blank" rel="noopener noreferrer" class="c1-gallery-link" aria-label="Instagramへ移動">${base}</a>`;
+                  }
+                  return base;
+                })()
               : '';
             const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
       <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
-            if (tid === 'cafe_1' && s.id === 'menu' && (content.cafeBranchMenuItems?.length ?? 0) > 0) {
+            if (
+              tid === 'cafe_1' &&
+              s.id === 'menu' &&
+              ((content.cafeBranchMenuItems?.length ?? 0) > 0 || (content.cafeMenuTextRows?.length ?? 0) > 0)
+            ) {
+              const branchGrid =
+                (content.cafeBranchMenuItems?.length ?? 0) > 0
+                  ? `<div class="c1-menu-grid" role="list">
+        ${cafe1BranchMenuHtml()}
+        </div>`
+                  : '';
               return `    <section id="menu" class="section wo-sec c1-menu-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
-        <div class="c1-menu-grid" role="list">
-        ${cafe1BranchMenuHtml()}
-        </div>
+        ${cafe1MenuTextHtml()}
+        ${branchGrid}
       </div>
     </section>`;
             }
@@ -465,17 +506,34 @@ ${cafe1ShopLocationsHtml()}
       </div>
     </section>`;
             }
+            if (tid === 'cafe_1' && s.id === 'staff') {
+              const bubble = String(content.cafeOwnerBubbleText ?? '').trim();
+              const bubbleHtml = bubble ? `<p class="c1-owner-bubble">「${escapeHtml(bubble)}」</p>` : '';
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec ${rhythm} wo-alt" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${img}
+      <div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+      <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>${bubbleHtml}</div>
+    </section>`;
+            }
             if (s.id === 'hours') {
-              return `    <section class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+              const hourLines = String(s.content)
+                .split('\n')
+                .map((l) => l.trim())
+                .filter(Boolean);
+              const hoursInner =
+                tid === 'cafe_1'
+                  ? hourLines.map((l) => `<p class="wo-hours-detail">${escapeHtml(l)}</p>`).join('')
+                  : woHoursBody(s.content);
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-hours ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
-        ${woHoursBody(s.content)}
+        ${hoursInner}
       </div>
     </section>`;
             }
             if (s.id === 'faq' && faqItems.length > 0) {
               const faqHtml = faqItems.map((faq, j) => `<div class="wo-faq-item"><button type="button" class="wo-faq-q" aria-expanded="false" aria-controls="wo-faq-a-${i}-${j}" id="wo-faq-q-${i}-${j}">${escapeHtml(faq.q)}</button><div class="wo-faq-a" id="wo-faq-a-${i}-${j}" role="region" aria-labelledby="wo-faq-q-${i}-${j}"><p>${escapeHtml(faq.a)}</p></div></div>`).join('');
-              return `    <section class="section wo-sec wo-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         <div class="wo-faq-list">${faqHtml}</div>
@@ -495,7 +553,6 @@ ${cafe1ShopLocationsHtml()}
               return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
-        ${content.subheadline ? `<p class="c1-lede-sub">${escapeHtml(content.subheadline)}</p>` : ''}
         <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
       </div>
       ${img}
@@ -511,7 +568,7 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             const alt = s.imageUrl ? (i % 2 === 1 ? ' wo-alt' : ' wo-alt wo-alt-rev') : '';
-            return `    <section class="section wo-sec ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+            return `    <section id="${escapeHtml(s.id)}" class="section wo-sec ${rhythm}${alt}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${img}
       ${body}
     </section>`;
@@ -718,7 +775,8 @@ ${cafe1ShopLocationsHtml()}
     apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
     event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
     ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
-    cafe_1: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
+    cafe_1:
+      'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
     gym_personal_neon:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
@@ -739,9 +797,13 @@ ${cafe1ShopLocationsHtml()}
           const fallback = tid === 'cafe_1' ? defaultHeroImages.cafe_1! : defaultHeroImages.cafe_tea!;
           const d1 = heroImageUrl || fallback;
           const d2 =
-            'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
+            tid === 'cafe_1'
+              ? 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400'
+              : 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400';
           const d3 =
-            'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
+            tid === 'cafe_1'
+              ? 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400'
+              : 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
           const hs = (content.heroSlides ?? []).filter((u) => (u || '').trim());
           if (hs.length >= 2) return hs;
           if (hs.length === 1) return [hs[0]!, d2, d3];
@@ -752,7 +814,8 @@ ${cafe1ShopLocationsHtml()}
     tid === 'cafe_1'
       ? `<div class="wo-hero-inner c1-hero-inner">
         <p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>
-        ${content.headline ? `<p class="c1-hero-tagline">${escapeHtml(content.headline)}</p>` : ''}
+        ${content.headline ? `<h1 class="c1-hero-h1">${escapeHtml(content.headline)}</h1>` : ''}
+        ${content.subheadline ? `<p class="c1-hero-tagline">${escapeHtml(content.subheadline)}</p>` : ''}
       </div>`
       : `<div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
@@ -856,7 +919,6 @@ ${cafe1ShopLocationsHtml()}
 
   const scrollInScript =
     tid === 'cafe_tea' ||
-    tid === 'cafe_1' ||
     tid === 'navy_cyan_consult' ||
     tid === 'gym_personal_neon' ||
     tid === 'wiki_ensyuritsu' || tid === 'wiki_sauna'
@@ -1332,7 +1394,7 @@ io.observe(el);
     `var q="?returnUrl="+encodeURIComponent(window.location.href);f.src=b+q;` +
     `var a=document.getElementById("${fallbackId}");if(a)a.href=b+q;})();`;
   const paymentSectionHtml =
-    tid !== 'event'
+    tid !== 'event' && tid !== 'cafe_1'
       ? `
     <section id="payment" class="section section-rhythm-default section-payment" aria-labelledby="payment-title">
       <h2 id="payment-title">料金・お支払い</h2>
@@ -1373,7 +1435,7 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
     </section>`;
       }
     }
-    if (contactForm) {
+    if (contactForm && tid !== 'cafe_1') {
       const formAction = (formActionUrl ?? '').trim() || '#';
       if (tid === 'cafe_tea' || tid === 'cafe_1') {
         extraSectionsHtml += `
@@ -1442,6 +1504,41 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
       ${qrImg}
     </section>`;
     }
+  }
+
+  const igClientPerm = String(content.cafeInstagramPermalink ?? '').trim();
+  const igFeed = content.cafeInstagramFeedItems ?? [];
+  if (tid === 'cafe_1' && igFeed.length > 0) {
+    extraSectionsHtml += `
+    <section class="section wo-sec c1-ig-feed-sec" id="ig-feed" aria-labelledby="c1-ig-feed-title"${extraMotionAttr}>
+      <div class="section-body">
+        <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿</h2>
+        <div class="c1-ig-feed-grid">${igFeed.map((it) => `<a href="${escapeHtml(it.postUrl)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"></a>`).join('')}</div>
+      </div>
+    </section>`;
+  }
+  if (tid === 'cafe_1' && igClientPerm) {
+    extraSectionsHtml += `
+    <section class="section wo-sec c1-ig-embed-sec" id="instagram" aria-labelledby="c1-ig-embed-title"${extraMotionAttr}>
+      <div class="section-body">
+        <h2 id="c1-ig-embed-title" class="wo-sec-heading">Instagram</h2>
+        <div class="wo-sec-prose"><p>日替わり・限定メニューも投稿しています。埋め込みは公開投稿のURLを設定すると表示されます。</p></div>
+        <div class="c1-ig-embed-wrap">
+          <blockquote class="instagram-media" data-instgrm-permalink="${escapeHtml(igClientPerm)}" data-instgrm-version="14" style="background:#FFF;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15);margin:1px auto;max-width:540px;min-width:280px;padding:0;width:99.375%"></blockquote>
+        </div>
+      </div>
+    </section>`;
+  }
+  const gbPostsEmbedUrl = String(content.cafeGbPostsEmbedUrl ?? '').trim();
+  if (tid === 'cafe_1' && gbPostsEmbedUrl) {
+    extraSectionsHtml += `
+    <section class="section wo-sec c1-gbp-sec" id="gbp-posts" aria-labelledby="c1-gbp-title"${extraMotionAttr}>
+      <div class="section-body">
+        <h2 id="c1-gbp-title" class="wo-sec-heading">最新情報（Googleビジネスプロフィール）</h2>
+        <div class="wo-sec-prose"><p>本日の営業情報や限定メニューを随時更新しています。</p></div>
+        <div class="c1-gbp-embed-wrap"><iframe src="${escapeHtml(gbPostsEmbedUrl)}" title="Googleビジネスプロフィール最新情報" loading="lazy"></iframe></div>
+      </div>
+    </section>`;
   }
 
   const woChrome =
@@ -1582,6 +1679,44 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
   const embeddedDeliverableMainHtml =
     navyMainHtmlClient + gymValxMainHtmlClient + wikiEnsyuritsuMainHtmlClient + wikiSaunaMainHtmlClient;
 
+  const cafe1QuickDock =
+    tid === 'cafe_1'
+      ? (() => {
+          const locs = content.cafeShopLocations ?? [];
+          const mapU =
+            String(content.cafeFloatingMapUrl ?? '').trim() ||
+            (locs[0] ? String(locs[0].mapUrl ?? '').trim() : '') ||
+            '';
+          if (!mapU) return '';
+          const mapBtn = mapU
+            ? `<a class="c1-dock-btn c1-dock-map" href="${escapeHtml(mapU)}" target="_blank" rel="noopener noreferrer" aria-label="地図アプリで開く">今すぐ場所を確認</a>`
+            : '';
+          return `<div class="c1-quick-dock" role="navigation" aria-label="すぐ来店">${mapBtn}</div>`;
+        })()
+      : '';
+  const cafe1PhoneFab =
+    tid === 'cafe_1'
+      ? (() => {
+          const phone = String(content.footerPhone ?? '').trim();
+          const telDigits = phone.replace(/\s/g, '');
+          if (!telDigits) return '';
+          return `<a class="c1-phone-fab" href="tel:${escapeHtml(telDigits)}" aria-label="電話する"><span aria-hidden="true">☎</span><span>電話する</span></a>`;
+        })()
+      : '';
+  const cafe1ReviewSticky =
+    tid === 'cafe_1'
+      ? (() => {
+          const url = String(content.cafeReviewCtaUrl ?? '').trim();
+          if (!url) return '';
+          const txt = String(content.cafeReviewCtaText ?? 'スタッフにクチコミ画面提示で100円トッピング無料！');
+          return `<a class="c1-review-sticky" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Googleクチコミ投稿">${escapeHtml(txt)}</a>`;
+        })()
+      : '';
+  const cafe1IgEmbedScript =
+    tid === 'cafe_1' && String(content.cafeInstagramPermalink ?? '').trim()
+      ? '<script async src="https://www.instagram.com/embed.js"></script>'
+      : '';
+
   const bodyInner =
     tid === 'builder'
       ? `${skipLink}${builderViewsHtml}${builderViewScript}`
@@ -1619,6 +1754,9 @@ ${reserveSectionHtml}
   ${gymStickyCtaHtml}
   ${cramStickyCtaHtml}
   ${proStickyCtaHtml}
+  ${cafe1PhoneFab}
+  ${cafe1QuickDock}
+  ${cafe1ReviewSticky}
   ${footerHtml}
   ${a1Script}
   ${scrollInScript}
@@ -1634,12 +1772,14 @@ ${reserveSectionHtml}
           siteName: content.siteName || content.title || '',
         })
       : ''
-  }`;
+  }
+  ${cafe1IgEmbedScript}`;
 
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     ${metaTags}${paymentMetaLine}
+    ${tid === 'cafe_1' && woHeroSlides[0] ? `<link rel="preload" as="image" href="${escapeHtml(woHeroSlides[0])}">` : ''}
     ${googleFonts}
     <script type="application/ld+json">${jsonLd}</script>
     <style>${css}</style>

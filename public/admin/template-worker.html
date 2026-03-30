@@ -142,6 +142,7 @@
     <p class="sub">
       <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
       で変えてください）。<br />
+      <strong>cafe_1（複数店舗・ミニマル）</strong>では、下の「店舗・メニュー・FAQ」から<strong>画面上の文言と画像URLをすべて</strong>管理できます（コード変更は不要）。<br />
       保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
       <code>/api/template-preview/&lt;カスタムID&gt;</code> です。
     </p>
@@ -192,7 +193,11 @@
       <label>ページタイトル <input type="text" id="f-title" /></label>
       <label>メイン見出し <input type="text" id="f-headline" /></label>
       <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
-      <label>フッター文言 <input type="text" id="f-footerText" /></label>
+      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
+      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+      <label>フッター電話 <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
+      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+      <label>地図 iframe 埋め込み URL <input type="url" id="f-mapEmbedUrl" /></label>
       <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
       <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
       <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
@@ -201,12 +206,47 @@
         <textarea id="f-heroSlides" class="mono" rows="5" placeholder="https://..."></textarea>
       </label>
       <label>
-        セクション JSON（任意・上級者）
+        セクション JSON（任意）
         <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px"
-          >配列形式 <code>[{&quot;id&quot;:&quot;concept&quot;,&quot;title&quot;:&quot;…&quot;,&quot;content&quot;:&quot;…&quot;}]</code> 。空欄ならテンプレ既定。</span
+          ><code>id / title / content</code> に加え、写真があるセクションは <code>imageUrl</code>（https の画像URL）を付けられます。空欄ならテンプレ既定。</span
         >
         <textarea id="f-sections" class="mono" spellcheck="false"></textarea>
       </label>
+
+      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ（JSON）</h2>
+      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
+        ベースが <code>cafe_1</code> のときに使用。各欄は JSON 配列またはオブジェクト。空欄の項目はテンプレ既定のままです。
+      </p>
+      <label>
+        FAQ（よくある質問）
+        <textarea id="f-faqItems" class="mono" spellcheck="false" rows="4" placeholder='[{"q":"…","a":"…"}]'></textarea>
+      </label>
+      <label>
+        テキストメニュー行（お品書き）
+        <textarea id="f-cafeMenuTextRows" class="mono" spellcheck="false" rows="6" placeholder='[{"groupLabel":"…","name":"…","price":"¥…","description":"…","badge":"…"}]'></textarea>
+      </label>
+      <label>
+        MEO / JSON-LD 用 cafeMeo
+        <textarea id="f-cafeMeo" class="mono" spellcheck="false" rows="5" placeholder='{"servesCuisine":"…","priceRange":"…","openingHours":["Mo 11:00-23:00"],"streetAddress":"…","addressLocality":"…","addressRegion":"…","postalCode":"…"}'></textarea>
+      </label>
+      <label>
+        店舗カード（アクセス欄）
+        <textarea id="f-cafeShopLocations" class="mono" spellcheck="false" rows="5" placeholder='[{"name":"…","detail":"…","mapUrl":"https://…","imageUrl":"https://…"}]'></textarea>
+      </label>
+      <label>
+        Instagram 投稿グリッド（画像URL・投稿URL）
+        <textarea id="f-cafeInstagramFeedItems" class="mono" spellcheck="false" rows="4" placeholder='[{"imageUrl":"https://…","postUrl":"https://…"}]'></textarea>
+      </label>
+      <label>
+        メニューPDF等のボタン行
+        <textarea id="f-cafeBranchMenuItems" class="mono" spellcheck="false" rows="2" placeholder='[{"groupLabel":"…","label":"…","menuUrl":"https://…"}]'></textarea>
+      </label>
+      <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
+      <label>店主コメント（吹き出し） <textarea id="f-cafeOwnerBubbleText" rows="2"></textarea></label>
+      <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
+      <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
+      <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
+      <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
 
       <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
       <label>meta title <input type="text" id="f-metaTitle" /></label>
@@ -268,6 +308,16 @@
           el.textContent = text || '';
         }
 
+        function parseJsonOptional(text, label) {
+          var t = String(text || '').trim();
+          if (!t) return undefined;
+          try {
+            return JSON.parse(t);
+          } catch (e) {
+            throw new Error(label + ' の JSON が不正です: ' + (e.message || e));
+          }
+        }
+
         function buildOverrideFromForm() {
           var heroRaw = document.getElementById('f-heroSlides').value.trim();
           var heroLines = heroRaw
@@ -288,6 +338,24 @@
               throw new Error('セクション JSON が不正です: ' + (e.message || e));
             }
           }
+          var faqItems = parseJsonOptional(document.getElementById('f-faqItems').value, 'FAQ');
+          if (faqItems !== undefined && !Array.isArray(faqItems)) throw new Error('FAQ は配列 JSON にしてください');
+          var cafeMenuTextRows = parseJsonOptional(document.getElementById('f-cafeMenuTextRows').value, 'テキストメニュー');
+          if (cafeMenuTextRows !== undefined && !Array.isArray(cafeMenuTextRows))
+            throw new Error('テキストメニュー は配列 JSON にしてください');
+          var cafeMeo = parseJsonOptional(document.getElementById('f-cafeMeo').value, 'cafeMeo');
+          if (cafeMeo !== undefined && (typeof cafeMeo !== 'object' || Array.isArray(cafeMeo)))
+            throw new Error('cafeMeo はオブジェクト JSON にしてください');
+          var cafeShopLocations = parseJsonOptional(document.getElementById('f-cafeShopLocations').value, '店舗カード');
+          if (cafeShopLocations !== undefined && !Array.isArray(cafeShopLocations))
+            throw new Error('店舗カード は配列 JSON にしてください');
+          var cafeInstagramFeedItems = parseJsonOptional(document.getElementById('f-cafeInstagramFeedItems').value, 'Instagramグリッド');
+          if (cafeInstagramFeedItems !== undefined && !Array.isArray(cafeInstagramFeedItems))
+            throw new Error('Instagramグリッド は配列 JSON にしてください');
+          var cafeBranchMenuItems = parseJsonOptional(document.getElementById('f-cafeBranchMenuItems').value, 'メニュー資料ボタン');
+          if (cafeBranchMenuItems !== undefined && !Array.isArray(cafeBranchMenuItems))
+            throw new Error('メニュー資料ボタン は配列 JSON にしてください');
+
           var ov = {
             siteName: document.getElementById('f-siteName').value.trim(),
             title: document.getElementById('f-title').value.trim(),
@@ -302,9 +370,25 @@
             ogImageUrl: document.getElementById('f-ogImageUrl').value.trim(),
             canonicalUrl: document.getElementById('f-canonicalUrl').value.trim(),
             keywords: document.getElementById('f-keywords').value.trim(),
+            footerAddress: document.getElementById('f-footerAddress').value.trim(),
+            footerPhone: document.getElementById('f-footerPhone').value.trim(),
+            footerInstagramUrl: document.getElementById('f-footerInstagramUrl').value.trim(),
+            mapEmbedUrl: document.getElementById('f-mapEmbedUrl').value.trim(),
+            cafeFloatingMapUrl: document.getElementById('f-cafeFloatingMapUrl').value.trim(),
+            cafeOwnerBubbleText: document.getElementById('f-cafeOwnerBubbleText').value.trim(),
+            cafeReviewCtaText: document.getElementById('f-cafeReviewCtaText').value.trim(),
+            cafeReviewCtaUrl: document.getElementById('f-cafeReviewCtaUrl').value.trim(),
+            cafeGbPostsEmbedUrl: document.getElementById('f-cafeGbPostsEmbedUrl').value.trim(),
+            cafeInstagramPermalink: document.getElementById('f-cafeInstagramPermalink').value.trim(),
           };
           if (heroLines.length) ov.heroSlides = heroLines;
           if (sections && sections.length) ov.sections = sections;
+          if (faqItems && faqItems.length) ov.faqItems = faqItems;
+          if (cafeMenuTextRows && cafeMenuTextRows.length) ov.cafeMenuTextRows = cafeMenuTextRows;
+          if (cafeMeo && Object.keys(cafeMeo).length) ov.cafeMeo = cafeMeo;
+          if (cafeShopLocations && cafeShopLocations.length) ov.cafeShopLocations = cafeShopLocations;
+          if (cafeInstagramFeedItems && cafeInstagramFeedItems.length) ov.cafeInstagramFeedItems = cafeInstagramFeedItems;
+          if (cafeBranchMenuItems && cafeBranchMenuItems.length) ov.cafeBranchMenuItems = cafeBranchMenuItems;
           return ov;
         }
 
@@ -323,9 +407,41 @@
           document.getElementById('f-ogImageUrl').value = ov.ogImageUrl || '';
           document.getElementById('f-canonicalUrl').value = ov.canonicalUrl || '';
           document.getElementById('f-keywords').value = ov.keywords || '';
+          document.getElementById('f-footerAddress').value = ov.footerAddress || '';
+          document.getElementById('f-footerPhone').value = ov.footerPhone || '';
+          document.getElementById('f-footerInstagramUrl').value = ov.footerInstagramUrl || '';
+          document.getElementById('f-mapEmbedUrl').value = ov.mapEmbedUrl || '';
+          document.getElementById('f-cafeFloatingMapUrl').value = ov.cafeFloatingMapUrl || '';
+          document.getElementById('f-cafeOwnerBubbleText').value = ov.cafeOwnerBubbleText || '';
+          document.getElementById('f-cafeReviewCtaText').value = ov.cafeReviewCtaText || '';
+          document.getElementById('f-cafeReviewCtaUrl').value = ov.cafeReviewCtaUrl || '';
+          document.getElementById('f-cafeGbPostsEmbedUrl').value = ov.cafeGbPostsEmbedUrl || '';
+          document.getElementById('f-cafeInstagramPermalink').value = ov.cafeInstagramPermalink || '';
           document.getElementById('f-heroSlides').value = Array.isArray(ov.heroSlides) ? ov.heroSlides.join('\n') : '';
           document.getElementById('f-sections').value =
             Array.isArray(ov.sections) && ov.sections.length ? JSON.stringify(ov.sections, null, 2) : '';
+          document.getElementById('f-faqItems').value =
+            Array.isArray(ov.faqItems) && ov.faqItems.length ? JSON.stringify(ov.faqItems, null, 2) : '';
+          document.getElementById('f-cafeMenuTextRows').value =
+            Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length
+              ? JSON.stringify(ov.cafeMenuTextRows, null, 2)
+              : '';
+          document.getElementById('f-cafeMeo').value =
+            ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) && Object.keys(ov.cafeMeo).length
+              ? JSON.stringify(ov.cafeMeo, null, 2)
+              : '';
+          document.getElementById('f-cafeShopLocations').value =
+            Array.isArray(ov.cafeShopLocations) && ov.cafeShopLocations.length
+              ? JSON.stringify(ov.cafeShopLocations, null, 2)
+              : '';
+          document.getElementById('f-cafeInstagramFeedItems').value =
+            Array.isArray(ov.cafeInstagramFeedItems) && ov.cafeInstagramFeedItems.length
+              ? JSON.stringify(ov.cafeInstagramFeedItems, null, 2)
+              : '';
+          document.getElementById('f-cafeBranchMenuItems').value =
+            Array.isArray(ov.cafeBranchMenuItems) && ov.cafeBranchMenuItems.length
+              ? JSON.stringify(ov.cafeBranchMenuItems, null, 2)
+              : '';
         }
 
         function updatePreviewUrl() {

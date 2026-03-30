@@ -95,6 +95,55 @@ export function generateKeywords(content: PageContent, count = 8): string[] {
     .map(([k]) => k);
 }
 
+/** 「¥1,100」等から JSON-LD Offer 用の価格文字列（数字のみ）を抽出 */
+function parsePriceYenForJsonLd(price?: string): string | undefined {
+  if (!price) return undefined;
+  const digits = price.replace(/[,¥￥\s]/g, '').replace(/[^\d]/g, '');
+  return digits || undefined;
+}
+
+/** cafe_1 テキストメニュー行から schema.org Menu を組み立てる */
+function buildCafeMenuJsonLd(
+  rows: NonNullable<PageContent['cafeMenuTextRows']>
+): Record<string, unknown> | undefined {
+  if (!rows.length) return undefined;
+  type MenuItemJson = Record<string, unknown>;
+  const sections: { name: string; items: MenuItemJson[] }[] = [];
+  let cur: { name: string; items: MenuItemJson[] } | null = null;
+
+  for (const row of rows) {
+    const g = (row.groupLabel ?? '').trim() || 'メニュー';
+    if (!cur || cur.name !== g) {
+      if (cur) sections.push(cur);
+      cur = { name: g, items: [] };
+    }
+    const displayName = [row.name, row.badge].filter(Boolean).join(' ');
+    const item: MenuItemJson = {
+      '@type': 'MenuItem',
+      name: displayName || 'メニュー',
+    };
+    if (row.description?.trim()) item.description = row.description.trim();
+    const p = parsePriceYenForJsonLd(row.price);
+    if (p) {
+      item.offers = { '@type': 'Offer', price: p, priceCurrency: 'JPY' };
+    }
+    cur.items.push(item);
+  }
+  if (cur) sections.push(cur);
+
+  const hasMenuSection = sections.map((sec) => ({
+    '@type': 'MenuSection',
+    name: sec.name,
+    hasMenuItem: sec.items,
+  }));
+
+  return {
+    '@type': 'Menu',
+    name: 'お品書き',
+    hasMenuSection,
+  };
+}
+
 /** JSON-LD Organization / WebPage 用の構造化データを生成 */
 export function buildJsonLd(
   content: PageContent,
@@ -137,6 +186,57 @@ export function buildJsonLd(
     }
     if (seo.ogImageUrl) localBusiness.image = seo.ogImageUrl;
     graphs.push(localBusiness);
+  }
+
+  if (templateId === 'cafe_1') {
+    const meo = content.cafeMeo;
+    const restaurant: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'Restaurant',
+      name: content.siteName,
+      description: seo.metaDescription,
+      url: url || undefined,
+    };
+    if (content.footerPhone) restaurant.telephone = content.footerPhone;
+    const street =
+      (meo?.streetAddress || '').trim() || (content.footerAddress || '').trim() || undefined;
+    if (street || meo?.addressLocality || meo?.addressRegion || meo?.postalCode) {
+      restaurant.address = {
+        '@type': 'PostalAddress',
+        streetAddress: street,
+        addressLocality: meo?.addressLocality || undefined,
+        addressRegion: meo?.addressRegion || undefined,
+        postalCode: meo?.postalCode || undefined,
+        addressCountry: 'JP',
+      };
+    }
+    if (meo?.servesCuisine) restaurant.servesCuisine = meo.servesCuisine;
+    if (meo?.priceRange) restaurant.priceRange = meo.priceRange;
+    if (meo?.openingHours?.length) restaurant.openingHours = meo.openingHours;
+    const imgs = [seo.ogImageUrl, ...(content.heroSlides ?? []).map((u) => (u || '').trim()).filter(Boolean)].filter(
+      Boolean
+    ) as string[];
+    if (imgs.length) restaurant.image = imgs.length === 1 ? imgs[0] : imgs;
+    const menuLd = buildCafeMenuJsonLd(content.cafeMenuTextRows ?? []);
+    if (menuLd) restaurant.hasMenu = menuLd;
+    graphs.push(restaurant);
+  }
+
+  const faq = content.faqItems ?? [];
+  if (faq.length > 0) {
+    graphs.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      ...(url ? { url } : {}),
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.a,
+        },
+      })),
+    });
   }
 
   return JSON.stringify(graphs);

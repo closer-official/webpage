@@ -112,6 +112,40 @@ export interface PageContent {
   gymStatAnimations?: { end: number; suffix: string }[];
   /** cafe_1：複数店舗のメニュー画像・PDF 等（別タブで開く） */
   cafeBranchMenuItems?: { groupLabel?: string; label: string; menuUrl: string }[];
+  /**
+   * cafe_1：テキストメニュー（MEO・クローラ向け）。画像のみのお品書きの代替・併用に。
+   */
+  cafeMenuTextRows?: { groupLabel?: string; name: string; price?: string; description?: string; badge?: string }[];
+  /**
+   * cafe_1：Restaurant JSON-LD 用（servesCuisine / priceRange / 営業時間 / 住所の分解）。
+   * 未指定の住所項目は footerAddress を streetAddress として流用します。
+   */
+  cafeMeo?: {
+    servesCuisine: string;
+    priceRange: string;
+    /** 例: ["Mo-Su 11:00-22:00"] または曜日ごと ["Mo 11:00-23:00", "Tu 11:00-23:00", …]（本文の営業時間と揃える） */
+    openingHours?: string[];
+    streetAddress?: string;
+    addressLocality?: string;
+    addressRegion?: string;
+    postalCode?: string;
+  };
+  /** cafe_1：フローティング「地図」ボタン優先URL（未指定時は先頭店舗の mapUrl） */
+  cafeFloatingMapUrl?: string;
+  /**
+   * cafe_1：公開投稿の Instagram URL（blockquote 埋め込み用。プロフィールURLは不可）
+   */
+  cafeInstagramPermalink?: string;
+  /** cafe_1：Googleクチコミ導線（固定バナー） */
+  cafeReviewCtaText?: string;
+  /** cafe_1：Googleクチコミ投稿URL */
+  cafeReviewCtaUrl?: string;
+  /** cafe_1：Googleビジネスプロフィール投稿/最新情報の埋め込みURL */
+  cafeGbPostsEmbedUrl?: string;
+  /** cafe_1：店主写真まわりの吹き出しコメント */
+  cafeOwnerBubbleText?: string;
+  /** cafe_1：Instagram投稿グリッド（途中表示） */
+  cafeInstagramFeedItems?: { imageUrl: string; postUrl: string }[];
   /** cafe_1：店舗一覧（SHOP）。指定時は access セクションでカード表示 */
   cafeShopLocations?: {
     name: string;

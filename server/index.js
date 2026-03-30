@@ -494,9 +494,118 @@ function sanitizeOverrideSections(raw) {
     if (!id) id = `sec-${out.length}`;
     const title = String(row.title || '').trim().slice(0, 120);
     const content = String(row.content || '').trim().slice(0, 8000);
-    out.push({ id, title, content });
+    const sec = { id, title, content };
+    const img = String(row.imageUrl || '').trim().slice(0, 2000);
+    if (img && /^https?:\/\//i.test(img)) sec.imageUrl = img;
+    out.push(sec);
   }
   return out.length ? out : undefined;
+}
+
+function sanitizeFaqItemsOverride(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 40)) {
+    if (!row || typeof row !== 'object') continue;
+    const q = String(row.q || '').trim().slice(0, 500);
+    const a = String(row.a || '').trim().slice(0, 4000);
+    if (q && a) out.push({ q, a });
+  }
+  return out.length ? out : undefined;
+}
+
+function sanitizeCafeMenuTextRowsOverride(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 100)) {
+    if (!row || typeof row !== 'object') continue;
+    const name = String(row.name || '').trim().slice(0, 200);
+    if (!name) continue;
+    out.push({
+      ...(String(row.groupLabel || '').trim()
+        ? { groupLabel: String(row.groupLabel || '').trim().slice(0, 120) }
+        : {}),
+      name,
+      ...(String(row.price || '').trim() ? { price: String(row.price || '').trim().slice(0, 40) } : {}),
+      ...(String(row.description || '').trim() ? { description: String(row.description || '').trim().slice(0, 800) } : {}),
+      ...(String(row.badge || '').trim() ? { badge: String(row.badge || '').trim().slice(0, 40) } : {}),
+    });
+  }
+  return out.length ? out : undefined;
+}
+
+function sanitizeCafeShopLocationsOverride(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 8)) {
+    if (!row || typeof row !== 'object') continue;
+    const name = String(row.name || '').trim().slice(0, 120);
+    const detail = String(row.detail || '').trim().slice(0, 8000);
+    if (!name || !detail) continue;
+    const loc = { name, detail };
+    const mapUrl = String(row.mapUrl || '').trim().slice(0, 2000);
+    if (mapUrl && /^https?:\/\//i.test(mapUrl)) loc.mapUrl = mapUrl;
+    const imageUrl = String(row.imageUrl || '').trim().slice(0, 2000);
+    if (imageUrl && /^https?:\/\//i.test(imageUrl)) loc.imageUrl = imageUrl;
+    const reserveUrl = String(row.reserveUrl || '').trim().slice(0, 2000);
+    if (reserveUrl && /^https?:\/\//i.test(reserveUrl)) loc.reserveUrl = reserveUrl;
+    const reserveLabel = String(row.reserveLabel || '').trim().slice(0, 80);
+    if (reserveLabel) loc.reserveLabel = reserveLabel;
+    out.push(loc);
+  }
+  return out.length ? out : undefined;
+}
+
+function sanitizeCafeInstagramFeedItemsOverride(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 24)) {
+    if (!row || typeof row !== 'object') continue;
+    const imageUrl = String(row.imageUrl || '').trim().slice(0, 2000);
+    const postUrl = String(row.postUrl || '').trim().slice(0, 2000);
+    if (imageUrl && /^https?:\/\//i.test(imageUrl) && postUrl && /^https?:\/\//i.test(postUrl)) {
+      out.push({ imageUrl, postUrl });
+    }
+  }
+  return out.length ? out : undefined;
+}
+
+function sanitizeCafeBranchMenuItemsOverride(raw) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  for (const row of raw.slice(0, 20)) {
+    if (!row || typeof row !== 'object') continue;
+    const label = String(row.label || '').trim().slice(0, 120);
+    const menuUrl = String(row.menuUrl || '').trim().slice(0, 2000);
+    if (!label || !menuUrl || !/^https?:\/\//i.test(menuUrl)) continue;
+    const item = { label, menuUrl };
+    const gl = String(row.groupLabel || '').trim().slice(0, 120);
+    if (gl) item.groupLabel = gl;
+    out.push(item);
+  }
+  return out.length ? out : undefined;
+}
+
+function sanitizeCafeMeoOverride(raw) {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const o = {};
+  const servesCuisine = String(raw.servesCuisine || '').trim().slice(0, 300);
+  if (servesCuisine) o.servesCuisine = servesCuisine;
+  const priceRange = String(raw.priceRange || '').trim().slice(0, 80);
+  if (priceRange) o.priceRange = priceRange;
+  if (Array.isArray(raw.openingHours)) {
+    const oh = raw.openingHours.map((s) => String(s).trim()).filter(Boolean).slice(0, 14);
+    if (oh.length) o.openingHours = oh;
+  }
+  const sa = String(raw.streetAddress || '').trim().slice(0, 200);
+  if (sa) o.streetAddress = sa;
+  const loc = String(raw.addressLocality || '').trim().slice(0, 120);
+  if (loc) o.addressLocality = loc;
+  const reg = String(raw.addressRegion || '').trim().slice(0, 120);
+  if (reg) o.addressRegion = reg;
+  const pc = String(raw.postalCode || '').trim().slice(0, 20);
+  if (pc) o.postalCode = pc;
+  return Object.keys(o).length ? o : undefined;
 }
 
 /** カスタム override の正規化（空はキーごと省略。theme は1つでも値があればだけ載せる） */
@@ -512,7 +621,7 @@ function normalizeCustomizationInput(body = {}) {
   if (siteName) out.siteName = siteName;
   const title = String(body.title || '').trim().slice(0, 200);
   if (title) out.title = title;
-  const footerText = String(body.footerText || '').trim().slice(0, 500);
+  const footerText = String(body.footerText || '').trim().slice(0, 5000);
   if (footerText) out.footerText = footerText;
   const ctaLabel = String(body.ctaLabel || '').trim().slice(0, 80);
   if (ctaLabel) out.ctaLabel = ctaLabel;
@@ -541,6 +650,40 @@ function normalizeCustomizationInput(body = {}) {
 
   const sections = sanitizeOverrideSections(body.sections);
   if (sections) out.sections = sections;
+
+  const footerAddress = String(body.footerAddress || '').trim().slice(0, 300);
+  if (footerAddress) out.footerAddress = footerAddress;
+  const footerPhone = String(body.footerPhone || '').trim().slice(0, 40);
+  if (footerPhone) out.footerPhone = footerPhone;
+  const footerInstagramUrl = String(body.footerInstagramUrl || '').trim().slice(0, 2000);
+  if (footerInstagramUrl && /^https?:\/\//i.test(footerInstagramUrl)) out.footerInstagramUrl = footerInstagramUrl;
+  const mapEmbedUrl = String(body.mapEmbedUrl || '').trim().slice(0, 2000);
+  if (mapEmbedUrl && /^https?:\/\//i.test(mapEmbedUrl)) out.mapEmbedUrl = mapEmbedUrl;
+  const cafeFloatingMapUrl = String(body.cafeFloatingMapUrl || '').trim().slice(0, 2000);
+  if (cafeFloatingMapUrl && /^https?:\/\//i.test(cafeFloatingMapUrl)) out.cafeFloatingMapUrl = cafeFloatingMapUrl;
+  const cafeInstagramPermalink = String(body.cafeInstagramPermalink || '').trim().slice(0, 2000);
+  if (cafeInstagramPermalink && /^https?:\/\//i.test(cafeInstagramPermalink)) out.cafeInstagramPermalink = cafeInstagramPermalink;
+  const cafeOwnerBubbleText = String(body.cafeOwnerBubbleText || '').trim().slice(0, 800);
+  if (cafeOwnerBubbleText) out.cafeOwnerBubbleText = cafeOwnerBubbleText;
+  const cafeReviewCtaText = String(body.cafeReviewCtaText || '').trim().slice(0, 200);
+  if (cafeReviewCtaText) out.cafeReviewCtaText = cafeReviewCtaText;
+  const cafeReviewCtaUrl = String(body.cafeReviewCtaUrl || '').trim().slice(0, 2000);
+  if (cafeReviewCtaUrl && /^https?:\/\//i.test(cafeReviewCtaUrl)) out.cafeReviewCtaUrl = cafeReviewCtaUrl;
+  const cafeGbPostsEmbedUrl = String(body.cafeGbPostsEmbedUrl || '').trim().slice(0, 2000);
+  if (cafeGbPostsEmbedUrl && /^https?:\/\//i.test(cafeGbPostsEmbedUrl)) out.cafeGbPostsEmbedUrl = cafeGbPostsEmbedUrl;
+
+  const faqItems = sanitizeFaqItemsOverride(body.faqItems);
+  if (faqItems) out.faqItems = faqItems;
+  const cafeMenuTextRows = sanitizeCafeMenuTextRowsOverride(body.cafeMenuTextRows);
+  if (cafeMenuTextRows) out.cafeMenuTextRows = cafeMenuTextRows;
+  const cafeShopLocations = sanitizeCafeShopLocationsOverride(body.cafeShopLocations);
+  if (cafeShopLocations) out.cafeShopLocations = cafeShopLocations;
+  const cafeInstagramFeedItems = sanitizeCafeInstagramFeedItemsOverride(body.cafeInstagramFeedItems);
+  if (cafeInstagramFeedItems) out.cafeInstagramFeedItems = cafeInstagramFeedItems;
+  const cafeBranchMenuItems = sanitizeCafeBranchMenuItemsOverride(body.cafeBranchMenuItems);
+  if (cafeBranchMenuItems) out.cafeBranchMenuItems = cafeBranchMenuItems;
+  const cafeMeo = sanitizeCafeMeoOverride(body.cafeMeo);
+  if (cafeMeo) out.cafeMeo = cafeMeo;
 
   return out;
 }

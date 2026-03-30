@@ -1,3 +1,8 @@
+import {
+  buildCafe1ShopLocationDetail,
+  CAFE_1_HOURS_SECTION_CONTENT,
+  CAFE_1_OPENING_HOURS_JSON_LD,
+} from './cafe1HoursPreset.js';
 import { buildHtml } from './buildHtml.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 import { BUILTIN_BUILD_HTML_TEMPLATES } from './templateRegistry.js';
@@ -103,7 +108,7 @@ export function applyTemplateCustomization(content, customization = {}) {
     out.title = String(customization.title).trim().slice(0, 200);
   }
   if (String(customization.footerText || '').trim()) {
-    out.footerText = String(customization.footerText).trim().slice(0, 500);
+    out.footerText = String(customization.footerText).trim().slice(0, 5000);
   }
   if (String(customization.ctaLabel || '').trim()) {
     out.ctaLabel = String(customization.ctaLabel).trim().slice(0, 80);
@@ -117,6 +122,47 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (Array.isArray(customization.sections) && customization.sections.length > 0) {
     out.sections = customization.sections.slice(0, 15);
   }
+
+  const ft = String(customization.footerAddress || '').trim().slice(0, 300);
+  if (ft) out.footerAddress = ft;
+  const fp = String(customization.footerPhone || '').trim().slice(0, 40);
+  if (fp) out.footerPhone = fp;
+  const fig = String(customization.footerInstagramUrl || '').trim().slice(0, 2000);
+  if (fig && /^https?:\/\//i.test(fig)) out.footerInstagramUrl = fig;
+  const mem = String(customization.mapEmbedUrl || '').trim().slice(0, 2000);
+  if (mem && /^https?:\/\//i.test(mem)) out.mapEmbedUrl = mem;
+  const cfl = String(customization.cafeFloatingMapUrl || '').trim().slice(0, 2000);
+  if (cfl && /^https?:\/\//i.test(cfl)) out.cafeFloatingMapUrl = cfl;
+  const cip = String(customization.cafeInstagramPermalink || '').trim().slice(0, 2000);
+  if (cip && /^https?:\/\//i.test(cip)) out.cafeInstagramPermalink = cip;
+  const cob = String(customization.cafeOwnerBubbleText || '').trim().slice(0, 800);
+  if (cob) out.cafeOwnerBubbleText = cob;
+  const crt = String(customization.cafeReviewCtaText || '').trim().slice(0, 200);
+  if (crt) out.cafeReviewCtaText = crt;
+  const cru = String(customization.cafeReviewCtaUrl || '').trim().slice(0, 2000);
+  if (cru && /^https?:\/\//i.test(cru)) out.cafeReviewCtaUrl = cru;
+  const cgb = String(customization.cafeGbPostsEmbedUrl || '').trim().slice(0, 2000);
+  if (cgb && /^https?:\/\//i.test(cgb)) out.cafeGbPostsEmbedUrl = cgb;
+
+  if (Array.isArray(customization.faqItems) && customization.faqItems.length > 0) {
+    out.faqItems = customization.faqItems;
+  }
+  if (Array.isArray(customization.cafeMenuTextRows) && customization.cafeMenuTextRows.length > 0) {
+    out.cafeMenuTextRows = customization.cafeMenuTextRows;
+  }
+  if (Array.isArray(customization.cafeShopLocations) && customization.cafeShopLocations.length > 0) {
+    out.cafeShopLocations = customization.cafeShopLocations;
+  }
+  if (Array.isArray(customization.cafeInstagramFeedItems) && customization.cafeInstagramFeedItems.length > 0) {
+    out.cafeInstagramFeedItems = customization.cafeInstagramFeedItems;
+  }
+  if (Array.isArray(customization.cafeBranchMenuItems) && customization.cafeBranchMenuItems.length > 0) {
+    out.cafeBranchMenuItems = customization.cafeBranchMenuItems;
+  }
+  if (customization.cafeMeo && typeof customization.cafeMeo === 'object') {
+    out.cafeMeo = { ...(out.cafeMeo || {}), ...customization.cafeMeo };
+  }
+
   return out;
 }
 
@@ -236,6 +282,141 @@ export function renderTemplatePreview(templateId, customization = null) {
         'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
       ],
     };
+  } else if (id === 'cafe_1') {
+    content = {
+      siteName: '満腹食堂 鉄人（まんぷくしょくどう てつじん）',
+      title: '満腹食堂 鉄人',
+      headline: '千住で一番、米が進む場所。',
+      subheadline:
+        '北千住駅東口から徒歩3分。東京電機大学のすぐそばで、大学生・現場仕事帰り・会社員の夕飯を支えるガッツリ食堂。',
+      footerAddress: '〒120-0026 東京都足立区千住旭町40-2',
+      footerPhone: '03-6806-1192',
+      cafeMeo: {
+        servesCuisine: 'ガッツリ系定食;どんぶり;日本料理',
+        priceRange: '¥850〜¥1,200',
+        openingHours: [...CAFE_1_OPENING_HOURS_JSON_LD],
+        streetAddress: '千住旭町40-2',
+        addressLocality: '足立区',
+        addressRegion: '東京都',
+        postalCode: '120-0026',
+      },
+      cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
+      cafeReviewCtaText: 'スタッフにクチコミ画面提示で100円トッピング無料！',
+      cafeReviewCtaUrl:
+        'https://search.google.com/local/writereview?placeid=ChIJd8BlQ2CMGGAR3x0qf4l6P6k',
+      cafeGbPostsEmbedUrl:
+        'https://www.google.com/maps?q=東京都足立区千住旭町40-2&output=embed',
+      cafeOwnerBubbleText: '腹が減ってる日に、迷わず来てください。米と味は裏切りません。',
+      faqItems: [
+        {
+          q: '予約はできますか？',
+          a: 'お電話（03-6806-1192）にて承っております。ランチタイムの混雑時はお時間をいただく場合がございます。',
+        },
+        {
+          q: '駐車場はありますか？',
+          a: '専用駐車場はございません。近隣のコインパーキングをご利用ください。',
+        },
+        {
+          q: '一人でも入りやすいですか？',
+          a: 'はい！カウンター席を10席完備しており、東京電機大学の学生さんや会社員の方にお一人で多くご利用いただいています。',
+        },
+        {
+          q: 'テイクアウトは可能ですか？',
+          a: '全ての定食メニューでお弁当としての持ち帰りが可能です。',
+        },
+      ],
+      cafeInstagramFeedItems: [
+        { imageUrl: 'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+      ],
+      sections: [
+        {
+          id: 'concept',
+          title: '北千住でガッツリ食べるなら',
+          content:
+            '北千住駅東口から徒歩3分。東京電機大学のすぐそば！\n秘伝ダレと炊きたてご飯で、毎日食べても飽きない腹パン系食堂です。',
+        },
+        {
+          id: 'staff',
+          title: '店主・鉄人',
+          content:
+            '「安く、速く、腹いっぱい」を毎日守るため、仕込みは朝から手を抜きません。\n学生さんも職人さんも、今日の一食で元気になる一皿を出します。',
+          imageUrl:
+            'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        },
+        {
+          id: 'menu',
+          title: 'お品書き（全15品・税込）',
+          content: '全15品・税込。',
+        },
+        {
+          id: 'access',
+          title: '店舗・地図',
+          content: '北千住駅東口から徒歩3分、学園通り沿い。東京電機大学から歩いてすぐ。',
+        },
+        {
+          id: 'hours',
+          title: '営業時間',
+          content: CAFE_1_HOURS_SECTION_CONTENT,
+        },
+        {
+          id: 'faq',
+          title: 'よくあるご質問（Q&A）',
+          content: '',
+        },
+        {
+          id: 'shop',
+          title: '店舗詳細情報',
+          content:
+            '【お支払い方法】\n現金 / クレジットカード（Visa, Master, JCB, Amex） / PayPay / 交通系ICカード\n\n【設備・サービス】\n総席数：25席（カウンター10席、テーブル15席） / 全席禁煙（店外に喫煙スペースあり） / 無料Wi-Fiあり / コンセント利用可（一部席）',
+        },
+        {
+          id: 'contact',
+          title: 'お問い合わせ',
+          content:
+            '今すぐ来店するなら、席状況を電話で確認→地図で3分。\nクチコミ投稿で100円トッピング無料キャンペーン実施中。',
+        },
+      ],
+      cafeMenuTextRows: [
+        { groupLabel: 'お食事（定食・どんぶり）', name: '名物！鉄人スタミナ豚炒め定食', price: '¥980', description: 'ニンニクの効いた秘伝タレでご飯が止まらない。', badge: '店主イチオシ' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '厚切りサクサク！とんかつ定食', price: '¥1,100', description: '200gのロース肉を贅沢に使用した一番人気。', badge: '人気No.1' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '自家製タルタルのチキン南蛮定食', price: '¥950', description: '卵たっぷりの濃厚タルタルをたっぷり。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: 'とろとろ親子丼（大盛り無料）', price: '¥850', description: '出汁が決め手のふわとろ食感。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: 'ピリ辛麻婆豆腐定食', price: '¥900', description: '山椒が香る、本格派の痺れる旨さ。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '黄金比の生姜焼き定食', price: '¥920', description: '生生姜の香りが際立つ、家庭では出せない味。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '肉厚ホッケの塩焼き定食', price: '¥1,050', description: '豊洲直送。脂の乗った大ぶりなホッケ。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '鉄人特製 カツカレー', price: '¥1,150', description: '3日間煮込んだスパイシーな濃厚ルー。', badge: '満腹保証' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '野菜たっぷり野菜炒め定食', price: '¥880', description: 'シャキシャキ野菜が400g。ヘルシーかつ満腹。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '日替わり「今日のガッツリ」定食', price: '¥900', description: '店主の気まぐれ。毎日来ても飽きない一皿。' },
+        { groupLabel: 'ドリンク', name: 'キンキンに冷えた生ビール（中）', price: '¥550', description: '' },
+        { groupLabel: 'ドリンク', name: '強炭酸！レモンサワー', price: '¥450', description: '' },
+        { groupLabel: 'ドリンク', name: 'こだわり酒場のハイボール', price: '¥480', description: '' },
+        { groupLabel: 'ドリンク', name: '濃厚 黒ウーロン茶', price: '¥300', description: '' },
+        { groupLabel: 'ドリンク', name: 'キンキンの瓶コーラ', price: '¥250', description: '' },
+      ],
+      heroSlides: [
+        'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      ],
+      cafeShopLocations: [
+        {
+          name: '満腹食堂 鉄人',
+          detail: buildCafe1ShopLocationDetail('03-6806-1192', '〒120-0026 東京都足立区千住旭町40-2'),
+          mapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
+          imageUrl:
+            'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
+        },
+      ],
+      mapEmbedUrl:
+        'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E8%B6%B3%E7%AB%8B%E5%8C%BA%E5%8D%83%E4%BD%8F%E6%97%AD%E7%94%BA40-2&output=embed',
+      ctaLabel: '席を電話で確認',
+      ctaHref: 'tel:0368061192',
+      footerText: `北千住駅周辺で「安くて旨いガッツリ飯」をお探しなら、満腹食堂 鉄人へ。\n© ${now} 満腹食堂 鉄人 | 東京都足立区千住旭町40-2 | 03-6806-1192`,
+      footerInstagramUrl: 'https://www.instagram.com/',
+    };
   } else {
     content = {
       siteName: `${name} サンプル`,
@@ -266,7 +447,7 @@ export function renderTemplatePreview(templateId, customization = null) {
   content = applyTemplateCustomization(content, ov);
   seo = applySeoCustomization(seo, ov);
   let html = buildHtml(content, seo, id, {
-    contactForm: true,
+    contactForm: id === 'cafe_1' ? false : true,
     formActionUrl: '#',
     instagramLine: true,
     instagramUrl: 'https://instagram.com/',

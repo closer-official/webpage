@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { isApiAvailable, api } from './lib/api';
+import { OperatorWorkbench } from './OperatorWorkbench';
 import './App.css';
 import './App.operator.css';
 
@@ -91,52 +92,16 @@ function App() {
 
   return (
     <div className="app app--operator">
-      <header className="app-header">
-        <h1>運営メニュー</h1>
-        <p className="operator-hub-lead">
-          テンプレのプレビュー・店舗ドラフト・ウィザードは下のリンクから開きます。旧「フルオート／ダッシュボード／手動キュー／ヒアリング一覧／設定」タブは整理のためここから外しています（サーバーAPIは互換のため残っています）。
-        </p>
+      <header className="app-header app-header--workbench">
+        <div className="app-header-workbench-row">
+          <h1>Closer 運営</h1>
+          <p className="operator-hub-lead">
+            まずは制作ハブで<strong>目的</strong>を選び、<strong>LP と DM 文案のたたき台</strong>まで進めます。テンプレ管理などの作業は「運営ツール」から。
+          </p>
+        </div>
       </header>
-
-      <main className="operator-hub">
-        <ul className="operator-hub-grid">
-          <li>
-            <a className="operator-hub-card" href="/admin/template-hub.html">
-              <span className="operator-hub-card-title">テンプレ・ギャラリーハブ</span>
-              <span className="operator-hub-card-desc">ビルトインのプレビュー・ギャラリー公開の切替・手順文のコピー</span>
-            </a>
-          </li>
-          <li>
-            <a className="operator-hub-card" href="/admin/template-worker.html">
-              <span className="operator-hub-card-title">店舗ドラフト編集（作業者用）</span>
-              <span className="operator-hub-card-desc">ベーステンプレ＋文章・画像URL・SEO を保存（要 API ログイン）</span>
-            </a>
-          </li>
-          <li>
-            <a className="operator-hub-card" href="/admin/store-wizard.html">
-              <span className="operator-hub-card-title">店舗セットアップ</span>
-              <span className="operator-hub-card-desc">納品テンプレ選択・店舗キー・購入者用編集URLの発行</span>
-            </a>
-          </li>
-          <li>
-            <a className="operator-hub-card" href="/admin/sales-console.html">
-              <span className="operator-hub-card-title">売上コンソール</span>
-              <span className="operator-hub-card-desc">販売・決済まわり（利用している場合）</span>
-            </a>
-          </li>
-          <li>
-            <a className="operator-hub-card" href="/admin/gym-lp.html">
-              <span className="operator-hub-card-title">ジムLP 管理</span>
-              <span className="operator-hub-card-desc">gym LP 用ツール（利用している場合）</span>
-            </a>
-          </li>
-          <li>
-            <a className="operator-hub-card" href="/template-gallery" target="_blank" rel="noopener noreferrer">
-              <span className="operator-hub-card-title">公開テンプレギャラリー</span>
-              <span className="operator-hub-card-desc">一般向けカタログ（別タブ）</span>
-            </a>
-          </li>
-        </ul>
+      <main className="operator-main-shell">
+        <OperatorWorkbench />
       </main>
     </div>
   );

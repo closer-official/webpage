@@ -763,7 +763,8 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .wo-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 40%, transparent 72%); z-index: 3; pointer-events: none; }
   .page-wrapper.template-cafe_1 .c1-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: center; padding: 2rem 1.5rem 4.5rem; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.45); }
   .page-wrapper.template-cafe_1 .c1-hero-brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; margin: 0 0 0.35rem; }
-  .page-wrapper.template-cafe_1 .c1-hero-tagline { font-family: "Cormorant Garamond", "Times New Roman", serif; font-size: clamp(1rem, 3vw, 1.25rem); font-style: italic; font-weight: 500; margin: 0; opacity: 0.95; letter-spacing: 0.02em; }
+  .page-wrapper.template-cafe_1 .c1-hero-h1 { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; margin: 0.25rem 0 0.5rem; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  .page-wrapper.template-cafe_1 .c1-hero-tagline { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(0.92rem, 3vw, 1.05rem); font-style: normal; font-weight: 500; margin: 0; opacity: 0.96; line-height: 1.55; letter-spacing: 0.02em; }
   .page-wrapper.template-cafe_1 .wo-hero-dots { position: absolute; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; gap: 0.45rem; }
   .page-wrapper.template-cafe_1 .wo-hero-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.9); background: transparent; padding: 0; cursor: pointer; }
   .page-wrapper.template-cafe_1 .wo-hero-dot.active { background: #fff; }
@@ -773,6 +774,41 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .c1-lede-sub { font-family: "Cormorant Garamond", "Times New Roman", serif; font-size: 1.35rem; font-style: italic; color: var(--tp-heading); margin: 0 0 1.25rem; }
   .page-wrapper.template-cafe_1 .wo-lede-prose p, .page-wrapper.template-cafe_1 .wo-sec-prose p { font-size: 0.98rem; line-height: 2; color: var(--tp-text); }
   .page-wrapper.template-cafe_1 .section-img-wrap { border-radius: 0; overflow: hidden; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-block { margin-top: 1.25rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-zone { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #999; margin: 1.25rem 0 0.5rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-zone:first-child { margin-top: 0; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(0,0,0,0.09); font-size: 1.02rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-name { font-weight: 600; color: var(--tp-heading); }
+  .page-wrapper.template-cafe_1 .c1-menu-badge { display: inline-block; margin-left: 0.45rem; padding: 0.12rem 0.42rem; border-radius: 999px; font-style: normal; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; color: #fff; background: #c7161f; vertical-align: middle; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-price { font-weight: 800; color: #111; white-space: nowrap; font-size: 1.04rem; }
+  .page-wrapper.template-cafe_1 .c1-menu-text-desc { margin: 0.15rem 0 0.65rem; font-size: 0.85rem; line-height: 1.65; color: var(--tp-text); }
+  .page-wrapper.template-cafe_1 .c1-owner-bubble { margin: 0.9rem 0 0; padding: 0.7rem 0.85rem; background: rgba(0,0,0,0.05); border-left: 4px solid #111; font-size: 0.88rem; line-height: 1.7; }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; margin-top: 0.9rem; }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-item img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+  .page-wrapper.template-cafe_1 .footer-c1-nap { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--tp-border); }
+  .page-wrapper.template-cafe_1 .footer-c1-nap-line { margin: 0.35rem 0; font-size: 0.82rem; line-height: 1.65; color: #333; }
+  .page-wrapper.template-cafe_1 .footer-c1-nap-line a { color: #111; }
+  .page-wrapper.template-cafe_1 .c1-quick-dock { position: fixed; right: max(0.75rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); z-index: 195; display: flex; }
+  .page-wrapper.template-cafe_1 .c1-dock-btn { display: flex; align-items: center; justify-content: center; min-height: 3.35rem; padding: 0 1.1rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; box-shadow: 0 6px 22px rgba(0,0,0,0.18); border: none; white-space: nowrap; }
+  .page-wrapper.template-cafe_1 .c1-dock-map { background: #111; color: #fff; }
+  .page-wrapper.template-cafe_1 .c1-phone-fab { position: fixed; top: max(0.9rem, env(safe-area-inset-top)); right: max(0.75rem, env(safe-area-inset-right)); z-index: 196; min-height: 2.9rem; border-radius: 999px; display: none; align-items: center; justify-content: center; gap: 0.32rem; padding: 0 0.72rem; background: #c7161f; color: #fff; text-decoration: none; font-size: 0.88rem; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+  .page-wrapper.template-cafe_1 .c1-phone-fab span[aria-hidden="true"] { font-size: 1.02rem; }
+  .page-wrapper.template-cafe_1 .c1-review-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 194; display: block; padding: 0.65rem 0.9rem calc(0.65rem + env(safe-area-inset-bottom)); text-align: center; background: #c7161f; color: #fff; text-decoration: none; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em; }
+  .page-wrapper.template-cafe_1 .c1-gbp-embed-wrap { margin-top: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
+  .page-wrapper.template-cafe_1 .c1-gbp-embed-wrap iframe { width: 100%; min-height: 260px; border: 0; }
+  .page-wrapper.template-cafe_1 .wo-hours-emphasis { font-size: clamp(1.35rem, 4.6vw, 2rem); font-weight: 800; line-height: 1.35; letter-spacing: 0.02em; }
+  .page-wrapper.template-cafe_1 .wo-hours-detail { font-size: 1.05rem; font-weight: 700; line-height: 1.75; }
+  .page-wrapper.template-cafe_1 .c1-gallery-link { display: block; }
+  @media (max-width: 768px) {
+    .page-wrapper.template-cafe_1 .c1-phone-fab { display: inline-flex; }
+    .page-wrapper.template-cafe_1 .c1-page-top { bottom: calc(9.2rem + env(safe-area-inset-bottom)); }
+    .page-wrapper.template-cafe_1 .c1-menu-text-row { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+    .page-wrapper.template-cafe_1 .c1-menu-text-name { font-size: 1.03rem; }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-grid { display: flex; overflow-x: auto; gap: 0.55rem; padding-bottom: 0.35rem; scroll-snap-type: x mandatory; }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-item { flex: 0 0 42vw; scroll-snap-align: start; }
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-embed-sec .c1-ig-embed-wrap { display: flex; justify-content: center; margin-top: 1rem; }
+  .page-wrapper.template-cafe_1 [data-scroll-in].section-img-wrap { will-change: opacity, transform; }
   .page-wrapper.template-cafe_1 .c1-menu-zone { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: #aaa; margin: 1.5rem 0 0.75rem; }
   .page-wrapper.template-cafe_1 .c1-menu-zone:first-child { margin-top: 0; }
   .page-wrapper.template-cafe_1 .c1-menu-grid { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.5rem; }
@@ -795,7 +831,7 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .footer-c1-ig { display: inline-flex; width: 2.5rem; height: 2.5rem; align-items: center; justify-content: center; border: 1px solid var(--tp-border); border-radius: 50%; text-decoration: none; color: var(--tp-heading); font-size: 1.1rem; margin-bottom: 1.25rem; }
   .page-wrapper.template-cafe_1 .footer-c1-text { font-size: 0.75rem; letter-spacing: 0.04em; color: #666; margin: 0; }
   .page-wrapper.template-cafe_1 .c1-page-top {
-    position: fixed; bottom: max(1.25rem, env(safe-area-inset-bottom)); right: max(1rem, env(safe-area-inset-right)); z-index: 200;
+    position: fixed; bottom: calc(5.6rem + env(safe-area-inset-bottom)); right: max(1rem, env(safe-area-inset-right)); z-index: 200;
     width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid #ccc; background: #fff; color: #666; text-decoration: none; font-size: 0.85rem;
     display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   }

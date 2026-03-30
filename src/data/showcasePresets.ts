@@ -1,5 +1,10 @@
 import type { PageContent, SEOData, StyleId } from '../types';
 import { SHOWCASE_VARIANT_COUNT } from '../types';
+import {
+  buildCafe1ShopLocationDetail,
+  CAFE_1_HOURS_SECTION_CONTENT,
+  CAFE_1_OPENING_HOURS_JSON_LD,
+} from '../../server/cafe1HoursPreset.js';
 import { WARM_ORGANIC_CAFE_PRESET } from './warmOrganicCafePreset';
 
 /** 1テンプレあたりのバリアント数（15×バリアント数スロット） */
@@ -82,99 +87,158 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   cafe_1: {
     content: {
-      siteName: 'STUDIO TABLE',
-      title: 'STUDIO TABLE',
-      headline: '街と緑のあいだで、ひと息つく場所。',
-      subheadline: 'Have a calm moment.',
-      navItems: [
-        { label: 'About', href: '#concept' },
-        { label: 'Menu', href: '#menu' },
-        { label: 'Recruit', href: '#recruit' },
-        { label: 'Business', href: '#business' },
-        { label: 'Shop', href: '#access' },
-        { label: 'Contact', href: '#contact' },
+      siteName: '満腹食堂 鉄人（まんぷくしょくどう てつじん）',
+      title: '満腹食堂 鉄人',
+      headline: '千住で一番、米が進む場所。',
+      subheadline:
+        '北千住駅東口から徒歩3分。東京電機大学のすぐそばで、大学生・現場仕事帰り・仕事終わりの一人飯をガッツリ支えます。',
+      footerAddress: '〒120-0026 東京都足立区千住旭町40-2',
+      footerPhone: '03-6806-1192',
+      cafeMeo: {
+        servesCuisine: 'ガッツリ系定食;どんぶり;日本料理',
+        priceRange: '¥850〜¥1,200',
+        openingHours: [...CAFE_1_OPENING_HOURS_JSON_LD],
+        streetAddress: '千住旭町40-2',
+        addressLocality: '足立区',
+        addressRegion: '東京都',
+        postalCode: '120-0026',
+      },
+      cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
+      cafeReviewCtaText: 'スタッフにクチコミ画面提示で100円トッピング無料！',
+      cafeReviewCtaUrl:
+        'https://search.google.com/local/writereview?placeid=ChIJd8BlQ2CMGGAR3x0qf4l6P6k',
+      cafeGbPostsEmbedUrl:
+        'https://www.google.com/maps?q=東京都足立区千住旭町40-2&output=embed',
+      cafeOwnerBubbleText: '腹が減ってる日に、迷わず来てください。米と味は裏切りません。',
+      faqItems: [
+        {
+          q: '予約はできますか？',
+          a: 'お電話（03-6806-1192）にて承っております。ランチタイムの混雑時はお時間をいただく場合がございます。',
+        },
+        {
+          q: '駐車場はありますか？',
+          a: '専用駐車場はございません。近隣のコインパーキングをご利用ください。',
+        },
+        {
+          q: '一人でも入りやすいですか？',
+          a: 'はい！カウンター席を10席完備しており、東京電機大学の学生さんや会社員の方にお一人で多くご利用いただいています。',
+        },
+        {
+          q: 'テイクアウトは可能ですか？',
+          a: '全ての定食メニューでお弁当としての持ち帰りが可能です。',
+        },
+      ],
+      cafeInstagramFeedItems: [
+        { imageUrl: 'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: 'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
       ],
       sections: [
         {
           id: 'concept',
-          title: 'ABOUT',
+          title: '北千住でガッツリ食べるなら',
           content:
-            '世代をまたいで通えるレストランカフェとして、ペントハウスのような開放感と落ち着きの両方を大切にしています。朝のコーヒーから夜の食事まで、日常にそっと寄り添う一杯と一皿をご用意しています。',
+            '北千住駅東口から徒歩3分。東京電機大学のすぐそば！\n秘伝ダレと炊きたてご飯で、毎日食べても飽きない腹パン系食堂です。\nGoogleビジネスプロフィールと店名・住所・電話を統一し、地域で探す人に確実に見つけてもらえる導線にしています。',
+        },
+        {
+          id: 'staff',
+          title: '店主・鉄人',
+          content:
+            '「安く、速く、腹いっぱい」を毎日守るため、仕込みは朝から手を抜きません。\n学生さんも職人さんも、ひとりで来る会社員さんも、今日の一食でしっかり元気になる一皿を出します。',
+          imageUrl:
+            'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
         {
           id: 'gallery',
-          title: '',
-          content: '',
+          title: '料理写真',
+          content: '湯気・照り・ジュワっと感で「今すぐ食べたい」を狙った写真だけを載せています。',
           imageUrl:
-            'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200',
+            'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
         {
           id: 'menu',
-          title: 'MENU',
-          content: '店舗ごとのメニューは、ボタンから別タブでご覧いただけます。',
-        },
-        {
-          id: 'recruit',
-          title: 'RECRUIT',
-          content:
-            'ホール・キッチン・マネジメント候補を募集しています。未経験からキャリアを積みたい方、おいしいものと空間づくりが好きな方を歓迎します。詳細は採用サイトをご確認ください。',
-        },
-        {
-          id: 'business',
-          title: 'BUSINESS',
-          content:
-            '店舗運営のほか、ケータリングやコラボイベントのご相談も承っています。ブランドの世界観を守りながら、柔軟にご提案いたします。',
+          title: 'お品書き（テキスト）',
+          content: '全15品・税込。',
         },
         {
           id: 'access',
-          title: 'SHOP',
-          content: '各店の最新情報・ご予約は店舗ページよりお願いいたします。',
+          title: '店舗・地図',
+          content:
+            '北千住駅東口から徒歩3分、学園通り沿い。\n東京電機大学から歩いてすぐ。夕飯を安く早く済ませたい日に最短で寄れます。',
+        },
+        {
+          id: 'hours',
+          title: '営業時間',
+          content: CAFE_1_HOURS_SECTION_CONTENT,
+        },
+        {
+          id: 'faq',
+          title: 'よくあるご質問（Q&A）',
+          content: '',
+        },
+        {
+          id: 'shop',
+          title: '店舗詳細情報',
+          content:
+            '【お支払い方法】\n現金 / クレジットカード（Visa, Master, JCB, Amex） / PayPay / 交通系ICカード\n\n【設備・サービス】\n総席数：25席（カウンター10席、テーブル15席） / 全席禁煙（店外に喫煙スペースあり） / 無料Wi-Fiあり / コンセント利用可（一部席）',
         },
         {
           id: 'contact',
-          title: 'CONTACT',
-          content: 'お問い合わせ・ご予約は下記よりお願いいたします。',
+          title: 'お問い合わせ',
+          content:
+            '今すぐ来店するなら、席状況を電話で確認→地図で3分。\nクチコミ投稿で100円トッピング無料キャンペーン実施中。',
         },
       ],
-      footerText: '© STUDIO TABLE GROUP. All rights reserved.',
-      footerInstagramUrl: 'https://www.instagram.com/',
-      ctaLabel: 'お問い合わせ',
-      ctaHref: '#contact',
-      heroSlides: [
-        'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1400',
-        'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1400',
-        'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1400',
+      cafeMenuTextRows: [
+        { groupLabel: 'お食事（定食・どんぶり）', name: '名物！鉄人スタミナ豚炒め定食', price: '¥980', description: 'ニンニクの効いた秘伝タレでご飯が止まらない。', badge: '店主イチオシ' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '厚切りサクサク！とんかつ定食', price: '¥1,100', description: '200gのロース肉を贅沢に使ったボリューム満点の一番人気。', badge: '人気No.1' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '自家製タルタルのチキン南蛮定食', price: '¥950', description: '卵たっぷりの濃厚タルタルをたっぷり。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: 'とろとろ親子丼（大盛り無料）', price: '¥850', description: '出汁が決め手のふわとろ食感。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: 'ピリ辛麻婆豆腐定食', price: '¥900', description: '山椒が香る、本格派の痺れる旨さ。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '黄金比の生姜焼き定食', price: '¥920', description: '生生姜の香りが際立つ、家庭では出せない味。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '肉厚ホッケの塩焼き定食', price: '¥1,050', description: '豊洲直送。脂の乗った大ぶりなホッケ。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '鉄人特製 カツカレー', price: '¥1,150', description: '3日間煮込んだスパイシーな濃厚ルー。', badge: '満腹保証' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '野菜たっぷり野菜炒め定食', price: '¥880', description: 'シャキシャキ野菜が400g。ヘルシーかつ満腹。' },
+        { groupLabel: 'お食事（定食・どんぶり）', name: '日替わり「今日のガッツリ」定食', price: '¥900', description: '店主の気まぐれ。毎日来ても飽きない一皿。' },
+        { groupLabel: 'ドリンク', name: 'キンキンに冷えた生ビール（中）', price: '¥550', description: '' },
+        { groupLabel: 'ドリンク', name: '強炭酸！レモンサワー', price: '¥450', description: '' },
+        { groupLabel: 'ドリンク', name: 'こだわり酒場のハイボール', price: '¥480', description: '' },
+        { groupLabel: 'ドリンク', name: '濃厚 黒ウーロン茶', price: '¥300', description: '' },
+        { groupLabel: 'ドリンク', name: 'キンキンの瓶コーラ', price: '¥250', description: '' },
       ],
       cafeBranchMenuItems: [
-        { groupLabel: '都心エリア', label: 'NORTH GATE', menuUrl: 'https://example.com/menu/north' },
-        { groupLabel: '都心エリア', label: 'EAST YARD', menuUrl: 'https://example.com/menu/east' },
-        { groupLabel: '公園沿い', label: 'RIVER SIDE', menuUrl: 'https://example.com/menu/river' },
-        { groupLabel: '公園沿い', label: 'HILL TERRACE', menuUrl: 'https://example.com/menu/hill' },
+        { groupLabel: 'メニュー資料', label: '紙のお品書きPDF（準備中）', menuUrl: 'https://example.com/menu.pdf' },
+      ],
+      footerText:
+        '北千住駅周辺で「安くて旨いガッツリ飯」をお探しなら、満腹食堂 鉄人へ。\n© 2026 満腹食堂 鉄人 | 東京都足立区千住旭町40-2 | 03-6806-1192',
+      footerInstagramUrl: 'https://www.instagram.com/',
+      ctaLabel: '席を電話で確認',
+      ctaHref: 'tel:0368061192',
+      heroSlides: [
+        'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=1400',
       ],
       cafeShopLocations: [
         {
-          name: 'STUDIO TABLE NORTH GATE',
-          detail: '平日 11:00–22:00 / 土日祝 10:00–22:00\n03-0000-0001\n東京都〇〇区〇〇 1-2-3',
-          mapUrl: 'https://maps.google.com/',
-          reserveLabel: '予約する',
-          reserveUrl: 'https://example.com/reserve/north',
-          imageUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900',
-        },
-        {
-          name: 'STUDIO TABLE RIVER SIDE',
-          detail: '平日 10:00–21:00 / 定休：火曜\n03-0000-0002\n神奈川県〇〇市〇〇 4-5-6',
-          mapUrl: 'https://maps.google.com/',
-          reserveLabel: '予約する',
-          reserveUrl: 'https://example.com/reserve/river',
-          imageUrl: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=900',
+          name: '満腹食堂 鉄人',
+          detail: buildCafe1ShopLocationDetail('03-6806-1192', '〒120-0026 東京都足立区千住旭町40-2'),
+          mapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
+          imageUrl:
+            'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
         },
       ],
+      mapEmbedUrl:
+        'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E8%B6%B3%E7%AB%8B%E5%8C%BA%E5%8D%83%E4%BD%8F%E6%97%AD%E7%94%BA40-2&output=embed',
     },
     seo: {
-      metaTitle: 'STUDIO TABLE | レストランカフェ',
-      metaDescription: '街と緑のあいだで。複数店舗で展開するレストランカフェの公式ページ。',
-      keywords: 'カフェ, レストラン, 複数店舗, ブランチ',
-      ogImageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688cbabf7?auto=format&fit=crop&w=1200',
+      metaTitle: '北千住 定食・どんぶり｜満腹食堂 鉄人',
+      metaDescription:
+        '北千住駅東口徒歩3分。満腹食堂 鉄人は850円〜1,200円でガッツリ系定食・どんぶりを提供。大学生や仕事帰りの夕飯に。',
+      keywords: '北千住,足立区,定食,どんぶり,ガッツリ,安い夕飯,東京電機大学',
+      ogImageUrl:
+        'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1200',
       canonicalUrl: '',
     },
   },
