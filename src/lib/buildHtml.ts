@@ -507,12 +507,21 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             if (tid === 'cafe_1' && s.id === 'staff') {
-              const bubble = String(content.cafeOwnerBubbleText ?? '').trim();
-              const bubbleHtml = bubble ? `<p class="c1-owner-bubble">「${escapeHtml(bubble)}」</p>` : '';
-              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec ${rhythm} wo-alt" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      ${img}
-      <div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
-      <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>${bubbleHtml}</div>
+              const staffAvatar = s.imageUrl
+                ? `<div class="c1-staff-avatar"><div class="section-img-wrap c1-staff-photo-wrap"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div></div>`
+                : '';
+              const staffProse = String(s.content ?? '').trim()
+                ? `<div class="wo-sec-prose c1-staff-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>`
+                : '';
+              const staffNoPhotoClass = s.imageUrl ? '' : ' c1-staff-no-photo';
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec c1-staff-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body c1-staff-inner${staffNoPhotoClass}">
+        ${staffAvatar}
+        <div class="c1-staff-post">
+          <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+          ${staffProse}
+        </div>
+      </div>
     </section>`;
             }
             if (s.id === 'hours') {

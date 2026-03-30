@@ -782,7 +782,17 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .c1-menu-badge { display: inline-block; margin-left: 0.45rem; padding: 0.12rem 0.42rem; border-radius: 999px; font-style: normal; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; color: #fff; background: #c7161f; vertical-align: middle; }
   .page-wrapper.template-cafe_1 .c1-menu-text-price { font-weight: 800; color: #111; white-space: nowrap; font-size: 1.04rem; }
   .page-wrapper.template-cafe_1 .c1-menu-text-desc { margin: 0.15rem 0 0.65rem; font-size: 0.85rem; line-height: 1.65; color: var(--tp-text); }
-  .page-wrapper.template-cafe_1 .c1-owner-bubble { margin: 0.9rem 0 0; padding: 0.7rem 0.85rem; background: rgba(0,0,0,0.05); border-left: 4px solid #111; font-size: 0.88rem; line-height: 1.7; }
+  .page-wrapper.template-cafe_1 .c1-staff-sec .c1-staff-inner { display: flex; flex-direction: row; align-items: flex-start; gap: 0.85rem 1rem; text-align: left; padding: 0.5rem 0 0.35rem; }
+  .page-wrapper.template-cafe_1 .c1-staff-inner.c1-staff-no-photo { gap: 0; }
+  .page-wrapper.template-cafe_1 .c1-staff-avatar { flex-shrink: 0; padding-top: 0.2rem; }
+  .page-wrapper.template-cafe_1 .c1-staff-photo-wrap { width: 4rem; height: 4rem; max-width: 4rem; margin: 0; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .page-wrapper.template-cafe_1 .c1-staff-photo-wrap .section-img { width: 100%; height: 100%; max-height: none; object-fit: cover; display: block; }
+  .page-wrapper.template-cafe_1 .c1-staff-post { flex: 1; min-width: 0; background: rgba(0,0,0,0.045); border-radius: 14px; padding: 0.7rem 0.95rem 0.85rem; border: 1px solid var(--tp-border); }
+  .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-heading { text-transform: none; letter-spacing: 0.02em; font-size: 0.98rem; font-weight: 700; color: var(--tp-heading); margin: 0 0 0.35rem; }
+  .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-heading:last-child { margin-bottom: 0; }
+  .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose { margin: 0; }
+  .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--tp-text); }
+  .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p:first-child { margin-top: 0; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; margin-top: 0.9rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-item img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; }
   .page-wrapper.template-cafe_1 .footer-c1-nap { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--tp-border); }

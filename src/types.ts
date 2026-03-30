@@ -142,8 +142,6 @@ export interface PageContent {
   cafeReviewCtaUrl?: string;
   /** cafe_1：Googleビジネスプロフィール投稿/最新情報の埋め込みURL */
   cafeGbPostsEmbedUrl?: string;
-  /** cafe_1：店主写真まわりの吹き出しコメント */
-  cafeOwnerBubbleText?: string;
   /** cafe_1：Instagram投稿グリッド（途中表示） */
   cafeInstagramFeedItems?: { imageUrl: string; postUrl: string }[];
   /** cafe_1：店舗一覧（SHOP）。指定時は access セクションでカード表示 */

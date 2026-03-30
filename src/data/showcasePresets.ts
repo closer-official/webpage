@@ -109,7 +109,6 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         'https://search.google.com/local/writereview?placeid=ChIJd8BlQ2CMGGAR3x0qf4l6P6k',
       cafeGbPostsEmbedUrl:
         'https://www.google.com/maps?q=東京都足立区千住旭町40-2&output=embed',
-      cafeOwnerBubbleText: '腹が減ってる日に、迷わず来てください。米と味は裏切りません。',
       faqItems: [
         {
           q: '予約はできますか？',
@@ -145,7 +144,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
           id: 'staff',
           title: '店主・鉄人',
           content:
-            '「安く、速く、腹いっぱい」を毎日守るため、仕込みは朝から手を抜きません。\n学生さんも職人さんも、ひとりで来る会社員さんも、今日の一食でしっかり元気になる一皿を出します。',
+            '今日も炊きたてご飯と秘伝ダレでお待ちしています。学生さん・お仕事帰りの方も、腹ペコのときは気軽にどうぞ。',
           imageUrl:
             'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
