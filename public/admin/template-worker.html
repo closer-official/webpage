@@ -12,18 +12,23 @@
         line-height: 1.55;
       }
       body {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: 1.25rem 1rem 3rem;
+        margin: 0;
+        padding: 0.75rem 0.75rem 2rem;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .app-head {
+        max-width: 1600px;
+        margin: 0 auto 0.75rem;
       }
       h1 {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         margin: 0 0 0.35rem;
       }
       .sub {
         color: #8b9cb3;
-        font-size: 0.88rem;
-        margin: 0 0 1rem;
+        font-size: 0.84rem;
+        margin: 0;
       }
       .panel {
         background: #121a2e;
@@ -42,6 +47,13 @@
         font-size: 0.78rem;
         color: #9aacbf;
         margin-top: 10px;
+      }
+      .field-hint {
+        display: block;
+        font-size: 0.72rem;
+        color: #7d8fa3;
+        margin-top: 4px;
+        line-height: 1.45;
       }
       input[type='text'],
       input[type='url'],
@@ -62,10 +74,9 @@
         min-height: 72px;
         font-family: inherit;
       }
-      textarea.mono {
-        font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-        font-size: 0.78rem;
-        min-height: 140px;
+      textarea.plain-block {
+        min-height: 100px;
+        line-height: 1.5;
       }
       .row-actions {
         display: flex;
@@ -121,31 +132,113 @@
         border: 1px solid #2a3b52;
         margin-top: 8px;
       }
-      iframe#preview {
-        width: 100%;
-        height: 420px;
-        border: 1px solid #2a3b52;
-        border-radius: 10px;
-        background: #fff;
-        margin-top: 10px;
-      }
       code {
         font-size: 0.85em;
         background: #0f172a;
         padding: 0.1em 0.35em;
         border-radius: 4px;
       }
+
+      .work-shell {
+        display: none;
+        max-width: 1600px;
+        margin: 0 auto;
+        gap: 12px;
+        align-items: stretch;
+        min-height: calc(100vh - 120px);
+      }
+      @media (min-width: 960px) {
+        .work-shell {
+          display: none;
+          grid-template-columns: minmax(0, 1fr) minmax(340px, 520px);
+        }
+        .work-shell.is-visible {
+          display: grid;
+        }
+      }
+      @media (max-width: 959px) {
+        .work-shell.is-visible {
+          display: flex;
+          flex-direction: column-reverse;
+        }
+      }
+
+      .preview-pane {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: #0a0f1a;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .preview-toolbar {
+        flex-shrink: 0;
+        padding: 10px 12px;
+        background: #111827;
+        border-bottom: 1px solid #2a3b52;
+        font-size: 0.82rem;
+      }
+      .preview-toolbar strong {
+        color: #7dd3fc;
+      }
+      .preview-hint {
+        display: block;
+        font-size: 0.74rem;
+        color: #8b9cb3;
+        margin-top: 4px;
+      }
+      .preview-status {
+        flex-shrink: 0;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        color: #fca5a5;
+        min-height: 1.2em;
+      }
+      iframe#preview-live {
+        flex: 1;
+        width: 100%;
+        min-height: 480px;
+        border: 0;
+        background: #fff;
+      }
+
+      .editor-pane {
+        min-height: 0;
+        overflow-y: auto;
+        max-height: calc(100vh - 80px);
+        padding-right: 4px;
+      }
+      .editor-pane .panel:last-child {
+        margin-bottom: 0;
+      }
+
+      .jump-flash {
+        animation: jumpFlash 1.2s ease;
+      }
+      @keyframes jumpFlash {
+        0% {
+          box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+        }
+        40% {
+          box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.25);
+        }
+        100% {
+          box-shadow: none;
+        }
+      }
     </style>
   </head>
   <body>
-    <h1>店舗ドラフト編集（作業者用）</h1>
-    <p class="sub">
-      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
-      で変えてください）。<br />
-      <strong>cafe_1（複数店舗・ミニマル）</strong>では、下の「店舗・メニュー・FAQ」から<strong>画面上の文言と画像URLをすべて</strong>管理できます（コード変更は不要）。<br />
-      保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
-      <code>/api/template-preview/&lt;カスタムID&gt;</code> です。
-    </p>
+    <div class="app-head">
+      <h1>店舗ドラフト編集（作業者用）</h1>
+      <p class="sub">
+        <strong>左</strong>でライブプレビュー（入力のたびに更新）、<strong>右</strong>で編集。プレビュー内をクリックすると該当の入力欄へスクロールします（cafe_1
+        向けマッピング）。<br />
+        店舗・FAQ などは<strong>プレーンテキスト</strong>で記入し、保存・プレビュー時に JSON に変換されます（従来の JSON 貼り付けも一部対応）。<br />
+        保存先 <code>/api/template-customizations</code>。共有用 URL は <code>/api/template-preview/&lt;カスタムID&gt;</code>。
+      </p>
+    </div>
 
     <div class="panel" id="login-box">
       <h2>管理者ログイン</h2>
@@ -158,123 +251,148 @@
       <p id="adm-login-err" class="err" style="display: none"></p>
     </div>
 
-    <div class="panel" id="work-box" style="display: none">
-      <h2>1. ドラフトの選択</h2>
-      <label>
-        モード
-        <select id="mode-select">
-          <option value="new">新規ドラフト（ベーステンプレから）</option>
-          <option value="edit">既存のカスタムを編集</option>
-        </select>
-      </label>
-      <label id="wrap-base" style="display: block">
-        ベーステンプレ（ビルトイン）
-        <select id="base-template"></select>
-      </label>
-      <label id="wrap-existing" style="display: none">
-        既存カスタム
-        <select id="existing-id"></select>
-      </label>
-      <label>
-        ドラフト名（管理用・80文字以内）
-        <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
-      </label>
-      <div class="row-actions">
-        <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
-        <button type="button" class="btn primary" id="btn-save">保存</button>
+    <div class="work-shell" id="work-shell">
+      <aside class="preview-pane" aria-label="ライブプレビュー">
+        <div class="preview-toolbar">
+          <strong>ライブプレビュー</strong>（未保存でも反映）
+          <span class="preview-hint">枠内の該当ブロックをクリック → 右の編集欄へ。ヒーローのスライド操作はそのまま使えます。</span>
+        </div>
+        <div id="preview-live-status" class="preview-status"></div>
+        <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+      </aside>
+
+      <div class="editor-pane" id="editor-pane">
+        <div class="panel" id="work-box">
+          <h2>1. ドラフトの選択</h2>
+          <label>
+            モード
+            <select id="mode-select">
+              <option value="new">新規ドラフト（ベーステンプレから）</option>
+              <option value="edit">既存のカスタムを編集</option>
+            </select>
+          </label>
+          <label id="wrap-base" style="display: block">
+            ベーステンプレ（ビルトイン）
+            <select id="base-template"></select>
+          </label>
+          <label id="wrap-existing" style="display: none">
+            既存カスタム
+            <select id="existing-id"></select>
+          </label>
+          <label>
+            ドラフト名（管理用・80文字以内）
+            <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
+          </label>
+          <div class="row-actions">
+            <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
+            <button type="button" class="btn primary" id="btn-save">保存</button>
+          </div>
+          <p id="save-msg" class="ok" style="display: none"></p>
+          <p id="save-err" class="err" style="display: none"></p>
+        </div>
+
+        <div class="panel" id="form-box">
+          <h2>2. 本文・画像・URL</h2>
+          <label>サイト名（店名） <input type="text" id="f-siteName" data-jump-field /></label>
+          <label>ページタイトル <input type="text" id="f-title" data-jump-field /></label>
+          <label>メイン見出し <input type="text" id="f-headline" data-jump-field /></label>
+          <label>リード文 <textarea id="f-subheadline" rows="3" data-jump-field></textarea></label>
+          <label>フッター文言（改行可） <textarea id="f-footerText" rows="4" data-jump-field></textarea></label>
+          <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+          <label>フッター電話 <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
+          <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+          <label>地図 iframe 埋め込み URL <input type="url" id="f-mapEmbedUrl" /></label>
+          <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
+          <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
+          <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
+          <label>
+            ヒーロー・メイン画像 URL（1行1URL）
+            <span class="field-hint">http(s)・最大10件。スライダー背景に使われます。</span>
+            <textarea id="f-heroSlides" rows="5" placeholder="https://..." data-jump-field></textarea>
+          </label>
+          <label>
+            セクション（プレーンテキストまたは JSON）
+            <span class="field-hint"
+              ><strong>プレーン</strong>: ブロックを <code>### id | 見出し</code> で区切り、本文を続けます。画像は行
+              <code>[imageUrl: https://…]</code>。従来どおり <code>[</code> で始まる JSON 配列も可。</span
+            >
+            <textarea id="f-sections" class="plain-block" spellcheck="false" rows="10" data-jump-field></textarea>
+          </label>
+
+          <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ（プレーンテキスト）</h2>
+          <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
+            ベースが <code>cafe_1</code> のとき。下記はそのまま文章で入力 → 内部で JSON 化します。
+          </p>
+          <label>
+            FAQ
+            <span class="field-hint"
+              >ブロックごとに <code>Q:</code> と <code>A:</code>（答えは改行可）。または従来の JSON 配列。</span
+            >
+            <textarea id="f-faqItems" class="plain-block" spellcheck="false" rows="8" data-jump-field></textarea>
+          </label>
+          <label>
+            テキストメニュー（お品書き）
+            <span class="field-hint"
+              >任意で先頭に <code># グループ名</code>。各行 <code>料理名 | 価格 | 説明 | バッジ</code>（不要な列は空でも可）。</span
+            >
+            <textarea id="f-cafeMenuTextRows" class="plain-block" spellcheck="false" rows="10" data-jump-field></textarea>
+          </label>
+          <label>
+            MEO / JSON-LD（cafeMeo）
+            <span class="field-hint">1行1項目 <code>キー: 値</code>。<code>openingHours:</code> を複数行で営業時間を追加。</span>
+            <textarea id="f-cafeMeo" class="plain-block" spellcheck="false" rows="8" data-jump-field></textarea>
+          </label>
+          <label>
+            店舗カード（アクセス）
+            <span class="field-hint"
+              >店舗ごとに <code>## 店名</code> のあと、詳細テキスト。別行で <code>mapUrl:</code> <code>imageUrl:</code>。</span
+            >
+            <textarea id="f-cafeShopLocations" class="plain-block" spellcheck="false" rows="10" data-jump-field></textarea>
+          </label>
+          <label>
+            Instagram グリッド
+            <span class="field-hint">1行1組 <code>画像URL | 投稿ページURL</code></span>
+            <textarea id="f-cafeInstagramFeedItems" class="plain-block" spellcheck="false" rows="5" data-jump-field></textarea>
+          </label>
+          <label>
+            メニューPDF 等のボタン
+            <span class="field-hint">各行 <code>グループ | ラベル | https://…</code>（グループ省略時は先頭を空に）</span>
+            <textarea id="f-cafeBranchMenuItems" class="plain-block" spellcheck="false" rows="4" data-jump-field></textarea>
+          </label>
+          <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
+          <label>店主コメント（吹き出し） <textarea id="f-cafeOwnerBubbleText" rows="2" data-jump-field></textarea></label>
+          <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
+          <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
+          <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
+          <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
+
+          <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
+          <label>meta title <input type="text" id="f-metaTitle" /></label>
+          <label>meta description <textarea id="f-metaDescription" rows="2"></textarea></label>
+          <label>OG 画像 URL（https） <input type="url" id="f-ogImageUrl" /></label>
+          <label>canonical URL <input type="text" id="f-canonicalUrl" /></label>
+          <label>keywords <input type="text" id="f-keywords" /></label>
+        </div>
+
+        <div class="panel" id="share-box">
+          <h2>4. 共有 URL（保存後）</h2>
+          <p style="font-size: 0.84rem; color: #b8c5d6; margin: 0 0 8px">
+            保存後にカスタム ID が確定します。左のライブプレビューとは別に、<strong>固定の共有 URL</strong>として使えます。
+          </p>
+          <p class="preview-url" id="preview-url-text">（保存後に表示）</p>
+          <div class="row-actions">
+            <button type="button" class="btn primary" id="btn-open-preview" disabled>共有プレビューを別タブで開く</button>
+            <button type="button" class="btn" id="btn-copy-url" disabled>URLをコピー</button>
+            <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
+            <button type="button" class="btn" id="btn-refresh-live">ライブプレビューを再描画</button>
+          </div>
+        </div>
+
+        <p class="sub" style="margin-top: 0.5rem">
+          <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">← テンプレ・ギャラリーハブ</a>
+        </p>
       </div>
-      <p id="save-msg" class="ok" style="display: none"></p>
-      <p id="save-err" class="err" style="display: none"></p>
     </div>
-
-    <div class="panel" id="form-box" style="display: none">
-      <h2>2. 本文・画像・URL</h2>
-      <label>サイト名（店名） <input type="text" id="f-siteName" /></label>
-      <label>ページタイトル <input type="text" id="f-title" /></label>
-      <label>メイン見出し <input type="text" id="f-headline" /></label>
-      <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
-      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
-      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
-      <label>フッター電話 <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
-      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
-      <label>地図 iframe 埋め込み URL <input type="url" id="f-mapEmbedUrl" /></label>
-      <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
-      <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
-      <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
-      <label>
-        ヒーロー・メイン画像 URL（1行1URL・http(s)・最大10件）
-        <textarea id="f-heroSlides" class="mono" rows="5" placeholder="https://..."></textarea>
-      </label>
-      <label>
-        セクション JSON（任意）
-        <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px"
-          ><code>id / title / content</code> に加え、写真があるセクションは <code>imageUrl</code>（https の画像URL）を付けられます。空欄ならテンプレ既定。</span
-        >
-        <textarea id="f-sections" class="mono" spellcheck="false"></textarea>
-      </label>
-
-      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ（JSON）</h2>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
-        ベースが <code>cafe_1</code> のときに使用。各欄は JSON 配列またはオブジェクト。空欄の項目はテンプレ既定のままです。
-      </p>
-      <label>
-        FAQ（よくある質問）
-        <textarea id="f-faqItems" class="mono" spellcheck="false" rows="4" placeholder='[{"q":"…","a":"…"}]'></textarea>
-      </label>
-      <label>
-        テキストメニュー行（お品書き）
-        <textarea id="f-cafeMenuTextRows" class="mono" spellcheck="false" rows="6" placeholder='[{"groupLabel":"…","name":"…","price":"¥…","description":"…","badge":"…"}]'></textarea>
-      </label>
-      <label>
-        MEO / JSON-LD 用 cafeMeo
-        <textarea id="f-cafeMeo" class="mono" spellcheck="false" rows="5" placeholder='{"servesCuisine":"…","priceRange":"…","openingHours":["Mo 11:00-23:00"],"streetAddress":"…","addressLocality":"…","addressRegion":"…","postalCode":"…"}'></textarea>
-      </label>
-      <label>
-        店舗カード（アクセス欄）
-        <textarea id="f-cafeShopLocations" class="mono" spellcheck="false" rows="5" placeholder='[{"name":"…","detail":"…","mapUrl":"https://…","imageUrl":"https://…"}]'></textarea>
-      </label>
-      <label>
-        Instagram 投稿グリッド（画像URL・投稿URL）
-        <textarea id="f-cafeInstagramFeedItems" class="mono" spellcheck="false" rows="4" placeholder='[{"imageUrl":"https://…","postUrl":"https://…"}]'></textarea>
-      </label>
-      <label>
-        メニューPDF等のボタン行
-        <textarea id="f-cafeBranchMenuItems" class="mono" spellcheck="false" rows="2" placeholder='[{"groupLabel":"…","label":"…","menuUrl":"https://…"}]'></textarea>
-      </label>
-      <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
-      <label>店主コメント（吹き出し） <textarea id="f-cafeOwnerBubbleText" rows="2"></textarea></label>
-      <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
-      <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
-      <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
-      <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
-
-      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
-      <label>meta title <input type="text" id="f-metaTitle" /></label>
-      <label>meta description <textarea id="f-metaDescription" rows="2"></textarea></label>
-      <label>OG 画像 URL（https） <input type="url" id="f-ogImageUrl" /></label>
-      <label>canonical URL <input type="text" id="f-canonicalUrl" /></label>
-      <label>keywords <input type="text" id="f-keywords" /></label>
-    </div>
-
-    <div class="panel" id="share-box" style="display: none">
-      <h2>4. プレビュー・共有（送信）</h2>
-      <p style="font-size: 0.84rem; color: #b8c5d6; margin: 0 0 8px">
-        保存後にカスタム ID が確定します。<strong>プレビュー URL</strong>をコピーするか、メール作成画面を開いて本文に貼って送ってください（メールはブラウザの
-        mailto）。
-      </p>
-      <p class="preview-url" id="preview-url-text">（保存後に表示）</p>
-      <div class="row-actions">
-        <button type="button" class="btn primary" id="btn-open-preview" disabled>プレビューを別タブで開く</button>
-        <button type="button" class="btn" id="btn-copy-url" disabled>プレビューURLをコピー</button>
-        <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
-      </div>
-      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">下の枠を再読み込み</button>
-      <iframe id="preview" title="プレビュー" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
-    </div>
-
-    <p class="sub" style="margin-top: 1.5rem">
-      <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">← テンプレ・ギャラリーハブ</a>
-    </p>
 
     <script>
       (function () {
@@ -285,6 +403,8 @@
         })();
 
         var currentCustomId = null;
+        var loadedBaseTemplateId = null;
+        var previewTimer = null;
 
         function credFetch(url, opts) {
           var o = opts || {};
@@ -296,26 +416,315 @@
           return fetch(url, o);
         }
 
-        function setAuthUi(authenticated) {
-          document.getElementById('work-box').style.display = authenticated ? 'block' : 'none';
-          document.getElementById('form-box').style.display = authenticated ? 'block' : 'none';
-          document.getElementById('share-box').style.display = authenticated ? 'block' : 'none';
-        }
-
         function showErr(elId, text) {
           var el = document.getElementById(elId);
           el.style.display = text ? 'block' : 'none';
           el.textContent = text || '';
         }
 
-        function parseJsonOptional(text, label) {
+        function parseFaqPlain(text) {
           var t = String(text || '').trim();
           if (!t) return undefined;
-          try {
-            return JSON.parse(t);
-          } catch (e) {
-            throw new Error(label + ' の JSON が不正です: ' + (e.message || e));
+          if (t.charAt(0) === '[') {
+            try {
+              var j = JSON.parse(t);
+              if (Array.isArray(j)) return j;
+            } catch (e) {
+              throw new Error('FAQ JSON: ' + e.message);
+            }
           }
+          var blocks = t.split(/\n\n+/);
+          var out = [];
+          for (var b = 0; b < blocks.length; b++) {
+            var block = blocks[b].trim();
+            if (!block) continue;
+            var m = /^\s*Q:\s*([\s\S]+?)\n\s*A:\s*([\s\S]+)$/im.exec(block);
+            if (m) out.push({ q: m[1].trim(), a: m[2].trim() });
+          }
+          if (!out.length) {
+            var one = /^\s*Q:\s*([\s\S]+?)\n\s*A:\s*([\s\S]+)$/im.exec(t);
+            if (one) out.push({ q: one[1].trim(), a: one[2].trim() });
+          }
+          if (out.length) return out;
+          throw new Error('FAQ: 「Q:」「A:」形式のブロック（空行区切り）か、JSON 配列で入力してください');
+        }
+
+        function stringifyFaqPlain(arr) {
+          if (!arr || !arr.length) return '';
+          return arr
+            .map(function (x) {
+              return 'Q: ' + x.q + '\nA: ' + x.a;
+            })
+            .join('\n\n');
+        }
+
+        function parseMenuRowsPlain(text) {
+          var lines = String(text || '')
+            .split(/\r?\n/)
+            .map(function (l) {
+              return l.trim();
+            });
+          var out = [];
+          var curGroup = '';
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (!line) continue;
+            if (line.indexOf('#') === 0) {
+              curGroup = line.replace(/^#+\s*/, '').trim();
+              continue;
+            }
+            var parts = line.split('|').map(function (s) {
+              return s.trim();
+            });
+            if (parts.length >= 2) {
+              out.push({
+                groupLabel: curGroup || undefined,
+                name: parts[0] || '',
+                price: parts[1] || '',
+                description: parts[2] || '',
+                badge: parts[3] || '',
+              });
+            }
+          }
+          return out.length ? out : undefined;
+        }
+
+        function stringifyMenuRowsPlain(arr) {
+          if (!arr || !arr.length) return '';
+          var lines = [];
+          var lastG = '\u0000';
+          for (var i = 0; i < arr.length; i++) {
+            var r = arr[i];
+            var g = r.groupLabel || '';
+            if (g && g !== lastG) {
+              lines.push('# ' + g);
+              lastG = g;
+            }
+            lines.push([r.name || '', r.price || '', r.description || '', r.badge || ''].join(' | '));
+          }
+          return lines.join('\n');
+        }
+
+        function parseCafeMeoPlain(text) {
+          var t = String(text || '').trim();
+          if (!t) return undefined;
+          if (t.charAt(0) === '{') {
+            try {
+              var o = JSON.parse(t);
+              if (o && typeof o === 'object' && !Array.isArray(o)) return o;
+            } catch (e) {
+              throw new Error('cafeMeo JSON: ' + e.message);
+            }
+          }
+          var lines = t.split(/\r?\n/);
+          var o = {};
+          var oh = [];
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var m = /^\s*([^:]+):\s*(.*)$/.exec(line);
+            if (!m) continue;
+            var k = m[1].trim();
+            var v = m[2].trim();
+            if (k === 'openingHours') oh.push(v);
+            else o[k] = v;
+          }
+          if (oh.length) o.openingHours = oh;
+          return Object.keys(o).length ? o : undefined;
+        }
+
+        function stringifyCafeMeoPlain(obj) {
+          if (!obj || typeof obj !== 'object') return '';
+          var lines = [];
+          var keys = Object.keys(obj);
+          for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            if (k === 'openingHours' && Array.isArray(obj.openingHours)) {
+              for (var j = 0; j < obj.openingHours.length; j++) {
+                lines.push('openingHours: ' + obj.openingHours[j]);
+              }
+            } else if (k !== 'openingHours') {
+              lines.push(k + ': ' + String(obj[k]));
+            }
+          }
+          return lines.join('\n');
+        }
+
+        function parseShopLocationsPlain(text) {
+          var t = String(text || '').trim();
+          if (!t) return undefined;
+          if (t.charAt(0) === '[') {
+            try {
+              var j = JSON.parse(t);
+              if (Array.isArray(j)) return j;
+            } catch (e) {
+              throw new Error('店舗カード JSON: ' + e.message);
+            }
+          }
+          var raw = t.replace(/\r\n/g, '\n');
+          var parts = raw.split(/\n(?=##\s+)/);
+          var out = [];
+          for (var p = 0; p < parts.length; p++) {
+            var part = parts[p].replace(/^\s*##\s*/, '').trim();
+            if (!part) continue;
+            var lines = part.split('\n');
+            var name = lines[0].trim();
+            var mapUrl = '';
+            var imageUrl = '';
+            var detailLines = [];
+            for (var i = 1; i < lines.length; i++) {
+              var line = lines[i];
+              var mm = /^\s*mapUrl:\s*(.+)$/i.exec(line);
+              if (mm) {
+                mapUrl = mm[1].trim();
+                continue;
+              }
+              mm = /^\s*imageUrl:\s*(.+)$/i.exec(line);
+              if (mm) {
+                imageUrl = mm[1].trim();
+                continue;
+              }
+              detailLines.push(line);
+            }
+            out.push({
+              name: name,
+              detail: detailLines.join('\n').trim(),
+              mapUrl: mapUrl || undefined,
+              imageUrl: imageUrl || undefined,
+            });
+          }
+          return out.length ? out : undefined;
+        }
+
+        function stringifyShopLocationsPlain(arr) {
+          if (!arr || !arr.length) return '';
+          return arr
+            .map(function (loc) {
+              var lines = ['## ' + (loc.name || '')];
+              var d = String(loc.detail || '').trim();
+              if (d) lines.push(d);
+              if (loc.mapUrl) lines.push('mapUrl: ' + loc.mapUrl);
+              if (loc.imageUrl) lines.push('imageUrl: ' + loc.imageUrl);
+              return lines.join('\n');
+            })
+            .join('\n\n');
+        }
+
+        function parseInstagramFeedPlain(text) {
+          var raw = String(text || '').trim();
+          if (!raw) return undefined;
+          if (raw.charAt(0) === '[') {
+            try {
+              var j = JSON.parse(raw);
+              if (Array.isArray(j)) return j;
+            } catch (e) {
+              throw new Error('Instagram JSON: ' + e.message);
+            }
+          }
+          var lines = raw.split(/\r?\n/).map(function (l) {
+            return l.trim();
+          });
+          var out = [];
+          for (var i = 0; i < lines.length; i++) {
+            if (!lines[i]) continue;
+            var parts = lines[i].split('|').map(function (s) {
+              return s.trim();
+            });
+            if (parts.length >= 2) out.push({ imageUrl: parts[0], postUrl: parts[1] });
+          }
+          return out.length ? out : undefined;
+        }
+
+        function stringifyInstagramFeedPlain(arr) {
+          if (!arr || !arr.length) return '';
+          return arr
+            .map(function (x) {
+              return (x.imageUrl || '') + ' | ' + (x.postUrl || '');
+            })
+            .join('\n');
+        }
+
+        function parseBranchMenuPlain(text) {
+          var raw = String(text || '').trim();
+          if (!raw) return undefined;
+          if (raw.charAt(0) === '[') {
+            try {
+              var ja = JSON.parse(raw);
+              if (Array.isArray(ja)) return ja;
+            } catch (e) {
+              throw new Error('メニュー資料 JSON: ' + e.message);
+            }
+          }
+          var lines = raw.split(/\r?\n/).map(function (l) {
+            return l.trim();
+          });
+          var out = [];
+          for (var i = 0; i < lines.length; i++) {
+            if (!lines[i]) continue;
+            var parts = lines[i].split('|').map(function (s) {
+              return s.trim();
+            });
+            if (parts.length >= 3) {
+              out.push({
+                groupLabel: parts[0] || undefined,
+                label: parts[1],
+                menuUrl: parts[2],
+              });
+            }
+          }
+          return out.length ? out : undefined;
+        }
+
+        function stringifyBranchMenuPlain(arr) {
+          if (!arr || !arr.length) return '';
+          return arr
+            .map(function (x) {
+              return [x.groupLabel || '', x.label || '', x.menuUrl || ''].join(' | ');
+            })
+            .join('\n');
+        }
+
+        function parseSectionsPlainOrJson(text) {
+          var t = String(text || '').trim();
+          if (!t) return undefined;
+          if (t.charAt(0) === '[') {
+            try {
+              var j = JSON.parse(t);
+              if (!Array.isArray(j)) throw new Error('配列ではありません');
+              return j;
+            } catch (e) {
+              throw new Error('セクション JSON: ' + e.message);
+            }
+          }
+          var raw = t.replace(/\r\n/g, '\n');
+          if (!/^\s*###\s/.test(raw)) raw = '### ' + raw;
+          var chunks = raw.split(/\n(?=###\s+)/);
+          return chunks.map(function (chunk) {
+            var c = chunk.replace(/^\s*###\s*/, '');
+            var lines = c.split('\n');
+            var head = lines[0].split('|').map(function (x) {
+              return x.trim();
+            });
+            var id = head[0];
+            var title = head[1] || '';
+            var rest = lines.slice(1).join('\n');
+            var imageUrl = '';
+            var im = /\[imageUrl:\s*(https?:[^\]]+)\]/i.exec(rest);
+            if (im) {
+              imageUrl = im[1].trim();
+              rest = rest.replace(im[0], '').trim();
+            }
+            return { id: id, title: title, content: rest.trim(), imageUrl: imageUrl || undefined };
+          });
+        }
+
+        function stringifySectionsPlain(sections) {
+          if (!sections || !sections.length) return '';
+          return sections
+            .map(function (s) {
+              var img = s.imageUrl ? '\n[imageUrl: ' + s.imageUrl + ']' : '';
+              return '### ' + s.id + ' | ' + (s.title || '') + '\n' + (s.content || '') + img;
+            })
+            .join('\n\n');
         }
 
         function buildOverrideFromForm() {
@@ -330,31 +739,22 @@
             : [];
           var sectionsText = document.getElementById('f-sections').value.trim();
           var sections = undefined;
-          if (sectionsText) {
-            try {
-              sections = JSON.parse(sectionsText);
-              if (!Array.isArray(sections)) throw new Error('sections は配列');
-            } catch (e) {
-              throw new Error('セクション JSON が不正です: ' + (e.message || e));
-            }
-          }
-          var faqItems = parseJsonOptional(document.getElementById('f-faqItems').value, 'FAQ');
-          if (faqItems !== undefined && !Array.isArray(faqItems)) throw new Error('FAQ は配列 JSON にしてください');
-          var cafeMenuTextRows = parseJsonOptional(document.getElementById('f-cafeMenuTextRows').value, 'テキストメニュー');
-          if (cafeMenuTextRows !== undefined && !Array.isArray(cafeMenuTextRows))
-            throw new Error('テキストメニュー は配列 JSON にしてください');
-          var cafeMeo = parseJsonOptional(document.getElementById('f-cafeMeo').value, 'cafeMeo');
-          if (cafeMeo !== undefined && (typeof cafeMeo !== 'object' || Array.isArray(cafeMeo)))
-            throw new Error('cafeMeo はオブジェクト JSON にしてください');
-          var cafeShopLocations = parseJsonOptional(document.getElementById('f-cafeShopLocations').value, '店舗カード');
-          if (cafeShopLocations !== undefined && !Array.isArray(cafeShopLocations))
-            throw new Error('店舗カード は配列 JSON にしてください');
-          var cafeInstagramFeedItems = parseJsonOptional(document.getElementById('f-cafeInstagramFeedItems').value, 'Instagramグリッド');
+          if (sectionsText) sections = parseSectionsPlainOrJson(sectionsText);
+
+          var faqItems = parseFaqPlain(document.getElementById('f-faqItems').value);
+          var cafeMenuTextRows = parseMenuRowsPlain(document.getElementById('f-cafeMenuTextRows').value);
+          var cafeMeo = parseCafeMeoPlain(document.getElementById('f-cafeMeo').value);
+          var cafeShopLocations = parseShopLocationsPlain(document.getElementById('f-cafeShopLocations').value);
+          var cafeInstagramFeedItems = parseInstagramFeedPlain(document.getElementById('f-cafeInstagramFeedItems').value);
+          var cafeBranchMenuItems = parseBranchMenuPlain(document.getElementById('f-cafeBranchMenuItems').value);
+
+          if (faqItems !== undefined && !Array.isArray(faqItems)) throw new Error('FAQ 形式エラー');
+          if (cafeMenuTextRows !== undefined && !Array.isArray(cafeMenuTextRows)) throw new Error('メニュー形式エラー');
+          if (cafeMeo !== undefined && (typeof cafeMeo !== 'object' || Array.isArray(cafeMeo))) throw new Error('cafeMeo 形式エラー');
+          if (cafeShopLocations !== undefined && !Array.isArray(cafeShopLocations)) throw new Error('店舗カード形式エラー');
           if (cafeInstagramFeedItems !== undefined && !Array.isArray(cafeInstagramFeedItems))
-            throw new Error('Instagramグリッド は配列 JSON にしてください');
-          var cafeBranchMenuItems = parseJsonOptional(document.getElementById('f-cafeBranchMenuItems').value, 'メニュー資料ボタン');
-          if (cafeBranchMenuItems !== undefined && !Array.isArray(cafeBranchMenuItems))
-            throw new Error('メニュー資料ボタン は配列 JSON にしてください');
+            throw new Error('Instagram形式エラー');
+          if (cafeBranchMenuItems !== undefined && !Array.isArray(cafeBranchMenuItems)) throw new Error('メニュー資料形式エラー');
 
           var ov = {
             siteName: document.getElementById('f-siteName').value.trim(),
@@ -419,29 +819,134 @@
           document.getElementById('f-cafeInstagramPermalink').value = ov.cafeInstagramPermalink || '';
           document.getElementById('f-heroSlides').value = Array.isArray(ov.heroSlides) ? ov.heroSlides.join('\n') : '';
           document.getElementById('f-sections').value =
-            Array.isArray(ov.sections) && ov.sections.length ? JSON.stringify(ov.sections, null, 2) : '';
+            Array.isArray(ov.sections) && ov.sections.length ? stringifySectionsPlain(ov.sections) : '';
           document.getElementById('f-faqItems').value =
-            Array.isArray(ov.faqItems) && ov.faqItems.length ? JSON.stringify(ov.faqItems, null, 2) : '';
+            Array.isArray(ov.faqItems) && ov.faqItems.length ? stringifyFaqPlain(ov.faqItems) : '';
           document.getElementById('f-cafeMenuTextRows').value =
-            Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length
-              ? JSON.stringify(ov.cafeMenuTextRows, null, 2)
-              : '';
+            Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length ? stringifyMenuRowsPlain(ov.cafeMenuTextRows) : '';
           document.getElementById('f-cafeMeo').value =
             ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) && Object.keys(ov.cafeMeo).length
-              ? JSON.stringify(ov.cafeMeo, null, 2)
+              ? stringifyCafeMeoPlain(ov.cafeMeo)
               : '';
           document.getElementById('f-cafeShopLocations').value =
             Array.isArray(ov.cafeShopLocations) && ov.cafeShopLocations.length
-              ? JSON.stringify(ov.cafeShopLocations, null, 2)
+              ? stringifyShopLocationsPlain(ov.cafeShopLocations)
               : '';
           document.getElementById('f-cafeInstagramFeedItems').value =
             Array.isArray(ov.cafeInstagramFeedItems) && ov.cafeInstagramFeedItems.length
-              ? JSON.stringify(ov.cafeInstagramFeedItems, null, 2)
+              ? stringifyInstagramFeedPlain(ov.cafeInstagramFeedItems)
               : '';
           document.getElementById('f-cafeBranchMenuItems').value =
             Array.isArray(ov.cafeBranchMenuItems) && ov.cafeBranchMenuItems.length
-              ? JSON.stringify(ov.cafeBranchMenuItems, null, 2)
+              ? stringifyBranchMenuPlain(ov.cafeBranchMenuItems)
               : '';
+        }
+
+        function getBaseTemplateIdForRender() {
+          var mode = document.getElementById('mode-select').value;
+          if (mode === 'edit' && loadedBaseTemplateId) return loadedBaseTemplateId;
+          return document.getElementById('base-template').value;
+        }
+
+        var JUMP_CAFE_1 = [
+          { sel: '.c1-hero-brand', field: 'f-siteName' },
+          { sel: '.c1-hero-h1', field: 'f-headline' },
+          { sel: '.c1-hero-tagline', field: 'f-subheadline' },
+          { sel: '.wo-hero', field: 'f-heroSlides' },
+          { sel: 'section#faq', field: 'f-faqItems' },
+          { sel: 'section#menu', field: 'f-cafeMenuTextRows' },
+          { sel: 'section#access', field: 'f-cafeShopLocations' },
+          { sel: 'section#staff', field: 'f-cafeOwnerBubbleText' },
+          { sel: 'footer.footer-c1', field: 'f-footerText' },
+        ];
+
+        function focusEditorField(fieldId) {
+          var el = document.getElementById(fieldId);
+          if (!el) return;
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('jump-flash');
+          setTimeout(function () {
+            el.classList.remove('jump-flash');
+          }, 1300);
+          el.focus();
+        }
+
+        function attachJumpHandlers(iframe) {
+          try {
+            var doc = iframe.contentDocument;
+            if (!doc) return;
+            var base = getBaseTemplateIdForRender();
+            var map = base === 'cafe_1' ? JUMP_CAFE_1 : [];
+            if (!map.length) return;
+            map.forEach(function (entry) {
+              var nodes = doc.querySelectorAll(entry.sel);
+              nodes.forEach(function (node) {
+                node.style.cursor = 'pointer';
+                node.title = 'クリックで「' + entry.field + '」を編集';
+                node.addEventListener(
+                  'click',
+                  function (ev) {
+                    if (ev.target.closest && ev.target.closest('a[href^="tel:"]')) return;
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    focusEditorField(entry.field);
+                  },
+                  true,
+                );
+              });
+            });
+          } catch (e) {}
+        }
+
+        function renderPreviewLive() {
+          var statusEl = document.getElementById('preview-live-status');
+          var base = getBaseTemplateIdForRender();
+          if (!base) {
+            statusEl.textContent = 'ベーステンプレを選ぶか、既存ドラフトを読み込んでください。';
+            return;
+          }
+          var ov;
+          try {
+            ov = buildOverrideFromForm();
+          } catch (e) {
+            statusEl.textContent = e.message || String(e);
+            return;
+          }
+          statusEl.textContent = '描画中…';
+          credFetch(api + '/template-preview/render', {
+            method: 'POST',
+            body: JSON.stringify({ baseTemplateId: base, override: ov }),
+          })
+            .then(function (r) {
+              if (!r.ok)
+                return r.json().then(function (j) {
+                  throw new Error(j.error || 'HTTP ' + r.status);
+                });
+              return r.text();
+            })
+            .then(function (html) {
+              var iframe = document.getElementById('preview-live');
+              iframe.srcdoc = html;
+              iframe.onload = function () {
+                attachJumpHandlers(iframe);
+                statusEl.textContent = '';
+              };
+            })
+            .catch(function (e) {
+              statusEl.textContent = e.message || String(e);
+            });
+        }
+
+        function schedulePreviewRender() {
+          clearTimeout(previewTimer);
+          previewTimer = setTimeout(renderPreviewLive, 420);
+        }
+
+        function setAuthUi(authenticated) {
+          var shell = document.getElementById('work-shell');
+          shell.style.display = authenticated ? '' : 'none';
+          shell.classList.toggle('is-visible', !!authenticated);
+          if (authenticated) schedulePreviewRender();
         }
 
         function updatePreviewUrl() {
@@ -452,8 +957,6 @@
           document.getElementById('btn-open-preview').disabled = !has;
           document.getElementById('btn-copy-url').disabled = !has;
           document.getElementById('btn-mailto').disabled = !has;
-          var iframe = document.getElementById('preview');
-          if (has) iframe.src = path;
         }
 
         credFetch(api + '/admin-auth/status')
@@ -498,6 +1001,7 @@
           credFetch(api + '/admin-auth/logout', { method: 'POST', body: '{}' }).finally(function () {
             setAuthUi(false);
             currentCustomId = null;
+            loadedBaseTemplateId = null;
           });
         };
 
@@ -506,7 +1010,16 @@
           document.getElementById('wrap-base').style.display = edit ? 'none' : 'block';
           document.getElementById('wrap-existing').style.display = edit ? 'block' : 'none';
           if (!edit) currentCustomId = null;
+          schedulePreviewRender();
         };
+
+        document.getElementById('base-template').onchange = function () {
+          loadedBaseTemplateId = null;
+          schedulePreviewRender();
+        };
+
+        document.getElementById('form-box').addEventListener('input', schedulePreviewRender);
+        document.getElementById('form-box').addEventListener('change', schedulePreviewRender);
 
         function loadBasesAndCustoms() {
           return credFetch(api + '/template-candidates')
@@ -538,6 +1051,7 @@
                 o.textContent = (item.name || item.id) + ' · ' + item.id + ' · base:' + (item.baseTemplateId || '');
                 ex.appendChild(o);
               });
+              schedulePreviewRender();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');
@@ -563,20 +1077,24 @@
                 });
                 if (!item) throw new Error('見つかりません');
                 currentCustomId = item.id;
+                loadedBaseTemplateId = item.baseTemplateId || null;
                 document.getElementById('draft-name').value = item.name || '';
                 fillFormFromOverride(item.override);
                 updatePreviewUrl();
                 showErr('save-msg', '読み込みました。');
+                schedulePreviewRender();
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
               });
           } else {
             currentCustomId = null;
+            loadedBaseTemplateId = null;
             document.getElementById('draft-name').value = '';
             fillFormFromOverride({});
             updatePreviewUrl();
             showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
+            schedulePreviewRender();
           }
         };
 
@@ -622,6 +1140,7 @@
                 if (!x.ok) throw new Error(x.j.error || '保存失敗');
                 updatePreviewUrl();
                 showErr('save-msg', '保存しました（下書き）。');
+                schedulePreviewRender();
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
@@ -650,6 +1169,7 @@
               .then(function (x) {
                 if (!x.ok) throw new Error(x.j.error || '保存失敗');
                 currentCustomId = x.j.item.id;
+                loadedBaseTemplateId = x.j.item.baseTemplateId || baseTemplateId;
                 document.getElementById('mode-select').value = 'edit';
                 document.getElementById('mode-select').dispatchEvent(new Event('change'));
                 loadBasesAndCustoms().then(function () {
@@ -657,6 +1177,7 @@
                 });
                 updatePreviewUrl();
                 showErr('save-msg', '新規ドラフトを保存しました。以降は「既存のカスタムを編集」で開けます。');
+                schedulePreviewRender();
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
@@ -696,8 +1217,8 @@
             'mailto:?subject=' + encodeURIComponent('[店舗ドラフト] ' + name) + '&body=' + encodeURIComponent(body);
         };
 
-        document.getElementById('btn-refresh-iframe').onclick = function () {
-          updatePreviewUrl();
+        document.getElementById('btn-refresh-live').onclick = function () {
+          renderPreviewLive();
         };
       })();
     </script>

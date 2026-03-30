@@ -963,6 +963,29 @@ app.get(['/template-gallery', '/api/template-gallery'], (req, res) => {
   res.send(renderTemplateGalleryPage());
 });
 
+/** 管理者のみ。未保存の override で HTML を返す（店舗ドラフト編集のライブプレビュー用） */
+app.post('/api/template-preview/render', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const baseTemplateId = String(req.body?.baseTemplateId || '').trim();
+  if (!baseTemplateId) {
+    return res.status(400).json({ error: 'baseTemplateId is required' });
+  }
+  try {
+    const override = normalizeCustomizationInput(req.body?.override || {});
+    const html = renderTemplatePreview(baseTemplateId, { override });
+    if (!html) {
+      return res.status(400).json({ error: 'render failed or invalid template id' });
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.send(html);
+  } catch (e) {
+    console.error('[template-preview/render]', e);
+    res.status(500).json({ error: e?.message || 'render failed' });
+  }
+});
+
 app.get('/api/template-preview/:templateId', (req, res) => {
   const templateId = String(req.params.templateId || '');
   Promise.all([store.getTemplateCustomizations(), store.getGalleryDraftBuiltins()])
