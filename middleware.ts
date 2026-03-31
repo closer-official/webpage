@@ -37,13 +37,23 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
     p === '/template-gallery' ||
     p === '/api/public/template-catalog';
   const isPublicTranslate = p === '/api/public/translate-ui';
+  /** LP 本文から参照するロゴ（Basic 保護下でもテンプレプレビュー HTML と同じ未ログインで読める必要がある） */
+  const isBrandAssetPath = p.startsWith('/payment-logos/') || p.startsWith('/social-icons/');
 
   if (m === 'OPTIONS') {
-    return isIntakeForm || isDraftApi || isTemplatePreview || isTemplateGallery || isPublicTranslate;
+    return (
+      isIntakeForm ||
+      isDraftApi ||
+      isTemplatePreview ||
+      isTemplateGallery ||
+      isPublicTranslate ||
+      isBrandAssetPath
+    );
   }
   if (isIntakeForm && (m === 'GET' || m === 'POST')) return true;
   if (m === 'GET' && isTemplatePreview) return true;
   if (m === 'GET' && isTemplateGallery) return true;
+  if (m === 'GET' && isBrandAssetPath) return true;
   if (m === 'POST' && isPublicTranslate) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
   if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;

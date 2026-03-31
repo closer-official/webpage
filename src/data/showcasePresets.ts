@@ -180,7 +180,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
           id: 'shop',
           title: '店舗詳細情報',
           content:
-            '【お支払い方法】\n現金 / クレジットカード（Visa, Master, JCB, Amex） / PayPay / 交通系ICカード\n\n【設備・サービス】\n総席数：25席（カウンター10席、テーブル15席） / 全席禁煙（店外に喫煙スペースあり） / 無料Wi-Fiあり / コンセント利用可（一部席）',
+            '店内は全席禁煙です。喫煙は店外の指定スペースをご利用ください。お子さま連れの方も安心してお食事いただけます。\n\n【お支払い方法】\n現金 / クレジットカード（Visa, Master, JCB, Amex） / PayPay / 交通系ICカード\n\n【設備・サービス】\n総席数：25席（カウンター10席、テーブル15席） / 無料Wi-Fiあり / コンセント利用可（一部席）',
         },
         {
           id: 'contact',
@@ -212,6 +212,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       footerText:
         '北千住駅周辺で「安くて旨いガッツリ飯」をお探しなら、満腹食堂 鉄人へ。\n© 2026 満腹食堂 鉄人 | 東京都足立区千住旭町40-2 | 03-6806-1192',
       footerInstagramUrl: 'https://www.instagram.com/',
+      footerLineUrl: 'https://line.me/',
       ctaLabel: '席を電話で確認',
       ctaHref: 'tel:0368061192',
       heroSlides: [

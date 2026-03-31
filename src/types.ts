@@ -156,6 +156,8 @@ export interface PageContent {
   }[];
   /** cafe_1：フッターに Instagram アイコンリンクを出す場合 */
   footerInstagramUrl?: string;
+  /** cafe_1：フッターに LINE アイコンリンクを出す場合 */
+  footerLineUrl?: string;
   /**
    * navy_cyan_consult のみ: 埋め込む LP のフォルダ名（public/deliverables/{slug}/）。
    * 未指定時は web-closer-intro（テンプレ14・自社紹介 LP）。納品デモは japanese-history-higashi 等を指定。

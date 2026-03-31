@@ -155,4 +155,70 @@ body.bp-dark .bp-hero-grid-dark {
     grid-template-columns: 1fr;
   }
 }
+
+/* 決済ブランドロゴ（本文に Visa / PayPay 等の記載がある場合のみ出力） */
+.closer-payment-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.65rem 0 0.35rem;
+}
+.closer-payment-logos__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.65rem;
+  min-width: 2.25rem;
+  padding: 0.15rem 0.4rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.closer-payment-logos__item img {
+  display: block;
+  max-height: 1.35rem;
+  width: auto;
+  max-width: 3.25rem;
+  object-fit: contain;
+}
+
+/* LINE / Instagram 公式アイコン（/social-icons/*.png） */
+.closer-social-icon-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.wo-sns-row .wo-sns-emoji {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  line-height: 0;
+}
+.wo-sns-row .wo-sns-emoji .closer-social-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.section.sns-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+.section.sns-links h2 {
+  width: 100%;
+  margin: 0 0 0.5rem;
+}
+.sns-links-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  line-height: 0;
+}
 `;

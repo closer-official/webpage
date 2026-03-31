@@ -197,6 +197,7 @@
       <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
       <label>フッター電話 <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
       <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+      <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
       <label>地図 iframe 埋め込み URL <input type="url" id="f-mapEmbedUrl" /></label>
       <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
       <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
@@ -372,6 +373,7 @@
             footerAddress: document.getElementById('f-footerAddress').value.trim(),
             footerPhone: document.getElementById('f-footerPhone').value.trim(),
             footerInstagramUrl: document.getElementById('f-footerInstagramUrl').value.trim(),
+            footerLineUrl: document.getElementById('f-footerLineUrl').value.trim(),
             mapEmbedUrl: document.getElementById('f-mapEmbedUrl').value.trim(),
             cafeFloatingMapUrl: document.getElementById('f-cafeFloatingMapUrl').value.trim(),
             cafeReviewCtaText: document.getElementById('f-cafeReviewCtaText').value.trim(),
@@ -408,6 +410,7 @@
           document.getElementById('f-footerAddress').value = ov.footerAddress || '';
           document.getElementById('f-footerPhone').value = ov.footerPhone || '';
           document.getElementById('f-footerInstagramUrl').value = ov.footerInstagramUrl || '';
+          document.getElementById('f-footerLineUrl').value = ov.footerLineUrl || '';
           document.getElementById('f-mapEmbedUrl').value = ov.mapEmbedUrl || '';
           document.getElementById('f-cafeFloatingMapUrl').value = ov.cafeFloatingMapUrl || '';
           document.getElementById('f-cafeReviewCtaText').value = ov.cafeReviewCtaText || '';

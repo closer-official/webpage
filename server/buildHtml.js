@@ -12,6 +12,12 @@ import { buildNavyDeliverableMainHtml } from '../templates/workspaces/navy-cyan-
 import { buildGymValxDeliverableMainHtml } from '../templates/workspaces/gym-valx/server/gymValxDeliverableClone.js';
 import { buildWikiEnsyuritsuDeliverableMainHtml } from '../templates/workspaces/wiki-ensyuritsu/server/wikiEnsyuritsuDeliverableClone.js';
 import { buildWikiSaunaDeliverableMainHtml } from '../templates/workspaces/wiki-sauna/server/wikiSaunaDeliverableClone.js';
+import {
+  renderProseParagraphsWithPaymentLogos,
+  wrapBrParagraphWithPaymentLogos,
+  appendPaymentLogosAfterBrContent,
+  plainLineAsParagraphWithPaymentLogos,
+} from './paymentLogosHtml.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -61,7 +67,7 @@ const DEFAULT_NAV = {
     { label: 'Q&A', href: '#faq' },
     { label: '店舗詳細', href: '#shop' },
     { label: '店舗・地図', href: '#access' },
-    { label: 'Instagram', href: '#sns' },
+    { label: 'Instagram', href: '#ig-feed' },
     { label: 'お問い合わせ', href: '#contact' },
   ],
   clinic_chiropractic: [
@@ -377,8 +383,10 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       : tid === 'cafe_1'
         ? `<footer class="footer-c1">
     <div class="container footer-c1-inner">
-      ${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-ig" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>` : ''}
-      <p class="footer-c1-text">${escapeHtml(content.footerText).replace(/\n/g, '<br>')}</p>
+      ${content.footerInstagramUrl || content.footerLineUrl
+        ? `<div class="footer-c1-social-row">${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}${content.footerLineUrl ? `<a href="${escapeHtml(content.footerLineUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}</div>`
+        : ''}
+      ${wrapBrParagraphWithPaymentLogos(content.footerText, escapeHtml, { className: 'footer-c1-text' })}
       ${footerLegal}
     </div>
   </footer>
@@ -579,7 +587,8 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   const scrollInAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   const sectionImg = (s) => s.imageUrl ? `<div class="section-img-wrap"><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>` : '';
-  const sectionBody = (s) => `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p></div>`;
+  const sectionBody = (s) =>
+    `<div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}</div>`;
 
   function woHoursBody(text) {
     const lines = String(text).split('\n').map((l) => l.trim()).filter(Boolean);
@@ -612,7 +621,7 @@ ${petSvc.map((row) => `        <li class="pet-service-card"><span class="pet-ser
       <div class="container">
       <h2 id="pet-policy-title" class="pet-sec-title">ご利用上の注意・規約</h2>
       <p class="pet-policy-note">長文はそのまま表示せず、タップで開いてご確認いただけます。</p>
-${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc-sum">${escapeHtml(p.title)}</summary><div class="pet-acc-body">${escapeHtml(p.body).replace(/\n/g, '<br>')}</div></details>`).join('\n')}
+${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc-sum">${escapeHtml(p.title)}</summary><div class="pet-acc-body">${appendPaymentLogosAfterBrContent(p.body, escapeHtml)}</div></details>`).join('\n')}
       </div>
     </section>`
       : '';
@@ -658,16 +667,35 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
         parts.push(`<h3 class="c1-menu-text-zone">${escapeHtml(g)}</h3>`);
         lastG = g;
       }
+      const desc = row.description
+        ? `<p class="c1-menu-text-desc">${escapeHtml(row.description)}</p>`
+        : '';
       parts.push(
-        `<div class="c1-menu-text-row"><span class="c1-menu-text-name">${escapeHtml(row.name)}${row.badge ? `<em class="c1-menu-badge">${escapeHtml(row.badge)}</em>` : ''}</span>` +
+        `<div class="c1-menu-text-unit"><div class="c1-menu-text-row"><span class="c1-menu-text-name">${escapeHtml(row.name)}${row.badge ? `<em class="c1-menu-badge">${escapeHtml(row.badge)}</em>` : ''}</span>` +
           (row.price ? `<span class="c1-menu-text-price">${escapeHtml(row.price)}</span>` : '') +
-          `</div>`
+          `</div>${desc}</div>`
       );
-      if (row.description) {
-        parts.push(`<p class="c1-menu-text-desc">${escapeHtml(row.description)}</p>`);
-      }
     }
     return `<div class="c1-menu-text-block">${parts.join('\n        ')}</div>`;
+  }
+  function cafe1ShopSectionBody(raw) {
+    const text = String(raw || '').trim();
+    if (!text) return '<div class="wo-sec-prose"></div>';
+    const parts = text
+      .split(/\n\n/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const head = parts[0] || '';
+    const smokingLead = /禁煙|喫煙|分煙/.test(head);
+    if (smokingLead && parts.length > 1) {
+      const callout =
+        '<aside class="c1-shop-callout" aria-label="喫煙・お席について"><p>' +
+        escapeHtml(head).replace(/\n/g, '</p><p>') +
+        '</p></aside>';
+      const rest = renderProseParagraphsWithPaymentLogos(parts.slice(1).join('\n\n'), escapeHtml);
+      return callout + '<div class="wo-sec-prose">' + rest + '</div>';
+    }
+    return '<div class="wo-sec-prose">' + renderProseParagraphsWithPaymentLogos(text, escapeHtml) + '</div>';
   }
   function cafe1ShopLocationsHtml() {
     const locs = content.cafeShopLocations || [];
@@ -677,7 +705,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
           .split('\n')
           .map((l) => l.trim())
           .filter(Boolean)
-          .map((l) => `<p>${escapeHtml(l)}</p>`)
+          .map((l) => plainLineAsParagraphWithPaymentLogos(l, escapeHtml))
           .join('');
         const img = loc.imageUrl
           ? `<img class="c1-shop-img" src="${escapeHtml(loc.imageUrl)}" alt="" loading="lazy">`
@@ -714,7 +742,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
                   return base;
                 })()
               : '';
-            const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2><div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>`;
+            const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2><div class="wo-sec-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div></div>`;
             if (
               tid === 'cafe_1' &&
               s.id === 'menu' &&
@@ -729,7 +757,7 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
               return `    <section id="menu" class="section wo-sec c1-menu-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
-        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+        <div class="wo-sec-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
         ${cafe1MenuTextHtml()}
         ${branchGrid}
       </div>
@@ -737,14 +765,14 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
             }
             if (tid === 'cafe_1' && s.id === 'access' && (content.cafeShopLocations || []).length > 0) {
               const mapEmbed = content.mapEmbedUrl
-                ? `<div class="c1-shop-map-embed" style="margin-top:2rem;"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                ? `<div class="c1-shop-map-embed c1-shop-map-embed--first"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section id="access" class="section wo-sec c1-shop-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
-        <div class="wo-sec-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
-${cafe1ShopLocationsHtml()}
         ${mapEmbed}
+        <div class="wo-sec-prose c1-access-lede">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
+${cafe1ShopLocationsHtml()}
       </div>
     </section>`;
             }
@@ -753,7 +781,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="c1-staff-avatar"><div class="section-img-wrap c1-staff-photo-wrap"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div></div>`
                 : '';
               const staffProse = String(s.content || '').trim()
-                ? `<div class="wo-sec-prose c1-staff-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>`
+                ? `<div class="wo-sec-prose c1-staff-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>`
                 : '';
               const staffNoPhotoClass = s.imageUrl ? '' : ' c1-staff-no-photo';
               return `    <section id="${escapeHtml(s.id)}" class="section wo-sec c1-staff-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
@@ -783,11 +811,42 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             if (s.id === 'faq' && faqItems.length > 0) {
-              const faqHtml = faqItems.map((faq, j) => `<div class="wo-faq-item"><button type="button" class="wo-faq-q" aria-expanded="false" aria-controls="wo-faq-a-${i}-${j}" id="wo-faq-q-${i}-${j}">${escapeHtml(faq.q)}</button><div class="wo-faq-a" id="wo-faq-a-${i}-${j}" role="region" aria-labelledby="wo-faq-q-${i}-${j}"><p>${escapeHtml(faq.a)}</p></div></div>`).join('');
+              if (tid === 'cafe_1') {
+                const faqStatic = faqItems
+                  .map(
+                    (faq) =>
+                      `<div class="c1-faq-item"><h3 class="c1-faq-q">${escapeHtml(faq.q)}</h3><div class="c1-faq-a">${wrapBrParagraphWithPaymentLogos(faq.a, escapeHtml)}</div></div>`
+                  )
+                  .join('');
+                return `    <section id="${escapeHtml(s.id)}" class="section wo-sec c1-faq-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        <div class="c1-faq-list">${faqStatic}</div>
+      </div>
+    </section>`;
+              }
+              const faqHtml = faqItems
+                .map(
+                  (faq, j) =>
+                    `<div class="wo-faq-item"><button type="button" class="wo-faq-q" aria-expanded="false" aria-controls="wo-faq-a-${i}-${j}" id="wo-faq-q-${i}-${j}">${escapeHtml(faq.q)}</button><div class="wo-faq-a" id="wo-faq-a-${i}-${j}" role="region" aria-labelledby="wo-faq-q-${i}-${j}">${wrapBrParagraphWithPaymentLogos(faq.a, escapeHtml)}</div></div>`
+                )
+                .join('');
               return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         <div class="wo-faq-list">${faqHtml}</div>
+      </div>
+    </section>`;
+            }
+            if (tid === 'cafe_1' && s.id === 'shop') {
+              const shopImg = s.imageUrl
+                ? `<div class="section-img-wrap"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`
+                : '';
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec c1-shop-detail-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      ${shopImg}
+      <div class="section-body">
+        <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
+        ${cafe1ShopSectionBody(s.content)}
       </div>
     </section>`;
             }
@@ -804,7 +863,7 @@ ${cafe1ShopLocationsHtml()}
               return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
-        <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+        <div class="wo-lede-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
       </div>
       ${img}
     </section>`;
@@ -813,7 +872,7 @@ ${cafe1ShopLocationsHtml()}
               return `    <section class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
-        <div class="wo-lede-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div>
+        <div class="wo-lede-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
       </div>
       ${img}
     </section>`;
@@ -832,7 +891,7 @@ ${cafe1ShopLocationsHtml()}
             if (tid === 'salon_barber' && s.id === 'concept') {
               return `    <section class="section section-concept-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
-      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><div class="section-concept-prose"><p>${escapeHtml(s.content).replace(/\n/g, '</p><p>')}</p></div></div>
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><div class="section-concept-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div></div>
     </section>`;
             }
             if (tid === 'salon_barber' && s.id === 'hours') {
@@ -857,7 +916,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="salon-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2><p class="salon-access-text">${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title" class="salon-sec-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml, { className: 'salon-access-text' })}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'clinic_chiropractic' && s.id === 'access') {
@@ -865,7 +924,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="clinic-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'gym_yoga' && s.id === 'access') {
@@ -873,7 +932,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="gym-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'cram_school' && s.id === 'access') {
@@ -881,7 +940,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="cram-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'salon_barber' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
@@ -891,7 +950,12 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             if (tid === 'pet_salon' && s.id === 'concept') {
-              const paras = String(s.content).split('\n').map((l) => l.trim()).filter(Boolean).map((l) => `<p>${escapeHtml(l)}</p>`).join('');
+              const paras = String(s.content)
+                .split('\n')
+                .map((l) => l.trim())
+                .filter(Boolean)
+                .map((l) => plainLineAsParagraphWithPaymentLogos(l, escapeHtml))
+                .join('');
               const block = `    <section class="section pet-concept ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${paras}</div>
@@ -913,7 +977,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="pet-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'ramen' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
@@ -925,7 +989,7 @@ ${cafe1ShopLocationsHtml()}
                 return `<div class="ramen-menu-item"><img src="${escapeHtml(url)}" alt="" loading="lazy"><div class="ramen-menu-body"><p class="ramen-menu-name">${name}</p><p class="ramen-menu-price">${price}</p></div></div>`;
               }).join('');
               return `    <section class="section ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p><div class="ramen-menu-grid">${items}</div></div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}<div class="ramen-menu-grid">${items}</div></div>
     </section>`;
             }
             if (tid === 'ramen' && s.id === 'access') {
@@ -933,11 +997,16 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="ramen-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
             if (tid === 'professional' && s.id === 'concept') {
-              const paras = String(s.content).split('\n').map((l) => l.trim()).filter(Boolean).map((l) => `<p>${escapeHtml(l)}</p>`).join('');
+              const paras = String(s.content)
+                .split('\n')
+                .map((l) => l.trim())
+                .filter(Boolean)
+                .map((l) => plainLineAsParagraphWithPaymentLogos(l, escapeHtml))
+                .join('');
               const block = `    <section class="section pro-concept ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       ${sectionImg(s)}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${paras}</div>
@@ -952,7 +1021,7 @@ ${cafe1ShopLocationsHtml()}
               return `    <section class="section pro-staff ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="pro-staff-inner">
         ${photo}
-        <div class="pro-staff-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+        <div class="pro-staff-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}
         <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p></div>
       </div>
     </section>`;
@@ -960,12 +1029,17 @@ ${cafe1ShopLocationsHtml()}
             if (tid === 'professional' && s.id === 'menu' && priceRows.length > 0) {
               const rows = priceRows.map((row) => `<div class="pro-price-card"><span class="pro-price-name">${escapeHtml(row.name)}</span><span class="pro-price-val">${escapeHtml(row.price)}</span></div>`).join('');
               return `    <section class="section pro-price-wrap ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p><div class="pro-price-grid">${rows}</div></div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}<div class="pro-price-grid">${rows}</div></div>
       <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
     </section>`;
             }
             if (tid === 'professional' && s.id === 'faq' && faqItems.length > 0) {
-              const fq = faqItems.map((f) => `<details class="pro-faq-item"><summary class="pro-faq-sum">${escapeHtml(f.q)}</summary><div class="pro-faq-body">${escapeHtml(f.a)}</div></details>`).join('');
+              const fq = faqItems
+                .map(
+                  (f) =>
+                    `<details class="pro-faq-item"><summary class="pro-faq-sum">${escapeHtml(f.q)}</summary><div class="pro-faq-body">${appendPaymentLogosAfterBrContent(f.a, escapeHtml)}</div></details>`
+                )
+                .join('');
               return `    <section id="faq" class="section pro-faq ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
       ${fq}
@@ -977,7 +1051,7 @@ ${cafe1ShopLocationsHtml()}
                 ? `<div class="pro-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="240" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
                 : '';
               return `    <section class="section pro-access section-access ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2><p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>${mapEmbed}</div>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
       <p class="pro-sec-cta"><a href="${escapeHtml(cta.href)}" class="pro-ghost-cta">${escapeHtml(cta.label)}</a></p>
     </section>`;
             }
@@ -988,7 +1062,7 @@ ${cafe1ShopLocationsHtml()}
                 : '';
               return `    <section id="contact" class="section pro-contact-band ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>
-      <p>${escapeHtml(s.content).replace(/\n/g, '<br>')}</p>
+      ${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}
       ${telBlock}
       <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
     </section>`;
@@ -1031,19 +1105,30 @@ ${cafe1ShopLocationsHtml()}
       extraSections += `
     <section class="section sns-links"${extraMotionAttr}>
       <h2>フォロー・お問い合わせ</h2>
-      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer">Instagram</a>` : ''}
-      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer">LINE</a>` : ''}
+      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
+      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
     </section>`;
     }
   }
   const igPerm = String(content.cafeInstagramPermalink || '').trim();
   const igFeed = content.cafeInstagramFeedItems || [];
   if (tid === 'cafe_1' && igFeed.length > 0) {
+    const igProfileUrl = String(content.footerInstagramUrl || '').trim();
+    const igProfileLink = igProfileUrl
+      ? `<p class="c1-ig-feed-actions"><a class="c1-ig-feed-profile" href="${escapeHtml(igProfileUrl)}" target="_blank" rel="noopener noreferrer">Instagramプロフィールを見る</a></p>`
+      : '';
     extraSections += `
     <section class="section wo-sec c1-ig-feed-sec" id="ig-feed" aria-labelledby="c1-ig-feed-title"${extraMotionAttr}>
       <div class="section-body">
-        <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿</h2>
-        <div class="c1-ig-feed-grid">${igFeed.map((it) => `<a href="${escapeHtml(it.postUrl)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"></a>`).join('')}</div>
+        <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿（Instagram）</h2>
+        <p class="c1-ig-feed-lede">店主がInstagramに投稿した料理の写真です。各画像をタップすると投稿ページへ移動します（手動で差し替えた画像を反映しています）。</p>
+        ${igProfileLink}
+        <div class="c1-ig-feed-grid">${igFeed
+          .map(
+            (it) =>
+              `<a href="${escapeHtml(it.postUrl)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"><span class="c1-ig-feed-item-cta" aria-hidden="true">Instagramで見る</span></span></a>`
+          )
+          .join('')}</div>
       </div>
     </section>`;
   }
@@ -1242,7 +1327,7 @@ ${cafe1ShopLocationsHtml()}
       : tid === 'cafe_1'
         ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">`
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">`
         : tid === 'studio_blush_editorial'
           ? `<link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1528,7 +1613,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
       <div>${gymFaqItems.map((faq) => `
         <details class="gym-faq-item">
           <summary class="gym-faq-q">${escapeHtml(faq.q)}</summary>
-          <div class="gym-faq-a">${escapeHtml(faq.a).replace(/\n/g, '<br>')}</div>
+          <div class="gym-faq-a">${appendPaymentLogosAfterBrContent(faq.a, escapeHtml)}</div>
         </details>`).join('')}
       </div>
     </section>`;

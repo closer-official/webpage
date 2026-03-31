@@ -27,10 +27,15 @@ const NOTES = [
 export const CAFE_1_HOURS_SECTION_CONTENT = [...WEEKDAY_LINES, ...NOTES].join('\n');
 
 /**
- * アクセス内店舗カードの detail（曜日表 + 注記 + 電話 + 住所）
+ * アクセス内店舗カードの detail（電話・住所・営業の要約のみ）
+ * 曜日別の詳細は「営業時間」セクションに任せ、ここでは重複させない。
  * @param {string} phone 例: 03-6806-1192
  * @param {string} postalAddressLine 例: 〒120-0026 東京都足立区千住旭町40-2
  */
 export function buildCafe1ShopLocationDetail(phone, postalAddressLine) {
-  return [...WEEKDAY_LINES, NOTES[0], phone, postalAddressLine].join('\n');
+  return [
+    `電話: ${phone}`,
+    postalAddressLine,
+    `営業: 毎日 ${TIME_LINE}（曜日別・定休の詳細はページ内「営業時間」をご確認ください）`,
+  ].join('\n');
 }
