@@ -222,6 +222,16 @@
         padding: 0 10px;
         font-size: 0.74rem;
       }
+      .checklist {
+        margin-top: 8px;
+        padding: 8px 10px;
+        border: 1px dashed #3d5675;
+        border-radius: 8px;
+        background: #0b1323;
+        font-size: 0.76rem;
+        color: #b8c5d6;
+        white-space: pre-line;
+      }
       iframe#preview-live {
         width: 100%;
         flex: 1 1 auto;
@@ -297,6 +307,26 @@
         資料取り込み（画像/PDF・最大4ファイル）
         <input type="file" id="import-files" accept="image/*,.pdf,application/pdf" multiple />
       </label>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">AI調査取り込みテンプレ（Gemini / ChatGPT用）</div>
+        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
+          下の文面をコピーしてAIに渡し、返ってきたJSONを「AI出力JSON貼り付け」に入れるとフォームに反映できます（写真項目は対象外）。
+        </p>
+        <textarea id="ai-import-prompt" rows="14" readonly></textarea>
+        <div class="row-actions">
+          <button type="button" class="btn" id="btn-copy-ai-prompt">AI向けテンプレをコピー</button>
+        </div>
+        <label>
+          AI出力JSON貼り付け
+          <textarea id="ai-import-json" class="mono" rows="8" placeholder='{"nameSuggestion":"...","override":{...}}'></textarea>
+        </label>
+        <div class="row-actions">
+          <button type="button" class="btn" id="btn-apply-ai-json">AI出力をフォームに反映</button>
+        </div>
+        <div id="ai-verify-report" class="checklist" style="display: none"></div>
+        <p id="ai-json-msg" class="ok" style="display: none"></p>
+        <p id="ai-json-err" class="err" style="display: none"></p>
+      </div>
       <div class="row-actions">
         <button type="button" class="btn" id="btn-import-docs">資料から自動入力</button>
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
@@ -470,6 +500,129 @@
             };
             fr.readAsDataURL(file);
           });
+        }
+
+        function buildAiImportPromptTemplate() {
+          return (
+            'あなたは店舗LP制作のためのリサーチアシスタントです。\\n' +
+            '指定した店舗について、公式情報・Googleマップ情報・口コミ要約などを調査し、次のJSONのみを返してください。\\n' +
+            '必ず有効なJSONオブジェクト1つのみ。説明文・Markdown・コードフェンスは不要。\\n\\n' +
+            '重要ルール:\\n' +
+            '- 写真URLは埋めなくてよい（空配列/空文字で可）\\n' +
+            '- 不明項目は空文字または空配列\\n' +
+            '- 推測しすぎない\\n' +
+            '- 取得した事実には必ず出典URLを添える\\n' +
+            '- FAQは実在情報に基づく範囲で自然文\\n' +
+            '- メニューは name を必ず埋める\\n\\n' +
+            '返却JSONスキーマ:\\n' +
+            '{\\n' +
+            '  "nameSuggestion": "ドラフト名候補（80文字以内）",\\n' +
+            '  "verification": {\\n' +
+            '    "confidence": 0.0,\\n' +
+            '    "sourceUrls": ["https://..."],\\n' +
+            '    "unknownFields": ["footerPhone", "cafeMeo.postalCode"],\\n' +
+            '    "notes": "確認メモ"\\n' +
+            '  },\\n' +
+            '  "override": {\\n' +
+            '    "siteName": "",\\n' +
+            '    "title": "",\\n' +
+            '    "headline": "",\\n' +
+            '    "subheadline": "",\\n' +
+            '    "footerText": "",\\n' +
+            '    "footerAddress": "",\\n' +
+            '    "footerPhone": "",\\n' +
+            '    "ctaLabel": "",\\n' +
+            '    "ctaHref": "#contact",\\n' +
+            '    "navLabels": "コンセプト, メニュー, アクセス",\\n' +
+            '    "metaTitle": "",\\n' +
+            '    "metaDescription": "",\\n' +
+            '    "canonicalUrl": "",\\n' +
+            '    "keywords": "",\\n' +
+            '    "faqItems": [\\n' +
+            '      { "q": "", "a": "" }\\n' +
+            '    ],\\n' +
+            '    "cafeMenuTextRows": [\\n' +
+            '      { "groupLabel": "", "name": "", "price": "", "description": "", "badge": "" }\\n' +
+            '    ],\\n' +
+            '    "cafeMeo": {\\n' +
+            '      "servesCuisine": "",\\n' +
+            '      "priceRange": "",\\n' +
+            '      "openingHours": [""],\\n' +
+            '      "streetAddress": "",\\n' +
+            '      "addressLocality": "",\\n' +
+            '      "addressRegion": "",\\n' +
+            '      "postalCode": ""\\n' +
+            '    },\\n' +
+            '    "cafeShopLocations": [\\n' +
+            '      { "name": "", "detail": "", "mapUrl": "" }\\n' +
+            '    ],\\n' +
+            '    "cafeBranchMenuItems": [\\n' +
+            '      { "groupLabel": "", "label": "", "menuUrl": "" }\\n' +
+            '    ]\\n' +
+            '  }\\n' +
+            '}\\n\\n' +
+            '対象店舗情報（ここをユーザーが上書き）:\\n' +
+            '- 店舗名: {{STORE_NAME}}\\n' +
+            '- 地域: {{AREA}}\\n' +
+            '- 業種: {{CATEGORY}}\\n\\n' +
+            '最後に、sourceUrlsには参照したURLを最低2件入れてください。'
+          );
+        }
+
+        function normalizeVerification(v) {
+          var out = {
+            confidence: null,
+            sourceUrls: [],
+            unknownFields: [],
+            notes: '',
+          };
+          if (!v || typeof v !== 'object') return out;
+          var c = Number(v.confidence);
+          if (!Number.isNaN(c)) out.confidence = Math.max(0, Math.min(1, c));
+          if (Array.isArray(v.sourceUrls)) {
+            out.sourceUrls = v.sourceUrls
+              .map(function (s) {
+                return String(s || '').trim();
+              })
+              .filter(function (s) {
+                return /^https?:\/\//i.test(s);
+              })
+              .slice(0, 12);
+          }
+          if (Array.isArray(v.unknownFields)) {
+            out.unknownFields = v.unknownFields
+              .map(function (s) {
+                return String(s || '').trim();
+              })
+              .filter(Boolean)
+              .slice(0, 40);
+          }
+          out.notes = String(v.notes || '').trim().slice(0, 500);
+          return out;
+        }
+
+        function renderAiVerificationReport(verification, ov) {
+          var box = document.getElementById('ai-verify-report');
+          if (!box) return;
+          var v = normalizeVerification(verification);
+          var missing = [];
+          if (!String(ov.siteName || '').trim()) missing.push('siteName');
+          if (!String(ov.headline || '').trim()) missing.push('headline');
+          if (!String(ov.footerAddress || '').trim()) missing.push('footerAddress');
+          if (!Array.isArray(ov.cafeMenuTextRows) || !ov.cafeMenuTextRows.length) missing.push('cafeMenuTextRows');
+          if (!Array.isArray(ov.faqItems) || !ov.faqItems.length) missing.push('faqItems');
+          var lines = [];
+          lines.push('検証レポート');
+          lines.push(
+            '- 信頼度: ' + (v.confidence === null ? '未指定' : Math.round(v.confidence * 100) + '%')
+          );
+          lines.push('- 出典URL数: ' + v.sourceUrls.length + (v.sourceUrls.length ? '（下記）' : '（不足）'));
+          if (v.sourceUrls.length) lines.push('  ' + v.sourceUrls.join('\n  '));
+          lines.push('- AIが不明とした項目: ' + (v.unknownFields.length ? v.unknownFields.join(', ') : 'なし'));
+          lines.push('- 必須寄りの未入力: ' + (missing.length ? missing.join(', ') : 'なし'));
+          if (v.notes) lines.push('- メモ: ' + v.notes);
+          box.textContent = lines.join('\n');
+          box.style.display = 'block';
         }
 
         function escapeHtml(s) {
@@ -938,6 +1091,7 @@
 
         bindAddButtonsOnce();
         fillFormFromOverride({});
+        document.getElementById('ai-import-prompt').value = buildAiImportPromptTemplate();
 
         credFetch(api + '/admin-auth/status')
           .then(function (r) {
@@ -1140,6 +1294,56 @@
               showErr('import-err', e.message || String(e));
               showErr('import-msg', '');
             });
+        };
+
+        document.getElementById('btn-copy-ai-prompt').onclick = function () {
+          var t = document.getElementById('ai-import-prompt').value || '';
+          navigator.clipboard.writeText(t).then(
+            function () {
+              showErr('ai-json-err', '');
+              showErr('ai-json-msg', 'AI向けテンプレをコピーしました。');
+            },
+            function () {
+              window.prompt('コピー:', t);
+            },
+          );
+        };
+
+        document.getElementById('btn-apply-ai-json').onclick = function () {
+          showErr('ai-json-err', '');
+          showErr('ai-json-msg', '');
+          var report = document.getElementById('ai-verify-report');
+          if (report) report.style.display = 'none';
+          var raw = String(document.getElementById('ai-import-json').value || '').trim();
+          if (!raw) {
+            showErr('ai-json-err', 'AI出力JSONを貼り付けてください。');
+            return;
+          }
+          var parsed;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            showErr('ai-json-err', 'JSONが不正です: ' + (e.message || e));
+            return;
+          }
+          var ov = parsed && parsed.override && typeof parsed.override === 'object' ? parsed.override : parsed;
+          if (!ov || typeof ov !== 'object') {
+            showErr('ai-json-err', 'override オブジェクトが見つかりません。');
+            return;
+          }
+          fillFormFromOverride(ov);
+          if (parsed.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
+            document.getElementById('draft-name').value = String(parsed.nameSuggestion).slice(0, 80);
+          }
+          currentCustomId = null;
+          if (document.getElementById('mode-select').value !== 'new') {
+            document.getElementById('mode-select').value = 'new';
+            document.getElementById('mode-select').dispatchEvent(new Event('change'));
+          }
+          updatePreviewUrl();
+          scheduleLivePreview();
+          renderAiVerificationReport(parsed.verification || {}, ov);
+          showErr('ai-json-msg', 'AI出力をフォームへ反映しました。微調整して保存してください。');
         };
 
         document.getElementById('btn-save').onclick = function () {
