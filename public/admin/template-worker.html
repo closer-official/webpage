@@ -192,6 +192,36 @@
         border: 1px solid #2a3b52;
         margin-top: 8px;
       }
+      .repeat-group {
+        margin-top: 12px;
+        border: 1px solid #2a3b52;
+        border-radius: 10px;
+        padding: 10px;
+        background: #0f172a;
+      }
+      .repeat-item {
+        border: 1px solid #2a3b52;
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 8px;
+        background: #0b1323;
+      }
+      .repeat-item:first-child {
+        margin-top: 0;
+      }
+      .repeat-item-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #9aacbf;
+        margin-bottom: 6px;
+      }
+      .repeat-item .btn {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 0.74rem;
+      }
       iframe#preview-live {
         width: 100%;
         flex: 1 1 auto;
@@ -290,42 +320,52 @@
         ヒーロー・メイン画像 URL（1行1URL・http(s)・最大10件）
         <textarea id="f-heroSlides" class="mono" rows="5" placeholder="https://..."></textarea>
       </label>
-      <label>
-        セクション JSON（任意）
-        <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px"
-          ><code>id / title / content</code> に加え、写真があるセクションは <code>imageUrl</code>（https の画像URL）を付けられます。空欄ならテンプレ既定。</span
-        >
-        <textarea id="f-sections" class="mono" spellcheck="false"></textarea>
-      </label>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">セクション（任意）</div>
+        <div id="f-sections-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-section">＋ セクション追加</button></div>
+      </div>
 
-      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ（JSON）</h2>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
-        ベースが <code>cafe_1</code> のときに使用。各欄は JSON 配列またはオブジェクト。空欄の項目はテンプレ既定のままです。
-      </p>
-      <label>
-        FAQ（よくある質問）
-        <textarea id="f-faqItems" class="mono" spellcheck="false" rows="4" placeholder='[{"q":"…","a":"…"}]'></textarea>
-      </label>
-      <label>
-        テキストメニュー行（お品書き）
-        <textarea id="f-cafeMenuTextRows" class="mono" spellcheck="false" rows="6" placeholder='[{"groupLabel":"…","name":"…","price":"¥…","description":"…","badge":"…"}]'></textarea>
-      </label>
-      <label>
-        MEO / JSON-LD 用 cafeMeo
-        <textarea id="f-cafeMeo" class="mono" spellcheck="false" rows="5" placeholder='{"servesCuisine":"…","priceRange":"…","openingHours":["Mo 11:00-23:00"],"streetAddress":"…","addressLocality":"…","addressRegion":"…","postalCode":"…"}'></textarea>
-      </label>
-      <label>
-        店舗カード（アクセス欄）
-        <textarea id="f-cafeShopLocations" class="mono" spellcheck="false" rows="5" placeholder='[{"name":"…","detail":"…","mapUrl":"https://…","imageUrl":"https://…"}]'></textarea>
-      </label>
-      <label>
-        Instagram 投稿グリッド（画像URL・投稿URL）
-        <textarea id="f-cafeInstagramFeedItems" class="mono" spellcheck="false" rows="4" placeholder='[{"imageUrl":"https://…","postUrl":"https://…"}]'></textarea>
-      </label>
-      <label>
-        メニューPDF等のボタン行
-        <textarea id="f-cafeBranchMenuItems" class="mono" spellcheck="false" rows="2" placeholder='[{"groupLabel":"…","label":"…","menuUrl":"https://…"}]'></textarea>
-      </label>
+      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ</h2>
+      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">JSON不要。通常フォームで追加して入力できます。</p>
+
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">FAQ（よくある質問）</div>
+        <div id="f-faq-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-faq">＋ FAQ追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">テキストメニュー行（お品書き）</div>
+        <div id="f-menu-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-menu">＋ メニュー追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">MEO / JSON-LD 用 cafeMeo</div>
+        <label>料理ジャンル（servesCuisine）<input type="text" id="f-meo-servesCuisine" /></label>
+        <label>価格帯（priceRange）<input type="text" id="f-meo-priceRange" /></label>
+        <label>住所（streetAddress）<input type="text" id="f-meo-streetAddress" /></label>
+        <label>市区町村（addressLocality）<input type="text" id="f-meo-addressLocality" /></label>
+        <label>都道府県（addressRegion）<input type="text" id="f-meo-addressRegion" /></label>
+        <label>郵便番号（postalCode）<input type="text" id="f-meo-postalCode" /></label>
+        <div style="font-size: 0.78rem; color: #9aacbf; margin-top: 10px">営業時間（openingHours）</div>
+        <div id="f-meo-hours-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-meo-hour">＋ 営業時間追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
+        <div id="f-shop-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-shop">＋ 店舗カード追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">Instagram 投稿グリッド</div>
+        <div id="f-instagram-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-instagram">＋ 投稿追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">メニューPDF等のボタン行</div>
+        <div id="f-branch-menu-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-branch-menu">＋ ボタン追加</button></div>
+      </div>
       <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
       <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
       <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
@@ -373,6 +413,7 @@
         var currentCustomId = null;
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
+        var addBtnIdsBound = false;
 
         function credFetch(url, opts) {
           var o = opts || {};
@@ -408,6 +449,191 @@
           }
         }
 
+        function escapeHtml(s) {
+          return String(s || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        function addFaqItem(item) {
+          var it = item || {};
+          var root = document.getElementById('f-faq-list');
+          var idx = root.querySelectorAll('.repeat-item').length + 1;
+          root.insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>FAQ ' +
+              idx +
+              '</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>質問 <input type="text" class="f-faq-q" value="' +
+              escapeHtml(it.q) +
+              '" /></label>' +
+              '<label>回答 <textarea class="f-faq-a" rows="3">' +
+              escapeHtml(it.a) +
+              '</textarea></label>' +
+              '</div>',
+          );
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+            if (!root.querySelector('.repeat-item')) addFaqItem();
+          };
+        }
+
+        function addMenuItem(item) {
+          var it = item || {};
+          var root = document.getElementById('f-menu-list');
+          var idx = root.querySelectorAll('.repeat-item').length + 1;
+          root.insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>メニュー ' +
+              idx +
+              '</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>カテゴリ（任意）<input type="text" class="f-menu-group" value="' +
+              escapeHtml(it.groupLabel) +
+              '" /></label>' +
+              '<label>商品名<input type="text" class="f-menu-name" value="' +
+              escapeHtml(it.name) +
+              '" /></label>' +
+              '<label>価格（任意）<input type="text" class="f-menu-price" value="' +
+              escapeHtml(it.price) +
+              '" /></label>' +
+              '<label>説明（任意）<textarea class="f-menu-desc" rows="2">' +
+              escapeHtml(it.description) +
+              '</textarea></label>' +
+              '<label>バッジ（任意）<input type="text" class="f-menu-badge" value="' +
+              escapeHtml(it.badge) +
+              '" /></label>' +
+              '</div>',
+          );
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+            if (!root.querySelector('.repeat-item')) addMenuItem();
+          };
+        }
+
+        function addSectionItem(item) {
+          var it = item || {};
+          document.getElementById('f-sections-list').insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>セクション</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>ID（半角英数字・任意）<input type="text" class="f-sec-id" value="' +
+              escapeHtml(it.id) +
+              '" /></label>' +
+              '<label>見出し<input type="text" class="f-sec-title" value="' +
+              escapeHtml(it.title) +
+              '" /></label>' +
+              '<label>本文<textarea class="f-sec-content" rows="3">' +
+              escapeHtml(it.content) +
+              '</textarea></label>' +
+              '<label>画像URL（任意）<input type="url" class="f-sec-image" value="' +
+              escapeHtml(it.imageUrl) +
+              '" /></label>' +
+              '</div>',
+          );
+          var root = document.getElementById('f-sections-list');
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+          };
+        }
+
+        function addShopItem(item) {
+          var it = item || {};
+          document.getElementById('f-shop-list').insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>店舗カード</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>店舗名<input type="text" class="f-shop-name" value="' +
+              escapeHtml(it.name) +
+              '" /></label>' +
+              '<label>説明<textarea class="f-shop-detail" rows="2">' +
+              escapeHtml(it.detail) +
+              '</textarea></label>' +
+              '<label>地図URL（任意）<input type="url" class="f-shop-map" value="' +
+              escapeHtml(it.mapUrl) +
+              '" /></label>' +
+              '<label>画像URL（任意）<input type="url" class="f-shop-image" value="' +
+              escapeHtml(it.imageUrl) +
+              '" /></label>' +
+              '</div>',
+          );
+          var root = document.getElementById('f-shop-list');
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+          };
+        }
+
+        function addInstagramItem(item) {
+          var it = item || {};
+          document.getElementById('f-instagram-list').insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>Instagram 投稿</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>画像URL<input type="url" class="f-insta-image" value="' +
+              escapeHtml(it.imageUrl) +
+              '" /></label>' +
+              '<label>投稿URL<input type="url" class="f-insta-post" value="' +
+              escapeHtml(it.postUrl) +
+              '" /></label>' +
+              '</div>',
+          );
+          var root = document.getElementById('f-instagram-list');
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+          };
+        }
+
+        function addBranchMenuItem(item) {
+          var it = item || {};
+          document.getElementById('f-branch-menu-list').insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>ボタン</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>カテゴリ（任意）<input type="text" class="f-bm-group" value="' +
+              escapeHtml(it.groupLabel) +
+              '" /></label>' +
+              '<label>表示ラベル<input type="text" class="f-bm-label" value="' +
+              escapeHtml(it.label) +
+              '" /></label>' +
+              '<label>リンクURL<input type="url" class="f-bm-url" value="' +
+              escapeHtml(it.menuUrl) +
+              '" /></label>' +
+              '</div>',
+          );
+          var root = document.getElementById('f-branch-menu-list');
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+          };
+        }
+
+        function addMeoHourItem(value) {
+          var v = value || '';
+          var root = document.getElementById('f-meo-hours-list');
+          root.insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>営業時間</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<input type="text" class="f-meo-hour" value="' +
+              escapeHtml(v) +
+              '" placeholder="例: Mo-Su 11:00-23:00" />' +
+              '</div>',
+          );
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+            if (!root.querySelector('.repeat-item')) addMeoHourItem('');
+          };
+        }
+
         function buildOverrideFromForm() {
           var heroRaw = document.getElementById('f-heroSlides').value.trim();
           var heroLines = heroRaw
@@ -418,33 +644,88 @@
                 })
                 .filter(Boolean)
             : [];
-          var sectionsText = document.getElementById('f-sections').value.trim();
-          var sections = undefined;
-          if (sectionsText) {
-            try {
-              sections = JSON.parse(sectionsText);
-              if (!Array.isArray(sections)) throw new Error('sections は配列');
-            } catch (e) {
-              throw new Error('セクション JSON が不正です: ' + (e.message || e));
-            }
-          }
-          var faqItems = parseJsonOptional(document.getElementById('f-faqItems').value, 'FAQ');
-          if (faqItems !== undefined && !Array.isArray(faqItems)) throw new Error('FAQ は配列 JSON にしてください');
-          var cafeMenuTextRows = parseJsonOptional(document.getElementById('f-cafeMenuTextRows').value, 'テキストメニュー');
-          if (cafeMenuTextRows !== undefined && !Array.isArray(cafeMenuTextRows))
-            throw new Error('テキストメニュー は配列 JSON にしてください');
-          var cafeMeo = parseJsonOptional(document.getElementById('f-cafeMeo').value, 'cafeMeo');
-          if (cafeMeo !== undefined && (typeof cafeMeo !== 'object' || Array.isArray(cafeMeo)))
-            throw new Error('cafeMeo はオブジェクト JSON にしてください');
-          var cafeShopLocations = parseJsonOptional(document.getElementById('f-cafeShopLocations').value, '店舗カード');
-          if (cafeShopLocations !== undefined && !Array.isArray(cafeShopLocations))
-            throw new Error('店舗カード は配列 JSON にしてください');
-          var cafeInstagramFeedItems = parseJsonOptional(document.getElementById('f-cafeInstagramFeedItems').value, 'Instagramグリッド');
-          if (cafeInstagramFeedItems !== undefined && !Array.isArray(cafeInstagramFeedItems))
-            throw new Error('Instagramグリッド は配列 JSON にしてください');
-          var cafeBranchMenuItems = parseJsonOptional(document.getElementById('f-cafeBranchMenuItems').value, 'メニュー資料ボタン');
-          if (cafeBranchMenuItems !== undefined && !Array.isArray(cafeBranchMenuItems))
-            throw new Error('メニュー資料ボタン は配列 JSON にしてください');
+          var sections = Array.prototype.map
+            .call(document.querySelectorAll('#f-sections-list .repeat-item'), function (row) {
+              return {
+                id: row.querySelector('.f-sec-id').value.trim(),
+                title: row.querySelector('.f-sec-title').value.trim(),
+                content: row.querySelector('.f-sec-content').value.trim(),
+                imageUrl: row.querySelector('.f-sec-image').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.id || x.title || x.content || x.imageUrl;
+            });
+          var faqItems = Array.prototype.map
+            .call(document.querySelectorAll('#f-faq-list .repeat-item'), function (row) {
+              return {
+                q: row.querySelector('.f-faq-q').value.trim(),
+                a: row.querySelector('.f-faq-a').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.q && x.a;
+            });
+          var cafeMenuTextRows = Array.prototype.map
+            .call(document.querySelectorAll('#f-menu-list .repeat-item'), function (row) {
+              return {
+                groupLabel: row.querySelector('.f-menu-group').value.trim(),
+                name: row.querySelector('.f-menu-name').value.trim(),
+                price: row.querySelector('.f-menu-price').value.trim(),
+                description: row.querySelector('.f-menu-desc').value.trim(),
+                badge: row.querySelector('.f-menu-badge').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.name;
+            });
+          var meoOpeningHours = Array.prototype.map
+            .call(document.querySelectorAll('#f-meo-hours-list .f-meo-hour'), function (el) {
+              return el.value.trim();
+            })
+            .filter(Boolean);
+          var cafeMeo = {
+            servesCuisine: document.getElementById('f-meo-servesCuisine').value.trim(),
+            priceRange: document.getElementById('f-meo-priceRange').value.trim(),
+            streetAddress: document.getElementById('f-meo-streetAddress').value.trim(),
+            addressLocality: document.getElementById('f-meo-addressLocality').value.trim(),
+            addressRegion: document.getElementById('f-meo-addressRegion').value.trim(),
+            postalCode: document.getElementById('f-meo-postalCode').value.trim(),
+            openingHours: meoOpeningHours,
+          };
+          var cafeShopLocations = Array.prototype.map
+            .call(document.querySelectorAll('#f-shop-list .repeat-item'), function (row) {
+              return {
+                name: row.querySelector('.f-shop-name').value.trim(),
+                detail: row.querySelector('.f-shop-detail').value.trim(),
+                mapUrl: row.querySelector('.f-shop-map').value.trim(),
+                imageUrl: row.querySelector('.f-shop-image').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.name && x.detail;
+            });
+          var cafeInstagramFeedItems = Array.prototype.map
+            .call(document.querySelectorAll('#f-instagram-list .repeat-item'), function (row) {
+              return {
+                imageUrl: row.querySelector('.f-insta-image').value.trim(),
+                postUrl: row.querySelector('.f-insta-post').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.imageUrl && x.postUrl;
+            });
+          var cafeBranchMenuItems = Array.prototype.map
+            .call(document.querySelectorAll('#f-branch-menu-list .repeat-item'), function (row) {
+              return {
+                groupLabel: row.querySelector('.f-bm-group').value.trim(),
+                label: row.querySelector('.f-bm-label').value.trim(),
+                menuUrl: row.querySelector('.f-bm-url').value.trim(),
+              };
+            })
+            .filter(function (x) {
+              return x.label && x.menuUrl;
+            });
 
           var ov = {
             siteName: document.getElementById('f-siteName').value.trim(),
@@ -508,30 +789,53 @@
           document.getElementById('f-cafeGbPostsEmbedUrl').value = ov.cafeGbPostsEmbedUrl || '';
           document.getElementById('f-cafeInstagramPermalink').value = ov.cafeInstagramPermalink || '';
           document.getElementById('f-heroSlides').value = Array.isArray(ov.heroSlides) ? ov.heroSlides.join('\n') : '';
-          document.getElementById('f-sections').value =
-            Array.isArray(ov.sections) && ov.sections.length ? JSON.stringify(ov.sections, null, 2) : '';
-          document.getElementById('f-faqItems').value =
-            Array.isArray(ov.faqItems) && ov.faqItems.length ? JSON.stringify(ov.faqItems, null, 2) : '';
-          document.getElementById('f-cafeMenuTextRows').value =
-            Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length
-              ? JSON.stringify(ov.cafeMenuTextRows, null, 2)
-              : '';
-          document.getElementById('f-cafeMeo').value =
-            ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) && Object.keys(ov.cafeMeo).length
-              ? JSON.stringify(ov.cafeMeo, null, 2)
-              : '';
-          document.getElementById('f-cafeShopLocations').value =
-            Array.isArray(ov.cafeShopLocations) && ov.cafeShopLocations.length
-              ? JSON.stringify(ov.cafeShopLocations, null, 2)
-              : '';
-          document.getElementById('f-cafeInstagramFeedItems').value =
-            Array.isArray(ov.cafeInstagramFeedItems) && ov.cafeInstagramFeedItems.length
-              ? JSON.stringify(ov.cafeInstagramFeedItems, null, 2)
-              : '';
-          document.getElementById('f-cafeBranchMenuItems').value =
-            Array.isArray(ov.cafeBranchMenuItems) && ov.cafeBranchMenuItems.length
-              ? JSON.stringify(ov.cafeBranchMenuItems, null, 2)
-              : '';
+          document.getElementById('f-sections-list').innerHTML = '';
+          (Array.isArray(ov.sections) && ov.sections.length ? ov.sections : []).forEach(addSectionItem);
+          var meo = ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) ? ov.cafeMeo : {};
+          document.getElementById('f-meo-servesCuisine').value = meo.servesCuisine || '';
+          document.getElementById('f-meo-priceRange').value = meo.priceRange || '';
+          document.getElementById('f-meo-streetAddress').value = meo.streetAddress || '';
+          document.getElementById('f-meo-addressLocality').value = meo.addressLocality || '';
+          document.getElementById('f-meo-addressRegion').value = meo.addressRegion || '';
+          document.getElementById('f-meo-postalCode').value = meo.postalCode || '';
+          document.getElementById('f-meo-hours-list').innerHTML = '';
+          (Array.isArray(meo.openingHours) && meo.openingHours.length ? meo.openingHours : ['']).forEach(addMeoHourItem);
+          document.getElementById('f-faq-list').innerHTML = '';
+          (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addFaqItem);
+          document.getElementById('f-menu-list').innerHTML = '';
+          (Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length ? ov.cafeMenuTextRows : [{}]).forEach(addMenuItem);
+          document.getElementById('f-shop-list').innerHTML = '';
+          (Array.isArray(ov.cafeShopLocations) && ov.cafeShopLocations.length ? ov.cafeShopLocations : []).forEach(addShopItem);
+          document.getElementById('f-instagram-list').innerHTML = '';
+          (Array.isArray(ov.cafeInstagramFeedItems) && ov.cafeInstagramFeedItems.length ? ov.cafeInstagramFeedItems : []).forEach(addInstagramItem);
+          document.getElementById('f-branch-menu-list').innerHTML = '';
+          (Array.isArray(ov.cafeBranchMenuItems) && ov.cafeBranchMenuItems.length ? ov.cafeBranchMenuItems : []).forEach(addBranchMenuItem);
+        }
+
+        function bindAddButtonsOnce() {
+          if (addBtnIdsBound) return;
+          addBtnIdsBound = true;
+          document.getElementById('btn-add-section').onclick = function () {
+            addSectionItem({});
+          };
+          document.getElementById('btn-add-faq').onclick = function () {
+            addFaqItem({});
+          };
+          document.getElementById('btn-add-menu').onclick = function () {
+            addMenuItem({});
+          };
+          document.getElementById('btn-add-shop').onclick = function () {
+            addShopItem({});
+          };
+          document.getElementById('btn-add-instagram').onclick = function () {
+            addInstagramItem({});
+          };
+          document.getElementById('btn-add-branch-menu').onclick = function () {
+            addBranchMenuItem({});
+          };
+          document.getElementById('btn-add-meo-hour').onclick = function () {
+            addMeoHourItem('');
+          };
         }
 
         function scheduleLivePreview() {
@@ -608,6 +912,9 @@
             scheduleLivePreview();
           }
         }
+
+        bindAddButtonsOnce();
+        fillFormFromOverride({});
 
         credFetch(api + '/admin-auth/status')
           .then(function (r) {
