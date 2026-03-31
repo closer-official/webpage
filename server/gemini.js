@@ -164,3 +164,72 @@ JSONで返してください。キーは summary, byCategory, designSummary, byC
     return { summary: raw.slice(0, 2000), byCategory: {}, designSummary: '', byCategoryDesign: {} };
   }
 }
+
+/**
+ * 画像/PDFからテンプレ編集用 override を抽出する（JSONのみ）
+ * @param {{mimeType:string,data:string,name?:string}[]} files
+ */
+export async function extractTemplateOverrideFromDocuments(files) {
+  const model = getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const usable = Array.isArray(files) ? files.filter((f) => f && f.mimeType && f.data).slice(0, 4) : [];
+  if (!usable.length) throw new Error('no files');
+
+  const prompt = `あなたはWeb制作の入力補助AIです。添付の画像/PDFから店舗情報を抽出し、以下のJSONスキーマで返してください。
+必ずJSONオブジェクト1つのみを返し、説明文は書かないこと。
+不明項目は空文字または空配列にしてください。推測しすぎないこと。
+
+{
+  "nameSuggestion": "ドラフト名候補（任意）",
+  "override": {
+    "siteName": "",
+    "title": "",
+    "headline": "",
+    "subheadline": "",
+    "footerAddress": "",
+    "footerPhone": "",
+    "faqItems": [{"q":"", "a":""}],
+    "cafeMenuTextRows": [{"groupLabel":"", "name":"", "price":"", "description":"", "badge":""}],
+    "cafeMeo": {
+      "servesCuisine": "",
+      "priceRange": "",
+      "openingHours": [""],
+      "streetAddress": "",
+      "addressLocality": "",
+      "addressRegion": "",
+      "postalCode": ""
+    },
+    "cafeShopLocations": [{"name":"", "detail":"", "mapUrl":"", "imageUrl":""}],
+    "cafeBranchMenuItems": [{"groupLabel":"", "label":"", "menuUrl":""}]
+  }
+}
+
+補足:
+- メニューは "cafeMenuTextRows" にできるだけ分解する。
+- FAQらしき記述があれば "faqItems" に入れる。
+- Googleマップ系情報は "footerAddress" と "cafeMeo" に優先反映する。`;
+
+  const parts = [{ text: prompt }];
+  for (const f of usable) {
+    parts.push({
+      inlineData: {
+        mimeType: String(f.mimeType),
+        data: String(f.data),
+      },
+    });
+  }
+
+  const result = await model.generateContent(parts);
+  const raw = (result.response.text() || '').trim();
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Gemini did not return valid JSON');
+  let parsed = {};
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new Error('Failed to parse extracted JSON');
+  }
+  return {
+    nameSuggestion: typeof parsed.nameSuggestion === 'string' ? parsed.nameSuggestion.slice(0, 80) : '',
+    override: parsed.override && typeof parsed.override === 'object' ? parsed.override : {},
+  };
+}

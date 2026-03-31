@@ -18,7 +18,7 @@ import { processOne } from './process.js';
 import { store } from './data/store.js';
 import { isSupabaseConfigured } from './data/storeSupabase.js';
 import { fetchPageMeta } from './fetchPageMeta.js';
-import { analyzeReferenceSites, extractDesignFromHtml } from './gemini.js';
+import { analyzeReferenceSites, extractDesignFromHtml, extractTemplateOverrideFromDocuments } from './gemini.js';
 import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
@@ -144,7 +144,7 @@ function pricePayload(body, billing) {
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
 
 const PORT = process.env.PORT || 3001;
 
@@ -983,6 +983,35 @@ app.post('/api/template-preview/render', (req, res) => {
   } catch (e) {
     console.error('[template-preview/render]', e);
     res.status(500).json({ error: e?.message || 'render failed' });
+  }
+});
+
+/** 管理者のみ。画像/PDFからドラフト入力候補を抽出 */
+app.post('/api/template-customizations/extract', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const files = Array.isArray(req.body?.files) ? req.body.files : [];
+    const cleanFiles = files
+      .slice(0, 4)
+      .map((f) => ({
+        mimeType: String(f?.mimeType || '').trim().slice(0, 120),
+        data: String(f?.data || '').trim(),
+        name: String(f?.name || '').trim().slice(0, 160),
+      }))
+      .filter((f) => f.mimeType && f.data);
+    if (!cleanFiles.length) return res.status(400).json({ error: 'files are required' });
+
+    const extracted = await extractTemplateOverrideFromDocuments(cleanFiles);
+    const normalized = normalizeCustomizationInput(extracted.override || {});
+    res.json({
+      ok: true,
+      nameSuggestion: extracted.nameSuggestion || '',
+      override: normalized,
+      fileCount: cleanFiles.length,
+    });
+  } catch (e) {
+    console.error('[template-customizations/extract]', e);
+    res.status(500).json({ error: e?.message || 'extract failed' });
   }
 });
 

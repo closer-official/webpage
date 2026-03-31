@@ -293,10 +293,17 @@
         ドラフト名（管理用・80文字以内）
         <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
       </label>
+      <label>
+        資料取り込み（画像/PDF・最大4ファイル）
+        <input type="file" id="import-files" accept="image/*,.pdf,application/pdf" multiple />
+      </label>
       <div class="row-actions">
+        <button type="button" class="btn" id="btn-import-docs">資料から自動入力</button>
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
         <button type="button" class="btn primary" id="btn-save">保存</button>
       </div>
+      <p id="import-msg" class="ok" style="display: none"></p>
+      <p id="import-err" class="err" style="display: none"></p>
       <p id="save-msg" class="ok" style="display: none"></p>
       <p id="save-err" class="err" style="display: none"></p>
     </div>
@@ -447,6 +454,22 @@
           } catch (e) {
             throw new Error(label + ' の JSON が不正です: ' + (e.message || e));
           }
+        }
+
+        function readFileAsBase64(file) {
+          return new Promise(function (resolve, reject) {
+            var fr = new FileReader();
+            fr.onload = function () {
+              var v = String(fr.result || '');
+              var idx = v.indexOf('base64,');
+              if (idx < 0) return reject(new Error('base64 変換に失敗しました'));
+              resolve(v.slice(idx + 7));
+            };
+            fr.onerror = function () {
+              reject(new Error('ファイル読み込みに失敗しました'));
+            };
+            fr.readAsDataURL(file);
+          });
         }
 
         function escapeHtml(s) {
@@ -1055,6 +1078,68 @@
             updatePreviewUrl();
             showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
           }
+        };
+
+        document.getElementById('btn-import-docs').onclick = function () {
+          showErr('import-err', '');
+          showErr('import-msg', '');
+          var input = document.getElementById('import-files');
+          var files = Array.prototype.slice.call((input && input.files) || []).slice(0, 4);
+          if (!files.length) {
+            showErr('import-err', '画像またはPDFを選んでください。');
+            return;
+          }
+          var maxBytes = 8 * 1024 * 1024;
+          var tooBig = files.find(function (f) {
+            return f.size > maxBytes;
+          });
+          if (tooBig) {
+            showErr('import-err', '8MBを超えるファイルがあります: ' + tooBig.name);
+            return;
+          }
+          showErr('import-msg', '資料を解析中です…（30-60秒程度）');
+          Promise.all(
+            files.map(function (f) {
+              return readFileAsBase64(f).then(function (b64) {
+                return {
+                  name: f.name,
+                  mimeType: f.type || (String(f.name).toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/png'),
+                  data: b64,
+                };
+              });
+            }),
+          )
+            .then(function (payloadFiles) {
+              return credFetch(api + '/template-customizations/extract', {
+                method: 'POST',
+                body: JSON.stringify({ files: payloadFiles }),
+              });
+            })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || '抽出に失敗しました');
+              var ov = x.j.override || {};
+              fillFormFromOverride(ov);
+              if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
+                document.getElementById('draft-name').value = x.j.nameSuggestion;
+              }
+              currentCustomId = null;
+              if (document.getElementById('mode-select').value !== 'new') {
+                document.getElementById('mode-select').value = 'new';
+                document.getElementById('mode-select').dispatchEvent(new Event('change'));
+              }
+              updatePreviewUrl();
+              scheduleLivePreview();
+              showErr('import-msg', '自動入力しました。内容を確認して必要箇所を微調整してください。');
+            })
+            .catch(function (e) {
+              showErr('import-err', e.message || String(e));
+              showErr('import-msg', '');
+            });
         };
 
         document.getElementById('btn-save').onclick = function () {
