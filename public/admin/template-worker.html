@@ -12,9 +12,80 @@
         line-height: 1.55;
       }
       body {
-        max-width: 920px;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .app-head {
+        max-width: 1600px;
         margin: 0 auto;
-        padding: 1.25rem 1rem 3rem;
+        padding: 1.25rem 1rem 0.5rem;
+      }
+      .work-shell {
+        display: none;
+        flex-direction: row;
+        gap: 1rem;
+        align-items: flex-start;
+        justify-content: center;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 1rem 3rem;
+        box-sizing: border-box;
+      }
+      .work-shell.is-visible {
+        display: flex;
+      }
+      .preview-pane {
+        flex: 1 1 50%;
+        min-width: 0;
+        min-height: 0;
+        position: sticky;
+        top: 0.5rem;
+        align-self: flex-start;
+        max-height: calc(100vh - 0.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+      .preview-toolbar {
+        font-size: 0.82rem;
+        color: #a5d8ff;
+        font-weight: 600;
+      }
+      .preview-toolbar .hint {
+        display: block;
+        font-weight: 400;
+        color: #8b9cb3;
+        font-size: 0.76rem;
+        margin-top: 0.25rem;
+      }
+      .preview-status {
+        font-size: 0.75rem;
+        color: #fbbf24;
+        min-height: 1.25em;
+      }
+      .editor-pane {
+        flex: 0 1 520px;
+        max-width: 560px;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      @media (max-width: 960px) {
+        .work-shell.is-visible {
+          flex-direction: column;
+        }
+        .preview-pane {
+          position: relative;
+          max-height: none;
+          width: 100%;
+        }
+        .editor-pane {
+          flex: 1 1 auto;
+          max-width: none;
+          width: 100%;
+        }
       }
       h1 {
         font-size: 1.3rem;
@@ -121,13 +192,14 @@
         border: 1px solid #2a3b52;
         margin-top: 8px;
       }
-      iframe#preview {
+      iframe#preview-live {
         width: 100%;
-        height: 420px;
+        flex: 1 1 auto;
+        min-height: 360px;
+        height: min(72vh, 840px);
         border: 1px solid #2a3b52;
         border-radius: 10px;
         background: #fff;
-        margin-top: 10px;
       }
       code {
         font-size: 0.85em;
@@ -138,14 +210,16 @@
     </style>
   </head>
   <body>
-    <h1>店舗ドラフト編集（作業者用）</h1>
-    <p class="sub">
-      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
-      で変えてください）。<br />
-      <strong>cafe_1（複数店舗・ミニマル）</strong>では、下の「店舗・メニュー・FAQ」から<strong>画面上の文言と画像URLをすべて</strong>管理できます（コード変更は不要）。<br />
-      保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
-      <code>/api/template-preview/&lt;カスタムID&gt;</code> です。
-    </p>
+    <div class="app-head">
+      <h1>店舗ドラフト編集（作業者用）</h1>
+      <p class="sub">
+        <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
+        で変えてください）。<br />
+        <strong>cafe_1（複数店舗・ミニマル）</strong>では、下の「店舗・メニュー・FAQ」から<strong>画面上の文言と画像URLをすべて</strong>管理できます（コード変更は不要）。<br />
+        保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
+        <code>/api/template-preview/&lt;カスタムID&gt;</code> です。左側は<strong>ライブプレビュー</strong>（未保存の変更も反映）です。
+      </p>
+    </div>
 
     <div class="panel" id="login-box">
       <h2>管理者ログイン</h2>
@@ -155,9 +229,19 @@
         <button type="button" class="btn primary" id="adm-login-btn">ログイン</button>
         <button type="button" class="btn" id="adm-logout-btn">ログアウト</button>
       </div>
-      <p id="adm-login-err" class="err" style="display: none"></p>
+      <p id="adm-login-err" class="err" style="display: none">      </p>
     </div>
 
+    <div class="work-shell" id="work-shell">
+      <aside class="preview-pane" aria-label="ライブプレビュー">
+        <div class="preview-toolbar">
+          ライブプレビュー
+          <span class="hint">未保存のドラフトも反映（入力から少し遅れて更新）。保存済みの ID があるときは保存済み URL を表示。</span>
+        </div>
+        <div class="preview-status" id="preview-live-status"></div>
+        <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-scripts allow-same-origin"></iframe>
+      </aside>
+      <div class="editor-pane" id="editor-pane">
     <div class="panel" id="work-box" style="display: none">
       <h2>1. ドラフトの選択</h2>
       <label>
@@ -268,8 +352,10 @@
         <button type="button" class="btn" id="btn-copy-url" disabled>プレビューURLをコピー</button>
         <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
       </div>
-      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">下の枠を再読み込み</button>
-      <iframe id="preview" title="プレビュー" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">左のプレビューを再読み込み</button>
+    </div>
+
+      </div>
     </div>
 
     <p class="sub" style="margin-top: 1.5rem">
@@ -285,6 +371,8 @@
         })();
 
         var currentCustomId = null;
+        var previewBaseTemplateId = '';
+        var livePreviewTimer = null;
 
         function credFetch(url, opts) {
           var o = opts || {};
@@ -297,6 +385,8 @@
         }
 
         function setAuthUi(authenticated) {
+          var shell = document.getElementById('work-shell');
+          if (shell) shell.classList.toggle('is-visible', !!authenticated);
           document.getElementById('work-box').style.display = authenticated ? 'block' : 'none';
           document.getElementById('form-box').style.display = authenticated ? 'block' : 'none';
           document.getElementById('share-box').style.display = authenticated ? 'block' : 'none';
@@ -444,6 +534,59 @@
               : '';
         }
 
+        function scheduleLivePreview() {
+          if (currentCustomId) return;
+          clearTimeout(livePreviewTimer);
+          livePreviewTimer = setTimeout(runLivePreview, 420);
+        }
+
+        function runLivePreview() {
+          if (currentCustomId) return;
+          if (document.getElementById('mode-select').value === 'edit') {
+            var st = document.getElementById('preview-live-status');
+            if (st) st.textContent = '既存カスタムを選んで「フォームに読み込む」を押すとプレビューできます。';
+            return;
+          }
+          var baseId =
+            previewBaseTemplateId ||
+            (document.getElementById('base-template') && document.getElementById('base-template').value) ||
+            '';
+          var iframe = document.getElementById('preview-live');
+          var statusEl = document.getElementById('preview-live-status');
+          if (!baseId) {
+            if (statusEl) statusEl.textContent = 'ベーステンプレを選ぶか、「フォームに読み込む」を押してください。';
+            return;
+          }
+          var override;
+          try {
+            override = buildOverrideFromForm();
+          } catch (e) {
+            if (statusEl) statusEl.textContent = '入力エラー: ' + (e.message || e);
+            return;
+          }
+          if (statusEl) statusEl.textContent = 'レンダー中…';
+          credFetch(api + '/template-preview/render', {
+            method: 'POST',
+            body: JSON.stringify({ baseTemplateId: baseId, override: override }),
+          })
+            .then(function (r) {
+              if (!r.ok) {
+                return r.text().then(function (t) {
+                  throw new Error(t || String(r.status));
+                });
+              }
+              return r.text();
+            })
+            .then(function (html) {
+              iframe.removeAttribute('src');
+              iframe.srcdoc = html;
+              if (statusEl) statusEl.textContent = 'ライブプレビュー（未保存の内容）';
+            })
+            .catch(function (e) {
+              if (statusEl) statusEl.textContent = 'プレビュー失敗: ' + (e.message || e);
+            });
+        }
+
         function updatePreviewUrl() {
           var path = currentCustomId ? '/api/template-preview/' + encodeURIComponent(currentCustomId) : '';
           var full = path ? window.location.origin + path : '';
@@ -452,8 +595,18 @@
           document.getElementById('btn-open-preview').disabled = !has;
           document.getElementById('btn-copy-url').disabled = !has;
           document.getElementById('btn-mailto').disabled = !has;
-          var iframe = document.getElementById('preview');
-          if (has) iframe.src = path;
+          var iframe = document.getElementById('preview-live');
+          var statusEl = document.getElementById('preview-live-status');
+          if (has) {
+            iframe.removeAttribute('srcdoc');
+            iframe.src = path;
+            if (statusEl) statusEl.textContent = '保存済みプレビュー（サーバー保存内容）を表示中';
+          } else {
+            iframe.removeAttribute('srcdoc');
+            iframe.src = 'about:blank';
+            if (statusEl) statusEl.textContent = '';
+            scheduleLivePreview();
+          }
         }
 
         credFetch(api + '/admin-auth/status')
@@ -505,7 +658,18 @@
           var edit = document.getElementById('mode-select').value === 'edit';
           document.getElementById('wrap-base').style.display = edit ? 'none' : 'block';
           document.getElementById('wrap-existing').style.display = edit ? 'block' : 'none';
-          if (!edit) currentCustomId = null;
+          if (!edit) {
+            currentCustomId = null;
+            previewBaseTemplateId = document.getElementById('base-template').value || '';
+          }
+          updatePreviewUrl();
+        };
+
+        document.getElementById('base-template').onchange = function () {
+          if (document.getElementById('mode-select').value === 'new') {
+            previewBaseTemplateId = document.getElementById('base-template').value || '';
+            if (!currentCustomId) scheduleLivePreview();
+          }
         };
 
         function loadBasesAndCustoms() {
@@ -538,6 +702,10 @@
                 o.textContent = (item.name || item.id) + ' · ' + item.id + ' · base:' + (item.baseTemplateId || '');
                 ex.appendChild(o);
               });
+              if (document.getElementById('mode-select').value === 'new') {
+                previewBaseTemplateId = document.getElementById('base-template').value || '';
+              }
+              if (!currentCustomId) scheduleLivePreview();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');
@@ -563,6 +731,7 @@
                 });
                 if (!item) throw new Error('見つかりません');
                 currentCustomId = item.id;
+                previewBaseTemplateId = item.baseTemplateId || '';
                 document.getElementById('draft-name').value = item.name || '';
                 fillFormFromOverride(item.override);
                 updatePreviewUrl();
@@ -573,6 +742,7 @@
               });
           } else {
             currentCustomId = null;
+            previewBaseTemplateId = document.getElementById('base-template').value || '';
             document.getElementById('draft-name').value = '';
             fillFormFromOverride({});
             updatePreviewUrl();
@@ -697,8 +867,27 @@
         };
 
         document.getElementById('btn-refresh-iframe').onclick = function () {
-          updatePreviewUrl();
+          if (currentCustomId) {
+            var iframe = document.getElementById('preview-live');
+            var p = '/api/template-preview/' + encodeURIComponent(currentCustomId);
+            iframe.removeAttribute('srcdoc');
+            iframe.src = p;
+            var statusEl = document.getElementById('preview-live-status');
+            if (statusEl) statusEl.textContent = '保存済みプレビューを再読み込みしました';
+          } else {
+            runLivePreview();
+          }
         };
+
+        var editorPane = document.getElementById('editor-pane');
+        if (editorPane) {
+          editorPane.addEventListener('input', function () {
+            if (!currentCustomId) scheduleLivePreview();
+          });
+          editorPane.addEventListener('change', function () {
+            if (!currentCustomId) scheduleLivePreview();
+          });
+        }
       })();
     </script>
   </body>
