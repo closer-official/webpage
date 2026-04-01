@@ -302,6 +302,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
           return [d1, d2, d3];
         })()
       : [];
+  const woHeroSlideStyles = Array.isArray(content.heroSlideStyles) ? content.heroSlideStyles : [];
 
   const skipLink = '<a href="#main-content" class="skip-link">メインコンテンツへ</a>';
 
@@ -1240,7 +1241,15 @@ ${cafe1ShopLocationsHtml()}
     tid === 'cafe_tea' || tid === 'cafe_1'
       ? `<section${tid === 'cafe_1' ? ' id="wo-top"' : ''} class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
       <div class="wo-hero-viewport">
-        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides.map((u) => `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)})"></div>`).join('')}</div>
+        <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides
+          .map((u, i) => {
+            const st = woHeroSlideStyles[i] || {};
+            const x = Number.isFinite(Number(st.x)) ? Math.max(0, Math.min(100, Number(st.x))) : 50;
+            const y = Number.isFinite(Number(st.y)) ? Math.max(0, Math.min(100, Number(st.y))) : 50;
+            const zoom = Number.isFinite(Number(st.zoom)) ? Math.max(50, Math.min(250, Number(st.zoom))) : 100;
+            return `<div class="wo-hero-slide" style="background-image:url(${escapeHtml(u)});background-position:${x}% ${y}%;background-size:${zoom}% auto;"></div>`;
+          })
+          .join('')}</div>
       </div>
       ${woHeroInnerHtml}
       <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>

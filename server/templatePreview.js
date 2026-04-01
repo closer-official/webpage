@@ -119,6 +119,9 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (Array.isArray(customization.heroSlides) && customization.heroSlides.length > 0) {
     out.heroSlides = customization.heroSlides.slice(0, 10);
   }
+  if (Array.isArray(customization.heroSlideStyles) && customization.heroSlideStyles.length > 0) {
+    out.heroSlideStyles = customization.heroSlideStyles.slice(0, 10);
+  }
   if (Array.isArray(customization.sections) && customization.sections.length > 0) {
     out.sections = customization.sections.slice(0, 15);
   }

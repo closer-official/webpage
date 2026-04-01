@@ -481,6 +481,27 @@ function sanitizeOverrideHeroSlides(raw) {
   return urls.length ? urls : undefined;
 }
 
+function sanitizeOverrideHeroSlideStyles(raw, countHint = 0) {
+  if (!Array.isArray(raw)) return undefined;
+  const out = [];
+  const max = Math.min(10, Math.max(0, Number(countHint) || 0) || 10);
+  for (const row of raw.slice(0, max)) {
+    if (!row || typeof row !== 'object') {
+      out.push({ x: 50, y: 50, zoom: 100 });
+      continue;
+    }
+    const x = Number(row.x);
+    const y = Number(row.y);
+    const z = Number(row.zoom);
+    out.push({
+      x: Number.isFinite(x) ? Math.max(0, Math.min(100, x)) : 50,
+      y: Number.isFinite(y) ? Math.max(0, Math.min(100, y)) : 50,
+      zoom: Number.isFinite(z) ? Math.max(50, Math.min(250, z)) : 100,
+    });
+  }
+  return out.length ? out : undefined;
+}
+
 function sanitizeOverrideSections(raw) {
   if (!Array.isArray(raw)) return undefined;
   const out = [];
@@ -647,6 +668,8 @@ function normalizeCustomizationInput(body = {}) {
 
   const heroSlides = sanitizeOverrideHeroSlides(body.heroSlides);
   if (heroSlides) out.heroSlides = heroSlides;
+  const heroSlideStyles = sanitizeOverrideHeroSlideStyles(body.heroSlideStyles, heroSlides?.length || 0);
+  if (heroSlideStyles) out.heroSlideStyles = heroSlideStyles;
 
   const sections = sanitizeOverrideSections(body.sections);
   if (sections) out.sections = sections;

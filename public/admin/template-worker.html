@@ -357,10 +357,11 @@
       <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
       <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
       <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
-      <label>
-        ヒーロー・メイン画像 URL（1行1URL・http(s)・最大10件）
-        <textarea id="f-heroSlides" class="mono" rows="5" placeholder="https://..."></textarea>
-      </label>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">トップ画像（追加・並び替えは手動。最大10枚）</div>
+        <div id="f-hero-slides-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
+      </div>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">セクション（任意）</div>
         <div id="f-sections-list"></div>
@@ -412,6 +413,11 @@
       <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
       <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
       <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
+      <label>
+        高度設定JSON（未露出キー用・任意）
+        <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">ここに入れたキーは override にそのままマージされます。通常項目に無い `cafe_1` 専用キーを編集したいときに使用。</span>
+        <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
+      </label>
 
       <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
       <label>meta title <input type="text" id="f-metaTitle" /></label>
@@ -784,6 +790,12 @@
               '<label>画像URL（任意）<input type="url" class="f-shop-image" value="' +
               escapeHtml(it.imageUrl) +
               '" /></label>' +
+              '<label>予約URL（任意）<input type="url" class="f-shop-reserve-url" value="' +
+              escapeHtml(it.reserveUrl) +
+              '" /></label>' +
+              '<label>予約ボタン文言（任意）<input type="text" class="f-shop-reserve-label" value="' +
+              escapeHtml(it.reserveLabel) +
+              '" /></label>' +
               '</div>',
           );
           var root = document.getElementById('f-shop-list');
@@ -857,16 +869,62 @@
           };
         }
 
+        function addHeroSlideItem(item) {
+          var it = item || {};
+          var root = document.getElementById('f-hero-slides-list');
+          var idx = root.querySelectorAll('.repeat-item').length + 1;
+          root.insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>トップ画像 ' +
+              idx +
+              '</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>画像URL<input type="url" class="f-hero-url" value="' +
+              escapeHtml(it.url) +
+              '" placeholder="https://..." /></label>' +
+              '<label>表示位置X（%）<input type="number" class="f-hero-pos-x" min="0" max="100" step="1" value="' +
+              escapeHtml(it.posX == null ? '50' : String(it.posX)) +
+              '" /></label>' +
+              '<label>表示位置Y（%）<input type="number" class="f-hero-pos-y" min="0" max="100" step="1" value="' +
+              escapeHtml(it.posY == null ? '50' : String(it.posY)) +
+              '" /></label>' +
+              '<label>ズーム倍率（%）<input type="number" class="f-hero-zoom" min="50" max="250" step="1" value="' +
+              escapeHtml(it.zoom == null ? '100' : String(it.zoom)) +
+              '" /></label>' +
+              '</div>',
+          );
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+            if (!root.querySelector('.repeat-item')) addHeroSlideItem({});
+          };
+        }
+
         function buildOverrideFromForm() {
-          var heroRaw = document.getElementById('f-heroSlides').value.trim();
-          var heroLines = heroRaw
-            ? heroRaw
-                .split(/\n+/)
-                .map(function (s) {
-                  return s.trim();
-                })
-                .filter(Boolean)
-            : [];
+          var heroRows = Array.prototype.map.call(document.querySelectorAll('#f-hero-slides-list .repeat-item'), function (row) {
+            return {
+              url: row.querySelector('.f-hero-url').value.trim(),
+              posX: Number(row.querySelector('.f-hero-pos-x').value),
+              posY: Number(row.querySelector('.f-hero-pos-y').value),
+              zoom: Number(row.querySelector('.f-hero-zoom').value),
+            };
+          });
+          var heroLines = heroRows
+            .map(function (r) {
+              return r.url;
+            })
+            .filter(Boolean);
+          var heroSlideStyles = heroRows
+            .filter(function (r) {
+              return r.url;
+            })
+            .map(function (r) {
+              return {
+                x: Number.isFinite(r.posX) ? r.posX : 50,
+                y: Number.isFinite(r.posY) ? r.posY : 50,
+                zoom: Number.isFinite(r.zoom) ? r.zoom : 100,
+              };
+            });
           var sections = Array.prototype.map
             .call(document.querySelectorAll('#f-sections-list .repeat-item'), function (row) {
               return {
@@ -923,6 +981,8 @@
                 detail: row.querySelector('.f-shop-detail').value.trim(),
                 mapUrl: row.querySelector('.f-shop-map').value.trim(),
                 imageUrl: row.querySelector('.f-shop-image').value.trim(),
+                reserveUrl: row.querySelector('.f-shop-reserve-url').value.trim(),
+                reserveLabel: row.querySelector('.f-shop-reserve-label').value.trim(),
               };
             })
             .filter(function (x) {
@@ -976,6 +1036,7 @@
             cafeInstagramPermalink: document.getElementById('f-cafeInstagramPermalink').value.trim(),
           };
           if (heroLines.length) ov.heroSlides = heroLines;
+          if (heroSlideStyles.length) ov.heroSlideStyles = heroSlideStyles;
           if (sections && sections.length) ov.sections = sections;
           if (faqItems && faqItems.length) ov.faqItems = faqItems;
           if (cafeMenuTextRows && cafeMenuTextRows.length) ov.cafeMenuTextRows = cafeMenuTextRows;
@@ -983,6 +1044,19 @@
           if (cafeShopLocations && cafeShopLocations.length) ov.cafeShopLocations = cafeShopLocations;
           if (cafeInstagramFeedItems && cafeInstagramFeedItems.length) ov.cafeInstagramFeedItems = cafeInstagramFeedItems;
           if (cafeBranchMenuItems && cafeBranchMenuItems.length) ov.cafeBranchMenuItems = cafeBranchMenuItems;
+
+          var advanced = String(document.getElementById('f-advanced-override-json').value || '').trim();
+          if (advanced) {
+            var advObj = parseJsonOptional(advanced, '高度設定JSON');
+            if (advObj !== undefined) {
+              if (!advObj || typeof advObj !== 'object' || Array.isArray(advObj)) {
+                throw new Error('高度設定JSONはオブジェクト形式にしてください');
+              }
+              Object.keys(advObj).forEach(function (k) {
+                ov[k] = advObj[k];
+              });
+            }
+          }
           return ov;
         }
 
@@ -1011,7 +1085,17 @@
           document.getElementById('f-cafeReviewCtaUrl').value = ov.cafeReviewCtaUrl || '';
           document.getElementById('f-cafeGbPostsEmbedUrl').value = ov.cafeGbPostsEmbedUrl || '';
           document.getElementById('f-cafeInstagramPermalink').value = ov.cafeInstagramPermalink || '';
-          document.getElementById('f-heroSlides').value = Array.isArray(ov.heroSlides) ? ov.heroSlides.join('\n') : '';
+          document.getElementById('f-hero-slides-list').innerHTML = '';
+          var hs = Array.isArray(ov.heroSlides) ? ov.heroSlides : [];
+          var hst = Array.isArray(ov.heroSlideStyles) ? ov.heroSlideStyles : [];
+          if (hs.length) {
+            hs.forEach(function (u, i) {
+              var st = hst[i] || {};
+              addHeroSlideItem({ url: u, posX: st.x, posY: st.y, zoom: st.zoom });
+            });
+          } else {
+            addHeroSlideItem({});
+          }
           document.getElementById('f-sections-list').innerHTML = '';
           (Array.isArray(ov.sections) && ov.sections.length ? ov.sections : []).forEach(addSectionItem);
           var meo = ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) ? ov.cafeMeo : {};
@@ -1033,6 +1117,46 @@
           (Array.isArray(ov.cafeInstagramFeedItems) && ov.cafeInstagramFeedItems.length ? ov.cafeInstagramFeedItems : []).forEach(addInstagramItem);
           document.getElementById('f-branch-menu-list').innerHTML = '';
           (Array.isArray(ov.cafeBranchMenuItems) && ov.cafeBranchMenuItems.length ? ov.cafeBranchMenuItems : []).forEach(addBranchMenuItem);
+
+          var knownKeys = {
+            siteName: true,
+            title: true,
+            headline: true,
+            subheadline: true,
+            footerText: true,
+            ctaLabel: true,
+            ctaHref: true,
+            navLabels: true,
+            metaTitle: true,
+            metaDescription: true,
+            ogImageUrl: true,
+            canonicalUrl: true,
+            keywords: true,
+            footerAddress: true,
+            footerPhone: true,
+            footerInstagramUrl: true,
+            footerLineUrl: true,
+            mapEmbedUrl: true,
+            cafeFloatingMapUrl: true,
+            cafeReviewCtaText: true,
+            cafeReviewCtaUrl: true,
+            cafeGbPostsEmbedUrl: true,
+            cafeInstagramPermalink: true,
+            heroSlides: true,
+            heroSlideStyles: true,
+            sections: true,
+            faqItems: true,
+            cafeMenuTextRows: true,
+            cafeMeo: true,
+            cafeShopLocations: true,
+            cafeInstagramFeedItems: true,
+            cafeBranchMenuItems: true,
+          };
+          var extra = {};
+          Object.keys(ov || {}).forEach(function (k) {
+            if (!knownKeys[k]) extra[k] = ov[k];
+          });
+          document.getElementById('f-advanced-override-json').value = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : '';
         }
 
         function bindAddButtonsOnce() {
@@ -1058,6 +1182,12 @@
           };
           document.getElementById('btn-add-meo-hour').onclick = function () {
             addMeoHourItem('');
+          };
+          document.getElementById('btn-add-hero-slide').onclick = function () {
+            var root = document.getElementById('f-hero-slides-list');
+            if (!root) return;
+            if (root.querySelectorAll('.repeat-item').length >= 10) return;
+            addHeroSlideItem({});
           };
         }
 
