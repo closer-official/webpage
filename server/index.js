@@ -991,6 +991,7 @@ app.post('/api/template-customizations/extract', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   try {
     const files = Array.isArray(req.body?.files) ? req.body.files : [];
+    const textContext = String(req.body?.text || '').trim().slice(0, 16000);
     const cleanFiles = files
       .slice(0, 4)
       .map((f) => ({
@@ -999,15 +1000,16 @@ app.post('/api/template-customizations/extract', async (req, res) => {
         name: String(f?.name || '').trim().slice(0, 160),
       }))
       .filter((f) => f.mimeType && f.data);
-    if (!cleanFiles.length) return res.status(400).json({ error: 'files are required' });
+    if (!cleanFiles.length && !textContext) return res.status(400).json({ error: 'files or text are required' });
 
-    const extracted = await extractTemplateOverrideFromDocuments(cleanFiles);
+    const extracted = await extractTemplateOverrideFromDocuments(cleanFiles, textContext);
     const normalized = normalizeCustomizationInput(extracted.override || {});
     res.json({
       ok: true,
       nameSuggestion: extracted.nameSuggestion || '',
       override: normalized,
       fileCount: cleanFiles.length,
+      textLength: textContext.length,
     });
   } catch (e) {
     console.error('[template-customizations/extract]', e);

@@ -166,15 +166,17 @@ JSONで返してください。キーは summary, byCategory, designSummary, byC
 }
 
 /**
- * 画像/PDFからテンプレ編集用 override を抽出する（JSONのみ）
+ * 画像/PDF/テキストからテンプレ編集用 override を抽出する（JSONのみ）
  * @param {{mimeType:string,data:string,name?:string}[]} files
+ * @param {string} textContext
  */
-export async function extractTemplateOverrideFromDocuments(files) {
+export async function extractTemplateOverrideFromDocuments(files, textContext = '') {
   const model = getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
   const usable = Array.isArray(files) ? files.filter((f) => f && f.mimeType && f.data).slice(0, 4) : [];
-  if (!usable.length) throw new Error('no files');
+  const text = String(textContext || '').trim().slice(0, 16000);
+  if (!usable.length && !text) throw new Error('no input');
 
-  const prompt = `あなたはWeb制作の入力補助AIです。添付の画像/PDFから店舗情報を抽出し、以下のJSONスキーマで返してください。
+  const prompt = `あなたはWeb制作の入力補助AIです。添付の画像/PDFおよび追加入力テキストから店舗情報を抽出し、以下のJSONスキーマで返してください。
 必ずJSONオブジェクト1つのみを返し、説明文は書かないこと。
 不明項目は空文字または空配列にしてください。推測しすぎないこと。
 
@@ -206,9 +208,15 @@ export async function extractTemplateOverrideFromDocuments(files) {
 補足:
 - メニューは "cafeMenuTextRows" にできるだけ分解する。
 - FAQらしき記述があれば "faqItems" に入れる。
-- Googleマップ系情報は "footerAddress" と "cafeMeo" に優先反映する。`;
+- Googleマップ系情報は "footerAddress" と "cafeMeo" に優先反映する。
+- テキスト入力にある事実は優先して採用する。`;
 
   const parts = [{ text: prompt }];
+  if (text) {
+    parts.push({
+      text: `追加テキスト:\n${text}`,
+    });
+  }
   for (const f of usable) {
     parts.push({
       inlineData: {

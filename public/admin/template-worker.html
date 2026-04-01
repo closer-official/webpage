@@ -307,6 +307,10 @@
         資料取り込み（画像/PDF・最大4ファイル）
         <input type="file" id="import-files" accept="image/*,.pdf,application/pdf" multiple />
       </label>
+      <label>
+        文字取り込み（メモ/ヒアリング内容）
+        <textarea id="import-text" rows="5" placeholder="例: 店舗名、住所、営業時間、メニュー、FAQ候補、強みなど"></textarea>
+      </label>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">AI調査取り込みテンプレ（Gemini / ChatGPT用）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
@@ -1239,8 +1243,9 @@
           showErr('import-msg', '');
           var input = document.getElementById('import-files');
           var files = Array.prototype.slice.call((input && input.files) || []).slice(0, 4);
-          if (!files.length) {
-            showErr('import-err', '画像またはPDFを選んでください。');
+          var textInput = String(document.getElementById('import-text').value || '').trim();
+          if (!files.length && !textInput) {
+            showErr('import-err', '画像/PDFまたは文字入力のどちらかを入れてください。');
             return;
           }
           var maxBytes = 8 * 1024 * 1024;
@@ -1266,7 +1271,7 @@
             .then(function (payloadFiles) {
               return credFetch(api + '/template-customizations/extract', {
                 method: 'POST',
-                body: JSON.stringify({ files: payloadFiles }),
+                body: JSON.stringify({ files: payloadFiles, text: textInput }),
               });
             })
             .then(function (r) {
