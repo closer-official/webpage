@@ -219,7 +219,7 @@ function resolveTemplateOverride(customization) {
   return customization;
 }
 
-export function renderTemplatePreview(templateId, customization = null) {
+export function renderTemplatePreview(templateId, customization = null, options = {}) {
   const cust = customization && typeof customization === 'object' ? customization : null;
   if (cust?.blueprint && typeof cust.blueprint === 'object' && cust.blueprint.version === 1) {
     const ov = resolveTemplateOverride(cust);
@@ -449,6 +449,9 @@ export function renderTemplatePreview(templateId, customization = null) {
 
   content = applyTemplateCustomization(content, ov);
   seo = applySeoCustomization(seo, ov);
+  if (options && options.returnResolvedData) {
+    return { id, content, seo };
+  }
   let html = buildHtml(content, seo, id, {
     contactForm: id === 'cafe_1' ? false : true,
     formActionUrl: '#',

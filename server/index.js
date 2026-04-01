@@ -1009,6 +1009,24 @@ app.post('/api/template-preview/render', (req, res) => {
   }
 });
 
+/** 管理者のみ。ビルトインテンプレの現在値を編集フォーム用に返す */
+app.get('/api/template-default/:templateId', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const templateId = String(req.params.templateId || '').trim();
+  if (!templateId) return res.status(400).json({ error: 'templateId is required' });
+  try {
+    const resolved = renderTemplatePreview(templateId, {}, { returnResolvedData: true });
+    if (!resolved || typeof resolved !== 'object' || !resolved.content) {
+      return res.status(404).json({ error: 'template not found' });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ ok: true, id: resolved.id, content: resolved.content, seo: resolved.seo || {} });
+  } catch (e) {
+    console.error('[template-default]', e);
+    res.status(500).json({ error: e?.message || 'template-default failed' });
+  }
+});
+
 /** 管理者のみ。画像/PDFからドラフト入力候補を抽出 */
 app.post('/api/template-customizations/extract', async (req, res) => {
   if (!requireAdmin(req, res)) return;
