@@ -116,10 +116,13 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (String(customization.ctaHref || '').trim()) {
     out.ctaHref = String(customization.ctaHref).trim().slice(0, 500);
   }
-  if (Array.isArray(customization.heroSlides) && customization.heroSlides.length > 0) {
-    out.heroSlides = customization.heroSlides.slice(0, 10);
+  if (Array.isArray(customization.heroSlides)) {
+    out.heroSlides = customization.heroSlides
+      .map((u) => String(u || '').trim())
+      .filter((u) => /^https?:\/\//i.test(u))
+      .slice(0, 10);
   }
-  if (Array.isArray(customization.heroSlideStyles) && customization.heroSlideStyles.length > 0) {
+  if (Array.isArray(customization.heroSlideStyles)) {
     out.heroSlideStyles = customization.heroSlideStyles.slice(0, 10);
   }
   if (Array.isArray(customization.sections) && customization.sections.length > 0) {

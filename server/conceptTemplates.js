@@ -996,6 +996,14 @@ const CAFE_1_CSS =
   .page-wrapper.template-cafe_1 .wo-nav-drawer .wo-nav-brand { color: #9a9a9a !important; }
   .page-wrapper.template-cafe_1 .wo-nav-drawer .cta-btn { background: #111 !important; color: #fff !important; width: 100%; justify-content: center; }
   .page-wrapper.template-cafe_1 .wo-hero-inner { text-align: center !important; padding: 2rem 1.5rem 4.5rem !important; }
+  .page-wrapper.template-cafe_1 .c1-hero-inner.c1-hero-inner--brand-only { padding-bottom: 3.35rem !important; }
+  .page-wrapper.template-cafe_1 .c1-hero-inner--brand-only .c1-hero-brand:last-child { margin-bottom: 0; }
+  .page-wrapper.template-cafe_1 .c1-hero-below { background: var(--tp-bg); border-bottom: 1px solid var(--tp-border); padding: 2rem 0 2.35rem; }
+  .page-wrapper.template-cafe_1 .c1-hero-below-inner { text-align: center; max-width: 40rem; margin: 0 auto; }
+  .page-wrapper.template-cafe_1 .c1-hero-below-h1 { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.15rem, 4vw, 1.55rem); font-weight: 700; line-height: 1.45; color: var(--tp-heading); margin: 0 0 0.85rem; }
+  .page-wrapper.template-cafe_1 .c1-hero-below-lede { font-size: 0.98rem; line-height: 1.9; color: var(--tp-text); }
+  .page-wrapper.template-cafe_1 .c1-hero-below-lede p { margin: 0 0 0.65rem; }
+  .page-wrapper.template-cafe_1 .c1-hero-below-lede p:last-child { margin-bottom: 0; }
   .page-wrapper.template-cafe_1 .c1-hero-brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; margin: 0 0 0.35rem; }
   .page-wrapper.template-cafe_1 .c1-hero-h1 { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; margin: 0.25rem 0 0.5rem; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
   .page-wrapper.template-cafe_1 .c1-hero-inner.c1-hero-minimal .c1-hero-h1 { margin-top: 0; margin-bottom: 0; }

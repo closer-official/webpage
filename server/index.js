@@ -466,6 +466,7 @@ function intakeToPageDraft(intake) {
 }
 
 function sanitizeOverrideHeroSlides(raw) {
+  if (raw === undefined || raw === null) return undefined;
   let list = [];
   if (Array.isArray(raw)) list = raw.map((s) => String(s).trim()).filter(Boolean);
   else if (typeof raw === 'string') {
@@ -478,13 +479,14 @@ function sanitizeOverrideHeroSlides(raw) {
     .slice(0, 10)
     .map((s) => s.slice(0, 2000))
     .filter((s) => /^https?:\/\//i.test(s));
-  return urls.length ? urls : undefined;
+  return urls;
 }
 
 function sanitizeOverrideHeroSlideStyles(raw, countHint = 0) {
   if (!Array.isArray(raw)) return undefined;
+  const slidesLen = Math.max(0, Math.min(10, Number(countHint) || 0));
+  const max = slidesLen > 0 ? slidesLen : Math.min(10, raw.length);
   const out = [];
-  const max = Math.min(10, Math.max(0, Number(countHint) || 0) || 10);
   for (const row of raw.slice(0, max)) {
     if (!row || typeof row !== 'object') {
       out.push({ x: 50, y: 50, zoom: 100 });
@@ -499,7 +501,7 @@ function sanitizeOverrideHeroSlideStyles(raw, countHint = 0) {
       zoom: Number.isFinite(z) ? Math.max(50, Math.min(250, z)) : 100,
     });
   }
-  return out.length ? out : undefined;
+  return out;
 }
 
 function sanitizeOverrideSections(raw) {
@@ -667,9 +669,12 @@ function normalizeCustomizationInput(body = {}) {
   if (theme.bg || theme.text || theme.accent) out.theme = theme;
 
   const heroSlides = sanitizeOverrideHeroSlides(body.heroSlides);
-  if (heroSlides) out.heroSlides = heroSlides;
-  const heroSlideStyles = sanitizeOverrideHeroSlideStyles(body.heroSlideStyles, heroSlides?.length || 0);
-  if (heroSlideStyles) out.heroSlideStyles = heroSlideStyles;
+  if (heroSlides !== undefined) out.heroSlides = heroSlides;
+  const heroSlideStyles = sanitizeOverrideHeroSlideStyles(
+    body.heroSlideStyles,
+    heroSlides !== undefined ? heroSlides.length : 0,
+  );
+  if (heroSlideStyles !== undefined) out.heroSlideStyles = heroSlideStyles;
 
   const sections = sanitizeOverrideSections(body.sections);
   if (sections) out.sections = sections;

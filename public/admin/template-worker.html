@@ -370,13 +370,15 @@
       <div class="tw-form-block" data-tw-for="all">
         <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">ヒーロー・ファーストビュー関連</h3>
         <div class="repeat-group">
-          <div style="font-size: 0.8rem; color: #9aacbf">トップ画像 URL（追加・並び替えは手動。最大10枚）</div>
+          <div style="font-size: 0.8rem; color: #9aacbf">
+            トップ画像 URL（「削除」で枚数を減らせます。最大10枚・並び替えは上から順に手動）
+          </div>
           <div id="f-hero-slides-list"></div>
           <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
         </div>
-        <label>サイト名（店名・ブランド名） <input type="text" id="f-siteName" /></label>
-        <label>メイン見出し <input type="text" id="f-headline" /></label>
-        <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
+        <label>店舗名（トップ写真の上にだけ表示） <input type="text" id="f-siteName" /></label>
+        <label>メイン見出し（写真の直下・白背景エリア） <input type="text" id="f-headline" /></label>
+        <label>リード文（写真の直下・見出しの下） <textarea id="f-subheadline" rows="3"></textarea></label>
         <label>ページタイトル（ブラウザのタブ・&lt;title&gt;） <input type="text" id="f-title" /></label>
       </div>
 
@@ -1042,7 +1044,6 @@
           var itemEl = root.lastElementChild;
           itemEl.querySelector('.js-remove-repeat').onclick = function () {
             itemEl.remove();
-            if (!root.querySelector('.repeat-item')) addHeroSlideItem({});
           };
         }
 
@@ -1181,8 +1182,8 @@
             cafeGbPostsEmbedUrl: document.getElementById('f-cafeGbPostsEmbedUrl').value.trim(),
             cafeInstagramPermalink: document.getElementById('f-cafeInstagramPermalink').value.trim(),
           };
-          if (heroLines.length) ov.heroSlides = heroLines;
-          if (heroSlideStyles.length) ov.heroSlideStyles = heroSlideStyles;
+          ov.heroSlides = heroLines;
+          ov.heroSlideStyles = heroSlideStyles;
           if (sections && sections.length) ov.sections = sections;
           if (faqItems && faqItems.length) ov.faqItems = faqItems;
           if (cafeMenuTextRows && cafeMenuTextRows.length) ov.cafeMenuTextRows = cafeMenuTextRows;
@@ -1239,8 +1240,6 @@
               var st = hst[i] || {};
               addHeroSlideItem({ url: u, posX: st.x, posY: st.y, zoom: st.zoom });
             });
-          } else {
-            addHeroSlideItem({});
           }
           document.getElementById('f-sections-list').innerHTML = '';
           (Array.isArray(ov.sections) && ov.sections.length ? ov.sections : []).forEach(addSectionItem);

@@ -296,9 +296,11 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
             tid === 'cafe_1'
               ? 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400'
               : 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1400';
-          const hs = (content.heroSlides || []).filter((u) => (u || '').trim());
-          if (hs.length >= 2) return hs;
-          if (hs.length === 1) return [hs[0], d2, d3];
+          const hs = (content.heroSlides || [])
+            .map((u) => String(u || '').trim())
+            .filter(Boolean)
+            .slice(0, 10);
+          if (hs.length > 0) return hs;
           return [d1, d2, d3];
         })()
       : [];
@@ -1226,14 +1228,10 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
   }
 
-  const cafe1HeroShowBrand =
-    Boolean(String(content.subheadline || '').trim()) || !String(content.headline || '').trim();
   const woHeroInnerHtml =
     tid === 'cafe_1'
-      ? `<div class="wo-hero-inner c1-hero-inner${cafe1HeroShowBrand ? '' : ' c1-hero-minimal'}">
-        ${cafe1HeroShowBrand ? `<p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>` : ''}
-        ${content.headline ? `<h1 class="c1-hero-h1">${escapeHtml(content.headline)}</h1>` : ''}
-        ${content.subheadline ? `<p class="c1-hero-tagline">${escapeHtml(content.subheadline)}</p>` : ''}
+      ? `<div class="wo-hero-inner c1-hero-inner c1-hero-inner--brand-only">
+        ${content.siteName ? `<p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>` : ''}
       </div>`
       : `<div class="wo-hero-inner">
         <p class="wo-hero-eyebrow">${escapeHtml(content.siteName)}</p>
@@ -1312,6 +1310,17 @@ ${cafe1ShopLocationsHtml()}
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`;
+
+  const cafe1HeroBelowHtml =
+    tid === 'cafe_1' &&
+    (String(content.headline || '').trim() || String(content.subheadline || '').trim())
+      ? `<section class="c1-hero-below" aria-label="キャッチコピー" id="c1-hero-copy">
+    <div class="container c1-hero-below-inner">
+      ${String(content.headline || '').trim() ? `<h1 class="c1-hero-below-h1">${escapeHtml(String(content.headline).trim())}</h1>` : ''}
+      ${String(content.subheadline || '').trim() ? `<div class="c1-hero-below-lede">${renderProseParagraphsWithPaymentLogos(content.subheadline, escapeHtml)}</div>` : ''}
+    </div>
+  </section>`
+      : '';
 
   const marqueeBar = '';
 
@@ -1976,6 +1985,7 @@ ${embeddedDeliverableMainHtml}
   ${headerHtml}
   <main id="main-content">
     ${heroSection}
+    ${cafe1HeroBelowHtml}
     ${proTrustHtml}
     ${proStepsHtml}
     ${ctaAfterHero}
