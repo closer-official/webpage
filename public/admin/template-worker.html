@@ -573,6 +573,49 @@
           );
         }
 
+        function extractUrlFromPossiblyMarkdownLink(input) {
+          var s = String(input || '').trim();
+          if (!s) return '';
+          var md = s.match(/\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/i);
+          if (md && md[1]) s = md[1].trim();
+          if (!/^https?:\/\//i.test(s)) return '';
+          try {
+            var u = new URL(s);
+            if (/google\./i.test(u.hostname) && u.searchParams.get('q')) {
+              var q = decodeURIComponent(u.searchParams.get('q'));
+              if (/^https?:\/\//i.test(q)) return q;
+            }
+          } catch (_) {}
+          return s;
+        }
+
+        function deepSanitizeLinks(value) {
+          if (Array.isArray(value)) return value.map(deepSanitizeLinks);
+          if (value && typeof value === 'object') {
+            var out = {};
+            Object.keys(value).forEach(function (k) {
+              out[k] = deepSanitizeLinks(value[k]);
+            });
+            return out;
+          }
+          if (typeof value === 'string') {
+            var u = extractUrlFromPossiblyMarkdownLink(value);
+            return u || value;
+          }
+          return value;
+        }
+
+        function parseAiJsonLenient(raw) {
+          var t = String(raw || '').trim();
+          t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+          try {
+            return JSON.parse(t);
+          } catch (_) {}
+          t = t.replace(/\\([^"\\/bfnrtu])/g, '$1');
+          t = t.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+          return JSON.parse(t);
+        }
+
         function normalizeVerification(v) {
           var out = {
             confidence: null,
@@ -586,7 +629,7 @@
           if (Array.isArray(v.sourceUrls)) {
             out.sourceUrls = v.sourceUrls
               .map(function (s) {
-                return String(s || '').trim();
+                return extractUrlFromPossiblyMarkdownLink(s);
               })
               .filter(function (s) {
                 return /^https?:\/\//i.test(s);
@@ -1326,11 +1369,12 @@
           }
           var parsed;
           try {
-            parsed = JSON.parse(raw);
+            parsed = parseAiJsonLenient(raw);
           } catch (e) {
             showErr('ai-json-err', 'JSONが不正です: ' + (e.message || e));
             return;
           }
+          parsed = deepSanitizeLinks(parsed);
           var ov = parsed && parsed.override && typeof parsed.override === 'object' ? parsed.override : parsed;
           if (!ov || typeof ov !== 'object') {
             showErr('ai-json-err', 'override オブジェクトが見つかりません。');
