@@ -1159,6 +1159,79 @@
           document.getElementById('f-advanced-override-json').value = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : '';
         }
 
+        function templateDefaultJsonToOverride(j) {
+          var c = (j && j.content) || {};
+          var s = (j && j.seo) || {};
+          return {
+            siteName: c.siteName || '',
+            title: c.title || '',
+            headline: c.headline || '',
+            subheadline: c.subheadline || '',
+            footerText: c.footerText || '',
+            footerAddress: c.footerAddress || '',
+            footerPhone: c.footerPhone || '',
+            footerInstagramUrl: c.footerInstagramUrl || '',
+            footerLineUrl: c.footerLineUrl || '',
+            mapEmbedUrl: c.mapEmbedUrl || '',
+            ctaLabel: c.ctaLabel || '',
+            ctaHref: c.ctaHref || '',
+            navLabels: Array.isArray(c.navItems)
+              ? c.navItems
+                  .map(function (n) {
+                    return n && n.label ? String(n.label).trim() : '';
+                  })
+                  .filter(Boolean)
+                  .join(', ')
+              : '',
+            heroSlides: Array.isArray(c.heroSlides) ? c.heroSlides : [],
+            heroSlideStyles: Array.isArray(c.heroSlideStyles) ? c.heroSlideStyles : [],
+            sections: Array.isArray(c.sections) ? c.sections : [],
+            faqItems: Array.isArray(c.faqItems) ? c.faqItems : [],
+            cafeMenuTextRows: Array.isArray(c.cafeMenuTextRows) ? c.cafeMenuTextRows : [],
+            cafeMeo: c.cafeMeo || {},
+            cafeShopLocations: Array.isArray(c.cafeShopLocations) ? c.cafeShopLocations : [],
+            cafeInstagramFeedItems: Array.isArray(c.cafeInstagramFeedItems) ? c.cafeInstagramFeedItems : [],
+            cafeBranchMenuItems: Array.isArray(c.cafeBranchMenuItems) ? c.cafeBranchMenuItems : [],
+            cafeFloatingMapUrl: c.cafeFloatingMapUrl || '',
+            cafeReviewCtaText: c.cafeReviewCtaText || '',
+            cafeReviewCtaUrl: c.cafeReviewCtaUrl || '',
+            cafeGbPostsEmbedUrl: c.cafeGbPostsEmbedUrl || '',
+            cafeInstagramPermalink: c.cafeInstagramPermalink || '',
+            metaTitle: s.metaTitle || '',
+            metaDescription: s.metaDescription || '',
+            ogImageUrl: s.ogImageUrl || '',
+            canonicalUrl: s.canonicalUrl || '',
+            keywords: s.keywords || '',
+          };
+        }
+
+        function loadBuiltinDefaultsIntoForm(templateId, opts) {
+          opts = opts || {};
+          if (!templateId) {
+            fillFormFromOverride({});
+            updatePreviewUrl();
+            if (opts.successMsg) showErr('save-msg', opts.successMsg);
+            return Promise.resolve();
+          }
+          return credFetch(api + '/template-default/' + encodeURIComponent(templateId))
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'テンプレ既定値の取得に失敗しました');
+              fillFormFromOverride(templateDefaultJsonToOverride(x.j));
+              updatePreviewUrl();
+              if (opts.successMsg) showErr('save-msg', opts.successMsg);
+            })
+            .catch(function (e) {
+              fillFormFromOverride({});
+              updatePreviewUrl();
+              showErr('save-err', e.message || String(e));
+            });
+        }
+
         function bindAddButtonsOnce() {
           if (addBtnIdsBound) return;
           addBtnIdsBound = true;
@@ -1322,14 +1395,23 @@
           if (!edit) {
             currentCustomId = null;
             previewBaseTemplateId = document.getElementById('base-template').value || '';
+            var bid = previewBaseTemplateId;
+            if (bid) loadBuiltinDefaultsIntoForm(bid, {});
+            else {
+              fillFormFromOverride({});
+              updatePreviewUrl();
+            }
+          } else {
+            updatePreviewUrl();
           }
-          updatePreviewUrl();
         };
 
         document.getElementById('base-template').onchange = function () {
           if (document.getElementById('mode-select').value === 'new') {
             previewBaseTemplateId = document.getElementById('base-template').value || '';
-            if (!currentCustomId) scheduleLivePreview();
+            if (!currentCustomId && previewBaseTemplateId) {
+              loadBuiltinDefaultsIntoForm(previewBaseTemplateId, {});
+            } else if (!currentCustomId) scheduleLivePreview();
           }
         };
 
@@ -1365,6 +1447,10 @@
               });
               if (document.getElementById('mode-select').value === 'new') {
                 previewBaseTemplateId = document.getElementById('base-template').value || '';
+              }
+              var bid = document.getElementById('base-template').value || '';
+              if (document.getElementById('mode-select').value === 'new' && !currentCustomId && bid) {
+                return loadBuiltinDefaultsIntoForm(bid, {});
               }
               if (!currentCustomId) scheduleLivePreview();
             })
@@ -1411,66 +1497,9 @@
               showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
               return;
             }
-            credFetch(api + '/template-default/' + encodeURIComponent(previewBaseTemplateId))
-              .then(function (r) {
-                return r.json().then(function (j) {
-                  return { ok: r.ok, j: j };
-                });
-              })
-              .then(function (x) {
-                if (!x.ok) throw new Error(x.j.error || 'テンプレ既定値の取得に失敗しました');
-                var c = x.j.content || {};
-                var s = x.j.seo || {};
-                var merged = {
-                  siteName: c.siteName || '',
-                  title: c.title || '',
-                  headline: c.headline || '',
-                  subheadline: c.subheadline || '',
-                  footerText: c.footerText || '',
-                  footerAddress: c.footerAddress || '',
-                  footerPhone: c.footerPhone || '',
-                  footerInstagramUrl: c.footerInstagramUrl || '',
-                  footerLineUrl: c.footerLineUrl || '',
-                  mapEmbedUrl: c.mapEmbedUrl || '',
-                  ctaLabel: c.ctaLabel || '',
-                  ctaHref: c.ctaHref || '',
-                  navLabels: Array.isArray(c.navItems)
-                    ? c.navItems
-                        .map(function (n) {
-                          return n && n.label ? String(n.label).trim() : '';
-                        })
-                        .filter(Boolean)
-                        .join(', ')
-                    : '',
-                  heroSlides: Array.isArray(c.heroSlides) ? c.heroSlides : [],
-                  heroSlideStyles: Array.isArray(c.heroSlideStyles) ? c.heroSlideStyles : [],
-                  sections: Array.isArray(c.sections) ? c.sections : [],
-                  faqItems: Array.isArray(c.faqItems) ? c.faqItems : [],
-                  cafeMenuTextRows: Array.isArray(c.cafeMenuTextRows) ? c.cafeMenuTextRows : [],
-                  cafeMeo: c.cafeMeo || {},
-                  cafeShopLocations: Array.isArray(c.cafeShopLocations) ? c.cafeShopLocations : [],
-                  cafeInstagramFeedItems: Array.isArray(c.cafeInstagramFeedItems) ? c.cafeInstagramFeedItems : [],
-                  cafeBranchMenuItems: Array.isArray(c.cafeBranchMenuItems) ? c.cafeBranchMenuItems : [],
-                  cafeFloatingMapUrl: c.cafeFloatingMapUrl || '',
-                  cafeReviewCtaText: c.cafeReviewCtaText || '',
-                  cafeReviewCtaUrl: c.cafeReviewCtaUrl || '',
-                  cafeGbPostsEmbedUrl: c.cafeGbPostsEmbedUrl || '',
-                  cafeInstagramPermalink: c.cafeInstagramPermalink || '',
-                  metaTitle: s.metaTitle || '',
-                  metaDescription: s.metaDescription || '',
-                  ogImageUrl: s.ogImageUrl || '',
-                  canonicalUrl: s.canonicalUrl || '',
-                  keywords: s.keywords || '',
-                };
-                fillFormFromOverride(merged);
-                updatePreviewUrl();
-                showErr('save-msg', 'ベーステンプレの現在値をフォームに読み込みました。');
-              })
-              .catch(function (e) {
-                fillFormFromOverride({});
-                updatePreviewUrl();
-                showErr('save-err', e.message || String(e));
-              });
+            loadBuiltinDefaultsIntoForm(previewBaseTemplateId, {
+              successMsg: 'ベーステンプレの現在値をフォームに読み込みました。',
+            });
           }
         };
 
