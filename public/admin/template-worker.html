@@ -247,6 +247,16 @@
         padding: 0.1em 0.35em;
         border-radius: 4px;
       }
+      .tw-form-block.tw-hidden {
+        display: none !important;
+      }
+      .tw-active-tpl-badge {
+        padding: 8px 10px;
+        background: #0f172a;
+        border: 1px solid #2a3b52;
+        border-radius: 8px;
+        line-height: 1.45;
+      }
     </style>
   </head>
   <body>
@@ -255,7 +265,7 @@
       <p class="sub">
         <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
         で変えてください）。<br />
-        <strong>cafe_1（複数店舗・ミニマル）</strong>では、下の「店舗・メニュー・FAQ」から<strong>画面上の文言と画像URLをすべて</strong>管理できます（コード変更は不要）。<br />
+        編集フォームの項目は<strong>選んだベーステンプレ</strong>に合わせて切り替わります（<strong>cafe_1</strong> だけ店主・お品書き・MEO など拡張項目が出ます。埋め込み型は名前・キャッチ・SEO中心）。<br />
         保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
         <code>/api/template-preview/&lt;カスタムID&gt;</code> です。左側は<strong>ライブプレビュー</strong>（未保存の変更も反映）です。
       </p>
@@ -344,102 +354,153 @@
 
     <div class="panel" id="form-box" style="display: none">
       <h2>2. 本文・画像・URL</h2>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
-        入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
-      </p>
+      <p id="tw-active-template-hint" class="tw-active-tpl-badge" style="margin: 0 0 12px; font-size: 0.78rem; color: #b8e6ff"></p>
 
-      <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">ヒーロー（トップ）</h3>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">トップ画像（追加・並び替えは手動。最大10枚）</div>
-        <div id="f-hero-slides-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
+          入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
+        </p>
       </div>
-      <label>サイト名（店名） <input type="text" id="f-siteName" /></label>
-      <label>メイン見出し <input type="text" id="f-headline" /></label>
-      <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
-      <label>ページタイトル（ブラウザのタブ・&lt;title&gt;） <input type="text" id="f-title" /></label>
-
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">メニュー（ハンバーガー内）</h3>
-      <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
-      <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
-      <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
-
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文ブロック（スクロール順）</h3>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">セクション（任意）</div>
-        <div id="f-sections-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-section">＋ セクション追加</button></div>
+      <div class="tw-form-block tw-hidden" data-tw-for="non_cafe_1">
+        <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
+          このベースは<strong>固定HTML埋め込み型</strong>です。左のプレビューはワークスペースのデザインが主体で、ここでの多くの項目は画面にそのまま出ないことがあります。<strong>サイト名・キャッチコピー・フッター文・SEO・高度JSON</strong>は保存データ・メタに引き継がれます。
+        </p>
       </div>
 
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">cafe_1：セクション内に差し込まれる内容</h3>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
-        メニュー欄・FAQ・アクセスなどは、上のセクションで <code>menu</code> / <code>faq</code> / <code>access</code> などの ID を置いた位置に表示されます。JSON は不要です。
-      </p>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">テキストメニュー行（お品書き・メニュー欄）</div>
-        <div id="f-menu-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-menu">＋ メニュー追加</button></div>
-      </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">メニューPDF等のボタン行（メニュー欄）</div>
-        <div id="f-branch-menu-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-branch-menu">＋ ボタン追加</button></div>
-      </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">FAQ（よくある質問）</div>
-        <div id="f-faq-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-faq">＋ FAQ追加</button></div>
-      </div>
-      <label>地図 iframe 埋め込み URL（アクセス欄の先頭） <input type="url" id="f-mapEmbedUrl" /></label>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
-        <div id="f-shop-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-shop">＋ 店舗カード追加</button></div>
+      <div class="tw-form-block" data-tw-for="all">
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">ヒーロー・ファーストビュー関連</h3>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">トップ画像 URL（追加・並び替えは手動。最大10枚）</div>
+          <div id="f-hero-slides-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
+        </div>
+        <label>サイト名（店名・ブランド名） <input type="text" id="f-siteName" /></label>
+        <label>メイン見出し <input type="text" id="f-headline" /></label>
+        <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
+        <label>ページタイトル（ブラウザのタブ・&lt;title&gt;） <input type="text" id="f-title" /></label>
       </div>
 
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文の下（Instagram・Google）</h3>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">Instagram 投稿グリッド</div>
-        <div id="f-instagram-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-instagram">＋ 投稿追加</button></div>
-      </div>
-      <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
-      <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
-
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">画面に固定されるボタン</h3>
-      <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
-      <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
-      <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
-
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター（ページ最下部）</h3>
-      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
-      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
-      <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
-      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
-      <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
-
-      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">検索・構造化データ（MEO / JSON-LD）</h3>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">本文の見た目の順序には含まれませんが、検索エンジン向けの情報です。</p>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">MEO / JSON-LD 用 cafeMeo</div>
-        <label>料理ジャンル（servesCuisine）<input type="text" id="f-meo-servesCuisine" /></label>
-        <label>価格帯（priceRange）<input type="text" id="f-meo-priceRange" /></label>
-        <label>住所（streetAddress）<input type="text" id="f-meo-streetAddress" /></label>
-        <label>市区町村（addressLocality）<input type="text" id="f-meo-addressLocality" /></label>
-        <label>都道府県（addressRegion）<input type="text" id="f-meo-addressRegion" /></label>
-        <label>郵便番号（postalCode）<input type="text" id="f-meo-postalCode" /></label>
-        <div style="font-size: 0.78rem; color: #9aacbf; margin-top: 10px">営業時間（openingHours）</div>
-        <div id="f-meo-hours-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-meo-hour">＋ 営業時間追加</button></div>
+      <div class="tw-form-block tw-hidden" data-tw-for="non_cafe_1">
+        <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 8px">
+          トップ画像は埋め込み型テンプレではスライダーとして使われないことがあります。1枚目は OG 等で参照される場合があります。
+        </p>
       </div>
 
-      <label style="margin-top: 10px">
-        高度設定JSON（未露出キー用・任意）
-        <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">ここに入れたキーは override にそのままマージされます。通常項目に無い `cafe_1` 専用キーを編集したいときに使用。</span>
-        <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
-      </label>
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">メニュー（ハンバーガー内）</h3>
+        <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
+        <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
+        <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
+      </div>
 
-      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
+      <div class="tw-form-block" data-tw-for="all">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文ブロック（スクロール順）</h3>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">セクション（任意）</div>
+          <div id="f-sections-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-section">＋ セクション追加</button></div>
+        </div>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <p style="font-size: 0.78rem; color: #9aacbf; margin: 10px 0 8px">
+          <strong>店主の顔・ひとこと</strong>は、セクションで ID を <code>staff</code> にし、<strong>見出し・本文・画像URL</strong>を埋めます（プレビューでは店主ブロックとしてレイアウトされます）。
+        </p>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">cafe_1：セクション内に差し込まれる内容</h3>
+        <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
+          メニュー欄・FAQ・アクセスなどは、上のセクションで <code>menu</code> / <code>faq</code> / <code>access</code> などの ID を置いた位置に表示されます。JSON は不要です。
+        </p>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">テキストメニュー行（お品書き・メニュー欄）</div>
+          <div id="f-menu-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-menu">＋ メニュー追加</button></div>
+        </div>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">メニューPDF等のボタン行（メニュー欄）</div>
+          <div id="f-branch-menu-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-branch-menu">＋ ボタン追加</button></div>
+        </div>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">FAQ（よくある質問）</div>
+          <div id="f-faq-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-faq">＋ FAQ追加</button></div>
+        </div>
+        <label>地図 iframe 埋め込み URL（アクセス欄の先頭） <input type="url" id="f-mapEmbedUrl" /></label>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
+          <div id="f-shop-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-shop">＋ 店舗カード追加</button></div>
+        </div>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文の下（Instagram・Google）</h3>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">Instagram 投稿グリッド</div>
+          <div id="f-instagram-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-instagram">＋ 投稿追加</button></div>
+        </div>
+        <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
+        <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">画面に固定されるボタン</h3>
+        <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
+        <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
+        <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="all">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター文言（コピーライト等）</h3>
+        <p class="tw-form-block tw-hidden" style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 8px" data-tw-for="non_cafe_1">
+          埋め込みプレビューにそのまま出ない場合もありますが、保存データに含まれます。
+        </p>
+        <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター連絡先・SNS（ページ最下部）</h3>
+        <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+        <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
+        <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+        <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">検索・構造化データ（MEO / JSON-LD）</h3>
+        <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">本文の見た目の順序には含まれませんが、検索エンジン向けの情報です。</p>
+        <div class="repeat-group">
+          <div style="font-size: 0.8rem; color: #9aacbf">MEO / JSON-LD 用 cafeMeo</div>
+          <label>料理ジャンル（servesCuisine）<input type="text" id="f-meo-servesCuisine" /></label>
+          <label>価格帯（priceRange）<input type="text" id="f-meo-priceRange" /></label>
+          <label>住所（streetAddress）<input type="text" id="f-meo-streetAddress" /></label>
+          <label>市区町村（addressLocality）<input type="text" id="f-meo-addressLocality" /></label>
+          <label>都道府県（addressRegion）<input type="text" id="f-meo-addressRegion" /></label>
+          <label>郵便番号（postalCode）<input type="text" id="f-meo-postalCode" /></label>
+          <div style="font-size: 0.78rem; color: #9aacbf; margin-top: 10px">営業時間（openingHours）</div>
+          <div id="f-meo-hours-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-add-meo-hour">＋ 営業時間追加</button></div>
+        </div>
+      </div>
+
+      <div class="tw-form-block" data-tw-for="all" style="margin-top: 10px">
+        <label style="margin-top: 0">
+          高度設定JSON（未露出キー用・任意）
+          <span class="tw-form-block" data-tw-for="cafe_1" style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">
+            ここに入れたキーは override にそのままマージされます。<code>cafe_1</code> 向けの追加キーなどを編集するときに使います。
+          </span>
+          <span class="tw-form-block tw-hidden" data-tw-for="non_cafe_1" style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">
+            テーマ <code>theme</code> や、フォームに無いキーをまとめて渡すときに使います。
+          </span>
+          <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
+        </label>
+      </div>
+
+      <h2 class="tw-form-block" data-tw-for="all" style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
       <label>meta title <input type="text" id="f-metaTitle" /></label>
       <label>meta description <textarea id="f-metaDescription" rows="2"></textarea></label>
       <label>OG 画像 URL（https） <input type="url" id="f-ogImageUrl" /></label>
@@ -481,6 +542,71 @@
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
         var addBtnIdsBound = false;
+        var customizationBaseById = {};
+        var EMBED_STYLE_TEMPLATE_IDS = {
+          navy_cyan_consult: true,
+          gym_personal_neon: true,
+          wiki_ensyuritsu: true,
+          wiki_sauna: true,
+        };
+
+        function isEmbedStyleTemplate(tid) {
+          return !!EMBED_STYLE_TEMPLATE_IDS[String(tid || '')];
+        }
+
+        function resolveWorkerFormBaseTemplateId() {
+          var mode = document.getElementById('mode-select').value;
+          if (mode === 'edit') {
+            var ex = document.getElementById('existing-id').value;
+            if (ex && customizationBaseById[ex] !== undefined && customizationBaseById[ex] !== null) {
+              return String(customizationBaseById[ex] || '');
+            }
+            return String(previewBaseTemplateId || '');
+          }
+          return String((document.getElementById('base-template') && document.getElementById('base-template').value) || '');
+        }
+
+        function applyWorkerFormTemplateVisibility() {
+          var tid = resolveWorkerFormBaseTemplateId();
+          var explicitEmbed = !!tid && isEmbedStyleTemplate(tid);
+          var isCafe1 = tid === 'cafe_1';
+          Array.prototype.forEach.call(document.querySelectorAll('#form-box .tw-form-block'), function (el) {
+            var f = el.getAttribute('data-tw-for') || 'all';
+            if (f === 'all') {
+              el.classList.remove('tw-hidden');
+              return;
+            }
+            if (f === 'cafe_1') {
+              if (!tid) {
+                el.classList.remove('tw-hidden');
+                return;
+              }
+              el.classList.toggle('tw-hidden', explicitEmbed);
+              return;
+            }
+            if (f === 'non_cafe_1') {
+              el.classList.toggle('tw-hidden', !explicitEmbed);
+            }
+          });
+          var badge = document.getElementById('tw-active-template-hint');
+          if (badge) {
+            if (!tid) {
+              badge.textContent =
+                'ベースまたは既存カスタムを選ぶと、そのテンプレ向けの項目だけが表示されます（未選択時は cafe_1 向けの拡張項目も表示）。';
+            } else if (isCafe1) {
+              badge.textContent =
+                '表示中: cafe_1 向け（店主・お品書き・MEO・固定ボタンなど）。店主の顔写真はセクション ID を staff にしてください。';
+            } else if (explicitEmbed) {
+              badge.textContent =
+                '表示中: ' +
+                tid +
+                '（固定HTML埋め込み型）。画面本体はワークスペースのデザイン優先。名前・キャッチ・フッター文・SEO・高度JSONを編集します。';
+            } else {
+              badge.textContent =
+                '表示中: ' + tid + '。ビルトイン以外のベースでは、cafe_1 専用以外の項目もフォームで触れます（必要なら高度JSONで補完）。';
+            }
+          }
+        }
 
         function credFetch(url, opts) {
           var o = opts || {};
@@ -1177,6 +1303,7 @@
             if (!knownKeys[k]) extra[k] = ov[k];
           });
           document.getElementById('f-advanced-override-json').value = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : '';
+          applyWorkerFormTemplateVisibility();
         }
 
         function templateDefaultJsonToOverride(j) {
@@ -1231,6 +1358,7 @@
             fillFormFromOverride({});
             updatePreviewUrl();
             if (opts.successMsg) showErr('save-msg', opts.successMsg);
+            applyWorkerFormTemplateVisibility();
             return Promise.resolve();
           }
           return credFetch(api + '/template-default/' + encodeURIComponent(templateId))
@@ -1424,6 +1552,11 @@
           } else {
             updatePreviewUrl();
           }
+          applyWorkerFormTemplateVisibility();
+        };
+
+        document.getElementById('existing-id').onchange = function () {
+          applyWorkerFormTemplateVisibility();
         };
 
         document.getElementById('base-template').onchange = function () {
@@ -1457,9 +1590,11 @@
               return r.json();
             })
             .then(function (list) {
+              customizationBaseById = {};
               var ex = document.getElementById('existing-id');
               ex.innerHTML = '';
               (list || []).forEach(function (item) {
+                customizationBaseById[item.id] = item.baseTemplateId || '';
                 var o = document.createElement('option');
                 o.value = item.id;
                 o.textContent = (item.name || item.id) + ' · ' + item.id + ' · base:' + (item.baseTemplateId || '');
@@ -1473,6 +1608,7 @@
                 return loadBuiltinDefaultsIntoForm(bid, {});
               }
               if (!currentCustomId) scheduleLivePreview();
+              applyWorkerFormTemplateVisibility();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');

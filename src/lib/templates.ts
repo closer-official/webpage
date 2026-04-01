@@ -764,6 +764,9 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .c1-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: center; padding: 2rem 1.5rem 4.5rem; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.45); }
   .page-wrapper.template-cafe_1 .c1-hero-brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; margin: 0 0 0.35rem; }
   .page-wrapper.template-cafe_1 .c1-hero-h1 { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; margin: 0.25rem 0 0.5rem; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  .page-wrapper.template-cafe_1 .c1-hero-inner.c1-hero-minimal .c1-hero-h1 { margin-top: 0; margin-bottom: 0; }
+  .page-wrapper.template-cafe_1 .c1-concept-title { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; letter-spacing: 0.04em; color: var(--tp-heading); margin: 0 0 1rem; text-transform: none; }
+  .page-wrapper.template-cafe_1 .c1-concept-lede-sec .wo-lede-prose p:first-child { font-size: 1.06rem; font-weight: 600; line-height: 1.75; color: var(--tp-heading); }
   .page-wrapper.template-cafe_1 .c1-hero-tagline { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(0.92rem, 3vw, 1.05rem); font-style: normal; font-weight: 500; margin: 0; opacity: 0.96; line-height: 1.55; letter-spacing: 0.02em; }
   .page-wrapper.template-cafe_1 .wo-hero-dots { position: absolute; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; gap: 0.45rem; }
   .page-wrapper.template-cafe_1 .wo-hero-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.9); background: transparent; padding: 0; cursor: pointer; }

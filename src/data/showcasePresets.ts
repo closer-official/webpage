@@ -87,11 +87,10 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   cafe_1: {
     content: {
-      siteName: '満腹食堂 鉄人（まんぷくしょくどう てつじん）',
-      title: '満腹食堂 鉄人',
-      headline: '千住で一番、米が進む場所。',
-      subheadline:
-        '北千住駅東口から徒歩3分。東京電機大学のすぐそばで、大学生・現場仕事帰り・仕事終わりの一人飯をガッツリ支えます。',
+      siteName: '茅堂寺（いどうじ）公式サイト',
+      title: '茅堂寺（いどうじ）',
+      headline: '茅堂寺（いどうじ）',
+      subheadline: '',
       footerAddress: '〒120-0026 東京都足立区千住旭町40-2',
       footerPhone: '03-6806-1192',
       cafeMeo: {
@@ -136,9 +135,9 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       sections: [
         {
           id: 'concept',
-          title: '北千住でガッツリ食べるなら',
+          title: '茅堂寺（いどうじ）',
           content:
-            '北千住駅東口から徒歩3分。東京電機大学のすぐそば！\n秘伝ダレと炊きたてご飯で、毎日食べても飽きない腹パン系食堂です。\nGoogleビジネスプロフィールと店名・住所・電話を統一し、地域で探す人に確実に見つけてもらえる導線にしています。',
+            'つくばから発信する、ラーメンの新しいスタンダード\n\n厳選された大仙鶏の旨味と、驚きに満ちた和え玉。\n\n一杯一皿に情熱を込めて。',
         },
         {
           id: 'staff',
@@ -210,19 +209,19 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         { groupLabel: 'メニュー資料', label: '紙のお品書きPDF（準備中）', menuUrl: 'https://example.com/menu.pdf' },
       ],
       footerText:
-        '北千住駅周辺で「安くて旨いガッツリ飯」をお探しなら、満腹食堂 鉄人へ。\n© 2026 満腹食堂 鉄人 | 東京都足立区千住旭町40-2 | 03-6806-1192',
+        'つくばのラーメン｜茅堂寺（いどうじ）\n© 2026 茅堂寺（いどうじ） | 東京都足立区千住旭町40-2 | 03-6806-1192',
       footerInstagramUrl: 'https://www.instagram.com/',
       footerLineUrl: 'https://line.me/',
       ctaLabel: '席を電話で確認',
       ctaHref: 'tel:0368061192',
       heroSlides: [
-        'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
         'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400',
-        'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400',
       ],
       cafeShopLocations: [
         {
-          name: '満腹食堂 鉄人',
+          name: '茅堂寺（いどうじ）',
           detail: buildCafe1ShopLocationDetail('03-6806-1192', '〒120-0026 東京都足立区千住旭町40-2'),
           mapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
           imageUrl:
@@ -233,10 +232,10 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E8%B6%B3%E7%AB%8B%E5%8C%BA%E5%8D%83%E4%BD%8F%E6%97%AD%E7%94%BA40-2&output=embed',
     },
     seo: {
-      metaTitle: '北千住 定食・どんぶり｜満腹食堂 鉄人',
+      metaTitle: 'つくば ラーメン｜茅堂寺（いどうじ）',
       metaDescription:
-        '北千住駅東口徒歩3分。満腹食堂 鉄人は850円〜1,200円でガッツリ系定食・どんぶりを提供。大学生や仕事帰りの夕飯に。',
-      keywords: '北千住,足立区,定食,どんぶり,ガッツリ,安い夕飯,東京電機大学',
+        'つくばから発信するラーメン。大仙鶏の旨味と和え玉が自慢の茅堂寺（いどうじ）公式サイト。',
+      keywords: 'つくば,ラーメン,茅堂寺,いどうじ,和え玉,大仙鶏',
       ogImageUrl:
         'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1200',
       canonicalUrl: '',

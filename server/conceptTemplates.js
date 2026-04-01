@@ -998,6 +998,9 @@ const CAFE_1_CSS =
   .page-wrapper.template-cafe_1 .wo-hero-inner { text-align: center !important; padding: 2rem 1.5rem 4.5rem !important; }
   .page-wrapper.template-cafe_1 .c1-hero-brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; margin: 0 0 0.35rem; }
   .page-wrapper.template-cafe_1 .c1-hero-h1 { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; margin: 0.25rem 0 0.5rem; color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+  .page-wrapper.template-cafe_1 .c1-hero-inner.c1-hero-minimal .c1-hero-h1 { margin-top: 0; margin-bottom: 0; }
+  .page-wrapper.template-cafe_1 .c1-concept-title { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(1.2rem, 4.2vw, 1.65rem); font-weight: 700; font-style: normal; line-height: 1.45; letter-spacing: 0.04em; color: var(--tp-heading); margin: 0 0 1rem; text-transform: none; }
+  .page-wrapper.template-cafe_1 .c1-concept-lede-sec .wo-lede-prose p:first-child { font-size: 1.06rem; font-weight: 600; line-height: 1.75; color: var(--tp-heading); }
   .page-wrapper.template-cafe_1 .c1-hero-tagline { font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; font-size: clamp(0.92rem, 3vw, 1.05rem); font-style: normal; font-weight: 500; margin: 0; opacity: 0.96; line-height: 1.55; }
   .page-wrapper.template-cafe_1 .c1-lede-sub { font-family: Georgia, "Times New Roman", serif; font-size: 1.35rem; font-style: italic; color: var(--tp-heading); margin: 0 0 1.25rem; }
   .page-wrapper.template-cafe_1 .c1-menu-text-block { margin-top: 1.25rem; }

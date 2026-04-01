@@ -861,9 +861,11 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             if (i === 0 && tid === 'cafe_1') {
-              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+              const c1LedeTitleClass = s.id === 'concept' ? 'c1-concept-title' : 'wo-lede-heading';
+              const c1LedeSecClass = s.id === 'concept' ? ' c1-concept-lede-sec' : '';
+              return `    <section id="${escapeHtml(s.id)}" class="section wo-sec wo-lede${c1LedeSecClass} ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
       <div class="section-body">
-        <h2 id="${s.id}-title" class="wo-lede-heading">${escapeHtml(s.title)}</h2>
+        <h2 id="${s.id}-title" class="${c1LedeTitleClass}">${escapeHtml(s.title)}</h2>
         <div class="wo-lede-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
       </div>
       ${img}
@@ -1224,10 +1226,12 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
   }
 
+  const cafe1HeroShowBrand =
+    Boolean(String(content.subheadline || '').trim()) || !String(content.headline || '').trim();
   const woHeroInnerHtml =
     tid === 'cafe_1'
-      ? `<div class="wo-hero-inner c1-hero-inner">
-        <p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>
+      ? `<div class="wo-hero-inner c1-hero-inner${cafe1HeroShowBrand ? '' : ' c1-hero-minimal'}">
+        ${cafe1HeroShowBrand ? `<p class="c1-hero-brand">${escapeHtml(content.siteName)}</p>` : ''}
         ${content.headline ? `<h1 class="c1-hero-h1">${escapeHtml(content.headline)}</h1>` : ''}
         ${content.subheadline ? `<p class="c1-hero-tagline">${escapeHtml(content.subheadline)}</p>` : ''}
       </div>`
