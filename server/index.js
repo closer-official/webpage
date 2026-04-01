@@ -18,7 +18,13 @@ import { processOne } from './process.js';
 import { store } from './data/store.js';
 import { isSupabaseConfigured } from './data/storeSupabase.js';
 import { fetchPageMeta } from './fetchPageMeta.js';
-import { analyzeReferenceSites, extractDesignFromHtml, extractTemplateOverrideFromDocuments } from './gemini.js';
+import {
+  analyzeReferenceSites,
+  extractDesignFromHtml,
+  extractTemplateOverrideFromDocuments,
+  researchStoreDraftForCafe1,
+  discoverStoresFromQuery,
+} from './gemini.js';
 import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
@@ -1029,6 +1035,169 @@ app.get('/api/template-default/:templateId', (req, res) => {
   } catch (e) {
     console.error('[template-default]', e);
     res.status(500).json({ error: e?.message || 'template-default failed' });
+  }
+});
+
+/** 管理者のみ。店名・地域等から cafe_1 向けドラフト候補を生成（フルオート調査） */
+app.post('/api/template-customizations/research-store', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const body = req.body || {};
+    const storeName = String(body.storeName || '').trim();
+    const area = String(body.area || '').trim();
+    if (!storeName || !area) {
+      return res.status(400).json({ error: 'storeName and area are required' });
+    }
+    const { nameSuggestion, verification, override } = await researchStoreDraftForCafe1({
+      storeName,
+      area,
+      category: body.category,
+      extraNotes: body.extraNotes,
+    });
+    const normalized = normalizeCustomizationInput(override || {});
+    res.json({
+      ok: true,
+      nameSuggestion: nameSuggestion || '',
+      verification: verification && typeof verification === 'object' ? verification : {},
+      override: normalized,
+    });
+  } catch (e) {
+    console.error('[template-customizations/research-store]', e);
+    res.status(500).json({ error: e?.message || 'research-store failed' });
+  }
+});
+
+/** 並列上限付きで配列を処理（Gemini 一括調査用） */
+async function mapWithConcurrency(items, limit, fn) {
+  const arr = Array.isArray(items) ? items : [];
+  const n = arr.length;
+  const out = new Array(n);
+  let next = 0;
+  async function worker() {
+    while (true) {
+      const i = next;
+      next += 1;
+      if (i >= n) return;
+      out[i] = await fn(arr[i], i);
+    }
+  }
+  const workers = Math.min(Math.max(1, limit), n || 1);
+  await Promise.all(Array.from({ length: workers }, () => worker()));
+  return out;
+}
+
+/** 管理者のみ。検索意図（例: ラーメン つくば）から複数店を列挙→各店を調査し cafe_1 下書きを一括保存 */
+app.post('/api/template-customizations/research-stores-batch', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const body = req.body || {};
+    const query = String(body.query || '').trim();
+    if (!query) {
+      return res.status(400).json({ error: 'query が必要です（例: ラーメン つくば）' });
+    }
+    const maxCount = Math.min(10, Math.max(1, parseInt(String(body.maxCount ?? '10'), 10) || 10));
+    const saveDrafts = body.saveDrafts !== false && body.saveDrafts !== 'false';
+    const concurrency = Math.min(5, Math.max(1, parseInt(String(body.concurrency ?? '4'), 10) || 4));
+
+    const { stores, batchVerification } = await discoverStoresFromQuery(query.slice(0, 500), maxCount);
+    if (!stores.length) {
+      return res.status(400).json({
+        error: '候補店舗が0件でした。検索意図を変えてください。',
+        batchVerification: batchVerification || {},
+      });
+    }
+
+    const researched = await mapWithConcurrency(stores, concurrency, async (s) => {
+      const storeName = String(s?.storeName || '').trim();
+      const area = String(s?.area || '').trim();
+      if (!storeName || !area) {
+        return { ok: false, storeName, area, error: '店名または地域が空です' };
+      }
+      try {
+        const r = await researchStoreDraftForCafe1({
+          storeName,
+          area,
+          category: String(s?.categoryHint || '').trim().slice(0, 120),
+          extraNotes: query,
+        });
+        return {
+          ok: true,
+          storeName,
+          area,
+          nameSuggestion: r.nameSuggestion,
+          verification: r.verification,
+          override: r.override,
+        };
+      } catch (err) {
+        return { ok: false, storeName, area, error: err?.message || String(err) };
+      }
+    });
+
+    const okItems = researched.filter((x) => x.ok);
+    const failures = researched
+      .filter((x) => !x.ok)
+      .map((x) => ({ storeName: x.storeName, area: x.area, error: x.error }));
+    if (!okItems.length) {
+      return res.status(500).json({
+        error: '全店舗の調査に失敗しました',
+        failures,
+        batchVerification: batchVerification || {},
+      });
+    }
+
+    if (!saveDrafts) {
+      const items = okItems.map((x) => ({
+        storeName: x.storeName,
+        area: x.area,
+        nameSuggestion: x.nameSuggestion,
+        verification: x.verification,
+        override: normalizeCustomizationInput(x.override || {}),
+      }));
+      return res.json({
+        ok: true,
+        batchVerification: batchVerification || {},
+        saved: [],
+        count: 0,
+        items,
+        failures,
+      });
+    }
+
+    const baseTemplateId = 'cafe_1';
+    const customizations = await store.getTemplateCustomizations();
+    if (!isValidTemplateId(baseTemplateId, customizations)) {
+      return res.status(400).json({ error: 'base cafe_1 が利用できません' });
+    }
+    const now = new Date().toISOString();
+    const baseTime = Date.now().toString(36);
+    const newItems = okItems.map((x, idx) => {
+      const name = String(x.nameSuggestion || x.storeName || `ドラフト ${idx + 1}`)
+        .trim()
+        .slice(0, 80);
+      const id = `custom-${baseTime}-${idx}-${Math.random().toString(36).slice(2, 10)}`;
+      return {
+        id,
+        name,
+        baseTemplateId,
+        override: normalizeCustomizationInput(x.override || {}),
+        status: 'draft',
+        createdAt: now,
+        updatedAt: now,
+      };
+    });
+    await store.setTemplateCustomizations([...newItems, ...customizations]);
+    const saved = newItems.map((item) => ({ id: item.id, name: item.name }));
+
+    res.json({
+      ok: true,
+      batchVerification: batchVerification || {},
+      saved,
+      count: saved.length,
+      failures,
+    });
+  } catch (e) {
+    console.error('[template-customizations/research-stores-batch]', e);
+    res.status(500).json({ error: e?.message || 'research-stores-batch failed' });
   }
 });
 
