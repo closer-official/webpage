@@ -1663,6 +1663,42 @@
             });
         }
 
+        /** 既存カスタム1件をフォーム・プレビューに読み込む（一覧APIから取得） */
+        function loadExistingCustomizationById(id, opts) {
+          opts = opts || {};
+          if (!id) return Promise.reject(new Error('id が空です'));
+          return credFetch(api + '/template-customizations')
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (list) {
+              var item = (list || []).find(function (x) {
+                return x.id === id;
+              });
+              if (!item) throw new Error('一覧に見つかりません。再読み込みするか、既存カスタムを選び直してください。');
+              currentCustomId = item.id;
+              previewBaseTemplateId = item.baseTemplateId || '';
+              document.getElementById('draft-name').value = item.name || '';
+              fillFormFromOverride(item.override || {});
+              updatePreviewUrl();
+              scheduleLivePreview();
+              applyWorkerFormTemplateVisibility();
+              if (opts.researchBatchAnnounce) {
+                var a = opts.researchBatchAnnounce;
+                var more =
+                  a.moreCount > 0
+                    ? ' ほか ' + a.moreCount + ' 件は上の「既存カスタム」で選び、「フォームに読み込む」で切り替えられます。'
+                    : '';
+                showErr(
+                  'research-batch-msg',
+                  a.prefix + ' このまま下のフォームで微調整・保存できます（表示中: ' + (item.name || item.id) + '）。' + more,
+                );
+              } else if (opts.successMsg) {
+                showErr('save-msg', opts.successMsg);
+              }
+            });
+        }
+
         document.getElementById('btn-load').onclick = function () {
           showErr('save-err', '');
           showErr('save-msg', '');
@@ -1672,25 +1708,9 @@
               showErr('save-err', '既存カスタムを選んでください。');
               return;
             }
-            credFetch(api + '/template-customizations')
-              .then(function (r) {
-                return r.json();
-              })
-              .then(function (list) {
-                var item = (list || []).find(function (x) {
-                  return x.id === id;
-                });
-                if (!item) throw new Error('見つかりません');
-                currentCustomId = item.id;
-                previewBaseTemplateId = item.baseTemplateId || '';
-                document.getElementById('draft-name').value = item.name || '';
-                fillFormFromOverride(item.override);
-                updatePreviewUrl();
-                showErr('save-msg', '読み込みました。');
-              })
-              .catch(function (e) {
-                showErr('save-err', e.message || String(e));
-              });
+            loadExistingCustomizationById(id, { successMsg: '読み込みました。' }).catch(function (e) {
+              showErr('save-err', e.message || String(e));
+            });
           } else {
             currentCustomId = null;
             previewBaseTemplateId = document.getElementById('base-template').value || '';
@@ -1807,7 +1827,7 @@
               if (!x.ok) throw new Error(x.j.error || '一括調査に失敗しました');
               var saved = x.j.saved || [];
               var fail = x.j.failures || [];
-              var parts = ['cafe_1 下書きを ' + saved.length + ' 件保存しました。既存カスタム一覧を更新しました。'];
+              var parts = ['cafe_1 下書きを ' + saved.length + ' 件保存しました。'];
               if (fail.length) {
                 parts.push(
                   '一部スキップ: ' +
@@ -1822,9 +1842,25 @@
                     '。',
                 );
               }
-              return loadBasesAndCustoms().then(function () {
-                showErr('research-batch-msg', parts.join(''));
-              });
+              var prefix = parts.join('');
+              var firstId = saved[0] && saved[0].id;
+              return loadBasesAndCustoms()
+                .then(function () {
+                  if (!firstId) {
+                    showErr('research-batch-msg', prefix);
+                    return;
+                  }
+                  document.getElementById('mode-select').value = 'edit';
+                  document.getElementById('existing-id').value = firstId;
+                  document.getElementById('mode-select').dispatchEvent(new Event('change'));
+                  return loadExistingCustomizationById(firstId, {
+                    researchBatchAnnounce: { prefix: prefix, moreCount: saved.length - 1 },
+                  });
+                })
+                .catch(function (e) {
+                  showErr('research-batch-err', e.message || String(e));
+                  showErr('research-batch-msg', prefix + ' 一覧の更新またはフォーム表示に失敗しました。');
+                });
             })
             .catch(function (e) {
               showErr('research-batch-err', e.message || String(e));
