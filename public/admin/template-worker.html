@@ -344,43 +344,82 @@
 
     <div class="panel" id="form-box" style="display: none">
       <h2>2. 本文・画像・URL</h2>
-      <label>サイト名（店名） <input type="text" id="f-siteName" /></label>
-      <label>ページタイトル <input type="text" id="f-title" /></label>
-      <label>メイン見出し <input type="text" id="f-headline" /></label>
-      <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
-      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
-      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
-      <label>フッター電話 <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
-      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
-      <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
-      <label>地図 iframe 埋め込み URL <input type="url" id="f-mapEmbedUrl" /></label>
-      <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
-      <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
-      <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
+      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
+        入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
+      </p>
+
+      <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">ヒーロー（トップ）</h3>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">トップ画像（追加・並び替えは手動。最大10枚）</div>
         <div id="f-hero-slides-list"></div>
         <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
       </div>
+      <label>サイト名（店名） <input type="text" id="f-siteName" /></label>
+      <label>メイン見出し <input type="text" id="f-headline" /></label>
+      <label>リード文 <textarea id="f-subheadline" rows="3"></textarea></label>
+      <label>ページタイトル（ブラウザのタブ・&lt;title&gt;） <input type="text" id="f-title" /></label>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">メニュー（ハンバーガー内）</h3>
+      <label>ナビラベル（カンマ区切り・任意） <input type="text" id="f-navLabels" placeholder="例: コンセプト, メニュー, アクセス" /></label>
+      <label>CTA ラベル <input type="text" id="f-ctaLabel" /></label>
+      <label>CTA リンク（#contact 等） <input type="text" id="f-ctaHref" /></label>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文ブロック（スクロール順）</h3>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">セクション（任意）</div>
         <div id="f-sections-list"></div>
         <div class="row-actions"><button type="button" class="btn" id="btn-add-section">＋ セクション追加</button></div>
       </div>
 
-      <h2 style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">cafe_1：店舗・メニュー・FAQ</h2>
-      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">JSON不要。通常フォームで追加して入力できます。</p>
-
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">cafe_1：セクション内に差し込まれる内容</h3>
+      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">
+        メニュー欄・FAQ・アクセスなどは、上のセクションで <code>menu</code> / <code>faq</code> / <code>access</code> などの ID を置いた位置に表示されます。JSON は不要です。
+      </p>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">テキストメニュー行（お品書き・メニュー欄）</div>
+        <div id="f-menu-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-menu">＋ メニュー追加</button></div>
+      </div>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">メニューPDF等のボタン行（メニュー欄）</div>
+        <div id="f-branch-menu-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-branch-menu">＋ ボタン追加</button></div>
+      </div>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">FAQ（よくある質問）</div>
         <div id="f-faq-list"></div>
         <div class="row-actions"><button type="button" class="btn" id="btn-add-faq">＋ FAQ追加</button></div>
       </div>
+      <label>地図 iframe 埋め込み URL（アクセス欄の先頭） <input type="url" id="f-mapEmbedUrl" /></label>
       <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">テキストメニュー行（お品書き）</div>
-        <div id="f-menu-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-menu">＋ メニュー追加</button></div>
+        <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
+        <div id="f-shop-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-shop">＋ 店舗カード追加</button></div>
       </div>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">本文の下（Instagram・Google）</h3>
+      <div class="repeat-group">
+        <div style="font-size: 0.8rem; color: #9aacbf">Instagram 投稿グリッド</div>
+        <div id="f-instagram-list"></div>
+        <div class="row-actions"><button type="button" class="btn" id="btn-add-instagram">＋ 投稿追加</button></div>
+      </div>
+      <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
+      <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">画面に固定されるボタン</h3>
+      <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
+      <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
+      <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター（ページ最下部）</h3>
+      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
+      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+      <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
+      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+      <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
+
+      <h3 style="margin: 1.1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">検索・構造化データ（MEO / JSON-LD）</h3>
+      <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 8px">本文の見た目の順序には含まれませんが、検索エンジン向けの情報です。</p>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">MEO / JSON-LD 用 cafeMeo</div>
         <label>料理ジャンル（servesCuisine）<input type="text" id="f-meo-servesCuisine" /></label>
@@ -393,27 +432,8 @@
         <div id="f-meo-hours-list"></div>
         <div class="row-actions"><button type="button" class="btn" id="btn-add-meo-hour">＋ 営業時間追加</button></div>
       </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
-        <div id="f-shop-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-shop">＋ 店舗カード追加</button></div>
-      </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">Instagram 投稿グリッド</div>
-        <div id="f-instagram-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-instagram">＋ 投稿追加</button></div>
-      </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">メニューPDF等のボタン行</div>
-        <div id="f-branch-menu-list"></div>
-        <div class="row-actions"><button type="button" class="btn" id="btn-add-branch-menu">＋ ボタン追加</button></div>
-      </div>
-      <label>フローティング「地図」ボタン URL <input type="url" id="f-cafeFloatingMapUrl" /></label>
-      <label>クチコミバナー文言 <input type="text" id="f-cafeReviewCtaText" /></label>
-      <label>クチコミ投稿 URL <input type="url" id="f-cafeReviewCtaUrl" /></label>
-      <label>Google マップ埋め込み（投稿欄）URL <input type="url" id="f-cafeGbPostsEmbedUrl" /></label>
-      <label>Instagram 投稿埋め込み（1投稿のURL・任意） <input type="url" id="f-cafeInstagramPermalink" /></label>
-      <label>
+
+      <label style="margin-top: 10px">
         高度設定JSON（未露出キー用・任意）
         <span style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">ここに入れたキーは override にそのままマージされます。通常項目に無い `cafe_1` 専用キーを編集したいときに使用。</span>
         <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
