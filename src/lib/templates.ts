@@ -758,8 +758,17 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 header { display: none; }
   .page-wrapper.template-cafe_1 .wo-hero { position: relative; min-height: var(--hero-min-h); overflow: hidden; background: #222; }
   .page-wrapper.template-cafe_1 .wo-hero-viewport { position: absolute; inset: 0; overflow: hidden; }
-  .page-wrapper.template-cafe_1 .wo-hero-track { display: flex; height: 100%; width: 100%; transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; }
-  .page-wrapper.template-cafe_1 .wo-hero-slide { flex: 0 0 100%; width: 100%; height: 100%; background-size: cover; background-position: center; }
+  .page-wrapper.template-cafe_1 .wo-hero-track {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    height: 100%;
+    width: 100%;
+    transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+  .page-wrapper.template-cafe_1 .wo-hero-slide { flex: 0 0 100%; width: 100%; min-width: 100%; height: 100%; background-size: cover; background-position: center; }
   .page-wrapper.template-cafe_1 .wo-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 40%, transparent 72%); z-index: 3; pointer-events: none; }
   .page-wrapper.template-cafe_1 .c1-hero-inner { position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; text-align: center; padding: 2rem 1.5rem 4.5rem; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.45); }
   .page-wrapper.template-cafe_1 .c1-hero-inner.c1-hero-inner--brand-only { padding-bottom: 3.35rem; }

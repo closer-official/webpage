@@ -300,6 +300,10 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
             .map((u) => String(u || '').trim())
             .filter(Boolean)
             .slice(0, 10);
+          if (tid === 'cafe_1') {
+            if (hs.length > 0) return hs.slice(0, 1);
+            return [d1];
+          }
           if (hs.length > 0) return hs;
           return [d1, d2, d3];
         })()
@@ -1235,7 +1239,7 @@ ${cafe1ShopLocationsHtml()}
       </div>`;
   const heroSection =
     tid === 'cafe_tea' || tid === 'cafe_1'
-      ? `<section${tid === 'cafe_1' ? ' id="wo-top"' : ''} class="wo-hero" aria-roledescription="carousel" aria-label="メインビジュアル">
+      ? `<section${tid === 'cafe_1' ? ' id="wo-top"' : ''} class="wo-hero"${woHeroSlides.length > 1 ? ' aria-roledescription="carousel"' : ''} aria-label="メインビジュアル">
       <div class="wo-hero-viewport">
         <div class="wo-hero-track" id="wo-hero-track">${woHeroSlides
           .map((u, i) => {
@@ -1248,7 +1252,7 @@ ${cafe1ShopLocationsHtml()}
           .join('')}</div>
       </div>
       ${woHeroInnerHtml}
-      <div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>
+      ${woHeroSlides.length > 1 ? `<div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>` : ''}
     </section>`
       : tid === 'pet_salon'
         ? `<section class="hero hero-full-img pet-hero hell-hero-parallax" style="--hero-bg-img: url(${escapeHtml(heroImageUrl)})">
