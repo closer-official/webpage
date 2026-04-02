@@ -341,55 +341,6 @@
         <p id="ai-json-msg" class="ok" style="display: none"></p>
         <p id="ai-json-err" class="err" style="display: none"></p>
       </div>
-      <div class="repeat-group" id="research-store-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">店舗調査フルオート（サーバー・Gemini）</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
-          <strong>cafe_1</strong> 向けの下書きです。トップ画像は空のまま（後から追加）。公開情報・モデル知識の範囲で推論するため、必ず人間が最終確認してください。
-        </p>
-        <div style="font-size: 0.78rem; color: #a8bdd4; margin: 10px 0 6px; font-weight: 600">一括（検索意図だけで最大10件・下書き保存）</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 0 0 8px">
-          店舗名の入力は不要です。「業種＋地域」のように書くだけで候補店を列挙し、各店を並列調査して<strong>下書きドラフトをそのまま保存</strong>します（例:
-          <span class="mono">ラーメン つくば</span>）。処理に数分かかることがあります。
-        </p>
-        <label>
-          検索意図（自由記述）
-          <input type="text" id="research-batch-query" placeholder="例: ラーメン つくば / カフェ 秋葉原" maxlength="500" />
-        </label>
-        <label>
-          件数（最大10）
-          <input type="number" id="research-batch-count" min="1" max="10" value="10" style="max-width: 6rem" />
-        </label>
-        <div class="row-actions">
-          <button type="button" class="btn primary" id="btn-research-stores-batch">検索意図で一括ドラフト作成（保存）</button>
-        </div>
-        <p id="research-batch-msg" class="ok" style="display: none"></p>
-        <p id="research-batch-err" class="err" style="display: none"></p>
-        <div style="font-size: 0.78rem; color: #a8bdd4; margin: 14px 0 6px; font-weight: 600">1店舗だけフォームに流し込む</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 0 0 8px">
-          店名と地域が決まっているときはこちら。現在のフォームに反映のみ（保存は別途「保存」ボタン）。
-        </p>
-        <label>
-          店舗名
-          <input type="text" id="research-store-name" placeholder="例: カフェ〇〇" maxlength="120" />
-        </label>
-        <label>
-          地域
-          <input type="text" id="research-store-area" placeholder="例: 東京都渋谷区〇〇" maxlength="200" />
-        </label>
-        <label>
-          業種（任意）
-          <input type="text" id="research-store-category" placeholder="例: カフェ・喫茶" maxlength="120" />
-        </label>
-        <label>
-          補足・地図URLなど（任意）
-          <textarea id="research-store-notes" rows="4" placeholder="GoogleマップのURL、チラシメモなど"></textarea>
-        </label>
-        <div class="row-actions">
-          <button type="button" class="btn" id="btn-research-store">店舗調査でフォームに流し込む</button>
-        </div>
-        <p id="research-store-msg" class="ok" style="display: none"></p>
-        <p id="research-store-err" class="err" style="display: none"></p>
-      </div>
       <div class="row-actions">
         <button type="button" class="btn" id="btn-import-docs">資料から自動入力</button>
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
@@ -480,6 +431,10 @@
           <div class="row-actions"><button type="button" class="btn" id="btn-add-faq">＋ FAQ追加</button></div>
         </div>
         <label>地図 iframe 埋め込み URL（アクセス欄の先頭） <input type="url" id="f-mapEmbedUrl" /></label>
+        <p style="font-size: 0.72rem; color: #7d8fa3; margin: -4px 0 8px">
+          ここに有効な https URL を入れると、空欄の「フローティング地図」「Google
+          マップ埋め込み（投稿欄）」「店舗カードの地図」にも自動で同じURLを入れます（別URLにしたい欄だけ後から上書き）。
+        </p>
         <div class="repeat-group">
           <div style="font-size: 0.8rem; color: #9aacbf">店舗カード（アクセス欄）</div>
           <div id="f-shop-list"></div>
@@ -518,6 +473,9 @@
         <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
         <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
         <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+        <p style="font-size: 0.72rem; color: #7d8fa3; margin: -4px 0 8px">
+          空欄の「Instagram 投稿埋め込み（1投稿のURL）」には、ここと同じURLを自動で入れます（別URLにする場合は下の欄で上書き）。
+        </p>
         <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
       </div>
 
@@ -1253,6 +1211,7 @@
               });
             }
           }
+          syncMapAndSocialUrlsIntoOverride(ov);
           return ov;
         }
 
@@ -1400,6 +1359,66 @@
           };
         }
 
+        function cloneJsonForForm(obj) {
+          try {
+            return JSON.parse(JSON.stringify(obj == null ? {} : obj));
+          } catch (e) {
+            return {};
+          }
+        }
+
+        /** 保存済み partial override をビルトイン既定で埋め、プレビューとフォームの表示を一致させる */
+        function mergePartialOverrideForForm(fullOv, partial) {
+          var out = cloneJsonForForm(fullOv);
+          partial = partial || {};
+          Object.keys(partial).forEach(function (k) {
+            var pv = partial[k];
+            if (k === 'cafeMeo' && pv && typeof pv === 'object' && !Array.isArray(pv)) {
+              out.cafeMeo = Object.assign({}, out.cafeMeo || {}, pv);
+              return;
+            }
+            out[k] = pv;
+          });
+          return out;
+        }
+
+        function syncMapAndSocialUrlsIntoOverride(ov) {
+          if (!ov || typeof ov !== 'object') return;
+          var m = String(ov.mapEmbedUrl || '').trim();
+          if (m && /^https?:\/\//i.test(m)) {
+            if (!String(ov.cafeFloatingMapUrl || '').trim()) ov.cafeFloatingMapUrl = m;
+            if (!String(ov.cafeGbPostsEmbedUrl || '').trim()) ov.cafeGbPostsEmbedUrl = m;
+          }
+          var ig = String(ov.footerInstagramUrl || '').trim();
+          if (ig && /^https?:\/\//i.test(ig)) {
+            if (!String(ov.cafeInstagramPermalink || '').trim()) ov.cafeInstagramPermalink = ig;
+          }
+          if (m && /^https?:\/\//i.test(m) && Array.isArray(ov.cafeShopLocations)) {
+            ov.cafeShopLocations = ov.cafeShopLocations.map(function (loc) {
+              var copy = Object.assign({}, loc || {});
+              if (!String(copy.mapUrl || '').trim()) copy.mapUrl = m;
+              return copy;
+            });
+          }
+        }
+
+        function syncRelatedUrlFieldsFromInputs() {
+          var emb = document.getElementById('f-mapEmbedUrl');
+          var fl = document.getElementById('f-cafeFloatingMapUrl');
+          var gb = document.getElementById('f-cafeGbPostsEmbedUrl');
+          var m = emb && emb.value ? emb.value.trim() : '';
+          if (m && /^https?:\/\//i.test(m)) {
+            if (fl && !fl.value.trim()) fl.value = m;
+            if (gb && !gb.value.trim()) gb.value = m;
+          }
+          var fig = document.getElementById('f-footerInstagramUrl');
+          var cip = document.getElementById('f-cafeInstagramPermalink');
+          var ig = fig && fig.value ? fig.value.trim() : '';
+          if (ig && /^https?:\/\//i.test(ig)) {
+            if (cip && !cip.value.trim()) cip.value = ig;
+          }
+        }
+
         function loadBuiltinDefaultsIntoForm(templateId, opts) {
           opts = opts || {};
           if (!templateId) {
@@ -1461,18 +1480,11 @@
         }
 
         function scheduleLivePreview() {
-          if (currentCustomId) return;
           clearTimeout(livePreviewTimer);
           livePreviewTimer = setTimeout(runLivePreview, 420);
         }
 
         function runLivePreview() {
-          if (currentCustomId) return;
-          if (document.getElementById('mode-select').value === 'edit') {
-            var st = document.getElementById('preview-live-status');
-            if (st) st.textContent = '既存カスタムを選んで「フォームに読み込む」を押すとプレビューできます。';
-            return;
-          }
           var baseId =
             previewBaseTemplateId ||
             (document.getElementById('base-template') && document.getElementById('base-template').value) ||
@@ -1655,7 +1667,7 @@
               if (document.getElementById('mode-select').value === 'new' && !currentCustomId && bid) {
                 return loadBuiltinDefaultsIntoForm(bid, {});
               }
-              if (!currentCustomId) scheduleLivePreview();
+              scheduleLivePreview();
               applyWorkerFormTemplateVisibility();
             })
             .catch(function () {
@@ -1676,26 +1688,40 @@
                 return x.id === id;
               });
               if (!item) throw new Error('一覧に見つかりません。再読み込みするか、既存カスタムを選び直してください。');
-              currentCustomId = item.id;
-              previewBaseTemplateId = item.baseTemplateId || '';
-              document.getElementById('draft-name').value = item.name || '';
-              fillFormFromOverride(item.override || {});
-              updatePreviewUrl();
-              scheduleLivePreview();
-              applyWorkerFormTemplateVisibility();
-              if (opts.researchBatchAnnounce) {
-                var a = opts.researchBatchAnnounce;
-                var more =
-                  a.moreCount > 0
-                    ? ' ほか ' + a.moreCount + ' 件は上の「既存カスタム」で選び、「フォームに読み込む」で切り替えられます。'
-                    : '';
-                showErr(
-                  'research-batch-msg',
-                  a.prefix + ' このまま下のフォームで微調整・保存できます（表示中: ' + (item.name || item.id) + '）。' + more,
-                );
-              } else if (opts.successMsg) {
-                showErr('save-msg', opts.successMsg);
+              var baseId = String(item.baseTemplateId || '').trim();
+
+              function applyToForm(formOv) {
+                currentCustomId = item.id;
+                previewBaseTemplateId = item.baseTemplateId || '';
+                document.getElementById('draft-name').value = item.name || '';
+                fillFormFromOverride(formOv);
+                updatePreviewUrl();
+                scheduleLivePreview();
+                applyWorkerFormTemplateVisibility();
+                if (opts.successMsg) showErr('save-msg', opts.successMsg);
               }
+
+              if (!baseId) {
+                applyToForm(item.override || {});
+                return;
+              }
+              return credFetch(api + '/template-default/' + encodeURIComponent(baseId))
+                .then(function (r) {
+                  return r.json().then(function (j) {
+                    return { ok: r.ok, j: j };
+                  });
+                })
+                .then(function (x) {
+                  if (!x.ok) {
+                    applyToForm(item.override || {});
+                    return;
+                  }
+                  var fullOv = templateDefaultJsonToOverride(x.j);
+                  applyToForm(mergePartialOverrideForForm(fullOv, item.override || {}));
+                })
+                .catch(function () {
+                  applyToForm(item.override || {});
+                });
             });
         }
 
@@ -1787,147 +1813,6 @@
             .catch(function (e) {
               showErr('import-err', e.message || String(e));
               showErr('import-msg', '');
-            });
-        };
-
-        document.getElementById('btn-research-stores-batch').onclick = function () {
-          showErr('research-batch-err', '');
-          showErr('research-batch-msg', '');
-          var q = String(document.getElementById('research-batch-query').value || '').trim();
-          if (!q) {
-            showErr('research-batch-err', '検索意図を入力してください（例: ラーメン つくば）。');
-            return;
-          }
-          var cntEl = document.getElementById('research-batch-count');
-          var maxCount = parseInt(String(cntEl && cntEl.value != null ? cntEl.value : '10'), 10);
-          if (Number.isNaN(maxCount) || maxCount < 1) maxCount = 10;
-          maxCount = Math.min(10, maxCount);
-          if (
-            !window.confirm(
-              '検索意図「' +
-                q +
-                '」で最大' +
-                maxCount +
-                '件を列挙し、各店を調査して cafe_1 の下書きとして保存します。Gemini を複数回呼ぶため1〜数分かかることがあります。続行しますか？',
-            )
-          ) {
-            return;
-          }
-          showErr('research-batch-msg', '候補の列挙と各店の調査を実行中です…（1〜数分お待ちください）');
-          credFetch(api + '/template-customizations/research-stores-batch', {
-            method: 'POST',
-            body: JSON.stringify({ query: q, maxCount: maxCount, saveDrafts: true }),
-          })
-            .then(function (r) {
-              return r.json().then(function (j) {
-                return { ok: r.ok, j: j };
-              });
-            })
-            .then(function (x) {
-              if (!x.ok) throw new Error(x.j.error || '一括調査に失敗しました');
-              var saved = x.j.saved || [];
-              var fail = x.j.failures || [];
-              var parts = ['cafe_1 下書きを ' + saved.length + ' 件保存しました。'];
-              if (fail.length) {
-                parts.push(
-                  '一部スキップ: ' +
-                    fail
-                      .map(function (f) {
-                        return f.storeName || f.area || '';
-                      })
-                      .filter(Boolean)
-                      .slice(0, 5)
-                      .join('、') +
-                    (fail.length > 5 ? '…' : '') +
-                    '。',
-                );
-              }
-              var prefix = parts.join('');
-              var firstId = saved[0] && saved[0].id;
-              return loadBasesAndCustoms()
-                .then(function () {
-                  if (!firstId) {
-                    showErr('research-batch-msg', prefix);
-                    return;
-                  }
-                  document.getElementById('mode-select').value = 'edit';
-                  document.getElementById('existing-id').value = firstId;
-                  document.getElementById('mode-select').dispatchEvent(new Event('change'));
-                  return loadExistingCustomizationById(firstId, {
-                    researchBatchAnnounce: { prefix: prefix, moreCount: saved.length - 1 },
-                  });
-                })
-                .catch(function (e) {
-                  showErr('research-batch-err', e.message || String(e));
-                  showErr('research-batch-msg', prefix + ' 一覧の更新またはフォーム表示に失敗しました。');
-                });
-            })
-            .catch(function (e) {
-              showErr('research-batch-err', e.message || String(e));
-              showErr('research-batch-msg', '');
-            });
-        };
-
-        document.getElementById('btn-research-store').onclick = function () {
-          var base = document.getElementById('base-template').value || '';
-          showErr('research-store-err', '');
-          showErr('research-store-msg', '');
-          var reportEl = document.getElementById('ai-verify-report');
-          if (reportEl) reportEl.style.display = 'none';
-          var storeName = String(document.getElementById('research-store-name').value || '').trim();
-          var area = String(document.getElementById('research-store-area').value || '').trim();
-          if (!storeName || !area) {
-            showErr('research-store-err', '店舗名と地域を入力してください。');
-            return;
-          }
-          if (base !== 'cafe_1') {
-            if (
-              !window.confirm(
-                'ベーステンプレが cafe_1 ではありません。この調査は cafe_1 向けのフィールド構成です。続行しますか？',
-              )
-            ) {
-              return;
-            }
-          }
-          showErr('research-store-msg', '店舗を調査中です…（20〜40秒程度）');
-          credFetch(api + '/template-customizations/research-store', {
-            method: 'POST',
-            body: JSON.stringify({
-              storeName: storeName,
-              area: area,
-              category: String(document.getElementById('research-store-category').value || '').trim(),
-              extraNotes: String(document.getElementById('research-store-notes').value || '').trim(),
-            }),
-          })
-            .then(function (r) {
-              return r.json().then(function (j) {
-                return { ok: r.ok, j: j };
-              });
-            })
-            .then(function (x) {
-              if (!x.ok) throw new Error(x.j.error || '調査に失敗しました');
-              var ov = x.j.override || {};
-              fillFormFromOverride(ov);
-              if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
-                document.getElementById('draft-name').value = x.j.nameSuggestion;
-              }
-              currentCustomId = null;
-              if (document.getElementById('mode-select').value !== 'new') {
-                document.getElementById('mode-select').value = 'new';
-                document.getElementById('mode-select').dispatchEvent(new Event('change'));
-              }
-              updatePreviewUrl();
-              scheduleLivePreview();
-              renderAiVerificationReport(x.j.verification || {}, ov);
-              var suffix =
-                base !== 'cafe_1'
-                  ? '（cafe_1 以外のベースでは項目の一部が使われないことがあります）'
-                  : '';
-              showErr('research-store-msg', '調査結果をフォームに反映しました。内容を確認してください。' + suffix);
-            })
-            .catch(function (e) {
-              showErr('research-store-err', e.message || String(e));
-              showErr('research-store-msg', '');
             });
         };
 
@@ -2114,12 +1999,21 @@
         var editorPane = document.getElementById('editor-pane');
         if (editorPane) {
           editorPane.addEventListener('input', function () {
-            if (!currentCustomId) scheduleLivePreview();
+            scheduleLivePreview();
+            syncRelatedUrlFieldsFromInputs();
           });
           editorPane.addEventListener('change', function () {
-            if (!currentCustomId) scheduleLivePreview();
+            scheduleLivePreview();
+            syncRelatedUrlFieldsFromInputs();
           });
         }
+        ;['f-mapEmbedUrl', 'f-footerInstagramUrl'].forEach(function (fid) {
+          var el = document.getElementById(fid);
+          if (el) {
+            el.addEventListener('input', syncRelatedUrlFieldsFromInputs);
+            el.addEventListener('change', syncRelatedUrlFieldsFromInputs);
+          }
+        });
       })();
     </script>
   </body>
