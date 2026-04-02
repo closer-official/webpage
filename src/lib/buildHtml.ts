@@ -1591,18 +1591,24 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
   if (tid === 'cafe_1' && igFeed.length > 0) {
     const igProfileUrl = String(content.footerInstagramUrl ?? '').trim();
     const igPostHrefFallback = igProfileUrl || snsInstagramUrl || 'https://www.instagram.com/';
+    const igCellHtml = igFeed
+      .map((it) => {
+        const raw = String(it.postUrl ?? '').trim();
+        const href = /^javascript:/i.test(raw) ? igPostHrefFallback : raw || igPostHrefFallback;
+        return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy" decoding="async"></span></a>`;
+      })
+      .join('');
     extraSectionsHtml += `
     <section class="section wo-sec c1-ig-feed-sec" id="ig-feed" aria-labelledby="c1-ig-feed-title"${extraMotionAttr}>
       <div class="section-body">
         <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿（Instagram）</h2>
-        <p class="c1-ig-feed-lede">投稿の一部です。画像をタップで各投稿へ。公式プロフィールはフッターのアイコンからどうぞ。</p>
-        <div class="c1-ig-feed-grid">${igFeed
-          .map((it) => {
-            const raw = String(it.postUrl ?? '').trim();
-            const href = /^javascript:/i.test(raw) ? igPostHrefFallback : raw || igPostHrefFallback;
-            return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"></span></a>`;
-          })
-          .join('')}</div>
+        <p class="c1-ig-feed-lede">店内の様子をご紹介します。写真は横に流れ続けます。各画像をタップで投稿・プロフィールへ。公式アカウントはフッターのアイコンからどうぞ。</p>
+        <div class="c1-ig-feed-marquee" role="region" aria-label="Instagram写真のスライド">
+          <div class="c1-ig-feed-track">
+            <div class="c1-ig-feed-row">${igCellHtml}</div>
+            <div class="c1-ig-feed-row c1-ig-feed-row--dup" aria-hidden="true" inert>${igCellHtml}</div>
+          </div>
+        </div>
       </div>
     </section>`;
   }

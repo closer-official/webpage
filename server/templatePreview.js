@@ -419,10 +419,9 @@ export function renderTemplatePreview(templateId, customization = null, options 
         },
       ],
       cafeInstagramFeedItems: [
-        { imageUrl: 'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
-        { imageUrl: 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
-        { imageUrl: 'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
-        { imageUrl: 'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=900', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: '/cafe-1/ig-marquee/1.png', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: '/cafe-1/ig-marquee/2.png', postUrl: 'https://www.instagram.com/' },
+        { imageUrl: '/cafe-1/ig-marquee/3.png', postUrl: 'https://www.instagram.com/' },
       ],
       sections: [
         {

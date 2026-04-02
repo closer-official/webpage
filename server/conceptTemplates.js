@@ -1040,27 +1040,71 @@ const CAFE_1_CSS =
   .page-wrapper.template-cafe_1 .c1-ig-feed-lede { font-size: 0.98rem; line-height: 2; color: var(--tp-text); margin: 0 0 0.75rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-actions { margin: 0 0 0.85rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-profile { display: inline-flex; align-items: center; font-size: 0.98rem; font-weight: 600; color: var(--tp-heading); text-decoration: none; border-bottom: 1px solid currentColor; }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    margin-top: 0.65rem;
+  @keyframes c1-ig-marquee-x {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-marquee {
+    overflow: hidden;
     width: 100vw;
     max-width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    margin-top: 0.65rem;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
   }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item { text-decoration: none; color: inherit; }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item-frame {
+  .page-wrapper.template-cafe_1 .c1-ig-feed-track {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: max-content;
+    gap: 0;
+    animation: c1-ig-marquee-x 36s linear infinite;
+    will-change: transform;
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-track:hover {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-wrapper.template-cafe_1 .c1-ig-feed-track {
+      animation: none;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 100%;
+      justify-content: center;
+      row-gap: 0.5rem;
+    }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-row--dup {
+      display: none !important;
+    }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-marquee .c1-ig-feed-item {
+    text-decoration: none;
+    color: inherit;
+    flex: 0 0 auto;
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-marquee .c1-ig-feed-item-frame {
     position: relative;
     display: block;
     border-radius: 0;
     overflow: hidden;
     border: none;
-    aspect-ratio: 3 / 4;
-    min-height: clamp(8rem, 26vh, 22rem);
+    width: min(72vw, 18.5rem);
+    aspect-ratio: 4 / 3;
+    min-height: 0;
   }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item img {
+  .page-wrapper.template-cafe_1 .c1-ig-feed-marquee .c1-ig-feed-item img {
     display: block;
     width: 100%;
     height: 100%;
@@ -1099,20 +1143,9 @@ const CAFE_1_CSS =
     .page-wrapper.template-cafe_1 .c1-page-top { bottom: calc(9.2rem + env(safe-area-inset-bottom)); }
     .page-wrapper.template-cafe_1 .c1-menu-text-row { display: grid; grid-template-columns: 1fr auto; align-items: center; }
     .page-wrapper.template-cafe_1 .c1-menu-text-name { font-size: 1.03rem; }
-    .page-wrapper.template-cafe_1 .c1-ig-feed-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0;
-      overflow-x: visible;
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-    }
-    .page-wrapper.template-cafe_1 .c1-ig-feed-item { width: 100%; min-width: 0; }
-    .page-wrapper.template-cafe_1 .c1-ig-feed-item-frame {
-      aspect-ratio: 16 / 9;
-      min-height: 0;
-      max-height: none;
+    .page-wrapper.template-cafe_1 .c1-ig-feed-marquee .c1-ig-feed-item-frame {
+      width: min(78vw, 17rem);
+      aspect-ratio: 4 / 3;
     }
   }
   .page-wrapper.template-cafe_1 .c1-ig-embed-sec .c1-ig-embed-wrap { display: flex; justify-content: center; margin-top: 1rem; }

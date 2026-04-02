@@ -18,6 +18,9 @@ const PLACEHOLDER_MAP =
 
 const IG = 'https://www.instagram.com/';
 
+/** cafe_1 Instagram 帯：同一3枚を横スクロールマーキーで表示 */
+const CAFE_1_IG_MARQUEE_IMAGES = ['/cafe-1/ig-marquee/1.png', '/cafe-1/ig-marquee/2.png', '/cafe-1/ig-marquee/3.png'];
+
 /** 編集画面のジャンルID → 固定プリセット種別 */
 export function mapGenreToBasicPresetKind(genreId) {
   const id = normalizeCafeVisualGenreId(genreId);
@@ -62,12 +65,7 @@ function ramenOverride() {
     cafeReviewCtaText: '',
     cafeReviewCtaUrl: '',
     faqItems: faqGeneric(),
-    cafeInstagramFeedItems: instagramGrid([
-      'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=900',
-    ]),
+    cafeInstagramFeedItems: instagramGrid(CAFE_1_IG_MARQUEE_IMAGES),
     sections: [
       {
         id: 'concept',
@@ -159,12 +157,7 @@ function cafeOverride() {
     cafeReviewCtaText: '',
     cafeReviewCtaUrl: '',
     faqItems: faqGeneric(),
-    cafeInstagramFeedItems: instagramGrid([
-      'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/683039/pexels-photo-683039.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/414630/pexels-photo-414630.jpeg?auto=compress&cs=tinysrgb&w=900',
-    ]),
+    cafeInstagramFeedItems: instagramGrid(CAFE_1_IG_MARQUEE_IMAGES),
     sections: [
       {
         id: 'concept',
@@ -246,12 +239,7 @@ function defaultOverride() {
     cafeReviewCtaText: '',
     cafeReviewCtaUrl: '',
     faqItems: faqGeneric(),
-    cafeInstagramFeedItems: instagramGrid([
-      'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg?auto=compress&cs=tinysrgb&w=900',
-      'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=900',
-    ]),
+    cafeInstagramFeedItems: instagramGrid(CAFE_1_IG_MARQUEE_IMAGES),
     sections: [
       {
         id: 'concept',
