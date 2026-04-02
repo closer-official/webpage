@@ -335,6 +335,23 @@
         </div>
         <p id="gemini-free-err" class="err" style="display: none"></p>
       </div>
+      <div class="repeat-group" style="margin-top: 12px">
+        <div style="font-size: 0.8rem; color: #9aacbf">地図を埋め込む（コピペ）</div>
+        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
+          Googleマップの「共有」→「地図を埋め込む」→「HTMLをコピー」の
+          <strong>iframe 全文</strong>、または埋め込みURL／短縮リンクを貼り付けます。下の「地図 iframe 埋め込みURL」に反映され、空欄ならフローティング地図等も同じURLで埋まります。貼り付け後しばらく待つか「地図URLに取り込む」を押してください。
+        </p>
+        <textarea
+          id="map-embed-paste"
+          class="mono"
+          rows="4"
+          placeholder='&lt;iframe src="https://www.google.com/maps/embed?pb=..." ...&gt;&lt;/iframe&gt;'
+        ></textarea>
+        <div class="row-actions">
+          <button type="button" class="btn primary" id="btn-map-embed-apply">地図URLに取り込む</button>
+        </div>
+        <p id="map-paste-err" class="err" style="display: none"></p>
+      </div>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">AI調査取り込みテンプレ（Gemini / ChatGPT用）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
@@ -613,6 +630,7 @@
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
         var seoAutofillTimer = null;
+        var mapPasteTimer = null;
         var addBtnIdsBound = false;
         var customizationBaseById = {};
         var EMBED_STYLE_TEMPLATE_IDS = {
@@ -2166,6 +2184,49 @@
               btn.disabled = false;
             });
         };
+
+        function applyMapEmbedPasteWorker() {
+          showErr('map-paste-err', '');
+          showErr('save-err', '');
+          var raw = String(document.getElementById('map-embed-paste').value || '').trim();
+          if (!raw) {
+            showErr('map-paste-err', 'iframe または URL を貼り付けてください。');
+            return;
+          }
+          var btn = document.getElementById('btn-map-embed-apply');
+          btn.disabled = true;
+          credFetch(api + '/resolve-map-embed-url', {
+            method: 'POST',
+            body: JSON.stringify({ raw: raw }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, status: r.status, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'HTTP ' + x.status);
+              if (!x.j.embedUrl) throw new Error('埋め込みURLがありません');
+              var u = extractUrlFromPossiblyMarkdownLink(x.j.embedUrl) || String(x.j.embedUrl).trim();
+              document.getElementById('f-mapEmbedUrl').value = u;
+              syncRelatedUrlFieldsFromInputs();
+              scheduleLivePreview();
+              scheduleSeoAutofillFromBasics();
+              showErr('import-msg', 'Googleマップの埋め込みURLを設定しました。');
+            })
+            .catch(function (e) {
+              showErr('map-paste-err', e.message || String(e));
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        }
+
+        document.getElementById('btn-map-embed-apply').onclick = applyMapEmbedPasteWorker;
+        document.getElementById('map-embed-paste').addEventListener('paste', function () {
+          clearTimeout(mapPasteTimer);
+          mapPasteTimer = setTimeout(applyMapEmbedPasteWorker, 450);
+        });
 
         document.getElementById('btn-copy-ai-prompt').onclick = function () {
           var t = document.getElementById('ai-import-prompt').value || '';
