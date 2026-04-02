@@ -55,6 +55,11 @@ import { buildPublicTemplateCatalog, buildAdminTemplateCatalog } from './publicT
 import { BUILTIN_BUILD_HTML_TEMPLATE_IDS } from './templateRegistry.js';
 import { translatePublicUiEntries } from './publicUiTranslate.js';
 import { CAFE_1_RAMEN_HERO_SLIDES, normalizeCafeVisualGenreId } from './cafe1GenrePresets.js';
+import {
+  getCafe1BasicLockedOverride,
+  mergeCafe1BasicEditable,
+  mapGenreToBasicPresetKind,
+} from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -698,6 +703,8 @@ function normalizeCustomizationInput(body = {}) {
   if (footerInstagramUrl && /^https?:\/\//i.test(footerInstagramUrl)) out.footerInstagramUrl = footerInstagramUrl;
   const footerLineUrl = String(body.footerLineUrl || '').trim().slice(0, 2000);
   if (footerLineUrl && /^https?:\/\//i.test(footerLineUrl)) out.footerLineUrl = footerLineUrl;
+  const footerTwitterUrl = String(body.footerTwitterUrl || '').trim().slice(0, 2000);
+  if (footerTwitterUrl && /^https?:\/\//i.test(footerTwitterUrl)) out.footerTwitterUrl = footerTwitterUrl;
   const mapEmbedUrl = String(body.mapEmbedUrl || '').trim().slice(0, 2000);
   if (mapEmbedUrl && /^https?:\/\//i.test(mapEmbedUrl)) out.mapEmbedUrl = mapEmbedUrl;
   const cafeFloatingMapUrl = String(body.cafeFloatingMapUrl || '').trim().slice(0, 2000);
@@ -1136,6 +1143,121 @@ app.post('/api/style-reference/extract', async (req, res) => {
 app.get('/api/template-customizations', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   res.json(await store.getTemplateCustomizations());
+});
+
+/** cafe_1 基本情報のみモード：ジャンル別の固定 override ひな型（プレビュー用） */
+app.get('/api/cafe-1-basic-locked-preset', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const genre = String(req.query.genre || '').trim();
+  const presetKind = mapGenreToBasicPresetKind(genre);
+  try {
+    const override = getCafe1BasicLockedOverride(presetKind);
+    res.json({ ok: true, presetKind, requestedGenre: genre, override });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || 'プリセット取得に失敗しました' });
+  }
+});
+
+/** cafe_1 基本情報のみ保存（固定コンテンツ＋入力項目をサーバー側でマージ） */
+app.post('/api/template-customizations/save-cafe1-basic', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  const genre = String(body.genre || '').trim();
+  const presetKind =
+    body.presetKind === 'ramen' || body.presetKind === 'cafe' || body.presetKind === 'default'
+      ? body.presetKind
+      : mapGenreToBasicPresetKind(genre);
+  let merged;
+  try {
+    merged = mergeCafe1BasicEditable(presetKind, body.editable || {});
+  } catch (e) {
+    return res.status(400).json({ error: e?.message || 'マージに失敗しました' });
+  }
+  const normalizedOv = normalizeCustomizationInput(merged);
+  const customizations = await store.getTemplateCustomizations();
+  const now = new Date().toISOString();
+  const mode = body.mode === 'update' ? 'update' : 'create';
+
+  if (mode === 'update') {
+    const id = String(body.id || '');
+    const i = customizations.findIndex((v) => v.id === id);
+    if (i === -1) return res.status(404).json({ error: 'Customization not found' });
+    const nextStatus =
+      body.status === 'draft' || body.status === 'published'
+        ? body.status
+        : customizations[i].status || 'published';
+    customizations[i] = {
+      ...customizations[i],
+      name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
+      baseTemplateId: 'cafe_1',
+      override: normalizedOv,
+      cafe1BasicPresetKind: presetKind,
+      status: nextStatus,
+      updatedAt: now,
+    };
+    await store.setTemplateCustomizations(customizations);
+    return res.json({ ok: true, item: customizations[i] });
+  }
+
+  if (!isValidTemplateId('cafe_1', customizations)) {
+    return res.status(400).json({ error: 'cafe_1 template is not available' });
+  }
+  const id = `custom-${Date.now().toString(36)}`;
+  const item = {
+    id,
+    name: String(body.name || '店舗（基本情報のみ）').trim().slice(0, 80),
+    baseTemplateId: 'cafe_1',
+    override: normalizedOv,
+    cafe1BasicPresetKind: presetKind,
+    status: body.status === 'draft' ? 'draft' : 'published',
+    createdAt: now,
+    updatedAt: now,
+  };
+  customizations.unshift(item);
+  await store.setTemplateCustomizations(customizations);
+  res.json({ ok: true, item });
+});
+
+/** cafe_1 基本情報のみ：マージ済み override を JSON で返す（クライアント検証用） */
+app.post('/api/cafe-1-basic-merged-override', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  const genre = String(body.genre || '').trim();
+  const presetKind =
+    body.presetKind === 'ramen' || body.presetKind === 'cafe' || body.presetKind === 'default'
+      ? body.presetKind
+      : mapGenreToBasicPresetKind(genre);
+  try {
+    const merged = mergeCafe1BasicEditable(presetKind, body.editable || {});
+    const override = normalizeCustomizationInput(merged);
+    res.json({ ok: true, presetKind, override });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || 'マージに失敗しました' });
+  }
+});
+
+/** cafe_1 基本情報のみ：ライブプレビュー用 HTML */
+app.post('/api/cafe-1-basic-preview-html', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  const genre = String(body.genre || '').trim();
+  const presetKind =
+    body.presetKind === 'ramen' || body.presetKind === 'cafe' || body.presetKind === 'default'
+      ? body.presetKind
+      : mapGenreToBasicPresetKind(genre);
+  try {
+    const merged = mergeCafe1BasicEditable(presetKind, body.editable || {});
+    const override = normalizeCustomizationInput(merged);
+    const html = renderTemplatePreview('cafe_1', { override });
+    if (!html) return res.status(400).json({ error: 'render failed' });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.send(html);
+  } catch (e) {
+    console.error('[cafe-1-basic-preview-html]', e);
+    res.status(500).json({ error: e?.message || 'preview failed' });
+  }
 });
 
 app.post('/api/template-customizations/save', async (req, res) => {

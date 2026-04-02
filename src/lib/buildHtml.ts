@@ -278,8 +278,8 @@ export function buildHtml(
       : tid === 'cafe_1'
         ? `<footer class="footer-c1">
     <div class="container footer-c1-inner">
-      ${content.footerInstagramUrl || content.footerLineUrl
-        ? `<div class="footer-c1-social-row">${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}${content.footerLineUrl ? `<a href="${escapeHtml(content.footerLineUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}</div>`
+      ${content.footerInstagramUrl || content.footerLineUrl || content.footerTwitterUrl
+        ? `<div class="footer-c1-social-row">${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}${content.footerTwitterUrl ? `<a href="${escapeHtml(content.footerTwitterUrl)}" class="footer-c1-social-link footer-c1-social-link--x" target="_blank" rel="noopener noreferrer" aria-label="X（旧Twitter）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" class="footer-c1-social-svg"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : ''}${content.footerLineUrl ? `<a href="${escapeHtml(content.footerLineUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}</div>`
         : ''}
       ${wrapBrParagraphWithPaymentLogos(content.footerText, escapeHtml, { className: 'footer-c1-text' })}
       ${footerLegal}
@@ -1492,30 +1492,34 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
 
   const extraMotionAttr = tid === 'cafe_tea' || tid === 'cafe_1' ? '' : ' data-scroll-in';
   let extraSectionsHtml = '';
-  if (genOpts) {
-    const { contactForm, formActionUrl, instagramLine, instagramUrl, lineUrl, qrCode, qrCodeDataUrl } = genOpts;
-    if (instagramLine && (instagramUrl || lineUrl)) {
-      if (tid === 'cafe_tea' || tid === 'cafe_1') {
-        extraSectionsHtml += `
+  const snsInstagramUrl =
+    String(genOpts?.instagramUrl ?? '').trim() || String(content.footerInstagramUrl ?? '').trim();
+  const snsLineUrl = String(genOpts?.lineUrl ?? '').trim() || String(content.footerLineUrl ?? '').trim();
+  const snsLinksEnabled = genOpts?.instagramLine !== false && !!(snsInstagramUrl || snsLineUrl);
+  if (snsLinksEnabled) {
+    if (tid === 'cafe_tea' || tid === 'cafe_1') {
+      extraSectionsHtml += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
         <h2 id="sns-title" class="wo-sec-heading">フォロー・お問い合わせ</h2>
-        <p class="wo-sns-caption">タップで開きます</p>
+        <p class="wo-sns-caption">下のアイコンをタップすると、フッターと同じInstagram・LINEのページが開きます。</p>
         <div class="wo-sns-row" role="list">
-          ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}
-          ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}
+          ${snsInstagramUrl ? `<a href="${escapeHtml(snsInstagramUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}
+          ${snsLineUrl ? `<a href="${escapeHtml(snsLineUrl)}" target="_blank" rel="noopener noreferrer" class="wo-sns-emoji" role="listitem" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}
         </div>
       </div>
     </section>`;
-      } else {
-        extraSectionsHtml += `
+    } else {
+      extraSectionsHtml += `
     <section class="section sns-links"${extraMotionAttr} id="sns">
       <h2 id="sns-title">フォロー・お問い合わせ</h2>
-      ${instagramUrl ? `<a href="${escapeHtml(instagramUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
-      ${lineUrl ? `<a href="${escapeHtml(lineUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
+      ${snsInstagramUrl ? `<a href="${escapeHtml(snsInstagramUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
+      ${snsLineUrl ? `<a href="${escapeHtml(snsLineUrl)}" target="_blank" rel="noopener noreferrer" class="sns-links-icon-link" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="36" height="36" loading="lazy" decoding="async" /></a>` : ''}
     </section>`;
-      }
     }
+  }
+  if (genOpts) {
+    const { contactForm, formActionUrl, qrCode, qrCodeDataUrl } = genOpts;
     if (contactForm && tid !== 'cafe_1') {
       const formAction = (formActionUrl ?? '').trim() || '#';
       if (tid === 'cafe_tea' || tid === 'cafe_1') {
@@ -1591,6 +1595,7 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
   const igFeed = content.cafeInstagramFeedItems ?? [];
   if (tid === 'cafe_1' && igFeed.length > 0) {
     const igProfileUrl = String(content.footerInstagramUrl ?? '').trim();
+    const igPostHrefFallback = igProfileUrl || snsInstagramUrl || 'https://www.instagram.com/';
     const igProfileLink = igProfileUrl
       ? `<p class="c1-ig-feed-actions"><a class="c1-ig-feed-profile" href="${escapeHtml(igProfileUrl)}" target="_blank" rel="noopener noreferrer">Instagramプロフィールを見る</a></p>`
       : '';
@@ -1598,13 +1603,14 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
     <section class="section wo-sec c1-ig-feed-sec" id="ig-feed" aria-labelledby="c1-ig-feed-title"${extraMotionAttr}>
       <div class="section-body">
         <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿（Instagram）</h2>
-        <p class="c1-ig-feed-lede">店主がInstagramに投稿した料理の写真です。各画像をタップすると投稿ページへ移動します（手動で差し替えた画像を反映しています）。</p>
+        <p class="c1-ig-feed-lede">Instagramの投稿から一部を表示しています。画像をタップで投稿ページを開きます。リンク先はフッターのInstagramと同じ公式URLにそろえています。</p>
         ${igProfileLink}
         <div class="c1-ig-feed-grid">${igFeed
-          .map(
-            (it) =>
-              `<a href="${escapeHtml(it.postUrl)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"><span class="c1-ig-feed-item-cta" aria-hidden="true">Instagramで見る</span></span></a>`
-          )
+          .map((it) => {
+            const raw = String(it.postUrl ?? '').trim();
+            const href = /^javascript:/i.test(raw) ? igPostHrefFallback : raw || igPostHrefFallback;
+            return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"><span class="c1-ig-feed-item-cta" aria-hidden="true">Instagramで見る</span></span></a>`;
+          })
           .join('')}</div>
       </div>
     </section>`;

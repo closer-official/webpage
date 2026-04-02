@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>店舗ドラフト（基本情報のみ）| Closer</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0c1220;
+        color: #e8edf5;
+        line-height: 1.55;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .app-head {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 0.5rem;
+      }
+      .work-shell {
+        display: none;
+        flex-direction: row;
+        gap: 1rem;
+        align-items: flex-start;
+        justify-content: center;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 1rem 3rem;
+        box-sizing: border-box;
+      }
+      .work-shell.is-visible {
+        display: flex;
+      }
+      .preview-pane {
+        flex: 1 1 50%;
+        min-width: 0;
+        position: sticky;
+        top: 0.5rem;
+        align-self: flex-start;
+        max-height: calc(100vh - 0.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+      .editor-pane {
+        flex: 0 1 520px;
+        max-width: 560px;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      @media (max-width: 960px) {
+        .work-shell.is-visible {
+          flex-direction: column;
+        }
+        .preview-pane {
+          position: relative;
+          max-height: none;
+          width: 100%;
+        }
+        .editor-pane {
+          max-width: none;
+          width: 100%;
+        }
+      }
+      h1 {
+        font-size: 1.3rem;
+        margin: 0 0 0.35rem;
+      }
+      .sub {
+        color: #8b9cb3;
+        font-size: 0.88rem;
+        margin: 0 0 1rem;
+      }
+      .panel {
+        background: #121a2e;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+      }
+      .panel h2 {
+        font-size: 0.95rem;
+        margin: 0 0 0.65rem;
+        color: #a5d8ff;
+      }
+      label {
+        display: block;
+        font-size: 0.78rem;
+        color: #9aacbf;
+        margin-top: 10px;
+      }
+      input[type='text'],
+      input[type='url'],
+      textarea,
+      select {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+        font-size: 0.88rem;
+      }
+      textarea {
+        min-height: 88px;
+        font-family: inherit;
+      }
+      textarea.mono {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.76rem;
+        min-height: 160px;
+      }
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      button.btn,
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #3d5675;
+        background: #1c2940;
+        color: #e0f2fe;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      a.btn:hover,
+      button.btn:hover {
+        border-color: #38bdf8;
+        color: #fff;
+      }
+      button.btn.primary,
+      a.btn.primary {
+        background: #0c4a6e;
+        border-color: #22d3ee;
+      }
+      .err {
+        color: #fca5a5;
+        font-size: 0.86rem;
+        margin-top: 8px;
+      }
+      .ok {
+        color: #86efac;
+        font-size: 0.86rem;
+        margin-top: 8px;
+      }
+      iframe#preview-live {
+        width: 100%;
+        flex: 1 1 auto;
+        min-height: 360px;
+        height: min(72vh, 840px);
+        border: 1px solid #2a3b52;
+        border-radius: 10px;
+        background: #fff;
+      }
+      .preview-toolbar {
+        font-size: 0.82rem;
+        color: #a5d8ff;
+        font-weight: 600;
+      }
+      .preview-toolbar .hint {
+        display: block;
+        font-weight: 400;
+        color: #8b9cb3;
+        font-size: 0.76rem;
+        margin-top: 0.25rem;
+      }
+      .preview-status {
+        font-size: 0.75rem;
+        color: #fbbf24;
+        min-height: 1.25em;
+      }
+      .locked-note {
+        font-size: 0.76rem;
+        color: #8b9cb3;
+        margin: 0;
+        white-space: pre-line;
+      }
+      code {
+        font-size: 0.85em;
+        background: #0f172a;
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-head">
+      <h1>店舗ドラフト（基本情報のみ）</h1>
+      <p class="sub">
+        <strong>cafe_1</strong> 向けの簡易モードです。<strong>メニュー・写真・コンセプト文・コメント等はジャンル別の固定サンプル</strong>のまま変更できません（フル編集は
+        <a href="/admin/template-worker.html" style="color: #7dd3fc">店舗ドラフト編集</a>）。<br />
+        ここで変更できるのは <strong>店名・住所・電話・営業時間・Googleマップ埋め込みURL・Instagram・X（Twitter）</strong> だけです。保存は
+        <code>/api/template-customizations/save-cafe1-basic</code> です。
+      </p>
+    </div>
+
+    <div class="panel" id="login-box">
+      <h2>管理者ログイン</h2>
+      <label>ユーザー名 <input type="text" id="adm-user" autocomplete="username" /></label>
+      <label>パスワード <input type="password" id="adm-pass" autocomplete="current-password" /></label>
+      <div class="row-actions">
+        <button type="button" class="btn primary" id="adm-login-btn">ログイン</button>
+        <button type="button" class="btn" id="adm-logout-btn">ログアウト</button>
+      </div>
+      <p id="adm-login-err" class="err" style="display: none"></p>
+    </div>
+
+    <div class="work-shell" id="work-shell">
+      <aside class="preview-pane">
+        <div class="preview-toolbar">
+          ライブプレビュー
+          <span class="hint">入力内容をサーバーで固定レイアウトとマージした結果です（未保存でも反映）。</span>
+        </div>
+        <div class="preview-status" id="preview-live-status"></div>
+        <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-scripts allow-same-origin"></iframe>
+      </aside>
+      <div class="editor-pane">
+        <div class="panel">
+          <h2>ドラフト</h2>
+          <label>
+            モード
+            <select id="mode-select">
+              <option value="new">新規（基本情報のみで作成）</option>
+              <option value="edit">既存を読み込んで更新</option>
+            </select>
+          </label>
+          <label id="wrap-existing" style="display: none">
+            既存カスタム（cafe_1）
+            <select id="existing-id"></select>
+          </label>
+          <label>
+            ドラフト名（管理用）
+            <input type="text" id="draft-name" maxlength="80" placeholder="例: ○○店 基本情報" />
+          </label>
+        </div>
+
+        <div class="panel">
+          <h2>業態（固定コンテンツの種類）</h2>
+          <p class="locked-note">
+            ラーメン・中華麺 → ラーメン向け固定メニュー／写真<br />
+            カフェ・喫茶 → カフェ向け固定<br />
+            その他のジャンル → 汎用飲食の固定サンプル
+          </p>
+          <label>
+            ビジュアルジャンル
+            <select id="f-genre">
+              <option value="ramen">ラーメン・中華麺（固定：ラーメン）</option>
+              <option value="cafe_coffee">カフェ・コーヒー（固定：カフェ）</option>
+              <option value="kissaten">喫茶・軽食（固定：カフェ）</option>
+              <option value="izakaya">居酒屋・ダイニングバー（固定：汎用飲食）</option>
+              <option value="yakiniku">焼肉・韓国料理（固定：汎用飲食）</option>
+              <option value="sushi">寿司・海鮮（固定：汎用飲食）</option>
+              <option value="yoshoku">洋食・レストラン（固定：汎用飲食）</option>
+              <option value="teishoku">定食・食堂（固定：汎用飲食）</option>
+              <option value="don_udon_soba">丼・うどん・そば（固定：汎用飲食）</option>
+              <option value="sweets">スイーツ・ベーカリー（固定：汎用飲食）</option>
+              <option value="takeout">テイクアウト・デリ（固定：汎用飲食）</option>
+              <option value="other_food">その他飲食（固定：汎用飲食）</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="panel">
+          <h2>基本情報（編集可）</h2>
+          <label>店名 <input type="text" id="f-siteName" placeholder="店舗の正式名称" /></label>
+          <label>住所（フッター・店舗カードに表示） <textarea id="f-footerAddress" rows="2" placeholder="〒 郵便番号 〜"></textarea></label>
+          <label>電話番号 <input type="text" id="f-footerPhone" placeholder="03-1234-5678" /></label>
+          <label>
+            営業時間（1行に1項目。サイトの「営業時間」欄と MEO に反映）
+            <textarea id="f-openingHours" rows="4" placeholder="11:00〜15:00（ランチ）&#10;17:00〜22:00（ディナー）"></textarea>
+          </label>
+          <label>
+            Googleマップの埋め込みURL
+            <input
+              type="url"
+              id="f-mapEmbedUrl"
+              placeholder="https://www.google.com/maps/embed?... または .../maps?...output=embed"
+            />
+          </label>
+          <label>Instagram URL <input type="url" id="f-instagram" placeholder="https://www.instagram.com/..." /></label>
+          <label>X（Twitter）URL <input type="url" id="f-twitter" placeholder="https://twitter.com/... または https://x.com/..." /></label>
+        </div>
+
+        <div class="panel">
+          <h2>調査用プロンプト（コピーして AI に渡す）</h2>
+          <p class="locked-note">返却JSONだけを貼り付け、各フィールドをこのフォームに転記してください。</p>
+          <textarea id="research-prompt" class="mono" readonly rows="12"></textarea>
+          <div class="row-actions">
+            <button type="button" class="btn" id="btn-copy-prompt">プロンプトをコピー</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>保存・プレビューURL</h2>
+          <div class="row-actions">
+            <button type="button" class="btn primary" id="btn-save">保存</button>
+            <a class="btn" id="btn-open-preview" href="#" target="_blank" rel="noopener">保存済みを別タブ</a>
+          </div>
+          <p id="save-msg" class="ok" style="display: none"></p>
+          <p id="save-err" class="err" style="display: none"></p>
+          <p style="font-size: 0.78rem; color: #8b9cb3; margin-top: 10px; word-break: break-all" id="preview-url-text"></p>
+        </div>
+
+        <p style="font-size: 0.8rem; margin: 0 1rem 2rem">
+          <a href="/admin/template-hub.html" style="color: #7dd3fc">← テンプレートハブ</a>
+          &nbsp;|&nbsp;
+          <a href="/admin/template-worker.html" style="color: #7dd3fc">フル編集へ</a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var api = (function () {
+          var p = location.pathname.indexOf('/admin/');
+          if (p >= 0) return location.pathname.slice(0, p) + '/api';
+          return '/api';
+        })();
+
+        var currentCustomId = null;
+        var liveTimer = null;
+        var customizationList = [];
+
+        function credFetch(url, opts) {
+          var o = opts || {};
+          o.credentials = 'same-origin';
+          o.headers = o.headers || {};
+          if (o.body && typeof o.body === 'string' && !o.headers['Content-Type']) {
+            o.headers['Content-Type'] = 'application/json';
+          }
+          return fetch(url, o);
+        }
+
+        function showErr(id, text) {
+          var el = document.getElementById(id);
+          el.style.display = text ? 'block' : 'none';
+          el.textContent = text || '';
+        }
+
+        function inferPresetKindFromItem(item) {
+          if (item && item.cafe1BasicPresetKind) return item.cafe1BasicPresetKind;
+          var ov = (item && item.override) || {};
+          var id = String(ov.cafeVisualGenre || '').trim();
+          if (id === 'ramen') return 'ramen';
+          if (id === 'cafe_coffee' || id === 'kissaten') return 'cafe';
+          return 'default';
+        }
+
+        function genreSelectValueForPresetKind(kind, visualGenre) {
+          if (kind === 'ramen') return 'ramen';
+          if (kind === 'cafe') return visualGenre === 'kissaten' ? 'kissaten' : 'cafe_coffee';
+          return visualGenre && String(visualGenre).trim() ? String(visualGenre) : 'other_food';
+        }
+
+        function buildResearchPrompt() {
+          return [
+            'あなたは店舗の基本情報だけを調べるリサーチアシスタントです。',
+            '指定した店舗について、公式サイト・Googleマップ・SNSを優先して確認し、次のJSONのみを返してください。',
+            '有効なJSONオブジェクト1つだけ。説明文・Markdown・コードフェンスは不要。',
+            '',
+            '返却JSONスキーマ:',
+            '{',
+            '  "siteName": "店名",',
+            '  "footerAddress": "〒を含む住所1行または複数行を改行で",',
+            '  "footerPhone": "代表電話（ハイフンありで可）",',
+            '  "mapEmbedUrl": "Googleマップの「地図を埋め込む」で取得できる https の embed URL（iframeのsrc）",',
+            '  "openingHoursText": "営業時間を人が読む形式で。改行は \\\\n で区切った1文字列でも、配列でも可",',
+            '  "footerInstagramUrl": "公式InstagramのURL（無ければ空文字）",',
+            '  "footerTwitterUrl": "公式X（Twitter）のURL（無ければ空文字）",',
+            '  "sourceUrls": ["参照したURLを列挙"],',
+            '  "notes": "取得できなかった項目や注意事項"',
+            '}',
+            '',
+            'ルール:',
+            '- 推測で断定しない。分からない値は空文字または notes に理由を書く。',
+            '- mapEmbedUrl は必ず https で、Google公式の埋め込み用URLに近い形式にする（検索結果ページのURLだけでは不十分な場合がある）。',
+            '- openingHoursText は店舗が掲示している表記を優先する。',
+            '',
+            '対象店舗（ユーザーが書き換え）:',
+            '- 店舗名: {{STORE_NAME}}',
+            '- 地域・駅: {{AREA}}',
+            '- 補足: {{HINT}}',
+          ].join('\n');
+        }
+
+        function readEditable() {
+          return {
+            siteName: document.getElementById('f-siteName').value.trim(),
+            footerAddress: document.getElementById('f-footerAddress').value.trim(),
+            footerPhone: document.getElementById('f-footerPhone').value.trim(),
+            mapEmbedUrl: document.getElementById('f-mapEmbedUrl').value.trim(),
+            openingHoursText: document.getElementById('f-openingHours').value.trim(),
+            footerInstagramUrl: document.getElementById('f-instagram').value.trim(),
+            footerTwitterUrl: document.getElementById('f-twitter').value.trim(),
+          };
+        }
+
+        function fillEditableFromJson(j) {
+          if (!j || typeof j !== 'object') return;
+          if (j.siteName) document.getElementById('f-siteName').value = j.siteName;
+          if (j.footerAddress) document.getElementById('f-footerAddress').value = j.footerAddress;
+          if (j.footerPhone) document.getElementById('f-footerPhone').value = j.footerPhone;
+          if (j.mapEmbedUrl) document.getElementById('f-mapEmbedUrl').value = j.mapEmbedUrl;
+          if (j.footerInstagramUrl) document.getElementById('f-instagram').value = j.footerInstagramUrl;
+          if (j.footerTwitterUrl) document.getElementById('f-twitter').value = j.footerTwitterUrl;
+          var oh = j.openingHoursText;
+          if (Array.isArray(oh)) document.getElementById('f-openingHours').value = oh.join('\n');
+          else if (typeof oh === 'string') document.getElementById('f-openingHours').value = oh.replace(/\\n/g, '\n');
+        }
+
+        function scheduleLivePreview() {
+          clearTimeout(liveTimer);
+          liveTimer = setTimeout(runLivePreview, 450);
+        }
+
+        function runLivePreview() {
+          var statusEl = document.getElementById('preview-live-status');
+          var iframe = document.getElementById('preview-live');
+          var genre = document.getElementById('f-genre').value;
+          statusEl.textContent = 'プレビュー更新中…';
+          credFetch(api + '/cafe-1-basic-preview-html', {
+            method: 'POST',
+            body: JSON.stringify({ genre: genre, editable: readEditable() }),
+          })
+            .then(function (r) {
+              if (!r.ok) return r.text().then(function (t) { throw new Error(t || String(r.status)); });
+              return r.text();
+            })
+            .then(function (html) {
+              iframe.removeAttribute('src');
+              iframe.srcdoc = html;
+              statusEl.textContent = 'ライブプレビュー（固定レイアウト＋基本情報）';
+            })
+            .catch(function (e) {
+              statusEl.textContent = 'プレビュー失敗: ' + (e.message || e);
+            });
+        }
+
+        function refreshResearchPrompt() {
+          var t = buildResearchPrompt()
+            .replace('{{STORE_NAME}}', document.getElementById('f-siteName').value.trim() || '（未入力）')
+            .replace('{{AREA}}', '（ユーザーが入力）')
+            .replace('{{HINT}}', '（任意）');
+          document.getElementById('research-prompt').value = t;
+        }
+
+        function loadCustomizationDropdown() {
+          return credFetch(api + '/template-customizations')
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+              customizationList = Array.isArray(list) ? list : [];
+              var sel = document.getElementById('existing-id');
+              sel.innerHTML = '';
+              var cafeOnes = customizationList.filter(function (x) { return x.baseTemplateId === 'cafe_1'; });
+              cafeOnes.forEach(function (x) {
+                var opt = document.createElement('option');
+                opt.value = x.id;
+                opt.textContent = (x.name || x.id) + ' — ' + x.id;
+                sel.appendChild(opt);
+              });
+              if (!cafeOnes.length) {
+                var o = document.createElement('option');
+                o.value = '';
+                o.textContent = '（cafe_1 のカスタムがありません）';
+                sel.appendChild(o);
+              }
+            });
+        }
+
+        function applyExistingItem(id) {
+          var item = customizationList.find(function (x) { return x.id === id; });
+          if (!item || !item.override) return;
+          var ov = item.override;
+          document.getElementById('draft-name').value = item.name || '';
+          var kind = inferPresetKindFromItem(item);
+          document.getElementById('f-genre').value = genreSelectValueForPresetKind(kind, ov.cafeVisualGenre);
+          document.getElementById('f-siteName').value = ov.siteName || '';
+          document.getElementById('f-footerAddress').value = ov.footerAddress || '';
+          document.getElementById('f-footerPhone').value = ov.footerPhone || '';
+          document.getElementById('f-mapEmbedUrl').value = ov.mapEmbedUrl || '';
+          document.getElementById('f-instagram').value = ov.footerInstagramUrl || '';
+          document.getElementById('f-twitter').value = ov.footerTwitterUrl || '';
+          var meo = ov.cafeMeo && typeof ov.cafeMeo === 'object' ? ov.cafeMeo : {};
+          var hours = Array.isArray(meo.openingHours) ? meo.openingHours.join('\n') : '';
+          var sec = (Array.isArray(ov.sections) ? ov.sections : []).find(function (s) { return s.id === 'hours'; });
+          document.getElementById('f-openingHours').value = hours || (sec && sec.content) || '';
+          currentCustomId = item.id;
+          updateSavedUrl();
+          refreshResearchPrompt();
+          scheduleLivePreview();
+        }
+
+        function updateSavedUrl() {
+          var path = currentCustomId ? '/api/template-preview/' + encodeURIComponent(currentCustomId) : '';
+          var full = path ? window.location.origin + path : '';
+          document.getElementById('preview-url-text').textContent = full || '（保存後に表示）';
+          var a = document.getElementById('btn-open-preview');
+          if (full) {
+            a.href = path;
+            a.classList.remove('btn');
+            a.classList.add('btn');
+          }
+          a.style.pointerEvents = full ? '' : 'none';
+          a.style.opacity = full ? '1' : '0.5';
+        }
+
+        function setAuthUi(on) {
+          document.getElementById('work-shell').classList.toggle('is-visible', !!on);
+        }
+
+        document.getElementById('research-prompt').value = buildResearchPrompt();
+
+        document.getElementById('f-genre').addEventListener('change', function () {
+          refreshResearchPrompt();
+          scheduleLivePreview();
+        });
+        ['f-siteName', 'f-footerAddress', 'f-footerPhone', 'f-openingHours', 'f-mapEmbedUrl', 'f-instagram', 'f-twitter'].forEach(
+          function (id) {
+            document.getElementById(id).addEventListener('input', function () {
+              refreshResearchPrompt();
+              scheduleLivePreview();
+            });
+          },
+        );
+
+        document.getElementById('btn-copy-prompt').onclick = function () {
+          refreshResearchPrompt();
+          var t = document.getElementById('research-prompt').value;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(t).then(
+              function () { showErr('save-msg', 'プロンプトをコピーしました'); },
+              function () { window.prompt('コピー:', t); },
+            );
+          } else window.prompt('コピー:', t);
+        };
+
+        document.getElementById('mode-select').onchange = function () {
+          var edit = document.getElementById('mode-select').value === 'edit';
+          document.getElementById('wrap-existing').style.display = edit ? 'block' : 'none';
+          if (!edit) {
+            currentCustomId = null;
+            updateSavedUrl();
+          } else loadCustomizationDropdown();
+        };
+
+        document.getElementById('existing-id').onchange = function () {
+          var id = document.getElementById('existing-id').value;
+          if (id) applyExistingItem(id);
+        };
+
+        document.getElementById('btn-save').onclick = function () {
+          showErr('save-err', '');
+          showErr('save-msg', '');
+          var name = document.getElementById('draft-name').value.trim();
+          if (!name) {
+            showErr('save-err', 'ドラフト名を入力してください。');
+            return;
+          }
+          var mode = document.getElementById('mode-select').value === 'edit' && currentCustomId ? 'update' : 'create';
+          var body = {
+            mode: mode,
+            name: name,
+            genre: document.getElementById('f-genre').value,
+            editable: readEditable(),
+          };
+          if (mode === 'update') body.id = currentCustomId;
+          credFetch(api + '/template-customizations/save-cafe1-basic', {
+            method: 'POST',
+            body: JSON.stringify(body),
+          })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || '保存に失敗しました');
+              currentCustomId = x.j.item.id;
+              document.getElementById('mode-select').value = 'edit';
+              document.getElementById('wrap-existing').style.display = 'block';
+              return loadCustomizationDropdown().then(function () {
+                document.getElementById('existing-id').value = x.j.item.id;
+              }).then(function () {
+                updateSavedUrl();
+                showErr('save-msg', '保存しました。');
+                runLivePreview();
+              });
+            })
+            .catch(function (e) {
+              showErr('save-err', e.message || String(e));
+            });
+        };
+
+        credFetch(api + '/admin-auth/status')
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            document.getElementById('login-box').style.display = d.enabled ? 'block' : 'none';
+            var authed = !d.enabled || d.authenticated;
+            setAuthUi(authed);
+            if (authed) {
+              loadCustomizationDropdown();
+              scheduleLivePreview();
+            }
+          })
+          .catch(function () { setAuthUi(false); });
+
+        document.getElementById('adm-login-btn').onclick = function () {
+          showErr('adm-login-err', '');
+          credFetch(api + '/admin-auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: document.getElementById('adm-user').value,
+              password: document.getElementById('adm-pass').value,
+            }),
+          })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'ログイン失敗');
+              setAuthUi(true);
+              loadCustomizationDropdown();
+              scheduleLivePreview();
+            })
+            .catch(function (e) { showErr('adm-login-err', e.message || String(e)); });
+        };
+
+        document.getElementById('adm-logout-btn').onclick = function () {
+          credFetch(api + '/admin-auth/logout', { method: 'POST', body: '{}' }).finally(function () {
+            setAuthUi(false);
+            currentCustomId = null;
+          });
+        };
+
+      })();
+    </script>
+  </body>
+</html>
