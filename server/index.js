@@ -1785,6 +1785,15 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   res.json(dashboard[i]);
 });
 
+/** 案件を一覧から削除（取り消し不可） */
+app.delete('/api/dashboard/:id', async (req, res) => {
+  const dashboard = await store.getDashboard();
+  const next = dashboard.filter((d) => d.id !== req.params.id);
+  if (next.length === dashboard.length) return res.status(404).json({ error: 'Not found' });
+  await store.setDashboard(next);
+  res.status(204).end();
+});
+
 /** 案件を複製（個別向け調整用）。元の案件はそのまま。 */
 app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   const dashboard = await store.getDashboard();

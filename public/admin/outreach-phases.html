@@ -237,6 +237,24 @@
           return j;
         }
 
+        function deleteDashboardItem(item, loadFn) {
+          var nm = (item.researched && item.researched.name) || item.id;
+          if (!window.confirm('「' + nm + '」を一覧から削除しますか？\n取り消しはできません。')) return;
+          fetch('/api/dashboard/' + encodeURIComponent(item.id), { method: 'DELETE', credentials: 'include' })
+            .then(function (r) {
+              if (r.status === 204) return;
+              return r.json().then(function (j) {
+                if (!r.ok) throw new Error((j && j.error) || r.statusText);
+              });
+            })
+            .then(function () {
+              loadFn();
+            })
+            .catch(function (e) {
+              showErr(String(e.message || e));
+            });
+        }
+
         function render(items) {
           var host = document.getElementById('boards');
           host.innerHTML = '';
@@ -288,6 +306,8 @@
                     showErr(String(e.message || e));
                   });
               };
+            } else if (mode === 'rejected') {
+              col2.appendChild(el('p', { class: 'muted', text: 'NG済み（送付対象外）。不要なら削除してください。' }));
             } else if (mode === 'approved') {
               col2.appendChild(el('p', { class: 'muted', text: 'OK済・送信前' }));
               col3.appendChild(
@@ -371,6 +391,12 @@
               }
             }
 
+            var delBtn = el('button', { type: 'button', class: 'btn small danger', text: '一覧から削除' });
+            delBtn.onclick = function () {
+              deleteDashboardItem(item, load);
+            };
+            col3.appendChild(delBtn);
+
             row.appendChild(col1);
             row.appendChild(col2);
             row.appendChild(col3);
@@ -392,6 +418,7 @@
 
           host.appendChild(section('レビュー待ち', pending, 'pending'));
           host.appendChild(section('OK済み（送信前）', approved, 'approved'));
+          host.appendChild(section('NG済み', rejected, 'rejected'));
 
           var byPhase = {};
           PHASE_ORDER.forEach(function (p) {
