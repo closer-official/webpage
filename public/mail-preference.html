@@ -138,12 +138,32 @@
       .hidden {
         display: none !important;
       }
+      .preview-banner {
+        margin: 0 0 1rem;
+        padding: 0.85rem 1rem;
+        font-size: 0.86rem;
+        line-height: 1.55;
+        color: #44403c;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(13, 148, 136, 0.12));
+        border: 1px solid rgba(180, 83, 9, 0.28);
+        border-radius: 12px;
+      }
+      .preview-banner strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
       <div id="view-form">
         <h1>ご案内メールの配信について</h1>
+        <div id="preview-banner" class="preview-banner hidden" role="status">
+          <strong>画面の見た目を確認中です</strong>
+          配信停止を<strong>実際に完了</strong>させるには、メール本文に記載のURL（末尾に長い文字が付いたリンク）を開いてください。ここではデザインと操作感だけお試しいただけます。
+        </div>
         <div class="card">
           <p class="lead">
             このたびはお時間をいただき、ありがとうございました。もしご案内のメールが不要でしたら、下のボタンから配信を停止できます。お手数をおかけし申し訳ございません。またのご縁がございましたら、よろしくお願いいたします。
@@ -170,18 +190,10 @@
         <p class="foot">ご不明点は、ご案内いただいた連絡先までお問い合わせください。</p>
       </div>
       <div id="view-done" class="hidden">
-        <h1>お手続きを承りました</h1>
+        <h1 id="done-title">お手続きを承りました</h1>
         <div class="card">
-          <p class="lead" style="color: var(--ink)">
+          <p id="done-body" class="lead" style="color: var(--ink)">
             配信の停止を記録しました。ご連絡いただきありがとうございました。またの機会がございましたら、よろしくお願いいたします。
-          </p>
-        </div>
-      </div>
-      <div id="view-bad" class="hidden">
-        <h1>ページを表示できません</h1>
-        <div class="card">
-          <p class="lead" style="color: var(--ink)">
-            リンクが正しくないか、すでに処理が完了している可能性があります。お手数ですが、メール本文のリンクを再度ご確認ください。
           </p>
         </div>
       </div>
@@ -190,6 +202,7 @@
       (function () {
         var params = new URLSearchParams(window.location.search);
         var token = (params.get('t') || '').trim();
+        var previewMode = !token;
         var form = document.getElementById('opt-out-form');
         var feedback = document.getElementById('feedback');
         var confirm = document.getElementById('confirm');
@@ -197,12 +210,19 @@
         var formMsg = document.getElementById('form-msg');
         var viewForm = document.getElementById('view-form');
         var viewDone = document.getElementById('view-done');
-        var viewBad = document.getElementById('view-bad');
+        var previewBanner = document.getElementById('preview-banner');
+        var doneTitle = document.getElementById('done-title');
+        var doneBody = document.getElementById('done-body');
 
-        if (!token) {
-          viewForm.classList.add('hidden');
-          viewBad.classList.remove('hidden');
-          return;
+        var titleReal = 'お手続きを承りました';
+        var bodyReal =
+          '配信の停止を記録しました。ご連絡いただきありがとうございました。またの機会がございましたら、よろしくお願いいたします。';
+        var titleDemo = '表示確認（デモ）';
+        var bodyDemo =
+          'こちらは画面の見本です。配信の停止はまだサーバーに記録されていません。本番では、メールに記載の専用リンクを開き、同じ手順で「配信を停止する」を押してください。';
+
+        if (previewMode) {
+          previewBanner.classList.remove('hidden');
         }
 
         function syncSubmit() {
@@ -219,6 +239,15 @@
             formMsg.classList.remove('hidden');
             return;
           }
+
+          if (previewMode) {
+            doneTitle.textContent = titleDemo;
+            doneBody.textContent = bodyDemo;
+            viewForm.classList.add('hidden');
+            viewDone.classList.remove('hidden');
+            return;
+          }
+
           submitBtn.disabled = true;
           var body = JSON.stringify({
             token: token,
@@ -236,6 +265,8 @@
             })
             .then(function (x) {
               if (x.ok && x.j && x.j.ok) {
+                doneTitle.textContent = titleReal;
+                doneBody.textContent = bodyReal;
                 viewForm.classList.add('hidden');
                 viewDone.classList.remove('hidden');
                 return;
