@@ -96,7 +96,7 @@ function App() {
         <div className="app-header-workbench-row">
           <h1>Closer 運営</h1>
           <p className="operator-hub-lead">
-            まずは制作ハブで<strong>目的</strong>を選び、<strong>LP と DM 文案のたたき台</strong>まで進めます。テンプレ管理などの作業は「運営ツール」から。
+            <strong>メインの営業フロー</strong>で地域・業種から候補を集め、LP案・DM案まで進めます。1店ずつの手動キュー・お客様向けページ・テンプレ管理は、画面内のリンクから切り替えられます。
           </p>
         </div>
       </header>

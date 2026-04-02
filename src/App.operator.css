@@ -245,6 +245,51 @@
   color: #444;
 }
 
+.app--operator .operator-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  background: #f8faf8;
+  border: 1px solid #cfe3d8;
+  border-radius: 10px;
+}
+
+.app--operator .operator-subnav-btn {
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid #b8d4c4;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a5f4a;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.app--operator .operator-subnav-btn:hover {
+  background: #eef7f2;
+  border-color: #1a5f4a;
+}
+
+.app--operator .operator-subnav-btn.is-active {
+  background: #1a5f4a;
+  border-color: #1a5f4a;
+  color: #fff;
+}
+
+.app--operator .operator-workbench-kicker {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: #2d6a4f;
+}
+
 .app--operator .operator-back-btn {
   display: inline-flex;
   margin: 0 0 16px;

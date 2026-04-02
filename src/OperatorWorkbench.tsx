@@ -9,7 +9,7 @@ import { QueueList } from './components/QueueList';
 import { ManualAddTarget } from './components/ManualAddTarget';
 import { ResearchForm } from './components/ResearchForm';
 
-export type OperatorMission = 'choose' | 'fullauto' | 'manual' | 'customer' | 'tools';
+export type OperatorMission = 'fullauto' | 'manual' | 'customer' | 'tools';
 
 function FlowStepper({ items }: { items: { title: string; desc: string }[] }) {
   return (
@@ -24,8 +24,49 @@ function FlowStepper({ items }: { items: { title: string; desc: string }[] }) {
   );
 }
 
+function MissionNav({
+  mission,
+  setMission,
+}: {
+  mission: OperatorMission;
+  setMission: (m: OperatorMission) => void;
+}) {
+  return (
+    <nav className="operator-subnav" aria-label="作業の切り替え">
+      <button
+        type="button"
+        className={`operator-subnav-btn${mission === 'fullauto' ? ' is-active' : ''}`}
+        onClick={() => setMission('fullauto')}
+      >
+        メインの営業フロー
+      </button>
+      <button
+        type="button"
+        className={`operator-subnav-btn${mission === 'manual' ? ' is-active' : ''}`}
+        onClick={() => setMission('manual')}
+      >
+        手動キュー（1店ずつ）
+      </button>
+      <button
+        type="button"
+        className={`operator-subnav-btn${mission === 'customer' ? ' is-active' : ''}`}
+        onClick={() => setMission('customer')}
+      >
+        お客様向け（公開）
+      </button>
+      <button
+        type="button"
+        className={`operator-subnav-btn${mission === 'tools' ? ' is-active' : ''}`}
+        onClick={() => setMission('tools')}
+      >
+        運営ツール
+      </button>
+    </nav>
+  );
+}
+
 export function OperatorWorkbench() {
-  const [mission, setMission] = useState<OperatorMission>('choose');
+  const [mission, setMission] = useState<OperatorMission>('fullauto');
   const [dashItems, setDashItems] = useState<DashboardItem[]>([]);
   const [queue, setQueue] = useState<QueueTarget[]>([]);
   const [researchTarget, setResearchTarget] = useState<QueueTarget | null>(null);
@@ -85,54 +126,10 @@ export function OperatorWorkbench() {
     scrollToReview();
   }, [refreshDashboard, refreshQueue, scrollToReview]);
 
-  if (mission === 'choose') {
-    return (
-      <div className="operator-workbench">
-        <header className="operator-workbench-header">
-          <h1 className="operator-workbench-title">Closer 制作ハブ</h1>
-          <p className="operator-workbench-lead">
-            <strong>いま何をしたいか</strong>を1つ選ぶと、<strong>ゴール（LPの叩き台 ＋ DM文案のたたき台）</strong>までの順番が分かります。
-            上から順に進めれば迷いにくい流れになっています。
-          </p>
-        </header>
-        <div className="operator-mission-grid">
-          <button type="button" className="operator-mission-card operator-mission-card--primary" onClick={() => setMission('fullauto')}>
-            <span className="operator-mission-kicker">メインの営業フロー</span>
-            <span className="operator-mission-card-title">地域・業種から自動で探し、LP案とDM文案まで作る</span>
-            <span className="operator-mission-card-body">
-              <strong>公式サイト未掲載</strong>の店だけを対象に、検索 → 口コミ分析 → LP複数案 → DM案までサーバーが実行。
-              終わったら<strong>同じ画面の下</strong>でプレビュー編集・DMのコピー・OK判定をします。
-            </span>
-          </button>
-          <button type="button" className="operator-mission-card" onClick={() => setMission('manual')}>
-            <span className="operator-mission-kicker">1店ずつ丁寧に</span>
-            <span className="operator-mission-card-title">Maps や手入力でキューに入れ、調査から LP・DM を作る</span>
-            <span className="operator-mission-card-body">
-              候補をキューに追加 → 各店の「調査」でコンセプト・テンプレを決める → 下の検閲で仕上げ。
-              フルオートで取りこぼした店向け。
-            </span>
-          </button>
-          <button type="button" className="operator-mission-card" onClick={() => setMission('customer')}>
-            <span className="operator-mission-kicker">お客様向け（公開）</span>
-            <span className="operator-mission-card-title">テンプレを見て、申し込み・ヒアリングする</span>
-            <span className="operator-mission-card-body">ギャラリー閲覧とフォーム。パスワード不要。別タブで開きます。</span>
-          </button>
-          <button type="button" className="operator-mission-card operator-mission-card--tools" onClick={() => setMission('tools')}>
-            <span className="operator-mission-kicker">管理者向け</span>
-            <span className="operator-mission-card-title">テンプレ・店舗発行・売上などのツール</span>
-            <span className="operator-mission-card-body">営業フローとは別枠の作業用リンクです。</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (mission === 'customer') {
     return (
       <div className="operator-workbench">
-        <button type="button" className="operator-back-btn" onClick={() => setMission('choose')}>
-          ← 目的の選択に戻る
-        </button>
+        <MissionNav mission={mission} setMission={setMission} />
         <header className="operator-workbench-header">
           <h1 className="operator-workbench-title">お客様向けページ</h1>
           <p className="operator-workbench-lead">閲覧・申込はパスワード不要です。</p>
@@ -158,8 +155,8 @@ export function OperatorWorkbench() {
   if (mission === 'tools') {
     return (
       <div className="operator-workbench">
-        <button type="button" className="operator-back-btn" onClick={() => setMission('choose')}>
-          ← 目的の選択に戻る
+        <button type="button" className="operator-back-btn" onClick={() => setMission('fullauto')}>
+          ← メインの営業フローに戻る
         </button>
         <header className="operator-workbench-header">
           <h1 className="operator-workbench-title">運営ツール</h1>
@@ -223,16 +220,16 @@ export function OperatorWorkbench() {
 
   return (
     <div className="operator-workbench">
-      <button type="button" className="operator-back-btn" onClick={() => setMission('choose')}>
-        ← 目的の選択に戻る
-      </button>
+      <MissionNav mission={mission} setMission={setMission} />
 
       {mission === 'fullauto' && (
         <>
           <header className="operator-workbench-header">
-            <h1 className="operator-workbench-title">フルオート：LP ＋ DM まで</h1>
+            <p className="operator-workbench-kicker">メインの営業フロー</p>
+            <h1 className="operator-workbench-title">地域・業種から自動で探し、LP案とDM文案まで作る</h1>
             <p className="operator-workbench-lead">
-              この画面の<strong>上から順</strong>に進めば完了です。③はページを少し下にスクロールした場所にあります（「ダッシュボードで確認」ボタンでもジャンプします）。
+              <strong>公式サイト未掲載</strong>の店だけを対象に、検索 → 口コミ分析 → LP複数案 → DM案までサーバーが実行します。終わったら
+              <strong>同じ画面の下</strong>でプレビュー編集・DMのコピー・OK判定をします。この画面の<strong>上から順</strong>に進めば完了です。③はページを少し下にスクロールした場所にあります（「ダッシュボードで確認」ボタンでもジャンプします）。
             </p>
           </header>
           <FlowStepper items={fullautoSteps} />
