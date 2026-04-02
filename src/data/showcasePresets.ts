@@ -87,11 +87,12 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   cafe_1: {
     content: {
-      siteName: '店名サンプル（公式）',
-      title: '店名サンプル',
-      headline: 'キャッチコピー・店名（サンプル）',
-      subheadline: 'リード文のサンプルです。編集画面からお店の内容に差し替えてください。',
-      footerAddress: '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）',
+      siteName: '道玄坂食堂',
+      title: '道玄坂食堂',
+      headline: '熱々の定食で、今日も元気に。',
+      subheadline:
+        'にんにく効いたスタミナ系から、あっさり焼き魚まで。仕事帰りの一杯にぴったりの味わいです。※掲載写真の一部はイメージです。',
+      footerAddress: '〒150-0043 東京都渋谷区道玄坂1-2-3',
       footerPhone: '03-0000-0000',
       cafeMeo: {
         servesCuisine: '定食;ラーメン;飲食店',
@@ -103,14 +104,14 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         postalCode: '150-0043',
       },
       cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
-      cafeReviewCtaText: 'Googleのクチコミはこちら（サンプル・URLは編集で差し替え）',
+      cafeReviewCtaText: 'Googleのクチコミはこちら',
       cafeReviewCtaUrl: 'https://www.google.com/maps',
       cafeGbPostsEmbedUrl:
         'https://www.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
       faqItems: [
         {
           q: '予約はできますか？',
-          a: 'お電話（03-0000-0000）にてご相談ください。混雑時はお時間をいただく場合がございます。（番号はサンプルです）',
+          a: 'お電話（03-0000-0000）にてご相談ください。混雑時はお時間をいただく場合がございます。',
         },
         {
           q: '駐車場はありますか？',
@@ -134,15 +135,15 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       sections: [
         {
           id: 'concept',
-          title: 'コンセプト（サンプル）',
+          title: 'コンセプト',
           content:
-            'お店の想いや魅力が伝わる文章をここに書きます。\n\n素材へのこだわり、お客様へのメッセージなど、編集画面から自由に差し替えできます。',
+            '毎日の仕込みから一品一品にこだわり、腹が満たされる「ごはん屋」でありたいと考えています。\n\n仕事や学びのあと、気軽に立ち寄れる価格と味付けを心がけています。',
         },
         {
           id: 'staff',
-          title: '店主・スタッフ（サンプル）',
+          title: '店主・スタッフ',
           content:
-            'スタッフからのひとことを書きます。今日のおすすめや、お客様へのごあいさつなど、編集画面で差し替えてください。',
+            '今日のおすすめや仕入れの話など、気軽にお声がけください。お一人様も、ご家族連れも、どうぞゆっくりお過ごしください。',
           imageUrl:
             'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
@@ -162,7 +163,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
           id: 'access',
           title: '店舗・地図',
           content:
-            '最寄り駅から徒歩○分、などアクセスの説明を書きます。住所・地図は下の項目や編集画面で設定してください。',
+            'JR渋谷駅より徒歩圏内。道玄坂を上がり、赤い看板が目印です。下の地図で位置をご確認ください。',
         },
         {
           id: 'hours',
@@ -184,7 +185,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
           id: 'contact',
           title: 'お問い合わせ',
           content:
-            'ご来店前に席の空き状況をお電話でご確認いただくとスムーズです。\nキャンペーンやSNSの案内は、実店舗の内容に合わせて編集してください。',
+            'ご来店前に席の空き状況をお電話でご確認いただくとスムーズです。キャンペーンや新メニューはSNSでもお知らせしています。',
         },
       ],
       cafeMenuTextRows: [
@@ -205,13 +206,12 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         { groupLabel: 'ドリンク', name: 'キンキンの瓶コーラ', price: '¥250', description: '' },
       ],
       cafeBranchMenuItems: [
-        { groupLabel: 'メニュー資料', label: '紙のお品書きPDF（準備中）', menuUrl: 'https://example.com/menu.pdf' },
+        { groupLabel: 'メニュー', label: 'お品書きPDF', menuUrl: 'https://example.com/menu.pdf' },
       ],
-      footerText:
-        '© 店名サンプル | 東京都渋谷区道玄坂1-2-3（サンプル） | 03-0000-0000',
+      footerText: '© 道玄坂食堂 | 東京都渋谷区道玄坂1-2-3 | 03-0000-0000',
       footerInstagramUrl: 'https://www.instagram.com/',
       footerLineUrl: 'https://line.me/',
-      ctaLabel: 'お電話はこちら（サンプル）',
+      ctaLabel: 'お電話はこちら',
       ctaHref: 'tel:0300000000',
       heroSlides: [
         'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
@@ -220,8 +220,8 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       ],
       cafeShopLocations: [
         {
-          name: '店名サンプル',
-          detail: buildCafe1ShopLocationDetail('03-0000-0000', '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）'),
+          name: '道玄坂食堂',
+          detail: buildCafe1ShopLocationDetail('03-0000-0000', '〒150-0043 東京都渋谷区道玄坂1-2-3'),
           mapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
           imageUrl:
             'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
@@ -231,10 +231,9 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
     },
     seo: {
-      metaTitle: '店名サンプル｜東京都渋谷区',
-      metaDescription:
-        '飲食店の公式サイト（サンプル）。メニューやアクセスは編集画面で実店舗の内容に差し替えてください。',
-      keywords: '飲食店,定食,ラーメン,東京都,渋谷区,店名サンプル',
+      metaTitle: '道玄坂食堂｜東京都渋谷区',
+      metaDescription: '東京都渋谷区道玄坂の定食・丼もの。メニュー・アクセス・営業時間のご案内。',
+      keywords: '飲食店,定食,ラーメン,東京都,渋谷区,道玄坂食堂',
       ogImageUrl:
         'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=1200',
       canonicalUrl: '',
@@ -520,8 +519,8 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
   },
   cram_school: {
     content: {
-      siteName: 'キッズ塾サンプル',
-      title: 'キッズ塾サンプル',
+      siteName: 'スター学習塾',
+      title: 'スター学習塾',
       headline: 'お子さまの「できた！」を増やす。',
       subheadline: '無料体験・資料請求はお気軽にどうぞ。',
       ctaLabel: '無料体験申込',
@@ -550,7 +549,7 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
         { id: 'access', title: 'アクセス', content: '〇〇県〇〇市〇〇町1-2-3\n〇〇駅 徒歩5分\n駐車場あり' },
         { id: 'contact', title: 'お問い合わせ', content: '無料体験・資料請求は下のボタンから。お電話でも承っております。' },
       ],
-      footerText: `© ${new Date().getFullYear()} キッズ塾サンプル. All rights reserved.`,
+      footerText: `© ${new Date().getFullYear()} スター学習塾. All rights reserved.`,
       mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
     },
     seo: {
@@ -718,30 +717,28 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       siteName: '円室律 ENSYRITSU',
       title: '円室律 ENSYRITSU | オリジナル・ナレッジ',
       headline: '私人のための、静かなクローズドWiki。',
-      subheadline:
-        '本体レイアウトは templates/workspaces/wiki-ensyuritsu/embed/index.html（wiki-ensyuritsu）。完全オリジナルブランドのデモです。',
+      subheadline: '記事とナレッジを、落ち着いたレイアウトでまとめられます。',
       ctaLabel: '設計を見る',
       ctaHref: '#top',
       sections: [
         {
           id: 'concept',
-          title: 'このテンプレについて',
-          content: 'ビルトインは固定 HTML 埋め込み。編集はワークスペースの embed を開いてください。',
+          title: 'ご利用について',
+          content: '非公開のナレッジ共有に向いた構成です。トピックごとに読みやすく整理できます。',
         },
-        { id: 'menu', title: 'トピック', content: 'トピック・ストック・公開設計の3カード構成です。' },
-        { id: 'hours', title: 'メタ', content: 'このテキストはメタ用。画面は embed が表示されます。' },
-        { id: 'access', title: 'フォルダ', content: 'templates/workspaces/wiki-ensyuritsu/' },
-        { id: 'contact', title: 'お問い合わせ', content: '本番ではフォームを接続してください。' },
+        { id: 'menu', title: 'トピック', content: 'ガイド・運用・資料など、カード形式で一覧できます。' },
+        { id: 'hours', title: '更新情報', content: '最新のお知らせや改訂履歴をここに掲載できます。' },
+        { id: 'access', title: 'アクセス', content: 'ご利用環境や接続方法の案内を記載できます。' },
+        { id: 'contact', title: 'お問い合わせ', content: 'ご質問はお手数ですが、ご案内の連絡先までお願いいたします。' },
       ],
-      footerText: `© ${new Date().getFullYear()} 円室律 ENSYRITSU（サンプル）`,
+      footerText: `© ${new Date().getFullYear()} 円室律 ENSYRITSU`,
       heroSlides: [
         'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1400',
       ],
     },
     seo: {
-      metaTitle: '円室律 ENSYRITSU | オリジナル・ナレッジ（wiki-ensyuritsu）',
-      metaDescription:
-        '銅×墨色のオリジナル・ナレッジレイアウト。クローズドWiki向けの静的デモ（ワークスペース embed）。',
+      metaTitle: '円室律 ENSYRITSU | オリジナル・ナレッジ',
+      metaDescription: '私人向けナレッジを、読みやすいレイアウトでまとめるクローズドWiki型のページ構成です。',
       keywords: 'wiki,ensyuritsu,円室律,ENSYRITSU,ナレッジ,オリジナル',
       ogImageUrl:
         'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1200',
@@ -753,30 +750,28 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       siteName: '湯環 TOWAN',
       title: '湯環 TOWAN | wiki-sauna',
       headline: 'サウナの知識を、ひとつの輪に。',
-      subheadline:
-        '本体レイアウトは templates/workspaces/wiki-sauna/embed/index.html（wiki-sauna）。施設運用向け Wiki の静的デモです。',
+      subheadline: '施設運用や会員向けに、ガイドと記事を整理して掲載できます。',
       ctaLabel: '記事一覧へ',
       ctaHref: '#topics',
       sections: [
         {
           id: 'concept',
-          title: 'このテンプレについて',
-          content: 'ビルトインは固定 HTML 埋め込み。編集はワークスペースの embed を開いてください。',
+          title: 'ご利用について',
+          content: 'ロウリュ手順や設備の案内、会員規約などを分かりやすくまとめられます。',
         },
-        { id: 'menu', title: 'トピック', content: 'GUIDE / OPS / WIKI の3カード（embed 内）。' },
-        { id: 'hours', title: 'メタ', content: 'このテキストはメタ用。画面は embed が表示されます。' },
-        { id: 'access', title: 'フォルダ', content: 'templates/workspaces/wiki-sauna/' },
-        { id: 'contact', title: 'お問い合わせ', content: '本番ではフォームを接続してください。' },
+        { id: 'menu', title: 'トピック', content: 'ガイド・運用・Wiki など、目的別に記事を配置できます。' },
+        { id: 'hours', title: '更新情報', content: '営業案内やメンテナンス情報をここに掲載できます。' },
+        { id: 'access', title: 'アクセス', content: '所在地・駐車場・最寄り駅などを記載できます。' },
+        { id: 'contact', title: 'お問い合わせ', content: 'ご予約・お問い合わせは、各ページの案内に従ってください。' },
       ],
-      footerText: `© ${new Date().getFullYear()} 湯環 TOWAN（サンプル）`,
+      footerText: `© ${new Date().getFullYear()} 湯環 TOWAN`,
       heroSlides: [
         'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
       ],
     },
     seo: {
-      metaTitle: '湯環 TOWAN | wiki-sauna（テンプレデモ）',
-      metaDescription:
-        '木×アンバーのサウナ・ウェルネス向け Wiki レイアウト。静的デモ（ワークスペース embed）。',
+      metaTitle: '湯環 TOWAN | wiki-sauna',
+      metaDescription: 'サウナ・ウェルネス施設向けに、ガイドと記事を整理して掲載できるWiki型のページ構成です。',
       keywords: 'wiki,sauna,湯環,TOWAN,サウナ,ウェルネス,ナレッジ',
       ogImageUrl:
         'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1200',
@@ -788,20 +783,25 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       siteName: 'CLOSER GYM',
       title: 'CLOSER GYM | 24時間フィットネス',
       headline: '理想の空間を、月額6,980円で。',
-      subheadline: 'テンプレ15は gym-valx-intro の固定HTMLを埋め込みます（単一店舗想定・黒×赤ネオン・テンプレ14型スティッキー申し込み・料金・FAQ・アクセス）。',
+      subheadline: '24時間使い放題のトレーニング空間。パーソナル指導と充実したマシンで、目標に合わせたトレーニングをサポートします。',
       ctaLabel: 'LINEで入会',
       ctaHref: '#top',
       sections: [
-        { id: 'concept', title: 'このテンプレについて', content: '参照スクリーンショットに基づく静的レイアウトです。文言・画像は本番前に差し替えてください。' },
+        {
+          id: 'concept',
+          title: 'コンセプト',
+          content:
+            '会員制のフィットネスジムとして、初心者から経験者まで安心してトレーニングできる環境を整えています。料金・設備・アクセスの詳細は各セクションをご覧ください。',
+        },
       ],
-      footerText: `© ${new Date().getFullYear()} CLOSER GYM（構成デモ）`,
+      footerText: `© ${new Date().getFullYear()} CLOSER GYM`,
       heroSlides: [
         'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',
       ],
     },
     seo: {
-      metaTitle: 'CLOSER GYM | 24時間フィットネス（テンプレデモ）',
-      metaDescription: 'パーソナルジム・ネオンシアン系モバイルLPの固定HTMLテンプレート。',
+      metaTitle: 'CLOSER GYM | 24時間フィットネス',
+      metaDescription: '24時間営業のフィットネスジム。パーソナル指導・マシン・料金・FAQをご案内します。',
       keywords: 'ジム, フィットネス, パーソナル, 24時間, LP',
       ogImageUrl:
         'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',

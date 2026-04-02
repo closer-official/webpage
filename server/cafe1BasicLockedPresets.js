@@ -53,9 +53,9 @@ function shopCard(name, phone, address, mapUrl, imageUrl) {
 function ramenOverride() {
   return {
     cafeVisualGenre: 'ramen',
-    headline: '一杯の満足を、気軽な価格で。（ラーメン向け固定サンプル）',
+    headline: '一杯の満足を、気軽な価格で。',
     subheadline:
-      'スープと麺にこだわった一杯をご提供します。※掲載の写真は著作権の観点から、実店舗の写真ではなくフリー素材を使用しています。',
+      'スープと麺にこだわった一杯をご提供します。※掲載写真の一部はイメージです。',
     heroSlides: [...CAFE_1_RAMEN_HERO_SLIDES],
     heroSlideStyles: [],
     footerLineUrl: '',
@@ -73,7 +73,7 @@ function ramenOverride() {
         id: 'concept',
         title: 'ラーメンのこだわり',
         content:
-          'スープは毎日店内で仕込み、麺は茹で加減までこだわりました。一杯ごとに温度とタイミングを調整し、ラーメン好きの方にも満足いただける一杯を目指しています。\n\n※本文はジャンル別の固定サンプルです。実店舗の内容とは異なる場合があります。',
+          'スープは毎日店内で仕込み、麺は茹で加減までこだわりました。一杯ごとに温度とタイミングを調整し、ラーメン好きの方にも満足いただける一杯を目指しています。',
         imageUrl:
           'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
@@ -81,7 +81,7 @@ function ramenOverride() {
         id: 'staff',
         title: '店主より',
         content:
-          '「今日も美味しい一杯を」— その想いだけは変わりません。常連の方も、初めての方も、気軽に声をかけてください。（固定サンプル文）',
+          '「今日も美味しい一杯を」— その想いだけは変わりません。常連の方も、初めての方も、気軽に声をかけてください。',
         imageUrl:
           'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
@@ -94,14 +94,13 @@ function ramenOverride() {
       },
       {
         id: 'menu',
-        title: 'お品書き（テキスト・サンプル）',
-        content: '価格・メニュー名はサンプルです。実店舗のメニューに合わせてフル編集画面から差し替えてください。',
+        title: 'お品書き',
+        content: '人気のラーメンとトッピング、サイドメニューをご用意しています。',
       },
       {
         id: 'access',
         title: '店舗・地図',
-        content:
-          '下記の地図は「Googleマップの埋め込みURL」を基本情報から入力すると、その場所が表示されます。住所・最寄り駅はこの文章でも補足できます。',
+        content: '下の地図でお店の位置をご確認ください。最寄り駅や目印はお気軽にお問い合わせください。',
       },
       {
         id: 'hours',
@@ -113,12 +112,12 @@ function ramenOverride() {
         id: 'shop',
         title: '店舗詳細情報',
         content:
-          '禁煙・お支払い方法・席数などの定型文はサンプルです。\n\n【お支払い例】\n現金 / カード / 交通系IC など\n\n※実店舗の運用に合わせてフル編集で修正してください。',
+          '店内は全席禁煙です。お支払いは現金のほか、カード・交通系IC などに対応している場合がございます。詳しくは店頭でお尋ねください。\n\n【設備の例】\nカウンター席・テーブル席 / 無料Wi-Fi（店舗により異なります）',
       },
       {
         id: 'contact',
         title: 'お問い合わせ',
-        content: 'ご予約・お問い合わせはお電話にて承ります。（電話番号は基本情報から入力してください）',
+        content: 'ご予約・お問い合わせはお電話にて承ります。',
       },
     ],
     cafeMenuTextRows: [
@@ -132,16 +131,16 @@ function ramenOverride() {
       { groupLabel: 'ドリンク', name: '生ビール（中）', price: '¥550', description: '', badge: '' },
     ],
     cafeShopLocations: shopCard(
-      '店名（基本情報で入力）',
+      '店舗名',
       '03-0000-0000',
-      '〒000-0000 住所（基本情報で入力）',
+      '〒000-0000 東京都渋谷区道玄坂1-2-3',
       PLACEHOLDER_MAP,
       'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
     ),
     mapEmbedUrl: PLACEHOLDER_MAP,
     cafeFloatingMapUrl: PLACEHOLDER_MAP,
     cafeGbPostsEmbedUrl: PLACEHOLDER_MAP,
-    ctaLabel: 'お電話はこちら（番号は基本情報で入力）',
+    ctaLabel: 'お電話はこちら',
     ctaHref: 'tel:0300000000',
   };
 }
@@ -149,9 +148,8 @@ function ramenOverride() {
 function cafeOverride() {
   return {
     cafeVisualGenre: 'cafe_coffee',
-    headline: '一杯のコーヒーから、ゆるやかな時間を。（カフェ向け固定サンプル）',
-    subheadline:
-      '豆の選び方から抽出まで、丁寧に一杯ずつお出しします。※写真はフリー素材です。',
+    headline: '一杯のコーヒーから、ゆるやかな時間を。',
+    subheadline: '豆の選び方から抽出まで、丁寧に一杯ずつお出しします。※掲載写真の一部はイメージです。',
     heroSlides: [
       'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1400',
       'https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=1400',
@@ -172,45 +170,45 @@ function cafeOverride() {
         id: 'concept',
         title: 'カフェのコンセプト',
         content:
-          '厳選した豆を浅煎り〜中深煎りで。ミルクとの相性も考えたブレンドをご用意しています。パティスリーとのコラボスイーツもお楽しみください。（固定サンプル）',
+          '厳選した豆を浅煎り〜中深煎りで。ミルクとの相性も考えたブレンドをご用意しています。パティスリーとのコラボスイーツもお楽しみください。',
         imageUrl:
           'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
       {
         id: 'staff',
         title: 'バリスタより',
-        content: '今日のおすすめ豆と抽出レシピをご案内します。苦さ・酸味の好みもお聞きします。（固定サンプル）',
+        content: '今日のおすすめ豆と抽出レシピをご案内します。苦さ・酸味の好みもお聞きします。',
         imageUrl:
           'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
       {
         id: 'gallery',
         title: '店内・スイーツ',
-        content: '木の温もりと自然光を意識したイメージです。（フリー素材）',
+        content: '木の温もりと自然光を意識した店内の雰囲気です。',
         imageUrl:
           'https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
       {
         id: 'menu',
-        title: 'メニュー（テキスト・サンプル）',
-        content: 'ドリンク・フードの価格はサンプルです。',
+        title: 'メニュー',
+        content: 'ドリンク・フードのラインナップです。',
       },
       {
         id: 'access',
         title: '店舗・地図',
-        content: '埋め込み地図は基本情報で指定した Google マップのURLが表示されます。',
+        content: '下の地図でお店の位置をご確認ください。',
       },
       { id: 'hours', title: '営業時間', content: CAFE_1_HOURS_SECTION_CONTENT },
       { id: 'faq', title: 'よくあるご質問（Q&A）', content: '' },
       {
         id: 'shop',
         title: '店舗詳細情報',
-        content: '禁煙席・電源・Wi-Fi などはサンプル文言です。実店舗に合わせフル編集で修正してください。',
+        content: '禁煙席・電源・Wi-Fi の有無は店舗により異なります。お気軽にお尋ねください。',
       },
       {
         id: 'contact',
         title: 'お問い合わせ',
-        content: 'テイクアウトの取り置きなどはお電話にて。（電話番号は基本情報から入力）',
+        content: 'テイクアウトの取り置きなどはお電話にてお問い合わせください。',
       },
     ],
     cafeMenuTextRows: [
@@ -224,16 +222,16 @@ function cafeOverride() {
       { groupLabel: 'その他', name: 'ソフトドリンク', price: '¥400', description: '', badge: '' },
     ],
     cafeShopLocations: shopCard(
-      '店名（基本情報で入力）',
+      '店舗名',
       '03-0000-0000',
-      '〒000-0000 住所（基本情報で入力）',
+      '〒000-0000 東京都渋谷区道玄坂1-2-3',
       PLACEHOLDER_MAP,
       'https://images.pexels.com/photos/414630/pexels-photo-414630.jpeg?auto=compress&cs=tinysrgb&w=900',
     ),
     mapEmbedUrl: PLACEHOLDER_MAP,
     cafeFloatingMapUrl: PLACEHOLDER_MAP,
     cafeGbPostsEmbedUrl: PLACEHOLDER_MAP,
-    ctaLabel: 'お電話はこちら（番号は基本情報で入力）',
+    ctaLabel: 'お電話はこちら',
     ctaHref: 'tel:0300000000',
   };
 }
@@ -241,9 +239,8 @@ function cafeOverride() {
 function defaultOverride() {
   return {
     cafeVisualGenre: 'other_food',
-    headline: '腹が減ったら、ここへ。（飲食店向け固定サンプル）',
-    subheadline:
-      '定食から一品料理まで、気軽に立ち寄れる一枚皿を揃えました。※写真はフリー素材です。',
+    headline: '腹が減ったら、ここへ。',
+    subheadline: '定食から一品料理まで、気軽に立ち寄れる一枚皿を揃えました。※掲載写真の一部はイメージです。',
     heroSlides: [...CAFE_1_DEFAULT_HERO_SLIDES],
     footerLineUrl: '',
     cafeReviewCtaText: '',
@@ -267,26 +264,26 @@ function defaultOverride() {
       {
         id: 'staff',
         title: '店主より',
-        content: '今日のおすすめや仕入れの話など、気軽にお声がけください。（固定サンプル）',
+        content: '今日のおすすめや仕入れの話など、気軽にお声がけください。',
         imageUrl:
           'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
       {
         id: 'gallery',
         title: '料理写真',
-        content: '定食・どんぶり・一品のイメージです。（フリー素材）',
+        content: '定食・どんぶり・一品料理の写真です。',
         imageUrl:
           'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1200',
       },
       {
         id: 'menu',
-        title: 'お品書き（テキスト・サンプル）',
-        content: 'メニュー名・価格はサンプルです。',
+        title: 'お品書き',
+        content: '定食・丼・一品のラインナップです。',
       },
       {
         id: 'access',
         title: '店舗・地図',
-        content: '地図は基本情報の Google マップ埋め込みURLで表示されます。',
+        content: '下の地図でお店の位置をご確認ください。',
       },
       { id: 'hours', title: '営業時間', content: CAFE_1_HOURS_SECTION_CONTENT },
       { id: 'faq', title: 'よくあるご質問（Q&A）', content: '' },
@@ -294,12 +291,12 @@ function defaultOverride() {
         id: 'shop',
         title: '店舗詳細情報',
         content:
-          'お支払い・席数・禁煙などの定型はサンプルです。フル編集画面で実店舗に合わせてください。',
+          'お支払い方法・席数・禁煙などは店舗により異なります。店内の掲示またはスタッフにお尋ねください。',
       },
       {
         id: 'contact',
         title: 'お問い合わせ',
-        content: 'ご来店前のお問い合わせはお電話にて。（電話番号は基本情報から入力）',
+        content: 'ご来店前のお問い合わせはお電話にて承ります。',
       },
     ],
     cafeMenuTextRows: [
@@ -313,16 +310,16 @@ function defaultOverride() {
       { groupLabel: 'ドリンク', name: '烏龍茶', price: '¥300', description: '', badge: '' },
     ],
     cafeShopLocations: shopCard(
-      '店名（基本情報で入力）',
+      '店舗名',
       '03-0000-0000',
-      '〒000-0000 住所（基本情報で入力）',
+      '〒000-0000 東京都渋谷区道玄坂1-2-3',
       PLACEHOLDER_MAP,
       'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
     ),
     mapEmbedUrl: PLACEHOLDER_MAP,
     cafeFloatingMapUrl: PLACEHOLDER_MAP,
     cafeGbPostsEmbedUrl: PLACEHOLDER_MAP,
-    ctaLabel: 'お電話はこちら（番号は基本情報で入力）',
+    ctaLabel: 'お電話はこちら',
     ctaHref: 'tel:0300000000',
   };
 }
@@ -335,8 +332,8 @@ export function getCafe1BasicLockedOverride(presetKind) {
   const k = presetKind === 'ramen' || presetKind === 'cafe' ? presetKind : 'default';
   const part = k === 'ramen' ? ramenOverride() : k === 'cafe' ? cafeOverride() : defaultOverride();
   const now = new Date().getFullYear();
-  const siteName = '店名（基本情報で入力）';
-  const footerAddress = '〒000-0000 都道府県市区町村番地（基本情報で入力）';
+  const siteName = '店舗名';
+  const footerAddress = '〒000-0000 東京都渋谷区道玄坂1-2-3';
   const footerPhone = '03-0000-0000';
   return {
     siteName,
@@ -357,7 +354,7 @@ export function getCafe1BasicLockedOverride(presetKind) {
       postalCode: '',
     },
     metaTitle: siteName,
-    metaDescription: `${footerAddress}の${siteName}（サンプル）`,
+    metaDescription: `${footerAddress}の${siteName}。`,
     ogImageUrl: '',
     keywords: '',
     canonicalUrl: '',
@@ -372,8 +369,8 @@ export function getCafe1BasicLockedOverride(presetKind) {
 export function mergeCafe1BasicEditable(presetKind, editable = {}) {
   const base = getCafe1BasicLockedOverride(presetKind);
   const e = editable && typeof editable === 'object' ? editable : {};
-  const siteName = String(e.siteName || '').trim().slice(0, 120) || '店名未入力';
-  const footerAddress = String(e.footerAddress || '').trim().slice(0, 300) || '住所未入力';
+  const siteName = String(e.siteName || '').trim().slice(0, 120) || '店舗名';
+  const footerAddress = String(e.footerAddress || '').trim().slice(0, 300) || '住所未登録';
   const footerPhone = String(e.footerPhone || '').trim().slice(0, 40) || '03-0000-0000';
   const mapEmbedUrl = String(e.mapEmbedUrl || '').trim().slice(0, 2000);
   const footerInstagramUrl = String(e.footerInstagramUrl || '').trim().slice(0, 2000);

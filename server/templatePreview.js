@@ -334,22 +334,21 @@ export function renderTemplatePreview(templateId, customization = null, options 
       siteName: '円室律 ENSYRITSU',
       title: '円室律 ENSYRITSU | オリジナル・ナレッジ',
       headline: '私人のための、静かなクローズドWiki。',
-      subheadline:
-        '見た目の本体は templates/workspaces/wiki-ensyuritsu/embed/index.html です（wiki-ensyuritsu・完全オリジナルブランドのデモ）。',
+      subheadline: '記事とナレッジを、落ち着いたレイアウトでまとめられます。',
       sections: [
         {
           id: 'concept',
-          title: 'このテンプレについて',
-          content: 'buildHtml はワークスペースの固定 HTML を埋め込みます。文言・配色は embed を編集してください。',
+          title: 'ご利用について',
+          content: '非公開のナレッジ共有に向いた構成です。トピックごとに読みやすく整理できます。',
         },
-        { id: 'menu', title: 'トピック', content: 'カードと帯のリズムで、長文サイトの下準備に使えます。' },
-        { id: 'hours', title: 'メタ情報', content: 'このブロックは API メタ用です。プレビュー画面は embed が優先されます。' },
-        { id: 'access', title: '置き場', content: 'templates/workspaces/wiki-ensyuritsu/' },
-        { id: 'contact', title: 'お問い合わせ', content: 'フォーム連携は本番実装時に接続してください。' },
+        { id: 'menu', title: 'トピック', content: 'ガイド・運用・資料など、カード形式で一覧できます。' },
+        { id: 'hours', title: '更新情報', content: '最新のお知らせや改訂履歴をここに掲載できます。' },
+        { id: 'access', title: 'アクセス', content: 'ご利用環境や接続方法の案内を記載できます。' },
+        { id: 'contact', title: 'お問い合わせ', content: 'ご質問はお手数ですが、ご案内の連絡先までお願いいたします。' },
       ],
       ctaLabel: '設計を見る',
       ctaHref: '#top',
-      footerText: `© ${now} 円室律 ENSYRITSU（サンプル）`,
+      footerText: `© ${now} 円室律 ENSYRITSU`,
       heroSlides: [
         'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1400',
       ],
@@ -359,33 +358,33 @@ export function renderTemplatePreview(templateId, customization = null, options 
       siteName: '湯環 TOWAN',
       title: '湯環 TOWAN | wiki-sauna',
       headline: 'サウナの知識を、ひとつの輪に。',
-      subheadline:
-        '本体は templates/workspaces/wiki-sauna/embed/index.html（wiki-sauna・湯環デモ）。施設運用向け Wiki レイアウトです。',
+      subheadline: '施設運用や会員向けに、ガイドと記事を整理して掲載できます。',
       sections: [
         {
           id: 'concept',
-          title: 'このテンプレについて',
-          content: '固定 HTML 埋め込み。ロウリュ手順・点検ログなどをカードで並べる想定です。',
+          title: 'ご利用について',
+          content: 'ロウリュ手順や設備の案内、会員規約などを分かりやすくまとめられます。',
         },
-        { id: 'menu', title: 'トピック', content: 'GUIDE / OPS / WIKI の3カード構成（embed 内）。' },
-        { id: 'hours', title: 'メタ', content: 'API メタ用。表示は embed が優先されます。' },
-        { id: 'access', title: '置き場', content: 'templates/workspaces/wiki-sauna/' },
-        { id: 'contact', title: 'お問い合わせ', content: '本番ではフォーム・予約を接続してください。' },
+        { id: 'menu', title: 'トピック', content: 'ガイド・運用・Wiki など、目的別に記事を配置できます。' },
+        { id: 'hours', title: '更新情報', content: '営業案内やメンテナンス情報をここに掲載できます。' },
+        { id: 'access', title: 'アクセス', content: '所在地・駐車場・最寄り駅などを記載できます。' },
+        { id: 'contact', title: 'お問い合わせ', content: 'ご予約・お問い合わせは、各ページの案内に従ってください。' },
       ],
       ctaLabel: '記事一覧へ',
       ctaHref: '#topics',
-      footerText: `© ${now} 湯環 TOWAN（サンプル）`,
+      footerText: `© ${now} 湯環 TOWAN`,
       heroSlides: [
         'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
       ],
     };
   } else if (id === 'cafe_1') {
     content = {
-      siteName: '店名サンプル（公式）',
-      title: '店名サンプル',
-      headline: 'キャッチコピー・店名（サンプル）',
-      subheadline: 'リード文のサンプルです。編集画面からお店の内容に差し替えてください。',
-      footerAddress: '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）',
+      siteName: '道玄坂食堂',
+      title: '道玄坂食堂',
+      headline: '熱々の定食で、今日も元気に。',
+      subheadline:
+        'にんにく効いたスタミナ系から、あっさり焼き魚まで。仕事帰りの一杯にぴったりの味わいです。※掲載写真の一部はイメージです。',
+      footerAddress: '〒150-0043 東京都渋谷区道玄坂1-2-3',
       footerPhone: '03-0000-0000',
       cafeMeo: {
         servesCuisine: '定食;ラーメン;飲食店',
@@ -397,14 +396,14 @@ export function renderTemplatePreview(templateId, customization = null, options 
         postalCode: '150-0043',
       },
       cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
-      cafeReviewCtaText: 'Googleのクチコミはこちら（サンプル・URLは編集で差し替え）',
+      cafeReviewCtaText: 'Googleのクチコミはこちら',
       cafeReviewCtaUrl: 'https://www.google.com/maps',
       cafeGbPostsEmbedUrl:
         'https://www.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
       faqItems: [
         {
           q: '予約はできますか？',
-          a: 'お電話（03-0000-0000）にてご相談ください。混雑時はお時間をいただく場合がございます。（番号はサンプルです）',
+          a: 'お電話（03-0000-0000）にてご相談ください。混雑時はお時間をいただく場合がございます。',
         },
         {
           q: '駐車場はありますか？',
@@ -428,15 +427,15 @@ export function renderTemplatePreview(templateId, customization = null, options 
       sections: [
         {
           id: 'concept',
-          title: 'コンセプト（サンプル）',
+          title: 'コンセプト',
           content:
-            'お店の想いや魅力が伝わる文章をここに書きます。\n\n素材へのこだわり、お客様へのメッセージなど、編集画面から自由に差し替えできます。',
+            '毎日の仕込みから一品一品にこだわり、腹が満たされる「ごはん屋」でありたいと考えています。\n\n仕事や学びのあと、気軽に立ち寄れる価格と味付けを心がけています。',
         },
         {
           id: 'staff',
-          title: '店主・スタッフ（サンプル）',
+          title: '店主・スタッフ',
           content:
-            'スタッフからのひとことを書きます。今日のおすすめや、お客様へのごあいさつなど、編集画面で差し替えてください。',
+            '今日のおすすめや仕入れの話など、気軽にお声がけください。お一人様も、ご家族連れも、どうぞゆっくりお過ごしください。',
           imageUrl:
             'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
@@ -448,7 +447,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
         {
           id: 'access',
           title: '店舗・地図',
-          content: '北千住駅東口から徒歩3分、学園通り沿い。東京電機大学から歩いてすぐ。',
+          content: 'JR渋谷駅より徒歩圏内。道玄坂を上がり、赤い看板が目印です。下の地図で位置をご確認ください。',
         },
         {
           id: 'hours',
@@ -470,7 +469,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
           id: 'contact',
           title: 'お問い合わせ',
           content:
-            'ご来店前に席の空き状況をお電話でご確認いただくとスムーズです。\nキャンペーンやSNSの案内は、実店舗の内容に合わせて編集してください。',
+            'ご来店前に席の空き状況をお電話でご確認いただくとスムーズです。キャンペーンや新メニューはSNSでもお知らせしています。',
         },
       ],
       cafeMenuTextRows: [
@@ -493,8 +492,8 @@ export function renderTemplatePreview(templateId, customization = null, options 
       heroSlides: [...CAFE_1_DEFAULT_HERO_SLIDES],
       cafeShopLocations: [
         {
-          name: '店名サンプル',
-          detail: buildCafe1ShopLocationDetail('03-0000-0000', '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）'),
+          name: '道玄坂食堂',
+          detail: buildCafe1ShopLocationDetail('03-0000-0000', '〒150-0043 東京都渋谷区道玄坂1-2-3'),
           mapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
           imageUrl:
             'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
@@ -502,28 +501,28 @@ export function renderTemplatePreview(templateId, customization = null, options 
       ],
       mapEmbedUrl:
         'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
-      ctaLabel: 'お電話はこちら（サンプル）',
+      ctaLabel: 'お電話はこちら',
       ctaHref: 'tel:0300000000',
-      footerText: `© ${now} 店名サンプル | 東京都渋谷区道玄坂1-2-3（サンプル） | 03-0000-0000`,
+      footerText: `© ${now} 道玄坂食堂 | 東京都渋谷区道玄坂1-2-3 | 03-0000-0000`,
       footerInstagramUrl: 'https://www.instagram.com/',
       footerLineUrl: 'https://line.me/',
     };
   } else {
     content = {
-      siteName: `${name} サンプル`,
-      title: `${name} サンプル`,
-      headline: `${name} サンプル`,
-      subheadline: 'デザイン確認用のサンプルです。実際の制作時には内容を差し替えます。',
+      siteName: name,
+      title: name,
+      headline: name,
+      subheadline: 'サービス内容のご案内です。詳細はお問い合わせください。',
       sections: [
-        { id: 'concept', title: 'コンセプト', content: 'このテンプレートの見え方を確認するためのサンプル文です。' },
-        { id: 'menu', title: 'サービス', content: '提供サービスの概要が入ります。' },
+        { id: 'concept', title: 'コンセプト', content: '事業内容や想い、強みが伝わる文章をご用意しています。' },
+        { id: 'menu', title: 'サービス', content: '提供内容の概要を分かりやすく掲載できます。' },
         { id: 'hours', title: '営業時間', content: '平日 10:00-19:00 / 土日祝 9:00-18:00' },
         { id: 'access', title: 'アクセス', content: '東京都〇〇区〇〇 1-2-3' },
         { id: 'contact', title: 'お問い合わせ', content: 'お問い合わせはフォームまたはSNSからご連絡ください。' },
       ],
       ctaLabel: 'お問い合わせ',
       ctaHref: '#contact',
-      footerText: `© ${now} ${name} Sample`,
+      footerText: `© ${now} ${name}`,
       heroSlides: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400'],
     };
   }

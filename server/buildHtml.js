@@ -384,7 +384,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
     ${footerLegal}
   </footer>`
       : tid === 'cafe_1'
-        ? `<footer class="footer-c1">
+        ? `<footer class="footer-c1" id="site-footer">
     <div class="container footer-c1-inner">
       ${content.footerInstagramUrl || content.footerLineUrl || content.footerTwitterUrl
         ? `<div class="footer-c1-social-row">${content.footerInstagramUrl ? `<a href="${escapeHtml(content.footerInstagramUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}${content.footerTwitterUrl ? `<a href="${escapeHtml(content.footerTwitterUrl)}" class="footer-c1-social-link footer-c1-social-link--x" target="_blank" rel="noopener noreferrer" aria-label="X（旧Twitter）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" class="footer-c1-social-svg"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : ''}${content.footerLineUrl ? `<a href="${escapeHtml(content.footerLineUrl)}" class="footer-c1-social-link" target="_blank" rel="noopener noreferrer" aria-label="LINE"><img src="/social-icons/line.png" alt="" class="closer-social-icon-img" width="40" height="40" loading="lazy" decoding="async" /></a>` : ''}</div>`
@@ -710,9 +710,6 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
           .filter(Boolean)
           .map((l) => plainLineAsParagraphWithPaymentLogos(l, escapeHtml))
           .join('');
-        const img = loc.imageUrl
-          ? `<img class="c1-shop-img" src="${escapeHtml(loc.imageUrl)}" alt="" loading="lazy">`
-          : '';
         const mapL = loc.mapUrl
           ? `<a class="c1-shop-map" href="${escapeHtml(loc.mapUrl)}" target="_blank" rel="noopener noreferrer">Google MAP ›</a>`
           : '';
@@ -720,7 +717,6 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
           ? `<a class="c1-shop-res" href="${escapeHtml(loc.reserveUrl)}">${escapeHtml(loc.reserveLabel || '予約する')}</a>`
           : '';
         return `      <article class="c1-shop-card">
-        ${img}
         <h3 class="c1-shop-name">${escapeHtml(loc.name)}</h3>
         <div class="c1-shop-detail">${paras}</div>
         <div class="c1-shop-actions">${mapL}${res}</div>
@@ -842,11 +838,7 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
             }
             if (tid === 'cafe_1' && s.id === 'shop') {
-              const shopImg = s.imageUrl
-                ? `<div class="section-img-wrap"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`
-                : '';
               return `    <section id="${escapeHtml(s.id)}" class="section wo-sec c1-shop-detail-sec ${rhythm}" aria-labelledby="${s.id}-title"${scrollInAttr}>
-      ${shopImg}
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         ${cafe1ShopSectionBody(s.content)}
@@ -870,7 +862,6 @@ ${cafe1ShopLocationsHtml()}
         <h2 id="${s.id}-title" class="${c1LedeTitleClass}">${escapeHtml(s.title)}</h2>
         <div class="wo-lede-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
       </div>
-      ${img}
     </section>`;
             }
             if (i === 0) {
@@ -1098,7 +1089,16 @@ ${cafe1ShopLocationsHtml()}
   const snsLineUrl = String(lineUrl || '').trim() || String(content.footerLineUrl || '').trim();
   const snsLinksEnabled = instagramLine !== false && !!(snsInstagramUrl || snsLineUrl);
   if (snsLinksEnabled) {
-    if (tid === 'cafe_tea' || tid === 'cafe_1') {
+    if (tid === 'cafe_1') {
+      extraSections += `
+    <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
+      <div class="section-body">
+        <h2 id="sns-title" class="wo-sec-heading">フォロー・お問い合わせ</h2>
+        <p class="wo-sns-caption wo-sns-caption--c1-jump">Instagram・LINEはページ下部のフッターからお開きください。</p>
+        <p class="wo-sns-footer-jump-wrap"><a href="#site-footer" class="cta-btn wo-sns-footer-jump" aria-label="ページ下部のフッターへ移動">こちら</a></p>
+      </div>
+    </section>`;
+    } else if (tid === 'cafe_tea') {
       extraSections += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
@@ -1124,15 +1124,11 @@ ${cafe1ShopLocationsHtml()}
   if (tid === 'cafe_1' && igFeed.length > 0) {
     const igProfileUrl = String(content.footerInstagramUrl || '').trim();
     const igPostHrefFallback = igProfileUrl || snsInstagramUrl || 'https://www.instagram.com/';
-    const igProfileLink = igProfileUrl
-      ? `<p class="c1-ig-feed-actions"><a class="c1-ig-feed-profile" href="${escapeHtml(igProfileUrl)}" target="_blank" rel="noopener noreferrer">Instagramプロフィールを見る</a></p>`
-      : '';
     extraSections += `
     <section class="section wo-sec c1-ig-feed-sec" id="ig-feed" aria-labelledby="c1-ig-feed-title"${extraMotionAttr}>
       <div class="section-body">
         <h2 id="c1-ig-feed-title" class="wo-sec-heading">今日の一皿（Instagram）</h2>
-        <p class="c1-ig-feed-lede">Instagramの投稿から一部を表示しています。画像をタップで投稿ページを開きます。リンク先はフッターのInstagramと同じ公式URLにそろえています。</p>
-        ${igProfileLink}
+        <p class="c1-ig-feed-lede">投稿の一部です。画像をタップで各投稿へ。公式プロフィールはフッターのアイコンからどうぞ。</p>
         <div class="c1-ig-feed-grid">${igFeed
           .map((it) => {
             const raw = String(it.postUrl || '').trim();
@@ -1156,7 +1152,8 @@ ${cafe1ShopLocationsHtml()}
     </section>`;
   }
   const gbPostsEmbedUrl = String(content.cafeGbPostsEmbedUrl || '').trim();
-  if (tid === 'cafe_1' && gbPostsEmbedUrl) {
+  const mapEmbedAlready = String(content.mapEmbedUrl || '').trim();
+  if (tid === 'cafe_1' && gbPostsEmbedUrl && !mapEmbedAlready) {
     extraSections += `
     <section class="section wo-sec c1-gbp-sec" id="gbp-posts" aria-labelledby="c1-gbp-title"${extraMotionAttr}>
       <div class="section-body">

@@ -810,6 +810,11 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--tp-text); }
   .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p:first-child { margin-top: 0; }
   .page-wrapper.template-cafe_1 .wo-sns-block .wo-sns-caption { font-size: 0.98rem; line-height: 2; color: var(--tp-text); margin: 0 0 0.75rem; }
+  .page-wrapper.template-cafe_1 .wo-sns-caption--c1-jump { margin-bottom: 0.5rem; }
+  .page-wrapper.template-cafe_1 .wo-sns-footer-jump-wrap { margin: 0; }
+  .page-wrapper.template-cafe_1 .wo-sns-footer-jump { text-decoration: none; }
+  html:has(.page-wrapper.template-cafe_1) { scroll-behavior: smooth; }
+  .page-wrapper.template-cafe_1 footer.footer-c1#site-footer { scroll-margin-top: 5.75rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-lede { font-size: 0.98rem; line-height: 2; color: var(--tp-text); margin: 0 0 0.75rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-actions { margin: 0 0 0.85rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-profile { display: inline-flex; align-items: center; font-size: 0.98rem; font-weight: 600; color: var(--tp-heading); text-decoration: none; border-bottom: 1px solid currentColor; }
