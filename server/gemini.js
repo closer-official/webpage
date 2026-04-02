@@ -241,3 +241,71 @@ export async function extractTemplateOverrideFromDocuments(files, textContext = 
     override: parsed.override && typeof parsed.override === 'object' ? parsed.override : {},
   };
 }
+
+function sliceStr(v, max) {
+  const s = typeof v === 'string' ? v.trim() : '';
+  return s.slice(0, max);
+}
+
+function openingHoursFromParsed(parsed) {
+  const oh = parsed.openingHoursText ?? parsed.opening_hours_text;
+  if (Array.isArray(oh)) return oh.map(String).join('\n').trim().slice(0, 2000);
+  return sliceStr(oh, 2000);
+}
+
+/**
+ * Google検索のまとめ・調査メモなど自由形式テキストから、cafe_1 基本情報フォーム用フィールドを抽出する
+ */
+export async function extractCafe1BasicFromFreeText(pastedText) {
+  const text = String(pastedText || '').trim().slice(0, 20000);
+  if (!text) throw new Error('empty text');
+  const model = getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const prompt = `あなたは店舗の基本情報をテキストから抽出するアシスタントです。ユーザーがGoogle検索のまとめ・食べログの要約・調査メモなど、自由形式で貼り付けた文章から、次のキーだけを持つJSONオブジェクトを1つ返してください。
+
+【厳守】
+- 有効なJSONオブジェクト1つだけ。説明文・Markdown・コードフェンス（\`\`\`）は禁止。
+- 文章中に明示されていない項目は必ず空文字 "" にする。推測・捏造はしない。
+- 電話番号が無ければ footerPhone は空。マップの「埋め込み用iframeのsrc」と同じURLが文中に無ければ mapEmbedUrl は空（通常の maps/place や検索URLは入れない）。
+- 「InstagramやXで発信」とだけ書いてURLが無い場合は footerInstagramUrl / footerTwitterUrl は空（@アカウントも文中に無ければ空）。
+- openingHoursText には営業時間の表記と定休日をまとめる。複数行にしてよい（JSON内は \\n で改行エスケープ可）。
+- URLは生のhttps文字列のみ。[表示](url)形式にしない。
+
+【visualGenre】は店の業態に最も近い次のいずれか1つ、はっきり分からなければ空文字:
+ramen | cafe_coffee | kissaten | izakaya | yakiniku | sushi | yoshoku | teishoku | don_udon_soba | sweets | takeout | other_food
+
+返却スキーマ:
+{
+  "siteName": "",
+  "footerAddress": "",
+  "footerPhone": "",
+  "mapEmbedUrl": "",
+  "openingHoursText": "",
+  "footerInstagramUrl": "",
+  "footerTwitterUrl": "",
+  "visualGenre": ""
+}
+
+【貼り付け文章】
+${text}`;
+
+  const result = await model.generateContent(prompt);
+  const raw = (result.response.text() || '').trim();
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Gemini did not return valid JSON');
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new Error('Failed to parse Gemini JSON');
+  }
+  return {
+    siteName: sliceStr(parsed.siteName, 200),
+    footerAddress: sliceStr(parsed.footerAddress, 800),
+    footerPhone: sliceStr(parsed.footerPhone, 60),
+    mapEmbedUrl: sliceStr(parsed.mapEmbedUrl, 2500),
+    openingHoursText: openingHoursFromParsed(parsed),
+    footerInstagramUrl: sliceStr(parsed.footerInstagramUrl, 500),
+    footerTwitterUrl: sliceStr(parsed.footerTwitterUrl, 500),
+    visualGenre: sliceStr(parsed.visualGenre || parsed.cafeVisualGenre, 40),
+  };
+}

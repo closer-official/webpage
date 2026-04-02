@@ -18,7 +18,12 @@ import { processOne } from './process.js';
 import { store } from './data/store.js';
 import { isSupabaseConfigured } from './data/storeSupabase.js';
 import { fetchPageMeta } from './fetchPageMeta.js';
-import { analyzeReferenceSites, extractDesignFromHtml, extractTemplateOverrideFromDocuments } from './gemini.js';
+import {
+  analyzeReferenceSites,
+  extractCafe1BasicFromFreeText,
+  extractDesignFromHtml,
+  extractTemplateOverrideFromDocuments,
+} from './gemini.js';
 import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
 import { calculatePrice, getPlanOptions, getRemovalOptions, getAddonOptions, getOtherServiceOptions } from './price.js';
@@ -1257,6 +1262,35 @@ app.post('/api/cafe-1-basic-preview-html', async (req, res) => {
   } catch (e) {
     console.error('[cafe-1-basic-preview-html]', e);
     res.status(500).json({ error: e?.message || 'preview failed' });
+  }
+});
+
+/** cafe_1 基本情報：長文貼り付けを Gemini で JSON 化（フォームは空のキーを上書きしない） */
+app.post('/api/cafe-1-basic-extract-from-text', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  const text = String(body.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'text が空です' });
+  if (text.length > 20000) return res.status(400).json({ error: 'text は 20000 文字以内にしてください' });
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'GEMINI_API_KEY が未設定です' });
+  }
+  try {
+    const raw = await extractCafe1BasicFromFreeText(text);
+    const extracted = {
+      siteName: raw.siteName || '',
+      footerAddress: raw.footerAddress || '',
+      footerPhone: raw.footerPhone || '',
+      mapEmbedUrl: raw.mapEmbedUrl || '',
+      openingHoursText: raw.openingHoursText || '',
+      footerInstagramUrl: raw.footerInstagramUrl || '',
+      footerTwitterUrl: raw.footerTwitterUrl || '',
+      visualGenre: normalizeCafeVisualGenreId(raw.visualGenre),
+    };
+    res.json({ ok: true, extracted });
+  } catch (e) {
+    console.error('[cafe-1-basic-extract-from-text]', e);
+    res.status(500).json({ error: e?.message || '抽出に失敗しました' });
   }
 });
 

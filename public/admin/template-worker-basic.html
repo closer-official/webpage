@@ -300,6 +300,22 @@
         </div>
 
         <div class="panel">
+          <h2>Gemini 一括入力（文章を貼り付け）</h2>
+          <p class="locked-note">
+            Google で店名を調べたときのようなまとめ文・食べログの要約・メモなどをそのまま貼ってください。サーバーで Gemini が店名・住所・電話・営業時間・地図URL・SNS・業態を読み取ります。
+            <strong>取れた項目だけ</strong>フォームを上書きし、空だった項目は今の入力（テンプレのまま）を維持します。
+          </p>
+          <label>
+            貼り付けテキスト
+            <textarea id="gemini-paste" rows="10" placeholder="店の紹介・住所・アクセス・営業時間・定休・駐車場・メニュー・雰囲気など、調べた内容をそのまま…"></textarea>
+          </label>
+          <div class="row-actions">
+            <button type="button" class="btn primary" id="btn-gemini-extract">Gemini でフォームに反映</button>
+          </div>
+          <p id="gemini-extract-err" class="err" style="display: none"></p>
+        </div>
+
+        <div class="panel">
           <h2>調査用プロンプト（コピーして AI に渡す）</h2>
           <p class="locked-note">AI が返した JSON を下の欄に貼り付けて「フォームに反映」すると入力欄へ流し込めます。</p>
           <textarea id="research-prompt" class="mono" readonly rows="12"></textarea>
@@ -489,6 +505,21 @@
           }
         }
 
+        var VALID_VISUAL_GENRES = [
+          'ramen',
+          'cafe_coffee',
+          'kissaten',
+          'izakaya',
+          'yakiniku',
+          'sushi',
+          'yoshoku',
+          'teishoku',
+          'don_udon_soba',
+          'sweets',
+          'takeout',
+          'other_food',
+        ];
+
         function fillEditableFromJson(j) {
           if (!j || typeof j !== 'object') return;
           if (j.siteName) document.getElementById('f-siteName').value = String(j.siteName).trim();
@@ -500,6 +531,41 @@
           var oh = j.openingHoursText;
           if (Array.isArray(oh)) document.getElementById('f-openingHours').value = oh.map(String).join('\n');
           else if (typeof oh === 'string') {
+            document.getElementById('f-openingHours').value = String(oh)
+              .replace(/\\n/g, '\n')
+              .replace(/\r\n/g, '\n');
+          }
+        }
+
+        /** 空でないキーだけフォームへ（Gemini 長文抽出用。未抽出はテンプレ／既存入力のまま） */
+        function fillEditableFromJsonPartial(j) {
+          if (!j || typeof j !== 'object') return;
+          var vg = String(j.visualGenre || j.cafeVisualGenre || '').trim();
+          if (vg && VALID_VISUAL_GENRES.indexOf(vg) !== -1) {
+            document.getElementById('f-genre').value = vg;
+          }
+          if (String(j.siteName || '').trim()) {
+            document.getElementById('f-siteName').value = String(j.siteName).trim();
+          }
+          if (String(j.footerAddress || '').trim()) {
+            document.getElementById('f-footerAddress').value = String(j.footerAddress).trim();
+          }
+          if (String(j.footerPhone || '').trim()) {
+            document.getElementById('f-footerPhone').value = String(j.footerPhone).trim();
+          }
+          if (String(j.mapEmbedUrl || '').trim()) {
+            document.getElementById('f-mapEmbedUrl').value = extractCleanHttpUrl(j.mapEmbedUrl);
+          }
+          if (String(j.footerInstagramUrl || '').trim()) {
+            document.getElementById('f-instagram').value = extractCleanHttpUrl(j.footerInstagramUrl);
+          }
+          if (String(j.footerTwitterUrl || '').trim()) {
+            document.getElementById('f-twitter').value = extractCleanHttpUrl(j.footerTwitterUrl);
+          }
+          var oh = j.openingHoursText;
+          if (Array.isArray(oh) && oh.length) {
+            document.getElementById('f-openingHours').value = oh.map(String).join('\n');
+          } else if (typeof oh === 'string' && String(oh).trim()) {
             document.getElementById('f-openingHours').value = String(oh)
               .replace(/\\n/g, '\n')
               .replace(/\r\n/g, '\n');
@@ -655,6 +721,43 @@
           } catch (e) {
             showErr('save-err', 'JSON が不正です: ' + (e.message || e));
           }
+        };
+
+        document.getElementById('btn-gemini-extract').onclick = function () {
+          showErr('gemini-extract-err', '');
+          showErr('save-err', '');
+          var text = document.getElementById('gemini-paste').value.trim();
+          if (!text) {
+            showErr('gemini-extract-err', '文章を貼り付けてください。');
+            return;
+          }
+          var btn = document.getElementById('btn-gemini-extract');
+          btn.disabled = true;
+          credFetch(api + '/cafe-1-basic-extract-from-text', {
+            method: 'POST',
+            body: JSON.stringify({ text: text }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, status: r.status, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'HTTP ' + x.status);
+              if (!x.j.extracted) throw new Error('応答形式が不正です');
+              fillEditableFromJsonPartial(x.j.extracted);
+              refreshResearchPrompt();
+              scheduleLivePreview();
+              var el = document.getElementById('save-msg');
+              el.style.display = 'block';
+              el.textContent = 'Gemini の結果をフォームに反映しました（空だった項目はそのままです）。';
+            })
+            .catch(function (e) {
+              showErr('gemini-extract-err', e.message || String(e));
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
         };
 
         document.getElementById('mode-select').onchange = function () {
