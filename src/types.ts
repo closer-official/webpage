@@ -302,6 +302,9 @@ export interface ResearchedShop {
   signals: VerificationSignals;
 }
 
+/** DM送付後の営業フェーズ（検閲ダッシュボード） */
+export type OutreachPhase = 'sent' | 'appointment' | 'won' | 'lost' | 'sleep';
+
 /** 検閲ダッシュボード用の1件（調査済み＋LP生成済み） */
 export interface DashboardItem {
   id: string;
@@ -313,6 +316,18 @@ export interface DashboardItem {
   dmBody: string;
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
+  /**
+   * 送信済み案件のフェーズ。status === email_sent のときに使用（未設定は sent として表示）。
+   */
+  outreachPhase?: OutreachPhase;
+  /** outreachPhase === sleep のとき、再送を控える目安日時（ISO） */
+  sleepUntil?: string;
+  /** 配信停止ページ用の秘密トークン（URLに含める） */
+  unsubscribeToken?: string;
+  /** 店主が配信停止フォームで任意入力した一言 */
+  optOutFeedback?: string;
+  /** 配信停止が記録された日時（ISO） */
+  optedOutAt?: string;
   /** 管理者画面用: プレビューURLの閲覧回数（サーバーで加算） */
   viewCount?: number;
   /** 検閲プレビュー編集で保存した追加CSS（data-pe セレクタ） */

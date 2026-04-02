@@ -1,7 +1,13 @@
-import type { QueueTarget, DashboardItem } from '../types';
+import type { QueueTarget, DashboardItem, OutreachPhase } from '../types';
 
 const QUEUE_KEY = 'webpage-queue';
 const DASHBOARD_KEY = 'webpage-dashboard';
+
+function makeUnsubscribeToken(): string {
+  const a = new Uint8Array(24);
+  crypto.getRandomValues(a);
+  return Array.from(a, (b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function getQueue(): QueueTarget[] {
   try {
@@ -51,6 +57,7 @@ export function addToDashboard(item: Omit<DashboardItem, 'id' | 'createdAt'>): D
     ...item,
     id: `d-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     createdAt: new Date().toISOString(),
+    unsubscribeToken: item.unsubscribeToken ?? makeUnsubscribeToken(),
   };
   list.unshift(newItem);
   setDashboard(list);
@@ -58,17 +65,54 @@ export function addToDashboard(item: Omit<DashboardItem, 'id' | 'createdAt'>): D
 }
 
 export function updateDashboardStatus(id: string, status: DashboardItem['status']): void {
-  const list = getDashboard().map((x) => (x.id === id ? { ...x, status } : x));
+  const list = getDashboard().map((x) => {
+    if (x.id !== id) return x;
+    const next: DashboardItem = { ...x, status };
+    if (status === 'approved' && !next.unsubscribeToken) {
+      next.unsubscribeToken = makeUnsubscribeToken();
+    }
+    if (status === 'email_sent') {
+      if (!next.outreachPhase) next.outreachPhase = 'sent';
+      if (!next.unsubscribeToken) next.unsubscribeToken = makeUnsubscribeToken();
+    }
+    return next;
+  });
   setDashboard(list);
 }
 
 export function updateDashboardItem(
   id: string,
   patch: Partial<
-    Pick<DashboardItem, 'dmBody' | 'content' | 'seo' | 'previewEditCss' | 'contentVariants'>
+    Pick<
+      DashboardItem,
+      | 'dmBody'
+      | 'content'
+      | 'seo'
+      | 'previewEditCss'
+      | 'contentVariants'
+      | 'outreachPhase'
+      | 'sleepUntil'
+      | 'unsubscribeToken'
+    >
   >
 ): void {
   const list = getDashboard().map((x) => (x.id === id ? { ...x, ...patch } : x));
+  setDashboard(list);
+}
+
+export function updateDashboardOutreachPhase(id: string, outreachPhase: OutreachPhase): void {
+  const list = getDashboard().map((x) => {
+    if (x.id !== id) return x;
+    const next: DashboardItem = { ...x, outreachPhase };
+    if (outreachPhase === 'sleep') {
+      const u = new Date();
+      u.setMonth(u.getMonth() + 3);
+      next.sleepUntil = u.toISOString();
+    } else {
+      next.sleepUntil = undefined;
+    }
+    return next;
+  });
   setDashboard(list);
 }
 
@@ -83,6 +127,11 @@ export function duplicateDashboardItem(id: string, personalizationLabel?: string
   newItem.status = 'pending';
   newItem.personalizationLabel = personalizationLabel?.trim() || undefined;
   newItem.viewCount = 0;
+  newItem.unsubscribeToken = makeUnsubscribeToken();
+  newItem.outreachPhase = undefined;
+  newItem.sleepUntil = undefined;
+  newItem.optOutFeedback = undefined;
+  newItem.optedOutAt = undefined;
   list.unshift(newItem);
   setDashboard(list);
   return newItem;

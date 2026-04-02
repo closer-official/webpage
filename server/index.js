@@ -6,7 +6,7 @@ import express from 'express';
 import cors from 'cors';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual, randomBytes } from 'node:crypto';
 import {
   isValidLpSiteKeyFormat,
   verifyPasswordScrypt,
@@ -1742,6 +1742,14 @@ app.post('/api/process-next', async (req, res) => {
 });
 
 // ---------- ダッシュボード ----------
+const OUTREACH_PHASES = new Set(['sent', 'appointment', 'won', 'lost', 'sleep']);
+
+function addMonthsIso(fromDate, months) {
+  const d = new Date(fromDate);
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString();
+}
+
 app.get('/api/dashboard', async (req, res) => {
   res.json(await store.getDashboard());
 });
@@ -1751,11 +1759,28 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body.dmBody !== undefined) dashboard[i].dmBody = req.body.dmBody;
-  if (req.body.status === 'email_sent') dashboard[i].status = 'email_sent';
+  if (req.body.status === 'email_sent') {
+    dashboard[i].status = 'email_sent';
+    if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'sent';
+    if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
+  }
   if (req.body.content !== undefined) dashboard[i].content = req.body.content;
   if (req.body.seo !== undefined) dashboard[i].seo = req.body.seo;
   if (req.body.previewEditCss !== undefined) dashboard[i].previewEditCss = req.body.previewEditCss;
   if (req.body.contentVariants !== undefined) dashboard[i].contentVariants = req.body.contentVariants;
+  if (req.body.outreachPhase !== undefined) {
+    if (dashboard[i].status !== 'email_sent') {
+      return res.status(400).json({ error: '送信済みの案件のみフェーズを変更できます。' });
+    }
+    const p = String(req.body.outreachPhase);
+    if (!OUTREACH_PHASES.has(p)) return res.status(400).json({ error: 'Invalid outreachPhase' });
+    dashboard[i].outreachPhase = p;
+    if (p === 'sleep') {
+      dashboard[i].sleepUntil = addMonthsIso(new Date(), 3);
+    } else {
+      dashboard[i].sleepUntil = undefined;
+    }
+  }
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
@@ -1775,9 +1800,40 @@ app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   newItem.status = 'pending';
   newItem.personalizationLabel = label || undefined;
   newItem.viewCount = 0;
+  newItem.unsubscribeToken = randomBytes(24).toString('hex');
+  newItem.outreachPhase = undefined;
+  newItem.sleepUntil = undefined;
+  newItem.optOutFeedback = undefined;
+  newItem.optedOutAt = undefined;
   dashboard.unshift(newItem);
   await store.setDashboard(dashboard);
   res.status(201).json(newItem);
+});
+
+/** 店主向け：案内メールの配信停止（トークン照合・フェーズを失注に） */
+app.post('/api/outreach/opt-out', async (req, res) => {
+  try {
+    const token = String(req.body?.token || '').trim();
+    const feedback = String(req.body?.feedback || '').trim().slice(0, 2000);
+    if (!token) return res.status(400).json({ error: 'トークンが必要です。' });
+    const dashboard = await store.getDashboard();
+    const idx = dashboard.findIndex((d) => d.unsubscribeToken === token);
+    if (idx === -1) return res.status(404).json({ error: 'リンクが無効か、すでに処理済みです。' });
+    const row = dashboard[idx];
+    if (!['approved', 'email_sent'].includes(row.status)) {
+      return res.status(400).json({ error: 'このリンクは現在ご利用いただけません。' });
+    }
+    row.status = 'email_sent';
+    row.outreachPhase = 'lost';
+    row.sleepUntil = undefined;
+    row.optOutFeedback = feedback || undefined;
+    row.optedOutAt = new Date().toISOString();
+    await store.setDashboard(dashboard);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[outreach/opt-out]', e);
+    res.status(500).json({ error: '処理に失敗しました。時間をおいて再度お試しください。' });
+  }
 });
 
 app.post('/api/dashboard/:id/approve', async (req, res) => {
@@ -1785,6 +1841,7 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'approved';
+  if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

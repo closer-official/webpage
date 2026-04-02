@@ -1,20 +1,30 @@
 import { useCallback, useState } from 'react';
-import type { DashboardItem } from '../types';
+import type { DashboardItem, OutreachPhase } from '../types';
 import { TEMPLATES } from '../lib/templates';
 import { buildHtml } from '../lib/buildHtml';
-import { updateDashboardStatus, updateDashboardItem } from '../lib/queueStorage';
-import { api, isApiAvailable, getPreviewPublicUrl } from '../lib/api';
-import type { DashboardItem as DItem } from '../types';
+import { updateDashboardStatus, updateDashboardItem, updateDashboardOutreachPhase } from '../lib/queueStorage';
+import { api, isApiAvailable, getPreviewPublicUrl, getMailPreferencePublicUrl } from '../lib/api';
 import { injectPreviewEditCss } from '../lib/previewEditMarkers';
 import { ReviewPreviewEditor } from './ReviewPreviewEditor';
 
 type DashboardItemAny = DashboardItem & { contentVariants?: { templateId: string; html: string }[] };
+
+const OUTREACH_PHASE_ORDER: OutreachPhase[] = ['sent', 'appointment', 'won', 'sleep', 'lost'];
+const OUTREACH_PHASE_LABELS: Record<OutreachPhase, string> = {
+  sent: '送信済・フォロー中',
+  appointment: 'アポ・デモ検討中',
+  won: '成約・導入',
+  sleep: 'スリープ（3か月送信見送り）',
+  lost: '失注',
+};
 
 interface ReviewDashboardProps {
   items: DashboardItemAny[];
   onRefresh: () => void;
   useApi?: boolean;
 }
+
+type CardOptions = { pipeline?: boolean };
 
 export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardProps) {
   const [variantIndex, setVariantIndex] = useState<Record<string, number>>({});
@@ -54,11 +64,32 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
       if (useApi && isApiAvailable()) {
         api.markEmailSent(id).then(() => onRefresh());
       } else {
-        updateDashboardStatus(id, 'email_sent' as DItem['status']);
+        updateDashboardStatus(id, 'email_sent');
         onRefresh();
       }
     },
     [onRefresh, useApi]
+  );
+
+  const handleOutreachPhaseChange = useCallback(
+    (id: string, phase: OutreachPhase) => {
+      if (useApi && isApiAvailable()) {
+        api.patchDashboardItem(id, { outreachPhase: phase }).then(() => onRefresh());
+      } else {
+        updateDashboardOutreachPhase(id, phase);
+        onRefresh();
+      }
+    },
+    [onRefresh, useApi]
+  );
+
+  const handleAppendOptOutToDm = useCallback(
+    (id: string, dmBody: string, url: string) => {
+      if (!url.trim() || dmBody.includes(url)) return;
+      const addition = `\n\nご案内メールの配信を停止されたい場合は、下記からお手続きいただけます（ひとことのご感想・ご意見は任意です）。\n${url}\n`;
+      handleDmChange(id, dmBody + addition);
+    },
+    [handleDmChange]
   );
 
   const handleMailto = useCallback((dmBody: string, shopName: string) => {
@@ -67,7 +98,6 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   }, []);
 
-  /** 生成されたLPのHTMLを別タブで開く（確認用・編集CSS反映） */
   const handleOpenPreviewInNewTab = useCallback((html: string, previewCss?: string) => {
     const merged = injectPreviewEditCss(html, previewCss);
     const blob = new Blob([merged], { type: 'text/html;charset=utf-8' });
@@ -80,7 +110,13 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
   const approved = items.filter((i) => i.status === 'approved');
   const emailSent = items.filter((i) => i.status === 'email_sent');
 
-  const renderCard = (item: DashboardItemAny, showApproveActions: boolean, showEmailActions: boolean) => {
+  const renderCard = (item: DashboardItemAny, showApproveActions: boolean, showEmailActions: boolean, opts?: CardOptions) => {
+    const pipeline = opts?.pipeline ?? false;
+    const showOutreachTools = showEmailActions || pipeline;
+    const token = item.unsubscribeToken ?? '';
+    const prefUrl = token ? getMailPreferencePublicUrl(token) : '';
+    const effectivePhase: OutreachPhase = item.outreachPhase ?? 'sent';
+
     const variants = item.contentVariants && item.contentVariants.length > 0 ? item.contentVariants : null;
     const currentVariant = variantIndex[item.id] ?? 0;
     const html = variants
@@ -95,140 +131,220 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
     const s = item.researched.signals;
     return (
       <div key={item.id} className="review-card">
-                <div className="review-col review-left">
-                  <h4>店舗情報（実在確認用）</h4>
-                  <p className="shop-name">{item.researched.name}</p>
-                  <p className="shop-address">{item.researched.address}</p>
-                  {s.mapsUrl && (
-                    <a href={s.mapsUrl} target="_blank" rel="noopener noreferrer" className="link-maps">
-                      Google Maps で確認
-                    </a>
-                  )}
-                  <div className="signals">
-                    {s.userRatingsTotal != null && (
-                      <span>レビュー {s.userRatingsTotal} 件</span>
-                    )}
-                    {s.rating != null && <span>{s.rating}★</span>}
-                    {s.hasOpeningHours && <span>営業時間あり</span>}
-                    {s.hasPhoto && <span>写真あり</span>}
-                    {s.needsVerification && <span className="badge-warn">要確認</span>}
-                  </div>
-                </div>
-                <div className="review-col review-center">
-                  <h4>LPプレビュー</h4>
-                  {item.personalizationLabel && (
-                    <p className="review-personal-badge" aria-label="個別案用">
-                      個別: {item.personalizationLabel}
-                    </p>
-                  )}
-                  {variants && variants.length > 1 && (
-                    <select
-                      className="variant-select"
-                      value={currentVariant}
-                      onChange={(e) =>
-                        setVariantIndex((prev) => ({ ...prev, [item.id]: Number(e.target.value) }))
-                      }
-                    >
-                      {variants.map((v, idx) => (
-                        <option key={v.templateId} value={idx}>
-                          案{idx + 1}（{(v.templateId as string) === 'bakery' ? 'cafe_tea' : v.templateId}）
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  <button
-                    type="button"
-                    className="small"
-                    onClick={() => handleOpenPreviewInNewTab(html, item.previewEditCss)}
-                    style={{ marginBottom: 8 }}
-                  >
-                    このページを別タブで開く
-                  </button>
-                  <p className="review-preview-note" style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#64748b' }}>
-                    <strong>編集</strong>は下の「<strong>プレビューを編集</strong>」から行います（別タブ・共有URLの表示画面には編集ボタンはありません）。
-                  </p>
-                  {useApi && isApiAvailable() && (
-                    <div className="review-share-url" style={{ marginBottom: 12 }}>
-                      <label className="label-text" style={{ display: 'block', marginBottom: 4 }}>
-                        共有用URL（スマホ・他端末で開けます）
-                      </label>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <input
-                          type="text"
-                          readOnly
-                          value={getPreviewPublicUrl(item.id)}
-                          className="small"
-                          style={{ flex: '1 1 200px', minWidth: 0, fontSize: '0.8rem' }}
-                        />
-                        <button
-                          type="button"
-                          className="small"
-                          onClick={() => {
-                            navigator.clipboard.writeText(getPreviewPublicUrl(item.id));
-                          }}
-                        >
-                          コピー
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <ReviewPreviewEditor
-                    itemId={item.id}
-                    content={item.content}
-                    seo={item.seo}
-                    templateId={item.templateId}
-                    previewEditCss={item.previewEditCss}
-                    contentVariants={variants || undefined}
-                    variantIndex={currentVariant}
-                    useApi={useApi}
-                    styleOverrides={item.researched.styleOverrides}
-                    onSaved={onRefresh}
-                  />
-                </div>
-                <div className="review-col review-right">
-                  <h4>DM文面</h4>
-                  <textarea
-                    className="dm-textarea"
-                    value={item.dmBody}
-                    onChange={(e) => handleDmChange(item.id, e.target.value)}
-                    placeholder="DM文面を入力（手動で追記するか、別途生成してください）"
-                    rows={8}
-                  />
-                  <button
-                    type="button"
-                    className="small"
-                    onClick={() => handleCopyDm(item.dmBody)}
-                    disabled={!item.dmBody.trim()}
-                  >
-                    コピー
-                  </button>
-                  {showEmailActions && (
-                    <>
-                      <button
-                        type="button"
-                        className="small primary"
-                        onClick={() => handleMailto(item.dmBody, item.researched.name)}
-                        disabled={!item.dmBody.trim()}
-                      >
-                        メール送信（mailto）
-                      </button>
-                      <button type="button" className="small" onClick={() => handleMarkEmailSent(item.id)}>
-                        送信済み
-                      </button>
-                    </>
-                  )}
-                  {showApproveActions && (
-                    <div className="review-actions">
-                      <button type="button" className="primary" onClick={() => handleStatus(item.id, 'approved')}>
-                        OK
-                      </button>
-                      <button type="button" className="danger" onClick={() => handleStatus(item.id, 'rejected')}>
-                        NG
-                      </button>
-                    </div>
-                  )}
-                </div>
+        <div className="review-col review-left">
+          <h4>店舗情報（実在確認用）</h4>
+          <p className="shop-name">{item.researched.name}</p>
+          <p className="shop-address">{item.researched.address}</p>
+          {s.mapsUrl && (
+            <a href={s.mapsUrl} target="_blank" rel="noopener noreferrer" className="link-maps">
+              Google Maps で確認
+            </a>
+          )}
+          <div className="signals">
+            {s.userRatingsTotal != null && <span>レビュー {s.userRatingsTotal} 件</span>}
+            {s.rating != null && <span>{s.rating}★</span>}
+            {s.hasOpeningHours && <span>営業時間あり</span>}
+            {s.hasPhoto && <span>写真あり</span>}
+            {s.needsVerification && <span className="badge-warn">要確認</span>}
+          </div>
+        </div>
+        <div className="review-col review-center">
+          <h4>LPプレビュー</h4>
+          {item.personalizationLabel && (
+            <p className="review-personal-badge" aria-label="個別案用">
+              個別: {item.personalizationLabel}
+            </p>
+          )}
+          {variants && variants.length > 1 && (
+            <select
+              className="variant-select"
+              value={currentVariant}
+              onChange={(e) => setVariantIndex((prev) => ({ ...prev, [item.id]: Number(e.target.value) }))}
+            >
+              {variants.map((v, idx) => (
+                <option key={v.templateId} value={idx}>
+                  案{idx + 1}（{(v.templateId as string) === 'bakery' ? 'cafe_tea' : v.templateId}）
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            type="button"
+            className="small"
+            onClick={() => handleOpenPreviewInNewTab(html, item.previewEditCss)}
+            style={{ marginBottom: 8 }}
+          >
+            このページを別タブで開く
+          </button>
+          <p className="review-preview-note" style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#64748b' }}>
+            <strong>編集</strong>は下の「<strong>プレビューを編集</strong>」から行います（別タブ・共有URLの表示画面には編集ボタンはありません）。
+          </p>
+          {useApi && isApiAvailable() && (
+            <div className="review-share-url" style={{ marginBottom: 12 }}>
+              <label className="label-text" style={{ display: 'block', marginBottom: 4 }}>
+                共有用URL（スマホ・他端末で開けます）
+              </label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  readOnly
+                  value={getPreviewPublicUrl(item.id)}
+                  className="small"
+                  style={{ flex: '1 1 200px', minWidth: 0, fontSize: '0.8rem' }}
+                />
+                <button
+                  type="button"
+                  className="small"
+                  onClick={() => {
+                    navigator.clipboard.writeText(getPreviewPublicUrl(item.id));
+                  }}
+                >
+                  コピー
+                </button>
               </div>
+            </div>
+          )}
+          <ReviewPreviewEditor
+            itemId={item.id}
+            content={item.content}
+            seo={item.seo}
+            templateId={item.templateId}
+            previewEditCss={item.previewEditCss}
+            contentVariants={variants || undefined}
+            variantIndex={currentVariant}
+            useApi={useApi}
+            styleOverrides={item.researched.styleOverrides}
+            onSaved={onRefresh}
+          />
+        </div>
+        <div className="review-col review-right">
+          <h4>DM文面</h4>
+          <textarea
+            className="dm-textarea"
+            value={item.dmBody}
+            onChange={(e) => handleDmChange(item.id, e.target.value)}
+            placeholder="DM文面を入力（手動で追記するか、別途生成してください）"
+            rows={8}
+          />
+          <button
+            type="button"
+            className="small"
+            onClick={() => handleCopyDm(item.dmBody)}
+            disabled={!item.dmBody.trim()}
+          >
+            コピー
+          </button>
+          {showOutreachTools && (
+            <div
+              className="review-outreach-tools"
+              style={{
+                marginTop: 12,
+                paddingTop: 12,
+                borderTop: '1px solid rgba(148, 163, 184, 0.35)',
+              }}
+            >
+              <p className="label-text" style={{ margin: '0 0 6px', fontSize: '0.8rem', color: '#64748b' }}>
+                店主向け・案内の配信停止リンク（メール本文に貼り付け）
+              </p>
+              {prefUrl ? (
+                <>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+                    <input
+                      type="text"
+                      readOnly
+                      value={prefUrl}
+                      className="small"
+                      style={{ flex: '1 1 200px', minWidth: 0, fontSize: '0.78rem' }}
+                    />
+                    <button type="button" className="small" onClick={() => navigator.clipboard.writeText(prefUrl)}>
+                      コピー
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className="small"
+                    onClick={() => handleAppendOptOutToDm(item.id, item.dmBody, prefUrl)}
+                  >
+                    DM末尾に配信停止文とURLを挿入
+                  </button>
+                </>
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>OK承認後にリンクが利用できます。</p>
+              )}
+            </div>
+          )}
+          {pipeline && (
+            <div style={{ marginTop: 14 }}>
+              <label className="label-text" style={{ display: 'block', marginBottom: 6, fontSize: '0.82rem' }}>
+                送信後の状況（フェーズ）
+              </label>
+              <select
+                className="variant-select"
+                style={{ width: '100%', maxWidth: '100%' }}
+                value={effectivePhase}
+                onChange={(e) => handleOutreachPhaseChange(item.id, e.target.value as OutreachPhase)}
+              >
+                {OUTREACH_PHASE_ORDER.map((p) => (
+                  <option key={p} value={p}>
+                    {OUTREACH_PHASE_LABELS[p]}
+                  </option>
+                ))}
+              </select>
+              {effectivePhase === 'sleep' && item.sleepUntil && (
+                <p style={{ margin: '8px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                  再送の目安：{new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' })} 以降
+                </p>
+              )}
+              {effectivePhase === 'lost' && item.optedOutAt && (
+                <p style={{ margin: '8px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                  失注記録：{new Date(item.optedOutAt).toLocaleString('ja-JP')}
+                </p>
+              )}
+              {effectivePhase === 'lost' && item.optOutFeedback && (
+                <p
+                  style={{
+                    margin: '6px 0 0',
+                    fontSize: '0.8rem',
+                    color: '#334155',
+                    padding: '8px 10px',
+                    background: 'rgba(241, 245, 249, 0.9)',
+                    borderRadius: 8,
+                  }}
+                >
+                  <strong>店主からの一言（任意）：</strong>
+                  {item.optOutFeedback}
+                </p>
+              )}
+            </div>
+          )}
+          {showEmailActions && (
+            <>
+              <button
+                type="button"
+                className="small primary"
+                onClick={() => handleMailto(item.dmBody, item.researched.name)}
+                disabled={!item.dmBody.trim()}
+                style={{ marginTop: 10 }}
+              >
+                メール送信（mailto）
+              </button>
+              <button type="button" className="small" onClick={() => handleMarkEmailSent(item.id)}>
+                送信済み
+              </button>
+            </>
+          )}
+          {showApproveActions && (
+            <div className="review-actions">
+              <button type="button" className="primary" onClick={() => handleStatus(item.id, 'approved')}>
+                OK
+              </button>
+              <button type="button" className="danger" onClick={() => handleStatus(item.id, 'rejected')}>
+                NG
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -236,7 +352,9 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
     <div className="panel review-dashboard">
       <h2>検閲ダッシュボード</h2>
       <p className="hint">
-        左で店舗を実在確認し、中央でLPを確認（3案の場合は切り替え可）、右でDM文面を確認してください。OK → メール送信 → 送信済み の順で操作します。
+        左で店舗を実在確認し、中央でLPを確認（3案の場合は切り替え可）、右でDM文面を確認してください。OK → メール送信 →
+        送信済みの順で操作します。送信済み以降は<strong>フェーズ</strong>を更新し、店主にはメール内の
+        <strong>配信停止リンク</strong>から停止・ひとことフィードバック（任意）を受け取れます（停止後は自動で失注に移ります）。
         <strong>実在確認のため、必ず Google Maps のリンクから店舗をご確認ください。</strong>
       </p>
       {pending.length === 0 && approved.length === 0 && emailSent.length === 0 ? (
@@ -256,10 +374,20 @@ export function ReviewDashboard({ items, onRefresh, useApi }: ReviewDashboardPro
             </div>
           )}
           {emailSent.length > 0 && (
-            <div className="review-list review-list-sent">
-              <h3>送信済み</h3>
-              {emailSent.map((item) => renderCard(item, false, false))}
-            </div>
+            <>
+              {OUTREACH_PHASE_ORDER.map((phase) => {
+                const block = emailSent.filter((i) => (i.outreachPhase ?? 'sent') === phase);
+                if (block.length === 0) return null;
+                return (
+                  <div key={phase} className="review-list review-list-sent">
+                    <h3>
+                      送信済み — {OUTREACH_PHASE_LABELS[phase]}（{block.length}件）
+                    </h3>
+                    {block.map((item) => renderCard(item, false, false, { pipeline: true }))}
+                  </div>
+                );
+              })}
+            </>
           )}
         </>
       )}

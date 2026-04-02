@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { analyzePlace, generateDmBody } from './gemini.js';
 import { buildHtml } from './buildHtml.js';
 import { resolveEffectiveCanonicalUrl } from './canonical.js';
@@ -163,6 +164,7 @@ export async function processOne(queueItem, genOptions) {
     dmBody,
     status: 'pending',
     createdAt: new Date().toISOString(),
+    unsubscribeToken: randomBytes(24).toString('hex'),
   };
   return dashboardItem;
 }

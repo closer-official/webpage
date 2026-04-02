@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>ご案内メールの配信について</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f1eb;
+        --paper: #fffdf9;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --line: #d6d3cd;
+        --accent: #0d9488;
+        --accent-hover: #0f766e;
+        --danger: #b91c1c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+        background: radial-gradient(1200px 600px at 10% -10%, rgba(13, 148, 136, 0.08), transparent),
+          radial-gradient(900px 500px at 100% 20%, rgba(180, 160, 120, 0.12), transparent), var(--bg);
+        color: var(--ink);
+        line-height: 1.65;
+        padding: 2rem 1rem 3rem;
+      }
+      .wrap {
+        max-width: 32rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-family: 'Shippori Mincho', serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin: 0 0 0.75rem;
+        letter-spacing: 0.02em;
+      }
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.35rem 1.25rem 1.5rem;
+        box-shadow: 0 12px 40px rgba(28, 25, 23, 0.06);
+      }
+      p.lead {
+        margin: 0 0 1.1rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      label.block {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 0.35rem;
+      }
+      textarea {
+        width: 100%;
+        min-height: 5.5rem;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+        background: #fff;
+      }
+      textarea:focus {
+        outline: 2px solid rgba(13, 148, 136, 0.35);
+        outline-offset: 1px;
+      }
+      .check-row {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        margin: 1.1rem 0 1rem;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+      .check-row input {
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+      }
+      button.submit {
+        width: 100%;
+        margin-top: 0.25rem;
+        padding: 0.85rem 1rem;
+        font: inherit;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      button.submit:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+      button.submit:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .msg {
+        margin-top: 1rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 10px;
+        font-size: 0.88rem;
+      }
+      .msg.err {
+        background: #fef2f2;
+        color: var(--danger);
+        border: 1px solid #fecaca;
+      }
+      .msg.ok {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+      .foot {
+        margin-top: 1.5rem;
+        text-align: center;
+        font-size: 0.78rem;
+        color: #78716c;
+      }
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div id="view-form">
+        <h1>ご案内メールの配信について</h1>
+        <div class="card">
+          <p class="lead">
+            このたびはお時間をいただき、ありがとうございました。もしご案内のメールが不要でしたら、下のボタンから配信を停止できます。お手数をおかけし申し訳ございません。またのご縁がございましたら、よろしくお願いいたします。
+          </p>
+          <p class="lead" style="margin-bottom: 1rem">
+            よろしければ、差し支えなければ「何が合わなかったか」を一言だけ教えていただけると、今後の改善に役立ちます（任意です。空欄のままでも停止できます）。
+          </p>
+          <form id="opt-out-form" novalidate>
+            <label class="block" for="feedback">ご感想・ご意見（任意）</label>
+            <textarea
+              id="feedback"
+              name="feedback"
+              maxlength="2000"
+              placeholder="例：今は予算の都合で／別の業者と進めている など"
+            ></textarea>
+            <div class="check-row">
+              <input type="checkbox" id="confirm" name="confirm" required />
+              <label for="confirm">配信停止の内容を理解しました。案内メールの配信を停止します。</label>
+            </div>
+            <button type="submit" class="submit" id="submit-btn" disabled>配信を停止する</button>
+            <div id="form-msg" class="msg err hidden" role="alert"></div>
+          </form>
+        </div>
+        <p class="foot">ご不明点は、ご案内いただいた連絡先までお問い合わせください。</p>
+      </div>
+      <div id="view-done" class="hidden">
+        <h1>お手続きを承りました</h1>
+        <div class="card">
+          <p class="lead" style="color: var(--ink)">
+            配信の停止を記録しました。ご連絡いただきありがとうございました。またの機会がございましたら、よろしくお願いいたします。
+          </p>
+        </div>
+      </div>
+      <div id="view-bad" class="hidden">
+        <h1>ページを表示できません</h1>
+        <div class="card">
+          <p class="lead" style="color: var(--ink)">
+            リンクが正しくないか、すでに処理が完了している可能性があります。お手数ですが、メール本文のリンクを再度ご確認ください。
+          </p>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var token = (params.get('t') || '').trim();
+        var form = document.getElementById('opt-out-form');
+        var feedback = document.getElementById('feedback');
+        var confirm = document.getElementById('confirm');
+        var submitBtn = document.getElementById('submit-btn');
+        var formMsg = document.getElementById('form-msg');
+        var viewForm = document.getElementById('view-form');
+        var viewDone = document.getElementById('view-done');
+        var viewBad = document.getElementById('view-bad');
+
+        if (!token) {
+          viewForm.classList.add('hidden');
+          viewBad.classList.remove('hidden');
+          return;
+        }
+
+        function syncSubmit() {
+          submitBtn.disabled = !confirm.checked;
+        }
+        confirm.addEventListener('change', syncSubmit);
+        syncSubmit();
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          formMsg.classList.add('hidden');
+          if (!confirm.checked) {
+            formMsg.textContent = '配信停止には、確認のチェックが必要です。';
+            formMsg.classList.remove('hidden');
+            return;
+          }
+          submitBtn.disabled = true;
+          var body = JSON.stringify({
+            token: token,
+            feedback: (feedback.value || '').trim(),
+          });
+          fetch('/api/outreach/opt-out', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (x.ok && x.j && x.j.ok) {
+                viewForm.classList.add('hidden');
+                viewDone.classList.remove('hidden');
+                return;
+              }
+              var err = (x.j && x.j.error) || '送信に失敗しました。時間をおいて再度お試しください。';
+              formMsg.textContent = err;
+              formMsg.classList.remove('hidden');
+              submitBtn.disabled = false;
+            })
+            .catch(function () {
+              formMsg.textContent = '通信に失敗しました。通信環境をご確認のうえ、再度お試しください。';
+              formMsg.classList.remove('hidden');
+              submitBtn.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>

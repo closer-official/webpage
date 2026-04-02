@@ -137,6 +137,13 @@ export function getPreviewPublicUrl(id: string): string {
   return `${origin}/api/preview/${encodeURIComponent(id)}`;
 }
 
+/** 店主向け・案内メールの配信停止ページ（トークン付き） */
+export function getMailPreferencePublicUrl(token: string): string {
+  if (typeof window === 'undefined' || !token) return '';
+  const origin = BASE && BASE.startsWith('http') ? new URL(BASE).origin : window.location.origin;
+  return `${origin}/mail-preference.html?t=${encodeURIComponent(token)}`;
+}
+
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const { headers: optHeaders, credentials: optCred, ...rest } = options || {};
   const res = await fetch(`${BASE}${path}`, {
