@@ -1,8 +1,30 @@
 import { useState, useCallback, useEffect } from 'react';
 import { isApiAvailable, api } from './lib/api';
-import { OperatorWorkbench } from './OperatorWorkbench';
 import './App.css';
 import './App.operator.css';
+
+const OPS_LINKS: { href: string; title: string; desc: string }[] = [
+  {
+    href: '/admin/template-worker-basic.html',
+    title: '店舗ドラフト（基本情報のみ）',
+    desc: 'cafe_1 など。店名・住所・電話・地図・SNS 中心のたたき台。',
+  },
+  {
+    href: '/admin/template-worker.html',
+    title: '店舗ドラフト編集（作業者用）',
+    desc: '全テンプレの文言・写真URL・SEO などフル編集。',
+  },
+  {
+    href: '/admin/outreach-phases.html',
+    title: '送付・フェーズ管理',
+    desc: '送信後のフェーズ変更・配信停止用URLのコピー（ダッシュボード案件）。',
+  },
+  {
+    href: '/mail-preference.html',
+    title: '配信停止ページ（店主向け・確認用）',
+    desc: '本番はメールに記載の ?t= 付きURLから開きます。トークンなしでは画面デモのみ。',
+  },
+];
 
 function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -96,12 +118,23 @@ function App() {
         <div className="app-header-workbench-row">
           <h1>Closer 運営</h1>
           <p className="operator-hub-lead">
-            <strong>メインの営業フロー</strong>で地域・業種から候補を集め、LP案・DM案まで進めます。1店ずつの手動キュー・お客様向けページ・テンプレ管理は、画面内のリンクから切り替えられます。
+            作業は次の4つから開きます。テンプレのたたき台・送付フェーズ・店主向け配信停止の確認に使い分けてください。
           </p>
         </div>
       </header>
       <main className="operator-main-shell">
-        <OperatorWorkbench />
+        <div className="operator-hub">
+          <ul className="operator-hub-grid">
+            {OPS_LINKS.map((link) => (
+              <li key={link.href}>
+                <a className="operator-hub-card" href={link.href}>
+                  <span className="operator-hub-card-title">{link.title}</span>
+                  <span className="operator-hub-card-desc">{link.desc}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
     </div>
   );

@@ -1088,17 +1088,8 @@ ${cafe1ShopLocationsHtml()}
     String(instagramUrl || '').trim() || String(content.footerInstagramUrl || '').trim();
   const snsLineUrl = String(lineUrl || '').trim() || String(content.footerLineUrl || '').trim();
   const snsLinksEnabled = instagramLine !== false && !!(snsInstagramUrl || snsLineUrl);
-  if (snsLinksEnabled) {
-    if (tid === 'cafe_1') {
-      extraSections += `
-    <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
-      <div class="section-body">
-        <h2 id="sns-title" class="wo-sec-heading">フォロー・お問い合わせ</h2>
-        <p class="wo-sns-caption wo-sns-caption--c1-jump">Instagram・LINEはページ下部のフッターからお開きください。</p>
-        <p class="wo-sns-footer-jump-wrap"><a href="#site-footer" class="cta-btn wo-sns-footer-jump" aria-label="ページ下部のフッターへ移動">こちら</a></p>
-      </div>
-    </section>`;
-    } else if (tid === 'cafe_tea') {
+  if (snsLinksEnabled && tid !== 'cafe_1') {
+    if (tid === 'cafe_tea') {
       extraSections += `
     <section class="section wo-sec wo-sns-block"${extraMotionAttr} id="sns">
       <div class="section-body">
@@ -1133,7 +1124,7 @@ ${cafe1ShopLocationsHtml()}
           .map((it) => {
             const raw = String(it.postUrl || '').trim();
             const href = /^javascript:/i.test(raw) ? igPostHrefFallback : raw || igPostHrefFallback;
-            return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"><span class="c1-ig-feed-item-cta" aria-hidden="true">Instagramで見る</span></span></a>`;
+            return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="c1-ig-feed-item"><span class="c1-ig-feed-item-frame"><img src="${escapeHtml(it.imageUrl)}" alt="" loading="lazy"></span></a>`;
           })
           .join('')}</div>
       </div>

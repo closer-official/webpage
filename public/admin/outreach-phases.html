@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>送付・フェーズ管理 | Closer</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0c1220;
+        color: #e8edf5;
+        line-height: 1.55;
+      }
+      body {
+        margin: 0;
+        padding: 0 1rem 3rem;
+        box-sizing: border-box;
+      }
+      .app-head {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.25rem 0 0.75rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 0.35rem;
+      }
+      .sub {
+        color: #8b9cb3;
+        font-size: 0.86rem;
+        margin: 0 0 1rem;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .btn,
+      a.back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #3d5675;
+        background: #1c2940;
+        color: #e0f2fe;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      a.back {
+        border-color: #2a3b52;
+        background: #121a2e;
+      }
+      .btn:hover,
+      a.back:hover {
+        border-color: #38bdf8;
+        color: #fff;
+      }
+      .btn.small {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 0.78rem;
+      }
+      .btn.primary {
+        background: #0c4a6e;
+        border-color: #22d3ee;
+      }
+      .btn.danger {
+        border-color: #7f1d1d;
+        background: #450a0a;
+        color: #fecaca;
+      }
+      .err {
+        color: #fca5a5;
+        font-size: 0.88rem;
+        margin: 0 0 1rem;
+      }
+      .panel {
+        max-width: 1100px;
+        margin: 0 auto 1.25rem;
+        background: #121a2e;
+        border: 1px solid #2a3b52;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+      }
+      .panel h2 {
+        font-size: 0.95rem;
+        margin: 0 0 0.75rem;
+        color: #a5d8ff;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a3b52;
+      }
+      .row:last-child {
+        border-bottom: none;
+      }
+      @media (min-width: 720px) {
+        .row {
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.2fr);
+          align-items: start;
+        }
+      }
+      .shop-name {
+        font-weight: 700;
+        margin: 0 0 4px;
+      }
+      .muted {
+        color: #8b9cb3;
+        font-size: 0.8rem;
+        margin: 0;
+      }
+      select,
+      input[type='text'] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+        background: #0f172a;
+        color: #e8edf5;
+        font-size: 0.82rem;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .url-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .url-row input {
+        flex: 1 1 200px;
+        min-width: 0;
+        font-size: 0.72rem;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: #1e293b;
+        color: #94a3b8;
+      }
+      .feedback {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #0f172a;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #cbd5e1;
+      }
+      .empty {
+        color: #64748b;
+        font-size: 0.88rem;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-head">
+      <a class="back" href="/">← 運営トップ</a>
+      <h1>送付・フェーズ管理</h1>
+      <p class="sub">
+        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、送信後のフェーズをまとめて確認・更新します。店主向けの配信停止URLは各行からコピーできます。
+      </p>
+      <div class="toolbar">
+        <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
+      </div>
+      <p id="load-err" class="err" style="display: none"></p>
+    </div>
+    <div id="boards"></div>
+    <script>
+      (function () {
+        var PHASE_ORDER = ['sent', 'appointment', 'won', 'sleep', 'lost'];
+        var PHASE_LABELS = {
+          sent: '送信済・フォロー中',
+          appointment: 'アポ・デモ検討中',
+          won: '成約・導入',
+          sleep: 'スリープ（3か月送信見送り）',
+          lost: '失注',
+        };
+
+        function mailPrefUrl(token) {
+          if (!token) return '';
+          var o = window.location.origin;
+          return o + '/mail-preference.html?t=' + encodeURIComponent(token);
+        }
+
+        function el(tag, attrs, children) {
+          var e = document.createElement(tag);
+          if (attrs) {
+            Object.keys(attrs).forEach(function (k) {
+              if (k === 'text') e.textContent = attrs[k];
+              else if (k === 'html') e.innerHTML = attrs[k];
+              else e.setAttribute(k, attrs[k]);
+            });
+          }
+          (children || []).forEach(function (c) {
+            if (c) e.appendChild(c);
+          });
+          return e;
+        }
+
+        function showErr(msg) {
+          var p = document.getElementById('load-err');
+          p.style.display = msg ? 'block' : 'none';
+          p.textContent = msg || '';
+        }
+
+        async function apiJson(path, opts) {
+          var r = await fetch(path, Object.assign({ credentials: 'include' }, opts || {}));
+          var j = null;
+          try {
+            j = await r.json();
+          } catch (e) {}
+          if (!r.ok) {
+            var err = (j && j.error) || r.statusText || 'request failed';
+            throw new Error(err);
+          }
+          return j;
+        }
+
+        function render(items) {
+          var host = document.getElementById('boards');
+          host.innerHTML = '';
+
+          var pending = items.filter(function (i) {
+            return i.status === 'pending';
+          });
+          var approved = items.filter(function (i) {
+            return i.status === 'approved';
+          });
+          var sent = items.filter(function (i) {
+            return i.status === 'email_sent';
+          });
+
+          function renderRow(item, mode) {
+            var name = (item.researched && item.researched.name) || '（無題）';
+            var addr = (item.researched && item.researched.address) || '';
+            var row = el('div', { class: 'row' });
+
+            var col1 = el('div');
+            col1.appendChild(el('p', { class: 'shop-name', text: name }));
+            col1.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
+            col1.appendChild(el('span', { class: 'badge', text: 'ID: ' + item.id }));
+
+            var col2 = el('div');
+            var col3 = el('div', { class: 'actions' });
+
+            if (mode === 'pending') {
+              col2.appendChild(el('p', { class: 'muted', text: 'レビュー待ち' }));
+              col3.appendChild(
+                el(
+                  'button',
+                  { type: 'button', class: 'btn small primary', text: 'OK' },
+                  [],
+                ),
+              ).onclick = function () {
+                apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' })
+                  .then(load)
+                  .catch(function (e) {
+                    showErr(String(e.message || e));
+                  });
+              };
+              col3.appendChild(
+                el('button', { type: 'button', class: 'btn small danger', text: 'NG' }, []),
+              ).onclick = function () {
+                apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' })
+                  .then(load)
+                  .catch(function (e) {
+                    showErr(String(e.message || e));
+                  });
+              };
+            } else if (mode === 'approved') {
+              col2.appendChild(el('p', { class: 'muted', text: 'OK済・送信前' }));
+              col3.appendChild(
+                el('button', { type: 'button', class: 'btn small primary', text: '送信済みにする' }, []),
+              ).onclick = function () {
+                apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status: 'email_sent' }),
+                })
+                  .then(load)
+                  .catch(function (e) {
+                    showErr(String(e.message || e));
+                  });
+              };
+              var tok = item.unsubscribeToken || '';
+              if (tok) {
+                var u = mailPrefUrl(tok);
+                var ur = el('div', { class: 'url-row' });
+                ur.appendChild(
+                  el('input', { type: 'text', readonly: 'readonly', value: u }, []),
+                );
+                var cp = el('button', { type: 'button', class: 'btn small', text: 'URLコピー' }, []);
+                cp.onclick = function () {
+                  navigator.clipboard.writeText(u);
+                };
+                ur.appendChild(cp);
+                col2.appendChild(ur);
+              } else {
+                col2.appendChild(el('p', { class: 'muted', text: '配信停止URLは承認直後に発行されます。' }));
+              }
+            } else {
+              var eff = item.outreachPhase || 'sent';
+              var sel = el('select', {}, []);
+              PHASE_ORDER.forEach(function (p) {
+                var opt = el('option', { value: p, text: PHASE_LABELS[p] });
+                if (p === eff) opt.selected = true;
+                sel.appendChild(opt);
+              });
+              sel.onchange = function () {
+                var v = sel.value;
+                apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ outreachPhase: v }),
+                })
+                  .then(load)
+                  .catch(function (e) {
+                    showErr(String(e.message || e));
+                  });
+              };
+              col2.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
+              col2.appendChild(sel);
+              if (eff === 'sleep' && item.sleepUntil) {
+                col2.appendChild(
+                  el('p', {
+                    class: 'muted',
+                    text:
+                      '再送の目安: ' +
+                      new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
+                      ' 以降',
+                  }),
+                );
+              }
+              if (eff === 'lost' && item.optOutFeedback) {
+                col2.appendChild(
+                  el('div', { class: 'feedback', text: '店主の一言（任意）: ' + item.optOutFeedback }),
+                );
+              }
+              var tok2 = item.unsubscribeToken || '';
+              if (tok2) {
+                var u2 = mailPrefUrl(tok2);
+                var ur2 = el('div', { class: 'url-row' });
+                ur2.appendChild(el('input', { type: 'text', readonly: 'readonly', value: u2 }));
+                var cp2 = el('button', { type: 'button', class: 'btn small', text: 'URLコピー' });
+                cp2.onclick = function () {
+                  navigator.clipboard.writeText(u2);
+                };
+                ur2.appendChild(cp2);
+                col3.appendChild(ur2);
+              }
+            }
+
+            row.appendChild(col1);
+            row.appendChild(col2);
+            row.appendChild(col3);
+            return row;
+          }
+
+          function section(title, list, mode) {
+            var p = el('div', { class: 'panel' });
+            p.appendChild(el('h2', { text: title + '（' + list.length + '件）' }));
+            if (list.length === 0) {
+              p.appendChild(el('p', { class: 'empty', text: '該当なし' }));
+            } else {
+              list.forEach(function (item) {
+                p.appendChild(renderRow(item, mode));
+              });
+            }
+            return p;
+          }
+
+          host.appendChild(section('レビュー待ち', pending, 'pending'));
+          host.appendChild(section('OK済み（送信前）', approved, 'approved'));
+
+          var byPhase = {};
+          PHASE_ORDER.forEach(function (p) {
+            byPhase[p] = [];
+          });
+          sent.forEach(function (item) {
+            var ph = item.outreachPhase || 'sent';
+            if (!byPhase[ph]) byPhase[ph] = [];
+            byPhase[ph].push(item);
+          });
+          PHASE_ORDER.forEach(function (ph) {
+            var list = byPhase[ph] || [];
+            if (list.length === 0) return;
+            var p = el('div', { class: 'panel' });
+            p.appendChild(
+              el('h2', { text: '送信済み — ' + PHASE_LABELS[ph] + '（' + list.length + '件）' }),
+            );
+            list.forEach(function (item) {
+              p.appendChild(renderRow(item, 'sent'));
+            });
+            host.appendChild(p);
+          });
+        }
+
+        function load() {
+          showErr('');
+          fetch('/api/dashboard', { credentials: 'include' })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) {
+                throw new Error((x.j && x.j.error) || '一覧の取得に失敗しました');
+              }
+              render(Array.isArray(x.j) ? x.j : []);
+            })
+            .catch(function (e) {
+              showErr(e.message || String(e));
+              document.getElementById('boards').innerHTML = '';
+            });
+        }
+
+        document.getElementById('btn-refresh').onclick = load;
+        load();
+      })();
+    </script>
+  </body>
+</html>

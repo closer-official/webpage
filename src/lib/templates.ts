@@ -810,20 +810,39 @@ export const TEMPLATES: TemplateOption[] = [
   .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.7; color: var(--tp-text); }
   .page-wrapper.template-cafe_1 .c1-staff-post .wo-sec-prose p:first-child { margin-top: 0; }
   .page-wrapper.template-cafe_1 .wo-sns-block .wo-sns-caption { font-size: 0.98rem; line-height: 2; color: var(--tp-text); margin: 0 0 0.75rem; }
-  .page-wrapper.template-cafe_1 .wo-sns-caption--c1-jump { margin-bottom: 0.5rem; }
-  .page-wrapper.template-cafe_1 .wo-sns-footer-jump-wrap { margin: 0; }
-  .page-wrapper.template-cafe_1 .wo-sns-footer-jump { text-decoration: none; }
-  html:has(.page-wrapper.template-cafe_1) { scroll-behavior: smooth; }
   .page-wrapper.template-cafe_1 footer.footer-c1#site-footer { scroll-margin-top: 5.75rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-lede { font-size: 0.98rem; line-height: 2; color: var(--tp-text); margin: 0 0 0.75rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-actions { margin: 0 0 0.85rem; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-profile { display: inline-flex; align-items: center; font-size: 0.98rem; font-weight: 600; color: var(--tp-heading); text-decoration: none; border-bottom: 1px solid currentColor; }
   .page-wrapper.template-cafe_1 .c1-ig-feed-profile:hover { color: #c7161f; border-color: #c7161f; }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; margin-top: 0.35rem; }
+  /* ヒーローと同様：cover・角なし・トップの main ビジュアルに近い縦長（モバイルヒーローに寄せた 3:4） */
+  .page-wrapper.template-cafe_1 .c1-ig-feed-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 0.65rem;
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
   .page-wrapper.template-cafe_1 .c1-ig-feed-item { text-decoration: none; color: inherit; }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item-frame { position: relative; display: block; border-radius: 10px; overflow: hidden; border: 1px solid var(--tp-border); }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-  .page-wrapper.template-cafe_1 .c1-ig-feed-item-cta { position: absolute; left: 0; right: 0; bottom: 0; padding: 0.4rem 0.5rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-align: center; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,0.72)); }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-item-frame {
+    position: relative;
+    display: block;
+    border-radius: 0;
+    overflow: hidden;
+    border: none;
+    aspect-ratio: 3 / 4;
+    min-height: clamp(8rem, 26vh, 22rem);
+  }
+  .page-wrapper.template-cafe_1 .c1-ig-feed-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
   .page-wrapper.template-cafe_1 .footer-c1-nap { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--tp-border); }
   .page-wrapper.template-cafe_1 .footer-c1-nap-line { margin: 0.35rem 0; font-size: 0.82rem; line-height: 1.65; color: #333; }
   .page-wrapper.template-cafe_1 .footer-c1-nap-line a { color: #111; }
@@ -856,8 +875,16 @@ export const TEMPLATES: TemplateOption[] = [
     .page-wrapper.template-cafe_1 .c1-page-top { bottom: calc(9.2rem + env(safe-area-inset-bottom)); }
     .page-wrapper.template-cafe_1 .c1-menu-text-row { display: grid; grid-template-columns: 1fr auto; align-items: center; }
     .page-wrapper.template-cafe_1 .c1-menu-text-name { font-size: 1.03rem; }
-    .page-wrapper.template-cafe_1 .c1-ig-feed-grid { display: flex; overflow-x: auto; gap: 0.55rem; padding-bottom: 0.35rem; scroll-snap-type: x mandatory; }
-    .page-wrapper.template-cafe_1 .c1-ig-feed-item { flex: 0 0 42vw; scroll-snap-align: start; }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-grid {
+      display: flex;
+      overflow-x: auto;
+      gap: 0;
+      padding-bottom: 0;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-item { flex: 0 0 78vw; max-width: 20rem; scroll-snap-align: start; }
+    .page-wrapper.template-cafe_1 .c1-ig-feed-item-frame { aspect-ratio: 3 / 4; min-height: clamp(10rem, 42vw, 24rem); }
   }
   .page-wrapper.template-cafe_1 .c1-ig-embed-sec .c1-ig-embed-wrap { display: flex; justify-content: center; margin-top: 1rem; }
   .page-wrapper.template-cafe_1 [data-scroll-in].section-img-wrap { will-change: opacity, transform; }
