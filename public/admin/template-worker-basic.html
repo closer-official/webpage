@@ -301,10 +301,16 @@
 
         <div class="panel">
           <h2>調査用プロンプト（コピーして AI に渡す）</h2>
-          <p class="locked-note">返却JSONだけを貼り付け、各フィールドをこのフォームに転記してください。</p>
+          <p class="locked-note">AI が返した JSON を下の欄に貼り付けて「フォームに反映」すると入力欄へ流し込めます。</p>
           <textarea id="research-prompt" class="mono" readonly rows="12"></textarea>
           <div class="row-actions">
             <button type="button" class="btn" id="btn-copy-prompt">プロンプトをコピー</button>
+          </div>
+          <label style="margin-top: 14px">調査結果JSON（貼り付け）
+            <textarea id="paste-json" class="mono" rows="5" placeholder='{"siteName":"...", "mapEmbedUrl":"https://..."}'></textarea>
+          </label>
+          <div class="row-actions">
+            <button type="button" class="btn" id="btn-apply-json">フォームに反映</button>
           </div>
         </div>
 
@@ -546,10 +552,35 @@
           var t = document.getElementById('research-prompt').value;
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(t).then(
-              function () { showErr('save-msg', 'プロンプトをコピーしました'); },
+              function () {
+                showErr('save-err', '');
+                var el = document.getElementById('save-msg');
+                el.style.display = 'block';
+                el.textContent = 'プロンプトをコピーしました';
+              },
               function () { window.prompt('コピー:', t); },
             );
           } else window.prompt('コピー:', t);
+        };
+
+        document.getElementById('btn-apply-json').onclick = function () {
+          showErr('save-err', '');
+          var raw = document.getElementById('paste-json').value.trim();
+          if (!raw) {
+            showErr('save-err', 'JSON を貼り付けてください。');
+            return;
+          }
+          try {
+            var j = JSON.parse(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
+            fillEditableFromJson(j);
+            refreshResearchPrompt();
+            scheduleLivePreview();
+            var el = document.getElementById('save-msg');
+            el.style.display = 'block';
+            el.textContent = 'フォームに反映しました。';
+          } catch (e) {
+            showErr('save-err', 'JSON が不正です: ' + (e.message || e));
+          }
         };
 
         document.getElementById('mode-select').onchange = function () {

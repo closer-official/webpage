@@ -180,6 +180,12 @@ export function OperatorWorkbench() {
               </a>
             </li>
             <li>
+              <a className="operator-hub-card" href="/admin/template-worker-basic.html">
+                <span className="operator-hub-card-title">店舗ドラフト（基本情報のみ）</span>
+                <span className="operator-hub-card-desc">cafe_1：店名・住所・電話・地図・SNS だけ。メニュー等はジャンル別固定</span>
+              </a>
+            </li>
+            <li>
               <a className="operator-hub-card" href="/admin/store-wizard.html">
                 <span className="operator-hub-card-title">店舗セットアップ</span>
                 <span className="operator-hub-card-desc">テンプレ選択・店舗キー・購入者用URL</span>
