@@ -268,6 +268,9 @@
           var sent = items.filter(function (i) {
             return i.status === 'email_sent';
           });
+          var rejected = items.filter(function (i) {
+            return i.status === 'rejected';
+          });
 
           function renderRow(item, mode) {
             var name = (item.researched && item.researched.name) || '（無題）';
