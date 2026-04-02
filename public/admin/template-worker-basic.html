@@ -388,16 +388,20 @@
             '  "footerAddress": "〒を含む住所1行または複数行を改行で",',
             '  "footerPhone": "代表電話（ハイフンありで可）",',
             '  "mapEmbedUrl": "Googleマップの「地図を埋め込む」で取得できる https の embed URL（iframeのsrc）",',
-            '  "openingHoursText": "営業時間を人が読む形式で。改行は \\\\n で区切った1文字列でも、配列でも可",',
+            '  "openingHoursText": "営業時間（改行は実改行で複数行にしてよい。JSON内では \\n でエスケープ）",',
             '  "footerInstagramUrl": "公式InstagramのURL（無ければ空文字）",',
             '  "footerTwitterUrl": "公式X（Twitter）のURL（無ければ空文字）",',
             '  "sourceUrls": ["参照したURLを列挙"],',
             '  "notes": "取得できなかった項目や注意事項"',
             '}',
             '',
+            '厳守（貼り付けエラー防止）:',
+            '- URLは必ず生の文字列のみ。Markdownの [表示名](URL) 形式にしない。',
+            '- mapEmbedUrl は Googleマップの「地図を埋め込む」の iframe の src と同じ https のURL（maps/embed?pb=...）。URLの途中に \\ を入れない（! や & はそのまま）。',
+            '- Google検索結果のURLでラップしない（search?q=... にしない）。',
+            '',
             'ルール:',
             '- 推測で断定しない。分からない値は空文字または notes に理由を書く。',
-            '- mapEmbedUrl は必ず https で、Google公式の埋め込み用URLに近い形式にする（検索結果ページのURLだけでは不十分な場合がある）。',
             '- openingHoursText は店舗が掲示している表記を優先する。',
             '',
             '対象店舗（ユーザーが書き換え）:',
@@ -419,17 +423,87 @@
           };
         }
 
+        /** Markdown [t](url)・Google search?q=・URL外に続く !1m… / _handle を解く */
+        function extractCleanHttpUrl(input) {
+          var s = String(input || '').trim().replace(/\\!/g, '!').replace(/\\_/g, '_');
+          if (!s) return '';
+          var afterParen = '';
+          var rp = s.lastIndexOf(')');
+          if (rp >= 0) {
+            afterParen = s
+              .slice(rp + 1)
+              .replace(/^[)\s"'、。，]+/, '')
+              .replace(/\\!/g, '!')
+              .replace(/\\_/g, '_');
+          }
+          var md = s.match(/\[[^\]]*\]\((https?:\/\/[^)]+)\)/i);
+          var cand = (md && md[1] ? md[1] : s).trim();
+
+          function unwrapGoogleSearch(url) {
+            try {
+              var u = new URL(url);
+              if (!/google\./i.test(u.hostname) || !/\/search/i.test(u.pathname)) return url;
+              var q = u.searchParams.get('q');
+              if (!q) return url;
+              try {
+                q = decodeURIComponent(q.replace(/\+/g, ' '));
+              } catch (_) {}
+              return String(q).replace(/\\!/g, '!').replace(/\\_/g, '_');
+            } catch (_) {
+              return url;
+            }
+          }
+
+          if (!/^https?:\/\//i.test(cand)) {
+            var emb = s.match(/https:\/\/www\.google\.com\/maps\/embed\?[^"\s\]]+/i);
+            return emb ? emb[0] : s;
+          }
+
+          var u = unwrapGoogleSearch(cand);
+          if (!/^https?:\/\//i.test(u)) return cand;
+
+          if (/maps\/embed/i.test(u) && afterParen && /^!1m/i.test(afterParen)) {
+            return u + afterParen;
+          }
+          if (/(instagram\.com|twitter\.com|(^|\.)x\.com)/i.test(u) && afterParen) {
+            if (afterParen.charAt(0) === '_') {
+              return u.replace(/\/+$/, '') + afterParen.replace(/\/+$/, '');
+            }
+          }
+          return u;
+        }
+
+        /** AIがよく出す不正JSON（\\! や 全角引用符）を緩く直してパース */
+        function parseBasicInfoAiJson(raw) {
+          var t = String(raw || '').trim();
+          var lo = t.indexOf('{');
+          var hi = t.lastIndexOf('}');
+          if (lo >= 0 && hi > lo) t = t.slice(lo, hi + 1);
+          t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+          t = t.replace(/[\u201c\u201d]/g, '"').replace(/[\u2018\u2019]/g, "'");
+          try {
+            return JSON.parse(t);
+          } catch (_) {
+            t = t.replace(/\\([^"\\/bfnrtu])/g, '$1');
+            return JSON.parse(t);
+          }
+        }
+
         function fillEditableFromJson(j) {
           if (!j || typeof j !== 'object') return;
-          if (j.siteName) document.getElementById('f-siteName').value = j.siteName;
-          if (j.footerAddress) document.getElementById('f-footerAddress').value = j.footerAddress;
-          if (j.footerPhone) document.getElementById('f-footerPhone').value = j.footerPhone;
-          if (j.mapEmbedUrl) document.getElementById('f-mapEmbedUrl').value = j.mapEmbedUrl;
-          if (j.footerInstagramUrl) document.getElementById('f-instagram').value = j.footerInstagramUrl;
-          if (j.footerTwitterUrl) document.getElementById('f-twitter').value = j.footerTwitterUrl;
+          if (j.siteName) document.getElementById('f-siteName').value = String(j.siteName).trim();
+          if (j.footerAddress) document.getElementById('f-footerAddress').value = String(j.footerAddress).trim();
+          if (j.footerPhone) document.getElementById('f-footerPhone').value = String(j.footerPhone).trim();
+          if (j.mapEmbedUrl) document.getElementById('f-mapEmbedUrl').value = extractCleanHttpUrl(j.mapEmbedUrl);
+          if (j.footerInstagramUrl) document.getElementById('f-instagram').value = extractCleanHttpUrl(j.footerInstagramUrl);
+          if (j.footerTwitterUrl) document.getElementById('f-twitter').value = extractCleanHttpUrl(j.footerTwitterUrl);
           var oh = j.openingHoursText;
-          if (Array.isArray(oh)) document.getElementById('f-openingHours').value = oh.join('\n');
-          else if (typeof oh === 'string') document.getElementById('f-openingHours').value = oh.replace(/\\n/g, '\n');
+          if (Array.isArray(oh)) document.getElementById('f-openingHours').value = oh.map(String).join('\n');
+          else if (typeof oh === 'string') {
+            document.getElementById('f-openingHours').value = String(oh)
+              .replace(/\\n/g, '\n')
+              .replace(/\r\n/g, '\n');
+          }
         }
 
         function scheduleLivePreview() {
@@ -571,7 +645,7 @@
             return;
           }
           try {
-            var j = JSON.parse(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
+            var j = parseBasicInfoAiJson(raw);
             fillEditableFromJson(j);
             refreshResearchPrompt();
             scheduleLivePreview();
