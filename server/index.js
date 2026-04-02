@@ -54,6 +54,7 @@ import { renderTemplateGalleryPage } from './templateGalleryPage.js';
 import { buildPublicTemplateCatalog, buildAdminTemplateCatalog } from './publicTemplateCatalog.js';
 import { BUILTIN_BUILD_HTML_TEMPLATE_IDS } from './templateRegistry.js';
 import { translatePublicUiEntries } from './publicUiTranslate.js';
+import { CAFE_1_RAMEN_HERO_SLIDES, normalizeCafeVisualGenreId } from './cafe1GenrePresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -478,7 +479,11 @@ function sanitizeOverrideHeroSlides(raw) {
   const urls = list
     .slice(0, 10)
     .map((s) => s.slice(0, 2000))
-    .filter((s) => /^https?:\/\//i.test(s));
+    .filter((s) => {
+      if (/^https?:\/\//i.test(s)) return true;
+      if (s.startsWith('/') && !s.includes('..')) return true;
+      return false;
+    });
   return urls;
 }
 
@@ -668,7 +673,13 @@ function normalizeCustomizationInput(body = {}) {
   };
   if (theme.bg || theme.text || theme.accent) out.theme = theme;
 
-  const heroSlides = sanitizeOverrideHeroSlides(body.heroSlides);
+  const cafeVisualGenre = normalizeCafeVisualGenreId(body.cafeVisualGenre);
+  if (cafeVisualGenre) out.cafeVisualGenre = cafeVisualGenre;
+
+  let heroSlides = sanitizeOverrideHeroSlides(body.heroSlides);
+  if (cafeVisualGenre === 'ramen') {
+    heroSlides = [...CAFE_1_RAMEN_HERO_SLIDES];
+  }
   if (heroSlides !== undefined) out.heroSlides = heroSlides;
   const heroSlideStyles = sanitizeOverrideHeroSlideStyles(
     body.heroSlideStyles,

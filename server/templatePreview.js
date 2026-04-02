@@ -1,4 +1,9 @@
 import {
+  CAFE_1_DEFAULT_HERO_SLIDES,
+  CAFE_1_RAMEN_HERO_SLIDES,
+  normalizeCafeVisualGenreId,
+} from './cafe1GenrePresets.js';
+import {
   buildCafe1ShopLocationDetail,
   CAFE_1_HOURS_SECTION_CONTENT,
   CAFE_1_OPENING_HOURS_JSON_LD,
@@ -95,6 +100,14 @@ function makeNavItems(csv) {
   });
 }
 
+function isAllowedHeroSlideUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return false;
+  if (/^https?:\/\//i.test(s)) return true;
+  if (s.startsWith('/') && !s.includes('..')) return true;
+  return false;
+}
+
 export function applyTemplateCustomization(content, customization = {}) {
   const out = { ...content };
   if (customization.headline) out.headline = String(customization.headline).slice(0, 200);
@@ -119,7 +132,7 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (Array.isArray(customization.heroSlides)) {
     out.heroSlides = customization.heroSlides
       .map((u) => String(u || '').trim())
-      .filter((u) => /^https?:\/\//i.test(u))
+      .filter((u) => isAllowedHeroSlideUrl(u))
       .slice(0, 10);
   }
   if (Array.isArray(customization.heroSlideStyles)) {
@@ -168,6 +181,9 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (customization.cafeMeo && typeof customization.cafeMeo === 'object') {
     out.cafeMeo = { ...(out.cafeMeo || {}), ...customization.cafeMeo };
   }
+
+  const genreId = normalizeCafeVisualGenreId(customization.cafeVisualGenre);
+  if (genreId) out.cafeVisualGenre = genreId;
 
   return out;
 }
@@ -473,11 +489,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
         { groupLabel: 'ドリンク', name: '濃厚 黒ウーロン茶', price: '¥300', description: '' },
         { groupLabel: 'ドリンク', name: 'キンキンの瓶コーラ', price: '¥250', description: '' },
       ],
-      heroSlides: [
-        'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
-        'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400',
-        'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400',
-      ],
+      heroSlides: [...CAFE_1_DEFAULT_HERO_SLIDES],
       cafeShopLocations: [
         {
           name: '茅堂寺（いどうじ）',
@@ -516,6 +528,10 @@ export function renderTemplatePreview(templateId, customization = null, options 
   }
 
   content = applyTemplateCustomization(content, ov);
+  if (id === 'cafe_1' && normalizeCafeVisualGenreId(content.cafeVisualGenre || ov.cafeVisualGenre) === 'ramen') {
+    content.heroSlides = [...CAFE_1_RAMEN_HERO_SLIDES];
+    content.heroSlideStyles = [];
+  }
   let seo = buildDefaultSeoFromMergedContent(id, name, content);
   seo = applySeoCustomization(seo, ov);
   if (options && options.returnResolvedData) {

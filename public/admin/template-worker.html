@@ -367,6 +367,31 @@
         </p>
       </div>
 
+      <div class="tw-form-block" data-tw-for="cafe_1">
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">店のジャンル（cafe_1）</h3>
+        <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 10px; line-height: 1.45">
+          業態に近いものを選んでください。<strong>「ラーメン・中華麺」</strong>のときは、トップのスライドが<strong>そのジャンル向けの2枚だけ</strong>に自動で切り替わります（他ジャンル・未指定はサンプル3枚）。あとから画像URLを直すこともできます。
+        </p>
+        <label>
+          ビジュアルジャンル
+          <select id="f-cafeVisualGenre">
+            <option value="">指定なし（サンプル写真3枚）</option>
+            <option value="ramen">ラーメン・中華麺</option>
+            <option value="cafe_coffee">カフェ・コーヒー</option>
+            <option value="kissaten">喫茶・軽食</option>
+            <option value="izakaya">居酒屋・ダイニングバー</option>
+            <option value="yakiniku">焼肉・韓国料理</option>
+            <option value="sushi">寿司・海鮮</option>
+            <option value="yoshoku">洋食・レストラン</option>
+            <option value="teishoku">定食・食堂</option>
+            <option value="don_udon_soba">丼・うどん・そば</option>
+            <option value="sweets">スイーツ・ベーカリー</option>
+            <option value="takeout">テイクアウト・デリ</option>
+            <option value="other_food">その他飲食</option>
+          </select>
+        </label>
+      </div>
+
       <div class="tw-form-block" data-tw-for="all">
         <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">ヒーロー・ファーストビュー関連</h3>
         <div class="repeat-group">
@@ -1058,9 +1083,9 @@
               '<div class="repeat-item-head"><span>トップ画像 ' +
               idx +
               '</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
-              '<label>画像URL<input type="url" class="f-hero-url" value="' +
+              '<label>画像URL<input type="text" class="f-hero-url" value="' +
               escapeHtml(it.url) +
-              '" placeholder="https://..." /></label>' +
+              '" placeholder="https://… または /cafe1-genres/…" /></label>' +
               '<label>表示位置X（%）<input type="number" class="f-hero-pos-x" min="0" max="100" step="1" value="' +
               escapeHtml(it.posX == null ? '50' : String(it.posX)) +
               '" /></label>' +
@@ -1076,6 +1101,23 @@
           itemEl.querySelector('.js-remove-repeat').onclick = function () {
             itemEl.remove();
           };
+        }
+
+        var CAFE_1_DEFAULT_HERO_URLS = [
+          'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
+          'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1400',
+          'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ];
+        var CAFE_1_RAMEN_HERO_URLS = ['/cafe1-genres/ramen/hero-1.png', '/cafe1-genres/ramen/hero-2.png'];
+
+        function applyCafeVisualGenreHeroSlides(genreId) {
+          var root = document.getElementById('f-hero-slides-list');
+          if (!root) return;
+          root.innerHTML = '';
+          var urls = genreId === 'ramen' ? CAFE_1_RAMEN_HERO_URLS : CAFE_1_DEFAULT_HERO_URLS;
+          urls.forEach(function (u) {
+            addHeroSlideItem({ url: u });
+          });
         }
 
         function buildOverrideFromForm() {
@@ -1214,6 +1256,8 @@
             cafeGbPostsEmbedUrl: document.getElementById('f-cafeGbPostsEmbedUrl').value.trim(),
             cafeInstagramPermalink: document.getElementById('f-cafeInstagramPermalink').value.trim(),
           };
+          var cvgEl = document.getElementById('f-cafeVisualGenre');
+          if (cvgEl) ov.cafeVisualGenre = (cvgEl.value || '').trim();
           ov.heroSlides = heroLines;
           ov.heroSlideStyles = heroSlideStyles;
           if (sections && sections.length) ov.sections = sections;
@@ -1265,6 +1309,8 @@
           document.getElementById('f-cafeReviewCtaUrl').value = ov.cafeReviewCtaUrl || '';
           document.getElementById('f-cafeGbPostsEmbedUrl').value = ov.cafeGbPostsEmbedUrl || '';
           document.getElementById('f-cafeInstagramPermalink').value = ov.cafeInstagramPermalink || '';
+          var genrePick = document.getElementById('f-cafeVisualGenre');
+          if (genrePick) genrePick.value = ov.cafeVisualGenre || '';
           document.getElementById('f-hero-slides-list').innerHTML = '';
           var hs = Array.isArray(ov.heroSlides) ? ov.heroSlides : [];
           var hst = Array.isArray(ov.heroSlideStyles) ? ov.heroSlideStyles : [];
@@ -1329,6 +1375,7 @@
             cafeShopLocations: true,
             cafeInstagramFeedItems: true,
             cafeBranchMenuItems: true,
+            cafeVisualGenre: true,
           };
           var extra = {};
           Object.keys(ov || {}).forEach(function (k) {
@@ -1372,6 +1419,7 @@
             cafeShopLocations: Array.isArray(c.cafeShopLocations) ? c.cafeShopLocations : [],
             cafeInstagramFeedItems: Array.isArray(c.cafeInstagramFeedItems) ? c.cafeInstagramFeedItems : [],
             cafeBranchMenuItems: Array.isArray(c.cafeBranchMenuItems) ? c.cafeBranchMenuItems : [],
+            cafeVisualGenre: c.cafeVisualGenre || '',
             cafeFloatingMapUrl: c.cafeFloatingMapUrl || '',
             cafeReviewCtaText: c.cafeReviewCtaText || '',
             cafeReviewCtaUrl: c.cafeReviewCtaUrl || '',
@@ -1715,6 +1763,15 @@
             } else if (!currentCustomId) scheduleLivePreview();
           }
         };
+
+        var genreEl = document.getElementById('f-cafeVisualGenre');
+        if (genreEl) {
+          genreEl.onchange = function () {
+            applyCafeVisualGenreHeroSlides(this.value || '');
+            scheduleLivePreview();
+            scheduleSeoAutofillFromBasics();
+          };
+        }
 
         function loadBasesAndCustoms() {
           return credFetch(api + '/template-candidates')
