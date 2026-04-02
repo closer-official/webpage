@@ -717,70 +717,124 @@
         }
 
         function buildAiImportPromptTemplate() {
-          return (
-            'あなたは店舗LP制作のためのリサーチアシスタントです。\\n' +
-            '指定した店舗について、公式情報・Googleマップ情報・口コミ要約などを調査し、次のJSONのみを返してください。\\n' +
-            '必ず有効なJSONオブジェクト1つのみ。説明文・Markdown・コードフェンスは不要。\\n\\n' +
-            '重要ルール:\\n' +
-            '- 写真URLは埋めなくてよい（空配列/空文字で可）\\n' +
-            '- 不明項目は空文字または空配列\\n' +
-            '- 推測しすぎない\\n' +
-            '- 取得した事実には必ず出典URLを添える\\n' +
-            '- FAQは実在情報に基づく範囲で自然文\\n' +
-            '- メニューは name を必ず埋める\\n\\n' +
-            '返却JSONスキーマ:\\n' +
-            '{\\n' +
-            '  "nameSuggestion": "ドラフト名候補（80文字以内）",\\n' +
-            '  "verification": {\\n' +
-            '    "confidence": 0.0,\\n' +
-            '    "sourceUrls": ["https://..."],\\n' +
-            '    "unknownFields": ["footerPhone", "cafeMeo.postalCode"],\\n' +
-            '    "notes": "確認メモ"\\n' +
-            '  },\\n' +
-            '  "override": {\\n' +
-            '    "siteName": "",\\n' +
-            '    "title": "",\\n' +
-            '    "headline": "",\\n' +
-            '    "subheadline": "",\\n' +
-            '    "footerText": "",\\n' +
-            '    "footerAddress": "",\\n' +
-            '    "footerPhone": "",\\n' +
-            '    "ctaLabel": "",\\n' +
-            '    "ctaHref": "#contact",\\n' +
-            '    "navLabels": "コンセプト, メニュー, アクセス",\\n' +
-            '    "metaTitle": "",\\n' +
-            '    "metaDescription": "",\\n' +
-            '    "canonicalUrl": "",\\n' +
-            '    "keywords": "",\\n' +
-            '    "faqItems": [\\n' +
-            '      { "q": "", "a": "" }\\n' +
-            '    ],\\n' +
-            '    "cafeMenuTextRows": [\\n' +
-            '      { "groupLabel": "", "name": "", "price": "", "description": "", "badge": "" }\\n' +
-            '    ],\\n' +
-            '    "cafeMeo": {\\n' +
-            '      "servesCuisine": "",\\n' +
-            '      "priceRange": "",\\n' +
-            '      "openingHours": [""],\\n' +
-            '      "streetAddress": "",\\n' +
-            '      "addressLocality": "",\\n' +
-            '      "addressRegion": "",\\n' +
-            '      "postalCode": ""\\n' +
-            '    },\\n' +
-            '    "cafeShopLocations": [\\n' +
-            '      { "name": "", "detail": "", "mapUrl": "" }\\n' +
-            '    ],\\n' +
-            '    "cafeBranchMenuItems": [\\n' +
-            '      { "groupLabel": "", "label": "", "menuUrl": "" }\\n' +
-            '    ]\\n' +
-            '  }\\n' +
-            '}\\n\\n' +
-            '対象店舗情報（ここをユーザーが上書き）:\\n' +
-            '- 店舗名: {{STORE_NAME}}\\n' +
-            '- 地域: {{AREA}}\\n' +
-            '- 業種: {{CATEGORY}}\\n\\n' +
-            '最後に、sourceUrlsには参照したURLを最低2件入れてください。'
-          );
+          return [
+            'あなたは店舗LP（飲食店テンプレ）の入力欄を埋めるリサーチアシスタントです。',
+            '指定店舗について公式サイト・Googleマップ・SNS・口コミ等を調査し、下記「返却JSON」のキーをすべて埋めたうえで、有効なJSONオブジェクト1つだけを返してください。',
+            '説明文・Markdown・コードフェンスは付けないでください。',
+            '',
+            '【必須】すべての項目を出力すること',
+            '- override 内のすべてのキーを省略せず出力する（値が空のキーを省略しない）。',
+            '- 配列は「空配列」にせず、下記の最低件数を満たす。',
+            '  - faqItems: 4件以上（q・a はすべて非空）',
+            '  - cafeMenuTextRows: 6件以上（name は必須。price・description も可能な限り）',
+            '  - sections: 5件（id は半角英数字。推奨順: concept, staff, gallery, menu, access）',
+            '  - heroSlides: 3件（https の画像URL。Unsplash / Pexels / Pixabay 等のフリー素材のみ）',
+            '  - heroSlideStyles: heroSlides と同じ件数。各要素 { "x": 50, "y": 50, "zoom": 100 } のように数値で指定',
+            '  - cafeShopLocations: 1件以上（name・detail・mapUrl は必須。mapUrl は Google マップの埋め込み用URL等、https）',
+            '  - cafeInstagramFeedItems: 4件（imageUrl・postUrl ともに https。画像はフリー素材URL。postUrl は該当店のInstagram投稿URLが分かればそれ、無ければ店舗公式InstagramのプロフィールURL、それも無ければ https://www.instagram.com/ ）',
+            '  - cafeBranchMenuItems: 1件以上（公式PDFやメニューページのURL。無い場合は店舗公式サイトトップ等、実在するhttps URL）',
+            '',
+            '【デモ版・情報源について（写真以外）】',
+            '- 公式に確認できない内容は、推測で断定せず、公開Web・マップ・口コミから取得可能な範囲で補い、それでも不足する場合はプレースホルダーで埋めてよい。',
+            '- その場合、verification.notes の先頭に次の文を必ず含める（一字一句この文から始める）:',
+            '  「現在デモ版のため、写真以外の情報はネットから抽出可能な範囲のみで作成しています。」',
+            '- 続けて、どの項目が推定・要約・プレースホルダーかを簡潔に書く。',
+            '- verification.sourceUrls には参照したURLを最低3件（公式・マップ・口コミサイト等）。',
+            '- verification.unknownFields には、公式確認が取れず推定や仮置きした override のキー名を列挙（該当がなければ空配列）。',
+            '',
+            '【写真・著作権（フリー素材）】',
+            '- 実店舗の写真URLは使わない。ヒーロー・セクション画像・店舗カード画像・Instagram欄の imageUrl はすべてフリー素材（Unsplash / Pexels / Pixabay 等）の直リンクのみ。',
+            '- トップ（ヒーロー）直下に見える本文として subheadline の末尾に、改行のあと次の1行を必ず追記する:',
+            '  「※掲載の写真は著作権の観点から、実店舗の写真ではなくフリー素材サイトの画像を使用しています。」',
+            '- imageUrl を持つ各 section の本文（content）の末尾にも、同じ趣旨の1行を追記する（重複でもよい）。',
+            '- cafeShopLocations[].imageUrl に画像を入れる場合もフリー素材のみ。入れない場合は空文字。',
+            '',
+            '【その他】',
+            '- siteName / headline / footerText 等の文字列フィールドは原則すべて非空。',
+            '- 公式に公開されていない項目（footerLineUrl・reserveUrl・reserveLabel・canonicalUrl 等）は空文字でよい。その場合 verification.notes に「○○は公式未公開のため空」と一行追記する。',
+            '- ogImageUrl はヒーロー1枚目と同じURLでもよい（https）。',
+            '- cafeReviewCtaText / cafeReviewCtaUrl は、Googleマップのレビュー投稿に繋がる場合のみ埋める。無い場合は空文字（notesに明記）。',
+            '- mapEmbedUrl・cafeFloatingMapUrl・cafeGbPostsEmbedUrl は同一店舗の Google マップ埋め込みURL等で揃える（取得できる場合）。取得できなければ検索で特定できる埋め込みURLを優先し、どうしても無い場合のみ空文字（notesに明記）。',
+            '- footerInstagramUrl と cafeInstagramPermalink は、公式Instagramが分かれば同一URL。無ければ空文字。',
+            '- cafeVisualGenre は次のいずれか1つだけ（店舗に最も近いもの）: ramen, cafe_coffee, kissaten, izakaya, yakiniku, sushi, yoshoku, teishoku, don_udon_soba, sweets, takeout, other_food。該当が難しければ other_food。',
+            '- ctaHref は #contact または公式予約・問い合わせの https URL。',
+            '- navLabels は「セクション見出し」をカンマ区切りで（例: コンセプト, スタッフ, ギャラリー, メニュー, アクセス）。sections の並びと一致させる。',
+            '',
+            '返却JSONスキーマ（キー名と構造はこのまま。値はすべて埋める）:',
+            '{',
+            '  "nameSuggestion": "ドラフト名候補（80文字以内）",',
+            '  "verification": {',
+            '    "confidence": 0.0,',
+            '    "sourceUrls": ["https://..."],',
+            '    "unknownFields": ["override内のキー名"],',
+            '    "notes": "上記デモ版の定型文から始め、補足を書く"',
+            '  },',
+            '  "override": {',
+            '    "siteName": "",',
+            '    "title": "",',
+            '    "headline": "",',
+            '    "subheadline": "",',
+            '    "footerText": "",',
+            '    "footerAddress": "",',
+            '    "footerPhone": "",',
+            '    "footerInstagramUrl": "",',
+            '    "footerLineUrl": "",',
+            '    "ctaLabel": "",',
+            '    "ctaHref": "#contact",',
+            '    "navLabels": "",',
+            '    "metaTitle": "",',
+            '    "metaDescription": "",',
+            '    "ogImageUrl": "",',
+            '    "canonicalUrl": "",',
+            '    "keywords": "",',
+            '    "mapEmbedUrl": "",',
+            '    "cafeFloatingMapUrl": "",',
+            '    "cafeReviewCtaText": "",',
+            '    "cafeReviewCtaUrl": "",',
+            '    "cafeGbPostsEmbedUrl": "",',
+            '    "cafeInstagramPermalink": "",',
+            '    "cafeVisualGenre": "other_food",',
+            '    "heroSlides": ["https://...", "https://...", "https://..."],',
+            '    "heroSlideStyles": [{ "x": 50, "y": 50, "zoom": 100 }, { "x": 50, "y": 50, "zoom": 100 }, { "x": 50, "y": 50, "zoom": 100 }],',
+            '    "sections": [',
+            '      { "id": "concept", "title": "", "content": "", "imageUrl": "" },',
+            '      { "id": "staff", "title": "", "content": "", "imageUrl": "" },',
+            '      { "id": "gallery", "title": "", "content": "", "imageUrl": "" },',
+            '      { "id": "menu", "title": "", "content": "", "imageUrl": "" },',
+            '      { "id": "access", "title": "", "content": "", "imageUrl": "" }',
+            '    ],',
+            '    "faqItems": [',
+            '      { "q": "", "a": "" }',
+            '    ],',
+            '    "cafeMenuTextRows": [',
+            '      { "groupLabel": "", "name": "", "price": "", "description": "", "badge": "" }',
+            '    ],',
+            '    "cafeMeo": {',
+            '      "servesCuisine": "",',
+            '      "priceRange": "",',
+            '      "openingHours": [""],',
+            '      "streetAddress": "",',
+            '      "addressLocality": "",',
+            '      "addressRegion": "",',
+            '      "postalCode": ""',
+            '    },',
+            '    "cafeShopLocations": [',
+            '      { "name": "", "detail": "", "mapUrl": "", "imageUrl": "", "reserveUrl": "", "reserveLabel": "" }',
+            '    ],',
+            '    "cafeInstagramFeedItems": [',
+            '      { "imageUrl": "", "postUrl": "" }',
+            '    ],',
+            '    "cafeBranchMenuItems": [',
+            '      { "groupLabel": "", "label": "", "menuUrl": "" }',
+            '    ]',
+            '  }',
+            '}',
+            '',
+            '対象店舗情報（ユーザーが差し替え）:',
+            '- 店舗名: {{STORE_NAME}}',
+            '- 地域: {{AREA}}',
+            '- 業種: {{CATEGORY}}',
+          ].join('\n');
         }
 
         function extractUrlFromPossiblyMarkdownLink(input) {

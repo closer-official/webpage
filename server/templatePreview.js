@@ -379,43 +379,42 @@ export function renderTemplatePreview(templateId, customization = null, options 
     };
   } else if (id === 'cafe_1') {
     content = {
-      siteName: '茅堂寺（いどうじ）公式サイト',
-      title: '茅堂寺（いどうじ）',
-      headline: '茅堂寺（いどうじ）',
-      subheadline: '',
-      footerAddress: '〒120-0026 東京都足立区千住旭町40-2',
-      footerPhone: '03-6806-1192',
+      siteName: '店名サンプル（公式）',
+      title: '店名サンプル',
+      headline: 'キャッチコピー・店名（サンプル）',
+      subheadline: 'リード文のサンプルです。編集画面からお店の内容に差し替えてください。',
+      footerAddress: '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）',
+      footerPhone: '03-0000-0000',
       cafeMeo: {
-        servesCuisine: 'ガッツリ系定食;どんぶり;日本料理',
-        priceRange: '¥850〜¥1,200',
+        servesCuisine: '定食;ラーメン;飲食店',
+        priceRange: '¥800〜¥1,200',
         openingHours: [...CAFE_1_OPENING_HOURS_JSON_LD],
-        streetAddress: '千住旭町40-2',
-        addressLocality: '足立区',
+        streetAddress: '道玄坂1-2-3',
+        addressLocality: '渋谷区',
         addressRegion: '東京都',
-        postalCode: '120-0026',
+        postalCode: '150-0043',
       },
-      cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
-      cafeReviewCtaText: 'スタッフにクチコミ画面提示で100円トッピング無料！',
-      cafeReviewCtaUrl:
-        'https://search.google.com/local/writereview?placeid=ChIJd8BlQ2CMGGAR3x0qf4l6P6k',
+      cafeFloatingMapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
+      cafeReviewCtaText: 'Googleのクチコミはこちら（サンプル・URLは編集で差し替え）',
+      cafeReviewCtaUrl: 'https://www.google.com/maps',
       cafeGbPostsEmbedUrl:
-        'https://www.google.com/maps?q=東京都足立区千住旭町40-2&output=embed',
+        'https://www.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
       faqItems: [
         {
           q: '予約はできますか？',
-          a: 'お電話（03-6806-1192）にて承っております。ランチタイムの混雑時はお時間をいただく場合がございます。',
+          a: 'お電話（03-0000-0000）にてご相談ください。混雑時はお時間をいただく場合がございます。（番号はサンプルです）',
         },
         {
           q: '駐車場はありますか？',
-          a: '専用駐車場はございません。近隣のコインパーキングをご利用ください。',
+          a: '専用駐車場がない場合は、近隣のコインパーキングをご利用ください。',
         },
         {
           q: '一人でも入りやすいですか？',
-          a: 'はい！カウンター席を10席完備しており、東京電機大学の学生さんや会社員の方にお一人で多くご利用いただいています。',
+          a: 'はい。カウンター席もございます。お一人でもお気軽にどうぞ。',
         },
         {
           q: 'テイクアウトは可能ですか？',
-          a: '全ての定食メニューでお弁当としての持ち帰りが可能です。',
+          a: 'メニューによって異なります。お電話または店頭でお問い合わせください。',
         },
       ],
       cafeInstagramFeedItems: [
@@ -427,15 +426,15 @@ export function renderTemplatePreview(templateId, customization = null, options 
       sections: [
         {
           id: 'concept',
-          title: '茅堂寺（いどうじ）',
+          title: 'コンセプト（サンプル）',
           content:
-            'つくばから発信する、ラーメンの新しいスタンダード\n\n厳選された大仙鶏の旨味と、驚きに満ちた和え玉。\n\n一杯一皿に情熱を込めて。',
+            'お店の想いや魅力が伝わる文章をここに書きます。\n\n素材へのこだわり、お客様へのメッセージなど、編集画面から自由に差し替えできます。',
         },
         {
           id: 'staff',
-          title: '店主・鉄人',
+          title: '店主・スタッフ（サンプル）',
           content:
-            '今日も炊きたてご飯と秘伝ダレでお待ちしています。学生さん・お仕事帰りの方も、腹ペコのときは気軽にどうぞ。',
+            'スタッフからのひとことを書きます。今日のおすすめや、お客様へのごあいさつなど、編集画面で差し替えてください。',
           imageUrl:
             'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1200',
         },
@@ -469,7 +468,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
           id: 'contact',
           title: 'お問い合わせ',
           content:
-            '今すぐ来店するなら、席状況を電話で確認→地図で3分。\nクチコミ投稿で100円トッピング無料キャンペーン実施中。',
+            'ご来店前に席の空き状況をお電話でご確認いただくとスムーズです。\nキャンペーンやSNSの案内は、実店舗の内容に合わせて編集してください。',
         },
       ],
       cafeMenuTextRows: [
@@ -492,18 +491,18 @@ export function renderTemplatePreview(templateId, customization = null, options 
       heroSlides: [...CAFE_1_DEFAULT_HERO_SLIDES],
       cafeShopLocations: [
         {
-          name: '茅堂寺（いどうじ）',
-          detail: buildCafe1ShopLocationDetail('03-6806-1192', '〒120-0026 東京都足立区千住旭町40-2'),
-          mapUrl: 'https://maps.google.com/?q=東京都足立区千住旭町40-2',
+          name: '店名サンプル',
+          detail: buildCafe1ShopLocationDetail('03-0000-0000', '〒150-0043 東京都渋谷区道玄坂1-2-3（サンプル）'),
+          mapUrl: 'https://maps.google.com/?q=東京都渋谷区道玄坂',
           imageUrl:
             'https://images.pexels.com/photos/2233729/pexels-photo-2233729.jpeg?auto=compress&cs=tinysrgb&w=900',
         },
       ],
       mapEmbedUrl:
-        'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E8%B6%B3%E7%AB%8B%E5%8C%BA%E5%8D%83%E4%BD%8F%E6%97%AD%E7%94%BA40-2&output=embed',
-      ctaLabel: '席を電話で確認',
-      ctaHref: 'tel:0368061192',
-      footerText: `つくばのラーメン｜茅堂寺（いどうじ）\n© ${now} 茅堂寺（いどうじ） | 東京都足立区千住旭町40-2 | 03-6806-1192`,
+        'https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%8B%E8%B0%B7%E5%8C%BA%E9%81%93%E7%8E%84%E5%9D%82&output=embed',
+      ctaLabel: 'お電話はこちら（サンプル）',
+      ctaHref: 'tel:0300000000',
+      footerText: `© ${now} 店名サンプル | 東京都渋谷区道玄坂1-2-3（サンプル） | 03-0000-0000`,
       footerInstagramUrl: 'https://www.instagram.com/',
       footerLineUrl: 'https://line.me/',
     };
