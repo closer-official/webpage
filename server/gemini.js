@@ -242,6 +242,84 @@ export async function extractTemplateOverrideFromDocuments(files, textContext = 
   };
 }
 
+/**
+ * Google検索のまとめ・食べログ要約など、長文テキストだけからテンプレ override を抽出（画像なし）
+ */
+export async function extractTemplateOverrideFromFreeText(pastedText) {
+  const text = String(pastedText || '').trim().slice(0, 20000);
+  if (!text) throw new Error('empty text');
+  const model = getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const prompt = `あなたはWeb制作の入力補助AIです。ユーザーがGoogle検索のまとめ・食べログの要約・調査メモなど自由形式で貼り付けた文章から、店舗LP向けのJSONを返してください。
+
+【厳守】
+- 返すのはJSONオブジェクト1つのみ。説明文・Markdown・コードフェンス（\`\`\`）は禁止。
+- 文中に書かれていない情報は空文字・空配列にする。捏造しない。
+- mapEmbedUrl は「https://www.google.com/maps/embed?...」形式が文中に明示されているときだけ。maps/place や検索URLは入れない。
+- Instagram/Xは実URL、または @アカウントが明示されているときだけ（「SNSで発信」のみでは空）。
+- メニューは文章に価格や品名があれば cafeMenuTextRows に分解する。無ければ []。
+- FAQらしきQ&Aがあれば faqItems に。無ければ []。
+
+【sections】は、LPの本文ブロックとして使えそうなまとめだけ返す。各要素は id（英小文字・数字・ハイフン）・title・content（imageUrlは文中に画像URLがあれば）。
+既存テンプレでよく使う id の例: concept / story / menu-intro / hours / access / interior / atmosphere
+文章に合う id を選ぶ。該当するまとめが無ければ sections は []。
+※ 同じ id のブロックは後からフォーム側で既存セクションにマージされる想定。
+
+【cafeVisualGenre】は次のいずれか1つ、分からなければ空文字:
+ramen | cafe_coffee | kissaten | izakaya | yakiniku | sushi | yoshoku | teishoku | don_udon_soba | sweets | takeout | other_food
+
+【cafeShopLocations】は店舗が1つなら name に店名、detail に住所・アクセス・駐車場などをまとめてよい。複数店舗の記述が無ければ1要素でよい。情報が乏しく name/detail が埋まらない場合は []。
+
+返却スキーマ:
+{
+  "nameSuggestion": "",
+  "override": {
+    "siteName": "",
+    "title": "",
+    "headline": "",
+    "subheadline": "",
+    "footerText": "",
+    "footerAddress": "",
+    "footerPhone": "",
+    "footerInstagramUrl": "",
+    "footerTwitterUrl": "",
+    "mapEmbedUrl": "",
+    "cafeVisualGenre": "",
+    "sections": [{"id":"", "title":"", "content":"", "imageUrl":""}],
+    "faqItems": [{"q":"", "a":""}],
+    "cafeMenuTextRows": [{"groupLabel":"", "name":"", "price":"", "description":"", "badge":""}],
+    "cafeMeo": {
+      "servesCuisine": "",
+      "priceRange": "",
+      "openingHours": [""],
+      "streetAddress": "",
+      "addressLocality": "",
+      "addressRegion": "",
+      "postalCode": ""
+    },
+    "cafeShopLocations": [{"name":"", "detail":"", "mapUrl":"", "imageUrl":""}],
+    "cafeBranchMenuItems": [{"groupLabel":"", "label":"", "menuUrl":""}]
+  }
+}
+
+【貼り付け文章】
+${text}`;
+
+  const result = await model.generateContent(prompt);
+  const raw = (result.response.text() || '').trim();
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Gemini did not return valid JSON');
+  let parsed = {};
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new Error('Failed to parse extracted JSON');
+  }
+  return {
+    nameSuggestion: typeof parsed.nameSuggestion === 'string' ? parsed.nameSuggestion.slice(0, 80) : '',
+    override: parsed.override && typeof parsed.override === 'object' ? parsed.override : {},
+  };
+}
+
 function sliceStr(v, max) {
   const s = typeof v === 'string' ? v.trim() : '';
   return s.slice(0, max);

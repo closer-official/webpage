@@ -23,6 +23,7 @@ import {
   extractCafe1BasicFromFreeText,
   extractDesignFromHtml,
   extractTemplateOverrideFromDocuments,
+  extractTemplateOverrideFromFreeText,
 } from './gemini.js';
 import { runLearningJob } from './learningJob.js';
 import { INDUSTRIES } from './learningQueries.js';
@@ -1082,6 +1083,29 @@ app.post('/api/template-customizations/extract', async (req, res) => {
     });
   } catch (e) {
     console.error('[template-customizations/extract]', e);
+    res.status(500).json({ error: e?.message || 'extract failed' });
+  }
+});
+
+/** 長文テキストのみから override を抽出（フル編集の「Gemini 一括入力」用。normalize 済み） */
+app.post('/api/template-customizations/extract-from-text', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const text = String(req.body?.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'text が空です' });
+  if (text.length > 20000) return res.status(400).json({ error: 'text は 20000 文字以内にしてください' });
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'GEMINI_API_KEY が未設定です' });
+  }
+  try {
+    const extracted = await extractTemplateOverrideFromFreeText(text);
+    const normalized = normalizeCustomizationInput(extracted.override || {});
+    res.json({
+      ok: true,
+      nameSuggestion: extracted.nameSuggestion || '',
+      override: normalized,
+    });
+  } catch (e) {
+    console.error('[template-customizations/extract-from-text]', e);
     res.status(500).json({ error: e?.message || 'extract failed' });
   }
 });
