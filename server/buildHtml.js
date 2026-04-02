@@ -736,15 +736,18 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
             const rhythm = getSectionRhythmClass(i, sections.length);
             const imgScroll = tid === 'cafe_1' && s.imageUrl ? ' data-scroll-in' : '';
             const imgWrapClass = s.imageUrl ? (i % 3 === 0 ? ' wo-img-wide' : i % 3 === 1 ? ' wo-img-tall' : ' wo-img-square') : '';
-            const img = s.imageUrl
-              ? (() => {
-                  const base = `<div class="section-img-wrap${imgWrapClass}"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`;
-                  if (tid === 'cafe_1' && s.id === 'gallery' && content.footerInstagramUrl) {
-                    return `<a href="${escapeHtml(content.footerInstagramUrl)}" target="_blank" rel="noopener noreferrer" class="c1-gallery-link" aria-label="Instagramへ移動">${base}</a>`;
-                  }
-                  return base;
-                })()
-              : '';
+            const cafe1SuppressLeadSectionImg =
+              tid === 'cafe_1' && (s.id === 'concept' || s.id === 'gallery');
+            const img =
+              s.imageUrl && !cafe1SuppressLeadSectionImg
+                ? (() => {
+                    const base = `<div class="section-img-wrap${imgWrapClass}"${imgScroll}><img src="${escapeHtml(s.imageUrl)}" alt="" class="section-img" loading="lazy"></div>`;
+                    if (tid === 'cafe_1' && s.id === 'gallery' && content.footerInstagramUrl) {
+                      return `<a href="${escapeHtml(content.footerInstagramUrl)}" target="_blank" rel="noopener noreferrer" class="c1-gallery-link" aria-label="Instagramへ移動">${base}</a>`;
+                    }
+                    return base;
+                  })()
+                : '';
             const body = `<div class="section-body"><h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2><div class="wo-sec-prose">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div></div>`;
             if (
               tid === 'cafe_1' &&

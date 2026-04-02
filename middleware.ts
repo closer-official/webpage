@@ -1,6 +1,6 @@
 /**
  * 1) webpage.closer-official.com: HTTP Basic（WEBPAGE_BASIC_AUTH_* 必須・未設定は503）。
- *    ヒアリング・テンプレギャラリー・店主向け配信停止ページ等の公開パスだけ Basic なし（isPublicHearingPath）。
+ *    ヒアリング・テンプレギャラリー・店主向け（共有LPプレビュー・配信停止・埋め込み用API等）の公開パスだけ Basic なし（isPublicHearingPath）。
  * 2) preview.{ドメイン}: /pv{24hex} → ジムLP プレビュー（salesPreview クエリ）
  * 3) supernihonshi.store-official.net: 日本史LP をルートに返す
  * 4) *.store-official.net（店舗サブドメイン）: ルート `/` だけジムLPテンプレへリライト
@@ -25,13 +25,25 @@ function isStoreOfficialSubdomain(host: string): boolean {
   return h.endsWith('.store-official.net');
 }
 
-/** ヒアリング・テンプレギャラリー・テンプレプレビュー等（/api/customer-intake-list は含めない） */
+/** ヒアリング・テンプレギャラリー・店主向けデモ／共有URL 等（管理APIは含めない） */
 function isPublicHearingPath(method: string, pathname: string): boolean {
   const p = pathname.replace(/\/$/, '') || '/';
   const m = method.toUpperCase();
   /** 店主向け：案内メールの配信停止（Basic なし・メール内リンクから直接開く） */
   const isMailPreferencePage = p === '/mail-preference.html';
   const isOutreachOptOutApi = p === '/api/outreach/opt-out';
+  /** 共有プレビューURL（検閲でコピーするリンク）。ID 推測困難前提で Basic なし */
+  const isDashboardPreview =
+    (m === 'GET' || m === 'HEAD') && /^\/api\/preview\/[^/]+$/.test(p);
+  /** LP 内の店向けデモ画像（例: cafe_1 マーキー） */
+  const isCafe1PublicStatic = (m === 'GET' || m === 'HEAD') && p.startsWith('/cafe-1/');
+  /** プレビュー LP からの予約・決済まわり（オプション利用時） */
+  const isBookingAvailabilityGet = m === 'GET' && /^\/api\/booking\/availability\/[^/]+$/.test(p);
+  const isBookingPost =
+    m === 'POST' && /^\/api\/booking\/[^/]+$/.test(p) && !p.includes('/availability');
+  const isCheckoutRedirectGet = (m === 'GET' || m === 'HEAD') && p === '/api/checkout-redirect';
+  const isLpPaymentFormGet = (m === 'GET' || m === 'HEAD') && p === '/api/lp-payment-form';
+  const isCreateCheckoutPost = m === 'POST' && p === '/api/create-checkout-session';
   const isIntakeForm = p === '/api/customer-intake' || p === '/customer-intake';
   const isDraftApi = p === '/api/customer-intake-draft' || p.startsWith('/api/customer-intake-draft/');
   const isTemplatePreview = p.startsWith('/api/template-preview/');
@@ -50,12 +62,28 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
       isTemplatePreview ||
       isTemplateGallery ||
       isPublicTranslate ||
-      isBrandAssetPath
+      isBrandAssetPath ||
+      isMailPreferencePage ||
+      isOutreachOptOutApi ||
+      isDashboardPreview ||
+      isCafe1PublicStatic ||
+      isBookingAvailabilityGet ||
+      isBookingPost ||
+      isCheckoutRedirectGet ||
+      isLpPaymentFormGet ||
+      isCreateCheckoutPost
     );
   }
   if (isIntakeForm && (m === 'GET' || m === 'POST')) return true;
   if (isMailPreferencePage && (m === 'GET' || m === 'HEAD')) return true;
   if (isOutreachOptOutApi && m === 'POST') return true;
+  if (isDashboardPreview) return true;
+  if (isCafe1PublicStatic) return true;
+  if (isBookingAvailabilityGet) return true;
+  if (isBookingPost) return true;
+  if (isCheckoutRedirectGet) return true;
+  if (isLpPaymentFormGet) return true;
+  if (isCreateCheckoutPost) return true;
   if (m === 'GET' && isTemplatePreview) return true;
   if (m === 'GET' && isTemplateGallery) return true;
   if (m === 'GET' && isBrandAssetPath) return true;
