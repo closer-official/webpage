@@ -376,10 +376,10 @@
           <div id="f-hero-slides-list"></div>
           <div class="row-actions"><button type="button" class="btn" id="btn-add-hero-slide">＋ 画像を追加</button></div>
         </div>
-        <label>店舗名（トップ写真の上にだけ表示） <input type="text" id="f-siteName" /></label>
+        <label>店舗名（トップ写真の上に表示。検索用タイトルの下書きの元にもなります） <input type="text" id="f-siteName" /></label>
         <label>メイン見出し（写真の直下・白背景エリア） <input type="text" id="f-headline" /></label>
-        <label>リード文（写真の直下・見出しの下） <textarea id="f-subheadline" rows="3"></textarea></label>
-        <label>ページタイトル（ブラウザのタブ・&lt;title&gt;） <input type="text" id="f-title" /></label>
+        <label>リード文（写真の直下・見出しの下。検索の説明文の下書きの元にもなります） <textarea id="f-subheadline" rows="3"></textarea></label>
+        <label>ページタイトル（ブラウザのタブ・検索タイトルの下書きの元にもなります） <input type="text" id="f-title" /></label>
       </div>
 
       <div class="tw-form-block tw-hidden" data-tw-for="non_cafe_1">
@@ -509,12 +509,35 @@
         </label>
       </div>
 
-      <h2 class="tw-form-block" data-tw-for="all" style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">3. SEO</h2>
-      <label>meta title <input type="text" id="f-metaTitle" /></label>
-      <label>meta description <textarea id="f-metaDescription" rows="2"></textarea></label>
-      <label>OG 画像 URL（https） <input type="url" id="f-ogImageUrl" /></label>
-      <label>canonical URL <input type="text" id="f-canonicalUrl" /></label>
-      <label>keywords <input type="text" id="f-keywords" /></label>
+      <h2 class="tw-form-block" data-tw-for="all" style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">
+        3. 検索表示（SEO）
+      </h2>
+      <p class="tw-form-block" data-tw-for="all" style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px; line-height: 1.5">
+        <strong>専門知識は不要です。</strong>上の<strong>店名・ページタイトル・キャッチ・住所</strong>を書いておけば、空欄の項目は自動で下書きが入ります（Googleの検索結果に出るタイトル・説明文のイメージです）。気になるところだけ直してください。
+      </p>
+      <div class="row-actions tw-form-block" data-tw-for="all" style="margin-bottom: 12px">
+        <button type="button" class="btn" id="btn-seo-autofill">空のSEO欄を今の内容で埋める</button>
+      </div>
+      <label>
+        検索結果のタイトル（タブに出る短い名前・最大120文字）
+        <input type="text" id="f-metaTitle" maxlength="120" placeholder="例: 店名｜エリア" />
+      </label>
+      <label>
+        検索結果の説明文（1〜2文・最大320文字）
+        <textarea id="f-metaDescription" rows="3" maxlength="320" placeholder="キャッチや住所が自動で入ります。必要なら編集"></textarea>
+      </label>
+      <label>
+        SNS等でシェアされたときの画像（1枚目のトップ写真と同じでもOK）
+        <input type="url" id="f-ogImageUrl" placeholder="https://…（空ならトップ写真を利用）" />
+      </label>
+      <label>
+        正式なページURL（本番のURLが決まってから・未決定は空でOK）
+        <input type="text" id="f-canonicalUrl" placeholder="https://example.com/…" />
+      </label>
+      <label>
+        検索しそうな言葉（カンマ区切り・店名や料理名など）
+        <input type="text" id="f-keywords" maxlength="500" placeholder="例: 店名,ラーメン,つくば" />
+      </label>
     </div>
 
     <div class="panel" id="share-box" style="display: none">
@@ -550,6 +573,7 @@
         var currentCustomId = null;
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
+        var seoAutofillTimer = null;
         var addBtnIdsBound = false;
         var customizationBaseById = {};
         var EMBED_STYLE_TEMPLATE_IDS = {
@@ -1055,6 +1079,7 @@
         }
 
         function buildOverrideFromForm() {
+          fillEmptySeoFromBasics();
           var heroRows = Array.prototype.map.call(document.querySelectorAll('#f-hero-slides-list .repeat-item'), function (row) {
             return {
               url: row.querySelector('.f-hero-url').value.trim(),
@@ -1310,6 +1335,7 @@
             if (!knownKeys[k]) extra[k] = ov[k];
           });
           document.getElementById('f-advanced-override-json').value = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : '';
+          fillEmptySeoFromBasics();
           applyWorkerFormTemplateVisibility();
         }
 
@@ -1416,6 +1442,68 @@
           var ig = fig && fig.value ? fig.value.trim() : '';
           if (ig && /^https?:\/\//i.test(ig)) {
             if (cip && !cip.value.trim()) cip.value = ig;
+          }
+        }
+
+        function scheduleSeoAutofillFromBasics() {
+          clearTimeout(seoAutofillTimer);
+          seoAutofillTimer = setTimeout(function () {
+            fillEmptySeoFromBasics();
+          }, 400);
+        }
+
+        /** 空欄のSEOだけ、店名・キャッチ・住所・MEO・トップ写真から埋める（上書きしない） */
+        function fillEmptySeoFromBasics() {
+          var site = document.getElementById('f-siteName').value.trim();
+          var title = document.getElementById('f-title').value.trim();
+          var head = document.getElementById('f-headline').value.trim();
+          var sub = document.getElementById('f-subheadline').value.trim();
+          var addr = document.getElementById('f-footerAddress').value.trim().replace(/\n/g, ' ');
+          var brand = (title || site || head || '').replace(/\s+/g, ' ').trim();
+          if (!brand) return;
+
+          var region = document.getElementById('f-meo-addressRegion').value.trim();
+          var locality = document.getElementById('f-meo-addressLocality').value.trim();
+          var loc = (region + locality).trim();
+          var tid = resolveWorkerFormBaseTemplateId();
+          var isCafe = tid === 'cafe_1';
+
+          var mt = document.getElementById('f-metaTitle');
+          if (mt && !mt.value.trim()) {
+            var line = brand;
+            if (loc && isCafe) line = brand + '｜' + loc;
+            mt.value = line.slice(0, 120);
+          }
+
+          var md = document.getElementById('f-metaDescription');
+          if (md && !md.value.trim()) {
+            var parts = [];
+            if (sub) parts.push(sub);
+            else if (head && head !== brand) parts.push(head);
+            if (addr) parts.push(addr.slice(0, 140));
+            md.value = (parts.join('。').trim() || brand + 'のご案内・お店の情報ページです。').slice(0, 320);
+          }
+
+          var kw = document.getElementById('f-keywords');
+          if (kw && !kw.value.trim()) {
+            var kws = [brand];
+            if (loc) kws.push(loc);
+            var cuisine = document.getElementById('f-meo-servesCuisine').value.trim();
+            if (cuisine) {
+              cuisine.split(/[;；,，、]/).forEach(function (p) {
+                var t = p.trim();
+                if (t) kws.push(t);
+              });
+            }
+            if (isCafe) kws.push('お店');
+            kw.value = kws.join(',').slice(0, 500);
+          }
+
+          var og = document.getElementById('f-ogImageUrl');
+          if (og && !og.value.trim()) {
+            var hu = document.querySelector('#f-hero-slides-list .f-hero-url');
+            var u = hu && hu.value ? hu.value.trim() : '';
+            if (u && /^https?:\/\//i.test(u)) og.value = u;
           }
         }
 
@@ -1996,15 +2084,24 @@
           }
         };
 
+        document.getElementById('btn-seo-autofill').onclick = function () {
+          fillEmptySeoFromBasics();
+          showErr('save-err', '');
+          showErr('save-msg', '空のSEO欄に下書きを入れました。必要なら上書きしてください。');
+          scheduleLivePreview();
+        };
+
         var editorPane = document.getElementById('editor-pane');
         if (editorPane) {
           editorPane.addEventListener('input', function () {
             scheduleLivePreview();
             syncRelatedUrlFieldsFromInputs();
+            scheduleSeoAutofillFromBasics();
           });
           editorPane.addEventListener('change', function () {
             scheduleLivePreview();
             syncRelatedUrlFieldsFromInputs();
+            scheduleSeoAutofillFromBasics();
           });
         }
         ;['f-mapEmbedUrl', 'f-footerInstagramUrl'].forEach(function (fid) {

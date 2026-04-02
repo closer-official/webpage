@@ -222,6 +222,79 @@ function resolveTemplateOverride(customization) {
   return customization;
 }
 
+/**
+ * カスタム適用後の content から検索用メタの下書きを作る（作業者が SEO 用語を知らなくても店名・キャッチから成立する値）。
+ */
+function buildDefaultSeoFromMergedContent(id, templateLabelName, content) {
+  const fallback = String(templateLabelName || 'サイト').trim() || 'サイト';
+  if (!content || typeof content !== 'object') {
+    return {
+      metaTitle: `${fallback}`.slice(0, 120),
+      metaDescription: `${fallback}のご案内ページです。`.slice(0, 320),
+      keywords: fallback.slice(0, 500),
+      ogImageUrl: '',
+      canonicalUrl: '',
+    };
+  }
+  const brand =
+    String(content.title || content.siteName || content.headline || fallback)
+      .trim()
+      .replace(/\s+/g, ' ') || fallback;
+  const sub = String(content.subheadline || '')
+    .trim()
+    .replace(/\s+/g, ' ');
+  const head = String(content.headline || '')
+    .trim()
+    .replace(/\s+/g, ' ');
+  const addr = String(content.footerAddress || '')
+    .trim()
+    .replace(/\n/g, ' ');
+
+  let locality = '';
+  if (content.cafeMeo && typeof content.cafeMeo === 'object') {
+    const m = content.cafeMeo;
+    locality = [m.addressRegion, m.addressLocality].filter(Boolean).join('');
+  }
+
+  let metaTitle = brand;
+  if (locality && id === 'cafe_1') metaTitle = `${brand}｜${locality}`;
+  metaTitle = metaTitle.slice(0, 120);
+
+  const descParts = [];
+  if (sub) descParts.push(sub);
+  else if (head && head !== brand) descParts.push(head);
+  if (addr) descParts.push(addr.slice(0, 140));
+  let metaDescription = descParts.join('。').trim();
+  if (!metaDescription) metaDescription = `${brand}のご案内・お店の情報ページです。`;
+  metaDescription = metaDescription.slice(0, 320);
+
+  const kwParts = [brand];
+  if (locality) kwParts.push(locality);
+  if (content.cafeMeo && typeof content.cafeMeo === 'object' && content.cafeMeo.servesCuisine) {
+    const parts = String(content.cafeMeo.servesCuisine)
+      .split(/[;；,，、]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    kwParts.push(...parts);
+  }
+  if (id === 'cafe_1') kwParts.push('お店');
+
+  let ogImageUrl = '';
+  if (Array.isArray(content.heroSlides) && content.heroSlides.length) {
+    const u = String(content.heroSlides[0] || '').trim();
+    if (/^https?:\/\//i.test(u)) ogImageUrl = u;
+  }
+
+  return {
+    metaTitle,
+    metaDescription,
+    keywords: kwParts.filter(Boolean).join(',').slice(0, 500),
+    ogImageUrl,
+    canonicalUrl: '',
+  };
+}
+
 export function renderTemplatePreview(templateId, customization = null, options = {}) {
   const cust = customization && typeof customization === 'object' ? customization : null;
   if (cust?.blueprint && typeof cust.blueprint === 'object' && cust.blueprint.version === 1) {
@@ -441,15 +514,9 @@ export function renderTemplatePreview(templateId, customization = null, options 
       heroSlides: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400'],
     };
   }
-  let seo = {
-    metaTitle: `${name} テンプレート確認`,
-    metaDescription: `${name} テンプレートの確認用ページです。`,
-    keywords: '',
-    ogImageUrl: '',
-    canonicalUrl: '',
-  };
 
   content = applyTemplateCustomization(content, ov);
+  let seo = buildDefaultSeoFromMergedContent(id, name, content);
   seo = applySeoCustomization(seo, ov);
   if (options && options.returnResolvedData) {
     return { id, content, seo };
