@@ -316,6 +316,36 @@
         </div>
 
         <div class="panel">
+          <h2>地図を埋め込む（コピペ）</h2>
+          <p class="locked-note">
+            Googleマップの「共有」→「地図を埋め込む」→「HTMLをコピー」で出る
+            <strong>iframe タグをそのまま</strong>貼り付けると、下の「Googleマップの埋め込みURL」欄に
+            <code>src</code>
+            のURLだけが入ります。貼り付け後、少し待つか「地図URLに取り込む」を押してください。
+          </p>
+          <p class="locked-note" style="margin-top: 8px">
+            短縮リンク（例:
+            <code>https://maps.app.goo.gl/…</code>
+            ）も試せます。うまくいかないときは iframe のほうが確実です（Google公式の埋め込み用
+            <code>pb=</code>
+            付きURLになります）。
+          </p>
+          <label>
+            埋め込みHTML または URL
+            <textarea
+              id="map-embed-paste"
+              class="mono"
+              rows="4"
+              placeholder='&lt;iframe src="https://www.google.com/maps/embed?pb=..." ...&gt;&lt;/iframe&gt;'
+            ></textarea>
+          </label>
+          <div class="row-actions">
+            <button type="button" class="btn primary" id="btn-map-embed-apply">地図URLに取り込む</button>
+          </div>
+          <p id="map-paste-err" class="err" style="display: none"></p>
+        </div>
+
+        <div class="panel">
           <h2>調査用プロンプト（コピーして AI に渡す）</h2>
           <p class="locked-note">AI が返した JSON を下の欄に貼り付けて「フォームに反映」すると入力欄へ流し込めます。</p>
           <textarea id="research-prompt" class="mono" readonly rows="12"></textarea>
@@ -359,6 +389,7 @@
 
         var currentCustomId = null;
         var liveTimer = null;
+        var mapPasteTimer = null;
         var customizationList = [];
 
         function credFetch(url, opts) {
@@ -759,6 +790,49 @@
               btn.disabled = false;
             });
         };
+
+        function applyMapEmbedPaste() {
+          showErr('map-paste-err', '');
+          showErr('save-err', '');
+          var raw = document.getElementById('map-embed-paste').value.trim();
+          if (!raw) {
+            showErr('map-paste-err', 'iframe または URL を貼り付けてください。');
+            return;
+          }
+          var btn = document.getElementById('btn-map-embed-apply');
+          btn.disabled = true;
+          credFetch(api + '/resolve-map-embed-url', {
+            method: 'POST',
+            body: JSON.stringify({ raw: raw }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, status: r.status, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'HTTP ' + x.status);
+              if (!x.j.embedUrl) throw new Error('埋め込みURLがありません');
+              document.getElementById('f-mapEmbedUrl').value = extractCleanHttpUrl(x.j.embedUrl);
+              refreshResearchPrompt();
+              scheduleLivePreview();
+              var el = document.getElementById('save-msg');
+              el.style.display = 'block';
+              el.textContent = 'Googleマップの埋め込みURLを設定しました。';
+            })
+            .catch(function (e) {
+              showErr('map-paste-err', e.message || String(e));
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        }
+
+        document.getElementById('btn-map-embed-apply').onclick = applyMapEmbedPaste;
+        document.getElementById('map-embed-paste').addEventListener('paste', function () {
+          clearTimeout(mapPasteTimer);
+          mapPasteTimer = setTimeout(applyMapEmbedPaste, 450);
+        });
 
         document.getElementById('mode-select').onchange = function () {
           var edit = document.getElementById('mode-select').value === 'edit';

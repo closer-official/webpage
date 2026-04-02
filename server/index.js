@@ -81,6 +81,7 @@ import {
   BOOKING_SLOT_DURATION_MIN,
 } from './bookingUtil.js';
 import { sendBookingNotification } from './bookingEmail.js';
+import { resolveMapEmbedFromRaw } from './mapEmbedResolve.js';
 
 /** 公開ページ UI 翻訳（Gemini） */
 const publicTranslateHits = new Map();
@@ -1315,6 +1316,24 @@ app.post('/api/cafe-1-basic-extract-from-text', async (req, res) => {
   } catch (e) {
     console.error('[cafe-1-basic-extract-from-text]', e);
     res.status(500).json({ error: e?.message || '抽出に失敗しました' });
+  }
+});
+
+/** iframe 全文・埋め込みURL・Google短縮リンク → プレビュー用の埋め込みURL（管理者のみ） */
+app.post('/api/resolve-map-embed-url', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = String(req.body?.raw ?? '').trim();
+  if (!raw) return res.status(400).json({ error: 'raw が空です' });
+  if (raw.length > 50000) return res.status(400).json({ error: '入力が長すぎます' });
+  try {
+    const out = await resolveMapEmbedFromRaw(raw);
+    if (!out.embedUrl) {
+      return res.status(422).json({ error: out.error || '埋め込みURLを取得できませんでした' });
+    }
+    res.json({ ok: true, embedUrl: out.embedUrl });
+  } catch (e) {
+    console.error('[resolve-map-embed-url]', e);
+    res.status(500).json({ error: e?.message || 'resolve failed' });
   }
 });
 
