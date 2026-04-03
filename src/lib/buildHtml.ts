@@ -1590,7 +1590,6 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
     }
   }
 
-  const igClientPerm = String(content.cafeInstagramPermalink ?? '').trim();
   const igFeed = content.cafeInstagramFeedItems ?? [];
   if (tid === 'cafe_1' && igFeed.length > 0) {
     const igProfileUrl = String(content.footerInstagramUrl ?? '').trim();
@@ -1612,18 +1611,6 @@ ${paymentBoot('payment-iframe', 'payment-fallback-link')}
             <div class="c1-ig-feed-row">${igCellHtml}</div>
             <div class="c1-ig-feed-row c1-ig-feed-row--dup" aria-hidden="true" inert>${igCellHtml}</div>
           </div>
-        </div>
-      </div>
-    </section>`;
-  }
-  if (tid === 'cafe_1' && igClientPerm) {
-    extraSectionsHtml += `
-    <section class="section wo-sec c1-ig-embed-sec" id="instagram" aria-labelledby="c1-ig-embed-title"${extraMotionAttr}>
-      <div class="section-body">
-        <h2 id="c1-ig-embed-title" class="wo-sec-heading">Instagram</h2>
-        <div class="wo-sec-prose"><p>日替わり・限定メニューも投稿しています。埋め込みは公開投稿のURLを設定すると表示されます。</p></div>
-        <div class="c1-ig-embed-wrap">
-          <blockquote class="instagram-media" data-instgrm-permalink="${escapeHtml(igClientPerm)}" data-instgrm-version="14" style="background:#FFF;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15);margin:1px auto;max-width:540px;min-width:280px;padding:0;width:99.375%"></blockquote>
         </div>
       </div>
     </section>`;
@@ -1812,11 +1799,6 @@ ${paymentBoot('payment-iframe-builder', 'payment-fallback-link-builder')}
           return `<a class="c1-review-sticky" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Googleクチコミ投稿">${escapeHtml(txt)}</a>`;
         })()
       : '';
-  const cafe1IgEmbedScript =
-    tid === 'cafe_1' && String(content.cafeInstagramPermalink ?? '').trim()
-      ? '<script async src="https://www.instagram.com/embed.js"></script>'
-      : '';
-
   const bodyInner =
     tid === 'builder'
       ? `${skipLink}${builderViewsHtml}${builderViewScript}`
@@ -1873,8 +1855,7 @@ ${reserveSectionHtml}
           siteName: content.siteName || content.title || '',
         })
       : ''
-  }
-  ${cafe1IgEmbedScript}`;
+  }`;
 
   return `<!DOCTYPE html>
 <html lang="ja">
