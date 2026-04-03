@@ -2511,7 +2511,18 @@
               .then(function (x) {
                 if (!x.ok) throw new Error(x.j.error || '保存失敗');
                 updatePreviewUrl();
-                showErr('save-msg', '保存しました（下書き）。');
+                var autoLid = x.j.item && x.j.item.linkedDashboardId;
+                return refreshDashboardCache().then(function () {
+                  var sel = document.getElementById('f-linked-dashboard');
+                  if (autoLid && sel) {
+                    sel.value = autoLid;
+                    syncWorkerOutreachPanel();
+                  }
+                  showErr(
+                    'save-msg',
+                    '保存しました（下書き）。送付・フェーズ管理に自動で案件が載っています（紐づけセレクトも更新済みです）。',
+                  );
+                });
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
@@ -2545,9 +2556,18 @@
                 document.getElementById('mode-select').dispatchEvent(new Event('change'));
                 loadBasesAndCustoms().then(function () {
                   document.getElementById('existing-id').value = currentCustomId;
+                  var autoLid = x.j.item && x.j.item.linkedDashboardId;
+                  var sel = document.getElementById('f-linked-dashboard');
+                  if (autoLid && sel) {
+                    sel.value = autoLid;
+                    syncWorkerOutreachPanel();
+                  }
                 });
                 updatePreviewUrl();
-                showErr('save-msg', '新規ドラフトを保存しました。以降は「既存のカスタムを編集」で開けます。');
+                showErr(
+                  'save-msg',
+                  '新規ドラフトを保存しました。送付・フェーズ管理に自動で案件を追加しました。以降は「既存のカスタムを編集」で開けます。',
+                );
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));

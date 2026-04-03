@@ -345,6 +345,8 @@ export interface DashboardItem {
   previewEditCss?: string;
   /** 3案LPのときの各テンプレHTML（保存時に再生成される） */
   contentVariants?: { templateId: string; html: string }[];
+  /** 店舗ドラフト（template-customizations）と紐づくときのカスタム ID（作業者用保存で自動付与） */
+  linkedTemplateCustomizationId?: string;
   /** マスターから「個別用に複製」したときのメモ（例: A社向け） */
   personalizationLabel?: string;
   /** 予約システムで確定済みの枠キー `YYYY-MM-DD_HH:mm` */

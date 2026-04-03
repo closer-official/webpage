@@ -67,6 +67,7 @@ import {
   mapGenreToBasicPresetKind,
 } from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
+import { ensureDashboardForWorkerDraft } from './dashboardFromWorkerDraft.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
 import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
@@ -1402,7 +1403,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
       else delete nextItem.linkedDashboardId;
     }
     customizations[i] = nextItem;
+    const dashUpdate = await store.getDashboard();
+    ensureDashboardForWorkerDraft(nextItem, body, dashUpdate);
     await store.setTemplateCustomizations(customizations);
+    await store.setDashboard(dashUpdate);
     return res.json({ ok: true, item: customizations[i] });
   }
 
@@ -1431,7 +1435,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
     updatedAt: now,
   };
   customizations.unshift(item);
+  const dashCreate = await store.getDashboard();
+  ensureDashboardForWorkerDraft(item, body, dashCreate);
   await store.setTemplateCustomizations(customizations);
+  await store.setDashboard(dashCreate);
   res.json({ ok: true, item });
 });
 
@@ -1943,6 +1950,7 @@ app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   newItem.sleepUntil = undefined;
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
+  delete newItem.linkedTemplateCustomizationId;
   dashboard.unshift(newItem);
   await store.setDashboard(dashboard);
   res.status(201).json(newItem);
