@@ -171,6 +171,14 @@
         font-size: 0.88rem;
         margin: 0;
       }
+      .share-urls-wrap {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #2a3b52;
+      }
+      .share-url-sub + .share-url-sub {
+        margin-top: 14px;
+      }
     </style>
   </head>
   <body>
@@ -178,7 +186,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。<strong>送信待ち（製作してまだ送付していない）</strong>は「OK済」のブロックのうち<strong>送信待ち（OK済・まだ送付していない）</strong>にまとまります（下の「送信済み — 送信待ち」は<strong>一度送ったあと</strong>の再送待ちです）。店主向け配信停止URLも各行からコピーできます。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
+        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。<strong>送信待ち（製作してまだ送付していない）</strong>は「OK済」のブロックのうち<strong>送信待ち（OK済・まだ送付していない）</strong>にまとまります（下の「送信済み — 送信待ち」は<strong>一度送ったあと</strong>の再送待ちです）。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）の両方を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -252,6 +260,46 @@
           return o + '/mail-preference.html?t=' + encodeURIComponent(token);
         }
 
+        function templatePreviewUrl(customizationId) {
+          if (!customizationId) return '';
+          return (
+            window.location.origin + '/api/template-preview/' + encodeURIComponent(String(customizationId).trim())
+          );
+        }
+
+        /** 店舗ドラフト（linkedTemplateCustomizationId）が付いている案件用 */
+        function renderTemplatePreviewBlock(container, item) {
+          container.appendChild(
+            el('p', { class: 'muted', text: 'プレビューページ（LPの見た目・共有用・Basic 不要）' }),
+          );
+          var cid = String(item.linkedTemplateCustomizationId || '').trim();
+          if (!cid) {
+            container.appendChild(
+              el('p', {
+                class: 'muted',
+                text: '※ 店舗ドラフトと未紐づけです。作業者用編集で保存すると自動で紐づき、次回から表示されます。',
+              }),
+            );
+            return;
+          }
+          var u = templatePreviewUrl(cid);
+          var ur = el('div', { class: 'url-row' });
+          ur.appendChild(el('input', { type: 'text', readonly: 'readonly', value: u }));
+          var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
+          cp.onclick = function () {
+            navigator.clipboard.writeText(u);
+          };
+          ur.appendChild(cp);
+          var op = document.createElement('a');
+          op.className = 'btn small';
+          op.href = u;
+          op.target = '_blank';
+          op.rel = 'noopener noreferrer';
+          op.textContent = '別タブで開いて確認';
+          ur.appendChild(op);
+          container.appendChild(ur);
+        }
+
         /** 全ステータスで配信停止URLを確認できるようにする */
         function renderUnsubscribeBlock(container, item) {
           container.appendChild(
@@ -283,6 +331,17 @@
           op.textContent = '別タブで開いて確認';
           ur.appendChild(op);
           container.appendChild(ur);
+        }
+
+        function renderShareUrlsSection(container, item) {
+          var wrap = el('div', { class: 'share-urls-wrap' });
+          var pv = el('div', { class: 'share-url-sub' });
+          var us = el('div', { class: 'share-url-sub' });
+          renderTemplatePreviewBlock(pv, item);
+          renderUnsubscribeBlock(us, item);
+          wrap.appendChild(pv);
+          wrap.appendChild(us);
+          container.appendChild(wrap);
         }
 
         function el(tag, attrs, children) {
@@ -435,7 +494,7 @@
               }
             }
 
-            renderUnsubscribeBlock(col2, item);
+            renderShareUrlsSection(col2, item);
 
             var delBtn = el('button', { type: 'button', class: 'btn small danger', text: '一覧から削除' });
             delBtn.onclick = function () {
