@@ -254,8 +254,9 @@ function buildDefaultSeoFromMergedContent(id, templateLabelName, content) {
       canonicalUrl: '',
     };
   }
+  /** siteName / headline を title より優先（cafe_1 既定の title が道玄坂のまま残り OGP が固定化するのを防ぐ） */
   const brand =
-    String(content.title || content.siteName || content.headline || fallback)
+    String(content.siteName || content.headline || content.title || fallback)
       .trim()
       .replace(/\s+/g, ' ') || fallback;
   const sub = String(content.subheadline || '')
@@ -532,7 +533,28 @@ export function renderTemplatePreview(templateId, customization = null, options 
     content.heroSlideStyles = [];
   }
   let seo = buildDefaultSeoFromMergedContent(id, name, content);
-  seo = applySeoCustomization(seo, ov);
+  if (options && options.previewSocialFromContent) {
+    const snapTitle = seo.metaTitle;
+    const snapDesc = seo.metaDescription;
+    seo = applySeoCustomization(seo, ov);
+    seo.metaTitle = snapTitle;
+    seo.metaDescription = snapDesc;
+  } else {
+    seo = applySeoCustomization(seo, ov);
+  }
+  if (options && options.previewCanonicalUrl) {
+    seo.canonicalUrl = options.previewCanonicalUrl;
+  }
+  const previewOrigin = options && options.previewAbsoluteOrigin ? String(options.previewAbsoluteOrigin).replace(/\/$/, '') : '';
+  if (previewOrigin) {
+    if (seo.ogImageUrl && seo.ogImageUrl.startsWith('/')) {
+      seo.ogImageUrl = previewOrigin + seo.ogImageUrl;
+    }
+    if (!seo.ogImageUrl && Array.isArray(content.heroSlides) && content.heroSlides.length) {
+      const u = String(content.heroSlides[0] || '').trim();
+      if (u.startsWith('/')) seo.ogImageUrl = previewOrigin + u;
+    }
+  }
   if (options && options.returnResolvedData) {
     return { id, content, seo };
   }

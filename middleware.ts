@@ -84,9 +84,10 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
   if (isCheckoutRedirectGet) return true;
   if (isLpPaymentFormGet) return true;
   if (isCreateCheckoutPost) return true;
-  if (m === 'GET' && isTemplatePreview) return true;
-  if (m === 'GET' && isTemplateGallery) return true;
-  if (m === 'GET' && isBrandAssetPath) return true;
+  /** HEAD: LINE 等のリンクプレビュー・検索クローラが先に叩くことがある */
+  if ((m === 'GET' || m === 'HEAD') && isTemplatePreview) return true;
+  if ((m === 'GET' || m === 'HEAD') && isTemplateGallery) return true;
+  if ((m === 'GET' || m === 'HEAD') && isBrandAssetPath) return true;
   if (m === 'POST' && isPublicTranslate) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
   if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;

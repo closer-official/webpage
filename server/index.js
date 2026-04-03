@@ -1111,33 +1111,57 @@ app.post('/api/template-customizations/extract-from-text', async (req, res) => {
   }
 });
 
-app.get('/api/template-preview/:templateId', (req, res) => {
+function templatePreviewPublicHandler(req, res) {
   const templateId = String(req.params.templateId || '');
+  const xfProto = String(req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim() || 'https';
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
+  const previewOrigin = host ? `${xfProto}://${host}` : '';
+  const previewCanonicalUrl = previewOrigin
+    ? `${previewOrigin}/api/template-preview/${encodeURIComponent(templateId)}`
+    : '';
+
   Promise.all([store.getTemplateCustomizations(), store.getGalleryDraftBuiltins()])
     .then(([customs, draftRec]) => {
       const candidate = findTemplateCandidate(templateId, customs);
-      if (!candidate) {
-        return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
-      }
+      const notFound = () => {
+        const msg = 'Template not found';
+        res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8');
+        if (req.method === 'HEAD') {
+          res.setHeader('Content-Length', Buffer.byteLength(msg, 'utf8'));
+          return res.end();
+        }
+        return res.send(msg);
+      };
+      if (!candidate) return notFound();
       const draftSet = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
       const isGalleryDraftBuiltin = !candidate.isCustom && draftSet.has(candidate.id);
-      if (isGalleryDraftBuiltin && adminAuthEnabled() && !isAdminAuthenticated(req)) {
-        return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Template not found');
-      }
+      if (isGalleryDraftBuiltin && adminAuthEnabled() && !isAdminAuthenticated(req)) return notFound();
+
       const baseId = candidate.baseTemplateId || candidate.id;
-      const html = renderTemplatePreview(baseId, candidate.customization || null);
+      const html = renderTemplatePreview(baseId, candidate.customization || null, {
+        previewSocialFromContent: true,
+        previewAbsoluteOrigin: previewOrigin || undefined,
+        previewCanonicalUrl: previewCanonicalUrl || undefined,
+      });
       if (!html) return res.status(500).json({ error: 'failed to render preview' });
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Cache-Control', 'private, max-age=60');
-      /* 同一オリジンからの iframe 埋め込み（ギャラリー・ヒアリング）を許可。他ドメインからの埋め込みは不可 */
+      const cc = candidate.isCustom ? 'private, no-store' : 'private, max-age=60';
+      res.setHeader('Cache-Control', cc);
       res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-      res.send(html);
+      if (req.method === 'HEAD') {
+        res.setHeader('Content-Length', Buffer.byteLength(html, 'utf8'));
+        return res.end();
+      }
+      return res.send(html);
     })
     .catch((e) => {
       console.error('[template-preview]', e);
-      res.status(500).json({ error: 'template preview failed' });
+      if (!res.headersSent) res.status(500).json({ error: 'template preview failed' });
     });
-});
+}
+
+app.get('/api/template-preview/:templateId', templatePreviewPublicHandler);
+app.head('/api/template-preview/:templateId', templatePreviewPublicHandler);
 
 app.get('/api/template-candidates', async (req, res) => {
   const customs = await store.getTemplateCustomizations();

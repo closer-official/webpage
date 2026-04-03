@@ -261,10 +261,10 @@
   </head>
   <body>
     <div class="app-head">
-      <h1>店舗ドラフト編集（作業者用）</h1>
-      <p class="sub">
-        <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
-        で変えてください）。<br />
+    <h1>店舗ドラフト編集（作業者用）</h1>
+    <p class="sub">
+      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
+      で変えてください）。<br />
         編集フォームの項目は<strong>選んだベーステンプレ</strong>に合わせて切り替わります（<strong>cafe_1</strong> だけ店主・お品書き・MEO など拡張項目が出ます。埋め込み型は名前・キャッチ・SEO中心）。<br />
         保存先は <code>/api/template-customizations</code>（<strong>この編集画面だけ</strong>管理者ログイン必須）。共有用の
         <code>/api/template-preview/&lt;カスタムID&gt;</code> を第三者が開くときは<strong>アプリのログインは不要</strong>です（ホスティング側でサイト全体にパスワードがかかっている場合は別）。左の枠は常に<strong>フォーム内容のライブプレビュー</strong>です。
@@ -332,7 +332,7 @@
           があれば中身だけ差し替え、無い <code>id</code> は末尾に追加します。メニュー・FAQ・店舗ブロックは、返ってきた行が1件以上あるときだけそのリストを置き換えます。
         </p>
         <textarea id="gemini-free-text" rows="8" placeholder="店名、住所、アクセス、営業時間、定休、メニューと価格、雰囲気、駐車場…"></textarea>
-        <div class="row-actions">
+      <div class="row-actions">
           <button type="button" class="btn primary" id="btn-gemini-free-text">Gemini で取り込む（部分反映）</button>
         </div>
         <p id="gemini-free-err" class="err" style="display: none"></p>
@@ -552,14 +552,14 @@
         <p class="tw-form-block tw-hidden" style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 8px" data-tw-for="non_cafe_1">
           埋め込みプレビューにそのまま出ない場合もありますが、保存データに含まれます。
         </p>
-        <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
+      <label>フッター文言（改行可） <textarea id="f-footerText" rows="4"></textarea></label>
       </div>
 
       <div class="tw-form-block" data-tw-for="cafe_1">
         <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター連絡先・SNS（ページ最下部）</h3>
-        <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
         <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
-        <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
         <p style="font-size: 0.72rem; color: #7d8fa3; margin: -4px 0 8px">
           空欄の「Instagram 投稿埋め込み（1投稿のURL）」には、ここと同じURLを自動で入れます（別URLにする場合は下の欄で上書き）。
         </p>
@@ -593,7 +593,7 @@
             テーマ <code>theme</code> や、フォームに無いキーをまとめて渡すときに使います。
           </span>
           <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
-        </label>
+      </label>
       </div>
 
       <h2 class="tw-form-block" data-tw-for="all" style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">
@@ -1073,7 +1073,7 @@
           if (!Number.isNaN(c)) out.confidence = Math.max(0, Math.min(1, c));
           if (Array.isArray(v.sourceUrls)) {
             out.sourceUrls = v.sourceUrls
-              .map(function (s) {
+                .map(function (s) {
                 return extractUrlFromPossiblyMarkdownLink(s);
               })
               .filter(function (s) {
@@ -1085,8 +1085,8 @@
             out.unknownFields = v.unknownFields
               .map(function (s) {
                 return String(s || '').trim();
-              })
-              .filter(Boolean)
+                })
+                .filter(Boolean)
               .slice(0, 40);
           }
           out.notes = String(v.notes || '').trim().slice(0, 500);
@@ -2145,13 +2145,13 @@
           opts = opts || {};
           if (!id) return Promise.reject(new Error('id が空です'));
           return credFetch(api + '/template-customizations')
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (list) {
-              var item = (list || []).find(function (x) {
-                return x.id === id;
-              });
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (list) {
+                var item = (list || []).find(function (x) {
+                  return x.id === id;
+                });
               if (!item) throw new Error('一覧に見つかりません。再読み込みするか、既存カスタムを選び直してください。');
               var baseId = String(item.baseTemplateId || '').trim();
 
@@ -2221,8 +2221,8 @@
               return;
             }
             loadExistingCustomizationById(id, { successMsg: '読み込みました。' }).catch(function (e) {
-              showErr('save-err', e.message || String(e));
-            });
+                showErr('save-err', e.message || String(e));
+              });
           } else {
             currentCustomId = null;
             previewBaseTemplateId = document.getElementById('base-template').value || '';
@@ -2230,9 +2230,9 @@
             var linkClear = document.getElementById('f-linked-dashboard');
             if (linkClear) linkClear.value = '';
             if (!previewBaseTemplateId) {
-              fillFormFromOverride({});
-              updatePreviewUrl();
-              showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
+            fillFormFromOverride({});
+            updatePreviewUrl();
+            showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
               return;
             }
             loadBuiltinDefaultsIntoForm(previewBaseTemplateId, {
