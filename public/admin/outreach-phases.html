@@ -179,6 +179,21 @@
       .share-url-sub + .share-url-sub {
         margin-top: 14px;
       }
+      .sender-panel label {
+        display: block;
+        font-size: 0.78rem;
+        color: #9aacbf;
+        margin-top: 10px;
+      }
+      .sender-panel label:first-of-type {
+        margin-top: 0;
+      }
+      .ok-msg {
+        color: #86efac;
+        font-size: 0.86rem;
+        margin: 0 0 0.75rem;
+        min-height: 1.25em;
+      }
     </style>
   </head>
   <body>
@@ -190,6 +205,23 @@
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
+      <div class="panel sender-panel" style="margin-bottom: 1rem">
+        <h2>送付文面用プロフィール（このブラウザに保存）</h2>
+        <p class="muted" style="margin: 0 0 8px">
+          メール／DMテンプレに自動で差し込みます。送信者名は<strong>必須</strong>（未入力のままコピーすると注意文が入ります）。
+        </p>
+        <label for="outreach-sender-name">送信者名（例：山田）</label>
+        <input type="text" id="outreach-sender-name" maxlength="80" placeholder="CLOSERの担当名" autocomplete="name" />
+        <label for="outreach-personal-email">個人メール（メール署名用・任意）</label>
+        <input
+          type="email"
+          id="outreach-personal-email"
+          maxlength="120"
+          placeholder="未入力のときは「xxxxx」のままコピーされます"
+          autocomplete="email"
+        />
+      </div>
+      <p id="copy-msg" class="ok-msg" style="display: none" aria-live="polite"></p>
       <div class="toolbar">
         <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
       </div>
@@ -198,6 +230,174 @@
     <div id="boards"></div>
     <script>
       (function () {
+        var STORAGE_SENDER_NAME = 'closer_outreach_sender_name';
+        var STORAGE_PERSONAL_EMAIL = 'closer_outreach_personal_email';
+
+        function getSavedSenderName() {
+          try {
+            return String(localStorage.getItem(STORAGE_SENDER_NAME) || '').trim();
+          } catch (e) {
+            return '';
+          }
+        }
+
+        function getSavedPersonalEmail() {
+          try {
+            return String(localStorage.getItem(STORAGE_PERSONAL_EMAIL) || '').trim();
+          } catch (e) {
+            return '';
+          }
+        }
+
+        function persistSenderProfile() {
+          var sn = document.getElementById('outreach-sender-name');
+          var pe = document.getElementById('outreach-personal-email');
+          try {
+            if (sn) localStorage.setItem(STORAGE_SENDER_NAME, String(sn.value || '').trim());
+            if (pe) localStorage.setItem(STORAGE_PERSONAL_EMAIL, String(pe.value || '').trim());
+          } catch (e) {}
+        }
+
+        function showCopyOk(label) {
+          var el = document.getElementById('copy-msg');
+          if (!el) return;
+          el.style.display = 'block';
+          el.textContent = (label || '文面') + 'をクリップボードにコピーしました。';
+          clearTimeout(showCopyOk._t);
+          showCopyOk._t = setTimeout(function () {
+            el.style.display = 'none';
+            el.textContent = '';
+          }, 2800);
+        }
+
+        function copyTextWithFeedback(text, label) {
+          navigator.clipboard.writeText(text).then(
+            function () {
+              showCopyOk(label);
+            },
+            function () {
+              window.prompt('コピーしてください:', text);
+            },
+          );
+        }
+
+        function outreachPreviewUrlForItem(item) {
+          var cid = String(item.linkedTemplateCustomizationId || '').trim();
+          return cid ? templatePreviewUrl(cid) : '';
+        }
+
+        function outreachShopName(item) {
+          var n = item.researched && item.researched.name;
+          return n ? String(n).trim() : '';
+        }
+
+        function buildOutreachEmailBody(item) {
+          var sender = getSavedSenderName();
+          if (!sender) sender = '（※上部パネルで送信者名を登録してください）';
+          var shop = outreachShopName(item) || '（店舗名未設定）';
+          var prev = outreachPreviewUrlForItem(item);
+          if (!prev) prev = '（プレビューURL：店舗ドラフトと紐づけが必要です）';
+          var opt = item.unsubscribeToken ? mailPrefUrl(item.unsubscribeToken) : '（配信停止URL：トークン未発行）';
+          var personalLine = getSavedPersonalEmail() || 'xxxxx';
+          return (
+            '突然のご連絡失礼いたします。\n' +
+            'WEB制作サービス「CLOSER」の' +
+            sender +
+            'と申します。\n' +
+            '\n' +
+            shop +
+            '様の投稿を拝見し、料理の写真が非常に魅力的だと感じました。\n' +
+            '\n' +
+            'ホームページが見当たらなかったため、\n' +
+            'お店の情報をもとに簡易的なデモページを作成いたしました。\n' +
+            '\n' +
+            '▼デモページ\n' +
+            prev +
+            '\n' +
+            '\n' +
+            'なお、制作自体は「divizero」というチームで行っております。\n' +
+            '\n' +
+            '今後このようなご連絡が不要な場合は、以下より配信停止いただけます。\n' +
+            opt +
+            '\n' +
+            '\n' +
+            '――――――――\n' +
+            sender +
+            '\n' +
+            'CLOSER\n' +
+            '（制作：divizero）\n' +
+            '個人メール：' +
+            personalLine +
+            '\n' +
+            '公式窓口：info@closer-official.com\n' +
+            '――――――――'
+          );
+        }
+
+        function buildOutreachDmBody(item) {
+          var sender = getSavedSenderName();
+          if (!sender) sender = '（※上部パネルで送信者名を登録してください）';
+          var prev = outreachPreviewUrlForItem(item);
+          if (!prev) prev = '（プレビューURL：店舗ドラフトと紐づけが必要です）';
+          return (
+            '突然すみません、インスタグラムの投稿を拝見して、\n' +
+            '料理の写真がすごく魅力的だなと思いました。\n' +
+            '\n' +
+            'WEB制作サービス「CLOSER」の' +
+            sender +
+            'と申します。\n' +
+            '\n' +
+            'ホームページが見当たらなかったので、\n' +
+            'お店の情報だけで5分ほどで簡単なデモを作ってみました👇\n' +
+            prev +
+            '\n' +
+            '\n' +
+            'このまま使える状態にはしてあります。\n' +
+            '不要でしたらスルーで大丈夫です。'
+          );
+        }
+
+        function renderOutreachTemplatesBlock(container, item) {
+          container.appendChild(
+            el('p', { class: 'muted', text: '送付文面テンプレ（店舗名・URL・配信停止を自動反映）' }),
+          );
+          var row = el('div', { class: 'url-row' });
+          var bMail = el('button', { type: 'button', class: 'btn small primary', text: 'メール用テンプレをコピー' });
+          bMail.onclick = function () {
+            persistSenderProfile();
+            if (!getSavedSenderName()) {
+              if (!window.confirm('送信者名が未登録です。プレースホルダ付きでコピーしますか？')) return;
+            }
+            copyTextWithFeedback(buildOutreachEmailBody(item), 'メール用テンプレ');
+          };
+          var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
+          bDm.onclick = function () {
+            persistSenderProfile();
+            if (!getSavedSenderName()) {
+              if (!window.confirm('送信者名が未登録です。プレースホルダ付きでコピーしますか？')) return;
+            }
+            copyTextWithFeedback(buildOutreachDmBody(item), 'DM用テンプレ');
+          };
+          row.appendChild(bMail);
+          row.appendChild(bDm);
+          container.appendChild(row);
+        }
+
+        (function initSenderProfileFields() {
+          var sn = document.getElementById('outreach-sender-name');
+          var pe = document.getElementById('outreach-personal-email');
+          if (sn) {
+            sn.value = getSavedSenderName();
+            sn.addEventListener('blur', persistSenderProfile);
+            sn.addEventListener('change', persistSenderProfile);
+          }
+          if (pe) {
+            pe.value = getSavedPersonalEmail();
+            pe.addEventListener('blur', persistSenderProfile);
+            pe.addEventListener('change', persistSenderProfile);
+          }
+        })();
+
         var PHASE_KEYS = ['pending_send', 'awaiting_reply', 'appointment', 'won', 'lost'];
         var PHASE_LABELS = {
           pending_send: '送信待ち',
@@ -337,10 +537,13 @@
           var wrap = el('div', { class: 'share-urls-wrap' });
           var pv = el('div', { class: 'share-url-sub' });
           var us = el('div', { class: 'share-url-sub' });
+          var tm = el('div', { class: 'share-url-sub' });
           renderTemplatePreviewBlock(pv, item);
           renderUnsubscribeBlock(us, item);
+          renderOutreachTemplatesBlock(tm, item);
           wrap.appendChild(pv);
           wrap.appendChild(us);
+          wrap.appendChild(tm);
           container.appendChild(wrap);
         }
 

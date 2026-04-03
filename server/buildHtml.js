@@ -29,10 +29,21 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-/** style 内の url("…") 用。escapeHtml は &→&amp; になり CSS が解釈せず背景画像が壊れる */
+/** style 内の url("…") の文字列本体用（CSS エスケープのみ） */
 function escapeCssUrlForStyle(s) {
   if (!s) return '';
   return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
+ * HTML の style="..."（二重引用符属性）に埋め込む url(...)。
+ * 属性内に生の " を入れると壊れるため、引用符は &quot; で表す。
+ */
+function cssUrlForHtmlStyleAttr(url) {
+  if (!url) return 'none';
+  const cssInner = escapeCssUrlForStyle(String(url));
+  const htmlInner = cssInner.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  return `url(&quot;${htmlInner}&quot;)`;
 }
 
 /** blob プレビュー等で iframe の相対 URL が壊れないよう補助 + 別タブフォールバック */
@@ -1249,7 +1260,7 @@ ${cafe1ShopLocationsHtml()}
             const x = Number.isFinite(Number(st.x)) ? Math.max(0, Math.min(100, Number(st.x))) : 50;
             const y = Number.isFinite(Number(st.y)) ? Math.max(0, Math.min(100, Number(st.y))) : 50;
             const zoom = Number.isFinite(Number(st.zoom)) ? Math.max(50, Math.min(250, Number(st.zoom))) : 100;
-            return `<div class="wo-hero-slide" style="background-image:url(\"${escapeCssUrlForStyle(u)}\");background-position:${x}% ${y}%;background-size:${zoom}% auto;"></div>`;
+            return `<div class="wo-hero-slide" style="background-image:${cssUrlForHtmlStyleAttr(u)};background-position:${x}% ${y}%;background-size:${zoom}% auto;"></div>`;
           })
           .join('')}</div>
       </div>
@@ -1257,7 +1268,7 @@ ${cafe1ShopLocationsHtml()}
       ${woHeroSlides.length > 1 ? `<div class="wo-hero-dots" role="tablist">${woHeroSlides.map((_, i) => `<button type="button" class="wo-hero-dot${i === 0 ? ' active' : ''}" aria-label="スライド ${i + 1} / ${woHeroSlides.length}"></button>`).join('')}</div>` : ''}
     </section>`
       : tid === 'pet_salon'
-        ? `<section class="hero hero-full-img pet-hero hell-hero-parallax" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")">
+        ? `<section class="hero hero-full-img pet-hero hell-hero-parallax" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -1266,7 +1277,7 @@ ${cafe1ShopLocationsHtml()}
       </div>
     </section>`
         : tid === 'ramen'
-        ? `<section class="hero hero-full-img ramen-hero hell-hero-parallax" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")">
+        ? `<section class="hero hero-full-img ramen-hero hell-hero-parallax" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -1275,7 +1286,7 @@ ${cafe1ShopLocationsHtml()}
       </div>
     </section>`
         : tid === 'professional'
-        ? `<section class="hero hero-full-img pro-hero hell-hero-parallax" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")">
+        ? `<section class="hero hero-full-img pro-hero hell-hero-parallax" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -1284,7 +1295,7 @@ ${cafe1ShopLocationsHtml()}
       </div>
     </section>`
         : tid === 'gym_yoga'
-        ? `<section class="hero hero-full-img hell-hero-parallax gym-hero-section" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")" aria-label="メインビジュアル">
+        ? `<section class="hero hero-full-img hell-hero-parallax gym-hero-section" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}" aria-label="メインビジュアル">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner gym-hero-inner">
         ${content.gymHeroBadge ? `<p class="gym-hero-badge">${escapeHtml(content.gymHeroBadge)}</p>` : ''}
@@ -1294,7 +1305,7 @@ ${cafe1ShopLocationsHtml()}
       </div>
     </section>`
         : tid === 'salon_barber' || tid === 'clinic_chiropractic' || tid === 'builder' || tid === 'cram_school' || tid === 'izakaya' || tid === 'apparel' || tid === 'event' || tid === 'studio_blush_editorial'
-        ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")">
+        ? `<section class="hero hero-full-img hell-hero-parallax" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -1302,7 +1313,7 @@ ${cafe1ShopLocationsHtml()}
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
-        : `<section class="hero hero-full-img" style="--hero-bg-img: url(\"${escapeCssUrlForStyle(heroImageUrl)}\")">
+        : `<section class="hero hero-full-img" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
       <div class="hero-inner">
         <h1>${escapeHtml(content.headline)}</h1>
@@ -1839,7 +1850,7 @@ ${paymentIframeBootJs('payment-iframe', 'payment-fallback-link')}
   let builderViewsHtml = '';
   let builderViewScript = '';
   if (tid === 'builder') {
-    const heroBg = `url("${escapeCssUrlForStyle(heroImageUrl)}")`;
+    const heroBg = cssUrlForHtmlStyleAttr(heroImageUrl);
     builderViewsHtml = `
 <div id="builder-views" class="builder-views">
   <div class="builder-view builder-view-hero active" id="builder-view-hero" data-builder-view="hero">
