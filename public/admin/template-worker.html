@@ -266,8 +266,8 @@
         <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
         で変えてください）。<br />
         編集フォームの項目は<strong>選んだベーステンプレ</strong>に合わせて切り替わります（<strong>cafe_1</strong> だけ店主・お品書き・MEO など拡張項目が出ます。埋め込み型は名前・キャッチ・SEO中心）。<br />
-        保存先は <code>/api/template-customizations</code>（管理者ログイン必須）。プレビューは
-        <code>/api/template-preview/&lt;カスタムID&gt;</code> です。左側は<strong>ライブプレビュー</strong>（未保存の変更も反映）です。
+        保存先は <code>/api/template-customizations</code>（<strong>この編集画面だけ</strong>管理者ログイン必須）。共有用の
+        <code>/api/template-preview/&lt;カスタムID&gt;</code> を第三者が開くときは<strong>アプリのログインは不要</strong>です（ホスティング側でサイト全体にパスワードがかかっている場合は別）。左の枠は常に<strong>フォーム内容のライブプレビュー</strong>です。
       </p>
     </div>
 
@@ -286,7 +286,9 @@
       <aside class="preview-pane" aria-label="ライブプレビュー">
         <div class="preview-toolbar">
           ライブプレビュー
-          <span class="hint">未保存のドラフトも反映（入力から少し遅れて更新）。保存済みの ID があるときは保存済み URL を表示。</span>
+          <span class="hint"
+            >左は常にフォームから生成したライブプレビューです。下の共有URLは<strong>最後に保存した内容</strong>（LINE等のリンクプレビューもこちら）。編集直後は左とURLが一致しないことがあるので、共有前に保存してください。</span
+          >
         </div>
         <div class="preview-status" id="preview-live-status"></div>
         <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-scripts allow-same-origin"></iframe>
@@ -600,7 +602,7 @@
       <h2>4. プレビュー・共有（送信）</h2>
       <p style="font-size: 0.84rem; color: #b8c5d6; margin: 0 0 8px">
         保存後にカスタム ID が確定します。<strong>プレビュー URL</strong>をコピーするか、メール作成画面を開いて本文に貼って送ってください（メールはブラウザの
-        mailto）。
+        mailto）。このURLを開く相手に、このサイトの<strong>管理者ユーザー名・パスワードは不要</strong>です。
       </p>
       <p class="preview-url" id="preview-url-text">（保存後に表示）</p>
       <div class="row-actions">
@@ -608,7 +610,9 @@
         <button type="button" class="btn" id="btn-copy-url" disabled>プレビューURLをコピー</button>
         <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
       </div>
-      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">左のプレビューを再読み込み</button>
+      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">
+        左を「保存済みURLの内容」で表示（デバッグ用）
+      </button>
     </div>
 
       </div>
@@ -1835,18 +1839,15 @@
           document.getElementById('btn-open-preview').disabled = !has;
           document.getElementById('btn-copy-url').disabled = !has;
           document.getElementById('btn-mailto').disabled = !has;
-          var iframe = document.getElementById('preview-live');
           var statusEl = document.getElementById('preview-live-status');
-          if (has) {
-            iframe.removeAttribute('srcdoc');
-            iframe.src = path;
-            if (statusEl) statusEl.textContent = '保存済みプレビュー（サーバー保存内容）を表示中';
-          } else {
-            iframe.removeAttribute('srcdoc');
-            iframe.src = 'about:blank';
+          if (!has) {
+            var iframeBlank = document.getElementById('preview-live');
+            iframeBlank.removeAttribute('srcdoc');
+            iframeBlank.src = 'about:blank';
             if (statusEl) statusEl.textContent = '';
-            scheduleLivePreview();
           }
+          /** 左の iframe は常に POST ライブプレビュー（共有URLは保存済みスナップショット用） */
+          scheduleLivePreview();
         }
 
         bindAddButtonsOnce();

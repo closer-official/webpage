@@ -1354,9 +1354,12 @@ app.post('/api/template-customizations/save', async (req, res) => {
         : customizations[i].status || 'published';
     const nextBp = body.blueprint != null ? sanitizeBlueprint(body.blueprint) : null;
     const normalizedOv = normalizeCustomizationInput(body.override || {});
-    const nextOverride = body.replaceOverride
-      ? normalizedOv
-      : { ...customizations[i].override, ...normalizedOv };
+    const prevOverride =
+      customizations[i].override && typeof customizations[i].override === 'object'
+        ? customizations[i].override
+        : {};
+    /** 置き換え指定でも「今回のフォームで送られたキーだけ」上書きし、省略された項目はDBのまま残す（テンプレ既定へ巻き戻り防止） */
+    const nextOverride = { ...prevOverride, ...normalizedOv };
     customizations[i] = {
       ...customizations[i],
       name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
