@@ -252,6 +252,39 @@
           return o + '/mail-preference.html?t=' + encodeURIComponent(token);
         }
 
+        /** 全ステータスで配信停止URLを確認できるようにする */
+        function renderUnsubscribeBlock(container, item) {
+          container.appendChild(
+            el('p', { class: 'muted', text: '配信停止ページ（店主向け・案内メールに貼るURL）' }),
+          );
+          var tok = item.unsubscribeToken || '';
+          if (!tok) {
+            container.appendChild(
+              el('p', {
+                class: 'muted',
+                text: '※ トークン未付与です。キュー経由の新規案件は作成時に付きます。再読み込みしても出ない場合は開発者に連絡ください。',
+              }),
+            );
+            return;
+          }
+          var u = mailPrefUrl(tok);
+          var ur = el('div', { class: 'url-row' });
+          ur.appendChild(el('input', { type: 'text', readonly: 'readonly', value: u }));
+          var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
+          cp.onclick = function () {
+            navigator.clipboard.writeText(u);
+          };
+          ur.appendChild(cp);
+          var op = document.createElement('a');
+          op.className = 'btn small';
+          op.href = u;
+          op.target = '_blank';
+          op.rel = 'noopener noreferrer';
+          op.textContent = '別タブで開いて確認';
+          ur.appendChild(op);
+          container.appendChild(ur);
+        }
+
         function el(tag, attrs, children) {
           var e = document.createElement(tag);
           if (attrs) {
@@ -376,22 +409,6 @@
                     showErr(String(e.message || e));
                   });
               };
-              var tok = item.unsubscribeToken || '';
-              if (tok) {
-                var u = mailPrefUrl(tok);
-                var ur = el('div', { class: 'url-row' });
-                ur.appendChild(
-                  el('input', { type: 'text', readonly: 'readonly', value: u }, []),
-                );
-                var cp = el('button', { type: 'button', class: 'btn small', text: 'URLコピー' }, []);
-                cp.onclick = function () {
-                  navigator.clipboard.writeText(u);
-                };
-                ur.appendChild(cp);
-                col2.appendChild(ur);
-              } else {
-                col2.appendChild(el('p', { class: 'muted', text: '配信停止URLは承認直後に発行されます。' }));
-              }
             } else {
               var eff = normalizePhase(item);
               col2.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
@@ -416,19 +433,9 @@
                   el('div', { class: 'feedback', text: '店主の一言（任意）: ' + item.optOutFeedback }),
                 );
               }
-              var tok2 = item.unsubscribeToken || '';
-              if (tok2) {
-                var u2 = mailPrefUrl(tok2);
-                var ur2 = el('div', { class: 'url-row' });
-                ur2.appendChild(el('input', { type: 'text', readonly: 'readonly', value: u2 }));
-                var cp2 = el('button', { type: 'button', class: 'btn small', text: 'URLコピー' });
-                cp2.onclick = function () {
-                  navigator.clipboard.writeText(u2);
-                };
-                ur2.appendChild(cp2);
-                col3.appendChild(ur2);
-              }
             }
+
+            renderUnsubscribeBlock(col2, item);
 
             var delBtn = el('button', { type: 'button', class: 'btn small danger', text: '一覧から削除' });
             delBtn.onclick = function () {

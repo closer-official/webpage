@@ -54,6 +54,10 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
   const isPublicTranslate = p === '/api/public/translate-ui';
   /** LP 本文から参照するロゴ（Basic 保護下でもテンプレプレビュー HTML と同じ未ログインで読める必要がある） */
   const isBrandAssetPath = p.startsWith('/payment-logos/') || p.startsWith('/social-icons/');
+  /** ブラウザが自動取得（Basic 401 だと認証ダイアログが先に出る） */
+  const isPublicRootAsset =
+    (m === 'GET' || m === 'HEAD') &&
+    (p === '/favicon.ico' || p === '/favicon.svg' || p === '/icons.svg' || p === '/robots.txt');
 
   if (m === 'OPTIONS') {
     return (
@@ -88,6 +92,7 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
   if ((m === 'GET' || m === 'HEAD') && isTemplatePreview) return true;
   if ((m === 'GET' || m === 'HEAD') && isTemplateGallery) return true;
   if ((m === 'GET' || m === 'HEAD') && isBrandAssetPath) return true;
+  if (isPublicRootAsset) return true;
   if (m === 'POST' && isPublicTranslate) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
   if (m === 'GET' && p.startsWith('/api/customer-intake-draft/')) return true;
