@@ -354,6 +354,35 @@
         </div>
         <p id="map-paste-err" class="err" style="display: none"></p>
       </div>
+      <div class="repeat-group" style="margin-top: 12px">
+        <div style="font-size: 0.8rem; color: #9aacbf">送付案件との紐づけ（このドラフトとダッシュボード1件）</div>
+        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
+          プレビューURL・配信停止URL・営業フェーズを、<strong>この場所からまとめて</strong>扱えます。フェーズは
+          <strong>OK済・送信済</strong>の案件のみ変更できます（送付・フェーズ管理と同じ5段階）。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります。
+        </p>
+        <label>
+          紐づける送付案件
+          <select id="f-linked-dashboard"></select>
+        </label>
+        <label>
+          営業フェーズ
+          <select id="f-worker-outreach-phase" disabled>
+            <option value="pending_send">送信待ち</option>
+            <option value="awaiting_reply">返信待ち</option>
+            <option value="appointment">アポ</option>
+            <option value="won">成約</option>
+            <option value="lost">失注</option>
+          </select>
+        </label>
+        <p id="worker-outreach-hint" class="muted" style="font-size: 0.74rem; color: #7d8fa3; margin: 6px 0 0"></p>
+        <p class="preview-url" id="worker-preview-url-inline" style="margin-top: 10px">（保存後に表示）</p>
+        <div class="row-actions">
+          <button type="button" class="btn primary" id="btn-worker-save">保存</button>
+          <button type="button" class="btn" id="btn-worker-copy-preview" disabled>プレビューURLをコピー</button>
+          <button type="button" class="btn" id="btn-worker-copy-unsub" disabled>配信停止URLをコピー</button>
+        </div>
+        <p id="worker-quick-err" class="err" style="display: none"></p>
+      </div>
       <div class="repeat-group">
         <div style="font-size: 0.8rem; color: #9aacbf">AI調査取り込みテンプレ（Gemini / ChatGPT用）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
@@ -637,6 +666,122 @@
         var mapPasteTimer = null;
         var addBtnIdsBound = false;
         var customizationBaseById = {};
+        var dashboardListCache = [];
+        var dashboardById = {};
+        var WORKER_PHASE_KEYS = ['pending_send', 'awaiting_reply', 'appointment', 'won', 'lost'];
+
+        function normalizeWorkerPhase(item) {
+          var p = item.outreachPhase;
+          if (p === 'sent') return 'awaiting_reply';
+          if (p === 'sleep') return 'pending_send';
+          if (WORKER_PHASE_KEYS.indexOf(p) >= 0) return p;
+          if (item.status === 'email_sent') return 'awaiting_reply';
+          if (item.status === 'approved') return 'pending_send';
+          return 'pending_send';
+        }
+
+        function workerAutoBumpHint(iso) {
+          if (!iso) return '';
+          try {
+            var d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return '';
+            d.setMonth(d.getMonth() + 3);
+            return (
+              '自動で送信待ちになる目安: ' + d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) + ' 以降（日次バッチ）'
+            );
+          } catch (e) {
+            return '';
+          }
+        }
+
+        function workerMailPrefUrl(token) {
+          if (!token) return '';
+          return window.location.origin + '/mail-preference.html?t=' + encodeURIComponent(token);
+        }
+
+        function refreshDashboardCache() {
+          return credFetch(api + '/dashboard')
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (list) {
+              dashboardListCache = Array.isArray(list) ? list : [];
+              dashboardById = {};
+              dashboardListCache.forEach(function (d) {
+                dashboardById[d.id] = d;
+              });
+              var sel = document.getElementById('f-linked-dashboard');
+              if (!sel) return;
+              var prev = sel.value;
+              sel.innerHTML = '';
+              var o0 = document.createElement('option');
+              o0.value = '';
+              o0.textContent = '（未紐づけ）';
+              sel.appendChild(o0);
+              dashboardListCache.forEach(function (d) {
+                var name = (d.researched && d.researched.name) || '（無題）';
+                var o = document.createElement('option');
+                o.value = d.id;
+                o.textContent = name + ' · ' + d.id;
+                sel.appendChild(o);
+              });
+              if (prev && Array.prototype.some.call(sel.options, function (opt) { return opt.value === prev; })) {
+                sel.value = prev;
+              }
+              syncWorkerOutreachPanel();
+            })
+            .catch(function () {
+              /* 一覧失敗時はプルダウンだけ空のまま */
+            });
+        }
+
+        function syncWorkerOutreachPanel() {
+          var linkSel = document.getElementById('f-linked-dashboard');
+          var phaseSel = document.getElementById('f-worker-outreach-phase');
+          var hintEl = document.getElementById('worker-outreach-hint');
+          var btnUnsub = document.getElementById('btn-worker-copy-unsub');
+          var btnPrev = document.getElementById('btn-worker-copy-preview');
+          if (!linkSel || !phaseSel) return;
+          showErr('worker-quick-err', '');
+          var did = String(linkSel.value || '').trim();
+          var previewFull = currentCustomId
+            ? window.location.origin + '/api/template-preview/' + encodeURIComponent(currentCustomId)
+            : '';
+          if (btnPrev) {
+            btnPrev.disabled = !previewFull || previewFull.indexOf('http') !== 0;
+          }
+          if (!did) {
+            phaseSel.disabled = true;
+            phaseSel.value = 'pending_send';
+            if (hintEl) {
+              hintEl.textContent = '送付案件を選ぶと、フェーズ変更と配信停止URLが使えます。';
+            }
+            if (btnUnsub) btnUnsub.disabled = true;
+            return;
+          }
+          var item = dashboardById[did];
+          if (!item) {
+            phaseSel.disabled = true;
+            if (hintEl) hintEl.textContent = '案件が一覧にありません。ページを再読み込みするか、送付管理を確認してください。';
+            if (btnUnsub) btnUnsub.disabled = true;
+            return;
+          }
+          var canPhase = item.status === 'approved' || item.status === 'email_sent';
+          phaseSel.disabled = !canPhase;
+          var eff = normalizeWorkerPhase(item);
+          phaseSel.value = eff;
+          if (hintEl) {
+            if (!canPhase) {
+              hintEl.textContent = 'レビュー待ち・NG済みの案件は、送付・フェーズ管理でOKにしてからフェーズを変更できます。';
+            } else if (eff === 'awaiting_reply') {
+              var bump = workerAutoBumpHint(item.replyWaitStartedAt);
+              hintEl.textContent = bump || '返信待ち（3か月で自動で送信待ちになります）。';
+            } else {
+              hintEl.textContent = item.status === 'approved' ? 'OK済・送信前' : '送信済み';
+            }
+          }
+          if (btnUnsub) btnUnsub.disabled = !item.unsubscribeToken;
+        }
         var EMBED_STYLE_TEMPLATE_IDS = {
           navy_cyan_consult: true,
           gym_personal_neon: true,
@@ -1835,6 +1980,8 @@
           var path = currentCustomId ? '/api/template-preview/' + encodeURIComponent(currentCustomId) : '';
           var full = path ? window.location.origin + path : '';
           document.getElementById('preview-url-text').textContent = full || '（保存後に表示）';
+          var wk = document.getElementById('worker-preview-url-inline');
+          if (wk) wk.textContent = full || '（保存後に表示）';
           var has = !!full;
           document.getElementById('btn-open-preview').disabled = !has;
           document.getElementById('btn-copy-url').disabled = !has;
@@ -1848,6 +1995,7 @@
           }
           /** 左の iframe は常に POST ライブプレビュー（共有URLは保存済みスナップショット用） */
           scheduleLivePreview();
+          syncWorkerOutreachPanel();
         }
 
         bindAddButtonsOnce();
@@ -1906,6 +2054,8 @@
           if (!edit) {
             currentCustomId = null;
             previewBaseTemplateId = document.getElementById('base-template').value || '';
+            var linkMode = document.getElementById('f-linked-dashboard');
+            if (linkMode) linkMode.value = '';
             var bid = previewBaseTemplateId;
             if (bid) loadBuiltinDefaultsIntoForm(bid, {});
             else {
@@ -1977,10 +2127,13 @@
               }
               var bid = document.getElementById('base-template').value || '';
               if (document.getElementById('mode-select').value === 'new' && !currentCustomId && bid) {
-                return loadBuiltinDefaultsIntoForm(bid, {});
+                return loadBuiltinDefaultsIntoForm(bid, {}).then(function () {
+                  return refreshDashboardCache();
+                });
               }
               scheduleLivePreview();
               applyWorkerFormTemplateVisibility();
+              return refreshDashboardCache();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');
@@ -2002,6 +2155,26 @@
               if (!item) throw new Error('一覧に見つかりません。再読み込みするか、既存カスタムを選び直してください。');
               var baseId = String(item.baseTemplateId || '').trim();
 
+              function applyLinkedDashboardUi() {
+                var linkSel = document.getElementById('f-linked-dashboard');
+                if (!linkSel) return;
+                var lid = String(item.linkedDashboardId || '').trim();
+                var hasOpt =
+                  !lid ||
+                  Array.prototype.some.call(linkSel.options, function (o) {
+                    return o.value === lid;
+                  });
+                if (hasOpt) {
+                  linkSel.value = lid;
+                  syncWorkerOutreachPanel();
+                } else {
+                  refreshDashboardCache().then(function () {
+                    linkSel.value = String(item.linkedDashboardId || '').trim();
+                    syncWorkerOutreachPanel();
+                  });
+                }
+              }
+
               function applyToForm(formOv) {
                 currentCustomId = item.id;
                 previewBaseTemplateId = item.baseTemplateId || '';
@@ -2010,6 +2183,7 @@
                 updatePreviewUrl();
                 scheduleLivePreview();
                 applyWorkerFormTemplateVisibility();
+                applyLinkedDashboardUi();
                 if (opts.successMsg) showErr('save-msg', opts.successMsg);
               }
 
@@ -2053,6 +2227,8 @@
             currentCustomId = null;
             previewBaseTemplateId = document.getElementById('base-template').value || '';
             document.getElementById('draft-name').value = '';
+            var linkClear = document.getElementById('f-linked-dashboard');
+            if (linkClear) linkClear.value = '';
             if (!previewBaseTemplateId) {
               fillFormFromOverride({});
               updatePreviewUrl();
@@ -2114,6 +2290,8 @@
                 document.getElementById('draft-name').value = x.j.nameSuggestion;
               }
               currentCustomId = null;
+              var linkImp = document.getElementById('f-linked-dashboard');
+              if (linkImp) linkImp.value = '';
               if (document.getElementById('mode-select').value !== 'new') {
                 document.getElementById('mode-select').value = 'new';
                 document.getElementById('mode-select').dispatchEvent(new Event('change'));
@@ -2270,6 +2448,8 @@
             document.getElementById('draft-name').value = String(parsed.nameSuggestion).slice(0, 80);
           }
           currentCustomId = null;
+          var linkAi = document.getElementById('f-linked-dashboard');
+          if (linkAi) linkAi.value = '';
           if (document.getElementById('mode-select').value !== 'new') {
             document.getElementById('mode-select').value = 'new';
             document.getElementById('mode-select').dispatchEvent(new Event('change'));
@@ -2296,6 +2476,8 @@
             return;
           }
 
+          var linkedDashId = String((document.getElementById('f-linked-dashboard') || {}).value || '').trim();
+
           if (document.getElementById('mode-select').value === 'edit' && !currentCustomId) {
             showErr('save-err', '既存カスタムを選び「フォームに読み込む」を押すか、新規モードで保存してください。');
             return;
@@ -2311,6 +2493,7 @@
                 override: override,
                 replaceOverride: true,
                 status: 'draft',
+                linkedDashboardId: linkedDashId,
               }),
             })
               .then(function (r) {
@@ -2340,6 +2523,7 @@
                 name: name,
                 override: override,
                 status: 'draft',
+                linkedDashboardId: linkedDashId || undefined,
               }),
             })
               .then(function (r) {
@@ -2362,6 +2546,66 @@
                 showErr('save-err', e.message || String(e));
               });
           }
+        };
+
+        document.getElementById('f-linked-dashboard').addEventListener('change', function () {
+          syncWorkerOutreachPanel();
+        });
+
+        document.getElementById('f-worker-outreach-phase').addEventListener('change', function () {
+          var linkSel = document.getElementById('f-linked-dashboard');
+          var did = linkSel && String(linkSel.value || '').trim();
+          var phaseSel = this;
+          if (!did || phaseSel.disabled) return;
+          var phase = phaseSel.value;
+          showErr('worker-quick-err', '');
+          credFetch(api + '/dashboard/' + encodeURIComponent(did), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ outreachPhase: phase }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error((x.j && x.j.error) || 'フェーズの更新に失敗しました');
+              dashboardById[did] = x.j;
+              var ix = dashboardListCache.findIndex(function (d) {
+                return d.id === did;
+              });
+              if (ix >= 0) dashboardListCache[ix] = x.j;
+              syncWorkerOutreachPanel();
+            })
+            .catch(function (e) {
+              showErr('worker-quick-err', e.message || String(e));
+              syncWorkerOutreachPanel();
+            });
+        });
+
+        document.getElementById('btn-worker-save').onclick = function () {
+          document.getElementById('btn-save').click();
+        };
+
+        document.getElementById('btn-worker-copy-preview').onclick = function () {
+          document.getElementById('btn-copy-url').click();
+        };
+
+        document.getElementById('btn-worker-copy-unsub').onclick = function () {
+          var linkSel = document.getElementById('f-linked-dashboard');
+          var did = linkSel && String(linkSel.value || '').trim();
+          var row = did ? dashboardById[did] : null;
+          var u = workerMailPrefUrl(row && row.unsubscribeToken);
+          if (!u) return;
+          navigator.clipboard.writeText(u).then(
+            function () {
+              alert('配信停止URLをコピーしました。');
+            },
+            function () {
+              window.prompt('コピー:', u);
+            },
+          );
         };
 
         document.getElementById('btn-open-preview').onclick = function () {

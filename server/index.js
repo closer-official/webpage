@@ -1360,7 +1360,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
         : {};
     /** 置き換え指定でも「今回のフォームで送られたキーだけ」上書きし、省略された項目はDBのまま残す（テンプレ既定へ巻き戻り防止） */
     const nextOverride = { ...prevOverride, ...normalizedOv };
-    customizations[i] = {
+    const nextItem = {
       ...customizations[i],
       name: String(body.name || customizations[i].name || '').trim().slice(0, 80),
       override: nextOverride,
@@ -1372,6 +1372,12 @@ app.post('/api/template-customizations/save', async (req, res) => {
       ...(nextBp ? { blueprint: nextBp } : {}),
       updatedAt: now,
     };
+    if (body.linkedDashboardId !== undefined) {
+      const lid = String(body.linkedDashboardId || '').trim().slice(0, 200);
+      if (lid) nextItem.linkedDashboardId = lid;
+      else delete nextItem.linkedDashboardId;
+    }
+    customizations[i] = nextItem;
     await store.setTemplateCustomizations(customizations);
     return res.json({ ok: true, item: customizations[i] });
   }
@@ -1385,6 +1391,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
   }
   const id = `custom-${Date.now().toString(36)}`;
   const status = body.status === 'draft' ? 'draft' : 'published';
+  const lidCreate = String(body.linkedDashboardId || '').trim().slice(0, 200);
   const item = {
     id,
     name: String(body.name || `カスタムテンプレ ${customizations.length + 1}`).trim().slice(0, 80),
@@ -1395,6 +1402,7 @@ app.post('/api/template-customizations/save', async (req, res) => {
     fingerprint: sanitizeFingerprint(body.fingerprint),
     sourceIntakeId: String(body.sourceIntakeId || '').trim().slice(0, 80) || undefined,
     ...(blueprint && baseTemplateId === 'blueprint' ? { blueprint } : {}),
+    ...(lidCreate ? { linkedDashboardId: lidCreate } : {}),
     createdAt: now,
     updatedAt: now,
   };
@@ -1822,7 +1830,15 @@ app.post('/api/process-next', async (req, res) => {
 });
 
 // ---------- ダッシュボード ----------
-const OUTREACH_PHASES = new Set(['sent', 'appointment', 'won', 'lost', 'sleep']);
+const OUTREACH_PHASES = new Set([
+  'pending_send',
+  'awaiting_reply',
+  'appointment',
+  'won',
+  'lost',
+  'sleep',
+  'sent',
+]);
 
 function addMonthsIso(fromDate, months) {
   const d = new Date(fromDate);
@@ -1841,7 +1857,11 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.dmBody !== undefined) dashboard[i].dmBody = req.body.dmBody;
   if (req.body.status === 'email_sent') {
     dashboard[i].status = 'email_sent';
-    if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'sent';
+    const ph = dashboard[i].outreachPhase;
+    if (!ph || ph === 'sent' || ph === 'pending_send') {
+      dashboard[i].outreachPhase = 'awaiting_reply';
+      dashboard[i].replyWaitStartedAt = new Date().toISOString();
+    }
     if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
   }
   if (req.body.content !== undefined) dashboard[i].content = req.body.content;
@@ -1849,12 +1869,17 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.previewEditCss !== undefined) dashboard[i].previewEditCss = req.body.previewEditCss;
   if (req.body.contentVariants !== undefined) dashboard[i].contentVariants = req.body.contentVariants;
   if (req.body.outreachPhase !== undefined) {
-    if (dashboard[i].status !== 'email_sent') {
-      return res.status(400).json({ error: '送信済みの案件のみフェーズを変更できます。' });
+    if (!['approved', 'email_sent'].includes(dashboard[i].status)) {
+      return res.status(400).json({ error: 'OK済みまたは送信済みの案件のみフェーズを変更できます。' });
     }
     const p = String(req.body.outreachPhase);
     if (!OUTREACH_PHASES.has(p)) return res.status(400).json({ error: 'Invalid outreachPhase' });
     dashboard[i].outreachPhase = p;
+    if (p === 'awaiting_reply') {
+      dashboard[i].replyWaitStartedAt = new Date().toISOString();
+    } else {
+      dashboard[i].replyWaitStartedAt = undefined;
+    }
     if (p === 'sleep') {
       dashboard[i].sleepUntil = addMonthsIso(new Date(), 3);
     } else {
@@ -1925,12 +1950,43 @@ app.post('/api/outreach/opt-out', async (req, res) => {
   }
 });
 
+/**
+ * 返信待ち開始から3か月経過 → 自動で送信待ち（再送キュー）
+ * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
+ */
+app.get('/api/outreach/phase-tick', async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (secret) {
+    const ok = req.headers['x-cron-secret'] === secret || String(req.query?.secret || '') === secret;
+    if (!ok) return res.status(401).type('text/plain').send('Unauthorized');
+  }
+  try {
+    const dashboard = await store.getDashboard();
+    let bumped = 0;
+    for (const row of dashboard) {
+      if (row.outreachPhase !== 'awaiting_reply' || !row.replyWaitStartedAt) continue;
+      const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
+      if (new Date(deadline).getTime() <= Date.now()) {
+        row.outreachPhase = 'pending_send';
+        row.replyWaitStartedAt = undefined;
+        bumped += 1;
+      }
+    }
+    if (bumped) await store.setDashboard(dashboard);
+    res.json({ ok: true, bumped });
+  } catch (e) {
+    console.error('[outreach/phase-tick]', e);
+    res.status(500).json({ error: e?.message || 'tick failed' });
+  }
+});
+
 app.post('/api/dashboard/:id/approve', async (req, res) => {
   const dashboard = await store.getDashboard();
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'approved';
   if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
+  if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pending_send';
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

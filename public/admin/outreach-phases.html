@@ -178,7 +178,9 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、送信後のフェーズをまとめて確認・更新します。店主向けの配信停止URLは各行からコピーできます。
+        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。店主向け配信停止URLも各行からコピーできます。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
+        <code>/api/outreach/phase-tick</code>
+        の Cron 実行時）。
       </p>
       <div class="toolbar">
         <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
@@ -188,14 +190,61 @@
     <div id="boards"></div>
     <script>
       (function () {
-        var PHASE_ORDER = ['sent', 'appointment', 'won', 'sleep', 'lost'];
+        var PHASE_KEYS = ['pending_send', 'awaiting_reply', 'appointment', 'won', 'lost'];
         var PHASE_LABELS = {
-          sent: '送信済・フォロー中',
-          appointment: 'アポ・デモ検討中',
-          won: '成約・導入',
-          sleep: 'スリープ（3か月送信見送り）',
+          pending_send: '送信待ち',
+          awaiting_reply: '返信待ち',
+          appointment: 'アポ',
+          won: '成約',
           lost: '失注',
         };
+
+        function normalizePhase(item) {
+          var p = item.outreachPhase;
+          if (p === 'sent') return 'awaiting_reply';
+          if (p === 'sleep') return 'pending_send';
+          if (PHASE_KEYS.indexOf(p) >= 0) return p;
+          if (item.status === 'email_sent') return 'awaiting_reply';
+          if (item.status === 'approved') return 'pending_send';
+          return 'pending_send';
+        }
+
+        function autoBumpHint(iso) {
+          if (!iso) return '';
+          try {
+            var d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return '';
+            d.setMonth(d.getMonth() + 3);
+            return (
+              '自動で送信待ちになる目安: ' + d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) + ' 以降（日次バッチ）'
+            );
+          } catch (e) {
+            return '';
+          }
+        }
+
+        function renderPhaseSelect(item, loadFn) {
+          var eff = normalizePhase(item);
+          var sel = el('select', {}, []);
+          PHASE_KEYS.forEach(function (p) {
+            var opt = el('option', { value: p, text: PHASE_LABELS[p] });
+            if (p === eff) opt.selected = true;
+            sel.appendChild(opt);
+          });
+          sel.onchange = function () {
+            var v = sel.value;
+            apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ outreachPhase: v }),
+            })
+              .then(loadFn)
+              .catch(function (e) {
+                showErr(String(e.message || e));
+              });
+          };
+          return sel;
+        }
 
         function mailPrefUrl(token) {
           if (!token) return '';
@@ -312,7 +361,8 @@
             } else if (mode === 'rejected') {
               col2.appendChild(el('p', { class: 'muted', text: 'NG済み（送付対象外）。不要なら削除してください。' }));
             } else if (mode === 'approved') {
-              col2.appendChild(el('p', { class: 'muted', text: 'OK済・送信前' }));
+              col2.appendChild(el('p', { class: 'muted', text: 'OK済・送信前 — フェーズ' }));
+              col2.appendChild(renderPhaseSelect(item, load));
               col3.appendChild(
                 el('button', { type: 'button', class: 'btn small primary', text: '送信済みにする' }, []),
               ).onclick = function () {
@@ -343,33 +393,19 @@
                 col2.appendChild(el('p', { class: 'muted', text: '配信停止URLは承認直後に発行されます。' }));
               }
             } else {
-              var eff = item.outreachPhase || 'sent';
-              var sel = el('select', {}, []);
-              PHASE_ORDER.forEach(function (p) {
-                var opt = el('option', { value: p, text: PHASE_LABELS[p] });
-                if (p === eff) opt.selected = true;
-                sel.appendChild(opt);
-              });
-              sel.onchange = function () {
-                var v = sel.value;
-                apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ outreachPhase: v }),
-                })
-                  .then(load)
-                  .catch(function (e) {
-                    showErr(String(e.message || e));
-                  });
-              };
+              var eff = normalizePhase(item);
               col2.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
-              col2.appendChild(sel);
-              if (eff === 'sleep' && item.sleepUntil) {
+              col2.appendChild(renderPhaseSelect(item, load));
+              var bump = autoBumpHint(item.replyWaitStartedAt);
+              if (eff === 'awaiting_reply' && bump) {
+                col2.appendChild(el('p', { class: 'muted', text: bump }));
+              }
+              if (item.sleepUntil && item.outreachPhase === 'sleep') {
                 col2.appendChild(
                   el('p', {
                     class: 'muted',
                     text:
-                      '再送の目安: ' +
+                      '（旧スリープ）再送の目安: ' +
                       new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
                       ' 以降',
                   }),
@@ -424,15 +460,15 @@
           host.appendChild(section('NG済み', rejected, 'rejected'));
 
           var byPhase = {};
-          PHASE_ORDER.forEach(function (p) {
+          PHASE_KEYS.forEach(function (p) {
             byPhase[p] = [];
           });
           sent.forEach(function (item) {
-            var ph = item.outreachPhase || 'sent';
+            var ph = normalizePhase(item);
             if (!byPhase[ph]) byPhase[ph] = [];
             byPhase[ph].push(item);
           });
-          PHASE_ORDER.forEach(function (ph) {
+          PHASE_KEYS.forEach(function (ph) {
             var list = byPhase[ph] || [];
             if (list.length === 0) return;
             var p = el('div', { class: 'panel' });

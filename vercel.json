@@ -16,6 +16,7 @@
     }
   },
   "crons": [
-    { "path": "/api/auto-process/tick", "schedule": "0 0 * * *" }
+    { "path": "/api/auto-process/tick", "schedule": "0 0 * * *" },
+    { "path": "/api/outreach/phase-tick", "schedule": "0 4 * * *" }
   ]
 }

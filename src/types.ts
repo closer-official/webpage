@@ -302,8 +302,17 @@ export interface ResearchedShop {
   signals: VerificationSignals;
 }
 
-/** DM送付後の営業フェーズ（検閲ダッシュボード） */
-export type OutreachPhase = 'sent' | 'appointment' | 'won' | 'lost' | 'sleep';
+/** 営業フェーズ（検閲ダッシュボード・送付管理） */
+export type OutreachPhase =
+  | 'pending_send'
+  | 'awaiting_reply'
+  | 'appointment'
+  | 'won'
+  | 'lost'
+  /** @deprecated 互換用。表示上は awaiting_reply 相当 */
+  | 'sent'
+  /** @deprecated 手動スリープ。自動再送フローでは pending_send を使用 */
+  | 'sleep';
 
 /** 検閲ダッシュボード用の1件（調査済み＋LP生成済み） */
 export interface DashboardItem {
@@ -317,9 +326,11 @@ export interface DashboardItem {
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**
-   * 送信済み案件のフェーズ。status === email_sent のときに使用（未設定は sent として表示）。
+   * OK済・送信済案件のフェーズ。
    */
   outreachPhase?: OutreachPhase;
+  /** outreachPhase === awaiting_reply のとき、返信待ち開始（この日時から3か月後に自動で pending_send） */
+  replyWaitStartedAt?: string;
   /** outreachPhase === sleep のとき、再送を控える目安日時（ISO） */
   sleepUntil?: string;
   /** 配信停止ページ用の秘密トークン（URLに含める） */

@@ -71,8 +71,14 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
     if (status === 'approved' && !next.unsubscribeToken) {
       next.unsubscribeToken = makeUnsubscribeToken();
     }
+    if (status === 'approved' && !next.outreachPhase) {
+      next.outreachPhase = 'pending_send';
+    }
     if (status === 'email_sent') {
-      if (!next.outreachPhase) next.outreachPhase = 'sent';
+      if (!next.outreachPhase || next.outreachPhase === 'sent' || next.outreachPhase === 'pending_send') {
+        next.outreachPhase = 'awaiting_reply';
+        if (!next.replyWaitStartedAt) next.replyWaitStartedAt = new Date().toISOString();
+      }
       if (!next.unsubscribeToken) next.unsubscribeToken = makeUnsubscribeToken();
     }
     return next;
@@ -104,6 +110,11 @@ export function updateDashboardOutreachPhase(id: string, outreachPhase: Outreach
   const list = getDashboard().map((x) => {
     if (x.id !== id) return x;
     const next: DashboardItem = { ...x, outreachPhase };
+    if (outreachPhase === 'awaiting_reply') {
+      if (!next.replyWaitStartedAt) next.replyWaitStartedAt = new Date().toISOString();
+    } else {
+      next.replyWaitStartedAt = undefined;
+    }
     if (outreachPhase === 'sleep') {
       const u = new Date();
       u.setMonth(u.getMonth() + 3);

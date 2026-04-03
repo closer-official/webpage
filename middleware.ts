@@ -102,7 +102,12 @@ function gateWebpageBasicAuth(request: Request, host: string): Response | null {
   const path = url.pathname;
 
   // Vercel Cron: サーバー側で CRON_SECRET を検証するため Basic 認証は不要
-  if (path === '/api/auto-process/tick' || path === '/api/auto-process/tick/') {
+  if (
+    path === '/api/auto-process/tick' ||
+    path === '/api/auto-process/tick/' ||
+    path === '/api/outreach/phase-tick' ||
+    path === '/api/outreach/phase-tick/'
+  ) {
     return null;
   }
 
