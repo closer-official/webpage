@@ -178,7 +178,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。店主向け配信停止URLも各行からコピーできます。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
+        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。<strong>送信待ち（製作してまだ送付していない）</strong>は「OK済」のブロックのうち<strong>送信待ち（OK済・まだ送付していない）</strong>にまとまります（下の「送信済み — 送信待ち」は<strong>一度送ったあと</strong>の再送待ちです）。店主向け配信停止URLも各行からコピーできます。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -456,7 +456,22 @@
           }
 
           host.appendChild(section('レビュー待ち', pending, 'pending'));
-          host.appendChild(section('OK済み（送信前）', approved, 'approved'));
+
+          var approvedPendingSend = approved.filter(function (i) {
+            return normalizePhase(i) === 'pending_send';
+          });
+          var approvedOtherPhase = approved.filter(function (i) {
+            return normalizePhase(i) !== 'pending_send';
+          });
+          host.appendChild(
+            section('送信待ち（OK済・まだ送付していない）', approvedPendingSend, 'approved'),
+          );
+          if (approvedOtherPhase.length > 0) {
+            host.appendChild(
+              section('OK済み（送信前）・送信待ち以外のフェーズ', approvedOtherPhase, 'approved'),
+            );
+          }
+
           host.appendChild(section('NG済み', rejected, 'rejected'));
 
           var byPhase = {};
@@ -472,9 +487,16 @@
             var list = byPhase[ph] || [];
             if (list.length === 0) return;
             var p = el('div', { class: 'panel' });
-            p.appendChild(
-              el('h2', { text: '送信済み — ' + PHASE_LABELS[ph] + '（' + list.length + '件）' }),
-            );
+            var title = '送信済み — ' + PHASE_LABELS[ph] + '（' + list.length + '件）';
+            p.appendChild(el('h2', { text: title }));
+            if (ph === 'pending_send') {
+              p.appendChild(
+                el('p', {
+                  class: 'muted',
+                  text: '※ ここは送付済みの案件です。製作中で未送付の「送信待ち」は上のパネルを見てください。',
+                }),
+              );
+            }
             list.forEach(function (item) {
               p.appendChild(renderRow(item, 'sent'));
             });
