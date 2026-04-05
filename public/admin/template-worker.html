@@ -500,6 +500,17 @@
         <p style="font-size: 0.78rem; color: #9aacbf; margin: 10px 0 8px">
           <strong>店主の顔・ひとこと</strong>は、セクションで ID を <code>staff</code> にし、<strong>見出し・本文・画像URL</strong>を埋めます（プレビューでは店主ブロックとしてレイアウトされます）。
         </p>
+        <label style="display: block; margin-top: 12px">
+          <span style="font-size: 0.85rem; font-weight: 600">店舗詳細情報（セクションID <code>shop</code>）</span>
+          <span style="display: block; font-size: 0.72rem; color: #7d8fa3; font-weight: 400; margin: 4px 0 6px"
+            >禁煙・お子さま連れ、お支払い方法（Visa / PayPay など）、設備・座席など。空行で段落分け。先頭に「禁煙」等があると強調ボックスになります。下の「セクション」一覧の <code>shop</code> 行とも同期します。</span>
+          <textarea
+            id="f-cafe1-shop-details"
+            rows="14"
+            style="width: 100%; max-width: 100%; box-sizing: border-box; font-family: inherit; margin-top: 4px"
+            placeholder="店内は全席禁煙です。…&#10;&#10;【お支払い方法】&#10;現金 / クレジットカード…&#10;&#10;【設備・サービス】&#10;総席数：…"
+          ></textarea>
+        </label>
       </div>
 
       <div class="tw-form-block" data-tw-for="cafe_1">
@@ -1400,6 +1411,25 @@
             .filter(function (x) {
               return x.id || x.title || x.content || x.imageUrl;
             });
+          if (resolveWorkerFormBaseTemplateId() === 'cafe_1') {
+            var shopTa = document.getElementById('f-cafe1-shop-details');
+            if (shopTa) {
+              var shopBody = String(shopTa.value || '').trim();
+              var shopIdx = sections.findIndex(function (x) {
+                return String(x.id || '').trim() === 'shop';
+              });
+              if (shopIdx >= 0) {
+                sections[shopIdx] = Object.assign({}, sections[shopIdx], { content: shopBody });
+              } else if (shopBody) {
+                sections.push({
+                  id: 'shop',
+                  title: '店舗詳細情報',
+                  content: shopBody,
+                  imageUrl: '',
+                });
+              }
+            }
+          }
           var faqItems = Array.prototype.map
             .call(document.querySelectorAll('#f-faq-list .repeat-item'), function (row) {
               return {
@@ -1564,6 +1594,13 @@
           }
           document.getElementById('f-sections-list').innerHTML = '';
           (Array.isArray(ov.sections) && ov.sections.length ? ov.sections : []).forEach(addSectionItem);
+          var shopDetailsTa = document.getElementById('f-cafe1-shop-details');
+          if (shopDetailsTa) {
+            var shopSec = (Array.isArray(ov.sections) ? ov.sections : []).find(function (s) {
+              return s && String(s.id || '').trim() === 'shop';
+            });
+            shopDetailsTa.value = shopSec ? String(shopSec.content || '') : '';
+          }
           var meo = ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) ? ov.cafeMeo : {};
           document.getElementById('f-meo-servesCuisine').value = meo.servesCuisine || '';
           document.getElementById('f-meo-priceRange').value = meo.priceRange || '';
@@ -1718,6 +1755,25 @@
             }
           });
           return baseSecs;
+        }
+
+        /** Gemini が footerText を返さず店名・住所・電話だけ更新したとき、古い © 行を残さない */
+        function refreshFooterTextWhenGeminiOmittedFooter(base, merged, patch) {
+          patch = patch || {};
+          merged = merged || {};
+          if (String(patch.footerText || '').trim()) return merged;
+          var contributed =
+            String(patch.siteName || '').trim() ||
+            String(patch.footerAddress || '').trim() ||
+            String(patch.footerPhone || '').trim();
+          if (!contributed) return merged;
+          var site = String(merged.siteName || '').trim();
+          var addr = String(merged.footerAddress || '').trim();
+          var phone = String(merged.footerPhone || '').trim();
+          if (!site && !addr && !phone) return merged;
+          var y = new Date().getFullYear();
+          merged.footerText = ['© ' + y, site, addr, phone].filter(Boolean).join(' | ');
+          return merged;
         }
 
         function mergeExtractPatchIntoOverride(base, patch) {
@@ -1935,6 +1991,43 @@
             if (root.querySelectorAll('.repeat-item').length >= 10) return;
             addHeroSlideItem({});
           };
+
+          var secRoot = document.getElementById('f-sections-list');
+          var cafe1ShopTa = document.getElementById('f-cafe1-shop-details');
+          if (secRoot && cafe1ShopTa && !secRoot.dataset.cafe1ShopSyncBound) {
+            secRoot.dataset.cafe1ShopSyncBound = '1';
+            function syncCafe1ShopTextareaFromRows() {
+              if (resolveWorkerFormBaseTemplateId() !== 'cafe_1') return;
+              var rows = document.querySelectorAll('#f-sections-list .repeat-item');
+              for (var i = 0; i < rows.length; i++) {
+                var idEl = rows[i].querySelector('.f-sec-id');
+                if (idEl && String(idEl.value || '').trim() === 'shop') {
+                  var cEl = rows[i].querySelector('.f-sec-content');
+                  cafe1ShopTa.value = cEl ? cEl.value : '';
+                  return;
+                }
+              }
+            }
+            function syncCafe1ShopRowFromTextarea() {
+              if (resolveWorkerFormBaseTemplateId() !== 'cafe_1') return;
+              var rows = document.querySelectorAll('#f-sections-list .repeat-item');
+              for (var j = 0; j < rows.length; j++) {
+                var idE = rows[j].querySelector('.f-sec-id');
+                if (idE && String(idE.value || '').trim() === 'shop') {
+                  var cE = rows[j].querySelector('.f-sec-content');
+                  if (cE) cE.value = cafe1ShopTa.value;
+                  return;
+                }
+              }
+            }
+            secRoot.addEventListener('input', function (ev) {
+              var t = ev.target;
+              if (!t || !t.classList) return;
+              if (!t.classList.contains('f-sec-content') && !t.classList.contains('f-sec-id')) return;
+              syncCafe1ShopTextareaFromRows();
+            });
+            cafe1ShopTa.addEventListener('input', syncCafe1ShopRowFromTextarea);
+          }
         }
 
         function scheduleLivePreview() {
@@ -2292,6 +2385,7 @@
             .then(function (x) {
               if (!x.ok) throw new Error(x.j.error || '抽出に失敗しました');
               var ov = x.j.override || {};
+              refreshFooterTextWhenGeminiOmittedFooter({}, ov, ov);
               fillFormFromOverride(ov);
               if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
                 document.getElementById('draft-name').value = x.j.nameSuggestion;
@@ -2346,6 +2440,7 @@
               delete patch.heroSlides;
               delete patch.heroSlideStyles;
               var merged = mergeExtractPatchIntoOverride(baseOv, patch);
+              refreshFooterTextWhenGeminiOmittedFooter(baseOv, merged, patch);
               syncMapAndSocialUrlsIntoOverride(merged);
               fillFormFromOverride(merged);
               if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
@@ -2450,6 +2545,7 @@
             showErr('ai-json-err', 'override オブジェクトが見つかりません。');
             return;
           }
+          refreshFooterTextWhenGeminiOmittedFooter({}, ov, ov);
           fillFormFromOverride(ov);
           if (parsed.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
             document.getElementById('draft-name').value = String(parsed.nameSuggestion).slice(0, 80);

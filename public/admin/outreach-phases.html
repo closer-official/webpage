@@ -194,6 +194,29 @@
         margin: 0 0 0.75rem;
         min-height: 1.25em;
       }
+      .search-panel label {
+        display: block;
+        font-size: 0.78rem;
+        color: #9aacbf;
+        margin-bottom: 6px;
+      }
+      .search-panel .search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .search-panel input[type='search'] {
+        flex: 1 1 220px;
+        min-width: 0;
+        max-width: none;
+      }
+      .not-registered {
+        color: #fca5a5;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0.5rem 0 0;
+      }
     </style>
   </head>
   <body>
@@ -222,6 +245,22 @@
         />
       </div>
       <p id="copy-msg" class="ok-msg" style="display: none" aria-live="polite"></p>
+      <div class="panel search-panel" style="margin-bottom: 1rem">
+        <h2 style="margin-top: 0">登録済みか検索</h2>
+        <p class="muted" style="margin: 0 0 10px">
+          店名の一部、または Google マップの<strong>埋め込み用 HTML</strong>（<code>iframe</code> ごと）・<strong>埋め込み URL</strong>（<code>https://www.google.com/maps/embed?...</code>）を貼り付けてください。一致するダッシュボード案件があれば一覧し、なければ未登録と表示します。
+        </p>
+        <label for="phase-search">検索</label>
+        <div class="search-row">
+          <input
+            type="search"
+            id="phase-search"
+            autocomplete="off"
+            placeholder="例：カフェ ○○ ／ 埋め込み iframe または embed URL"
+          />
+          <button type="button" class="btn small" id="btn-search-clear">クリア</button>
+        </div>
+      </div>
       <div class="toolbar">
         <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
       </div>
@@ -305,15 +344,19 @@
             sender +
             'と申します。\n' +
             '\n' +
+            '※本メールはWEB制作に関するご提案（広告）としてお送りしております。\n' +
+            '\n' +
             shop +
             '様の投稿を拝見し、料理の写真が非常に魅力的だと感じました。\n' +
             '\n' +
             'ホームページが見当たらなかったため、\n' +
-            'お店の情報をもとに簡易的なデモページを作成いたしました。\n' +
+            '公開情報をもとに簡易的なデモページを作成いたしました。\n' +
             '\n' +
             '▼デモページ\n' +
             prev +
             '\n' +
+            '\n' +
+            '※本デモは仮情報・フリー素材を用いたサンプルです。実際の運用時には内容の調整が可能です。\n' +
             '\n' +
             'なお、制作自体は「divizero」というチームで行っております。\n' +
             '\n' +
@@ -335,25 +378,24 @@
         }
 
         function buildOutreachDmBody(item) {
-          var sender = getSavedSenderName();
-          if (!sender) sender = '（※上部パネルで送信者名を登録してください）';
           var prev = outreachPreviewUrlForItem(item);
           if (!prev) prev = '（プレビューURL：店舗ドラフトと紐づけが必要です）';
           return (
-            '突然すみません、インスタグラムの投稿を拝見して、\n' +
-            '料理の写真がすごく魅力的だなと思いました。\n' +
-            '\n' +
-            'WEB制作サービス「CLOSER」の' +
-            sender +
-            'と申します。\n' +
+            '突然すみません！\n' +
+            '投稿の料理写真がすごく素敵で思わず見入ってしまいました。\n' +
             '\n' +
             'ホームページが見当たらなかったので、\n' +
-            'お店の情報だけで5分ほどで簡単なデモを作ってみました👇\n' +
+            '勝手ながらお店の情報だけで簡単なデモサイトを作ってみました👇\n' +
+            '\n' +
             prev +
             '\n' +
             '\n' +
-            'このまま使える状態にはしてあります。\n' +
-            '不要でしたらスルーで大丈夫です。'
+            '※仮の情報で作ったサンプルです\n' +
+            '\n' +
+            'もし「こういうのあってもいいかも」と思われたら、\n' +
+            'そこから一緒に整えていけたら嬉しいです。\n' +
+            '\n' +
+            '不要でしたらそのままスルーで大丈夫です🙇‍♂️'
           );
         }
 
@@ -373,9 +415,6 @@
           var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
           bDm.onclick = function () {
             persistSenderProfile();
-            if (!getSavedSenderName()) {
-              if (!window.confirm('送信者名が未登録です。プレースホルダ付きでコピーしますか？')) return;
-            }
             copyTextWithFeedback(buildOutreachDmBody(item), 'DM用テンプレ');
           };
           row.appendChild(bMail);
@@ -407,6 +446,172 @@
           lost: '失注',
         };
 
+        var cachedDashboardItems = [];
+        var liveSearchQuery = '';
+        var searchDebounceTimer = null;
+
+        function decodeBasicEntities(s) {
+          return String(s || '')
+            .replace(/&amp;/gi, '&')
+            .replace(/&quot;/gi, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>');
+        }
+
+        function extractIframeSrcFromPaste(html) {
+          var s = decodeBasicEntities(html);
+          var m = s.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+          return m ? m[1].trim() : '';
+        }
+
+        /** 入力テキストから比較用の地図系 URL を列挙（iframe の src・embed URL など） */
+        function extractMapNeedlesFromQuery(raw) {
+          var s = String(raw || '');
+          var out = [];
+          var seen = {};
+          function add(u) {
+            var t = String(u || '').trim();
+            if (!t || seen[t]) return;
+            seen[t] = 1;
+            out.push(t);
+          }
+          var fromIframe = extractIframeSrcFromPaste(s);
+          if (/google\./i.test(fromIframe) && /maps/i.test(fromIframe)) add(fromIframe);
+          var reEmbed = /https:\/\/www\.google\.com\/maps\/embed\?[^\s"'<>]+/gi;
+          var m;
+          while ((m = reEmbed.exec(s))) add(m[0]);
+          var reAny = /https:\/\/(www\.)?google\.(com|co\.jp)\/maps[^\s"'<>]*/gi;
+          while ((m = reAny.exec(s))) add(m[0]);
+          return out;
+        }
+
+        function stripMapUrlsForTextNeedle(raw, mapNeedles) {
+          var t = String(raw || '');
+          mapNeedles.forEach(function (u) {
+            t = t.split(u).join(' ');
+          });
+          return t
+            .replace(/<iframe[\s\S]*?<\/iframe>/gi, ' ')
+            .replace(/https:\/\/[^\s]+/gi, function (url) {
+              return /google/i.test(url) && /maps/i.test(url) ? ' ' : url;
+            })
+            .replace(/\s+/g, ' ')
+            .trim();
+        }
+
+        function normalizeMapsHref(u) {
+          var s = decodeBasicEntities(String(u || '').trim());
+          try {
+            return new URL(s.replace(/^http:\/\//i, 'https://')).href;
+          } catch (e) {
+            return s;
+          }
+        }
+
+        function pbParam(u) {
+          var m = String(u).match(/[?&]pb=([^&]+)/);
+          return m ? m[1] : '';
+        }
+
+        function urlsLooselyMatch(a, b) {
+          var na = normalizeMapsHref(a);
+          var nb = normalizeMapsHref(b);
+          if (!na || !nb) return false;
+          if (na === nb) return true;
+          if (na.indexOf(nb) >= 0 || nb.indexOf(na) >= 0) return true;
+          var pba = pbParam(na);
+          var pbb = pbParam(nb);
+          if (pba && pbb && pba === pbb) return true;
+          return false;
+        }
+
+        function collectItemMapUrls(item) {
+          var out = [];
+          var seen = {};
+          function add(u) {
+            var t = String(u || '').trim();
+            if (!t || seen[t]) return;
+            seen[t] = 1;
+            out.push(t);
+          }
+          var c = item.content;
+          if (c && c.mapEmbedUrl) add(c.mapEmbedUrl);
+          var sig = item.researched && item.researched.signals;
+          if (sig && sig.mapsUrl) add(sig.mapsUrl);
+          var vars = item.contentVariants;
+          if (Array.isArray(vars)) {
+            vars.forEach(function (v) {
+              var html = String((v && v.html) || '');
+              var re = /https:\/\/www\.google\.com\/maps\/embed\?[^"'\\s]*/gi;
+              var m;
+              while ((m = re.exec(html))) add(m[0]);
+              var re2 = /\bsrc\s*=\s*["'](https:\/\/www\.google\.com\/maps\/embed[^"']+)/gi;
+              while ((m = re2.exec(html))) add(m[1]);
+            });
+          }
+          return out;
+        }
+
+        function normSearchText(s) {
+          return String(s || '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+        }
+
+        function textFieldMatches(haystack, needle) {
+          if (!needle) return false;
+          return normSearchText(haystack).indexOf(normSearchText(needle)) >= 0;
+        }
+
+        function itemMatchesSearch(item, rawQuery) {
+          var q = String(rawQuery || '').trim();
+          if (!q) return true;
+          if (item.id === q) return true;
+          var mapNeedles = extractMapNeedlesFromQuery(q);
+          var textNeedle = stripMapUrlsForTextNeedle(q, mapNeedles).trim();
+          var hasUrl = mapNeedles.length > 0;
+          var hasText = textNeedle.length > 0;
+          if (!hasUrl && !hasText) return false;
+
+          var urlHit = false;
+          if (hasUrl) {
+            var itemUrls = collectItemMapUrls(item);
+            urlHit = mapNeedles.some(function (n) {
+              return itemUrls.some(function (iu) {
+                return urlsLooselyMatch(n, iu);
+              });
+            });
+            if (!urlHit && item.researched && item.researched.signals && item.researched.signals.placeId) {
+              var pid = String(item.researched.signals.placeId);
+              urlHit = mapNeedles.some(function (n) {
+                return n.indexOf(pid) >= 0;
+              });
+            }
+          }
+
+          var textHit = false;
+          if (hasText) {
+            var sig = item.researched && item.researched.signals;
+            var fields = [
+              outreachShopName(item),
+              (item.content && item.content.siteName) || '',
+              (item.content && item.content.title) || '',
+              (item.content && item.content.headline) || '',
+              (sig && sig.mapsUrl) || '',
+              (sig && sig.placeId) || '',
+            ];
+            textHit = fields.some(function (f) {
+              return textFieldMatches(f, textNeedle);
+            });
+          }
+
+          if (hasUrl && hasText) return urlHit || textHit;
+          if (hasUrl) return urlHit;
+          return textHit;
+        }
+
         function normalizePhase(item) {
           var p = item.outreachPhase;
           if (p === 'sent') return 'awaiting_reply';
@@ -415,6 +620,25 @@
           if (item.status === 'email_sent') return 'awaiting_reply';
           if (item.status === 'approved') return 'pending_send';
           return 'pending_send';
+        }
+
+        function searchStatusLabel(item) {
+          if (item.status === 'pending') return 'レビュー待ち';
+          if (item.status === 'rejected') return 'NG済み';
+          if (item.status === 'approved') {
+            return 'OK済（送信前）· ' + PHASE_LABELS[normalizePhase(item)];
+          }
+          if (item.status === 'email_sent') {
+            return '送信済み · ' + PHASE_LABELS[normalizePhase(item)];
+          }
+          return String(item.status || '—');
+        }
+
+        function rowModeForItem(item) {
+          if (item.status === 'pending') return 'pending';
+          if (item.status === 'rejected') return 'rejected';
+          if (item.status === 'approved') return 'approved';
+          return 'sent';
         }
 
         function autoBumpHint(iso) {
@@ -616,12 +840,21 @@
             return i.status === 'rejected';
           });
 
-          function renderRow(item, mode) {
+          function renderRow(item, mode, meta) {
             var name = (item.researched && item.researched.name) || '（無題）';
             var addr = (item.researched && item.researched.address) || '';
             var row = el('div', { class: 'row' });
 
             var col1 = el('div');
+            if (meta && meta.searchLabel) {
+              col1.appendChild(
+                el('span', {
+                  class: 'badge',
+                  style: 'margin-bottom:6px;display:inline-block;',
+                  text: meta.searchLabel,
+                }),
+              );
+            }
             col1.appendChild(el('p', { class: 'shop-name', text: name }));
             col1.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
             col1.appendChild(el('span', { class: 'badge', text: 'ID: ' + item.id }));
@@ -785,7 +1018,8 @@
               if (!x.ok) {
                 throw new Error((x.j && x.j.error) || '一覧の取得に失敗しました');
               }
-              render(Array.isArray(x.j) ? x.j : []);
+              cachedDashboardItems = Array.isArray(x.j) ? x.j : [];
+              render(cachedDashboardItems);
             })
             .catch(function (e) {
               showErr(e.message || String(e));
@@ -794,6 +1028,34 @@
         }
 
         document.getElementById('btn-refresh').onclick = load;
+        (function initPhaseSearch() {
+          var inp = document.getElementById('phase-search');
+          var btnClear = document.getElementById('btn-search-clear');
+          function applySearchFromInput() {
+            liveSearchQuery = inp ? inp.value : '';
+            render(cachedDashboardItems);
+          }
+          if (inp) {
+            inp.addEventListener('input', function () {
+              clearTimeout(searchDebounceTimer);
+              searchDebounceTimer = setTimeout(applySearchFromInput, 250);
+            });
+            inp.addEventListener('search', function () {
+              if (inp.value === '') {
+                liveSearchQuery = '';
+                render(cachedDashboardItems);
+              }
+            });
+          }
+          if (btnClear && inp) {
+            btnClear.onclick = function () {
+              liveSearchQuery = '';
+              inp.value = '';
+              render(cachedDashboardItems);
+              inp.focus();
+            };
+          }
+        })();
         load();
       })();
     </script>

@@ -258,6 +258,7 @@ export async function extractTemplateOverrideFromFreeText(pastedText) {
 - Instagram/Xは実URL、または @アカウントが明示されているときだけ（「SNSで発信」のみでは空）。
 - メニューは文章に価格や品名があれば cafeMenuTextRows に分解する。無ければ []。
 - FAQらしきQ&Aがあれば faqItems に。無ければ []。
+- 店名・住所・電話のいずれかが文中にあっても、長い営業案内を footerText に書かない。footerText には分かる範囲で「© 現在の西暦年 店名 | 住所 | 電話」を1行にまとめる（情報が無い部分は省略。捏造しない）。
 
 【sections】は、LPの本文ブロックとして使えそうなまとめだけ返す。各要素は id（英小文字・数字・ハイフン）・title・content（imageUrlは文中に画像URLがあれば）。
 既存テンプレでよく使う id の例: concept / story / menu-intro / hours / access / interior / atmosphere

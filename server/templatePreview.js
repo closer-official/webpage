@@ -108,8 +108,19 @@ function isAllowedHeroSlideUrl(u) {
   return false;
 }
 
+/** override に footerText が無いとき、店名・住所・電話から © 行を組み立てる（Gemini 等で本文だけ取り込んだ場合の表示用） */
+function syntheticFooterCopyrightFromBasics(siteName, footerAddress, footerPhone) {
+  const sn = String(siteName || '').trim();
+  const fa = String(footerAddress || '').trim();
+  const fp = String(footerPhone || '').trim();
+  if (!sn && !fa && !fp) return '';
+  const y = new Date().getFullYear();
+  return ['© ' + y, sn, fa, fp].filter(Boolean).join(' | ').slice(0, 5000);
+}
+
 export function applyTemplateCustomization(content, customization = {}) {
   const out = { ...content };
+  const explicitFooterText = String(customization.footerText || '').trim();
   if (customization.headline) out.headline = String(customization.headline).slice(0, 200);
   if (customization.subheadline) out.subheadline = String(customization.subheadline).slice(0, 400);
   const navItems = makeNavItems(customization.navLabels);
@@ -120,8 +131,8 @@ export function applyTemplateCustomization(content, customization = {}) {
   if (String(customization.title || '').trim()) {
     out.title = String(customization.title).trim().slice(0, 200);
   }
-  if (String(customization.footerText || '').trim()) {
-    out.footerText = String(customization.footerText).trim().slice(0, 5000);
+  if (explicitFooterText) {
+    out.footerText = explicitFooterText.slice(0, 5000);
   }
   if (String(customization.ctaLabel || '').trim()) {
     out.ctaLabel = String(customization.ctaLabel).trim().slice(0, 80);
@@ -186,6 +197,17 @@ export function applyTemplateCustomization(content, customization = {}) {
 
   const genreId = normalizeCafeVisualGenreId(customization.cafeVisualGenre);
   if (genreId) out.cafeVisualGenre = genreId;
+
+  if (!explicitFooterText) {
+    const contributed =
+      String(customization.siteName || '').trim() ||
+      String(customization.footerAddress || '').trim() ||
+      String(customization.footerPhone || '').trim();
+    if (contributed) {
+      const syn = syntheticFooterCopyrightFromBasics(out.siteName, out.footerAddress, out.footerPhone);
+      if (syn) out.footerText = syn;
+    }
+  }
 
   return out;
 }
