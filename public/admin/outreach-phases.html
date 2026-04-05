@@ -554,7 +554,11 @@
         }
 
         function normSearchText(s) {
-          return String(s || '')
+          var t = String(s || '');
+          try {
+            t = t.normalize('NFKC');
+          } catch (e) {}
+          return t
             .toLowerCase()
             .replace(/\s+/g, ' ')
             .trim();
@@ -599,6 +603,7 @@
               (item.content && item.content.siteName) || '',
               (item.content && item.content.title) || '',
               (item.content && item.content.headline) || '',
+              (item.dmBody && String(item.dmBody).slice(0, 400)) || '',
               (sig && sig.mapsUrl) || '',
               (sig && sig.placeId) || '',
             ];
@@ -826,6 +831,46 @@
         function render(items) {
           var host = document.getElementById('boards');
           host.innerHTML = '';
+
+          var q = String(liveSearchQuery || '').trim();
+          if (q) {
+            var matches = items.filter(function (i) {
+              return itemMatchesSearch(i, q);
+            });
+            var searchPanel = el('div', { class: 'panel' });
+            searchPanel.appendChild(
+              el('h2', { text: matches.length ? '検索結果（' + matches.length + '件）' : '検索結果' }),
+            );
+            searchPanel.appendChild(
+              el('p', {
+                class: 'muted',
+                text: '検索中はフェーズ別一覧を省略しています。検索欄を空にするか「クリア」で一覧に戻ります。',
+              }),
+            );
+            if (items.length === 0) {
+              searchPanel.appendChild(
+                el('p', {
+                  class: 'muted',
+                  text: '一覧がまだ読み込まれていません。「再読み込み」を押すか、しばらく待ってから再度お試しください。',
+                }),
+              );
+            } else if (matches.length === 0) {
+              searchPanel.appendChild(
+                el('p', {
+                  class: 'not-registered',
+                  text: '未登録（ダッシュボードに一致する案件がありません）',
+                }),
+              );
+            } else {
+              matches.forEach(function (item) {
+                searchPanel.appendChild(
+                  renderRow(item, rowModeForItem(item), { searchLabel: searchStatusLabel(item) }),
+                );
+              });
+            }
+            host.appendChild(searchPanel);
+            return;
+          }
 
           var pending = items.filter(function (i) {
             return i.status === 'pending';
