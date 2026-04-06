@@ -409,7 +409,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズをプルダウン変更できます。<strong>送信待ち（製作してまだ送付していない）</strong>は「OK済」のブロックのうち<strong>送信待ち（OK済・まだ送付していない）</strong>にまとまります（下の「送信済み — 送信待ち」は<strong>一度送ったあと</strong>の再送待ちです）。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）の両方を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。返信待ちは開始から<strong>3か月後</strong>に自動で送信待ちになります（毎日
+        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（6段階）をプルダウン変更できます。<strong>初回接触済</strong>かつ<strong>まだ送付していないOK済</strong>は「OK済」のブロックのうち<strong>初回接触フェーズ（OK済・未送付）</strong>にまとまります。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）の両方を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>初回接触済</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -450,7 +450,7 @@
       <div class="panel send-timing-panel" id="send-timing-panel">
         <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
         <p class="timing-hint">
-          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>送信待ち（OK済・まだ送付していない）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
+          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>初回接触フェーズ（OK済・未送付）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
         </p>
         <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
         <div id="send-timing-body"></div>
@@ -805,13 +805,21 @@
           }
         })();
 
-        var PHASE_KEYS = ['pending_send', 'awaiting_reply', 'appointment', 'won', 'lost'];
+        var PHASE_KEYS = [
+          'first_contact',
+          'hearing',
+          'proposal',
+          'contracted',
+          'lost',
+          'no_outreach_channel',
+        ];
         var PHASE_LABELS = {
-          pending_send: '送信待ち',
-          awaiting_reply: '返信待ち',
-          appointment: 'アポ',
-          won: '成約',
+          first_contact: '初回接触済',
+          hearing: 'ヒアリング中',
+          proposal: '提案済',
+          contracted: '契約済',
           lost: '失注',
+          no_outreach_channel: 'SNS/メールなし',
         };
 
         var cachedDashboardItems = [];
@@ -987,12 +995,16 @@
 
         function normalizePhase(item) {
           var p = item.outreachPhase;
-          if (p === 'sent') return 'awaiting_reply';
-          if (p === 'sleep') return 'pending_send';
+          if (p === 'sent') return 'proposal';
+          if (p === 'sleep') return 'no_outreach_channel';
+          if (p === 'pending_send') return 'first_contact';
+          if (p === 'awaiting_reply') return 'proposal';
+          if (p === 'appointment') return 'hearing';
+          if (p === 'won') return 'contracted';
           if (PHASE_KEYS.indexOf(p) >= 0) return p;
-          if (item.status === 'email_sent') return 'awaiting_reply';
-          if (item.status === 'approved') return 'pending_send';
-          return 'pending_send';
+          if (item.status === 'email_sent') return 'proposal';
+          if (item.status === 'approved') return 'first_contact';
+          return 'first_contact';
         }
 
         function searchStatusLabel(item) {
@@ -1245,8 +1257,8 @@
           return isInsideAnyInterval(tokyo.minutes, ivs);
         }
 
-        function isApprovedPendingSend(item) {
-          return item.status === 'approved' && normalizePhase(item) === 'pending_send';
+        function isApprovedFirstContactSlot(item) {
+          return item.status === 'approved' && normalizePhase(item) === 'first_contact';
         }
 
         var sendTimingLastBuild = 0;
@@ -1266,7 +1278,7 @@
 
           if (inWin && cachedDashboardItems.length) {
             cachedDashboardItems.forEach(function (item) {
-              if (!isApprovedPendingSend(item)) return;
+              if (!isApprovedFirstContactSlot(item)) return;
               var open = isShopOpenNowJst(item, tokyo);
               if (open === null) unknown.push(item);
               else if (open === false) eligible.push(item);
@@ -1292,7 +1304,7 @@
             bodyEl.appendChild(
               el('p', {
                 class: 'timing-empty',
-                text: '該当する店舗はありません（営業中・または送信待ちが0件です）。',
+                text: '該当する店舗はありません（営業中・または初回接触フェーズ未送付が0件です）。',
               }),
             );
           } else {
@@ -1313,14 +1325,14 @@
           }
           bodyEl.appendChild(
             el('h3', {
-              text: '営業時間を自動判別できない送信待ち（' + unknown.length + '件）',
+              text: '営業時間を自動判別できない初回接触フェーズ（未送付）（' + unknown.length + '件）',
             }),
           );
           if (unknown.length === 0) {
             bodyEl.appendChild(
               el('p', {
                 class: 'timing-empty',
-                text: 'なし（または送信待ちが該当しません）。',
+                text: 'なし（または該当フェーズがありません）。',
               }),
             );
           } else {
@@ -1348,7 +1360,9 @@
             if (Number.isNaN(d.getTime())) return '';
             d.setMonth(d.getMonth() + 3);
             return (
-              '自動で送信待ちになる目安: ' + d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) + ' 以降（日次バッチ）'
+              '自動で「初回接触済」に戻る目安: ' +
+              d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
+              ' 以降（日次バッチ）'
             );
           } catch (e) {
             return '';
@@ -1730,15 +1744,15 @@
               statusBlock.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
               statusBlock.appendChild(renderPhaseSelect(item, load));
               var bump = autoBumpHint(item.replyWaitStartedAt);
-              if (eff === 'awaiting_reply' && bump) {
+              if (eff === 'proposal' && bump) {
                 statusBlock.appendChild(el('p', { class: 'muted', text: bump }));
               }
-              if (item.sleepUntil && item.outreachPhase === 'sleep') {
+              if (item.sleepUntil) {
                 statusBlock.appendChild(
                   el('p', {
                     class: 'muted',
                     text:
-                      '（旧スリープ）再送の目安: ' +
+                      '再送・フォローの控え目安: ' +
                       new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
                       ' 以降',
                   }),
@@ -1786,17 +1800,17 @@
           host.appendChild(section('レビュー待ち', pending, 'pending'));
 
           var approvedPendingSend = approved.filter(function (i) {
-            return normalizePhase(i) === 'pending_send';
+            return normalizePhase(i) === 'first_contact';
           });
           var approvedOtherPhase = approved.filter(function (i) {
-            return normalizePhase(i) !== 'pending_send';
+            return normalizePhase(i) !== 'first_contact';
           });
           host.appendChild(
-            section('送信待ち（OK済・まだ送付していない）', approvedPendingSend, 'approved'),
+            section('初回接触フェーズ（OK済・未送付）', approvedPendingSend, 'approved'),
           );
           if (approvedOtherPhase.length > 0) {
             host.appendChild(
-              section('OK済み（送信前）・送信待ち以外のフェーズ', approvedOtherPhase, 'approved'),
+              section('OK済（送信前）・上記以外のフェーズ', approvedOtherPhase, 'approved'),
             );
           }
 
@@ -1817,11 +1831,11 @@
             var p = el('div', { class: 'panel' });
             var title = '送信済み — ' + PHASE_LABELS[ph] + '（' + list.length + '件）';
             p.appendChild(el('h2', { text: title }));
-            if (ph === 'pending_send') {
+            if (ph === 'first_contact') {
               p.appendChild(
                 el('p', {
                   class: 'muted',
-                  text: '※ ここは送付済みの案件です。製作中で未送付の「送信待ち」は上のパネルを見てください。',
+                  text: '※ ここは送付済みの案件です。製作中で未送付の「初回接触フェーズ」は上のパネルを見てください。',
                 }),
               );
             }

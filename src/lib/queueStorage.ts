@@ -72,12 +72,23 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
       next.unsubscribeToken = makeUnsubscribeToken();
     }
     if (status === 'approved' && !next.outreachPhase) {
-      next.outreachPhase = 'pending_send';
+      next.outreachPhase = 'first_contact';
     }
     if (status === 'email_sent') {
-      if (!next.outreachPhase || next.outreachPhase === 'sent' || next.outreachPhase === 'pending_send') {
-        next.outreachPhase = 'awaiting_reply';
-        if (!next.replyWaitStartedAt) next.replyWaitStartedAt = new Date().toISOString();
+      const ph = next.outreachPhase;
+      const bumpToProposal =
+        !ph ||
+        ph === 'sent' ||
+        ph === 'pending_send' ||
+        ph === 'first_contact' ||
+        ph === 'hearing' ||
+        ph === 'no_outreach_channel' ||
+        ph === 'appointment';
+      if (bumpToProposal) {
+        next.outreachPhase = 'proposal';
+        next.replyWaitStartedAt = new Date().toISOString();
+      } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !next.replyWaitStartedAt) {
+        next.replyWaitStartedAt = new Date().toISOString();
       }
       if (!next.unsubscribeToken) next.unsubscribeToken = makeUnsubscribeToken();
     }
@@ -110,7 +121,7 @@ export function updateDashboardOutreachPhase(id: string, outreachPhase: Outreach
   const list = getDashboard().map((x) => {
     if (x.id !== id) return x;
     const next: DashboardItem = { ...x, outreachPhase };
-    if (outreachPhase === 'awaiting_reply') {
+    if (outreachPhase === 'proposal' || outreachPhase === 'awaiting_reply') {
       if (!next.replyWaitStartedAt) next.replyWaitStartedAt = new Date().toISOString();
     } else {
       next.replyWaitStartedAt = undefined;

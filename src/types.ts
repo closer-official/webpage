@@ -304,14 +304,23 @@ export interface ResearchedShop {
 
 /** 営業フェーズ（検閲ダッシュボード・送付管理） */
 export type OutreachPhase =
-  | 'pending_send'
-  | 'awaiting_reply'
-  | 'appointment'
-  | 'won'
+  | 'first_contact'
+  | 'hearing'
+  | 'proposal'
+  | 'contracted'
   | 'lost'
-  /** @deprecated 互換用。表示上は awaiting_reply 相当 */
+  | 'no_outreach_channel'
+  /** @deprecated 保存値の互換。正規化後は first_contact */
+  | 'pending_send'
+  /** @deprecated 保存値の互換。正規化後は proposal */
+  | 'awaiting_reply'
+  /** @deprecated 保存値の互換。正規化後は hearing */
+  | 'appointment'
+  /** @deprecated 保存値の互換。正規化後は contracted */
+  | 'won'
+  /** @deprecated 互換。正規化後は proposal */
   | 'sent'
-  /** @deprecated 手動スリープ。自動再送フローでは pending_send を使用 */
+  /** @deprecated 保存値の互換。正規化後は no_outreach_channel */
   | 'sleep';
 
 /** 検閲ダッシュボード用の1件（調査済み＋LP生成済み） */
@@ -335,9 +344,9 @@ export interface DashboardItem {
    * OK済・送信済案件のフェーズ。
    */
   outreachPhase?: OutreachPhase;
-  /** outreachPhase === awaiting_reply のとき、返信待ち開始（この日時から3か月後に自動で pending_send） */
+  /** outreachPhase === proposal（旧 awaiting_reply）のとき、フォロー開始（この日時から3か月後に自動で first_contact） */
   replyWaitStartedAt?: string;
-  /** outreachPhase === sleep のとき、再送を控える目安日時（ISO） */
+  /** 旧 sleep のときの再送目安（ISO）。no_outreach_channel 移行後は未使用になり得る */
   sleepUntil?: string;
   /** 配信停止ページ用の秘密トークン（URLに含める） */
   unsubscribeToken?: string;

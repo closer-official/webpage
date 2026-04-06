@@ -1861,15 +1861,29 @@ app.post('/api/process-next', async (req, res) => {
 });
 
 // ---------- ダッシュボード ----------
-const OUTREACH_PHASES = new Set([
-  'pending_send',
-  'awaiting_reply',
-  'appointment',
-  'won',
+const OUTREACH_PHASE_CANONICAL = new Set([
+  'first_contact',
+  'hearing',
+  'proposal',
+  'contracted',
   'lost',
-  'sleep',
-  'sent',
+  'no_outreach_channel',
 ]);
+/** PATCH および旧データ用。保存値は正規化して CANONICAL のいずれかに揃える */
+const OUTREACH_PHASE_LEGACY_MAP = {
+  pending_send: 'first_contact',
+  awaiting_reply: 'proposal',
+  sent: 'proposal',
+  appointment: 'hearing',
+  won: 'contracted',
+  sleep: 'no_outreach_channel',
+};
+
+function canonicalizeOutreachPhaseInput(p) {
+  const s = String(p || '').trim();
+  if (OUTREACH_PHASE_CANONICAL.has(s)) return s;
+  return OUTREACH_PHASE_LEGACY_MAP[s] || null;
+}
 
 function addMonthsIso(fromDate, months) {
   const d = new Date(fromDate);
@@ -1898,8 +1912,18 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.status === 'email_sent') {
     dashboard[i].status = 'email_sent';
     const ph = dashboard[i].outreachPhase;
-    if (!ph || ph === 'sent' || ph === 'pending_send') {
-      dashboard[i].outreachPhase = 'awaiting_reply';
+    const bumpToProposal =
+      !ph ||
+      ph === 'sent' ||
+      ph === 'pending_send' ||
+      ph === 'first_contact' ||
+      ph === 'hearing' ||
+      ph === 'no_outreach_channel' ||
+      ph === 'appointment';
+    if (bumpToProposal) {
+      dashboard[i].outreachPhase = 'proposal';
+      dashboard[i].replyWaitStartedAt = new Date().toISOString();
+    } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !dashboard[i].replyWaitStartedAt) {
       dashboard[i].replyWaitStartedAt = new Date().toISOString();
     }
     if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
@@ -1912,15 +1936,16 @@ app.patch('/api/dashboard/:id', async (req, res) => {
     if (!['approved', 'email_sent'].includes(dashboard[i].status)) {
       return res.status(400).json({ error: 'OK済みまたは送信済みの案件のみフェーズを変更できます。' });
     }
-    const p = String(req.body.outreachPhase);
-    if (!OUTREACH_PHASES.has(p)) return res.status(400).json({ error: 'Invalid outreachPhase' });
+    const pRaw = String(req.body.outreachPhase);
+    const p = canonicalizeOutreachPhaseInput(pRaw);
+    if (!p) return res.status(400).json({ error: 'Invalid outreachPhase' });
     dashboard[i].outreachPhase = p;
-    if (p === 'awaiting_reply') {
+    if (p === 'proposal') {
       dashboard[i].replyWaitStartedAt = new Date().toISOString();
     } else {
       dashboard[i].replyWaitStartedAt = undefined;
     }
-    if (p === 'sleep') {
+    if (pRaw === 'sleep') {
       dashboard[i].sleepUntil = addMonthsIso(new Date(), 3);
     } else {
       dashboard[i].sleepUntil = undefined;
@@ -1992,7 +2017,7 @@ app.post('/api/outreach/opt-out', async (req, res) => {
 });
 
 /**
- * 返信待ち開始から3か月経過 → 自動で送信待ち（再送キュー）
+ * 提案済（旧:返信待ち）でフォロー開始から3か月経過 → 自動で初回接触済（再アプローチ用）
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
 app.get('/api/outreach/phase-tick', async (req, res) => {
@@ -2005,10 +2030,12 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
     const dashboard = await store.getDashboard();
     let bumped = 0;
     for (const row of dashboard) {
-      if (row.outreachPhase !== 'awaiting_reply' || !row.replyWaitStartedAt) continue;
+      const ph = row.outreachPhase;
+      const inProposalWait = ph === 'proposal' || ph === 'awaiting_reply';
+      if (!inProposalWait || !row.replyWaitStartedAt) continue;
       const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
       if (new Date(deadline).getTime() <= Date.now()) {
-        row.outreachPhase = 'pending_send';
+        row.outreachPhase = 'first_contact';
         row.replyWaitStartedAt = undefined;
         bumped += 1;
       }
@@ -2027,7 +2054,7 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'approved';
   if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
-  if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pending_send';
+  if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'first_contact';
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
