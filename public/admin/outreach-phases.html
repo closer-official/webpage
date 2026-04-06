@@ -237,6 +237,23 @@
         color: #64748b;
         font-style: italic;
       }
+      .dm-pattern-block {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #2a3b52;
+      }
+      .dm-pattern-block label {
+        display: block;
+        font-size: 0.72rem;
+        color: #9aacbf;
+        margin: 8px 0 4px;
+      }
+      .dm-pattern-block label:first-of-type {
+        margin-top: 0;
+      }
+      .dm-pattern-block select {
+        max-width: 100%;
+      }
     </style>
   </head>
   <body>
@@ -397,32 +414,187 @@
           );
         }
 
+        function dmPatternKey(item) {
+          var p = String((item && item.outreachDmPattern) || '1').trim();
+          return /^[1-5]$/.test(p) ? p : '1';
+        }
+
+        function buildDmBodyForPattern(pattern, prevUrl, signatureName) {
+          var prev = prevUrl;
+          var name = signatureName || '○○';
+          var bodies = {
+            '1':
+              '突然すみません。\n' +
+              '投稿を拝見して、写真や雰囲気がすごく良いのに、\n' +
+              '受け皿がないのが少しもったいないなと思いまして…\n' +
+              '\n' +
+              '公開情報だけで簡単なデモページを仮で作ってみました👇\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※仮の情報で作ったサンプルです\n' +
+              'もし「こういう形もありかも」と思われたら、\n' +
+              'そこから整えていくこともできます。\n' +
+              '\n' +
+              '不要でしたらスルーで大丈夫です。\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
+            '2':
+              '突然すみません。\n' +
+              'お店の情報を見ていて、\n' +
+              '良さそうなお店なのに情報がまとまって見える場所がないのが\n' +
+              '少しもったいないなと思いまして…\n' +
+              '\n' +
+              '公開情報だけで簡単なデモページを仮で作ってみました👇\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※仮情報で作ったサンプルです\n' +
+              'こういう形でまとまるだけでも、\n' +
+              '初めての方の安心感はかなり変わりそうだなと思いました。\n' +
+              '\n' +
+              '不要でしたらスルーで大丈夫です。\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
+            '3':
+              '突然すみません。\n' +
+              'すでにホームページはあるのですが、\n' +
+              'スマホで見た時の導線が少しもったいないかもと思いまして…\n' +
+              '\n' +
+              '比較用として、別パターンの簡易デモを仮で作ってみました👇\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※比較用のサンプルです\n' +
+              'こういう見せ方だと、\n' +
+              '初めて来る方には少し伝わりやすくなるかもしれません。\n' +
+              '\n' +
+              '不要でしたらスルーで大丈夫です。\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
+            '4':
+              '突然すみません。\n' +
+              '口コミやお店の評価を見て、\n' +
+              '初めての方にももっと伝わりやすく見せられそうだなと思いまして…\n' +
+              '\n' +
+              '公開情報だけで簡単なデモページを仮で作ってみました👇\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※仮情報で作ったサンプルです\n' +
+              'こういう形でまとまると、\n' +
+              '初来店のハードルも少し下がりそうだなと思いました。\n' +
+              '\n' +
+              '不要でしたらスルーで大丈夫です。\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
+            '5':
+              '突然すみません。\n' +
+              'お店の情報を見て、\n' +
+              '簡単なデモページを仮で作ってみました👇\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※仮情報のサンプルです\n' +
+              '見るだけで大丈夫なので、\n' +
+              'もしタイミング合えば参考までに見てもらえたら嬉しいです。\n' +
+              '\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
+          };
+          return bodies[pattern] || bodies['1'];
+        }
+
         function buildOutreachDmBody(item) {
           var prev = outreachPreviewUrlForItem(item);
           if (!prev) prev = '（プレビューURL：店舗ドラフトと紐づけが必要です）';
-          return (
-            '突然すみません！\n' +
-            '投稿の料理写真がすごく素敵で思わず見入ってしまいました。\n' +
-            '\n' +
-            'ホームページが見当たらなかったので、\n' +
-            '勝手ながらお店の情報だけで簡単なデモサイトを作ってみました👇\n' +
-            '\n' +
-            prev +
-            '\n' +
-            '\n' +
-            '※仮の情報で作ったサンプルです\n' +
-            '\n' +
-            'もし「こういうのあってもいいかも」と思われたら、\n' +
-            'そこから一緒に整えていけたら嬉しいです。\n' +
-            '\n' +
-            '不要でしたらそのままスルーで大丈夫です🙇‍♂️'
-          );
+          var pattern = dmPatternKey(item);
+          var sig = String(getSavedSenderName() || '').trim() || '○○';
+          var custom = String((item && item.outreachDmCustomFirstLine) || '').trim();
+          var core = buildDmBodyForPattern(pattern, prev, sig);
+          if (custom) return custom + '\n\n' + core;
+          return core;
+        }
+
+        function mergeDashboardItemIntoCache(updated) {
+          if (!updated || !updated.id) return;
+          var idx = cachedDashboardItems.findIndex(function (x) {
+            return x.id === updated.id;
+          });
+          if (idx >= 0) cachedDashboardItems[idx] = updated;
+        }
+
+        function patchOutreachDmFields(itemId, payload) {
+          return apiJson('/api/dashboard/' + encodeURIComponent(itemId), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }).then(function (updated) {
+            mergeDashboardItemIntoCache(updated);
+          });
         }
 
         function renderOutreachTemplatesBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: '送付文面テンプレ（店舗名・URL・配信停止を自動反映）' }),
+            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：下のパターン・1行目・プレビューURL・署名）' }),
           );
+
+          var dmWrap = el('div', { class: 'dm-pattern-block' });
+          dmWrap.appendChild(
+            el('p', {
+              class: 'muted',
+              text: 'DMは5パターンから選択。先頭1行は任意（未入力ならテンプレ本文から開始）。変更は自動保存されます。',
+            }),
+          );
+          dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
+          var sel = el('select', { id: 'dm-pattern-' + item.id }, []);
+          [
+            { v: '1', t: '① SNS強い × HPなし（王道）' },
+            { v: '2', t: '② SNS弱め × HPなし' },
+            { v: '3', t: '③ HPあり・弱い／古い（比較用）' },
+            { v: '4', t: '④ 口コミ・評価が強い店' },
+            { v: '5', t: '⑤ 忙しそうな店向け・短文' },
+          ].forEach(function (o) {
+            sel.appendChild(el('option', { value: o.v, text: o.t }));
+          });
+          sel.value = dmPatternKey(item);
+          sel.onchange = function () {
+            patchOutreachDmFields(item.id, { outreachDmPattern: sel.value }).catch(function (e) {
+              showErr(String(e.message || e));
+            });
+          };
+          dmWrap.appendChild(sel);
+
+          dmWrap.appendChild(el('label', { for: 'dm-firstline-' + item.id, text: 'DMの最初の一行（任意・カスタム1行）' }));
+          var inp = el('input', {
+            type: 'text',
+            id: 'dm-firstline-' + item.id,
+            maxlength: 500,
+            placeholder: '例：いつも美味しそうな投稿、ありがとうございます。',
+            value: String(item.outreachDmCustomFirstLine || ''),
+          });
+          var dmFirstLineTimer = null;
+          function saveFirstLine() {
+            patchOutreachDmFields(item.id, { outreachDmCustomFirstLine: inp.value }).catch(function (e) {
+              showErr(String(e.message || e));
+            });
+          }
+          inp.addEventListener('input', function () {
+            clearTimeout(dmFirstLineTimer);
+            dmFirstLineTimer = setTimeout(saveFirstLine, 600);
+          });
+          inp.addEventListener('blur', function () {
+            clearTimeout(dmFirstLineTimer);
+            saveFirstLine();
+          });
+          dmWrap.appendChild(inp);
+          container.appendChild(dmWrap);
+
           var row = el('div', { class: 'url-row' });
           var bMail = el('button', { type: 'button', class: 'btn small primary', text: 'メール用テンプレをコピー' });
           bMail.onclick = function () {
@@ -435,7 +607,11 @@
           var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
           bDm.onclick = function () {
             persistSenderProfile();
-            copyTextWithFeedback(buildOutreachDmBody(item), 'DM用テンプレ');
+            var merged = Object.assign({}, item, {
+              outreachDmPattern: sel.value,
+              outreachDmCustomFirstLine: String(inp.value || '').trim(),
+            });
+            copyTextWithFeedback(buildOutreachDmBody(merged), 'DM用テンプレ');
           };
           row.appendChild(bMail);
           row.appendChild(bDm);

@@ -323,6 +323,10 @@ export interface DashboardItem {
   templateId: string;
   /** DM文面（手動入力または後でAIで生成する用のプレースホルダ） */
   dmBody: string;
+  /** 送付用 DM のテンプレパターン（1–5）。未指定時はクライアントで①扱い */
+  outreachDmPattern?: '1' | '2' | '3' | '4' | '5';
+  /** DM 先頭のカスタム1行（任意） */
+  outreachDmCustomFirstLine?: string;
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**

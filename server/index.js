@@ -1886,6 +1886,15 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body.dmBody !== undefined) dashboard[i].dmBody = req.body.dmBody;
+  if (req.body.outreachDmPattern !== undefined) {
+    const p = String(req.body.outreachDmPattern || '').trim();
+    if (/^[1-5]$/.test(p)) dashboard[i].outreachDmPattern = p;
+  }
+  if (req.body.outreachDmCustomFirstLine !== undefined) {
+    dashboard[i].outreachDmCustomFirstLine = String(req.body.outreachDmCustomFirstLine || '')
+      .trim()
+      .slice(0, 500);
+  }
   if (req.body.status === 'email_sent') {
     dashboard[i].status = 'email_sent';
     const ph = dashboard[i].outreachPhase;
