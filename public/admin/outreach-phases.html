@@ -402,6 +402,31 @@
         font-size: 0.82rem;
         margin: 0;
       }
+      .phase-browser-panel .phase-browser-row {
+        display: grid;
+        gap: 14px;
+        margin-top: 4px;
+      }
+      @media (min-width: 640px) {
+        .phase-browser-panel .phase-browser-row {
+          grid-template-columns: 1fr 1fr;
+          align-items: end;
+        }
+      }
+      .phase-browser-field label {
+        display: block;
+        font-size: 0.78rem;
+        color: #9aacbf;
+        margin-bottom: 6px;
+      }
+      .phase-detail-host {
+        max-width: 1100px;
+        margin: 0 auto 1.25rem;
+        min-height: 120px;
+      }
+      .phase-detail-host > .muted {
+        padding: 12px 4px;
+      }
     </style>
   </head>
   <body>
@@ -409,7 +434,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        ダッシュボード案件のステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（6段階）をプルダウン変更できます。<strong>初回接触済</strong>かつ<strong>まだ送付していないOK済</strong>は「OK済」のブロックのうち<strong>初回接触フェーズ（OK済・未送付）</strong>にまとまります。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）の両方を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>初回接触済</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。ダッシュボードのステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（6段階）をプルダウン変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>初回接触済</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -1005,6 +1030,50 @@
           if (item.status === 'email_sent') return 'proposal';
           if (item.status === 'approved') return 'first_contact';
           return 'first_contact';
+        }
+
+        /** フェーズ確認用：1段目プルダウンの区分一覧 */
+        function buildPhaseBrowserGroups() {
+          return [
+            {
+              id: 'pending',
+              label: 'レビュー待ち',
+              filter: function (i) {
+                return i.status === 'pending';
+              },
+            },
+            {
+              id: 'approved_first',
+              label: 'OK済・未送付（初回接触済）',
+              filter: function (i) {
+                return i.status === 'approved' && normalizePhase(i) === 'first_contact';
+              },
+            },
+            {
+              id: 'approved_other',
+              label: 'OK済・送信前（その他のフェーズ）',
+              filter: function (i) {
+                return i.status === 'approved' && normalizePhase(i) !== 'first_contact';
+              },
+            },
+            {
+              id: 'rejected',
+              label: 'NG済み',
+              filter: function (i) {
+                return i.status === 'rejected';
+              },
+            },
+          ].concat(
+            PHASE_KEYS.map(function (ph) {
+              return {
+                id: 'sent_' + ph,
+                label: '送信済・' + PHASE_LABELS[ph],
+                filter: function (i) {
+                  return i.status === 'email_sent' && normalizePhase(i) === ph;
+                },
+              };
+            }),
+          );
         }
 
         function searchStatusLabel(item) {
@@ -1605,6 +1674,127 @@
             });
         }
 
+        function renderDashboardRow(item, mode, meta, loadFn) {
+          var name = (item.researched && item.researched.name) || '（無題）';
+          var addr = (item.researched && item.researched.address) || '';
+          var row = el('div', { class: 'phase-card' });
+
+          var header = el('header', { class: 'phase-card__header' });
+          if (meta && meta.searchLabel) {
+            header.appendChild(
+              el('span', {
+                class: 'badge',
+                text: meta.searchLabel,
+              }),
+            );
+          }
+          header.appendChild(el('h3', { class: 'phase-card__title', text: name }));
+          row.appendChild(header);
+
+          var body = el('div', { class: 'phase-card__body' });
+          var top = el('div', { class: 'phase-card__top' });
+
+          var colShop = el('aside', { class: 'phase-card__col phase-card__col--shop' });
+          colShop.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
+          var hoursText = openingHoursLinesForItem(item);
+          colShop.appendChild(el('p', { class: 'hours-heading', text: '営業時間' }));
+          colShop.appendChild(
+            el('p', {
+              class: hoursText ? 'hours-value' : 'hours-value missing',
+              text: hoursText || '（LPに営業時間テキストなし）',
+            }),
+          );
+          colShop.appendChild(el('span', { class: 'badge', text: 'ID: ' + item.id }));
+
+          var colMain = el('div', { class: 'phase-card__col phase-card__col--main' });
+          var statusBlock = el('div', { class: 'phase-card__status' });
+          var actionsCluster = el('div', { class: 'phase-card__actions' });
+
+          if (mode === 'pending') {
+            statusBlock.appendChild(el('p', { class: 'muted', text: 'レビュー待ち' }));
+            var bOk = el('button', { type: 'button', class: 'btn small primary', text: 'OK' });
+            bOk.onclick = function () {
+              apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' })
+                .then(loadFn)
+                .catch(function (e) {
+                  showErr(String(e.message || e));
+                });
+            };
+            actionsCluster.appendChild(bOk);
+            var bNg = el('button', { type: 'button', class: 'btn small danger', text: 'NG' });
+            bNg.onclick = function () {
+              apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' })
+                .then(loadFn)
+                .catch(function (e) {
+                  showErr(String(e.message || e));
+                });
+            };
+            actionsCluster.appendChild(bNg);
+          } else if (mode === 'rejected') {
+            statusBlock.appendChild(
+              el('p', { class: 'muted', text: 'NG済み（送付対象外）。不要なら削除してください。' }),
+            );
+          } else if (mode === 'approved') {
+            statusBlock.appendChild(el('p', { class: 'muted', text: 'OK済・送信前 — フェーズ' }));
+            statusBlock.appendChild(renderPhaseSelect(item, loadFn));
+            var bSent = el('button', { type: 'button', class: 'btn small primary', text: '送信済みにする' });
+            bSent.onclick = function () {
+              apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'email_sent' }),
+              })
+                .then(loadFn)
+                .catch(function (e) {
+                  showErr(String(e.message || e));
+                });
+            };
+            actionsCluster.appendChild(bSent);
+          } else {
+            var eff = normalizePhase(item);
+            statusBlock.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
+            statusBlock.appendChild(renderPhaseSelect(item, loadFn));
+            var bump = autoBumpHint(item.replyWaitStartedAt);
+            if (eff === 'proposal' && bump) {
+              statusBlock.appendChild(el('p', { class: 'muted', text: bump }));
+            }
+            if (item.sleepUntil) {
+              statusBlock.appendChild(
+                el('p', {
+                  class: 'muted',
+                  text:
+                    '再送・フォローの控え目安: ' +
+                    new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
+                    ' 以降',
+                }),
+              );
+            }
+            if (eff === 'lost' && item.optOutFeedback) {
+              statusBlock.appendChild(
+                el('div', { class: 'feedback', text: '店主の一言（任意）: ' + item.optOutFeedback }),
+              );
+            }
+          }
+
+          var delBtn = el('button', { type: 'button', class: 'btn small danger', text: '一覧から削除' });
+          delBtn.onclick = function () {
+            deleteDashboardItem(item, loadFn);
+          };
+          actionsCluster.appendChild(delBtn);
+
+          colMain.appendChild(statusBlock);
+          colMain.appendChild(actionsCluster);
+          top.appendChild(colShop);
+          top.appendChild(colMain);
+          body.appendChild(top);
+
+          var linksRow = el('div', { class: 'phase-card__links' });
+          renderShareUrlsSection(linksRow, item);
+          body.appendChild(linksRow);
+          row.appendChild(body);
+          return row;
+        }
+
         function render(items) {
           var host = document.getElementById('boards');
           host.innerHTML = '';
@@ -1621,7 +1811,7 @@
             searchPanel.appendChild(
               el('p', {
                 class: 'muted',
-                text: '検索中はフェーズ別一覧を省略しています。検索欄を空にするか「クリア」で一覧に戻ります。',
+                text: '検索中はカードをそのまま一覧表示しています。検索を空にすると、フェーズ別の2段プルダウンに戻ります。',
               }),
             );
             if (items.length === 0) {
@@ -1641,7 +1831,7 @@
             } else {
               matches.forEach(function (item) {
                 searchPanel.appendChild(
-                  renderRow(item, rowModeForItem(item), { searchLabel: searchStatusLabel(item) }),
+                  renderDashboardRow(item, rowModeForItem(item), { searchLabel: searchStatusLabel(item) }, load),
                 );
               });
             }
@@ -1650,200 +1840,125 @@
             return;
           }
 
-          var pending = items.filter(function (i) {
-            return i.status === 'pending';
-          });
-          var approved = items.filter(function (i) {
-            return i.status === 'approved';
-          });
-          var sent = items.filter(function (i) {
-            return i.status === 'email_sent';
-          });
-          var rejected = items.filter(function (i) {
-            return i.status === 'rejected';
-          });
+          function sortByShopName(a, b) {
+            var na = outreachShopName(a) || a.id;
+            var nb = outreachShopName(b) || b.id;
+            return na.localeCompare(nb, 'ja');
+          }
 
-          function renderRow(item, mode, meta) {
-            var name = (item.researched && item.researched.name) || '（無題）';
-            var addr = (item.researched && item.researched.address) || '';
-            var row = el('div', { class: 'phase-card' });
+          var browserPanel = el('div', { class: 'panel phase-browser-panel' });
+          browserPanel.appendChild(el('h2', { text: 'フェーズで店舗を選ぶ' }));
+          browserPanel.appendChild(
+            el('p', {
+              class: 'muted',
+              text: '① 区分・フェーズ → ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更・OK/NGなど）が開きます。店名はプルダウンにだけ出します。',
+            }),
+          );
 
-            var header = el('header', { class: 'phase-card__header' });
-            if (meta && meta.searchLabel) {
-              header.appendChild(
-                el('span', {
-                  class: 'badge',
-                  text: meta.searchLabel,
-                }),
-              );
+          var groups = buildPhaseBrowserGroups();
+          var row = el('div', { class: 'phase-browser-row' });
+
+          var fg = el('div', { class: 'phase-browser-field' });
+          fg.appendChild(el('label', { for: 'phase-group-select', text: '1. 区分・フェーズ' }));
+          var selG = el('select', { id: 'phase-group-select' });
+          selG.setAttribute('aria-label', '区分・フェーズ');
+
+          var fs = el('div', { class: 'phase-browser-field' });
+          fs.appendChild(el('label', { for: 'phase-shop-select', text: '2. 店名' }));
+          var selS = el('select', { id: 'phase-shop-select' });
+          selS.setAttribute('aria-label', '店名');
+          selS.disabled = true;
+
+          var detailHost = el('div', { class: 'phase-detail-host', id: 'phase-detail-host' });
+
+          function getFiltered(groupId) {
+            var g = null;
+            for (var gi = 0; gi < groups.length; gi++) {
+              if (groups[gi].id === groupId) {
+                g = groups[gi];
+                break;
+              }
             }
-            header.appendChild(el('h3', { class: 'phase-card__title', text: name }));
-            row.appendChild(header);
+            if (!g) return [];
+            return items.filter(g.filter).sort(sortByShopName);
+          }
 
-            var body = el('div', { class: 'phase-card__body' });
-            var top = el('div', { class: 'phase-card__top' });
+          groups.forEach(function (g) {
+            var n = items.filter(g.filter).length;
+            selG.appendChild(el('option', { value: g.id, text: g.label + '（' + n + '件）' }));
+          });
 
-            var colShop = el('aside', { class: 'phase-card__col phase-card__col--shop' });
-            colShop.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
-            var hoursText = openingHoursLinesForItem(item);
-            colShop.appendChild(el('p', { class: 'hours-heading', text: '営業時間' }));
-            colShop.appendChild(
-              el('p', {
-                class: hoursText ? 'hours-value' : 'hours-value missing',
-                text: hoursText || '（LPに営業時間テキストなし）',
+          function showDetail(itemId) {
+            detailHost.innerHTML = '';
+            if (!itemId) {
+              detailHost.appendChild(
+                el('p', { class: 'muted', text: '店名を選ぶと詳細が表示されます。' }),
+              );
+              return;
+            }
+            var item = null;
+            for (var j = 0; j < items.length; j++) {
+              if (items[j].id === itemId) {
+                item = items[j];
+                break;
+              }
+            }
+            if (!item) return;
+            var card = renderDashboardRow(item, rowModeForItem(item), null, load);
+            card.id = 'dash-' + item.id;
+            detailHost.appendChild(card);
+          }
+
+          function refillShops() {
+            var gid = selG.value;
+            var list = getFiltered(gid);
+            selS.innerHTML = '';
+            selS.appendChild(
+              el('option', {
+                value: '',
+                text: list.length ? '店を選択…' : '（該当店舗なし）',
               }),
             );
-            colShop.appendChild(el('span', { class: 'badge', text: 'ID: ' + item.id }));
-
-            var colMain = el('div', { class: 'phase-card__col phase-card__col--main' });
-            var statusBlock = el('div', { class: 'phase-card__status' });
-            var actionsCluster = el('div', { class: 'phase-card__actions' });
-
-            if (mode === 'pending') {
-              statusBlock.appendChild(el('p', { class: 'muted', text: 'レビュー待ち' }));
-              var bOk = el('button', { type: 'button', class: 'btn small primary', text: 'OK' });
-              bOk.onclick = function () {
-                apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' })
-                  .then(load)
-                  .catch(function (e) {
-                    showErr(String(e.message || e));
-                  });
-              };
-              actionsCluster.appendChild(bOk);
-              var bNg = el('button', { type: 'button', class: 'btn small danger', text: 'NG' });
-              bNg.onclick = function () {
-                apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' })
-                  .then(load)
-                  .catch(function (e) {
-                    showErr(String(e.message || e));
-                  });
-              };
-              actionsCluster.appendChild(bNg);
-            } else if (mode === 'rejected') {
-              statusBlock.appendChild(
-                el('p', { class: 'muted', text: 'NG済み（送付対象外）。不要なら削除してください。' }),
-              );
-            } else if (mode === 'approved') {
-              statusBlock.appendChild(el('p', { class: 'muted', text: 'OK済・送信前 — フェーズ' }));
-              statusBlock.appendChild(renderPhaseSelect(item, load));
-              var bSent = el('button', { type: 'button', class: 'btn small primary', text: '送信済みにする' });
-              bSent.onclick = function () {
-                apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ status: 'email_sent' }),
-                })
-                  .then(load)
-                  .catch(function (e) {
-                    showErr(String(e.message || e));
-                  });
-              };
-              actionsCluster.appendChild(bSent);
-            } else {
-              var eff = normalizePhase(item);
-              statusBlock.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
-              statusBlock.appendChild(renderPhaseSelect(item, load));
-              var bump = autoBumpHint(item.replyWaitStartedAt);
-              if (eff === 'proposal' && bump) {
-                statusBlock.appendChild(el('p', { class: 'muted', text: bump }));
-              }
-              if (item.sleepUntil) {
-                statusBlock.appendChild(
-                  el('p', {
-                    class: 'muted',
-                    text:
-                      '再送・フォローの控え目安: ' +
-                      new Date(item.sleepUntil).toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
-                      ' 以降',
-                  }),
-                );
-              }
-              if (eff === 'lost' && item.optOutFeedback) {
-                statusBlock.appendChild(
-                  el('div', { class: 'feedback', text: '店主の一言（任意）: ' + item.optOutFeedback }),
-                );
-              }
-            }
-
-            var delBtn = el('button', { type: 'button', class: 'btn small danger', text: '一覧から削除' });
-            delBtn.onclick = function () {
-              deleteDashboardItem(item, load);
-            };
-            actionsCluster.appendChild(delBtn);
-
-            colMain.appendChild(statusBlock);
-            colMain.appendChild(actionsCluster);
-            top.appendChild(colShop);
-            top.appendChild(colMain);
-            body.appendChild(top);
-
-            var linksRow = el('div', { class: 'phase-card__links' });
-            renderShareUrlsSection(linksRow, item);
-            body.appendChild(linksRow);
-            row.appendChild(body);
-            return row;
-          }
-
-          function section(title, list, mode) {
-            var p = el('div', { class: 'panel' });
-            p.appendChild(el('h2', { text: title + '（' + list.length + '件）' }));
-            if (list.length === 0) {
-              p.appendChild(el('p', { class: 'empty', text: '該当なし' }));
-            } else {
-              list.forEach(function (item) {
-                p.appendChild(renderRow(item, mode));
-              });
-            }
-            return p;
-          }
-
-          host.appendChild(section('レビュー待ち', pending, 'pending'));
-
-          var approvedPendingSend = approved.filter(function (i) {
-            return normalizePhase(i) === 'first_contact';
-          });
-          var approvedOtherPhase = approved.filter(function (i) {
-            return normalizePhase(i) !== 'first_contact';
-          });
-          host.appendChild(
-            section('初回接触フェーズ（OK済・未送付）', approvedPendingSend, 'approved'),
-          );
-          if (approvedOtherPhase.length > 0) {
-            host.appendChild(
-              section('OK済（送信前）・上記以外のフェーズ', approvedOtherPhase, 'approved'),
-            );
-          }
-
-          host.appendChild(section('NG済み', rejected, 'rejected'));
-
-          var byPhase = {};
-          PHASE_KEYS.forEach(function (p) {
-            byPhase[p] = [];
-          });
-          sent.forEach(function (item) {
-            var ph = normalizePhase(item);
-            if (!byPhase[ph]) byPhase[ph] = [];
-            byPhase[ph].push(item);
-          });
-          PHASE_KEYS.forEach(function (ph) {
-            var list = byPhase[ph] || [];
-            if (list.length === 0) return;
-            var p = el('div', { class: 'panel' });
-            var title = '送信済み — ' + PHASE_LABELS[ph] + '（' + list.length + '件）';
-            p.appendChild(el('h2', { text: title }));
-            if (ph === 'first_contact') {
-              p.appendChild(
-                el('p', {
-                  class: 'muted',
-                  text: '※ ここは送付済みの案件です。製作中で未送付の「初回接触フェーズ」は上のパネルを見てください。',
-                }),
-              );
-            }
-            list.forEach(function (item) {
-              p.appendChild(renderRow(item, 'sent'));
+            list.forEach(function (it) {
+              var nm = outreachShopName(it) || '（無題）';
+              selS.appendChild(el('option', { value: it.id, text: nm }));
             });
-            host.appendChild(p);
-          });
+            selS.disabled = list.length === 0;
+            showDetail('');
+          }
+
+          selG.onchange = refillShops;
+          selS.onchange = function () {
+            showDetail(selS.value);
+          };
+
+          fg.appendChild(selG);
+          fs.appendChild(selS);
+          row.appendChild(fg);
+          row.appendChild(fs);
+          browserPanel.appendChild(row);
+          host.appendChild(browserPanel);
+          host.appendChild(detailHost);
+
+          refillShops();
+          var firstIdx = -1;
+          for (var ri = 0; ri < groups.length; ri++) {
+            if (items.filter(groups[ri].filter).length > 0) {
+              firstIdx = ri;
+              break;
+            }
+          }
+          if (firstIdx >= 0) {
+            selG.selectedIndex = firstIdx;
+            refillShops();
+            if (selS.options.length > 1) {
+              selS.selectedIndex = 1;
+              showDetail(selS.value);
+            }
+          } else {
+            showDetail('');
+          }
+
           updateSendTimingPanel(true);
         }
 
