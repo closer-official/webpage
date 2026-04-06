@@ -689,6 +689,10 @@
           空欄の「Instagram 投稿埋め込み（1投稿のURL）」には、ここと同じURLを自動で入れます（別URLにする場合は下の欄で上書き）。
         </p>
         <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
+        <label
+          >X（Twitter）（フッターアイコン）URL
+          <input type="url" id="f-footerTwitterUrl" placeholder="https://x.com/… または https://twitter.com/…"
+        /></label>
       </div>
 
       <div class="tw-form-block" data-tw-for="cafe_1">
@@ -1124,11 +1128,12 @@
             '',
             '【その他】',
             '- siteName / headline / footerText 等の文字列フィールドは原則すべて非空。',
-            '- 公式に公開されていない項目（footerLineUrl・reserveUrl・reserveLabel・canonicalUrl 等）は空文字でよい。その場合 verification.notes に「○○は公式未公開のため空」と一行追記する。',
+            '- 公式に公開されていない項目（footerLineUrl・footerTwitterUrl・reserveUrl・reserveLabel・canonicalUrl 等）は空文字でよい。その場合 verification.notes に「○○は公式未公開のため空」と一行追記する。',
             '- ogImageUrl はヒーロー1枚目と同じURLでもよい（https）。',
             '- cafeReviewCtaText / cafeReviewCtaUrl は、Googleマップのレビュー投稿に繋がる場合のみ埋める。無い場合は空文字（notesに明記）。',
             '- mapEmbedUrl・cafeFloatingMapUrl・cafeGbPostsEmbedUrl は同一店舗の Google マップ埋め込みURL等で揃える（取得できる場合）。取得できなければ検索で特定できる埋め込みURLを優先し、どうしても無い場合のみ空文字（notesに明記）。',
             '- footerInstagramUrl と cafeInstagramPermalink は、公式Instagramが分かれば同一URL。無ければ空文字。',
+            '- footerTwitterUrl は公式 X（Twitter）のプロフィール等の https URL。無ければ空文字。',
             '- cafeVisualGenre は次のいずれか1つだけ（店舗に最も近いもの）: ramen, cafe_coffee, kissaten, izakaya, yakiniku, sushi, yoshoku, teishoku, don_udon_soba, sweets, takeout, other_food。該当が難しければ other_food。',
             '- ctaHref は #contact または公式予約・問い合わせの https URL。',
             '- navLabels は「セクション見出し」をカンマ区切りで（例: コンセプト, スタッフ, ギャラリー, メニュー, アクセス）。sections の並びと一致させる。',
@@ -1152,6 +1157,7 @@
             '    "footerPhone": "",',
             '    "footerInstagramUrl": "",',
             '    "footerLineUrl": "",',
+            '    "footerTwitterUrl": "",',
             '    "ctaLabel": "",',
             '    "ctaHref": "#contact",',
             '    "navLabels": "",',
@@ -1695,6 +1701,7 @@
             footerPhone: document.getElementById('f-footerPhone').value.trim(),
             footerInstagramUrl: document.getElementById('f-footerInstagramUrl').value.trim(),
             footerLineUrl: document.getElementById('f-footerLineUrl').value.trim(),
+            footerTwitterUrl: document.getElementById('f-footerTwitterUrl').value.trim(),
             mapEmbedUrl: document.getElementById('f-mapEmbedUrl').value.trim(),
             cafeFloatingMapUrl: document.getElementById('f-cafeFloatingMapUrl').value.trim(),
             cafeReviewCtaText: document.getElementById('f-cafeReviewCtaText').value.trim(),
@@ -1749,6 +1756,7 @@
           document.getElementById('f-footerPhone').value = ov.footerPhone || '';
           document.getElementById('f-footerInstagramUrl').value = ov.footerInstagramUrl || '';
           document.getElementById('f-footerLineUrl').value = ov.footerLineUrl || '';
+          document.getElementById('f-footerTwitterUrl').value = ov.footerTwitterUrl || '';
           document.getElementById('f-mapEmbedUrl').value = ov.mapEmbedUrl || '';
           document.getElementById('f-cafeFloatingMapUrl').value = ov.cafeFloatingMapUrl || '';
           document.getElementById('f-cafeReviewCtaText').value = ov.cafeReviewCtaText || '';
@@ -1813,6 +1821,7 @@
             footerPhone: true,
             footerInstagramUrl: true,
             footerLineUrl: true,
+            footerTwitterUrl: true,
             mapEmbedUrl: true,
             cafeFloatingMapUrl: true,
             cafeReviewCtaText: true,
@@ -1852,6 +1861,7 @@
             footerPhone: c.footerPhone || '',
             footerInstagramUrl: c.footerInstagramUrl || '',
             footerLineUrl: c.footerLineUrl || '',
+            footerTwitterUrl: c.footerTwitterUrl || '',
             mapEmbedUrl: c.mapEmbedUrl || '',
             ctaLabel: c.ctaLabel || '',
             ctaHref: c.ctaHref || '',
