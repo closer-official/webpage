@@ -64,6 +64,67 @@
         color: #fbbf24;
         min-height: 1.25em;
       }
+      .preview-status.is-ok {
+        color: #86efac;
+      }
+      .preview-status.is-err {
+        color: #fca5a5;
+      }
+      .preview-status.is-pending {
+        color: #fde68a;
+      }
+      .preview-frame-wrap {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .preview-frame-wrap.is-busy .preview-busy-overlay {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+      .preview-busy-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(12, 18, 32, 0.72);
+        border-radius: 10px;
+        color: #e0f2fe;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+        box-sizing: border-box;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+      }
+      .preview-busy-spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid rgba(56, 189, 248, 0.25);
+        border-top-color: #38bdf8;
+        animation: tw-spin 0.75s linear infinite;
+      }
+      .preview-busy-text {
+        max-width: 16rem;
+        line-height: 1.45;
+      }
+      @keyframes tw-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
       .editor-pane {
         flex: 0 1 520px;
         max-width: 560px;
@@ -138,6 +199,10 @@
         font-size: 0.78rem;
         min-height: 140px;
       }
+      select[aria-busy='true'] {
+        opacity: 0.65;
+        cursor: wait;
+      }
       .row-actions {
         display: flex;
         flex-wrap: wrap;
@@ -160,10 +225,39 @@
         cursor: pointer;
         text-decoration: none;
       }
-      button.btn:hover,
-      a.btn:hover {
+      button.btn:hover:not(:disabled),
+      a.btn:hover:not([aria-disabled='true']) {
         border-color: #38bdf8;
         color: #fff;
+      }
+      button.btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        border-color: #2a3b52;
+        color: #8b9cb3;
+      }
+      button.btn.is-loading:disabled {
+        opacity: 0.88;
+        cursor: wait;
+        border-color: #3d5675;
+        color: #e0f2fe;
+      }
+      button.btn.is-loading {
+        position: relative;
+        padding-left: 2.1rem;
+      }
+      button.btn.is-loading::before {
+        content: '';
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        margin-top: -7px;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(224, 242, 254, 0.3);
+        border-top-color: #38bdf8;
+        border-radius: 50%;
+        animation: tw-spin 0.7s linear infinite;
       }
       button.btn.primary,
       a.btn.primary {
@@ -240,6 +334,8 @@
         border: 1px solid #2a3b52;
         border-radius: 10px;
         background: #fff;
+        position: relative;
+        z-index: 1;
       }
       code {
         font-size: 0.85em;
@@ -295,8 +391,20 @@
             >左は常にフォームから生成したライブプレビューです。下の共有URLは<strong>最後に保存した内容</strong>（LINE等のリンクプレビューもこちら）。編集直後は左とURLが一致しないことがあるので、共有前に保存してください。</span
           >
         </div>
-        <div class="preview-status" id="preview-live-status"></div>
-        <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-scripts allow-same-origin"></iframe>
+        <div class="preview-status" id="preview-live-status" aria-live="polite"></div>
+        <div class="preview-frame-wrap" id="preview-frame-wrap">
+          <div
+            class="preview-busy-overlay"
+            id="preview-busy-overlay"
+            role="status"
+            aria-live="polite"
+            aria-hidden="true"
+          >
+            <span class="preview-busy-spinner" aria-hidden="true"></span>
+            <span class="preview-busy-text">サーバーでライブプレビューを描画しています。完了までそのままお待ちください。</span>
+          </div>
+          <iframe id="preview-live" title="ライブプレビュー" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
       </aside>
       <div class="editor-pane" id="editor-pane">
     <div class="panel" id="work-box" style="display: none">
@@ -680,6 +788,7 @@
         var currentCustomId = null;
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
+        var livePreviewInFlight = 0;
         var seoAutofillTimer = null;
         var mapPasteTimer = null;
         var addBtnIdsBound = false;
@@ -687,6 +796,45 @@
         var dashboardListCache = [];
         var dashboardById = {};
         var WORKER_PHASE_KEYS = ['pending_send', 'awaiting_reply', 'appointment', 'won', 'lost'];
+        var SHARE_BTN_DISABLED_TITLE = '先にドラフトを保存してカスタムIDが付くと使えます';
+        var WORKER_PREVIEW_COPY_TITLE = 'プレビューURLは保存後にコピーできます';
+        var WORKER_UNSUB_COPY_TITLE = '送付案件を紐づけ、配信停止トークンがあるときにコピーできます';
+
+        function setPreviewFrameBusy(busy) {
+          var wrap = document.getElementById('preview-frame-wrap');
+          var overlay = document.getElementById('preview-busy-overlay');
+          if (!wrap || !overlay) return;
+          wrap.classList.toggle('is-busy', !!busy);
+          overlay.setAttribute('aria-hidden', busy ? 'false' : 'true');
+        }
+
+        function setPreviewStatusTone(statusEl, tone) {
+          if (!statusEl) return;
+          statusEl.classList.remove('is-ok', 'is-err', 'is-pending');
+          if (tone === 'ok') statusEl.classList.add('is-ok');
+          else if (tone === 'err') statusEl.classList.add('is-err');
+          else if (tone === 'pending') statusEl.classList.add('is-pending');
+        }
+
+        /** 非同期中は disabled + スピナー + aria-busy。終了時に元ラベルへ戻す */
+        function setButtonLoading(btn, loading, loadingLabel) {
+          if (!btn || btn.tagName !== 'BUTTON') return;
+          if (loading) {
+            if (!btn.dataset.twLabelBk) btn.dataset.twLabelBk = btn.textContent;
+            btn.classList.add('is-loading');
+            btn.setAttribute('aria-busy', 'true');
+            btn.disabled = true;
+            btn.textContent = loadingLabel || '処理中…';
+          } else {
+            btn.classList.remove('is-loading');
+            btn.removeAttribute('aria-busy');
+            btn.disabled = false;
+            if (btn.dataset.twLabelBk) {
+              btn.textContent = btn.dataset.twLabelBk;
+              delete btn.dataset.twLabelBk;
+            }
+          }
+        }
 
         function normalizeWorkerPhase(item) {
           var p = item.outreachPhase;
@@ -766,7 +914,9 @@
             ? window.location.origin + '/api/template-preview/' + encodeURIComponent(currentCustomId)
             : '';
           if (btnPrev) {
-            btnPrev.disabled = !previewFull || previewFull.indexOf('http') !== 0;
+            var prevOk = !!(previewFull && previewFull.indexOf('http') === 0);
+            btnPrev.disabled = !prevOk;
+            btnPrev.title = prevOk ? '' : WORKER_PREVIEW_COPY_TITLE;
           }
           if (!did) {
             phaseSel.disabled = true;
@@ -774,14 +924,20 @@
             if (hintEl) {
               hintEl.textContent = '送付案件を選ぶと、フェーズ変更と配信停止URLが使えます。';
             }
-            if (btnUnsub) btnUnsub.disabled = true;
+            if (btnUnsub) {
+              btnUnsub.disabled = true;
+              btnUnsub.title = WORKER_UNSUB_COPY_TITLE;
+            }
             return;
           }
           var item = dashboardById[did];
           if (!item) {
             phaseSel.disabled = true;
             if (hintEl) hintEl.textContent = '案件が一覧にありません。ページを再読み込みするか、送付管理を確認してください。';
-            if (btnUnsub) btnUnsub.disabled = true;
+            if (btnUnsub) {
+              btnUnsub.disabled = true;
+              btnUnsub.title = WORKER_UNSUB_COPY_TITLE;
+            }
             return;
           }
           var canPhase = item.status === 'approved' || item.status === 'email_sent';
@@ -798,7 +954,11 @@
               hintEl.textContent = item.status === 'approved' ? 'OK済・送信前' : '送信済み';
             }
           }
-          if (btnUnsub) btnUnsub.disabled = !item.unsubscribeToken;
+          if (btnUnsub) {
+            var unsubOk = !!item.unsubscribeToken;
+            btnUnsub.disabled = !unsubOk;
+            btnUnsub.title = unsubOk ? '' : WORKER_UNSUB_COPY_TITLE;
+          }
         }
         var EMBED_STYLE_TEMPLATE_IDS = {
           navy_cyan_consult: true,
@@ -2043,17 +2203,30 @@
           var iframe = document.getElementById('preview-live');
           var statusEl = document.getElementById('preview-live-status');
           if (!baseId) {
-            if (statusEl) statusEl.textContent = 'ベーステンプレを選ぶか、「フォームに読み込む」を押してください。';
+            setPreviewFrameBusy(false);
+            if (statusEl) {
+              setPreviewStatusTone(statusEl, '');
+              statusEl.textContent = 'ベーステンプレを選ぶか、「フォームに読み込む」を押してください。';
+            }
             return;
           }
           var override;
           try {
             override = buildOverrideFromForm();
           } catch (e) {
-            if (statusEl) statusEl.textContent = '入力エラー: ' + (e.message || e);
+            setPreviewFrameBusy(false);
+            if (statusEl) {
+              setPreviewStatusTone(statusEl, 'err');
+              statusEl.textContent = '入力エラー: ' + (e.message || e);
+            }
             return;
           }
-          if (statusEl) statusEl.textContent = 'レンダー中…';
+          livePreviewInFlight++;
+          setPreviewFrameBusy(true);
+          if (statusEl) {
+            setPreviewStatusTone(statusEl, 'pending');
+            statusEl.textContent = 'レンダー中…（サーバーでHTMLを生成しています）';
+          }
           credFetch(api + '/template-preview/render', {
             method: 'POST',
             body: JSON.stringify({ baseTemplateId: baseId, override: override }),
@@ -2069,10 +2242,23 @@
             .then(function (html) {
               iframe.removeAttribute('src');
               iframe.srcdoc = html;
-              if (statusEl) statusEl.textContent = 'ライブプレビュー（未保存の内容）';
+              if (statusEl) {
+                setPreviewStatusTone(statusEl, 'ok');
+                statusEl.textContent = 'ライブプレビュー更新済み（未保存の内容・左の枠と一致）';
+              }
             })
             .catch(function (e) {
-              if (statusEl) statusEl.textContent = 'プレビュー失敗: ' + (e.message || e);
+              if (statusEl) {
+                setPreviewStatusTone(statusEl, 'err');
+                statusEl.textContent = 'プレビュー失敗: ' + (e.message || e);
+              }
+            })
+            .finally(function () {
+              livePreviewInFlight--;
+              if (livePreviewInFlight <= 0) {
+                livePreviewInFlight = 0;
+                setPreviewFrameBusy(false);
+              }
             });
         }
 
@@ -2087,11 +2273,17 @@
           document.getElementById('btn-copy-url').disabled = !has;
           document.getElementById('btn-mailto').disabled = !has;
           var statusEl = document.getElementById('preview-live-status');
+          document.getElementById('btn-open-preview').title = has ? '' : SHARE_BTN_DISABLED_TITLE;
+          document.getElementById('btn-copy-url').title = has ? '' : SHARE_BTN_DISABLED_TITLE;
+          document.getElementById('btn-mailto').title = has ? '' : SHARE_BTN_DISABLED_TITLE;
           if (!has) {
             var iframeBlank = document.getElementById('preview-live');
             iframeBlank.removeAttribute('srcdoc');
             iframeBlank.src = 'about:blank';
-            if (statusEl) statusEl.textContent = '';
+            if (statusEl) {
+              statusEl.textContent = '';
+              setPreviewStatusTone(statusEl, '');
+            }
           }
           /** 左の iframe は常に POST ライブプレビュー（共有URLは保存済みスナップショット用） */
           scheduleLivePreview();
@@ -2118,6 +2310,8 @@
 
         document.getElementById('adm-login-btn').onclick = function () {
           showErr('adm-login-err', '');
+          var loginBtn = document.getElementById('adm-login-btn');
+          setButtonLoading(loginBtn, true, 'ログイン確認中…');
           credFetch(api + '/admin-auth/login', {
             method: 'POST',
             body: JSON.stringify({
@@ -2133,10 +2327,13 @@
             .then(function (x) {
               if (!x.ok) throw new Error(x.j.error || 'ログイン失敗');
               setAuthUi(true);
-              loadBasesAndCustoms();
+              return loadBasesAndCustoms();
             })
             .catch(function (e) {
               showErr('adm-login-err', e.message || String(e));
+            })
+            .finally(function () {
+              setButtonLoading(loginBtn, false);
             });
         };
 
@@ -2345,14 +2542,20 @@
         document.getElementById('btn-load').onclick = function () {
           showErr('save-err', '');
           showErr('save-msg', '');
+          var loadBtn = document.getElementById('btn-load');
           if (document.getElementById('mode-select').value === 'edit') {
             var id = document.getElementById('existing-id').value;
             if (!id) {
               showErr('save-err', '既存カスタムを選んでください。');
               return;
             }
-            loadExistingCustomizationById(id, { successMsg: '読み込みました。' }).catch(function (e) {
+            setButtonLoading(loadBtn, true, '読み込み中…');
+            loadExistingCustomizationById(id, { successMsg: '読み込みました。' })
+              .catch(function (e) {
                 showErr('save-err', e.message || String(e));
+              })
+              .finally(function () {
+                setButtonLoading(loadBtn, false);
               });
           } else {
             currentCustomId = null;
@@ -2361,13 +2564,16 @@
             var linkClear = document.getElementById('f-linked-dashboard');
             if (linkClear) linkClear.value = '';
             if (!previewBaseTemplateId) {
-            fillFormFromOverride({});
-            updatePreviewUrl();
-            showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
+              fillFormFromOverride({});
+              updatePreviewUrl();
+              showErr('save-msg', '新規用にフォームを空にしました。ベーステンプレを選んで保存してください。');
               return;
             }
+            setButtonLoading(loadBtn, true, '読み込み中…');
             loadBuiltinDefaultsIntoForm(previewBaseTemplateId, {
               successMsg: 'ベーステンプレの現在値をフォームに読み込みました。',
+            }).finally(function () {
+              setButtonLoading(loadBtn, false);
             });
           }
         };
@@ -2390,6 +2596,8 @@
             showErr('import-err', '8MBを超えるファイルがあります: ' + tooBig.name);
             return;
           }
+          var importBtn = document.getElementById('btn-import-docs');
+          setButtonLoading(importBtn, true, '資料を解析中…');
           showErr('import-msg', '資料を解析中です…（30-60秒程度）');
           Promise.all(
             files.map(function (f) {
@@ -2435,6 +2643,9 @@
             .catch(function (e) {
               showErr('import-err', e.message || String(e));
               showErr('import-msg', '');
+            })
+            .finally(function () {
+              setButtonLoading(importBtn, false);
             });
         };
 
@@ -2454,7 +2665,7 @@
           }
           var prevGenre = String((baseOv.cafeVisualGenre || '').trim());
           var btn = document.getElementById('btn-gemini-free-text');
-          btn.disabled = true;
+          setButtonLoading(btn, true, 'Gemini 解析中…');
           showErr('import-msg', 'Gemini で解析中です…（30〜60秒程度）');
           credFetch(api + '/template-customizations/extract-from-text', {
             method: 'POST',
@@ -2493,7 +2704,7 @@
               showErr('import-msg', '');
             })
             .finally(function () {
-              btn.disabled = false;
+              setButtonLoading(btn, false);
             });
         };
 
@@ -2506,7 +2717,7 @@
             return;
           }
           var btn = document.getElementById('btn-map-embed-apply');
-          btn.disabled = true;
+          setButtonLoading(btn, true, '地図URL取得中…');
           credFetch(api + '/resolve-map-embed-url', {
             method: 'POST',
             body: JSON.stringify({ raw: raw }),
@@ -2530,7 +2741,7 @@
               showErr('map-paste-err', e.message || String(e));
             })
             .finally(function () {
-              btn.disabled = false;
+              setButtonLoading(btn, false);
             });
         }
 
@@ -2617,7 +2828,19 @@
             return;
           }
 
+          var saveBtn = document.getElementById('btn-save');
+          var workerSaveBtn = document.getElementById('btn-worker-save');
+          function endSaveLoading() {
+            setButtonLoading(saveBtn, false);
+            setButtonLoading(workerSaveBtn, false);
+          }
+          function startSaveLoading() {
+            setButtonLoading(saveBtn, true, '保存中…');
+            setButtonLoading(workerSaveBtn, true, '保存中…');
+          }
+
           if (document.getElementById('mode-select').value === 'edit' && currentCustomId) {
+            startSaveLoading();
             credFetch(api + '/template-customizations/save', {
               method: 'POST',
               body: JSON.stringify({
@@ -2653,13 +2876,15 @@
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
-              });
+              })
+              .finally(endSaveLoading);
           } else {
             var baseTemplateId = document.getElementById('base-template').value;
             if (!baseTemplateId) {
               showErr('save-err', 'ベーステンプレを選んでください。');
               return;
             }
+            startSaveLoading();
             credFetch(api + '/template-customizations/save', {
               method: 'POST',
               body: JSON.stringify({
@@ -2698,7 +2923,8 @@
               })
               .catch(function (e) {
                 showErr('save-err', e.message || String(e));
-              });
+              })
+              .finally(endSaveLoading);
           }
         };
 
@@ -2713,6 +2939,8 @@
           if (!did || phaseSel.disabled) return;
           var phase = phaseSel.value;
           showErr('worker-quick-err', '');
+          phaseSel.disabled = true;
+          phaseSel.setAttribute('aria-busy', 'true');
           credFetch(api + '/dashboard/' + encodeURIComponent(did), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -2730,10 +2958,12 @@
                 return d.id === did;
               });
               if (ix >= 0) dashboardListCache[ix] = x.j;
-              syncWorkerOutreachPanel();
             })
             .catch(function (e) {
               showErr('worker-quick-err', e.message || String(e));
+            })
+            .finally(function () {
+              phaseSel.removeAttribute('aria-busy');
               syncWorkerOutreachPanel();
             });
         });
@@ -2795,13 +3025,36 @@
         };
 
         document.getElementById('btn-refresh-iframe').onclick = function () {
+          var refreshBtn = document.getElementById('btn-refresh-iframe');
           if (currentCustomId) {
             var iframe = document.getElementById('preview-live');
-            var p = '/api/template-preview/' + encodeURIComponent(currentCustomId);
+            var p =
+              '/api/template-preview/' + encodeURIComponent(currentCustomId) + '?_=' + Date.now();
+            var statusEl = document.getElementById('preview-live-status');
+            if (statusEl) {
+              setPreviewStatusTone(statusEl, 'pending');
+              statusEl.textContent = '保存済みURLから読み込み中…';
+            }
+            var done = false;
+            function finishRefresh() {
+              if (done) return;
+              done = true;
+              iframe.removeEventListener('load', onLoad);
+              clearTimeout(tid);
+              setButtonLoading(refreshBtn, false);
+              if (statusEl) {
+                setPreviewStatusTone(statusEl, 'ok');
+                statusEl.textContent = '保存済みプレビューを表示しました（左の枠は共有URLの内容）';
+              }
+            }
+            function onLoad() {
+              finishRefresh();
+            }
+            setButtonLoading(refreshBtn, true, '再読み込み中…');
+            iframe.addEventListener('load', onLoad);
+            var tid = setTimeout(finishRefresh, 15000);
             iframe.removeAttribute('srcdoc');
             iframe.src = p;
-            var statusEl = document.getElementById('preview-live-status');
-            if (statusEl) statusEl.textContent = '保存済みプレビューを再読み込みしました';
           } else {
             runLivePreview();
           }
