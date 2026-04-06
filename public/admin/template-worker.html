@@ -2190,6 +2190,34 @@
           };
         }
 
+        /** 送付・フェーズ管理などから `?id=カスタムID` で開いたとき既存ドラフトを読み込む */
+        function applyDeepLinkFromQuery() {
+          try {
+            var q = new URLSearchParams(window.location.search || '');
+            var cid = String(q.get('id') || '').trim();
+            if (!cid) return Promise.resolve();
+            document.getElementById('mode-select').value = 'edit';
+            document.getElementById('wrap-base').style.display = 'none';
+            document.getElementById('wrap-existing').style.display = 'block';
+            var ex = document.getElementById('existing-id');
+            var found = Array.prototype.some.call(ex.options, function (o) {
+              return o.value === cid;
+            });
+            if (!found) {
+              showErr('save-err', 'URL の id が一覧にありません: ' + cid);
+              return Promise.resolve();
+            }
+            ex.value = cid;
+            return loadExistingCustomizationById(cid, {
+              successMsg: '指定された店舗ドラフトを読み込みました。',
+            }).catch(function (e) {
+              showErr('save-err', e.message || String(e));
+            });
+          } catch (e) {
+            return Promise.resolve();
+          }
+        }
+
         function loadBasesAndCustoms() {
           return credFetch(api + '/template-candidates')
             .then(function (r) {
@@ -2234,6 +2262,9 @@
               scheduleLivePreview();
               applyWorkerFormTemplateVisibility();
               return refreshDashboardCache();
+            })
+            .then(function () {
+              return applyDeepLinkFromQuery();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');

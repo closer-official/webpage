@@ -920,6 +920,62 @@
           );
         }
 
+        /** LP の「Instagram（フッターアイコン）URL」またはキュー由来のスナップショット */
+        function footerInstagramUrlForItem(item) {
+          var c = item.content;
+          var u = (c && c.footerInstagramUrl) || item.footerInstagramUrl || '';
+          u = String(u).trim();
+          if (!u || !/^https?:\/\//i.test(u)) return '';
+          return u;
+        }
+
+        function templateWorkerEditUrl(customizationId) {
+          var cid = String(customizationId || '').trim();
+          if (!cid) return '';
+          return (
+            window.location.origin +
+            '/admin/template-worker.html?id=' +
+            encodeURIComponent(cid)
+          );
+        }
+
+        function renderInstagramFooterBlock(container, item) {
+          container.appendChild(
+            el('p', { class: 'muted', text: 'Instagram（店舗ドラフトのフッターに入力したURL）' }),
+          );
+          var u = footerInstagramUrlForItem(item);
+          if (!u) {
+            container.appendChild(
+              el('p', {
+                class: 'muted',
+                text: '※ 未設定（作業者用編集の「Instagram（フッターアイコン）URL」に入力するとここに表示されます）',
+              }),
+            );
+            return;
+          }
+          var ur = el('div', { class: 'url-row' });
+          var a = document.createElement('a');
+          a.href = u;
+          a.className = 'btn small';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = 'Instagram を開く';
+          ur.appendChild(a);
+          var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
+          cp.onclick = function () {
+            navigator.clipboard.writeText(u);
+          };
+          ur.appendChild(cp);
+          container.appendChild(ur);
+          container.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'font-size:0.72rem;word-break:break-all;margin-top:6px',
+              text: u,
+            }),
+          );
+        }
+
         /** 店舗ドラフト（linkedTemplateCustomizationId）が付いている案件用 */
         function renderTemplatePreviewBlock(container, item) {
           container.appendChild(
@@ -951,6 +1007,15 @@
           op.textContent = '別タブで開いて確認';
           ur.appendChild(op);
           container.appendChild(ur);
+          var er = el('div', { class: 'url-row', style: 'margin-top:10px' });
+          var ed = document.createElement('a');
+          ed.className = 'btn small primary';
+          ed.href = templateWorkerEditUrl(cid);
+          ed.target = '_blank';
+          ed.rel = 'noopener noreferrer';
+          ed.textContent = '店舗ドラフトを再編集';
+          er.appendChild(ed);
+          container.appendChild(er);
         }
 
         /** 全ステータスで配信停止URLを確認できるようにする */
@@ -989,12 +1054,15 @@
         function renderShareUrlsSection(container, item) {
           var wrap = el('div', { class: 'share-urls-wrap' });
           var pv = el('div', { class: 'share-url-sub' });
+          var ig = el('div', { class: 'share-url-sub' });
           var us = el('div', { class: 'share-url-sub' });
           var tm = el('div', { class: 'share-url-sub' });
           renderTemplatePreviewBlock(pv, item);
+          renderInstagramFooterBlock(ig, item);
           renderUnsubscribeBlock(us, item);
           renderOutreachTemplatesBlock(tm, item);
           wrap.appendChild(pv);
+          wrap.appendChild(ig);
           wrap.appendChild(us);
           wrap.appendChild(tm);
           container.appendChild(wrap);

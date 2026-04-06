@@ -144,6 +144,7 @@ export async function processOne(queueItem, genOptions) {
     needsVerification: (queueItem.userRatingsTotal ?? 0) < 3,
   };
 
+  const igFooter = String(queueItem.instagramUrl || '').trim().slice(0, 2000);
   const dashboardItem = {
     id: makeId(),
     researched: {
@@ -162,6 +163,8 @@ export async function processOne(queueItem, genOptions) {
     templateId: top3[0],
     contentVariants,
     dmBody,
+    /** フッター用 Instagram（キューで入力された場合。フェーズ確認ページ表示用） */
+    ...(igFooter && /^https?:\/\//i.test(igFooter) ? { footerInstagramUrl: igFooter } : {}),
     status: 'pending',
     createdAt: new Date().toISOString(),
     unsubscribeToken: randomBytes(24).toString('hex'),

@@ -327,6 +327,8 @@ export interface DashboardItem {
   outreachDmPattern?: '1' | '2' | '3' | '4' | '5';
   /** DM 先頭のカスタム1行（任意） */
   outreachDmCustomFirstLine?: string;
+  /** キュー経由時など、フッター用 Instagram URL のスナップショット（content.footerInstagramUrl と併用可） */
+  footerInstagramUrl?: string;
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**
