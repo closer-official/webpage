@@ -217,6 +217,26 @@
         font-weight: 600;
         margin: 0.5rem 0 0;
       }
+      .hours-heading {
+        margin: 10px 0 2px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #7dd3fc;
+        letter-spacing: 0.03em;
+      }
+      .hours-value {
+        margin: 0 0 4px;
+        font-size: 0.8rem;
+        color: #9aacbf;
+        white-space: pre-wrap;
+        line-height: 1.45;
+        max-height: 9em;
+        overflow-y: auto;
+      }
+      .hours-value.missing {
+        color: #64748b;
+        font-style: italic;
+      }
     </style>
   </head>
   <body>
@@ -646,6 +666,34 @@
           return 'sent';
         }
 
+        /** LP用 content から営業時間の表示用文字列を組み立てる */
+        function openingHoursLinesForItem(item) {
+          var c = item.content;
+          if (!c || typeof c !== 'object') return '';
+          var sections = c.sections;
+          if (Array.isArray(sections)) {
+            for (var i = 0; i < sections.length; i++) {
+              var s = sections[i];
+              if (s && s.id === 'hours') {
+                var t = String(s.content || '').trim();
+                if (t) return t;
+              }
+            }
+          }
+          var oht = String(c.openingHoursText || '').trim();
+          if (oht) return oht;
+          var meo = c.cafeMeo;
+          if (meo && Array.isArray(meo.openingHours) && meo.openingHours.length) {
+            return meo.openingHours
+              .map(function (x) {
+                return String(x || '').trim();
+              })
+              .filter(Boolean)
+              .join('\n');
+          }
+          return '';
+        }
+
         function autoBumpHint(iso) {
           if (!iso) return '';
           try {
@@ -902,6 +950,14 @@
             }
             col1.appendChild(el('p', { class: 'shop-name', text: name }));
             col1.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
+            var hoursText = openingHoursLinesForItem(item);
+            col1.appendChild(el('p', { class: 'hours-heading', text: '営業時間' }));
+            col1.appendChild(
+              el('p', {
+                class: hoursText ? 'hours-value' : 'hours-value missing',
+                text: hoursText || '（LPに営業時間テキストなし）',
+              }),
+            );
             col1.appendChild(el('span', { class: 'badge', text: 'ID: ' + item.id }));
 
             var col2 = el('div');
