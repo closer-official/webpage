@@ -354,6 +354,54 @@
       .dm-pattern-block select {
         max-width: 100%;
       }
+      .dm-gate-err {
+        display: none;
+        color: #fca5a5;
+        font-size: 0.8rem;
+        margin: 8px 0 0;
+        font-weight: 600;
+      }
+      .send-timing-panel .tokyo-clock {
+        font-family: ui-monospace, monospace;
+        font-size: 0.95rem;
+        color: #7dd3fc;
+        margin: 0 0 10px;
+        letter-spacing: 0.04em;
+      }
+      .send-timing-panel .timing-hint {
+        font-size: 0.78rem;
+        color: #8b9cb3;
+        margin: 0 0 12px;
+      }
+      .send-timing-panel h3 {
+        font-size: 0.82rem;
+        margin: 14px 0 8px;
+        color: #a5d8ff;
+        font-weight: 600;
+      }
+      .send-timing-panel ul {
+        margin: 0;
+        padding-left: 1.15rem;
+        font-size: 0.82rem;
+        color: #cbd5e1;
+      }
+      .send-timing-panel li {
+        margin: 4px 0;
+      }
+      .send-timing-panel a.timing-jump {
+        color: #38bdf8;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+      }
+      .send-timing-panel a.timing-jump:hover {
+        color: #fff;
+        border-bottom-color: #fff;
+      }
+      .send-timing-panel .timing-empty {
+        color: #64748b;
+        font-size: 0.82rem;
+        margin: 0;
+      }
     </style>
   </head>
   <body>
@@ -398,6 +446,14 @@
           <button type="button" class="btn small" id="btn-search-clear">クリア</button>
           <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
         </div>
+      </div>
+      <div class="panel send-timing-panel" id="send-timing-panel">
+        <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
+        <p class="timing-hint">
+          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>送信待ち（OK済・まだ送付していない）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
+        </p>
+        <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
+        <div id="send-timing-body"></div>
       </div>
       <p id="load-err" class="err" style="display: none"></p>
     </div>
@@ -646,7 +702,7 @@
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは5パターンから選択。先頭1行は任意（未入力ならテンプレ本文から開始）。変更は自動保存されます。',
+              text: 'DMは5パターンから選択。一言コメント（下の1行）を入力しないとDM用テンプレはコピーできません（メール用はそのまま）。パターンと1行は自動保存されます。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -668,7 +724,12 @@
           };
           dmWrap.appendChild(sel);
 
-          dmWrap.appendChild(el('label', { for: 'dm-firstline-' + item.id, text: 'DMの最初の一行（任意・カスタム1行）' }));
+          dmWrap.appendChild(
+            el('label', {
+              for: 'dm-firstline-' + item.id,
+              text: '一言コメント（DMの先頭1行・コピー必須）',
+            }),
+          );
           var inp = el('input', {
             type: 'text',
             id: 'dm-firstline-' + item.id,
@@ -683,6 +744,8 @@
             });
           }
           inp.addEventListener('input', function () {
+            dmGateErr.style.display = 'none';
+            dmGateErr.textContent = '';
             clearTimeout(dmFirstLineTimer);
             dmFirstLineTimer = setTimeout(saveFirstLine, 600);
           });
@@ -691,6 +754,8 @@
             saveFirstLine();
           });
           dmWrap.appendChild(inp);
+          var dmGateErr = el('p', { class: 'dm-gate-err', text: '' });
+          dmWrap.appendChild(dmGateErr);
           container.appendChild(dmWrap);
 
           var row = el('div', { class: 'url-row' });
@@ -704,10 +769,19 @@
           };
           var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
           bDm.onclick = function () {
+            var oneLine = String(inp.value || '').trim();
+            if (!oneLine) {
+              dmGateErr.textContent = '一言コメント（DMの先頭1行）を入力してからコピーしてください。';
+              dmGateErr.style.display = 'block';
+              inp.focus();
+              return;
+            }
+            dmGateErr.style.display = 'none';
+            dmGateErr.textContent = '';
             persistSenderProfile();
             var merged = Object.assign({}, item, {
               outreachDmPattern: sel.value,
-              outreachDmCustomFirstLine: String(inp.value || '').trim(),
+              outreachDmCustomFirstLine: oneLine,
             });
             copyTextWithFeedback(buildOutreachDmBody(merged), 'DM用テンプレ');
           };
@@ -966,6 +1040,305 @@
               .join('\n');
           }
           return '';
+        }
+
+        /** 日本時間の曜日（0=日…6=土）と 0〜1439 分 */
+        function tokyoCalendarNow() {
+          var d = new Date();
+          var wk = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+          var parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Tokyo',
+            weekday: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23',
+            hour12: false,
+          }).formatToParts(d);
+          var dow = 0;
+          var h = 0;
+          var m = 0;
+          parts.forEach(function (p) {
+            if (p.type === 'weekday' && wk[p.value] !== undefined) dow = wk[p.value];
+            if (p.type === 'hour') h = parseInt(p.value, 10) || 0;
+            if (p.type === 'minute') m = parseInt(p.value, 10) || 0;
+          });
+          return { dow: dow, minutes: h * 60 + m, date: d };
+        }
+
+        function formatTokyoClockString() {
+          return new Intl.DateTimeFormat('ja-JP', {
+            timeZone: 'Asia/Tokyo',
+            dateStyle: 'full',
+            timeStyle: 'medium',
+          }).format(new Date());
+        }
+
+        /** 送信者がDMを送ってよい時間帯（JST 10:00〜23:59） */
+        function inDmSenderWindowJst(tokyo) {
+          var t = tokyo.minutes;
+          return t >= 10 * 60 && t <= 23 * 60 + 59;
+        }
+
+        var SCHEMA_DAY = { Mo: 1, Tu: 2, We: 3, Th: 4, Fr: 5, Sa: 6, Su: 0 };
+        var DAY_RING = [1, 2, 3, 4, 5, 6, 0];
+
+        function expandDayRing(d1, d2) {
+          var i1 = DAY_RING.indexOf(d1);
+          var i2 = DAY_RING.indexOf(d2);
+          if (i1 < 0 || i2 < 0) return [d1];
+          var out = [];
+          if (i1 <= i2) {
+            for (var i = i1; i <= i2; i++) out.push(DAY_RING[i]);
+          } else {
+            for (var j = i1; j < 7; j++) out.push(DAY_RING[j]);
+            for (var k = 0; k <= i2; k++) out.push(DAY_RING[k]);
+          }
+          return out;
+        }
+
+        function parseHm(tok) {
+          var m = String(tok).match(/^(\d{1,2}):(\d{2})$/);
+          if (!m) return null;
+          var h = parseInt(m[1], 10);
+          var mi = parseInt(m[2], 10);
+          if (h > 24 || mi > 59 || (h === 24 && mi > 0)) return null;
+          if (h === 24 && mi === 0) return 24 * 60;
+          return h * 60 + mi;
+        }
+
+        function addIntervalToSchedule(sched, dow, start, end) {
+          if (!sched[dow]) sched[dow] = [];
+          sched[dow].push({ start: start, end: end });
+        }
+
+        function mergeSchemaLinesToSchedule(lines) {
+          var sched = {};
+          for (var i = 0; i < lines.length; i++) {
+            var re = /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/i;
+            var m = String(lines[i]).trim().match(re);
+            if (!m) continue;
+            var d1 = SCHEMA_DAY[m[1]];
+            var d2 = m[2] ? SCHEMA_DAY[m[2]] : d1;
+            var s = parseHm(m[3]);
+            var e = parseHm(m[4]);
+            if (s === null || e === null) continue;
+            var days = d2 === d1 ? [d1] : expandDayRing(d1, d2);
+            for (var j = 0; j < days.length; j++) {
+              addIntervalToSchedule(sched, days[j], s, e);
+            }
+          }
+          return sched;
+        }
+
+        var JP_CHAR_TO_DOW = { 日: 0, 月: 1, 火: 2, 水: 3, 木: 4, 金: 5, 土: 6 };
+
+        function expandJpDayList(a, b) {
+          if (a === b) return [a];
+          return expandDayRing(a, b);
+        }
+
+        function parseJapaneseHoursLines(text) {
+          var sched = {};
+          var touched = {};
+          var lines = String(text || '').split(/\r?\n/);
+          var timeRe = /(\d{1,2})\s*[：:]\s*(\d{2})\s*[\u2013\u2014–〜～\-]\s*(\d{1,2})\s*[：:]\s*(\d{2})/g;
+          for (var li = 0; li < lines.length; li++) {
+            var raw = lines[li].trim();
+            if (!raw) continue;
+            var head = raw.match(
+              /^([月火水木金土日])(?:曜日?)?\s*[：:]\s*(.+)$|^([月火水木金土日])[～〜]([月火水木金土日])\s*[：:]\s*(.+)$/,
+            );
+            var days = [];
+            var rest = '';
+            if (head) {
+              if (head[1]) {
+                var d0 = JP_CHAR_TO_DOW[head[1]];
+                if (d0 !== undefined) {
+                  days = [d0];
+                  rest = head[2] || '';
+                }
+              } else if (head[3] && head[4]) {
+                var da = JP_CHAR_TO_DOW[head[3]];
+                var db = JP_CHAR_TO_DOW[head[4]];
+                if (da !== undefined && db !== undefined) days = expandJpDayList(da, db);
+                rest = head[5] || '';
+              }
+            }
+            if (!days.length) continue;
+            if (/定休|休業|店休|クローズ|closed|休み/i.test(rest)) {
+              for (var di = 0; di < days.length; di++) {
+                var dd = days[di];
+                sched[dd] = [];
+                touched[dd] = true;
+              }
+              continue;
+            }
+            if (/24\s*時間|通し営業|年中無休/i.test(rest)) {
+              for (var di2 = 0; di2 < days.length; di2++) {
+                var dd2 = days[di2];
+                if (!sched[dd2]) sched[dd2] = [];
+                sched[dd2].push({ start: 0, end: 24 * 60 });
+                touched[dd2] = true;
+              }
+              continue;
+            }
+            var mt;
+            while ((mt = timeRe.exec(rest)) !== null) {
+              var s = parseInt(mt[1], 10) * 60 + parseInt(mt[2], 10);
+              var e = parseInt(mt[3], 10) * 60 + parseInt(mt[4], 10);
+              if (s > 24 * 60 || e > 24 * 60) continue;
+              for (var di3 = 0; di3 < days.length; di3++) {
+                var dd3 = days[di3];
+                if (!sched[dd3]) sched[dd3] = [];
+                sched[dd3].push({ start: s, end: e });
+                touched[dd3] = true;
+              }
+            }
+            timeRe.lastIndex = 0;
+          }
+          var any = Object.keys(touched).length > 0;
+          return { schedule: sched, any: any };
+        }
+
+        function isUnknownHoursPlaceholderText(t) {
+          t = String(t || '').trim();
+          if (!t) return true;
+          if (t.length < 120 && /お問い合わせ|要確認|公式(サイト)?で|インスタ(グラム)?で|店舗にご確認/i.test(t)) return true;
+          return false;
+        }
+
+        function buildOpeningScheduleFromItem(item) {
+          var c = item.content || {};
+          var meo = c.cafeMeo;
+          if (meo && Array.isArray(meo.openingHours) && meo.openingHours.length) {
+            var sch0 = mergeSchemaLinesToSchedule(meo.openingHours);
+            if (Object.keys(sch0).length) return { known: true, schedule: sch0 };
+          }
+          var block = openingHoursLinesForItem(item);
+          if (isUnknownHoursPlaceholderText(block)) return { known: false, schedule: null };
+          var jp = parseJapaneseHoursLines(block);
+          if (jp.any) return { known: true, schedule: jp.schedule };
+          return { known: false, schedule: null };
+        }
+
+        function isInsideAnyInterval(minutes, intervals) {
+          if (!intervals || !intervals.length) return false;
+          for (var i = 0; i < intervals.length; i++) {
+            var iv = intervals[i];
+            var s = iv.start;
+            var e = iv.end;
+            if (e > s) {
+              if (minutes >= s && minutes < e) return true;
+            } else if (e < s) {
+              if (minutes >= s || minutes < e) return true;
+            }
+          }
+          return false;
+        }
+
+        function isShopOpenNowJst(item, tokyo) {
+          var r = buildOpeningScheduleFromItem(item);
+          if (!r.known) return null;
+          var ivs = r.schedule[tokyo.dow];
+          if (ivs === undefined) return null;
+          if (ivs.length === 0) return false;
+          return isInsideAnyInterval(tokyo.minutes, ivs);
+        }
+
+        function isApprovedPendingSend(item) {
+          return item.status === 'approved' && normalizePhase(item) === 'pending_send';
+        }
+
+        var sendTimingLastBuild = 0;
+        function updateSendTimingPanel(force) {
+          var clockEl = document.getElementById('tokyo-clock-live');
+          var bodyEl = document.getElementById('send-timing-body');
+          if (!clockEl || !bodyEl) return;
+          clockEl.textContent = '日本時間: ' + formatTokyoClockString();
+          var now = Date.now();
+          if (!force && now - sendTimingLastBuild < 30000) return;
+          sendTimingLastBuild = now;
+
+          var tokyo = tokyoCalendarNow();
+          var eligible = [];
+          var unknown = [];
+          var inWin = inDmSenderWindowJst(tokyo);
+
+          if (inWin && cachedDashboardItems.length) {
+            cachedDashboardItems.forEach(function (item) {
+              if (!isApprovedPendingSend(item)) return;
+              var open = isShopOpenNowJst(item, tokyo);
+              if (open === null) unknown.push(item);
+              else if (open === false) eligible.push(item);
+            });
+          }
+
+          bodyEl.innerHTML = '';
+          if (!inWin) {
+            bodyEl.appendChild(
+              el('p', {
+                class: 'timing-empty',
+                text: '現在は送信枠外です（日本時間で 10:00〜23:59 のあいだに再度ご確認ください）。',
+              }),
+            );
+            return;
+          }
+          bodyEl.appendChild(
+            el('h3', {
+              text: '送信候補（営業時間外と判定・' + eligible.length + '件）',
+            }),
+          );
+          if (eligible.length === 0) {
+            bodyEl.appendChild(
+              el('p', {
+                class: 'timing-empty',
+                text: '該当する店舗はありません（営業中・または送信待ちが0件です）。',
+              }),
+            );
+          } else {
+            var ulE = el('ul', {}, []);
+            eligible.forEach(function (item) {
+              var nm = (item.researched && item.researched.name) || item.id;
+              var li = el('li', {}, []);
+              var a = el('a', {
+                class: 'timing-jump',
+                href: '#dash-' + item.id,
+                text: nm,
+              });
+              li.appendChild(a);
+              li.appendChild(document.createTextNode(' · ' + item.id));
+              ulE.appendChild(li);
+            });
+            bodyEl.appendChild(ulE);
+          }
+          bodyEl.appendChild(
+            el('h3', {
+              text: '営業時間を自動判別できない送信待ち（' + unknown.length + '件）',
+            }),
+          );
+          if (unknown.length === 0) {
+            bodyEl.appendChild(
+              el('p', {
+                class: 'timing-empty',
+                text: 'なし（または送信待ちが該当しません）。',
+              }),
+            );
+          } else {
+            var ulU = el('ul', {}, []);
+            unknown.forEach(function (item) {
+              var nm = (item.researched && item.researched.name) || item.id;
+              var li = el('li', {}, []);
+              var a = el('a', {
+                class: 'timing-jump',
+                href: '#dash-' + item.id,
+                text: nm,
+              });
+              li.appendChild(a);
+              li.appendChild(document.createTextNode(' · ' + item.id));
+              ulU.appendChild(li);
+            });
+            bodyEl.appendChild(ulU);
+          }
         }
 
         function autoBumpHint(iso) {
@@ -1259,6 +1632,7 @@
               });
             }
             host.appendChild(searchPanel);
+            updateSendTimingPanel(true);
             return;
           }
 
@@ -1456,6 +1830,7 @@
             });
             host.appendChild(p);
           });
+          updateSendTimingPanel(true);
         }
 
         function load() {
@@ -1508,6 +1883,9 @@
             };
           }
         })();
+        setInterval(function () {
+          updateSendTimingPanel(false);
+        }, 1000);
         load();
       })();
     </script>
