@@ -15,7 +15,7 @@ const OPS_LINKS: { href: string; title: string; desc: string }[] = [
     desc: '全テンプレの文言・写真URL・SEO などフル編集。',
   },
   {
-    href: '/admin/outreach-phases.html',
+    href: '/admin/outreach-phases.html?v=7phase',
     title: '送付・フェーズ管理',
     desc: '7種のフェーズ管理・配信停止用URLのコピー（ダッシュボード案件）。',
   },

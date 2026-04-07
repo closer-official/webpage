@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
     <meta name="robots" content="noindex, nofollow" />
     <title>送付・フェーズ管理 | Closer</title>
     <style>
@@ -1857,6 +1859,13 @@
           var statusBlock = el('div', { class: 'phase-card__status' });
           var actionsCluster = el('div', { class: 'phase-card__actions' });
 
+          statusBlock.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'margin: 0 0 6px; font-size: 0.8rem',
+              text: 'フェーズ（送信前でも次の7種から変更できます）',
+            }),
+          );
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
 
           if (item.status === 'email_sent') {
