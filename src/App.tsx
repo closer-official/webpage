@@ -17,7 +17,7 @@ const OPS_LINKS: { href: string; title: string; desc: string }[] = [
   {
     href: '/admin/outreach-phases.html',
     title: '送付・フェーズ管理',
-    desc: '送信後のフェーズ変更・配信停止用URLのコピー（ダッシュボード案件）。',
+    desc: '7種のフェーズ管理・配信停止用URLのコピー（ダッシュボード案件）。',
   },
   {
     href: '/mail-preference.html',

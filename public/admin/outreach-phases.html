@@ -434,7 +434,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。1段目の区分は<strong>送信前・送信済み・各フェーズ・連絡NG</strong>の9項目です。OK済・送信済の案件では、<strong>送信前は接触前／初回接触済</strong>、<strong>送信後は7種類</strong>をプルダウンで変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。区分・検索の表示・各店のプルダウンは<strong>次の7種類だけ</strong>です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -475,7 +475,7 @@
       <div class="panel send-timing-panel" id="send-timing-panel">
         <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
         <p class="timing-hint">
-          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>接触前または初回接触済（OK済・未送付）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
+          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>送信前（未送信）かつ接触前または初回接触済</strong>の店だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
         </p>
         <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
         <div id="send-timing-body"></div>
@@ -830,17 +830,7 @@
           }
         })();
 
-        var PHASE_LABELS = {
-          pre_contact: '接触前',
-          first_contact: '初回接触済',
-          message_sent: '送信済み',
-          no_outreach_channel: 'SNSなし（送信不可）',
-          hearing: 'ヒアリング中',
-          proposal: '提案中',
-          contracted: '契約済み',
-          payment_confirmed: '支払い確認済み',
-          lost: '失注',
-        };
+        /** 保存値の正規化用（UIは seven で統一） */
         var APPROVED_PHASE_KEYS = ['pre_contact', 'first_contact'];
         var SENT_PHASE_KEYS = [
           'message_sent',
@@ -852,16 +842,25 @@
           'lost',
         ];
 
-        /** 検索バッジ・区分プルダウン・店ごとのフェーズ選択で同じ表記にする */
-        function unifiedPhaseUiLabel(status, phaseKey) {
-          if (status === 'approved' && APPROVED_PHASE_KEYS.indexOf(phaseKey) >= 0) {
-            return '送信前 · ' + PHASE_LABELS[phaseKey];
-          }
-          if (status === 'email_sent' && SENT_PHASE_KEYS.indexOf(phaseKey) >= 0) {
-            return PHASE_LABELS[phaseKey] || phaseKey;
-          }
-          return PHASE_LABELS[phaseKey] || phaseKey;
-        }
+        /** 検索・区分・店ごとプルダウン共通の7種（表記はこれだけ） */
+        var SEVEN_PHASE_KEYS = [
+          'before_send',
+          'message_sent',
+          'no_outreach_channel',
+          'hearing',
+          'proposal',
+          'contracted',
+          'lost',
+        ];
+        var SEVEN_PHASE_LABELS = {
+          before_send: '送信前',
+          message_sent: '送信済み',
+          no_outreach_channel: 'SNSなし（送信不可）',
+          hearing: 'ヒアリング中',
+          proposal: '提案中',
+          contracted: '契約済み',
+          lost: '失注',
+        };
 
         var cachedDashboardItems = [];
         var liveSearchQuery = '';
@@ -1055,89 +1054,79 @@
           return 'pre_contact';
         }
 
-        /** フェーズ確認用：1段目プルダウンの区分一覧 */
+        /** 7種のどれに相当するか（契約済み＝contracted／支払い確認済み、失注＝lost／却下） */
+        function sevenPhaseKey(item) {
+          if (item.status === 'pending' || item.status === 'approved') return 'before_send';
+          if (item.status === 'rejected') return 'lost';
+          if (item.status !== 'email_sent') return 'before_send';
+          var ph = normalizePhase(item);
+          if (ph === 'contracted' || ph === 'payment_confirmed') return 'contracted';
+          if (ph === 'message_sent') return 'message_sent';
+          if (ph === 'no_outreach_channel') return 'no_outreach_channel';
+          if (ph === 'hearing') return 'hearing';
+          if (ph === 'proposal') return 'proposal';
+          if (ph === 'lost') return 'lost';
+          return 'message_sent';
+        }
+
+        function searchStatusLabel(item) {
+          var k = sevenPhaseKey(item);
+          return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
+        }
+
+        /** フェーズ確認用：1段目プルダウンの区分一覧（7件） */
         function buildPhaseBrowserGroups() {
           return [
             {
               id: 'g_before_send',
-              label: '送信前',
+              label: SEVEN_PHASE_LABELS.before_send,
               filter: function (i) {
-                return i.status === 'pending' || i.status === 'approved';
+                return sevenPhaseKey(i) === 'before_send';
               },
             },
             {
               id: 'g_message_sent',
-              label: PHASE_LABELS.message_sent,
+              label: SEVEN_PHASE_LABELS.message_sent,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'message_sent';
+                return sevenPhaseKey(i) === 'message_sent';
               },
             },
             {
               id: 'g_no_sns',
-              label: PHASE_LABELS.no_outreach_channel,
+              label: SEVEN_PHASE_LABELS.no_outreach_channel,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'no_outreach_channel';
+                return sevenPhaseKey(i) === 'no_outreach_channel';
               },
             },
             {
               id: 'g_hearing',
-              label: PHASE_LABELS.hearing,
+              label: SEVEN_PHASE_LABELS.hearing,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'hearing';
+                return sevenPhaseKey(i) === 'hearing';
               },
             },
             {
               id: 'g_proposal',
-              label: PHASE_LABELS.proposal,
+              label: SEVEN_PHASE_LABELS.proposal,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'proposal';
+                return sevenPhaseKey(i) === 'proposal';
               },
             },
             {
               id: 'g_contracted',
-              label: PHASE_LABELS.contracted,
+              label: SEVEN_PHASE_LABELS.contracted,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'contracted';
-              },
-            },
-            {
-              id: 'g_payment',
-              label: PHASE_LABELS.payment_confirmed,
-              filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'payment_confirmed';
+                return sevenPhaseKey(i) === 'contracted';
               },
             },
             {
               id: 'g_lost',
-              label: PHASE_LABELS.lost,
+              label: SEVEN_PHASE_LABELS.lost,
               filter: function (i) {
-                return i.status === 'email_sent' && normalizePhase(i) === 'lost';
-              },
-            },
-            {
-              id: 'g_contact_ng',
-              label: '連絡NG',
-              filter: function (i) {
-                return i.status === 'rejected';
+                return sevenPhaseKey(i) === 'lost';
               },
             },
           ];
-        }
-
-        function searchStatusLabel(item) {
-          if (item.status === 'pending') return '送信前（レビュー待ち）';
-          if (item.status === 'rejected') return '連絡NG';
-          if (item.status === 'approved' || item.status === 'email_sent') {
-            return unifiedPhaseUiLabel(item.status, normalizePhase(item));
-          }
-          return String(item.status || '—');
-        }
-
-        function rowModeForItem(item) {
-          if (item.status === 'pending') return 'pending';
-          if (item.status === 'rejected') return 'rejected';
-          if (item.status === 'approved') return 'approved';
-          return 'sent';
         }
 
         /** LP用 content から営業時間の表示用文字列を組み立てる */
@@ -1419,7 +1408,7 @@
             bodyEl.appendChild(
               el('p', {
                 class: 'timing-empty',
-                text: '該当する店舗はありません（営業中・または接触前/初回接触済の未送付が0件です）。',
+                text: '該当する店舗はありません（営業中・または送信前の未送付が0件です）。',
               }),
             );
           } else {
@@ -1440,7 +1429,7 @@
           }
           bodyEl.appendChild(
             el('h3', {
-              text: '営業時間を自動判別できない接触前/初回接触済（未送付）（' + unknown.length + '件）',
+              text: '営業時間を自動判別できない送信前（未送付）（' + unknown.length + '件）',
             }),
           );
           if (unknown.length === 0) {
@@ -1484,34 +1473,87 @@
           }
         }
 
-        function renderPhaseSelect(item, loadFn) {
-          var eff = normalizePhase(item);
-          var keys =
-            item.status === 'approved'
-              ? APPROVED_PHASE_KEYS.slice()
-              : item.status === 'email_sent'
-                ? SENT_PHASE_KEYS.slice()
-                : [];
-          if (keys.length === 0) {
-            return el('p', { class: 'muted', text: 'このステータスではフェーズを変更できません。' });
+        function applyOutreachSevenPhase(item, newKey) {
+          var cur = sevenPhaseKey(item);
+          if (newKey === cur) {
+            return Promise.resolve();
           }
-          if (keys.indexOf(eff) < 0) keys.unshift(eff);
-          var sel = el('select', {}, []);
-          keys.forEach(function (p) {
-            var opt = el('option', { value: p, text: unifiedPhaseUiLabel(item.status, p) });
-            if (p === eff) opt.selected = true;
+
+          function patch(body) {
+            return apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            });
+          }
+          function postApprove() {
+            return apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' });
+          }
+          function postReject() {
+            return apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' });
+          }
+
+          var st = item.status;
+
+          if (newKey === 'before_send') {
+            if (st === 'pending' || st === 'approved') return Promise.resolve();
+            if (st === 'rejected') return postApprove();
+            if (st === 'email_sent') {
+              return patch({ status: 'approved', outreachPhase: 'pre_contact' });
+            }
+            return Promise.resolve();
+          }
+
+          if (newKey === 'lost') {
+            if (st === 'rejected') return Promise.resolve();
+            if (st === 'pending' || st === 'approved') return postReject();
+            return patch({ outreachPhase: 'lost' });
+          }
+
+          var postMap = {
+            message_sent: 'message_sent',
+            no_outreach_channel: 'no_outreach_channel',
+            hearing: 'hearing',
+            proposal: 'proposal',
+            contracted: 'contracted',
+          };
+          var ph = postMap[newKey];
+          if (!ph) return Promise.resolve();
+
+          if (st === 'email_sent') {
+            return patch({ outreachPhase: ph });
+          }
+          var chain = Promise.resolve();
+          if (st === 'rejected') {
+            chain = postApprove();
+          }
+          return chain.then(function () {
+            return patch({ status: 'email_sent', outreachPhase: ph });
+          });
+        }
+
+        function renderPhaseSelect(item, loadFn) {
+          var eff = sevenPhaseKey(item);
+          var sel = el('select', { 'aria-label': '営業フェーズ（7種）' }, []);
+          SEVEN_PHASE_KEYS.forEach(function (k) {
+            var opt = el('option', { value: k, text: SEVEN_PHASE_LABELS[k] });
+            if (k === eff) opt.selected = true;
             sel.appendChild(opt);
           });
           sel.onchange = function () {
             var v = sel.value;
-            apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ outreachPhase: v }),
-            })
-              .then(loadFn)
+            var prev = eff;
+            sel.disabled = true;
+            applyOutreachSevenPhase(item, v)
+              .then(function () {
+                return loadFn();
+              })
               .catch(function (e) {
                 showErr(String(e.message || e));
+                sel.value = prev;
+              })
+              .finally(function () {
+                sel.disabled = false;
               });
           };
           return sel;
@@ -1779,7 +1821,7 @@
             });
         }
 
-        function renderDashboardRow(item, mode, meta, loadFn) {
+        function renderDashboardRow(item, meta, loadFn) {
           var name = (item.researched && item.researched.name) || '（無題）';
           var addr = (item.researched && item.researched.address) || '';
           var row = el('div', { class: 'phase-card' });
@@ -1815,50 +1857,10 @@
           var statusBlock = el('div', { class: 'phase-card__status' });
           var actionsCluster = el('div', { class: 'phase-card__actions' });
 
-          if (mode === 'pending') {
-            statusBlock.appendChild(el('p', { class: 'muted', text: 'レビュー待ち' }));
-            var bOk = el('button', { type: 'button', class: 'btn small primary', text: 'OK' });
-            bOk.onclick = function () {
-              apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' })
-                .then(loadFn)
-                .catch(function (e) {
-                  showErr(String(e.message || e));
-                });
-            };
-            actionsCluster.appendChild(bOk);
-            var bNg = el('button', { type: 'button', class: 'btn small danger', text: 'NG' });
-            bNg.onclick = function () {
-              apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' })
-                .then(loadFn)
-                .catch(function (e) {
-                  showErr(String(e.message || e));
-                });
-            };
-            actionsCluster.appendChild(bNg);
-          } else if (mode === 'rejected') {
-            statusBlock.appendChild(
-              el('p', { class: 'muted', text: '連絡NG（送付対象外）。不要なら削除してください。' }),
-            );
-          } else if (mode === 'approved') {
-            statusBlock.appendChild(el('p', { class: 'muted', text: 'OK済・送信前 — フェーズ' }));
-            statusBlock.appendChild(renderPhaseSelect(item, loadFn));
-            var bSent = el('button', { type: 'button', class: 'btn small primary', text: '送信済みにする' });
-            bSent.onclick = function () {
-              apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'email_sent' }),
-              })
-                .then(loadFn)
-                .catch(function (e) {
-                  showErr(String(e.message || e));
-                });
-            };
-            actionsCluster.appendChild(bSent);
-          } else {
+          statusBlock.appendChild(renderPhaseSelect(item, loadFn));
+
+          if (item.status === 'email_sent') {
             var eff = normalizePhase(item);
-            statusBlock.appendChild(el('p', { class: 'muted', text: '送信後のフェーズ' }));
-            statusBlock.appendChild(renderPhaseSelect(item, loadFn));
             var bump = autoBumpHint(item.replyWaitStartedAt);
             if (eff === 'proposal' && bump) {
               statusBlock.appendChild(el('p', { class: 'muted', text: bump }));
@@ -1936,7 +1938,7 @@
             } else {
               matches.forEach(function (item) {
                 searchPanel.appendChild(
-                  renderDashboardRow(item, rowModeForItem(item), { searchLabel: searchStatusLabel(item) }, load),
+                  renderDashboardRow(item, { searchLabel: searchStatusLabel(item) }, load),
                 );
               });
             }
@@ -1956,7 +1958,7 @@
           browserPanel.appendChild(
             el('p', {
               class: 'muted',
-              text: '① 区分・フェーズ → ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更・OK/NGなど）が開きます。店名はプルダウンにだけ出します。',
+              text: '① 区分（7種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。',
             }),
           );
 
@@ -2009,7 +2011,7 @@
               }
             }
             if (!item) return;
-            var card = renderDashboardRow(item, rowModeForItem(item), null, load);
+            var card = renderDashboardRow(item, null, load);
             card.id = 'dash-' + item.id;
             detailHost.appendChild(card);
           }

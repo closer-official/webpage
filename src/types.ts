@@ -347,7 +347,7 @@ export interface DashboardItem {
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**
-   * OK済・送信済案件のフェーズ。
+   * ダッシュボード案件の送付フェーズ（UI では7種に集約表示）。
    */
   outreachPhase?: OutreachPhase;
   /** outreachPhase === proposal のときフォロー開始（この日時から3か月後に自動で message_sent） */

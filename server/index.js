@@ -1912,6 +1912,17 @@ app.patch('/api/dashboard/:id', async (req, res) => {
       .trim()
       .slice(0, 500);
   }
+  if (req.body.status === 'approved') {
+    if (dashboard[i].status !== 'email_sent' && dashboard[i].status !== 'rejected') {
+      return res.status(400).json({ error: '送信済みまたは失注の案件だけ、送信前に戻せます。' });
+    }
+    dashboard[i].status = 'approved';
+    const pBack = canonicalizeOutreachPhaseInput(req.body.outreachPhase);
+    dashboard[i].outreachPhase = pBack && ['pre_contact', 'first_contact'].includes(pBack) ? pBack : 'pre_contact';
+    dashboard[i].replyWaitStartedAt = undefined;
+    dashboard[i].sleepUntil = undefined;
+    if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
+  }
   if (req.body.status === 'email_sent') {
     dashboard[i].status = 'email_sent';
     const ph = dashboard[i].outreachPhase;
@@ -1938,7 +1949,7 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.contentVariants !== undefined) dashboard[i].contentVariants = req.body.contentVariants;
   if (req.body.outreachPhase !== undefined) {
     if (!['approved', 'email_sent'].includes(dashboard[i].status)) {
-      return res.status(400).json({ error: 'OK済みまたは送信済みの案件のみフェーズを変更できます。' });
+      return res.status(400).json({ error: '送信前または送信済みの案件のみフェーズを変更できます。' });
     }
     const pRaw = String(req.body.outreachPhase);
     const p = canonicalizeOutreachPhaseInput(pRaw);
