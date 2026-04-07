@@ -471,7 +471,7 @@
         <div style="font-size: 0.8rem; color: #9aacbf">送付案件との紐づけ（このドラフトとダッシュボード1件）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
           プレビューURL・配信停止URL・営業フェーズを、<strong>この場所からまとめて</strong>扱えます。フェーズは
-          <strong>OK済・送信済</strong>の案件のみ変更できます（送付・フェーズ管理と同じ6段階）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>初回接触済</strong>に戻ります。
+          <strong>OK済・送信済</strong>の案件のみ変更できます（送付・フェーズ管理と同じ7段階）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>接触前</strong>に戻ります。
         </p>
         <label>
           紐づける送付案件
@@ -480,6 +480,7 @@
         <label>
           営業フェーズ
           <select id="f-worker-outreach-phase" disabled>
+            <option value="pre_contact">接触前</option>
             <option value="first_contact">初回接触済</option>
             <option value="hearing">ヒアリング中</option>
             <option value="proposal">提案済</option>
@@ -801,6 +802,7 @@
         var dashboardListCache = [];
         var dashboardById = {};
         var WORKER_PHASE_KEYS = [
+          'pre_contact',
           'first_contact',
           'hearing',
           'proposal',
@@ -852,14 +854,14 @@
           var p = item.outreachPhase;
           if (p === 'sent') return 'proposal';
           if (p === 'sleep') return 'no_outreach_channel';
-          if (p === 'pending_send') return 'first_contact';
+          if (p === 'pending_send') return 'pre_contact';
           if (p === 'awaiting_reply') return 'proposal';
           if (p === 'appointment') return 'hearing';
           if (p === 'won') return 'contracted';
           if (WORKER_PHASE_KEYS.indexOf(p) >= 0) return p;
           if (item.status === 'email_sent') return 'proposal';
-          if (item.status === 'approved') return 'first_contact';
-          return 'first_contact';
+          if (item.status === 'approved') return 'pre_contact';
+          return 'pre_contact';
         }
 
         function workerAutoBumpHint(iso) {
@@ -869,7 +871,7 @@
             if (Number.isNaN(d.getTime())) return '';
             d.setMonth(d.getMonth() + 3);
             return (
-              '自動で「初回接触済」に戻る目安: ' +
+              '自動で「接触前」に戻る目安: ' +
               d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
               ' 以降（日次バッチ）'
             );
@@ -938,7 +940,7 @@
           }
           if (!did) {
             phaseSel.disabled = true;
-            phaseSel.value = 'first_contact';
+            phaseSel.value = 'pre_contact';
             if (hintEl) {
               hintEl.textContent = '送付案件を選ぶと、フェーズ変更と配信停止URLが使えます。';
             }
@@ -967,7 +969,7 @@
               hintEl.textContent = 'レビュー待ち・NG済みの案件は、送付・フェーズ管理でOKにしてからフェーズを変更できます。';
             } else if (eff === 'proposal') {
               var bump = workerAutoBumpHint(item.replyWaitStartedAt);
-              hintEl.textContent = bump || '提案済（3か月で自動で初回接触済に戻ります）。';
+              hintEl.textContent = bump || '提案済（3か月で自動で接触前に戻ります）。';
             } else {
               hintEl.textContent = item.status === 'approved' ? 'OK済・送信前' : '送信済み';
             }

@@ -72,7 +72,7 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
       next.unsubscribeToken = makeUnsubscribeToken();
     }
     if (status === 'approved' && !next.outreachPhase) {
-      next.outreachPhase = 'first_contact';
+      next.outreachPhase = 'pre_contact';
     }
     if (status === 'email_sent') {
       const ph = next.outreachPhase;
@@ -80,6 +80,7 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
         !ph ||
         ph === 'sent' ||
         ph === 'pending_send' ||
+        ph === 'pre_contact' ||
         ph === 'first_contact' ||
         ph === 'hearing' ||
         ph === 'no_outreach_channel' ||

@@ -434,7 +434,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。ダッシュボードのステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（6段階）をプルダウン変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>初回接触済</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。ダッシュボードのステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（7段階）をプルダウン変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>接触前</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -475,7 +475,7 @@
       <div class="panel send-timing-panel" id="send-timing-panel">
         <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
         <p class="timing-hint">
-          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>初回接触フェーズ（OK済・未送付）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
+          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>接触前または初回接触済（OK済・未送付）</strong>だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
         </p>
         <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
         <div id="send-timing-body"></div>
@@ -831,6 +831,7 @@
         })();
 
         var PHASE_KEYS = [
+          'pre_contact',
           'first_contact',
           'hearing',
           'proposal',
@@ -839,6 +840,7 @@
           'no_outreach_channel',
         ];
         var PHASE_LABELS = {
+          pre_contact: '接触前',
           first_contact: '初回接触済',
           hearing: 'ヒアリング中',
           proposal: '提案済',
@@ -1022,14 +1024,14 @@
           var p = item.outreachPhase;
           if (p === 'sent') return 'proposal';
           if (p === 'sleep') return 'no_outreach_channel';
-          if (p === 'pending_send') return 'first_contact';
+          if (p === 'pending_send') return 'pre_contact';
           if (p === 'awaiting_reply') return 'proposal';
           if (p === 'appointment') return 'hearing';
           if (p === 'won') return 'contracted';
           if (PHASE_KEYS.indexOf(p) >= 0) return p;
           if (item.status === 'email_sent') return 'proposal';
-          if (item.status === 'approved') return 'first_contact';
-          return 'first_contact';
+          if (item.status === 'approved') return 'pre_contact';
+          return 'pre_contact';
         }
 
         /** フェーズ確認用：1段目プルダウンの区分一覧 */
@@ -1043,6 +1045,13 @@
               },
             },
             {
+              id: 'approved_pre',
+              label: 'OK済・未送付（接触前）',
+              filter: function (i) {
+                return i.status === 'approved' && normalizePhase(i) === 'pre_contact';
+              },
+            },
+            {
               id: 'approved_first',
               label: 'OK済・未送付（初回接触済）',
               filter: function (i) {
@@ -1053,7 +1062,8 @@
               id: 'approved_other',
               label: 'OK済・送信前（その他のフェーズ）',
               filter: function (i) {
-                return i.status === 'approved' && normalizePhase(i) !== 'first_contact';
+                var ph = normalizePhase(i);
+                return i.status === 'approved' && ph !== 'pre_contact' && ph !== 'first_contact';
               },
             },
             {
@@ -1327,7 +1337,8 @@
         }
 
         function isApprovedFirstContactSlot(item) {
-          return item.status === 'approved' && normalizePhase(item) === 'first_contact';
+          var ph = normalizePhase(item);
+          return item.status === 'approved' && (ph === 'pre_contact' || ph === 'first_contact');
         }
 
         var sendTimingLastBuild = 0;
@@ -1373,7 +1384,7 @@
             bodyEl.appendChild(
               el('p', {
                 class: 'timing-empty',
-                text: '該当する店舗はありません（営業中・または初回接触フェーズ未送付が0件です）。',
+                text: '該当する店舗はありません（営業中・または接触前/初回接触済の未送付が0件です）。',
               }),
             );
           } else {
@@ -1394,7 +1405,7 @@
           }
           bodyEl.appendChild(
             el('h3', {
-              text: '営業時間を自動判別できない初回接触フェーズ（未送付）（' + unknown.length + '件）',
+              text: '営業時間を自動判別できない接触前/初回接触済（未送付）（' + unknown.length + '件）',
             }),
           );
           if (unknown.length === 0) {
@@ -1429,7 +1440,7 @@
             if (Number.isNaN(d.getTime())) return '';
             d.setMonth(d.getMonth() + 3);
             return (
-              '自動で「初回接触済」に戻る目安: ' +
+              '自動で「接触前」に戻る目安: ' +
               d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
               ' 以降（日次バッチ）'
             );

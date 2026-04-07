@@ -1862,6 +1862,7 @@ app.post('/api/process-next', async (req, res) => {
 
 // ---------- ダッシュボード ----------
 const OUTREACH_PHASE_CANONICAL = new Set([
+  'pre_contact',
   'first_contact',
   'hearing',
   'proposal',
@@ -1871,7 +1872,7 @@ const OUTREACH_PHASE_CANONICAL = new Set([
 ]);
 /** PATCH および旧データ用。保存値は正規化して CANONICAL のいずれかに揃える */
 const OUTREACH_PHASE_LEGACY_MAP = {
-  pending_send: 'first_contact',
+  pending_send: 'pre_contact',
   awaiting_reply: 'proposal',
   sent: 'proposal',
   appointment: 'hearing',
@@ -2017,7 +2018,7 @@ app.post('/api/outreach/opt-out', async (req, res) => {
 });
 
 /**
- * 提案済（旧:返信待ち）でフォロー開始から3か月経過 → 自動で初回接触済（再アプローチ用）
+ * 提案済（旧:返信待ち）でフォロー開始から3か月経過 → 自動で接触前（再アプローチ用）
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
 app.get('/api/outreach/phase-tick', async (req, res) => {
@@ -2035,7 +2036,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
       if (!inProposalWait || !row.replyWaitStartedAt) continue;
       const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
       if (new Date(deadline).getTime() <= Date.now()) {
-        row.outreachPhase = 'first_contact';
+        row.outreachPhase = 'pre_contact';
         row.replyWaitStartedAt = undefined;
         bumped += 1;
       }
@@ -2054,7 +2055,7 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'approved';
   if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
-  if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'first_contact';
+  if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pre_contact';
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

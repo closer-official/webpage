@@ -304,13 +304,14 @@ export interface ResearchedShop {
 
 /** 営業フェーズ（検閲ダッシュボード・送付管理） */
 export type OutreachPhase =
+  | 'pre_contact'
   | 'first_contact'
   | 'hearing'
   | 'proposal'
   | 'contracted'
   | 'lost'
   | 'no_outreach_channel'
-  /** @deprecated 保存値の互換。正規化後は first_contact */
+  /** @deprecated 保存値の互換。正規化後は pre_contact */
   | 'pending_send'
   /** @deprecated 保存値の互換。正規化後は proposal */
   | 'awaiting_reply'
@@ -346,7 +347,7 @@ export interface DashboardItem {
    * OK済・送信済案件のフェーズ。
    */
   outreachPhase?: OutreachPhase;
-  /** outreachPhase === proposal（旧 awaiting_reply）のとき、フォロー開始（この日時から3か月後に自動で first_contact） */
+  /** outreachPhase === proposal（旧 awaiting_reply）のとき、フォロー開始（この日時から3か月後に自動で pre_contact） */
   replyWaitStartedAt?: string;
   /** 旧 sleep のときの再送目安（ISO）。no_outreach_channel 移行後は未使用になり得る */
   sleepUntil?: string;
