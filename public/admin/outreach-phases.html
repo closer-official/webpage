@@ -434,7 +434,7 @@
       <a class="back" href="/">← 運営トップ</a>
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。ダッシュボードのステータス（レビュー・OK済・送信済）と、<strong>OK済・送信済の両方</strong>で営業フェーズ（7段階）をプルダウン変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>接触前</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと従来どおり一覧表示に切り替わります。1段目の区分は<strong>送信前・送信済み・各フェーズ・連絡NG</strong>の9項目です。OK済・送信済の案件では、<strong>送信前は接触前／初回接触済</strong>、<strong>送信後は7種類</strong>をプルダウンで変更できます。<strong>各行の下</strong>に<strong>プレビューページURL</strong>（LPの見た目）と<strong>配信停止ページURL</strong>（店主向け）を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -830,24 +830,27 @@
           }
         })();
 
-        var PHASE_KEYS = [
-          'pre_contact',
-          'first_contact',
-          'hearing',
-          'proposal',
-          'contracted',
-          'lost',
-          'no_outreach_channel',
-        ];
         var PHASE_LABELS = {
           pre_contact: '接触前',
           first_contact: '初回接触済',
+          message_sent: '送信済み',
+          no_outreach_channel: 'SNSなし（送信不可）',
           hearing: 'ヒアリング中',
-          proposal: '提案済',
-          contracted: '契約済',
+          proposal: '提案中',
+          contracted: '契約済み',
+          payment_confirmed: '支払い確認済み',
           lost: '失注',
-          no_outreach_channel: 'SNS/メールなし',
         };
+        var APPROVED_PHASE_KEYS = ['pre_contact', 'first_contact'];
+        var SENT_PHASE_KEYS = [
+          'message_sent',
+          'no_outreach_channel',
+          'hearing',
+          'proposal',
+          'contracted',
+          'payment_confirmed',
+          'lost',
+        ];
 
         var cachedDashboardItems = [];
         var liveSearchQuery = '';
@@ -1022,15 +1025,21 @@
 
         function normalizePhase(item) {
           var p = item.outreachPhase;
-          if (p === 'sent') return 'proposal';
+          if (p === 'sent') return 'message_sent';
           if (p === 'sleep') return 'no_outreach_channel';
           if (p === 'pending_send') return 'pre_contact';
           if (p === 'awaiting_reply') return 'proposal';
           if (p === 'appointment') return 'hearing';
           if (p === 'won') return 'contracted';
-          if (PHASE_KEYS.indexOf(p) >= 0) return p;
-          if (item.status === 'email_sent') return 'proposal';
-          if (item.status === 'approved') return 'pre_contact';
+          if (item.status === 'approved') {
+            if (APPROVED_PHASE_KEYS.indexOf(p) >= 0) return p;
+            return 'pre_contact';
+          }
+          if (item.status === 'email_sent') {
+            if (SENT_PHASE_KEYS.indexOf(p) >= 0) return p;
+            return 'message_sent';
+          }
+          if (SENT_PHASE_KEYS.indexOf(p) >= 0 || APPROVED_PHASE_KEYS.indexOf(p) >= 0) return p;
           return 'pre_contact';
         }
 
@@ -1038,62 +1047,79 @@
         function buildPhaseBrowserGroups() {
           return [
             {
-              id: 'pending',
-              label: 'レビュー待ち',
+              id: 'g_before_send',
+              label: '送信前',
               filter: function (i) {
-                return i.status === 'pending';
+                return i.status === 'pending' || i.status === 'approved';
               },
             },
             {
-              id: 'approved_pre',
-              label: 'OK済・未送付（接触前）',
+              id: 'g_message_sent',
+              label: '送信済み',
               filter: function (i) {
-                return i.status === 'approved' && normalizePhase(i) === 'pre_contact';
+                return i.status === 'email_sent' && normalizePhase(i) === 'message_sent';
               },
             },
             {
-              id: 'approved_first',
-              label: 'OK済・未送付（初回接触済）',
+              id: 'g_no_sns',
+              label: 'SNSなし（送信不可）',
               filter: function (i) {
-                return i.status === 'approved' && normalizePhase(i) === 'first_contact';
+                return i.status === 'email_sent' && normalizePhase(i) === 'no_outreach_channel';
               },
             },
             {
-              id: 'approved_other',
-              label: 'OK済・送信前（その他のフェーズ）',
+              id: 'g_hearing',
+              label: 'ヒアリング中',
               filter: function (i) {
-                var ph = normalizePhase(i);
-                return i.status === 'approved' && ph !== 'pre_contact' && ph !== 'first_contact';
+                return i.status === 'email_sent' && normalizePhase(i) === 'hearing';
               },
             },
             {
-              id: 'rejected',
-              label: 'NG済み',
+              id: 'g_proposal',
+              label: '提案中',
+              filter: function (i) {
+                return i.status === 'email_sent' && normalizePhase(i) === 'proposal';
+              },
+            },
+            {
+              id: 'g_contracted',
+              label: '契約済み',
+              filter: function (i) {
+                return i.status === 'email_sent' && normalizePhase(i) === 'contracted';
+              },
+            },
+            {
+              id: 'g_payment',
+              label: '支払い確認済み',
+              filter: function (i) {
+                return i.status === 'email_sent' && normalizePhase(i) === 'payment_confirmed';
+              },
+            },
+            {
+              id: 'g_lost',
+              label: '失注',
+              filter: function (i) {
+                return i.status === 'email_sent' && normalizePhase(i) === 'lost';
+              },
+            },
+            {
+              id: 'g_contact_ng',
+              label: '連絡NG',
               filter: function (i) {
                 return i.status === 'rejected';
               },
             },
-          ].concat(
-            PHASE_KEYS.map(function (ph) {
-              return {
-                id: 'sent_' + ph,
-                label: '送信済・' + PHASE_LABELS[ph],
-                filter: function (i) {
-                  return i.status === 'email_sent' && normalizePhase(i) === ph;
-                },
-              };
-            }),
-          );
+          ];
         }
 
         function searchStatusLabel(item) {
-          if (item.status === 'pending') return 'レビュー待ち';
-          if (item.status === 'rejected') return 'NG済み';
+          if (item.status === 'pending') return '送信前（レビュー待ち）';
+          if (item.status === 'rejected') return '連絡NG';
           if (item.status === 'approved') {
-            return 'OK済（送信前）· ' + PHASE_LABELS[normalizePhase(item)];
+            return '送信前 · ' + PHASE_LABELS[normalizePhase(item)];
           }
           if (item.status === 'email_sent') {
-            return '送信済み · ' + PHASE_LABELS[normalizePhase(item)];
+            return PHASE_LABELS[normalizePhase(item)] || normalizePhase(item);
           }
           return String(item.status || '—');
         }
@@ -1440,7 +1466,7 @@
             if (Number.isNaN(d.getTime())) return '';
             d.setMonth(d.getMonth() + 3);
             return (
-              '自動で「接触前」に戻る目安: ' +
+              '自動で「送信済み」に戻る目安: ' +
               d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
               ' 以降（日次バッチ）'
             );
@@ -1451,9 +1477,19 @@
 
         function renderPhaseSelect(item, loadFn) {
           var eff = normalizePhase(item);
+          var keys =
+            item.status === 'approved'
+              ? APPROVED_PHASE_KEYS.slice()
+              : item.status === 'email_sent'
+                ? SENT_PHASE_KEYS.slice()
+                : [];
+          if (keys.length === 0) {
+            return el('p', { class: 'muted', text: 'このステータスではフェーズを変更できません。' });
+          }
+          if (keys.indexOf(eff) < 0) keys.unshift(eff);
           var sel = el('select', {}, []);
-          PHASE_KEYS.forEach(function (p) {
-            var opt = el('option', { value: p, text: PHASE_LABELS[p] });
+          keys.forEach(function (p) {
+            var opt = el('option', { value: p, text: PHASE_LABELS[p] || p });
             if (p === eff) opt.selected = true;
             sel.appendChild(opt);
           });
@@ -1792,7 +1828,7 @@
             actionsCluster.appendChild(bNg);
           } else if (mode === 'rejected') {
             statusBlock.appendChild(
-              el('p', { class: 'muted', text: 'NG済み（送付対象外）。不要なら削除してください。' }),
+              el('p', { class: 'muted', text: '連絡NG（送付対象外）。不要なら削除してください。' }),
             );
           } else if (mode === 'approved') {
             statusBlock.appendChild(el('p', { class: 'muted', text: 'OK済・送信前 — フェーズ' }));

@@ -76,7 +76,7 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
     }
     if (status === 'email_sent') {
       const ph = next.outreachPhase;
-      const bumpToProposal =
+      const bumpToMessageSent =
         !ph ||
         ph === 'sent' ||
         ph === 'pending_send' ||
@@ -85,9 +85,9 @@ export function updateDashboardStatus(id: string, status: DashboardItem['status'
         ph === 'hearing' ||
         ph === 'no_outreach_channel' ||
         ph === 'appointment';
-      if (bumpToProposal) {
-        next.outreachPhase = 'proposal';
-        next.replyWaitStartedAt = new Date().toISOString();
+      if (bumpToMessageSent) {
+        next.outreachPhase = 'message_sent';
+        next.replyWaitStartedAt = undefined;
       } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !next.replyWaitStartedAt) {
         next.replyWaitStartedAt = new Date().toISOString();
       }

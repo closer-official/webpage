@@ -1864,9 +1864,11 @@ app.post('/api/process-next', async (req, res) => {
 const OUTREACH_PHASE_CANONICAL = new Set([
   'pre_contact',
   'first_contact',
+  'message_sent',
   'hearing',
   'proposal',
   'contracted',
+  'payment_confirmed',
   'lost',
   'no_outreach_channel',
 ]);
@@ -1874,7 +1876,7 @@ const OUTREACH_PHASE_CANONICAL = new Set([
 const OUTREACH_PHASE_LEGACY_MAP = {
   pending_send: 'pre_contact',
   awaiting_reply: 'proposal',
-  sent: 'proposal',
+  sent: 'message_sent',
   appointment: 'hearing',
   won: 'contracted',
   sleep: 'no_outreach_channel',
@@ -1913,17 +1915,18 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   if (req.body.status === 'email_sent') {
     dashboard[i].status = 'email_sent';
     const ph = dashboard[i].outreachPhase;
-    const bumpToProposal =
+    const bumpToMessageSent =
       !ph ||
       ph === 'sent' ||
       ph === 'pending_send' ||
+      ph === 'pre_contact' ||
       ph === 'first_contact' ||
       ph === 'hearing' ||
       ph === 'no_outreach_channel' ||
       ph === 'appointment';
-    if (bumpToProposal) {
-      dashboard[i].outreachPhase = 'proposal';
-      dashboard[i].replyWaitStartedAt = new Date().toISOString();
+    if (bumpToMessageSent) {
+      dashboard[i].outreachPhase = 'message_sent';
+      dashboard[i].replyWaitStartedAt = undefined;
     } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !dashboard[i].replyWaitStartedAt) {
       dashboard[i].replyWaitStartedAt = new Date().toISOString();
     }
@@ -1941,8 +1944,10 @@ app.patch('/api/dashboard/:id', async (req, res) => {
     const p = canonicalizeOutreachPhaseInput(pRaw);
     if (!p) return res.status(400).json({ error: 'Invalid outreachPhase' });
     dashboard[i].outreachPhase = p;
-    if (p === 'proposal') {
-      dashboard[i].replyWaitStartedAt = new Date().toISOString();
+    if (p === 'proposal' || p === 'awaiting_reply') {
+      if (!dashboard[i].replyWaitStartedAt) {
+        dashboard[i].replyWaitStartedAt = new Date().toISOString();
+      }
     } else {
       dashboard[i].replyWaitStartedAt = undefined;
     }
@@ -2018,7 +2023,7 @@ app.post('/api/outreach/opt-out', async (req, res) => {
 });
 
 /**
- * 提案済（旧:返信待ち）でフォロー開始から3か月経過 → 自動で接触前（再アプローチ用）
+ * 提案中でフォロー開始から3か月経過 → 自動で送信済み（再アプローチ用）
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
 app.get('/api/outreach/phase-tick', async (req, res) => {
@@ -2036,7 +2041,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
       if (!inProposalWait || !row.replyWaitStartedAt) continue;
       const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
       if (new Date(deadline).getTime() <= Date.now()) {
-        row.outreachPhase = 'pre_contact';
+        row.outreachPhase = 'message_sent';
         row.replyWaitStartedAt = undefined;
         bumped += 1;
       }

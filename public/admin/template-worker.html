@@ -471,7 +471,7 @@
         <div style="font-size: 0.8rem; color: #9aacbf">送付案件との紐づけ（このドラフトとダッシュボード1件）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
           プレビューURL・配信停止URL・営業フェーズを、<strong>この場所からまとめて</strong>扱えます。フェーズは
-          <strong>OK済・送信済</strong>の案件のみ変更できます（送付・フェーズ管理と同じ7段階）。<strong>提案済</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>接触前</strong>に戻ります。
+          <strong>OK済・送信済</strong>の案件のみ変更できます（送付・フェーズ管理と同じ区分：送信前は接触前／初回接触済、送信後は送信済み〜失注など）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります。
         </p>
         <label>
           紐づける送付案件
@@ -479,15 +479,7 @@
         </label>
         <label>
           営業フェーズ
-          <select id="f-worker-outreach-phase" disabled>
-            <option value="pre_contact">接触前</option>
-            <option value="first_contact">初回接触済</option>
-            <option value="hearing">ヒアリング中</option>
-            <option value="proposal">提案済</option>
-            <option value="contracted">契約済</option>
-            <option value="lost">失注</option>
-            <option value="no_outreach_channel">SNS/メールなし</option>
-          </select>
+          <select id="f-worker-outreach-phase" disabled></select>
         </label>
         <p id="worker-outreach-hint" class="muted" style="font-size: 0.74rem; color: #7d8fa3; margin: 6px 0 0"></p>
         <p class="preview-url" id="worker-preview-url-inline" style="margin-top: 10px">（保存後に表示）</p>
@@ -801,14 +793,26 @@
         var customizationBaseById = {};
         var dashboardListCache = [];
         var dashboardById = {};
-        var WORKER_PHASE_KEYS = [
-          'pre_contact',
-          'first_contact',
+        var WORKER_PHASE_LABELS = {
+          pre_contact: '接触前',
+          first_contact: '初回接触済',
+          message_sent: '送信済み',
+          no_outreach_channel: 'SNSなし（送信不可）',
+          hearing: 'ヒアリング中',
+          proposal: '提案中',
+          contracted: '契約済み',
+          payment_confirmed: '支払い確認済み',
+          lost: '失注',
+        };
+        var WORKER_APPROVED_PHASE_KEYS = ['pre_contact', 'first_contact'];
+        var WORKER_SENT_PHASE_KEYS = [
+          'message_sent',
+          'no_outreach_channel',
           'hearing',
           'proposal',
           'contracted',
+          'payment_confirmed',
           'lost',
-          'no_outreach_channel',
         ];
         var SHARE_BTN_DISABLED_TITLE = '先にドラフトを保存してカスタムIDが付くと使えます';
         var WORKER_PREVIEW_COPY_TITLE = 'プレビューURLは保存後にコピーできます';
@@ -852,16 +856,55 @@
 
         function normalizeWorkerPhase(item) {
           var p = item.outreachPhase;
-          if (p === 'sent') return 'proposal';
+          if (p === 'sent') return 'message_sent';
           if (p === 'sleep') return 'no_outreach_channel';
           if (p === 'pending_send') return 'pre_contact';
           if (p === 'awaiting_reply') return 'proposal';
           if (p === 'appointment') return 'hearing';
           if (p === 'won') return 'contracted';
-          if (WORKER_PHASE_KEYS.indexOf(p) >= 0) return p;
-          if (item.status === 'email_sent') return 'proposal';
-          if (item.status === 'approved') return 'pre_contact';
+          if (item.status === 'approved') {
+            if (WORKER_APPROVED_PHASE_KEYS.indexOf(p) >= 0) return p;
+            return 'pre_contact';
+          }
+          if (item.status === 'email_sent') {
+            if (WORKER_SENT_PHASE_KEYS.indexOf(p) >= 0) return p;
+            return 'message_sent';
+          }
+          if (WORKER_SENT_PHASE_KEYS.indexOf(p) >= 0 || WORKER_APPROVED_PHASE_KEYS.indexOf(p) >= 0) return p;
           return 'pre_contact';
+        }
+
+        function fillWorkerOutreachPhaseSelect(phaseSel, item) {
+          phaseSel.innerHTML = '';
+          if (!item) {
+            var o0 = document.createElement('option');
+            o0.value = '';
+            o0.textContent = '（送付案件を選んでください）';
+            phaseSel.appendChild(o0);
+            return;
+          }
+          var eff = normalizeWorkerPhase(item);
+          var keys =
+            item.status === 'approved'
+              ? WORKER_APPROVED_PHASE_KEYS.slice()
+              : item.status === 'email_sent'
+                ? WORKER_SENT_PHASE_KEYS.slice()
+                : [];
+          if (keys.length === 0) {
+            var o1 = document.createElement('option');
+            o1.value = '';
+            o1.textContent = '（このステータスでは変更不可）';
+            phaseSel.appendChild(o1);
+            return;
+          }
+          if (keys.indexOf(eff) < 0) keys.unshift(eff);
+          keys.forEach(function (k) {
+            var o = document.createElement('option');
+            o.value = k;
+            o.textContent = WORKER_PHASE_LABELS[k] || k;
+            phaseSel.appendChild(o);
+          });
+          phaseSel.value = eff;
         }
 
         function workerAutoBumpHint(iso) {
@@ -871,7 +914,7 @@
             if (Number.isNaN(d.getTime())) return '';
             d.setMonth(d.getMonth() + 3);
             return (
-              '自動で「接触前」に戻る目安: ' +
+              '自動で「送信済み」に戻る目安: ' +
               d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) +
               ' 以降（日次バッチ）'
             );
@@ -940,7 +983,7 @@
           }
           if (!did) {
             phaseSel.disabled = true;
-            phaseSel.value = 'pre_contact';
+            fillWorkerOutreachPhaseSelect(phaseSel, null);
             if (hintEl) {
               hintEl.textContent = '送付案件を選ぶと、フェーズ変更と配信停止URLが使えます。';
             }
@@ -953,6 +996,7 @@
           var item = dashboardById[did];
           if (!item) {
             phaseSel.disabled = true;
+            fillWorkerOutreachPhaseSelect(phaseSel, null);
             if (hintEl) hintEl.textContent = '案件が一覧にありません。ページを再読み込みするか、送付管理を確認してください。';
             if (btnUnsub) {
               btnUnsub.disabled = true;
@@ -962,14 +1006,21 @@
           }
           var canPhase = item.status === 'approved' || item.status === 'email_sent';
           phaseSel.disabled = !canPhase;
+          if (canPhase) fillWorkerOutreachPhaseSelect(phaseSel, item);
+          else {
+            phaseSel.innerHTML = '';
+            var od = document.createElement('option');
+            od.value = '';
+            od.textContent = '（レビュー待ち・連絡NGは変更不可）';
+            phaseSel.appendChild(od);
+          }
           var eff = normalizeWorkerPhase(item);
-          phaseSel.value = eff;
           if (hintEl) {
             if (!canPhase) {
-              hintEl.textContent = 'レビュー待ち・NG済みの案件は、送付・フェーズ管理でOKにしてからフェーズを変更できます。';
+              hintEl.textContent = 'レビュー待ち・連絡NGの案件は、送付・フェーズ管理でOKにしてからフェーズを変更できます。';
             } else if (eff === 'proposal') {
               var bump = workerAutoBumpHint(item.replyWaitStartedAt);
-              hintEl.textContent = bump || '提案済（3か月で自動で接触前に戻ります）。';
+              hintEl.textContent = bump || '提案中（3か月で自動で送信済みに戻ります）。';
             } else {
               hintEl.textContent = item.status === 'approved' ? 'OK済・送信前' : '送信済み';
             }
@@ -2964,6 +3015,7 @@
           var phaseSel = this;
           if (!did || phaseSel.disabled) return;
           var phase = phaseSel.value;
+          if (!phase) return;
           showErr('worker-quick-err', '');
           phaseSel.disabled = true;
           phaseSel.setAttribute('aria-busy', 'true');

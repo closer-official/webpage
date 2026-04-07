@@ -306,9 +306,12 @@ export interface ResearchedShop {
 export type OutreachPhase =
   | 'pre_contact'
   | 'first_contact'
+  /** 送信後・フォロー前（いわゆる「送信済み」段階） */
+  | 'message_sent'
   | 'hearing'
   | 'proposal'
   | 'contracted'
+  | 'payment_confirmed'
   | 'lost'
   | 'no_outreach_channel'
   /** @deprecated 保存値の互換。正規化後は pre_contact */
@@ -319,7 +322,7 @@ export type OutreachPhase =
   | 'appointment'
   /** @deprecated 保存値の互換。正規化後は contracted */
   | 'won'
-  /** @deprecated 互換。正規化後は proposal */
+  /** @deprecated 互換。正規化後は message_sent */
   | 'sent'
   /** @deprecated 保存値の互換。正規化後は no_outreach_channel */
   | 'sleep';
@@ -347,7 +350,7 @@ export interface DashboardItem {
    * OK済・送信済案件のフェーズ。
    */
   outreachPhase?: OutreachPhase;
-  /** outreachPhase === proposal（旧 awaiting_reply）のとき、フォロー開始（この日時から3か月後に自動で pre_contact） */
+  /** outreachPhase === proposal のときフォロー開始（この日時から3か月後に自動で message_sent） */
   replyWaitStartedAt?: string;
   /** 旧 sleep のときの再送目安（ISO）。no_outreach_channel 移行後は未使用になり得る */
   sleepUntil?: string;
