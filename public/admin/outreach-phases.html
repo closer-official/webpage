@@ -852,6 +852,17 @@
           'lost',
         ];
 
+        /** 検索バッジ・区分プルダウン・店ごとのフェーズ選択で同じ表記にする */
+        function unifiedPhaseUiLabel(status, phaseKey) {
+          if (status === 'approved' && APPROVED_PHASE_KEYS.indexOf(phaseKey) >= 0) {
+            return '送信前 · ' + PHASE_LABELS[phaseKey];
+          }
+          if (status === 'email_sent' && SENT_PHASE_KEYS.indexOf(phaseKey) >= 0) {
+            return PHASE_LABELS[phaseKey] || phaseKey;
+          }
+          return PHASE_LABELS[phaseKey] || phaseKey;
+        }
+
         var cachedDashboardItems = [];
         var liveSearchQuery = '';
         var searchDebounceTimer = null;
@@ -1012,6 +1023,7 @@
               (item.dmBody && String(item.dmBody).slice(0, 400)) || '',
               (sig && sig.mapsUrl) || '',
               (sig && sig.placeId) || '',
+              searchStatusLabel(item),
             ];
             textHit = fields.some(function (f) {
               return textFieldMatches(f, textNeedle);
@@ -1055,49 +1067,49 @@
             },
             {
               id: 'g_message_sent',
-              label: '送信済み',
+              label: PHASE_LABELS.message_sent,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'message_sent';
               },
             },
             {
               id: 'g_no_sns',
-              label: 'SNSなし（送信不可）',
+              label: PHASE_LABELS.no_outreach_channel,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'no_outreach_channel';
               },
             },
             {
               id: 'g_hearing',
-              label: 'ヒアリング中',
+              label: PHASE_LABELS.hearing,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'hearing';
               },
             },
             {
               id: 'g_proposal',
-              label: '提案中',
+              label: PHASE_LABELS.proposal,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'proposal';
               },
             },
             {
               id: 'g_contracted',
-              label: '契約済み',
+              label: PHASE_LABELS.contracted,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'contracted';
               },
             },
             {
               id: 'g_payment',
-              label: '支払い確認済み',
+              label: PHASE_LABELS.payment_confirmed,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'payment_confirmed';
               },
             },
             {
               id: 'g_lost',
-              label: '失注',
+              label: PHASE_LABELS.lost,
               filter: function (i) {
                 return i.status === 'email_sent' && normalizePhase(i) === 'lost';
               },
@@ -1115,11 +1127,8 @@
         function searchStatusLabel(item) {
           if (item.status === 'pending') return '送信前（レビュー待ち）';
           if (item.status === 'rejected') return '連絡NG';
-          if (item.status === 'approved') {
-            return '送信前 · ' + PHASE_LABELS[normalizePhase(item)];
-          }
-          if (item.status === 'email_sent') {
-            return PHASE_LABELS[normalizePhase(item)] || normalizePhase(item);
+          if (item.status === 'approved' || item.status === 'email_sent') {
+            return unifiedPhaseUiLabel(item.status, normalizePhase(item));
           }
           return String(item.status || '—');
         }
@@ -1489,7 +1498,7 @@
           if (keys.indexOf(eff) < 0) keys.unshift(eff);
           var sel = el('select', {}, []);
           keys.forEach(function (p) {
-            var opt = el('option', { value: p, text: PHASE_LABELS[p] || p });
+            var opt = el('option', { value: p, text: unifiedPhaseUiLabel(item.status, p) });
             if (p === eff) opt.selected = true;
             sel.appendChild(opt);
           });

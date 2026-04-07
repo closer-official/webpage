@@ -814,6 +814,18 @@
           'payment_confirmed',
           'lost',
         ];
+
+        /** 送付・フェーズ管理の unifiedPhaseUiLabel と同じ表記 */
+        function workerUnifiedPhaseUiLabel(status, phaseKey) {
+          if (status === 'approved' && WORKER_APPROVED_PHASE_KEYS.indexOf(phaseKey) >= 0) {
+            return '送信前 · ' + WORKER_PHASE_LABELS[phaseKey];
+          }
+          if (status === 'email_sent' && WORKER_SENT_PHASE_KEYS.indexOf(phaseKey) >= 0) {
+            return WORKER_PHASE_LABELS[phaseKey] || phaseKey;
+          }
+          return WORKER_PHASE_LABELS[phaseKey] || phaseKey;
+        }
+
         var SHARE_BTN_DISABLED_TITLE = '先にドラフトを保存してカスタムIDが付くと使えます';
         var WORKER_PREVIEW_COPY_TITLE = 'プレビューURLは保存後にコピーできます';
         var WORKER_UNSUB_COPY_TITLE = '送付案件を紐づけ、配信停止トークンがあるときにコピーできます';
@@ -901,7 +913,7 @@
           keys.forEach(function (k) {
             var o = document.createElement('option');
             o.value = k;
-            o.textContent = WORKER_PHASE_LABELS[k] || k;
+            o.textContent = workerUnifiedPhaseUiLabel(item.status, k);
             phaseSel.appendChild(o);
           });
           phaseSel.value = eff;
