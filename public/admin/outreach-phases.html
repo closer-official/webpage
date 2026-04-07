@@ -1483,6 +1483,15 @@
           return u;
         }
 
+        /** LP の「X（Twitter）（フッターアイコン）URL」またはキュー由来のスナップショット */
+        function footerTwitterUrlForItem(item) {
+          var c = item.content;
+          var u = (c && c.footerTwitterUrl) || item.footerTwitterUrl || '';
+          u = String(u).trim();
+          if (!u || !/^https?:\/\//i.test(u)) return '';
+          return u;
+        }
+
         function templateWorkerEditUrl(customizationId) {
           var cid = String(customizationId || '').trim();
           if (!cid) return '';
@@ -1514,6 +1523,43 @@
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
           a.textContent = 'Instagram を開く';
+          ur.appendChild(a);
+          var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
+          cp.onclick = function () {
+            navigator.clipboard.writeText(u);
+          };
+          ur.appendChild(cp);
+          container.appendChild(ur);
+          container.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'font-size:0.72rem;word-break:break-all;margin-top:6px',
+              text: u,
+            }),
+          );
+        }
+
+        function renderTwitterFooterBlock(container, item) {
+          container.appendChild(
+            el('p', { class: 'muted', text: 'X（Twitter）（店舗ドラフトのフッターに入力したURL）' }),
+          );
+          var u = footerTwitterUrlForItem(item);
+          if (!u) {
+            container.appendChild(
+              el('p', {
+                class: 'muted',
+                text: '※ 未設定（作業者用編集の「X（Twitter）（フッターアイコン）URL」に入力するとここに表示されます）',
+              }),
+            );
+            return;
+          }
+          var ur = el('div', { class: 'url-row' });
+          var a = document.createElement('a');
+          a.href = u;
+          a.className = 'btn small';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = 'X（Twitter）を開く';
           ur.appendChild(a);
           var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
           cp.onclick = function () {
@@ -1609,14 +1655,17 @@
           var wrap = el('div', { class: 'share-links-grid' });
           var pv = el('div', { class: 'link-tile' });
           var ig = el('div', { class: 'link-tile' });
+          var tw = el('div', { class: 'link-tile' });
           var us = el('div', { class: 'link-tile' });
           var tm = el('div', { class: 'link-tile' });
           renderTemplatePreviewBlock(pv, item);
           renderInstagramFooterBlock(ig, item);
+          renderTwitterFooterBlock(tw, item);
           renderUnsubscribeBlock(us, item);
           renderOutreachTemplatesBlock(tm, item);
           wrap.appendChild(pv);
           wrap.appendChild(ig);
+          wrap.appendChild(tw);
           wrap.appendChild(us);
           wrap.appendChild(tm);
           container.appendChild(wrap);

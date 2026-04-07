@@ -338,6 +338,8 @@ export interface DashboardItem {
   outreachDmCustomFirstLine?: string;
   /** キュー経由時など、フッター用 Instagram URL のスナップショット（content.footerInstagramUrl と併用可） */
   footerInstagramUrl?: string;
+  /** フッター用 X（Twitter）URL のスナップショット（content.footerTwitterUrl と併用可） */
+  footerTwitterUrl?: string;
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**
