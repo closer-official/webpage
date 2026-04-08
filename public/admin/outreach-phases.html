@@ -451,6 +451,84 @@
       .outreach-sticky-nav a.back:hover {
         text-decoration: underline;
       }
+      .view-mode-toggle .btn.primary {
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+      }
+      .excel-panel h2 {
+        margin-top: 0;
+      }
+      .excel-sheet-wrap {
+        overflow: auto;
+        max-height: min(72vh, 720px);
+        border: 1px solid var(--phase-line);
+        border-radius: 10px;
+        background: #0b1323;
+      }
+      .excel-sheet {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.76rem;
+        font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+      }
+      .excel-sheet th,
+      .excel-sheet td {
+        border: 1px solid #2a3b52;
+        padding: 6px 8px;
+        vertical-align: middle;
+        text-align: left;
+      }
+      .excel-sheet thead th {
+        background: #1c2940;
+        color: #a5d8ff;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        white-space: nowrap;
+      }
+      .excel-sheet .excel-corner {
+        background: #121a2e;
+        min-width: 28px;
+        z-index: 3;
+      }
+      .excel-sheet tbody td.row-num,
+      .excel-sheet thead th.row-head {
+        background: #0f172a;
+        color: #7d8fa3;
+        text-align: center;
+        font-weight: 600;
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        min-width: 2.25rem;
+      }
+      .excel-sheet thead th.row-head {
+        z-index: 4;
+      }
+      .excel-sheet td.excel-cell-text {
+        max-width: 220px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: system-ui, sans-serif;
+        font-size: 0.78rem;
+        color: #e8edf5;
+      }
+      .excel-sheet td.excel-cell-name {
+        max-width: 160px;
+        font-family: system-ui, sans-serif;
+        font-weight: 600;
+        color: #f0f9ff;
+      }
+      .excel-sheet select {
+        min-width: 10.5em;
+        max-width: 100%;
+        font-size: 0.76rem;
+        padding: 4px 6px;
+        border-radius: 6px;
+        background: #121a2e;
+        color: #e8edf5;
+        border: 1px solid #3d5675;
+      }
     </style>
   </head>
   <body>
@@ -482,6 +560,16 @@
         />
       </div>
       <p id="copy-msg" class="ok-msg" style="display: none" aria-live="polite"></p>
+      <div class="panel view-mode-panel" style="margin-bottom: 1rem">
+        <h2 style="margin-top: 0">表示モード</h2>
+        <p class="muted" style="margin: 0 0 10px">
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号 1,2,3…、上に列 A〜E の表です。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
+        </p>
+        <div class="toolbar view-mode-toggle">
+          <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
+          <button type="button" class="btn" id="btn-view-grid">一覧表（Excel風）</button>
+        </div>
+      </div>
       <div class="panel search-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">登録済みか検索</h2>
         <p class="muted" style="margin: 0 0 10px">
@@ -891,6 +979,27 @@
 
         var cachedDashboardItems = [];
         var liveSearchQuery = '';
+        var OUTREACH_VIEW_STORAGE_KEY = 'closer_outreach_view_mode';
+        var outreachViewMode = 'card';
+        try {
+          var _ovm = localStorage.getItem(OUTREACH_VIEW_STORAGE_KEY);
+          if (_ovm === 'grid') outreachViewMode = 'grid';
+        } catch (e) {}
+
+        function syncViewToggleButtons() {
+          var bc = document.getElementById('btn-view-card');
+          var bg = document.getElementById('btn-view-grid');
+          if (bc) bc.classList.toggle('primary', outreachViewMode === 'card');
+          if (bg) bg.classList.toggle('primary', outreachViewMode === 'grid');
+        }
+
+        function setOutreachViewMode(mode) {
+          outreachViewMode = mode === 'grid' ? 'grid' : 'card';
+          try {
+            localStorage.setItem(OUTREACH_VIEW_STORAGE_KEY, outreachViewMode);
+          } catch (e) {}
+          syncViewToggleButtons();
+        }
         var searchDebounceTimer = null;
 
         function decodeBasicEntities(s) {
@@ -1932,11 +2041,128 @@
           return row;
         }
 
+        /** 列見出しは Excel と同様（A, B, C…）。左端は行番号 1,2,3… */
+        function renderExcelGridPanel(host, items, loadFn, searchActive) {
+          var panel = el('div', { class: 'panel excel-panel' });
+          var title =
+            '一覧表（Excel風）' +
+            (searchActive ? ' · 検索結果 ' + items.length + '件' : ' · 全 ' + items.length + '件');
+          panel.appendChild(el('h2', { text: title }));
+          panel.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'margin: 0 0 10px; font-size: 0.8rem',
+              text: '左端が行番号（1,2,3…）。上段の A〜E が列見出し（Excel と同じイメージ）です。',
+            }),
+          );
+
+          if (!items.length) {
+            panel.appendChild(
+              el('p', {
+                class: 'muted',
+                text: searchActive
+                  ? '該当する案件がありません。検索を変えるか「カード」表示に切り替えてください。'
+                  : '案件がありません。「再読み込み」で取得できるか確認してください。',
+              }),
+            );
+            host.appendChild(panel);
+            return;
+          }
+
+          var wrap = el('div', { class: 'excel-sheet-wrap' });
+          var table = el('table', { class: 'excel-sheet' });
+          table.setAttribute('role', 'grid');
+          var thead = el('thead');
+          var hr = el('tr');
+          hr.appendChild(el('th', { class: 'excel-corner row-head', text: '' }));
+          var headMeta = [
+            { letter: 'A', desc: '店舗名' },
+            { letter: 'B', desc: 'フェーズ（7種）' },
+            { letter: 'C', desc: 'フッター住所' },
+            { letter: 'D', desc: 'ドラフト編集' },
+            { letter: 'E', desc: 'プレビュー' },
+          ];
+          headMeta.forEach(function (col) {
+            hr.appendChild(
+              el('th', {
+                text: col.letter + '（' + col.desc + '）',
+                title: col.desc,
+              }),
+            );
+          });
+          thead.appendChild(hr);
+          table.appendChild(thead);
+
+          var tbody = el('tbody');
+          items.forEach(function (item, idx) {
+            var tr = el('tr');
+            tr.appendChild(el('td', { class: 'row-num', text: String(idx + 1) }));
+            var nm = outreachShopName(item) || '（無題）';
+            tr.appendChild(el('td', { class: 'excel-cell-name', text: nm }));
+            var phaseTd = el('td');
+            phaseTd.appendChild(renderPhaseSelect(item, loadFn));
+            tr.appendChild(phaseTd);
+            var c = item.content || {};
+            var r = item.researched || {};
+            var addr = String(c.footerAddress || r.address || '').trim();
+            tr.appendChild(el('td', { class: 'excel-cell-text', text: addr || '—' }));
+            var editTd = el('td');
+            var cid = String(item.linkedTemplateCustomizationId || '').trim();
+            if (cid) {
+              var ea = document.createElement('a');
+              ea.href = templateWorkerEditUrl(cid);
+              ea.className = 'btn small';
+              ea.target = '_blank';
+              ea.rel = 'noopener noreferrer';
+              ea.textContent = '開く';
+              editTd.appendChild(ea);
+            } else {
+              editTd.appendChild(el('span', { class: 'muted', text: '—' }));
+            }
+            tr.appendChild(editTd);
+            var prevTd = el('td');
+            var pu = outreachPreviewUrlForItem(item);
+            if (pu) {
+              var pa = document.createElement('a');
+              pa.href = pu;
+              pa.className = 'btn small';
+              pa.target = '_blank';
+              pa.rel = 'noopener noreferrer';
+              pa.textContent = '表示';
+              prevTd.appendChild(pa);
+            } else {
+              prevTd.appendChild(el('span', { class: 'muted', text: '—' }));
+            }
+            tr.appendChild(prevTd);
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          wrap.appendChild(table);
+          panel.appendChild(wrap);
+          host.appendChild(panel);
+        }
+
         function render(items) {
           var host = document.getElementById('boards');
           host.innerHTML = '';
 
           var q = String(liveSearchQuery || '').trim();
+
+          if (outreachViewMode === 'grid') {
+            var gridItems = items
+              .filter(function (i) {
+                return q ? itemMatchesSearch(i, q) : true;
+              })
+              .sort(function (a, b) {
+                var na = outreachShopName(a) || a.id;
+                var nb = outreachShopName(b) || b.id;
+                return na.localeCompare(nb, 'ja');
+              });
+            renderExcelGridPanel(host, gridItems, load, !!q);
+            updateSendTimingPanel(true);
+            return;
+          }
+
           if (q) {
             var matches = items.filter(function (i) {
               return itemMatchesSearch(i, q);
@@ -2152,6 +2378,21 @@
         setInterval(function () {
           updateSendTimingPanel(false);
         }, 1000);
+        var btnViewCard = document.getElementById('btn-view-card');
+        var btnViewGrid = document.getElementById('btn-view-grid');
+        if (btnViewCard) {
+          btnViewCard.onclick = function () {
+            setOutreachViewMode('card');
+            render(cachedDashboardItems);
+          };
+        }
+        if (btnViewGrid) {
+          btnViewGrid.onclick = function () {
+            setOutreachViewMode('grid');
+            render(cachedDashboardItems);
+          };
+        }
+        syncViewToggleButtons();
         load();
       })();
     </script>
