@@ -453,6 +453,20 @@
         <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
       </label>
       <div class="repeat-group" style="margin-top: 12px">
+        <div style="font-size: 0.8rem; color: #9aacbf">Gemini 一括入力（文章だけ・最大2万文字）</div>
+        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
+          Googleのまとめ・食べログの要約などをそのまま貼り付け。サーバーで Gemini が店名・キャッチ・住所・MEO・メニュー行・FAQ・セクションなどを読み取ります。
+          <strong>取れた項目だけ</strong>いまのフォームに上書きし、空だった項目はテンプレ／既存入力のままです。セクションは同じ
+          <code>id</code>
+          があれば中身だけ差し替え、無い <code>id</code> は末尾に追加します。メニュー・FAQ・店舗ブロックは、返ってきた行が1件以上あるときだけそのリストを置き換えます。
+        </p>
+        <textarea id="gemini-free-text" rows="8" placeholder="店名、住所、アクセス、営業時間、定休、メニューと価格、雰囲気、駐車場…"></textarea>
+        <div class="row-actions">
+          <button type="button" class="btn primary" id="btn-gemini-free-text">Gemini で取り込む（部分反映）</button>
+        </div>
+        <p id="gemini-free-err" class="err" style="display: none"></p>
+      </div>
+      <div class="repeat-group" style="margin-top: 12px">
         <div style="font-size: 0.8rem; color: #9aacbf">地図を埋め込む（コピペ）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
           Googleマップの「共有」→「地図を埋め込む」→「HTMLをコピー」の
@@ -1167,6 +1181,22 @@
           return s;
         }
 
+        function deepSanitizeLinks(value) {
+          if (Array.isArray(value)) return value.map(deepSanitizeLinks);
+          if (value && typeof value === 'object') {
+            var out = {};
+            Object.keys(value).forEach(function (k) {
+              out[k] = deepSanitizeLinks(value[k]);
+            });
+            return out;
+          }
+          if (typeof value === 'string') {
+            var u = extractUrlFromPossiblyMarkdownLink(value);
+            return u || value;
+          }
+          return value;
+        }
+
         function escapeHtml(s) {
           return String(s || '')
             .replace(/&/g, '&amp;')
@@ -1794,6 +1824,105 @@
           return out;
         }
 
+        /** Gemini 長文抽出結果を現在のフォーム override にマージ（空のキーはベースを維持） */
+        function mergeSectionsByIdForExtract(baseSecs, patchSecs) {
+          baseSecs = Array.isArray(baseSecs) ? cloneJsonForForm(baseSecs) : [];
+          if (!Array.isArray(patchSecs) || !patchSecs.length) return baseSecs;
+          patchSecs.forEach(function (ps) {
+            if (!ps || typeof ps !== 'object') return;
+            var pid = String(ps.id || '').trim();
+            var idx =
+              pid !== ''
+                ? baseSecs.findIndex(function (s) {
+                    return s && String(s.id || '').trim() === pid;
+                  })
+                : -1;
+            if (idx >= 0) {
+              baseSecs[idx] = Object.assign({}, baseSecs[idx], ps);
+            } else if (String(ps.title || '').trim() || String(ps.content || '').trim()) {
+              baseSecs.push(Object.assign({}, ps));
+            }
+          });
+          return baseSecs;
+        }
+
+        /** Gemini が footerText を返さず店名・住所・電話だけ更新したとき、古い © 行を残さない */
+        function refreshFooterTextWhenGeminiOmittedFooter(base, merged, patch) {
+          patch = patch || {};
+          merged = merged || {};
+          if (String(patch.footerText || '').trim()) return merged;
+          var contributed =
+            String(patch.siteName || '').trim() ||
+            String(patch.footerAddress || '').trim() ||
+            String(patch.footerPhone || '').trim();
+          if (!contributed) return merged;
+          var site = String(merged.siteName || '').trim();
+          var addr = String(merged.footerAddress || '').trim();
+          var phone = String(merged.footerPhone || '').trim();
+          if (!site && !addr && !phone) return merged;
+          var y = new Date().getFullYear();
+          merged.footerText = ['© ' + y, site, addr, phone].filter(Boolean).join(' | ');
+          return merged;
+        }
+
+        function mergeExtractPatchIntoOverride(base, patch) {
+          base = cloneJsonForForm(base);
+          patch = deepSanitizeLinks(patch || {});
+          var arrayReplaceWhenNonEmpty = {
+            faqItems: true,
+            cafeMenuTextRows: true,
+            cafeShopLocations: true,
+            cafeBranchMenuItems: true,
+            cafeInstagramFeedItems: true,
+          };
+          Object.keys(patch).forEach(function (k) {
+            if (k === 'heroSlides' || k === 'heroSlideStyles') return;
+            var pv = patch[k];
+            if (k === 'cafeMeo') {
+              if (!pv || typeof pv !== 'object' || Array.isArray(pv)) return;
+              base.cafeMeo = base.cafeMeo || {};
+              Object.keys(pv).forEach(function (mk) {
+                var mv = pv[mk];
+                if (mk === 'openingHours') {
+                  if (Array.isArray(mv) && mv.some(function (x) { return String(x).trim(); })) {
+                    base.cafeMeo.openingHours = mv
+                      .map(function (x) {
+                        return String(x).trim();
+                      })
+                      .filter(Boolean);
+                  }
+                } else if (typeof mv === 'string' && mv.trim()) {
+                  base.cafeMeo[mk] = mv.trim();
+                }
+              });
+              return;
+            }
+            if (k === 'sections') {
+              base.sections = mergeSectionsByIdForExtract(base.sections, pv);
+              return;
+            }
+            if (arrayReplaceWhenNonEmpty[k]) {
+              if (Array.isArray(pv) && pv.length) base[k] = pv;
+              return;
+            }
+            if (pv == null) return;
+            if (typeof pv === 'string') {
+              if (pv.trim()) base[k] = pv;
+              return;
+            }
+            if (Array.isArray(pv)) {
+              if (pv.length) base[k] = pv;
+              return;
+            }
+            if (typeof pv === 'object') {
+              base[k] = Object.assign({}, base[k] || {}, pv);
+              return;
+            }
+            base[k] = pv;
+          });
+          return base;
+        }
+
         function syncMapAndSocialUrlsIntoOverride(ov) {
           if (!ov || typeof ov !== 'object') return;
           var m = String(ov.mapEmbedUrl || '').trim();
@@ -2312,6 +2441,64 @@
               setButtonLoading(loadBtn, false);
             });
           }
+        };
+
+        document.getElementById('btn-gemini-free-text').onclick = function () {
+          showErr('gemini-free-err', '');
+          var text = String(document.getElementById('gemini-free-text').value || '').trim();
+          if (!text) {
+            showErr('gemini-free-err', '文章を貼り付けてください。');
+            return;
+          }
+          var baseOv;
+          try {
+            baseOv = buildOverrideFromForm();
+          } catch (e) {
+            showErr('gemini-free-err', e.message || String(e));
+            return;
+          }
+          var prevGenre = String((baseOv.cafeVisualGenre || '').trim());
+          var btn = document.getElementById('btn-gemini-free-text');
+          setButtonLoading(btn, true, 'Gemini 解析中…');
+          showErr('import-msg', 'Gemini で解析中です…（30〜60秒程度）');
+          credFetch(api + '/template-customizations/extract-from-text', {
+            method: 'POST',
+            body: JSON.stringify({ text: text }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || '抽出に失敗しました');
+              var patch = x.j.override && typeof x.j.override === 'object' ? x.j.override : {};
+              delete patch.heroSlides;
+              delete patch.heroSlideStyles;
+              var merged = mergeExtractPatchIntoOverride(baseOv, patch);
+              refreshFooterTextWhenGeminiOmittedFooter(baseOv, merged, patch);
+              syncMapAndSocialUrlsIntoOverride(merged);
+              fillFormFromOverride(merged);
+              if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
+                document.getElementById('draft-name').value = String(x.j.nameSuggestion).slice(0, 80);
+              }
+              if (resolveWorkerFormBaseTemplateId() === 'cafe_1') {
+                var g = String((merged.cafeVisualGenre || '').trim());
+                if (g && g !== prevGenre) {
+                  applyCafeVisualGenreHeroSlides(g);
+                }
+              }
+              syncRelatedUrlFieldsFromInputs();
+              scheduleLivePreview();
+              showErr('import-msg', 'Gemini の取り込みが完了しました。空だった項目はそのままです。内容を確認してください。');
+            })
+            .catch(function (e) {
+              showErr('gemini-free-err', e.message || String(e));
+              showErr('import-msg', '');
+            })
+            .finally(function () {
+              setButtonLoading(btn, false);
+            });
         };
 
         function applyMapEmbedPasteWorker() {
