@@ -85,6 +85,15 @@ main, header, footer, section, article, .container, .header-inner, .hero-inner, 
     background-size: cover;
     background-position: center center;
   }
+  /* warm_organic / cafe: ヒーロースライドのインライン background-size（幅100%・高さauto）が
+   * モバイル WebKit で親の高さ連鎖と相性が悪く背景だけ消えることがあるため、小画面では cover で塗りつぶす */
+  .wo-hero-viewport,
+  .wo-hero-track {
+    min-height: 100%;
+  }
+  .wo-hero-slide {
+    background-size: cover !important;
+  }
   .pro-svc-grid,
   .pet-service-list,
   .gym-reason-grid,

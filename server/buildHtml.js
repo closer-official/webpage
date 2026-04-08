@@ -794,7 +794,6 @@ ${petPol.map((p) => `      <details class="pet-acc-item"><summary class="pet-acc
       <div class="section-body">
         <h2 id="${s.id}-title" class="wo-sec-heading">${escapeHtml(s.title)}</h2>
         ${mapEmbed}
-        <div class="wo-sec-prose c1-access-lede">${renderProseParagraphsWithPaymentLogos(s.content, escapeHtml)}</div>
 ${cafe1ShopLocationsHtml()}
       </div>
     </section>`;
