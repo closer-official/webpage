@@ -10,16 +10,39 @@
         background: #0c1220;
         color: #e8edf5;
         line-height: 1.55;
+        --tw-sticky-nav-h: 52px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
       body {
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
+      }
+      .tw-fixed-nav {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+        background: rgba(12, 18, 32, 0.94);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #2a3b52;
+      }
+      .tw-fixed-nav__inner {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 10px 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        min-height: var(--tw-sticky-nav-h);
       }
       .app-head {
         max-width: 1600px;
         margin: 0 auto;
-        padding: 1.25rem 1rem 0.5rem;
+        padding: 1rem 1rem 0.5rem;
       }
       .work-shell {
         display: none;
@@ -40,9 +63,9 @@
         min-width: 0;
         min-height: 0;
         position: sticky;
-        top: 0.5rem;
+        top: calc(var(--tw-sticky-nav-h) + 10px);
         align-self: flex-start;
-        max-height: calc(100vh - 0.5rem);
+        max-height: calc(100vh - var(--tw-sticky-nav-h) - 16px);
         display: flex;
         flex-direction: column;
         gap: 0.45rem;
@@ -356,17 +379,18 @@
     </style>
   </head>
   <body>
-    <div class="app-head">
-      <p class="sub" style="margin: 0 0 0.75rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+    <header class="tw-fixed-nav" role="banner">
+      <nav class="tw-fixed-nav__inner" aria-label="管理メニュー">
         <a href="/" class="btn" style="display: inline-flex; border-color: #2a3b52; background: #121a2e">← 運営トップ</a>
         <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">テンプレ・ギャラリーハブ</a>
-        <a href="/admin/outreach-phases.html" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
-      </p>
+        <a href="/admin/outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
+      </nav>
+    </header>
+    <div class="app-head">
     <h1>店舗ドラフト編集（作業者用）</h1>
     <p class="sub">
-      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL・SEO</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL
-      で変えてください）。<br />
-        編集フォームの項目は<strong>選んだベーステンプレ</strong>に合わせて切り替わります（<strong>cafe_1</strong> だけ店主・お品書き・MEO など拡張項目が出ます。埋め込み型は名前・キャッチ・SEO中心）。<br />
+      <strong>ベーステンプレ</strong>を選び、<strong>文章・写真URL</strong>を保存します（配色の選択 UI は置いていません。雰囲気は画像 URL で変えてください）。<br />
+        編集フォームの項目は<strong>選んだベーステンプレ</strong>に合わせて切り替わります（<strong>cafe_1</strong> だけ店主・お品書き・MEO など拡張項目が出ます）。<br />
         保存先は <code>/api/template-customizations</code>（<strong>この編集画面だけ</strong>管理者ログイン必須）。共有用の
         <code>/api/template-preview/&lt;カスタムID&gt;</code> を第三者が開くときは<strong>アプリのログインは不要</strong>です（ホスティング側でサイト全体にパスワードがかかっている場合は別）。左の枠は常に<strong>フォーム内容のライブプレビュー</strong>です。
       </p>
@@ -428,28 +452,6 @@
         ドラフト名（管理用・80文字以内）
         <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
       </label>
-      <label>
-        資料取り込み（画像/PDF・最大4ファイル）
-        <input type="file" id="import-files" accept="image/*,.pdf,application/pdf" multiple />
-      </label>
-      <label>
-        文字取り込み（メモ/ヒアリング内容）
-        <textarea id="import-text" rows="5" placeholder="例: 店舗名、住所、営業時間、メニュー、FAQ候補、強みなど"></textarea>
-      </label>
-      <div class="repeat-group" style="margin-top: 12px">
-        <div style="font-size: 0.8rem; color: #9aacbf">Gemini 一括入力（文章だけ・最大2万文字）</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
-          Googleのまとめ・食べログの要約などをそのまま貼り付け。サーバーで Gemini が店名・キャッチ・住所・MEO・メニュー行・FAQ・セクションなどを読み取ります。
-          <strong>取れた項目だけ</strong>いまのフォームに上書きし、空だった項目はテンプレ／既存入力のままです。セクションは同じ
-          <code>id</code>
-          があれば中身だけ差し替え、無い <code>id</code> は末尾に追加します。メニュー・FAQ・店舗ブロックは、返ってきた行が1件以上あるときだけそのリストを置き換えます。
-        </p>
-        <textarea id="gemini-free-text" rows="8" placeholder="店名、住所、アクセス、営業時間、定休、メニューと価格、雰囲気、駐車場…"></textarea>
-      <div class="row-actions">
-          <button type="button" class="btn primary" id="btn-gemini-free-text">Gemini で取り込む（部分反映）</button>
-        </div>
-        <p id="gemini-free-err" class="err" style="display: none"></p>
-      </div>
       <div class="repeat-group" style="margin-top: 12px">
         <div style="font-size: 0.8rem; color: #9aacbf">地図を埋め込む（コピペ）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
@@ -489,28 +491,7 @@
         </div>
         <p id="worker-quick-err" class="err" style="display: none"></p>
       </div>
-      <div class="repeat-group">
-        <div style="font-size: 0.8rem; color: #9aacbf">AI調査取り込みテンプレ（Gemini / ChatGPT用）</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0">
-          下の文面をコピーしてAIに渡し、返ってきたJSONを「AI出力JSON貼り付け」に入れるとフォームに反映できます（写真項目は対象外）。
-        </p>
-        <textarea id="ai-import-prompt" rows="14" readonly></textarea>
-        <div class="row-actions">
-          <button type="button" class="btn" id="btn-copy-ai-prompt">AI向けテンプレをコピー</button>
-        </div>
-        <label>
-          AI出力JSON貼り付け
-          <textarea id="ai-import-json" class="mono" rows="8" placeholder='{"nameSuggestion":"...","override":{...}}'></textarea>
-        </label>
-        <div class="row-actions">
-          <button type="button" class="btn" id="btn-apply-ai-json">AI出力をフォームに反映</button>
-        </div>
-        <div id="ai-verify-report" class="checklist" style="display: none"></div>
-        <p id="ai-json-msg" class="ok" style="display: none"></p>
-        <p id="ai-json-err" class="err" style="display: none"></p>
-      </div>
       <div class="row-actions">
-        <button type="button" class="btn" id="btn-import-docs">資料から自動入力</button>
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
         <button type="button" class="btn primary" id="btn-save">保存</button>
       </div>
@@ -521,9 +502,40 @@
     </div>
 
     <div class="panel" id="form-box" style="display: none">
-      <h2>2. 本文・画像・URL</h2>
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          margin-bottom: 8px;
+        "
+      >
+        <h2 style="margin: 0">2. 本文・画像・URL</h2>
+        <button type="button" class="btn small" id="btn-toggle-form-main" aria-expanded="false">
+          本文・画像などを表示
+        </button>
+      </div>
       <p id="tw-active-template-hint" class="tw-active-tpl-badge" style="margin: 0 0 12px; font-size: 0.78rem; color: #b8e6ff"></p>
 
+      <div class="tw-form-block" data-tw-for="all">
+        <h3 style="margin: 0 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">SNS（フッターアイコン）URL</h3>
+        <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 10px; line-height: 1.45">
+          Instagram・LINE・X（Twitter）は折りたたみの外に固定しています。
+        </p>
+        <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
+        <p style="font-size: 0.72rem; color: #7d8fa3; margin: -4px 0 8px" class="tw-form-block" data-tw-for="cafe_1">
+          空欄の「Instagram 投稿埋め込み（1投稿のURL）」には、ここと同じURLを自動で入れます（別URLにする場合は下の欄で上書き）。
+        </p>
+        <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
+        <label
+          >X（Twitter）（フッターアイコン）URL
+          <input type="url" id="f-footerTwitterUrl" placeholder="https://x.com/… または https://twitter.com/…"
+        /></label>
+      </div>
+
+      <div id="form-main-collapsible" style="display: none">
       <div class="tw-form-block" data-tw-for="cafe_1">
         <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
           入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
@@ -531,7 +543,7 @@
       </div>
       <div class="tw-form-block tw-hidden" data-tw-for="non_cafe_1">
         <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
-          このベースは<strong>固定HTML埋め込み型</strong>です。左のプレビューはワークスペースのデザインが主体で、ここでの多くの項目は画面にそのまま出ないことがあります。<strong>サイト名・キャッチコピー・フッター文・SEO・高度JSON</strong>は保存データ・メタに引き継がれます。
+          このベースは<strong>固定HTML埋め込み型</strong>です。左のプレビューはワークスペースのデザインが主体で、ここでの多くの項目は画面にそのまま出ないことがあります。<strong>サイト名・キャッチコピー・フッター文</strong>などは保存データに引き継がれます。
         </p>
       </div>
 
@@ -673,18 +685,9 @@
       </div>
 
       <div class="tw-form-block" data-tw-for="cafe_1">
-        <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター連絡先・SNS（ページ最下部）</h3>
-      <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
+        <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #a5d8ff">フッター連絡先（住所・電話）</h3>
+        <label>フッター住所（表示・JSON-LD用） <input type="text" id="f-footerAddress" placeholder="〒… 東京都…" /></label>
         <label>フッター電話（フッター表示・電話FAB） <input type="text" id="f-footerPhone" placeholder="03-…" /></label>
-      <label>Instagram（フッターアイコン）URL <input type="url" id="f-footerInstagramUrl" /></label>
-        <p style="font-size: 0.72rem; color: #7d8fa3; margin: -4px 0 8px">
-          空欄の「Instagram 投稿埋め込み（1投稿のURL）」には、ここと同じURLを自動で入れます（別URLにする場合は下の欄で上書き）。
-        </p>
-        <label>LINE（フッターアイコン）URL <input type="url" id="f-footerLineUrl" placeholder="https://line.me/…" /></label>
-        <label
-          >X（Twitter）（フッターアイコン）URL
-          <input type="url" id="f-footerTwitterUrl" placeholder="https://x.com/… または https://twitter.com/…"
-        /></label>
       </div>
 
       <div class="tw-form-block" data-tw-for="cafe_1">
@@ -704,52 +707,12 @@
         </div>
       </div>
 
-      <div class="tw-form-block" data-tw-for="all" style="margin-top: 10px">
-        <label style="margin-top: 0">
-          高度設定JSON（未露出キー用・任意）
-          <span class="tw-form-block" data-tw-for="cafe_1" style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">
-            ここに入れたキーは override にそのままマージされます。<code>cafe_1</code> 向けの追加キーなどを編集するときに使います。
-          </span>
-          <span class="tw-form-block tw-hidden" data-tw-for="non_cafe_1" style="display: block; font-size: 0.72rem; color: #7d8fa3; margin-top: 4px">
-            テーマ <code>theme</code> や、フォームに無いキーをまとめて渡すときに使います。
-          </span>
-          <textarea id="f-advanced-override-json" class="mono" spellcheck="false" rows="6" placeholder='{"someNewKey":"value"}'></textarea>
-      </label>
       </div>
 
-      <h2 class="tw-form-block" data-tw-for="all" style="margin-top: 1.25rem; font-size: 0.95rem; color: #a5d8ff">
-        3. 検索表示（SEO）
-      </h2>
-      <p class="tw-form-block" data-tw-for="all" style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px; line-height: 1.5">
-        <strong>専門知識は不要です。</strong>上の<strong>店名・ページタイトル・キャッチ・住所</strong>を書いておけば、空欄の項目は自動で下書きが入ります（Googleの検索結果に出るタイトル・説明文のイメージです）。気になるところだけ直してください。
-      </p>
-      <div class="row-actions tw-form-block" data-tw-for="all" style="margin-bottom: 12px">
-        <button type="button" class="btn" id="btn-seo-autofill">空のSEO欄を今の内容で埋める</button>
-      </div>
-      <label>
-        検索結果のタイトル（タブに出る短い名前・最大120文字）
-        <input type="text" id="f-metaTitle" maxlength="120" placeholder="例: 店名｜エリア" />
-      </label>
-      <label>
-        検索結果の説明文（1〜2文・最大320文字）
-        <textarea id="f-metaDescription" rows="3" maxlength="320" placeholder="キャッチや住所が自動で入ります。必要なら編集"></textarea>
-      </label>
-      <label>
-        SNS等でシェアされたときの画像（1枚目のトップ写真と同じでもOK）
-        <input type="url" id="f-ogImageUrl" placeholder="https://…（空ならトップ写真を利用）" />
-      </label>
-      <label>
-        正式なページURL（本番のURLが決まってから・未決定は空でOK）
-        <input type="text" id="f-canonicalUrl" placeholder="https://example.com/…" />
-      </label>
-      <label>
-        検索しそうな言葉（カンマ区切り・店名や料理名など）
-        <input type="text" id="f-keywords" maxlength="500" placeholder="例: 店名,ラーメン,つくば" />
-      </label>
     </div>
 
     <div class="panel" id="share-box" style="display: none">
-      <h2>4. プレビュー・共有（送信）</h2>
+      <h2>3. プレビュー・共有（送信）</h2>
       <p style="font-size: 0.84rem; color: #b8c5d6; margin: 0 0 8px">
         保存後にカスタム ID が確定します。<strong>プレビュー URL</strong>をコピーするか、メール作成画面を開いて本文に貼って送ってください（メールはブラウザの
         mailto）。このURLを開く相手に、このサイトの<strong>管理者ユーザー名・パスワードは不要</strong>です。
@@ -768,12 +731,6 @@
       </div>
     </div>
 
-    <p class="sub" style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
-      <a href="/" class="btn" style="display: inline-flex; border-color: #2a3b52; background: #121a2e">← 運営トップ</a>
-      <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">テンプレ・ギャラリーハブ</a>
-      <a href="/admin/outreach-phases.html" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
-    </p>
-
     <script>
       (function () {
         var api = (function () {
@@ -786,7 +743,8 @@
         var previewBaseTemplateId = '';
         var livePreviewTimer = null;
         var livePreviewInFlight = 0;
-        var seoAutofillTimer = null;
+        /** フォームに無い override キー（旧高度JSON・SEO 等）を保存時まで保持 */
+        var workerExtraOverride = {};
         var mapPasteTimer = null;
         var addBtnIdsBound = false;
         var customizationBaseById = {};
@@ -1193,155 +1151,6 @@
           el.textContent = text || '';
         }
 
-        function parseJsonOptional(text, label) {
-          var t = String(text || '').trim();
-          if (!t) return undefined;
-          try {
-            return JSON.parse(t);
-          } catch (e) {
-            throw new Error(label + ' の JSON が不正です: ' + (e.message || e));
-          }
-        }
-
-        function readFileAsBase64(file) {
-          return new Promise(function (resolve, reject) {
-            var fr = new FileReader();
-            fr.onload = function () {
-              var v = String(fr.result || '');
-              var idx = v.indexOf('base64,');
-              if (idx < 0) return reject(new Error('base64 変換に失敗しました'));
-              resolve(v.slice(idx + 7));
-            };
-            fr.onerror = function () {
-              reject(new Error('ファイル読み込みに失敗しました'));
-            };
-            fr.readAsDataURL(file);
-          });
-        }
-
-        function buildAiImportPromptTemplate() {
-          return [
-            'あなたは店舗LP（飲食店テンプレ）の入力欄を埋めるリサーチアシスタントです。',
-            '指定店舗について公式サイト・Googleマップ・SNS・口コミ等を調査し、下記「返却JSON」のキーをすべて埋めたうえで、有効なJSONオブジェクト1つだけを返してください。',
-            '説明文・Markdown・コードフェンスは付けないでください。',
-            '',
-            '【必須】すべての項目を出力すること',
-            '- override 内のすべてのキーを省略せず出力する（値が空のキーを省略しない）。',
-            '- 配列は「空配列」にせず、下記の最低件数を満たす。',
-            '  - faqItems: 4件以上（q・a はすべて非空）',
-            '  - cafeMenuTextRows: 6件以上（name は必須。price・description も可能な限り）',
-            '  - sections: 5件（id は半角英数字。推奨順: concept, staff, gallery, menu, access）',
-            '  - heroSlides: 3件（https の画像URL。Unsplash / Pexels / Pixabay 等のフリー素材のみ）',
-            '  - heroSlideStyles: heroSlides と同じ件数。各要素 { "x": 50, "y": 50, "zoom": 100 } のように数値で指定',
-            '  - cafeShopLocations: 1件以上（name・detail・mapUrl は必須。mapUrl は Google マップの埋め込み用URL等、https）',
-            '  - cafeInstagramFeedItems: 4件（imageUrl・postUrl ともに https。画像はフリー素材URL。postUrl は該当店のInstagram投稿URLが分かればそれ、無ければ店舗公式InstagramのプロフィールURL、それも無ければ https://www.instagram.com/ ）',
-            '  - cafeBranchMenuItems: 1件以上（公式PDFやメニューページのURL。無い場合は店舗公式サイトトップ等、実在するhttps URL）',
-            '',
-            '【デモ版・情報源について（写真以外）】',
-            '- 公式に確認できない内容は、推測で断定せず、公開Web・マップ・口コミから取得可能な範囲で補い、それでも不足する場合はプレースホルダーで埋めてよい。',
-            '- その場合、verification.notes の先頭に次の文を必ず含める（一字一句この文から始める）:',
-            '  「現在デモ版のため、写真以外の情報はネットから抽出可能な範囲のみで作成しています。」',
-            '- 続けて、どの項目が推定・要約・プレースホルダーかを簡潔に書く。',
-            '- verification.sourceUrls には参照したURLを最低3件（公式・マップ・口コミサイト等）。',
-            '- verification.unknownFields には、公式確認が取れず推定や仮置きした override のキー名を列挙（該当がなければ空配列）。',
-            '',
-            '【写真・著作権（フリー素材）】',
-            '- 実店舗の写真URLは使わない。ヒーロー・セクション画像・店舗カード画像・Instagram欄の imageUrl はすべてフリー素材（Unsplash / Pexels / Pixabay 等）の直リンクのみ。',
-            '- トップ（ヒーロー）直下に見える本文として subheadline の末尾に、改行のあと次の1行を必ず追記する:',
-            '  「※掲載の写真は著作権の観点から、実店舗の写真ではなくフリー素材サイトの画像を使用しています。」',
-            '- imageUrl を持つ各 section の本文（content）の末尾にも、同じ趣旨の1行を追記する（重複でもよい）。',
-            '- cafeShopLocations[].imageUrl に画像を入れる場合もフリー素材のみ。入れない場合は空文字。',
-            '',
-            '【その他】',
-            '- siteName / headline / footerText 等の文字列フィールドは原則すべて非空。',
-            '- 公式に公開されていない項目（footerLineUrl・footerTwitterUrl・reserveUrl・reserveLabel・canonicalUrl 等）は空文字でよい。その場合 verification.notes に「○○は公式未公開のため空」と一行追記する。',
-            '- ogImageUrl はヒーロー1枚目と同じURLでもよい（https）。',
-            '- cafeReviewCtaText / cafeReviewCtaUrl は、Googleマップのレビュー投稿に繋がる場合のみ埋める。無い場合は空文字（notesに明記）。',
-            '- mapEmbedUrl・cafeFloatingMapUrl・cafeGbPostsEmbedUrl は同一店舗の Google マップ埋め込みURL等で揃える（取得できる場合）。取得できなければ検索で特定できる埋め込みURLを優先し、どうしても無い場合のみ空文字（notesに明記）。',
-            '- footerInstagramUrl と cafeInstagramPermalink は、公式Instagramが分かれば同一URL。無ければ空文字。',
-            '- footerTwitterUrl は公式 X（Twitter）のプロフィール等の https URL。無ければ空文字。',
-            '- cafeVisualGenre は次のいずれか1つだけ（店舗に最も近いもの）: ramen, cafe_coffee, kissaten, izakaya, yakiniku, sushi, yoshoku, teishoku, don_udon_soba, sweets, takeout, other_food。該当が難しければ other_food。',
-            '- ctaHref は #contact または公式予約・問い合わせの https URL。',
-            '- navLabels は「セクション見出し」をカンマ区切りで（例: コンセプト, スタッフ, ギャラリー, メニュー, アクセス）。sections の並びと一致させる。',
-            '',
-            '返却JSONスキーマ（キー名と構造はこのまま。値はすべて埋める）:',
-            '{',
-            '  "nameSuggestion": "ドラフト名候補（80文字以内）",',
-            '  "verification": {',
-            '    "confidence": 0.0,',
-            '    "sourceUrls": ["https://..."],',
-            '    "unknownFields": ["override内のキー名"],',
-            '    "notes": "上記デモ版の定型文から始め、補足を書く"',
-            '  },',
-            '  "override": {',
-            '    "siteName": "",',
-            '    "title": "",',
-            '    "headline": "",',
-            '    "subheadline": "",',
-            '    "footerText": "",',
-            '    "footerAddress": "",',
-            '    "footerPhone": "",',
-            '    "footerInstagramUrl": "",',
-            '    "footerLineUrl": "",',
-            '    "footerTwitterUrl": "",',
-            '    "ctaLabel": "",',
-            '    "ctaHref": "#contact",',
-            '    "navLabels": "",',
-            '    "metaTitle": "",',
-            '    "metaDescription": "",',
-            '    "ogImageUrl": "",',
-            '    "canonicalUrl": "",',
-            '    "keywords": "",',
-            '    "mapEmbedUrl": "",',
-            '    "cafeFloatingMapUrl": "",',
-            '    "cafeReviewCtaText": "",',
-            '    "cafeReviewCtaUrl": "",',
-            '    "cafeGbPostsEmbedUrl": "",',
-            '    "cafeInstagramPermalink": "",',
-            '    "cafeVisualGenre": "other_food",',
-            '    "heroSlides": ["https://...", "https://...", "https://..."],',
-            '    "heroSlideStyles": [{ "x": 50, "y": 50, "zoom": 100 }, { "x": 50, "y": 50, "zoom": 100 }, { "x": 50, "y": 50, "zoom": 100 }],',
-            '    "sections": [',
-            '      { "id": "concept", "title": "", "content": "", "imageUrl": "" },',
-            '      { "id": "staff", "title": "", "content": "", "imageUrl": "" },',
-            '      { "id": "gallery", "title": "", "content": "", "imageUrl": "" },',
-            '      { "id": "menu", "title": "", "content": "", "imageUrl": "" },',
-            '      { "id": "access", "title": "", "content": "", "imageUrl": "" }',
-            '    ],',
-            '    "faqItems": [',
-            '      { "q": "", "a": "" }',
-            '    ],',
-            '    "cafeMenuTextRows": [',
-            '      { "groupLabel": "", "name": "", "price": "", "description": "", "badge": "" }',
-            '    ],',
-            '    "cafeMeo": {',
-            '      "servesCuisine": "",',
-            '      "priceRange": "",',
-            '      "openingHours": [""],',
-            '      "streetAddress": "",',
-            '      "addressLocality": "",',
-            '      "addressRegion": "",',
-            '      "postalCode": ""',
-            '    },',
-            '    "cafeShopLocations": [',
-            '      { "name": "", "detail": "", "mapUrl": "", "imageUrl": "", "reserveUrl": "", "reserveLabel": "" }',
-            '    ],',
-            '    "cafeInstagramFeedItems": [',
-            '      { "imageUrl": "", "postUrl": "" }',
-            '    ],',
-            '    "cafeBranchMenuItems": [',
-            '      { "groupLabel": "", "label": "", "menuUrl": "" }',
-            '    ]',
-            '  }',
-            '}',
-            '',
-            '対象店舗情報（ユーザーが差し替え）:',
-            '- 店舗名: {{STORE_NAME}}',
-            '- 地域: {{AREA}}',
-            '- 業種: {{CATEGORY}}',
-          ].join('\n');
-        }
-
         function extractUrlFromPossiblyMarkdownLink(input) {
           var s = String(input || '').trim();
           if (!s) return '';
@@ -1356,89 +1165,6 @@
             }
           } catch (_) {}
           return s;
-        }
-
-        function deepSanitizeLinks(value) {
-          if (Array.isArray(value)) return value.map(deepSanitizeLinks);
-          if (value && typeof value === 'object') {
-            var out = {};
-            Object.keys(value).forEach(function (k) {
-              out[k] = deepSanitizeLinks(value[k]);
-            });
-            return out;
-          }
-          if (typeof value === 'string') {
-            var u = extractUrlFromPossiblyMarkdownLink(value);
-            return u || value;
-          }
-          return value;
-        }
-
-        function parseAiJsonLenient(raw) {
-          var t = String(raw || '').trim();
-          t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-          try {
-            return JSON.parse(t);
-          } catch (_) {}
-          t = t.replace(/\\([^"\\/bfnrtu])/g, '$1');
-          t = t.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
-          return JSON.parse(t);
-        }
-
-        function normalizeVerification(v) {
-          var out = {
-            confidence: null,
-            sourceUrls: [],
-            unknownFields: [],
-            notes: '',
-          };
-          if (!v || typeof v !== 'object') return out;
-          var c = Number(v.confidence);
-          if (!Number.isNaN(c)) out.confidence = Math.max(0, Math.min(1, c));
-          if (Array.isArray(v.sourceUrls)) {
-            out.sourceUrls = v.sourceUrls
-                .map(function (s) {
-                return extractUrlFromPossiblyMarkdownLink(s);
-              })
-              .filter(function (s) {
-                return /^https?:\/\//i.test(s);
-              })
-              .slice(0, 12);
-          }
-          if (Array.isArray(v.unknownFields)) {
-            out.unknownFields = v.unknownFields
-              .map(function (s) {
-                return String(s || '').trim();
-                })
-                .filter(Boolean)
-              .slice(0, 40);
-          }
-          out.notes = String(v.notes || '').trim().slice(0, 500);
-          return out;
-        }
-
-        function renderAiVerificationReport(verification, ov) {
-          var box = document.getElementById('ai-verify-report');
-          if (!box) return;
-          var v = normalizeVerification(verification);
-          var missing = [];
-          if (!String(ov.siteName || '').trim()) missing.push('siteName');
-          if (!String(ov.headline || '').trim()) missing.push('headline');
-          if (!String(ov.footerAddress || '').trim()) missing.push('footerAddress');
-          if (!Array.isArray(ov.cafeMenuTextRows) || !ov.cafeMenuTextRows.length) missing.push('cafeMenuTextRows');
-          if (!Array.isArray(ov.faqItems) || !ov.faqItems.length) missing.push('faqItems');
-          var lines = [];
-          lines.push('検証レポート');
-          lines.push(
-            '- 信頼度: ' + (v.confidence === null ? '未指定' : Math.round(v.confidence * 100) + '%')
-          );
-          lines.push('- 出典URL数: ' + v.sourceUrls.length + (v.sourceUrls.length ? '（下記）' : '（不足）'));
-          if (v.sourceUrls.length) lines.push('  ' + v.sourceUrls.join('\n  '));
-          lines.push('- AIが不明とした項目: ' + (v.unknownFields.length ? v.unknownFields.join(', ') : 'なし'));
-          lines.push('- 必須寄りの未入力: ' + (missing.length ? missing.join(', ') : 'なし'));
-          if (v.notes) lines.push('- メモ: ' + v.notes);
-          box.textContent = lines.join('\n');
-          box.style.display = 'block';
         }
 
         function escapeHtml(s) {
@@ -1679,8 +1405,55 @@
           });
         }
 
+        /** 保存用 override に、空の meta / og / keywords だけ店名・本文・MEO・ヒーローから補完（既存値は上書きしない） */
+        function deriveSeoIntoOverride(ov) {
+          if (!ov || typeof ov !== 'object') return;
+          var site = String(ov.siteName || '').trim();
+          var title = String(ov.title || '').trim();
+          var head = String(ov.headline || '').trim();
+          var sub = String(ov.subheadline || '').trim();
+          var addr = String(ov.footerAddress || '').trim().replace(/\n/g, ' ');
+          var brand = (title || site || head || '').replace(/\s+/g, ' ').trim();
+          if (!brand) return;
+          var meo = ov.cafeMeo && typeof ov.cafeMeo === 'object' && !Array.isArray(ov.cafeMeo) ? ov.cafeMeo : {};
+          var region = String(meo.addressRegion || '').trim();
+          var locality = String(meo.addressLocality || '').trim();
+          var loc = (region + locality).trim();
+          var tid = resolveWorkerFormBaseTemplateId();
+          var isCafe = tid === 'cafe_1';
+          if (!String(ov.metaTitle || '').trim()) {
+            var line = brand;
+            if (loc && isCafe) line = brand + '｜' + loc;
+            ov.metaTitle = line.slice(0, 120);
+          }
+          if (!String(ov.metaDescription || '').trim()) {
+            var parts = [];
+            if (sub) parts.push(sub);
+            else if (head && head !== brand) parts.push(head);
+            if (addr) parts.push(addr.slice(0, 140));
+            ov.metaDescription = (parts.join('。').trim() || brand + 'のご案内・お店の情報ページです。').slice(0, 320);
+          }
+          if (!String(ov.keywords || '').trim()) {
+            var kws = [brand];
+            if (loc) kws.push(loc);
+            var cuisine = String(meo.servesCuisine || '').trim();
+            if (cuisine) {
+              cuisine.split(/[;；,，、]/).forEach(function (p) {
+                var t = p.trim();
+                if (t) kws.push(t);
+              });
+            }
+            if (isCafe) kws.push('お店');
+            ov.keywords = kws.join(',').slice(0, 500);
+          }
+          if (!String(ov.ogImageUrl || '').trim()) {
+            var hs = Array.isArray(ov.heroSlides) ? ov.heroSlides : [];
+            var u = hs.length ? String(hs[0] || '').trim() : '';
+            if (u && /^https?:\/\//i.test(u)) ov.ogImageUrl = u;
+          }
+        }
+
         function buildOverrideFromForm() {
-          fillEmptySeoFromBasics();
           var heroRows = Array.prototype.map.call(document.querySelectorAll('#f-hero-slides-list .repeat-item'), function (row) {
             return {
               url: row.querySelector('.f-hero-url').value.trim(),
@@ -1818,11 +1591,6 @@
             ctaLabel: document.getElementById('f-ctaLabel').value.trim(),
             ctaHref: document.getElementById('f-ctaHref').value.trim(),
             navLabels: document.getElementById('f-navLabels').value.trim(),
-            metaTitle: document.getElementById('f-metaTitle').value.trim(),
-            metaDescription: document.getElementById('f-metaDescription').value.trim(),
-            ogImageUrl: document.getElementById('f-ogImageUrl').value.trim(),
-            canonicalUrl: document.getElementById('f-canonicalUrl').value.trim(),
-            keywords: document.getElementById('f-keywords').value.trim(),
             footerAddress: document.getElementById('f-footerAddress').value.trim(),
             footerPhone: document.getElementById('f-footerPhone').value.trim(),
             footerInstagramUrl: document.getElementById('f-footerInstagramUrl').value.trim(),
@@ -1847,18 +1615,10 @@
           if (cafeInstagramFeedItems && cafeInstagramFeedItems.length) ov.cafeInstagramFeedItems = cafeInstagramFeedItems;
           if (cafeBranchMenuItems && cafeBranchMenuItems.length) ov.cafeBranchMenuItems = cafeBranchMenuItems;
 
-          var advanced = String(document.getElementById('f-advanced-override-json').value || '').trim();
-          if (advanced) {
-            var advObj = parseJsonOptional(advanced, '高度設定JSON');
-            if (advObj !== undefined) {
-              if (!advObj || typeof advObj !== 'object' || Array.isArray(advObj)) {
-                throw new Error('高度設定JSONはオブジェクト形式にしてください');
-              }
-              Object.keys(advObj).forEach(function (k) {
-                ov[k] = advObj[k];
-              });
-            }
-          }
+          Object.keys(workerExtraOverride || {}).forEach(function (k) {
+            ov[k] = workerExtraOverride[k];
+          });
+          deriveSeoIntoOverride(ov);
           syncMapAndSocialUrlsIntoOverride(ov);
           return ov;
         }
@@ -1873,11 +1633,6 @@
           document.getElementById('f-ctaLabel').value = ov.ctaLabel || '';
           document.getElementById('f-ctaHref').value = ov.ctaHref || '';
           document.getElementById('f-navLabels').value = ov.navLabels || '';
-          document.getElementById('f-metaTitle').value = ov.metaTitle || '';
-          document.getElementById('f-metaDescription').value = ov.metaDescription || '';
-          document.getElementById('f-ogImageUrl').value = ov.ogImageUrl || '';
-          document.getElementById('f-canonicalUrl').value = ov.canonicalUrl || '';
-          document.getElementById('f-keywords').value = ov.keywords || '';
           document.getElementById('f-footerAddress').value = ov.footerAddress || '';
           document.getElementById('f-footerPhone').value = ov.footerPhone || '';
           document.getElementById('f-footerInstagramUrl').value = ov.footerInstagramUrl || '';
@@ -1938,11 +1693,6 @@
             ctaLabel: true,
             ctaHref: true,
             navLabels: true,
-            metaTitle: true,
-            metaDescription: true,
-            ogImageUrl: true,
-            canonicalUrl: true,
-            keywords: true,
             footerAddress: true,
             footerPhone: true,
             footerInstagramUrl: true,
@@ -1969,8 +1719,7 @@
           Object.keys(ov || {}).forEach(function (k) {
             if (!knownKeys[k]) extra[k] = ov[k];
           });
-          document.getElementById('f-advanced-override-json').value = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : '';
-          fillEmptySeoFromBasics();
+          workerExtraOverride = Object.keys(extra).length ? cloneJsonForForm(extra) : {};
           applyWorkerFormTemplateVisibility();
         }
 
@@ -2045,105 +1794,6 @@
           return out;
         }
 
-        /** Gemini 長文抽出結果を現在のフォーム override にマージ（空のキーはベースを維持） */
-        function mergeSectionsByIdForExtract(baseSecs, patchSecs) {
-          baseSecs = Array.isArray(baseSecs) ? cloneJsonForForm(baseSecs) : [];
-          if (!Array.isArray(patchSecs) || !patchSecs.length) return baseSecs;
-          patchSecs.forEach(function (ps) {
-            if (!ps || typeof ps !== 'object') return;
-            var pid = String(ps.id || '').trim();
-            var idx =
-              pid !== ''
-                ? baseSecs.findIndex(function (s) {
-                    return s && String(s.id || '').trim() === pid;
-                  })
-                : -1;
-            if (idx >= 0) {
-              baseSecs[idx] = Object.assign({}, baseSecs[idx], ps);
-            } else if (String(ps.title || '').trim() || String(ps.content || '').trim()) {
-              baseSecs.push(Object.assign({}, ps));
-            }
-          });
-          return baseSecs;
-        }
-
-        /** Gemini が footerText を返さず店名・住所・電話だけ更新したとき、古い © 行を残さない */
-        function refreshFooterTextWhenGeminiOmittedFooter(base, merged, patch) {
-          patch = patch || {};
-          merged = merged || {};
-          if (String(patch.footerText || '').trim()) return merged;
-          var contributed =
-            String(patch.siteName || '').trim() ||
-            String(patch.footerAddress || '').trim() ||
-            String(patch.footerPhone || '').trim();
-          if (!contributed) return merged;
-          var site = String(merged.siteName || '').trim();
-          var addr = String(merged.footerAddress || '').trim();
-          var phone = String(merged.footerPhone || '').trim();
-          if (!site && !addr && !phone) return merged;
-          var y = new Date().getFullYear();
-          merged.footerText = ['© ' + y, site, addr, phone].filter(Boolean).join(' | ');
-          return merged;
-        }
-
-        function mergeExtractPatchIntoOverride(base, patch) {
-          base = cloneJsonForForm(base);
-          patch = deepSanitizeLinks(patch || {});
-          var arrayReplaceWhenNonEmpty = {
-            faqItems: true,
-            cafeMenuTextRows: true,
-            cafeShopLocations: true,
-            cafeBranchMenuItems: true,
-            cafeInstagramFeedItems: true,
-          };
-          Object.keys(patch).forEach(function (k) {
-            if (k === 'heroSlides' || k === 'heroSlideStyles') return;
-            var pv = patch[k];
-            if (k === 'cafeMeo') {
-              if (!pv || typeof pv !== 'object' || Array.isArray(pv)) return;
-              base.cafeMeo = base.cafeMeo || {};
-              Object.keys(pv).forEach(function (mk) {
-                var mv = pv[mk];
-                if (mk === 'openingHours') {
-                  if (Array.isArray(mv) && mv.some(function (x) { return String(x).trim(); })) {
-                    base.cafeMeo.openingHours = mv
-                      .map(function (x) {
-                        return String(x).trim();
-                      })
-                      .filter(Boolean);
-                  }
-                } else if (typeof mv === 'string' && mv.trim()) {
-                  base.cafeMeo[mk] = mv.trim();
-                }
-              });
-              return;
-            }
-            if (k === 'sections') {
-              base.sections = mergeSectionsByIdForExtract(base.sections, pv);
-              return;
-            }
-            if (arrayReplaceWhenNonEmpty[k]) {
-              if (Array.isArray(pv) && pv.length) base[k] = pv;
-              return;
-            }
-            if (pv == null) return;
-            if (typeof pv === 'string') {
-              if (pv.trim()) base[k] = pv;
-              return;
-            }
-            if (Array.isArray(pv)) {
-              if (pv.length) base[k] = pv;
-              return;
-            }
-            if (typeof pv === 'object') {
-              base[k] = Object.assign({}, base[k] || {}, pv);
-              return;
-            }
-            base[k] = pv;
-          });
-          return base;
-        }
-
         function syncMapAndSocialUrlsIntoOverride(ov) {
           if (!ov || typeof ov !== 'object') return;
           var m = String(ov.mapEmbedUrl || '').trim();
@@ -2178,68 +1828,6 @@
           var ig = fig && fig.value ? fig.value.trim() : '';
           if (ig && /^https?:\/\//i.test(ig)) {
             if (cip && !cip.value.trim()) cip.value = ig;
-          }
-        }
-
-        function scheduleSeoAutofillFromBasics() {
-          clearTimeout(seoAutofillTimer);
-          seoAutofillTimer = setTimeout(function () {
-            fillEmptySeoFromBasics();
-          }, 400);
-        }
-
-        /** 空欄のSEOだけ、店名・キャッチ・住所・MEO・トップ写真から埋める（上書きしない） */
-        function fillEmptySeoFromBasics() {
-          var site = document.getElementById('f-siteName').value.trim();
-          var title = document.getElementById('f-title').value.trim();
-          var head = document.getElementById('f-headline').value.trim();
-          var sub = document.getElementById('f-subheadline').value.trim();
-          var addr = document.getElementById('f-footerAddress').value.trim().replace(/\n/g, ' ');
-          var brand = (title || site || head || '').replace(/\s+/g, ' ').trim();
-          if (!brand) return;
-
-          var region = document.getElementById('f-meo-addressRegion').value.trim();
-          var locality = document.getElementById('f-meo-addressLocality').value.trim();
-          var loc = (region + locality).trim();
-          var tid = resolveWorkerFormBaseTemplateId();
-          var isCafe = tid === 'cafe_1';
-
-          var mt = document.getElementById('f-metaTitle');
-          if (mt && !mt.value.trim()) {
-            var line = brand;
-            if (loc && isCafe) line = brand + '｜' + loc;
-            mt.value = line.slice(0, 120);
-          }
-
-          var md = document.getElementById('f-metaDescription');
-          if (md && !md.value.trim()) {
-            var parts = [];
-            if (sub) parts.push(sub);
-            else if (head && head !== brand) parts.push(head);
-            if (addr) parts.push(addr.slice(0, 140));
-            md.value = (parts.join('。').trim() || brand + 'のご案内・お店の情報ページです。').slice(0, 320);
-          }
-
-          var kw = document.getElementById('f-keywords');
-          if (kw && !kw.value.trim()) {
-            var kws = [brand];
-            if (loc) kws.push(loc);
-            var cuisine = document.getElementById('f-meo-servesCuisine').value.trim();
-            if (cuisine) {
-              cuisine.split(/[;；,，、]/).forEach(function (p) {
-                var t = p.trim();
-                if (t) kws.push(t);
-              });
-            }
-            if (isCafe) kws.push('お店');
-            kw.value = kws.join(',').slice(0, 500);
-          }
-
-          var og = document.getElementById('f-ogImageUrl');
-          if (og && !og.value.trim()) {
-            var hu = document.querySelector('#f-hero-slides-list .f-hero-url');
-            var u = hu && hu.value ? hu.value.trim() : '';
-            if (u && /^https?:\/\//i.test(u)) og.value = u;
           }
         }
 
@@ -2442,7 +2030,6 @@
 
         bindAddButtonsOnce();
         fillFormFromOverride({});
-        document.getElementById('ai-import-prompt').value = buildAiImportPromptTemplate();
 
         credFetch(api + '/admin-auth/status')
           .then(function (r) {
@@ -2533,7 +2120,6 @@
           genreEl.onchange = function () {
             applyCafeVisualGenreHeroSlides(this.value || '');
             scheduleLivePreview();
-            scheduleSeoAutofillFromBasics();
           };
         }
 
@@ -2728,136 +2314,6 @@
           }
         };
 
-        document.getElementById('btn-import-docs').onclick = function () {
-          showErr('import-err', '');
-          showErr('import-msg', '');
-          var input = document.getElementById('import-files');
-          var files = Array.prototype.slice.call((input && input.files) || []).slice(0, 4);
-          var textInput = String(document.getElementById('import-text').value || '').trim();
-          if (!files.length && !textInput) {
-            showErr('import-err', '画像/PDFまたは文字入力のどちらかを入れてください。');
-            return;
-          }
-          var maxBytes = 8 * 1024 * 1024;
-          var tooBig = files.find(function (f) {
-            return f.size > maxBytes;
-          });
-          if (tooBig) {
-            showErr('import-err', '8MBを超えるファイルがあります: ' + tooBig.name);
-            return;
-          }
-          var importBtn = document.getElementById('btn-import-docs');
-          setButtonLoading(importBtn, true, '資料を解析中…');
-          showErr('import-msg', '資料を解析中です…（30-60秒程度）');
-          Promise.all(
-            files.map(function (f) {
-              return readFileAsBase64(f).then(function (b64) {
-                return {
-                  name: f.name,
-                  mimeType: f.type || (String(f.name).toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/png'),
-                  data: b64,
-                };
-              });
-            }),
-          )
-            .then(function (payloadFiles) {
-              return credFetch(api + '/template-customizations/extract', {
-                method: 'POST',
-                body: JSON.stringify({ files: payloadFiles, text: textInput }),
-              });
-            })
-            .then(function (r) {
-              return r.json().then(function (j) {
-                return { ok: r.ok, j: j };
-              });
-            })
-            .then(function (x) {
-              if (!x.ok) throw new Error(x.j.error || '抽出に失敗しました');
-              var ov = x.j.override || {};
-              refreshFooterTextWhenGeminiOmittedFooter({}, ov, ov);
-              fillFormFromOverride(ov);
-              if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
-                document.getElementById('draft-name').value = x.j.nameSuggestion;
-              }
-              currentCustomId = null;
-              var linkImp = document.getElementById('f-linked-dashboard');
-              if (linkImp) linkImp.value = '';
-              if (document.getElementById('mode-select').value !== 'new') {
-                document.getElementById('mode-select').value = 'new';
-                document.getElementById('mode-select').dispatchEvent(new Event('change'));
-              }
-              updatePreviewUrl();
-              scheduleLivePreview();
-              showErr('import-msg', '自動入力しました。内容を確認して必要箇所を微調整してください。');
-            })
-            .catch(function (e) {
-              showErr('import-err', e.message || String(e));
-              showErr('import-msg', '');
-            })
-            .finally(function () {
-              setButtonLoading(importBtn, false);
-            });
-        };
-
-        document.getElementById('btn-gemini-free-text').onclick = function () {
-          showErr('gemini-free-err', '');
-          var text = String(document.getElementById('gemini-free-text').value || '').trim();
-          if (!text) {
-            showErr('gemini-free-err', '文章を貼り付けてください。');
-            return;
-          }
-          var baseOv;
-          try {
-            baseOv = buildOverrideFromForm();
-          } catch (e) {
-            showErr('gemini-free-err', e.message || String(e));
-            return;
-          }
-          var prevGenre = String((baseOv.cafeVisualGenre || '').trim());
-          var btn = document.getElementById('btn-gemini-free-text');
-          setButtonLoading(btn, true, 'Gemini 解析中…');
-          showErr('import-msg', 'Gemini で解析中です…（30〜60秒程度）');
-          credFetch(api + '/template-customizations/extract-from-text', {
-            method: 'POST',
-            body: JSON.stringify({ text: text }),
-          })
-            .then(function (r) {
-              return r.json().then(function (j) {
-                return { ok: r.ok, j: j };
-              });
-            })
-            .then(function (x) {
-              if (!x.ok) throw new Error(x.j.error || '抽出に失敗しました');
-              var patch = x.j.override && typeof x.j.override === 'object' ? x.j.override : {};
-              delete patch.heroSlides;
-              delete patch.heroSlideStyles;
-              var merged = mergeExtractPatchIntoOverride(baseOv, patch);
-              refreshFooterTextWhenGeminiOmittedFooter(baseOv, merged, patch);
-              syncMapAndSocialUrlsIntoOverride(merged);
-              fillFormFromOverride(merged);
-              if (x.j.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
-                document.getElementById('draft-name').value = String(x.j.nameSuggestion).slice(0, 80);
-              }
-              if (resolveWorkerFormBaseTemplateId() === 'cafe_1') {
-                var g = String((merged.cafeVisualGenre || '').trim());
-                if (g && g !== prevGenre) {
-                  applyCafeVisualGenreHeroSlides(g);
-                }
-              }
-              syncRelatedUrlFieldsFromInputs();
-              scheduleLivePreview();
-              scheduleSeoAutofillFromBasics();
-              showErr('import-msg', 'Gemini の取り込みが完了しました。空だった項目はそのままです。内容を確認してください。');
-            })
-            .catch(function (e) {
-              showErr('gemini-free-err', e.message || String(e));
-              showErr('import-msg', '');
-            })
-            .finally(function () {
-              setButtonLoading(btn, false);
-            });
-        };
-
         function applyMapEmbedPasteWorker() {
           showErr('map-paste-err', '');
           showErr('save-err', '');
@@ -2884,7 +2340,6 @@
               document.getElementById('f-mapEmbedUrl').value = u;
               syncRelatedUrlFieldsFromInputs();
               scheduleLivePreview();
-              scheduleSeoAutofillFromBasics();
               showErr('import-msg', 'Googleマップの埋め込みURLを設定しました。');
             })
             .catch(function (e) {
@@ -2901,58 +2356,20 @@
           mapPasteTimer = setTimeout(applyMapEmbedPasteWorker, 450);
         });
 
-        document.getElementById('btn-copy-ai-prompt').onclick = function () {
-          var t = document.getElementById('ai-import-prompt').value || '';
-          navigator.clipboard.writeText(t).then(
-            function () {
-              showErr('ai-json-err', '');
-              showErr('ai-json-msg', 'AI向けテンプレをコピーしました。');
-            },
-            function () {
-              window.prompt('コピー:', t);
-            },
-          );
-        };
-
-        document.getElementById('btn-apply-ai-json').onclick = function () {
-          showErr('ai-json-err', '');
-          showErr('ai-json-msg', '');
-          var report = document.getElementById('ai-verify-report');
-          if (report) report.style.display = 'none';
-          var raw = String(document.getElementById('ai-import-json').value || '').trim();
-          if (!raw) {
-            showErr('ai-json-err', 'AI出力JSONを貼り付けてください。');
-            return;
+        document.getElementById('btn-toggle-form-main').onclick = function () {
+          var box = document.getElementById('form-main-collapsible');
+          var btn = document.getElementById('btn-toggle-form-main');
+          if (!box || !btn) return;
+          var open = box.style.display !== 'none';
+          if (open) {
+            box.style.display = 'none';
+            btn.setAttribute('aria-expanded', 'false');
+            btn.textContent = '本文・画像などを表示';
+          } else {
+            box.style.display = 'block';
+            btn.setAttribute('aria-expanded', 'true');
+            btn.textContent = '本文・画像などを隠す';
           }
-          var parsed;
-          try {
-            parsed = parseAiJsonLenient(raw);
-          } catch (e) {
-            showErr('ai-json-err', 'JSONが不正です: ' + (e.message || e));
-            return;
-          }
-          parsed = deepSanitizeLinks(parsed);
-          var ov = parsed && parsed.override && typeof parsed.override === 'object' ? parsed.override : parsed;
-          if (!ov || typeof ov !== 'object') {
-            showErr('ai-json-err', 'override オブジェクトが見つかりません。');
-            return;
-          }
-          refreshFooterTextWhenGeminiOmittedFooter({}, ov, ov);
-          fillFormFromOverride(ov);
-          if (parsed.nameSuggestion && !document.getElementById('draft-name').value.trim()) {
-            document.getElementById('draft-name').value = String(parsed.nameSuggestion).slice(0, 80);
-          }
-          currentCustomId = null;
-          var linkAi = document.getElementById('f-linked-dashboard');
-          if (linkAi) linkAi.value = '';
-          if (document.getElementById('mode-select').value !== 'new') {
-            document.getElementById('mode-select').value = 'new';
-            document.getElementById('mode-select').dispatchEvent(new Event('change'));
-          }
-          updatePreviewUrl();
-          scheduleLivePreview();
-          renderAiVerificationReport(parsed.verification || {}, ov);
-          showErr('ai-json-msg', 'AI出力をフォームへ反映しました。微調整して保存してください。');
         };
 
         document.getElementById('btn-save').onclick = function () {
@@ -3207,24 +2624,15 @@
           }
         };
 
-        document.getElementById('btn-seo-autofill').onclick = function () {
-          fillEmptySeoFromBasics();
-          showErr('save-err', '');
-          showErr('save-msg', '空のSEO欄に下書きを入れました。必要なら上書きしてください。');
-          scheduleLivePreview();
-        };
-
         var editorPane = document.getElementById('editor-pane');
         if (editorPane) {
           editorPane.addEventListener('input', function () {
             scheduleLivePreview();
             syncRelatedUrlFieldsFromInputs();
-            scheduleSeoAutofillFromBasics();
           });
           editorPane.addEventListener('change', function () {
             scheduleLivePreview();
             syncRelatedUrlFieldsFromInputs();
-            scheduleSeoAutofillFromBasics();
           });
         }
         ;['f-mapEmbedUrl', 'f-footerInstagramUrl'].forEach(function (fid) {

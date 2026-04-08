@@ -429,11 +429,36 @@
       .phase-detail-host > .muted {
         padding: 12px 4px;
       }
+      .outreach-sticky-nav {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 1rem;
+        margin: 0 -1rem;
+        background: rgba(8, 15, 26, 0.92);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--phase-line, #2a3b52);
+      }
+      .outreach-sticky-nav a.back {
+        color: #7dd3fc;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .outreach-sticky-nav a.back:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
-    <div class="app-head">
+    <nav class="outreach-sticky-nav" aria-label="ページ内ナビ">
       <a class="back" href="/">← 運営トップ</a>
+      <a href="/admin/template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト編集</a>
+    </nav>
+    <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
         案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。区分・検索の表示・各店のプルダウンは<strong>次の7種類だけ</strong>です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
