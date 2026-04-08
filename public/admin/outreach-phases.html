@@ -455,8 +455,8 @@
   </head>
   <body>
     <nav class="outreach-sticky-nav" aria-label="ページ内ナビ">
-      <a class="back" href="/">← 運営トップ</a>
-      <a href="/admin/template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト編集</a>
+      <a class="back" href="../">← 運営トップ</a>
+      <a href="./template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト編集</a>
     </nav>
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
@@ -1620,11 +1620,7 @@
         function templateWorkerEditUrl(customizationId) {
           var cid = String(customizationId || '').trim();
           if (!cid) return '';
-          return (
-            window.location.origin +
-            '/admin/template-worker.html?id=' +
-            encodeURIComponent(cid)
-          );
+          return './template-worker.html?id=' + encodeURIComponent(cid);
         }
 
         function renderInstagramFooterBlock(container, item) {

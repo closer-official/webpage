@@ -68,6 +68,7 @@ import {
 } from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { ensureDashboardForWorkerDraft } from './dashboardFromWorkerDraft.js';
+import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
 import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
@@ -1198,6 +1199,27 @@ app.post('/api/style-reference/extract', async (req, res) => {
 app.get('/api/template-customizations', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   res.json(await store.getTemplateCustomizations());
+});
+
+/** 店名（トップの店舗名）＋フッター住所の重複ヒント（保存前確認用） */
+app.post('/api/template-customizations/duplicate-hint', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const body = req.body || {};
+  try {
+    const customizations = await store.getTemplateCustomizations();
+    const dashboardItems = await store.getDashboard();
+    const hits = findDuplicateDraftHints({
+      siteName: String(body.siteName || ''),
+      footerAddress: String(body.footerAddress || ''),
+      excludeCustomizationId: String(body.excludeCustomizationId || ''),
+      customizations,
+      dashboardItems,
+    });
+    res.json({ ok: true, hits });
+  } catch (e) {
+    console.error('[template-customizations/duplicate-hint]', e);
+    res.status(500).json({ error: e?.message || 'duplicate-hint failed' });
+  }
 });
 
 /** cafe_1 基本情報のみモード：ジャンル別の固定 override ひな型（プレビュー用） */

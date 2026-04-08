@@ -376,14 +376,69 @@
         border-radius: 8px;
         line-height: 1.45;
       }
+      .tw-dup-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      .tw-dup-overlay.is-open {
+        display: flex;
+      }
+      .tw-dup-dialog {
+        max-width: 520px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: auto;
+        background: #121a2e;
+        border: 1px solid #38bdf8;
+        border-radius: 14px;
+        padding: 1.1rem 1.2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      }
+      .tw-dup-dialog h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1rem;
+        color: #7dd3fc;
+      }
+      .tw-dup-dialog > p {
+        margin: 0 0 10px;
+        font-size: 0.82rem;
+        color: #b8c5d6;
+        line-height: 1.5;
+      }
+      .tw-dup-hits {
+        list-style: none;
+        margin: 0 0 12px;
+        padding: 0;
+        font-size: 0.78rem;
+      }
+      .tw-dup-hits li {
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        background: #0f172a;
+        border-radius: 8px;
+        border: 1px solid #2a3b52;
+      }
+      .tw-dup-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
     </style>
   </head>
   <body>
     <header class="tw-fixed-nav" role="banner">
       <nav class="tw-fixed-nav__inner" aria-label="管理メニュー">
-        <a href="/" class="btn" style="display: inline-flex; border-color: #2a3b52; background: #121a2e">← 運営トップ</a>
-        <a href="/admin/template-hub.html" class="btn" style="display: inline-flex">テンプレ・ギャラリーハブ</a>
-        <a href="/admin/outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
+        <a href="../" class="btn" style="display: inline-flex; border-color: #2a3b52; background: #121a2e">← 運営トップ</a>
+        <a href="./template-hub.html" class="btn" style="display: inline-flex">テンプレ・ギャラリーハブ</a>
+        <a href="./outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
       </nav>
     </header>
     <div class="app-head">
@@ -742,6 +797,27 @@
       </button>
     </div>
 
+      </div>
+    </div>
+
+    <div
+      id="tw-dup-overlay"
+      class="tw-dup-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tw-dup-title"
+      aria-hidden="true"
+    >
+      <div class="tw-dup-dialog">
+        <h3 id="tw-dup-title">似た店名・住所のデータがあります</h3>
+        <p>
+          判定は<strong>店名（トップ表示）</strong>と<strong>フッター住所</strong>を元にしています。業種などの汎用語や、「東京都」だけの一致は除外しています。過去に作成済みの可能性があります。
+        </p>
+        <ul id="tw-dup-hits" class="tw-dup-hits"></ul>
+        <div class="tw-dup-actions">
+          <button type="button" class="btn primary" id="tw-dup-continue">別店舗のため保存を続ける</button>
+          <button type="button" class="btn" id="tw-dup-cancel">保存をやめる</button>
+        </div>
       </div>
     </div>
 
@@ -2559,29 +2635,67 @@
           }
         };
 
-        document.getElementById('btn-save').onclick = function () {
-          showErr('save-err', '');
-          showErr('save-msg', '');
-          var override;
-          try {
-            override = buildOverrideFromForm();
-          } catch (e) {
-            showErr('save-err', e.message || String(e));
-            return;
+        function openTwDuplicateModal(hits, onContinue) {
+          var overlay = document.getElementById('tw-dup-overlay');
+          var list = document.getElementById('tw-dup-hits');
+          var btnCont = document.getElementById('tw-dup-continue');
+          var btnCancel = document.getElementById('tw-dup-cancel');
+          list.innerHTML = '';
+          hits.forEach(function (h) {
+            var li = document.createElement('li');
+            var src = h.source === 'customization' ? '保存済みドラフト' : '送付・フェーズ案件';
+            var line = document.createElement('div');
+            line.textContent = src + ': ' + (h.draftName || h.id);
+            li.appendChild(line);
+            var sub = document.createElement('div');
+            sub.style.cssText = 'margin-top:6px;color:#8b9cb3;font-size:0.72rem;line-height:1.4;';
+            sub.textContent = '店名: ' + (h.siteName || '—') + ' / 住所: ' + (h.footerAddress || '—');
+            li.appendChild(sub);
+            var editId =
+              h.source === 'customization'
+                ? h.id
+                : String(h.linkedTemplateCustomizationId || '').trim();
+            if (editId) {
+              var a = document.createElement('a');
+              a.href = './template-worker.html?id=' + encodeURIComponent(editId);
+              a.target = '_blank';
+              a.rel = 'noopener noreferrer';
+              a.className = 'btn small';
+              a.style.marginTop = '6px';
+              a.style.display = 'inline-flex';
+              a.textContent = 'このドラフトを別タブで開く';
+              li.appendChild(a);
+            } else if (h.source === 'dashboard') {
+              var ao = document.createElement('a');
+              ao.href = './outreach-phases.html?v=7phase';
+              ao.target = '_blank';
+              ao.rel = 'noopener noreferrer';
+              ao.className = 'btn small';
+              ao.style.marginTop = '6px';
+              ao.style.display = 'inline-flex';
+              ao.textContent = '送付・フェーズ管理を開く';
+              li.appendChild(ao);
+            }
+            list.appendChild(li);
+          });
+          overlay.classList.add('is-open');
+          overlay.setAttribute('aria-hidden', 'false');
+          function close() {
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            btnCont.onclick = null;
+            btnCancel.onclick = null;
           }
-          var name = document.getElementById('draft-name').value.trim();
-          if (!name) {
-            showErr('save-err', 'ドラフト名を入れてください。');
-            return;
-          }
+          btnCont.onclick = function () {
+            close();
+            onContinue();
+          };
+          btnCancel.onclick = function () {
+            close();
+          };
+        }
 
-          var linkedDashId = String((document.getElementById('f-linked-dashboard') || {}).value || '').trim();
-
-          if (document.getElementById('mode-select').value === 'edit' && !currentCustomId) {
-            showErr('save-err', '既存カスタムを選び「フォームに読み込む」を押すか、新規モードで保存してください。');
-            return;
-          }
-
+        function runWorkerSaveWithPayload(override, name, linkedDashId) {
           var saveBtn = document.getElementById('btn-save');
           var workerSaveBtn = document.getElementById('btn-worker-save');
           function endSaveLoading() {
@@ -2680,6 +2794,58 @@
               })
               .finally(endSaveLoading);
           }
+        }
+
+        document.getElementById('btn-save').onclick = function () {
+          showErr('save-err', '');
+          showErr('save-msg', '');
+          var override;
+          try {
+            override = buildOverrideFromForm();
+          } catch (e) {
+            showErr('save-err', e.message || String(e));
+            return;
+          }
+          var name = document.getElementById('draft-name').value.trim();
+          if (!name) {
+            showErr('save-err', 'ドラフト名を入れてください。');
+            return;
+          }
+
+          var linkedDashId = String((document.getElementById('f-linked-dashboard') || {}).value || '').trim();
+
+          if (document.getElementById('mode-select').value === 'edit' && !currentCustomId) {
+            showErr('save-err', '既存カスタムを選び「フォームに読み込む」を押すか、新規モードで保存してください。');
+            return;
+          }
+
+          credFetch(api + '/template-customizations/duplicate-hint', {
+            method: 'POST',
+            body: JSON.stringify({
+              siteName: override.siteName || '',
+              footerAddress: override.footerAddress || '',
+              excludeCustomizationId: currentCustomId || '',
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || '重複確認に失敗しました');
+              var hits = x.j.hits || [];
+              if (hits.length) {
+                openTwDuplicateModal(hits, function () {
+                  runWorkerSaveWithPayload(override, name, linkedDashId);
+                });
+              } else {
+                runWorkerSaveWithPayload(override, name, linkedDashId);
+              }
+            })
+            .catch(function (e) {
+              showErr('save-err', e.message || String(e));
+            });
         };
 
         document.getElementById('f-linked-dashboard').addEventListener('change', function () {
@@ -2765,12 +2931,13 @@
         document.getElementById('btn-mailto').onclick = function () {
           var url = document.getElementById('preview-url-text').textContent.trim();
           var name = document.getElementById('draft-name').value.trim() || '店舗ドラフト';
+          var editBase = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
           var body =
             'プレビューURL（社内確認用）:\n' +
             url +
             '\n\n---\n編集画面: ' +
-            window.location.origin +
-            '/admin/template-worker.html';
+            editBase +
+            'template-worker.html';
           window.location.href =
             'mailto:?subject=' + encodeURIComponent('[店舗ドラフト] ' + name) + '&body=' + encodeURIComponent(body);
         };
