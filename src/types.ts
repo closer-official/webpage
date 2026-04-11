@@ -208,6 +208,7 @@ export type StyleId =
   | 'apparel'            // 10. アパレル
   | 'event'              // 11. イベント
   | 'ramen'              // 12. ラーメン
+  | 'ramen_2'            // 12b. ラーメン弐（クイック情報バー・SNS・buildHtml ビルトイン）
   | 'academy_lp'         // 13. 高CVセールスLP
   | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
   | 'gym_personal_neon' // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
