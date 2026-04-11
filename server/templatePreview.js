@@ -529,6 +529,60 @@ export function renderTemplatePreview(templateId, customization = null, options 
       footerInstagramUrl: 'https://www.instagram.com/',
       footerLineUrl: 'https://line.me/',
     };
+  } else if (id === 'ramen_2') {
+    content = {
+      siteName: '麺処 あさひ',
+      title: '麺処 あさひ',
+      headline: '毎日通いたくなる、一杯。',
+      subheadline: '鶏ガラと豚骨を長時間煮込んだ清湯スープ。毎朝仕込む自家製麺で、ほっとする時間をどうぞ。',
+      ctaLabel: 'メニューを見る',
+      ctaHref: '#menu',
+      ramen2Hours: '11:00〜15:00 / 18:00〜22:00（L.O. 21:30）',
+      ramen2Closed: '毎週火曜日',
+      ramen2Station: '〇〇駅 北口 徒歩3分',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      catalogImages: [
+        'https://images.pexels.com/photos/8969237/pexels-photo-8969237.jpeg?auto=compress&cs=tinysrgb&w=600',
+        'https://images.pexels.com/photos/6249499/pexels-photo-6249499.jpeg?auto=compress&cs=tinysrgb&w=600',
+        'https://images.pexels.com/photos/884600/pexels-photo-884600.jpeg?auto=compress&cs=tinysrgb&w=600',
+        'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=600',
+        'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=600',
+        'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600',
+      ],
+      priceRows: [
+        { name: '醤油らーめん', price: '¥900' },
+        { name: '塩らーめん', price: '¥900' },
+        { name: 'つけ麺（並）', price: '¥980' },
+        { name: '味噌らーめん', price: '¥950' },
+        { name: '辛味噌らーめん', price: '¥1,000' },
+        { name: '替え玉', price: '¥150' },
+      ],
+      sections: [
+        {
+          id: 'menu',
+          title: 'メニュー',
+          content: '人気の定番から季節限定まで、丁寧に仕込んだ一杯をご用意しています。替え玉・トッピングもどうぞ。',
+        },
+        {
+          id: 'concept',
+          title: 'こだわり',
+          content:
+            '鶏ガラと豚骨を長時間煮込んだ清湯スープ。毎朝仕込む自家製麺。素材の味を活かした丁寧な一杯です。\n\n添加物は一切使用せず、毎日作り置きなしで提供しています。スープが無くなり次第終了となりますので、お早めにどうぞ。',
+          imageUrl: 'https://images.pexels.com/photos/8969237/pexels-photo-8969237.jpeg?auto=compress&cs=tinysrgb&w=800',
+        },
+        {
+          id: 'access',
+          title: '営業情報・アクセス',
+          content: '東京都〇〇区〇〇 1-2-3\n〇〇駅 北口 徒歩3分\n\n営業時間：11:00〜15:00 / 18:00〜22:00（L.O. 21:30）\n定休日：毎週火曜日\n\nお支払い：現金・各種クレジットカード・PayPay',
+        },
+      ],
+      footerInstagramUrl: 'https://www.instagram.com/',
+      footerTwitterUrl: 'https://x.com/',
+      footerTiktokUrl: 'https://www.tiktok.com/',
+      footerText: `© ${now} 麺処 あさひ`,
+      footerAddress: '東京都〇〇区〇〇 1-2-3',
+      footerPhone: '03-XXXX-XXXX',
+    };
   } else {
     content = {
       siteName: name,
