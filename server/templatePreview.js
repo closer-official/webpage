@@ -29,14 +29,13 @@ export const EXCLUDED_FROM_TEMPLATE_CATALOG_IDS = new Set(['studio_blush_editori
 /**
  * @param {unknown[]} customizations
  * @param {{ forPublicSelection?: boolean, galleryDraftBuiltinIds?: Set<string>, includeCatalogExcluded?: boolean }} [options]
- *   forPublicSelection=true … カスタムの draft 非表示 + galleryDraftBuiltinIds に含まれるビルトインを非表示（公開ギャラリー・ヒアリング）
+ *   forPublicSelection=true … カスタムの status=draft のみ非表示。ビルトインは常に一覧に含める（プレビュー直URL・ヒアリングで隠れないようにする）。
+ *   galleryDraftBuiltinIds … 互換のため受け取るが、ビルトイン一覧からは除外しない（下書き表示は /api/admin/template-catalog の galleryDraft のみ）。
  *   includeCatalogExcluded=true … EXCLUDED_FROM_TEMPLATE_CATALOG_IDS を一覧に含める（findTemplateCandidate・プレビュー解決用）
  */
 export function getTemplateCandidates(customizations = [], options = {}) {
   const forPublic = options.forPublicSelection !== false;
   const includeCatalogExcluded = options.includeCatalogExcluded === true;
-  const galleryDraftSet =
-    options.galleryDraftBuiltinIds instanceof Set ? options.galleryDraftBuiltinIds : null;
   const custom = (Array.isArray(customizations) ? customizations : [])
     .filter((c) => {
       if (!forPublic) return true;
@@ -54,10 +53,7 @@ export function getTemplateCandidates(customizations = [], options = {}) {
       status: c.status || 'published',
       kind: c.blueprint ? 'blueprint' : 'skin',
     }));
-  let builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
-  if (forPublic && galleryDraftSet && galleryDraftSet.size > 0) {
-    builtin = builtin.filter((t) => !galleryDraftSet.has(t.id));
-  }
+  const builtin = TEMPLATE_CANDIDATES.map((t) => ({ ...t, baseTemplateId: t.id, isCustom: false }));
   const merged = [...builtin, ...custom];
   if (includeCatalogExcluded) return merged;
   return merged.filter((c) => {

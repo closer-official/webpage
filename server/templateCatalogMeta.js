@@ -49,6 +49,12 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 85,
     tags: ['wiki-sauna', '湯環', 'TOWAN', 'サウナ', 'オリジナル', '記事'],
   }),
+  ramen_2: Object.freeze({
+    category: '飲食・ラーメン',
+    categories: ['飲食', 'ラーメン', '店舗', 'SNS'],
+    popularity: 89,
+    tags: ['ラーメン', 'ramen_2', '麺', 'メニュー写真', 'クイック情報', 'Instagram', 'LINE', 'TikTok'],
+  }),
 });
 
 function simpleHash(str) {

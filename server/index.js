@@ -1122,8 +1122,9 @@ function templatePreviewPublicHandler(req, res) {
     ? `${previewOrigin}/api/template-preview/${encodeURIComponent(templateId)}`
     : '';
 
-  Promise.all([store.getTemplateCustomizations(), store.getGalleryDraftBuiltins()])
-    .then(([customs, draftRec]) => {
+  store
+    .getTemplateCustomizations()
+    .then((customs) => {
       const candidate = findTemplateCandidate(templateId, customs);
       const notFound = () => {
         const msg = 'Template not found';
@@ -1135,9 +1136,6 @@ function templatePreviewPublicHandler(req, res) {
         return res.send(msg);
       };
       if (!candidate) return notFound();
-      const draftSet = new Set(Array.isArray(draftRec?.draftBuiltinIds) ? draftRec.draftBuiltinIds : []);
-      const isGalleryDraftBuiltin = !candidate.isCustom && draftSet.has(candidate.id);
-      if (isGalleryDraftBuiltin && adminAuthEnabled() && !isAdminAuthenticated(req)) return notFound();
 
       const baseId = candidate.baseTemplateId || candidate.id;
       const html = renderTemplatePreview(baseId, candidate.customization || null, {

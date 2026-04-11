@@ -439,6 +439,7 @@ export function renderTemplateGalleryPage() {
     '法人・相談': 'Business · consultation',
     'オリジナル・ナレッジ': 'Original · knowledge layout',
     'ウェルネス・サウナ（wiki）': 'Wellness · sauna wiki',
+    '飲食・ラーメン': 'Food & dining · ramen',
     '参考デザイン': 'Reference designs',
     'カスタムテンプレート': 'Custom templates',
     'その他': 'Other',
