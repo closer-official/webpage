@@ -602,9 +602,21 @@
           >X（Twitter）（フッターアイコン）URL
           <input type="url" id="f-footerTwitterUrl" placeholder="https://x.com/… または https://twitter.com/…"
         /></label>
+        <label>TikTok URL <input type="url" id="f-footerTiktokUrl" placeholder="https://www.tiktok.com/@…" /></label>
       </div>
 
       <div id="form-main-collapsible" style="display: none">
+
+      <div class="tw-form-block" data-tw-for="ramen_2">
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #ffd166">ラーメン弐：クイック情報バー</h3>
+        <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 10px; line-height: 1.45">
+          ヒーロー画像のすぐ下に表示される黒帯のバーです。営業時間・定休日・最寄り駅など、来店に必要な情報を手短に入れてください。
+        </p>
+        <label>営業時間 <input type="text" id="f-ramen2Hours" placeholder="11:00〜22:00（L.O. 21:30）" /></label>
+        <label>定休日 <input type="text" id="f-ramen2Closed" placeholder="毎週火曜日" /></label>
+        <label>最寄り駅・アクセス <input type="text" id="f-ramen2Station" placeholder="〇〇駅 北口 徒歩3分" /></label>
+      </div>
+
       <div class="tw-form-block" data-tw-for="cafe_1">
         <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
           入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
@@ -1195,7 +1207,13 @@
             }
             if (f === 'non_cafe_1') {
               el.classList.toggle('tw-hidden', !explicitEmbed);
+              return;
             }
+            if (f === 'ramen_2') {
+              el.classList.toggle('tw-hidden', tid !== 'ramen_2');
+              return;
+            }
+            el.classList.add('tw-hidden');
           });
           var badge = document.getElementById('tw-active-template-hint');
           if (badge) {
@@ -1210,6 +1228,9 @@
                 '表示中: ' +
                 tid +
                 '（固定HTML埋め込み型）。画面本体はワークスペースのデザイン優先。名前・キャッチ・フッター文・SEO・高度JSONを編集します。';
+            } else if (tid === 'ramen_2') {
+              badge.textContent =
+                '表示中: ラーメン弐。クイック情報バー（営業時間・定休日・最寄り駅）・メニュー写真グリッド・Googleマップ・Instagram/X/TikTok対応。';
             } else {
               badge.textContent =
                 '表示中: ' + tid + '。ビルトイン以外のベースでは、cafe_1 専用以外の項目もフォームで触れます（必要なら高度JSONで補完）。';
@@ -1702,6 +1723,10 @@
             footerInstagramUrl: document.getElementById('f-footerInstagramUrl').value.trim(),
             footerLineUrl: document.getElementById('f-footerLineUrl').value.trim(),
             footerTwitterUrl: document.getElementById('f-footerTwitterUrl').value.trim(),
+            footerTiktokUrl: document.getElementById('f-footerTiktokUrl').value.trim(),
+            ramen2Hours: (document.getElementById('f-ramen2Hours') || {value:''}).value.trim(),
+            ramen2Closed: (document.getElementById('f-ramen2Closed') || {value:''}).value.trim(),
+            ramen2Station: (document.getElementById('f-ramen2Station') || {value:''}).value.trim(),
             mapEmbedUrl: document.getElementById('f-mapEmbedUrl').value.trim(),
             cafeFloatingMapUrl: document.getElementById('f-cafeFloatingMapUrl').value.trim(),
             cafeReviewCtaText: document.getElementById('f-cafeReviewCtaText').value.trim(),
@@ -1744,6 +1769,10 @@
           document.getElementById('f-footerInstagramUrl').value = ov.footerInstagramUrl || '';
           document.getElementById('f-footerLineUrl').value = ov.footerLineUrl || '';
           document.getElementById('f-footerTwitterUrl').value = ov.footerTwitterUrl || '';
+          document.getElementById('f-footerTiktokUrl').value = ov.footerTiktokUrl || '';
+          var r2h = document.getElementById('f-ramen2Hours'); if (r2h) r2h.value = ov.ramen2Hours || '';
+          var r2c = document.getElementById('f-ramen2Closed'); if (r2c) r2c.value = ov.ramen2Closed || '';
+          var r2s = document.getElementById('f-ramen2Station'); if (r2s) r2s.value = ov.ramen2Station || '';
           document.getElementById('f-mapEmbedUrl').value = ov.mapEmbedUrl || '';
           document.getElementById('f-cafeFloatingMapUrl').value = ov.cafeFloatingMapUrl || '';
           document.getElementById('f-cafeReviewCtaText').value = ov.cafeReviewCtaText || '';
@@ -1804,6 +1833,10 @@
             footerInstagramUrl: true,
             footerLineUrl: true,
             footerTwitterUrl: true,
+            footerTiktokUrl: true,
+            ramen2Hours: true,
+            ramen2Closed: true,
+            ramen2Station: true,
             mapEmbedUrl: true,
             cafeFloatingMapUrl: true,
             cafeReviewCtaText: true,
@@ -1843,6 +1876,10 @@
             footerInstagramUrl: c.footerInstagramUrl || '',
             footerLineUrl: c.footerLineUrl || '',
             footerTwitterUrl: c.footerTwitterUrl || '',
+            footerTiktokUrl: c.footerTiktokUrl || '',
+            ramen2Hours: c.ramen2Hours || '',
+            ramen2Closed: c.ramen2Closed || '',
+            ramen2Station: c.ramen2Station || '',
             mapEmbedUrl: c.mapEmbedUrl || '',
             ctaLabel: c.ctaLabel || '',
             ctaHref: c.ctaHref || '',

@@ -151,6 +151,12 @@ const DEFAULT_NAV = {
     { label: 'アクセス', href: '#access' },
     { label: 'お申し込み', href: '#contact' },
   ],
+  ramen_2: [
+    { label: 'メニュー', href: '#menu' },
+    { label: 'こだわり', href: '#concept' },
+    { label: '営業情報', href: '#access' },
+    { label: 'SNS', href: '#sns' },
+  ],
   ramen: [
     { label: 'こだわり', href: '#concept' },
     { label: 'お品書き', href: '#menu' },
@@ -204,6 +210,7 @@ const DEFAULT_CTA = {
   izakaya: { label: 'ご予約', href: '#contact' },
   pet_salon: { label: 'ご予約', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
+  ramen_2: { label: 'メニューを見る', href: '#menu' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
   wiki_ensyuritsu: { label: '相談する', href: '#contact' },
@@ -226,6 +233,7 @@ const defaultHeroImages = {
   apparel: 'https://images.unsplash.com/photo-1558769132-cb1aea3c5f40?auto=format&fit=crop&w=1200',
   event: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
   ramen: 'https://images.unsplash.com/photo-1569718212165-3a2853992c38?auto=format&fit=crop&w=1200',
+  ramen_2: 'https://images.pexels.com/photos/8969237/pexels-photo-8969237.jpeg?auto=compress&cs=tinysrgb&w=1400',
   navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
   wiki_ensyuritsu: 'https://images.unsplash.com/photo-1589829547916-cbfea2230cfe?auto=format&fit=crop&w=1400',
   wiki_sauna: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
@@ -391,8 +399,22 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
   const hasFooterCols = !!(content.footerAddress || content.footerPhone || content.footerEmail);
   const gymFooterSns = content.gymFooterSns ?? [];
   const gymHeroBadgeForFooter = content.gymHeroBadge ?? '';
+  const r2IgUrl = String(content.footerInstagramUrl || '').trim();
+  const r2TwUrl = String(content.footerTwitterUrl || '').trim();
+  const r2TtUrl = String(content.footerTiktokUrl || '').trim();
   const footerHtml =
-    tid === 'gym_yoga'
+    tid === 'ramen_2'
+      ? `<footer>
+    <div class="r2-footer-inner">
+      <p class="footer-brand">${escapeHtml(content.siteName)}</p>
+      ${content.footerAddress ? `<p class="footer-address">${escapeHtml(content.footerAddress)}</p>` : ''}
+      ${content.footerPhone ? `<p><a href="tel:${escapeHtml(String(content.footerPhone).replace(/\s/g, ''))}" class="footer-link">${escapeHtml(content.footerPhone)}</a></p>` : ''}
+      ${content.footerText ? `<p>${escapeHtml(content.footerText)}</p>` : ''}
+      ${(r2IgUrl || r2TwUrl || r2TtUrl) ? `<div class="r2-footer-sns">${r2IgUrl ? `<a href="${escapeHtml(r2IgUrl)}" class="r2-footer-sns-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/social-icons/instagram.png" alt="" width="22" height="22" loading="lazy" decoding="async" style="border-radius:4px;display:block;"></a>` : ''}${r2TwUrl ? `<a href="${escapeHtml(r2TwUrl)}" class="r2-footer-sns-link" target="_blank" rel="noopener noreferrer" aria-label="X（旧Twitter）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="display:block;"><path fill="#fff" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : ''}${r2TtUrl ? `<a href="${escapeHtml(r2TtUrl)}" class="r2-footer-sns-link" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="display:block;"><path fill="#fff" d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z"/></svg></a>` : ''}</div>` : ''}
+    </div>
+    ${footerLegal}
+  </footer>`
+      : tid === 'gym_yoga'
       ? `<footer>
     <div class="container gym-footer-inner">
       <div class="gym-footer-sns">${gymFooterSns.map((s) => `<a href="${escapeHtml(s.href)}" target="_blank" rel="noopener noreferrer" class="gym-footer-sns-link">${escapeHtml(s.label)}</a>`).join('')}</div>
@@ -999,6 +1021,26 @@ ${cafe1ShopLocationsHtml()}
       <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
     </section>`;
             }
+            if (tid === 'ramen_2' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
+              const priceRowsR2 = content.priceRows || [];
+              const r2Items = content.catalogImages.map((url, i) => {
+                const row = priceRowsR2[i];
+                const name = row ? escapeHtml(row.name) : `メニュー${i + 1}`;
+                const price = row ? escapeHtml(row.price) : '—';
+                return `<div class="r2-menu-card"><img src="${escapeHtml(url)}" alt="${name}" loading="lazy"><div class="r2-menu-card-body"><p class="r2-menu-name">${name}</p><p class="r2-menu-price">${price}</p></div></div>`;
+              }).join('');
+              return `    <section class="section ${rhythm}" id="${s.id}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}<div class="r2-menu-grid">${r2Items}</div></div>
+    </section>`;
+            }
+            if (tid === 'ramen_2' && s.id === 'access') {
+              const mapEmbed = content.mapEmbedUrl
+                ? `<div class="r2-map-wrap"><iframe src="${escapeHtml(content.mapEmbedUrl)}" width="100%" height="280" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="地図"></iframe></div>`
+                : '';
+              return `    <section class="section section-access ${rhythm}" id="${s.id}" aria-labelledby="${s.id}-title"${scrollInAttr}>
+      <div class="section-body"><h2 id="${s.id}-title">${escapeHtml(s.title)}</h2>${wrapBrParagraphWithPaymentLogos(s.content, escapeHtml)}${mapEmbed}</div>
+    </section>`;
+            }
             if (tid === 'ramen' && s.id === 'menu' && content.catalogImages && content.catalogImages.length > 0) {
               const priceRowsR = content.priceRows || [];
               const items = content.catalogImages.map((url, i) => {
@@ -1111,6 +1153,25 @@ ${cafe1ShopLocationsHtml()}
     String(instagramUrl || '').trim() || String(content.footerInstagramUrl || '').trim();
   const snsLineUrl = String(lineUrl || '').trim() || String(content.footerLineUrl || '').trim();
   const snsLinksEnabled = instagramLine !== false && !!(snsInstagramUrl || snsLineUrl);
+  if (tid === 'ramen_2') {
+    const r2SnsIg = String(content.footerInstagramUrl || '').trim();
+    const r2SnsTw = String(content.footerTwitterUrl || '').trim();
+    const r2SnsTt = String(content.footerTiktokUrl || '').trim();
+    if (r2SnsIg || r2SnsTw || r2SnsTt) {
+      const IG_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`;
+      const TW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+      const TT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z"/></svg>`;
+      extraSections += `
+    <section class="r2-sns-section" id="sns" aria-labelledby="r2-sns-title"${extraMotionAttr}>
+      <p class="r2-sns-title" id="r2-sns-title">SNS でフォローしてください</p>
+      <div class="r2-sns-row" role="list">
+        ${r2SnsIg ? `<a href="${escapeHtml(r2SnsIg)}" class="r2-sns-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Instagram">${IG_SVG}</a>` : ''}
+        ${r2SnsTw ? `<a href="${escapeHtml(r2SnsTw)}" class="r2-sns-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="X（旧Twitter）">${TW_SVG}</a>` : ''}
+        ${r2SnsTt ? `<a href="${escapeHtml(r2SnsTt)}" class="r2-sns-link" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="TikTok">${TT_SVG}</a>` : ''}
+      </div>
+    </section>`;
+    }
+  }
   if (snsLinksEnabled && tid !== 'cafe_1') {
     if (tid === 'cafe_tea') {
       extraSections += `
@@ -1275,6 +1336,30 @@ ${cafe1ShopLocationsHtml()}
         <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
       </div>
     </section>`
+        : tid === 'ramen_2'
+        ? (() => {
+            const r2Hours = String(content.ramen2Hours || '').trim();
+            const r2Closed = String(content.ramen2Closed || '').trim();
+            const r2Station = String(content.ramen2Station || '').trim();
+            const r2Phone = String(content.footerPhone || '').trim();
+            const quickItems = [
+              r2Hours ? { label: '営業時間', val: r2Hours } : null,
+              r2Closed ? { label: '定休日', val: r2Closed } : null,
+              r2Station ? { label: 'アクセス', val: r2Station } : null,
+              r2Phone ? { label: 'TEL', val: r2Phone } : null,
+            ].filter(Boolean);
+            const quickBarHtml = quickItems.length > 0
+              ? `<div class="r2-quick-bar" role="complementary" aria-label="店舗基本情報"><div class="r2-quick-bar-inner">${quickItems.map((qi) => `<div class="r2-quick-item"><span class="r2-quick-label">${escapeHtml(qi.label)}</span><span class="r2-quick-val">${escapeHtml(qi.val)}</span></div>`).join('')}</div></div>`
+              : '';
+            return `<section class="r2-hero hell-hero-parallax" style="background-image: url(${cssUrlForHtmlStyleAttr(heroImageUrl)})" aria-label="メインビジュアル">
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-inner">
+        <h1>${escapeHtml(content.headline)}</h1>
+        <p class="subheadline">${escapeHtml(content.subheadline)}</p>
+        <a href="${escapeHtml(cta.href)}" class="cta-btn cta-btn-primary">${escapeHtml(cta.label)}</a>
+      </div>
+    </section>${quickBarHtml}`;
+          })()
         : tid === 'ramen'
         ? `<section class="hero hero-full-img ramen-hero hell-hero-parallax" style="--hero-bg-img: ${cssUrlForHtmlStyleAttr(heroImageUrl)}">
       <div class="hero-bg-overlay"></div>
@@ -1426,7 +1511,7 @@ q.addEventListener('click',function(){var open=item.classList.toggle('is-open');
 <label for="wo-nav-toggle" class="wo-nav-fab" aria-label="メニュー"><span></span><span></span><span></span></label>`
       : '';
 
-  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'cafe_1' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic' && tid !== 'gym_yoga' && tid !== 'cram_school' && tid !== 'professional') ? ctaBlockHtml : '';
+  const ctaAfterHero = (tid !== 'cafe_tea' && tid !== 'cafe_1' && tid !== 'salon_barber' && tid !== 'clinic_chiropractic' && tid !== 'gym_yoga' && tid !== 'cram_school' && tid !== 'professional' && tid !== 'ramen_2') ? ctaBlockHtml : '';
 
   const proTelDigits = (content.footerPhone || '').replace(/\s/g, '');
   const proStickyCtaHtml =

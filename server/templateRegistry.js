@@ -21,6 +21,7 @@ export const BUILTIN_BUILD_HTML_TEMPLATES = Object.freeze([
   Object.freeze({ id: 'navy_cyan_consult', name: 'テンプレ3（ネイビー×シアン・Web/LP）' }),
   Object.freeze({ id: 'wiki_ensyuritsu', name: 'wiki円室律（オリジナル・ナレッジ）' }),
   Object.freeze({ id: 'wiki_sauna', name: 'wiki湯環（ウェルネス・サウナWiki）' }),
+  Object.freeze({ id: 'ramen_2', name: 'ラーメン弐（ラーメン・クイック情報バー・SNS三種）' }),
 ]);
 
 /** @type {readonly string[]} */

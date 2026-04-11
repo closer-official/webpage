@@ -160,6 +160,14 @@ export interface PageContent {
   footerLineUrl?: string;
   /** cafe_1：フッターに X（旧Twitter）アイコンリンクを出す場合 */
   footerTwitterUrl?: string;
+  /** ramen_2 など：フッターに TikTok アイコンリンクを出す場合 */
+  footerTiktokUrl?: string;
+  /** ramen_2：クイック情報バー — 営業時間 */
+  ramen2Hours?: string;
+  /** ramen_2：クイック情報バー — 定休日 */
+  ramen2Closed?: string;
+  /** ramen_2：クイック情報バー — 最寄り駅・アクセス */
+  ramen2Station?: string;
   /**
    * navy_cyan_consult のみ: 埋め込む LP のフォルダ名（public/deliverables/{slug}/）。
    * 未指定時は web-closer-intro（テンプレ14・自社紹介 LP）。納品デモは japanese-history-higashi 等を指定。
