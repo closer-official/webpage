@@ -207,8 +207,9 @@ export async function extractTemplateOverrideFromDocuments(files, textContext = 
 
 補足:
 - メニューは "cafeMenuTextRows" にできるだけ分解する。
-- FAQらしき記述があれば "faqItems" に入れる。
+- FAQ: 貼り付け文に駐車場・予約・一人向け・テイクアウトの**具体**があれば、それぞれに相当する定型質問（予約／駐車場／一人でも／テイクアウトの4枠想定）の **q/a を文中の事実で差し替え**。該当トピックが無い枠は推測せず短い中立の答えにする。何も無ければ []。
 - Googleマップ系情報は "footerAddress" と "cafeMeo" に優先反映する。
+- 支払い方法・総席数・禁煙等の**具体**があるときは sections に id "shop" のブロックで返してよい（無ければ含めない）。
 - テキスト入力にある事実は優先して採用する。`;
 
   const parts = [{ text: prompt }];
@@ -257,13 +258,27 @@ export async function extractTemplateOverrideFromFreeText(pastedText) {
 - mapEmbedUrl は「https://www.google.com/maps/embed?...」形式が文中に明示されているときだけ。maps/place や検索URLは入れない。
 - Instagram/Xは実URL、または @アカウントが明示されているときだけ（「SNSで発信」のみでは空）。
 - メニューは文章に価格や品名があれば cafeMenuTextRows に分解する。無ければ []。
-- FAQらしきQ&Aがあれば faqItems に。無ければ []。
+- FAQ（faqItems）は次のルール。
+  - 飲食LPでは多くの場合、次のような**定番の質問枠**に相当するQ&Aを並べる: 「予約はできますか？」「駐車場はありますか？」「一人でも入りやすいですか？」「テイクアウトは可能ですか？」。
+  - 貼り付け文中に**駐車場・コインパーキング・P・車で来店**などの記述があるときは、上記のうち**駐車場に相当する1件**の q と a を、その記述の内容だけで差し替えた文にする（捏造しない）。
+  - 文中に**予約・電話で席・要予約**などがあれば**予約に相当する1件**の q/a を差し替え。
+  - 文中に**一人・おひとり様・カウンター**などがあれば**一人でも入りやすい系の1件**を差し替え。
+  - 文中に**テイクアウト・持ち帰り**などがあれば**テイクアウト系の1件**を差し替え。
+  - 上記トピックについて文中に**何も書かれていない**枠は、推測で埋めず、**同じ意図の質問文（q）を維持し、a は「店舗にお問い合わせください」程度の短い中立文**にするか、既存LPに近い無難な定型答えにする。
+  - 文中にFAQらしき別のQ&Aがそのまま書かれていればそれも faqItems に追加してよい。
+  - 駐車場・予約・一人向け・テイクアウトの**いずれについても文中に具体が無い**ときだけ faqItems は [] でよい（支払い・席数は faqItems ではなく id:shop の content で扱う）。
 - 店名・住所・電話のいずれかが文中にあっても、長い営業案内を footerText に書かない。footerText には分かる範囲で「© 現在の西暦年 店名 | 住所 | 電話」を1行にまとめる（情報が無い部分は省略。捏造しない）。
 
 【sections】は、LPの本文ブロックとして使えそうなまとめだけ返す。各要素は id（英小文字・数字・ハイフン）・title・content（imageUrlは文中に画像URLがあれば）。
-既存テンプレでよく使う id の例: concept / story / menu-intro / hours / access / interior / atmosphere
+既存テンプレでよく使う id の例: concept / story / menu-intro / hours / access / interior / atmosphere / **shop**（店舗詳細・支払い・席数・禁煙など）
 文章に合う id を選ぶ。該当するまとめが無ければ sections は []。
 ※ 同じ id のブロックは後からフォーム側で既存セクションにマージされる想定。
+
+【sections の id:shop（店舗詳細）】
+貼り付け文中に**お支払い・支払い方法・クレジット・PayPay・現金・電子マネー**、または**総席数・席数・カウンター・テーブル席**、または**禁煙・喫煙・分煙**などの**具体表記**がある場合は、sections に **id を "shop"** とした要素を1つ返すこと。
+- title は「店舗詳細情報」など既存LPに合う短い見出しでよい。
+- content は、文中の事実だけを【お支払い方法】【設備・サービス】などの見出し付きで整理してよい。文中に無い項目は書かない。推測で数値やブランドを足さない。
+- 上記の具体表記が**一切無い**ときは id:shop の要素を返さない（sections に shop を含めない）。
 
 【cafeVisualGenre】は次のいずれか1つ、分からなければ空文字:
 ramen | cafe_coffee | kissaten | izakaya | yakiniku | sushi | yoshoku | teishoku | don_udon_soba | sweets | takeout | other_food

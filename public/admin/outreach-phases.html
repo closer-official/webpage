@@ -1205,6 +1205,13 @@
           return 'message_sent';
         }
 
+        /** Excel風一覧の並び：7区分の定義順（上から送信前→失注） */
+        function sevenPhaseSortIndex(item) {
+          var k = sevenPhaseKey(item);
+          var i = SEVEN_PHASE_KEYS.indexOf(k);
+          return i >= 0 ? i : SEVEN_PHASE_KEYS.length;
+        }
+
         function searchStatusLabel(item) {
           var k = sevenPhaseKey(item);
           return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
@@ -2052,7 +2059,7 @@
             el('p', {
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
-              text: '左端が行番号（1,2,3…）。上段の A〜E が列見出し（Excel と同じイメージ）です。',
+              text: '左端が行番号（1,2,3…）。上段の A〜E が列見出し（Excel と同じイメージ）です。行はフェーズ順（送信前→送信済み→…→失注）で上から並び、同一フェーズ内は店名順です。',
             }),
           );
 
@@ -2154,6 +2161,9 @@
                 return q ? itemMatchesSearch(i, q) : true;
               })
               .sort(function (a, b) {
+                var ia = sevenPhaseSortIndex(a);
+                var ib = sevenPhaseSortIndex(b);
+                if (ia !== ib) return ia - ib;
                 var na = outreachShopName(a) || a.id;
                 var nb = outreachShopName(b) || b.id;
                 return na.localeCompare(nb, 'ja');
