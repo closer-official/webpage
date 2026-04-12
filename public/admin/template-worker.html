@@ -386,6 +386,44 @@
       .tw-batch-table td.tw-b-cell-res a {
         color: #7dd3fc;
       }
+      .tw-input-mode-bar {
+        display: inline-flex;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        border: 1px solid #2a3b52;
+        border-radius: 10px;
+        overflow: hidden;
+        max-width: 100%;
+      }
+      .tw-input-mode-btn {
+        appearance: none;
+        border: none;
+        margin: 0;
+        padding: 10px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #1c2940;
+        color: #9aacbf;
+        font-family: inherit;
+      }
+      .tw-input-mode-btn + .tw-input-mode-btn {
+        border-left: 1px solid #2a3b52;
+      }
+      .tw-input-mode-btn.is-active {
+        background: #0c4a6e;
+        color: #e0f2fe;
+      }
+      .tw-input-mode-btn:focus-visible {
+        outline: 2px solid #38bdf8;
+        outline-offset: 2px;
+      }
+      .tw-input-pane {
+        margin-top: 10px;
+      }
+      .tw-input-pane.tw-hidden {
+        display: none !important;
+      }
       .repeat-item {
         border: 1px solid #2a3b52;
         border-radius: 8px;
@@ -577,50 +615,30 @@
         ドラフト名（管理用・80文字以内）
         <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
       </label>
-      <div class="repeat-group tw-batch-wrap" style="margin-top: 12px">
-        <div style="font-size: 0.8rem; color: #9aacbf">一括投入（最大10件・列フロー）</div>
-        <p style="font-size: 0.72rem; color: #8b9cb3; margin: 6px 0 10px; line-height: 1.45">
-          <strong>新規モード</strong>で上のベーステンプレを選んだうえで使います。行ごとに
-          <strong>名前（管理用ドラフト名）</strong>→<strong>重複の初回確認</strong>→<strong>Gemini</strong>→<strong>マップ貼付</strong>→<strong>SNS（IG / X / TikTok）</strong>→<strong>最終確認</strong>→<strong>自動保存</strong>の順で処理します（APIの都合で行ごとに数秒〜数十秒かかります）。類似ドラフトが最終チェックで見つかった行だけ保存をスキップします。「フォームへ」で下の既存フォームに載せて微調整できます。
-        </p>
-        <div class="row-actions" style="margin-bottom: 4px; flex-wrap: wrap">
-          <button type="button" class="btn primary" id="tw-batch-run-all">一括実行（全行を順に処理）</button>
-          <button type="button" class="btn" id="tw-batch-clear-rows">表をクリア</button>
-        </div>
-        <div class="tw-batch-scroll">
-          <table class="tw-batch-table" id="tw-batch-table" aria-label="一括投入10行">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>
-                  名前
-                  <span class="tw-b-th-sub">管理用ドラフト名（80字以内）</span>
-                </th>
-                <th>
-                  重複
-                  <span class="tw-b-th-sub">店名らしさで初回照会</span>
-                </th>
-                <th>Gemini</th>
-                <th>マップ</th>
-                <th>IG</th>
-                <th>X</th>
-                <th>TikTok</th>
-                <th>
-                  確認
-                  <span class="tw-b-th-sub">保存直前の要約</span>
-                </th>
-                <th>
-                  調整
-                  <span class="tw-b-th-sub">詳細フォームへ</span>
-                </th>
-                <th>結果</th>
-              </tr>
-            </thead>
-            <tbody id="tw-batch-tbody"></tbody>
-          </table>
-        </div>
+      <div class="tw-input-mode-bar" role="tablist" aria-label="入力画面の切替">
+        <button
+          type="button"
+          class="tw-input-mode-btn is-active"
+          id="tw-btn-input-classic"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tw-pane-classic"
+        >
+          従来型
+        </button>
+        <button
+          type="button"
+          class="tw-input-mode-btn"
+          id="tw-btn-input-excel"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tw-pane-excel"
+        >
+          エクセル型（一括10件）
+        </button>
       </div>
-      <div class="repeat-group" style="margin-top: 12px">
+      <div id="tw-pane-classic" class="tw-input-pane" role="tabpanel" aria-labelledby="tw-btn-input-classic">
+      <div class="repeat-group" style="margin-top: 0">
         <div style="font-size: 0.8rem; color: #9aacbf">Gemini 一括入力（文章だけ・最大2万文字）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
           Googleのまとめ・食べログの要約などをそのまま貼り付け。サーバーで Gemini が店名・キャッチ・住所・MEO・メニュー行・FAQ・セクションなどを読み取ります。
@@ -672,6 +690,52 @@
           <button type="button" class="btn" id="btn-worker-copy-unsub" disabled>配信停止URLをコピー</button>
         </div>
         <p id="worker-quick-err" class="err" style="display: none"></p>
+      </div>
+      </div>
+      <div id="tw-pane-excel" class="tw-input-pane tw-hidden" role="tabpanel" aria-labelledby="tw-btn-input-excel">
+      <div class="repeat-group tw-batch-wrap" style="margin-top: 0">
+        <div style="font-size: 0.8rem; color: #9aacbf">一括投入（最大10件・列フロー）</div>
+        <p style="font-size: 0.72rem; color: #8b9cb3; margin: 6px 0 10px; line-height: 1.45">
+          上の<strong>切替ボタン</strong>で「従来型」に戻ると、1件ずつの Gemini・地図貼付・送付紐づけが使えます。<strong>新規モード</strong>でベーステンプレを選んだうえで、行ごとに
+          <strong>名前</strong>→<strong>重複（初回）</strong>→<strong>Gemini</strong>→<strong>マップ</strong>→<strong>SNS</strong>→<strong>最終確認</strong>→<strong>自動保存</strong>の順で処理します（行ごとに数秒〜数十秒）。類似ドラフトが最終チェックで見つかった行だけ保存をスキップします。「フォームへ」で下のフォームに載せて微調整できます。送付案件の紐づけは従来型パネル内のプルダウンがそのまま各行の保存に使われます。
+        </p>
+        <div class="row-actions" style="margin-bottom: 4px; flex-wrap: wrap">
+          <button type="button" class="btn primary" id="tw-batch-run-all">一括実行（全行を順に処理）</button>
+          <button type="button" class="btn" id="tw-batch-clear-rows">表をクリア</button>
+        </div>
+        <div class="tw-batch-scroll">
+          <table class="tw-batch-table" id="tw-batch-table" aria-label="一括投入10行">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>
+                  名前
+                  <span class="tw-b-th-sub">管理用ドラフト名（80字以内）</span>
+                </th>
+                <th>
+                  重複
+                  <span class="tw-b-th-sub">店名らしさで初回照会</span>
+                </th>
+                <th>Gemini</th>
+                <th>マップ</th>
+                <th>IG</th>
+                <th>X</th>
+                <th>TikTok</th>
+                <th>
+                  確認
+                  <span class="tw-b-th-sub">保存直前の要約</span>
+                </th>
+                <th>
+                  調整
+                  <span class="tw-b-th-sub">詳細フォームへ</span>
+                </th>
+                <th>結果</th>
+              </tr>
+            </thead>
+            <tbody id="tw-batch-tbody"></tbody>
+          </table>
+        </div>
+      </div>
       </div>
       <div class="row-actions">
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
@@ -2426,7 +2490,7 @@
             document.getElementById('login-box').style.display = d.enabled ? 'block' : 'none';
             var authed = !d.enabled || d.authenticated;
             setAuthUi(authed);
-            if (authed) loadBasesAndCustoms();
+            if (authed) loadBasesAndCustoms().finally(applyTwWorkerInputModeFromStorage);
           })
           .catch(function () {
             setAuthUi(false);
@@ -2451,7 +2515,7 @@
             .then(function (x) {
               if (!x.ok) throw new Error(x.j.error || 'ログイン失敗');
               setAuthUi(true);
-              return loadBasesAndCustoms();
+              return loadBasesAndCustoms().finally(applyTwWorkerInputModeFromStorage);
             })
             .catch(function (e) {
               showErr('adm-login-err', e.message || String(e));
@@ -2758,6 +2822,38 @@
               setButtonLoading(btn, false);
             });
         };
+
+        var TW_WORKER_INPUT_UI_KEY = 'templateWorkerInputUi';
+
+        function setTwWorkerInputMode(mode) {
+          var excel = mode === 'excel';
+          var paneClassic = document.getElementById('tw-pane-classic');
+          var paneExcel = document.getElementById('tw-pane-excel');
+          var btnC = document.getElementById('tw-btn-input-classic');
+          var btnE = document.getElementById('tw-btn-input-excel');
+          if (!paneClassic || !paneExcel || !btnC || !btnE) return;
+          paneClassic.classList.toggle('tw-hidden', excel);
+          paneExcel.classList.toggle('tw-hidden', !excel);
+          btnC.classList.toggle('is-active', !excel);
+          btnE.classList.toggle('is-active', excel);
+          btnC.setAttribute('aria-selected', excel ? 'false' : 'true');
+          btnE.setAttribute('aria-selected', excel ? 'true' : 'false');
+          try {
+            localStorage.setItem(TW_WORKER_INPUT_UI_KEY, excel ? 'excel' : 'classic');
+          } catch (e) {}
+        }
+
+        function applyTwWorkerInputModeFromStorage() {
+          try {
+            if (localStorage.getItem(TW_WORKER_INPUT_UI_KEY) === 'excel') {
+              setTwWorkerInputMode('excel');
+            } else {
+              setTwWorkerInputMode('classic');
+            }
+          } catch (e) {
+            setTwWorkerInputMode('classic');
+          }
+        }
 
         function twBatchSleep(ms) {
           return new Promise(function (resolve) {
@@ -3070,6 +3166,20 @@
         });
 
         twBatchInitTable();
+
+        var twBtnClassic = document.getElementById('tw-btn-input-classic');
+        var twBtnExcel = document.getElementById('tw-btn-input-excel');
+        if (twBtnClassic) {
+          twBtnClassic.onclick = function () {
+            setTwWorkerInputMode('classic');
+          };
+        }
+        if (twBtnExcel) {
+          twBtnExcel.onclick = function () {
+            setTwWorkerInputMode('excel');
+          };
+        }
+        applyTwWorkerInputModeFromStorage();
 
         document.getElementById('tw-batch-run-all').onclick = function () {
           showErr('save-err', '');
