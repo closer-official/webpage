@@ -186,6 +186,79 @@
         width: 100%;
         min-width: 0;
       }
+      .work-shell.tw-excel-layout #form-box,
+      .work-shell.tw-excel-layout #share-box {
+        display: none !important;
+      }
+      .work-shell.tw-excel-layout #wrap-base {
+        display: none !important;
+      }
+      .tw-excel-tpl-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      .tw-excel-tpl-bar.is-disabled {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+      .tw-excel-tpl-btn {
+        appearance: none;
+        font-family: inherit;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #3d5675;
+        background: #1c2940;
+        color: #c8d6e8;
+      }
+      .tw-excel-tpl-btn:hover:not(:disabled) {
+        border-color: #38bdf8;
+        color: #fff;
+      }
+      .tw-excel-tpl-btn.is-active {
+        box-shadow: 0 0 0 2px #38bdf8;
+      }
+      .tw-excel-tpl-btn[data-template-id='cafe_1'] {
+        background: linear-gradient(180deg, #f4eadc 0%, #dcc9a8 100%);
+        color: #2d2419;
+        border-color: #a88658;
+      }
+      .tw-excel-tpl-btn[data-template-id='cafe_1'].is-active {
+        box-shadow: 0 0 0 2px #7a5c28;
+      }
+      .tw-excel-tpl-btn[data-template-id='ramen_2'] {
+        background: linear-gradient(180deg, #fff0e0 0%, #fdba74 100%);
+        color: #422006;
+        border-color: #ea8c2d;
+      }
+      .tw-excel-tpl-btn[data-template-id='ramen_2'].is-active {
+        box-shadow: 0 0 0 2px #c2410c;
+      }
+      .tw-phase-wrap {
+        margin-top: 10px;
+        padding: 10px 10px 8px;
+        border-radius: 10px;
+        border: 1px solid #2a3b52;
+        background: rgba(15, 23, 42, 0.65);
+      }
+      .tw-phase-wrap.tw-phase-tone--default label {
+        color: #9aacbf;
+      }
+      .tw-phase-wrap.tw-phase-tone--risk {
+        border-color: rgba(248, 113, 113, 0.55);
+        background: rgba(127, 29, 29, 0.22);
+      }
+      .tw-phase-wrap.tw-phase-tone--risk label {
+        color: #fecaca;
+      }
+      .tw-phase-wrap.tw-phase-tone--risk select {
+        border-color: #b91c1c;
+      }
       h1 {
         font-size: 1.3rem;
         margin: 0 0 0.35rem;
@@ -684,35 +757,14 @@
         </div>
         <p id="map-paste-err" class="err" style="display: none"></p>
       </div>
-      <div class="repeat-group" style="margin-top: 12px">
-        <div style="font-size: 0.8rem; color: #9aacbf">送付案件との紐づけ（このドラフトとダッシュボード1件）</div>
-        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
-          プレビューURL・配信停止URL・営業フェーズを、<strong>この場所からまとめて</strong>扱えます。フェーズは送付管理と同じ<strong>7種類</strong>のプルダウンです（送信前／送信済み／SNSなし／ヒアリング中／提案中／契約済み／失注）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります。
-        </p>
-        <label>
-          紐づける送付案件
-          <select id="f-linked-dashboard"></select>
-        </label>
-        <label>
-          営業フェーズ
-          <select id="f-worker-outreach-phase" disabled></select>
-        </label>
-        <p id="worker-outreach-hint" class="muted" style="font-size: 0.74rem; color: #7d8fa3; margin: 6px 0 0"></p>
-        <p class="preview-url" id="worker-preview-url-inline" style="margin-top: 10px">（保存後に表示）</p>
-        <div class="row-actions">
-          <button type="button" class="btn primary" id="btn-worker-save">保存</button>
-          <button type="button" class="btn" id="btn-worker-copy-preview" disabled>プレビューURLをコピー</button>
-          <button type="button" class="btn" id="btn-worker-copy-unsub" disabled>配信停止URLをコピー</button>
-        </div>
-        <p id="worker-quick-err" class="err" style="display: none"></p>
-      </div>
       </div>
       <div id="tw-pane-excel" class="tw-input-pane tw-hidden" role="tabpanel" aria-labelledby="tw-btn-input-excel">
       <div class="repeat-group tw-batch-wrap" style="margin-top: 0">
         <div style="font-size: 0.8rem; color: #9aacbf">一括投入（最大10件・列フロー）</div>
+        <div id="tw-excel-tpl-bar" class="tw-excel-tpl-bar" aria-label="一括用ベーステンプレ"></div>
         <p style="font-size: 0.72rem; color: #8b9cb3; margin: 6px 0 10px; line-height: 1.45">
-          上の<strong>切替ボタン</strong>で「従来型」に戻ると、1件ずつの Gemini・地図貼付・送付紐づけが使えます。<strong>新規モード</strong>でベーステンプレを選んだうえで、行ごとに
-          <strong>名前</strong>→<strong>重複（初回）</strong>→<strong>Gemini</strong>→<strong>マップ</strong>→<strong>SNS</strong>→<strong>最終確認</strong>→<strong>自動保存</strong>の順で処理します（行ごとに数秒〜数十秒）。類似ドラフトが最終チェックで見つかった行だけ保存をスキップします。「フォームへ」で下のフォームに載せて微調整できます。送付案件の紐づけは従来型パネル内のプルダウンがそのまま各行の保存に使われます。
+          <strong>新規モード</strong>で下のボタンからベーステンプレを選び、表に入力して<strong>一括実行</strong>してください（従来型に切り替えるとドロップダウンでも選べます）。行ごとに
+          <strong>名前</strong>→<strong>重複（初回）</strong>→<strong>Gemini</strong>→<strong>マップ</strong>→<strong>SNS</strong>→<strong>最終確認</strong>→<strong>自動保存</strong>の順です。下の<strong>送付案件</strong>のプルダウンは一括保存の紐づけにも使われます。「フォームへ」で詳細フォームに載せたあと、従来型に切り替えて保存・プレビュー共有もできます。
         </p>
         <div class="row-actions" style="margin-bottom: 4px; flex-wrap: wrap">
           <button type="button" class="btn primary" id="tw-batch-run-all">一括実行（全行を順に処理）</button>
@@ -751,6 +803,30 @@
           </table>
         </div>
       </div>
+      </div>
+      <div id="tw-shared-outreach" class="repeat-group tw-shared-outreach" style="margin-top: 12px">
+        <div style="font-size: 0.8rem; color: #9aacbf">送付案件との紐づけ（このドラフトとダッシュボード1件）</div>
+        <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
+          プレビューURL・配信停止URL・営業フェーズを、<strong>この場所からまとめて</strong>扱えます。フェーズは送付管理と同じ<strong>7種類</strong>のプルダウンです（送信前／送信済み／SNSなし／ヒアリング中／提案中／契約済み／失注）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります。
+        </p>
+        <label>
+          紐づける送付案件
+          <select id="f-linked-dashboard"></select>
+        </label>
+        <div class="tw-phase-wrap tw-phase-tone--default" id="tw-phase-wrap">
+          <label>
+            営業フェーズ
+            <select id="f-worker-outreach-phase" disabled></select>
+          </label>
+        </div>
+        <p id="worker-outreach-hint" class="muted" style="font-size: 0.74rem; color: #7d8fa3; margin: 6px 0 0"></p>
+        <p class="preview-url" id="worker-preview-url-inline" style="margin-top: 10px">（保存後に表示）</p>
+        <div class="row-actions">
+          <button type="button" class="btn primary" id="btn-worker-save">保存</button>
+          <button type="button" class="btn" id="btn-worker-copy-preview" disabled>プレビューURLをコピー</button>
+          <button type="button" class="btn" id="btn-worker-copy-unsub" disabled>配信停止URLをコピー</button>
+        </div>
+        <p id="worker-quick-err" class="err" style="display: none"></p>
       </div>
       <div class="row-actions">
         <button type="button" class="btn" id="btn-load">フォームに読み込む</button>
@@ -996,9 +1072,6 @@
         <button type="button" class="btn" id="btn-copy-url" disabled>プレビューURLをコピー</button>
         <button type="button" class="btn" id="btn-mailto" disabled>メールで送る（mailto）</button>
       </div>
-      <button type="button" class="btn" id="btn-refresh-iframe" style="margin-top: 10px">
-        左を「保存済みURLの内容」で表示（デバッグ用）
-      </button>
     </div>
 
       </div>
@@ -1330,6 +1403,59 @@
             .catch(function () {});
         }
 
+        function updateTwOutreachPhaseTone() {
+          var wrap = document.getElementById('tw-phase-wrap');
+          var phaseSel = document.getElementById('f-worker-outreach-phase');
+          if (!wrap || !phaseSel) return;
+          var ph = String(phaseSel.value || '').trim();
+          wrap.classList.remove('tw-phase-tone--default', 'tw-phase-tone--risk');
+          if (ph === 'lost' || ph === 'no_outreach_channel') {
+            wrap.classList.add('tw-phase-tone--risk');
+          } else {
+            wrap.classList.add('tw-phase-tone--default');
+          }
+        }
+
+        function refreshTwExcelTplBarDisabledState() {
+          var bar = document.getElementById('tw-excel-tpl-bar');
+          if (!bar) return;
+          var edit = document.getElementById('mode-select').value === 'edit';
+          bar.classList.toggle('is-disabled', edit);
+        }
+
+        function syncTwExcelTplBarActive() {
+          var sel = document.getElementById('base-template');
+          var bar = document.getElementById('tw-excel-tpl-bar');
+          if (!sel || !bar) return;
+          var v = String(sel.value || '');
+          Array.prototype.forEach.call(bar.querySelectorAll('.tw-excel-tpl-btn'), function (btn) {
+            btn.classList.toggle('is-active', btn.getAttribute('data-template-id') === v);
+          });
+        }
+
+        function buildTwExcelTemplateBar() {
+          var bar = document.getElementById('tw-excel-tpl-bar');
+          var sel = document.getElementById('base-template');
+          if (!bar || !sel) return;
+          bar.innerHTML = '';
+          Array.prototype.forEach.call(sel.options, function (opt) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tw-excel-tpl-btn';
+            b.setAttribute('data-template-id', opt.value);
+            b.textContent = opt.textContent;
+            b.onclick = function () {
+              if (document.getElementById('mode-select').value !== 'new') return;
+              sel.value = opt.value;
+              sel.dispatchEvent(new Event('change'));
+              syncTwExcelTplBarActive();
+            };
+            bar.appendChild(b);
+          });
+          syncTwExcelTplBarActive();
+          refreshTwExcelTplBarDisabledState();
+        }
+
         function syncWorkerOutreachPanel() {
           var linkSel = document.getElementById('f-linked-dashboard');
           var phaseSel = document.getElementById('f-worker-outreach-phase');
@@ -1357,6 +1483,7 @@
               btnUnsub.disabled = true;
               btnUnsub.title = WORKER_UNSUB_COPY_TITLE;
             }
+            updateTwOutreachPhaseTone();
             return;
           }
           var item = dashboardById[did];
@@ -1368,11 +1495,11 @@
               btnUnsub.disabled = true;
               btnUnsub.title = WORKER_UNSUB_COPY_TITLE;
             }
+            updateTwOutreachPhaseTone();
             return;
           }
           phaseSel.disabled = false;
           fillWorkerOutreachPhaseSelect(phaseSel, item);
-          var eff = normalizeWorkerPhase(item);
           var sk = workerSevenPhaseKey(item);
           if (hintEl) {
             if (sk === 'proposal') {
@@ -1387,6 +1514,7 @@
             btnUnsub.disabled = !unsubOk;
             btnUnsub.title = unsubOk ? '' : WORKER_UNSUB_COPY_TITLE;
           }
+          updateTwOutreachPhaseTone();
         }
         var EMBED_STYLE_TEMPLATE_IDS = {
           navy_cyan_consult: true,
@@ -2566,6 +2694,8 @@
             updatePreviewUrl();
           }
           applyWorkerFormTemplateVisibility();
+          refreshTwExcelTplBarDisabledState();
+          syncTwExcelTplBarActive();
         };
 
         document.getElementById('existing-id').onchange = function () {
@@ -2573,6 +2703,7 @@
         };
 
         document.getElementById('base-template').onchange = function () {
+          syncTwExcelTplBarActive();
           if (document.getElementById('mode-select').value === 'new') {
             previewBaseTemplateId = document.getElementById('base-template').value || '';
             if (!currentCustomId && previewBaseTemplateId) {
@@ -2633,6 +2764,7 @@
                 o.textContent = t.name + ' (' + t.id + ')';
                 baseSel.appendChild(o);
               });
+              buildTwExcelTemplateBar();
               return credFetch(api + '/template-customizations');
             })
             .then(function (r) {
@@ -2860,6 +2992,9 @@
             if (excel) prevAside.setAttribute('aria-hidden', 'true');
             else prevAside.removeAttribute('aria-hidden');
           }
+          refreshTwExcelTplBarDisabledState();
+          syncTwExcelTplBarActive();
+          updateTwOutreachPhaseTone();
           try {
             localStorage.setItem(TW_WORKER_INPUT_UI_KEY, excel ? 'excel' : 'classic');
           } catch (e) {}
@@ -3604,42 +3739,6 @@
             'template-worker.html';
           window.location.href =
             'mailto:?subject=' + encodeURIComponent('[店舗ドラフト] ' + name) + '&body=' + encodeURIComponent(body);
-        };
-
-        document.getElementById('btn-refresh-iframe').onclick = function () {
-          var refreshBtn = document.getElementById('btn-refresh-iframe');
-          if (currentCustomId) {
-            var iframe = document.getElementById('preview-live');
-            var p =
-              '/api/template-preview/' + encodeURIComponent(currentCustomId) + '?_=' + Date.now();
-            var statusEl = document.getElementById('preview-live-status');
-            if (statusEl) {
-              setPreviewStatusTone(statusEl, 'pending');
-              statusEl.textContent = '保存済みURLから読み込み中…';
-            }
-            var done = false;
-            function finishRefresh() {
-              if (done) return;
-              done = true;
-              iframe.removeEventListener('load', onLoad);
-              clearTimeout(tid);
-              setButtonLoading(refreshBtn, false);
-              if (statusEl) {
-                setPreviewStatusTone(statusEl, 'ok');
-                statusEl.textContent = '保存済みプレビューを表示しました（左の枠は共有URLの内容）';
-              }
-            }
-            function onLoad() {
-              finishRefresh();
-            }
-            setButtonLoading(refreshBtn, true, '再読み込み中…');
-            iframe.addEventListener('load', onLoad);
-            var tid = setTimeout(finishRefresh, 15000);
-            iframe.removeAttribute('srcdoc');
-            iframe.src = p;
-          } else {
-            runLivePreview();
-          }
         };
 
         var editorPane = document.getElementById('editor-pane');
