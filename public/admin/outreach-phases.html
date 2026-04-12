@@ -207,6 +207,54 @@
         color: #e8edf5;
         font-size: 0.82rem;
       }
+      /* 7フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
+      select.op-phase-select {
+        font-weight: 600;
+        border-width: 2px;
+        transition:
+          background 0.12s ease,
+          color 0.12s ease,
+          border-color 0.12s ease;
+      }
+      select.op-phase-select[data-phase='before_send'] {
+        background: linear-gradient(180deg, #475569 0%, #334155 100%);
+        color: #f8fafc;
+        border-color: #94a3b8;
+      }
+      select.op-phase-select[data-phase='message_sent'] {
+        background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+        color: #dbeafe;
+        border-color: #60a5fa;
+      }
+      select.op-phase-select[data-phase='no_outreach_channel'] {
+        background: linear-gradient(180deg, #9f1239 0%, #881337 100%);
+        color: #ffe4e6;
+        border-color: #fb7185;
+      }
+      select.op-phase-select[data-phase='hearing'] {
+        background: linear-gradient(180deg, #6d28d9 0%, #5b21b6 100%);
+        color: #ede9fe;
+        border-color: #a78bfa;
+      }
+      select.op-phase-select[data-phase='proposal'] {
+        background: linear-gradient(180deg, #b45309 0%, #92400e 100%);
+        color: #fffbeb;
+        border-color: #fbbf24;
+      }
+      select.op-phase-select[data-phase='contracted'] {
+        background: linear-gradient(180deg, #047857 0%, #065f46 100%);
+        color: #d1fae5;
+        border-color: #34d399;
+      }
+      select.op-phase-select[data-phase='lost'] {
+        background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+        color: #fee2e2;
+        border-color: #f87171;
+      }
+      select.op-phase-select:disabled {
+        opacity: 0.72;
+        cursor: wait;
+      }
       .actions {
         display: flex;
         flex-wrap: wrap;
@@ -1675,28 +1723,40 @@
           });
         }
 
+        function syncOpPhaseSelectVisual(sel) {
+          if (!sel) return;
+          var v = String(sel.value || '').trim();
+          if (SEVEN_PHASE_KEYS.indexOf(v) < 0) v = 'before_send';
+          sel.setAttribute('data-phase', v);
+        }
+
         function renderPhaseSelect(item, loadFn) {
           var eff = sevenPhaseKey(item);
-          var sel = el('select', { 'aria-label': '営業フェーズ（7種）' }, []);
+          var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（7種）' }, []);
           SEVEN_PHASE_KEYS.forEach(function (k) {
             var opt = el('option', { value: k, text: SEVEN_PHASE_LABELS[k] });
             if (k === eff) opt.selected = true;
             sel.appendChild(opt);
           });
+          syncOpPhaseSelectVisual(sel);
           sel.onchange = function () {
             var v = sel.value;
             var prev = eff;
+            syncOpPhaseSelectVisual(sel);
             sel.disabled = true;
             applyOutreachSevenPhase(item, v)
               .then(function () {
+                eff = v;
                 return loadFn();
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
                 sel.value = prev;
+                syncOpPhaseSelectVisual(sel);
               })
               .finally(function () {
                 sel.disabled = false;
+                syncOpPhaseSelectVisual(sel);
               });
           };
           return sel;
