@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { postProcessBeautySalonMellowBody } from './beautySalonMellowPostProcess.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -47,6 +48,8 @@ function main() {
   body = body.replace(/url\(\s*['"]data:[^'"]+['"]\s*\)/gi, () => `url('${nextImg()}')`);
   body = body.replace(/url\(\s*data:[^)]+\)/gi, () => `url('${nextImg()}')`);
   body = body.replace(/src\s*=\s*["']data:[^"']+["']/gi, () => `src="${nextImg()}"`);
+
+  body = postProcessBeautySalonMellowBody(body);
 
   fs.mkdirSync(outDir, { recursive: true });
   const cssPath = path.join(outDir, 'generated.css');
