@@ -171,6 +171,21 @@
           width: 100%;
         }
       }
+      /* エクセル型：左のライブプレビューを隠し、右エリアを横幅いっぱいに */
+      .work-shell.tw-excel-layout {
+        max-width: none;
+        width: 100%;
+        align-items: stretch;
+      }
+      .work-shell.tw-excel-layout .preview-pane {
+        display: none !important;
+      }
+      .work-shell.tw-excel-layout .editor-pane {
+        flex: 1 1 auto;
+        max-width: none;
+        width: 100%;
+        min-width: 0;
+      }
       h1 {
         font-size: 1.3rem;
         margin: 0 0 0.35rem;
@@ -2838,6 +2853,13 @@
           btnE.classList.toggle('is-active', excel);
           btnC.setAttribute('aria-selected', excel ? 'false' : 'true');
           btnE.setAttribute('aria-selected', excel ? 'true' : 'false');
+          var shell = document.getElementById('work-shell');
+          if (shell) shell.classList.toggle('tw-excel-layout', excel);
+          var prevAside = document.querySelector('.work-shell .preview-pane');
+          if (prevAside) {
+            if (excel) prevAside.setAttribute('aria-hidden', 'true');
+            else prevAside.removeAttribute('aria-hidden');
+          }
           try {
             localStorage.setItem(TW_WORKER_INPUT_UI_KEY, excel ? 'excel' : 'classic');
           } catch (e) {}
