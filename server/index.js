@@ -1918,6 +1918,65 @@ app.get('/api/dashboard', async (req, res) => {
   res.json(await store.getDashboard());
 });
 
+/** 送付・フェーズ前の軽量メモ（店名＋リンク等のみ。ダッシュボード案件とは別ストア） */
+app.get('/api/memo-leads', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getMemoLeads();
+  res.json(Array.isArray(raw) ? raw : []);
+});
+
+app.get('/api/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getMemoLeads();
+  const list = Array.isArray(raw) ? raw : [];
+  const item = list.find((x) => x && x.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Not found' });
+  res.json(item);
+});
+
+app.post('/api/memo-leads', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const shopName = String(req.body?.shopName || '').trim().slice(0, 200);
+  const memo = String(req.body?.memo || '').trim().slice(0, 12000);
+  if (!shopName) return res.status(400).json({ error: '店名（shopName）が必要です' });
+  const raw = await store.getMemoLeads();
+  const list = [...(Array.isArray(raw) ? raw : [])];
+  const now = new Date().toISOString();
+  const row = {
+    id: `ml-${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`,
+    shopName,
+    memo,
+    createdAt: now,
+    updatedAt: now,
+  };
+  list.unshift(row);
+  await store.setMemoLeads(list);
+  res.status(201).json(row);
+});
+
+app.patch('/api/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getMemoLeads();
+  const list = [...(Array.isArray(raw) ? raw : [])];
+  const i = list.findIndex((x) => x && x.id === req.params.id);
+  if (i === -1) return res.status(404).json({ error: 'Not found' });
+  if (req.body?.shopName !== undefined) list[i].shopName = String(req.body.shopName || '').trim().slice(0, 200);
+  if (req.body?.memo !== undefined) list[i].memo = String(req.body.memo || '').trim().slice(0, 12000);
+  list[i].updatedAt = new Date().toISOString();
+  await store.setMemoLeads(list);
+  res.json(list[i]);
+});
+
+app.delete('/api/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getMemoLeads();
+  const list = Array.isArray(raw) ? raw : [];
+  const next = list.filter((x) => !x || x.id !== req.params.id);
+  if (next.length === list.length) return res.status(404).json({ error: 'Not found' });
+  await store.setMemoLeads(next);
+  res.status(204).end();
+});
+
 app.patch('/api/dashboard/:id', async (req, res) => {
   const dashboard = await store.getDashboard();
   const i = dashboard.findIndex((d) => d.id === req.params.id);

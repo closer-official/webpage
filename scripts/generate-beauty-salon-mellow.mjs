@@ -13,7 +13,7 @@ const root = path.join(__dirname, '..');
 const srcPath = path.join(root, 'docs', '!DOCTYPE html - コピー.md');
 const outDir = path.join(root, 'server', 'beautySalonMellow');
 
-/** MD 内 data URL 置換用（生成後 postProcess で内装・外装5枚に統一される） */
+/** MD 内 data URL 置換用（生成後 postProcess で内装5枚へ。Style 6枚は style-hair に固定） */
 const POOL = [
   'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
   'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',

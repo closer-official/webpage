@@ -21,6 +21,7 @@ const FILES = {
   lpAnalytics: 'lpAnalytics.json',
   salesAgency: 'salesAgency.json',
   galleryDraftBuiltins: 'galleryDraftBuiltins.json',
+  memoLeads: 'memoLeads.json',
 };
 
 function ensureDir() {
@@ -44,7 +45,15 @@ function write(name, data) {
 }
 
 function getDefault(name) {
-  if (name === 'queue' || name === 'dashboard' || name === 'referenceSites' || name === 'customerIntake' || name === 'templateCustomizations') return [];
+  if (
+    name === 'queue' ||
+    name === 'dashboard' ||
+    name === 'memoLeads' ||
+    name === 'referenceSites' ||
+    name === 'customerIntake' ||
+    name === 'templateCustomizations'
+  )
+    return [];
   if (name === 'designInsights') return { summary: '', byIndustry: {}, designSummary: '', byIndustryDesign: {}, updatedAt: null };
   if (name === 'learningJob') return { status: 'idle', industry: null, maxResults: null, phase: '', current: 0, total: 0, result: null, error: null, startedAt: null, completedAt: null };
   if (name === 'options') return { multiLanguage: false, contactForm: false, formActionUrl: '', qrCodeTargetUrl: '', instagramLine: true, presentedBy: true, qrCode: false };
@@ -139,6 +148,11 @@ const fileStore = {
   setSalesAgency: async (whole) => {
     const base = getDefault('salesAgency');
     write('salesAgency', { ...base, ...whole, updatedAt: new Date().toISOString() });
+  },
+  getMemoLeads: () => Promise.resolve(read('memoLeads')),
+  setMemoLeads: (arr) => {
+    write('memoLeads', arr);
+    return Promise.resolve();
   },
   getGalleryDraftBuiltins: () => Promise.resolve(read('galleryDraftBuiltins')),
   setGalleryDraftBuiltins: (obj) => {

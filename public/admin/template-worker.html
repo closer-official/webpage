@@ -2748,6 +2748,54 @@
           }
         }
 
+        /** メモリード一覧から `?memoLeadId=` で開いたとき、店名・メモを新規フォームへ流し込む（`?id=` 併用時は id を優先） */
+        function applyMemoLeadFromQuery() {
+          try {
+            var q = new URLSearchParams(window.location.search || '');
+            if (String(q.get('id') || '').trim()) return Promise.resolve();
+            var mid = String(q.get('memoLeadId') || '').trim();
+            if (!mid) return Promise.resolve();
+            return credFetch(api + '/memo-leads/' + encodeURIComponent(mid))
+              .then(function (r) {
+                return r.json().then(function (j) {
+                  if (!r.ok) throw new Error((j && j.error) || r.statusText || '読込失敗');
+                  return j;
+                });
+              })
+              .then(function (row) {
+                var bid = document.getElementById('base-template').value || 'cafe_1';
+                document.getElementById('mode-select').value = 'new';
+                document.getElementById('wrap-base').style.display = 'block';
+                document.getElementById('wrap-existing').style.display = 'none';
+                currentCustomId = null;
+                previewBaseTemplateId = bid;
+                var linkMode = document.getElementById('f-linked-dashboard');
+                if (linkMode) linkMode.value = '';
+                return (bid ? loadBuiltinDefaultsIntoForm(bid, {}) : Promise.resolve()).then(function () {
+                  var nameEl = document.getElementById('f-siteName');
+                  var gem = document.getElementById('gemini-free-text');
+                  if (nameEl) nameEl.value = String(row.shopName || '').trim();
+                  if (gem) {
+                    var memo = String(row.memo || '').trim();
+                    gem.value = memo
+                      ? '--- メモリード（フェーズ確認前・下書き） ---\n' + memo + '\n--- ここから下へ追記可 ---\n'
+                      : '';
+                  }
+                  applyWorkerFormTemplateVisibility();
+                  refreshTwExcelTplBarDisabledState();
+                  syncTwExcelTplBarActive();
+                  scheduleLivePreview();
+                  showErr('save-err', '');
+                });
+              })
+              .catch(function (e) {
+                showErr('save-err', e.message || String(e));
+              });
+          } catch (e) {
+            return Promise.resolve();
+          }
+        }
+
         function loadBasesAndCustoms() {
           return credFetch(api + '/template-candidates')
             .then(function (r) {
@@ -2796,6 +2844,9 @@
             })
             .then(function () {
               return applyDeepLinkFromQuery();
+            })
+            .then(function () {
+              return applyMemoLeadFromQuery();
             })
             .catch(function () {
               showErr('save-err', '一覧の取得に失敗しました。ログインしてください。');

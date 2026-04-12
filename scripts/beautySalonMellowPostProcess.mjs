@@ -1,6 +1,6 @@
 /**
  * docs 由来の HTML から「人物＝美容師」誤解を招くスタッフ専用ページ・文言を除き、
- * スタイル（モデル撮影）として読めるようにする。generate-beauty-salon-mellow.mjs から呼ぶ。
+ * スタイルは public の style-hair 6枚に統一する。generate-beauty-salon-mellow.mjs から呼ぶ。
  */
 const HOME_STYLE_SECTION = `<!-- 店内ピックアップ（内装写真のみ） -->
 <section style="background:var(--cream)">
@@ -31,8 +31,15 @@ const HOME_STYLE_SECTION = `<!-- 店内ピックアップ（内装写真のみ�
 </section>
 `;
 
-const STYLE_GALLERY_NOTE =
-  '<br><small style="display:block;margin-top:1em;opacity:0.85">※写真は当サロンの内装・外観です。</small>';
+/** Style セクション（トップ・Style ページ）のギャラリー6枚 — ヘアカタログ用 */
+const MELLOW_STYLE_HAIR_SRC = [
+  '/beauty-salon-mellow/style-hair-01.png',
+  '/beauty-salon-mellow/style-hair-02.png',
+  '/beauty-salon-mellow/style-hair-03.png',
+  '/beauty-salon-mellow/style-hair-04.png',
+  '/beauty-salon-mellow/style-hair-05.png',
+  '/beauty-salon-mellow/style-hair-06.png',
+];
 
 /** Unsplash を public の内装・外装5枚に順に差し替え（人物ストックを使わない） */
 const MELLOW_BUILTIN_IMAGES = [
@@ -97,11 +104,32 @@ function forcePageSubHeroBg(html, pageId, url) {
   return html.slice(0, start) + chunk + html.slice(end);
 }
 
-/** Salon / Style / FAQ の見出しは内装のみ（外観が当たらないよう上書き） */
+/** Salon / FAQ のサブヒーローは内装。Style ページはヘアカタログ先頭画像。 */
 function forceSalonStyleFaqInteriorHeroes(html) {
   let out = forcePageSubHeroBg(html, 'salon', '/beauty-salon-mellow/interior-floor.png');
-  out = forcePageSubHeroBg(out, 'style', '/beauty-salon-mellow/interior-entrance.png');
+  out = forcePageSubHeroBg(out, 'style', '/beauty-salon-mellow/style-hair-01.png');
   out = forcePageSubHeroBg(out, 'faq', '/beauty-salon-mellow/interior-shampoo.png');
+  return out;
+}
+
+function patchGalleryGridImgSrcsToStyleHair(gridInner) {
+  let i = 0;
+  return gridInner.replace(/(<div class="gallery-item[^>]*>\s*<img src=")([^"]+)(")/g, (_m, a, _b, c) => {
+    const u = MELLOW_STYLE_HAIR_SRC[Math.min(i, MELLOW_STYLE_HAIR_SRC.length - 1)];
+    i += 1;
+    return a + u + c;
+  });
+}
+
+/** トップの Style 6枚グリッドと Style 専用ページのギャラリーを内装URLから必ず差し替え */
+function ensureMellowStyleGalleryHairImages(html) {
+  let out = String(html || '');
+  const pageStyleRe =
+    /(<div class="page" id="page-style">[\s\S]*?<div class="gallery-grid">)([\s\S]*?)(<\/div>\s*<\/section>\s*<section class="reserve-banner">)/;
+  out = out.replace(pageStyleRe, (_m, pre, grid, post) => pre + patchGalleryGridImgSrcsToStyleHair(grid) + post);
+  const homeStyleRe =
+    /(<div class="section-label fade-up">Style<\/div>[\s\S]*?<div class="gallery-grid">)([\s\S]*?)(<\/div>\s*<div style="text-align:center;margin-top:48px"><a class="btn-outline" onclick="showPage\('style'\)">View all styles →<\/a><\/div>\s*<\/section>)/;
+  out = out.replace(homeStyleRe, (_m, pre, grid, post) => pre + patchGalleryGridImgSrcsToStyleHair(grid) + post);
   return out;
 }
 
@@ -145,58 +173,12 @@ export function postProcessBeautySalonMellowBody(body) {
     );
   }
 
-  const galleryP =
-    /<p class="section-text fade-up delay-2">自然体の中に少しの洗練を感じるスタイルを大切にしています。<br>特に、ショート・ボブ・ミディアムのやわらかい質感づくりが得意です。<\/p>/;
-  if (galleryP.test(out) && !out.includes('当サロンの内装')) {
-    out = out.replace(galleryP, (m) => m.replace('</p>', `${STYLE_GALLERY_NOTE}</p>`));
-  }
-
   out = rewriteUnsplashToMellowSalonAssets(out);
   out = forceAccessPageExterior(out);
   out = forceReservePageEntrance(out);
   out = forceSalonStyleFaqInteriorHeroes(out);
 
-  out = out.replace('<!-- Style gallery: 人物写真のみ -->', '<!-- Salon interior / exterior -->');
-  out = out.replace('>得意なスタイル<', '>店内・外観の雰囲気<');
-  out = out.replace(
-    'ショート・ボブ・ミディアムのやわらかい質感づくりを中心に、一人ひとりに似合うスタイルをご提案します。',
-    '受付・セット面・シャンプー台など、店内の雰囲気と店頭の外観をご覧ください。',
-  );
-  out = out.replace('>スタイルギャラリー<', '>サロンの景色<');
-  out = out
-    .split(
-      '自然体の中に少しの洗練を感じるスタイルを大切にしています。<br>特に、ショート・ボブ・ミディアムのやわらかい質感づくりが得意です。',
-    )
-    .join('木と光、緑を取り入れた落ち着いた空間です。<br>ご来店前に、店内のイメージをお伝えします。');
-  out = out.replace('※ギャラリー写真は施術のイメージを伝えるためのモデル撮影であり、特定のスタッフを指すものではありません。', '※写真は当サロンの内装・外観です。');
-  out = out.replace('alt="ロングスタイル"', 'alt="店内の様子"');
-  out = out.replace('alt="施術シーン"', 'alt="店内"');
-  const galleryAltLabels = [
-    ['<span class="gallery-label">Short — やわらかなショート</span>', '<span class="gallery-label">セット面</span>'],
-    ['<span class="gallery-label">Bob — ふわっとしたボブ</span>', '<span class="gallery-label">シャンプー</span>'],
-    ['<span class="gallery-label">Bob — すっきりボブ</span>', '<span class="gallery-label">受付</span>'],
-    ['<span class="gallery-label">Medium — ナチュラルウェーブ</span>', '<span class="gallery-label">外観</span>'],
-    ['<span class="gallery-label">Long — やわらかなロング</span>', '<span class="gallery-label">エントランス</span>'],
-    ['<span class="gallery-label">Short — ソフトショート</span>', '<span class="gallery-label">店内</span>'],
-    ['<span class="gallery-label">Bob / Clean</span>', '<span class="gallery-label">受付</span>'],
-    ['<span class="gallery-label">Short / Soft</span>', '<span class="gallery-label">セット面</span>'],
-    ['<span class="gallery-label">Short</span>', '<span class="gallery-label">セット面</span>'],
-    ['<span class="gallery-label">Bob</span>', '<span class="gallery-label">シャンプー</span>'],
-    ['<span class="gallery-label">Medium</span>', '<span class="gallery-label">外観</span>'],
-    ['<span class="gallery-label">Long</span>', '<span class="gallery-label">エントランス</span>'],
-    ['alt="ショート"', 'alt="店内（セット面）"'],
-    ['alt="ボブ"', 'alt="シャンプー台"'],
-    ['alt="ミディアム"', 'alt="店舗外観"'],
-    ['alt="ロング"', 'alt="エントランス"'],
-    ['alt="ボブ2"', 'alt="受付カウンター"'],
-    ['alt="ショート2"', 'alt="店内（セット面）"'],
-    ['alt="Bob Wavy"', 'alt="店内"'],
-    ['alt="Bob Clean"', 'alt="店内"'],
-    ['alt="Short Dark"', 'alt="店内"'],
-  ];
-  for (const [a, b] of galleryAltLabels) {
-    out = out.split(a).join(b);
-  }
+  out = ensureMellowStyleGalleryHairImages(out);
 
   out = out.replace(/(<div class="mobile-menu"[\s\S]*?<\/div>)/, (block) =>
     block.replace(/\n\s{2,8}<a onclick="showPage/g, '\n  <a onclick="showPage'),

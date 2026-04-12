@@ -20,6 +20,11 @@ const OPS_LINKS: { href: string; title: string; desc: string }[] = [
     desc: '7種のフェーズ管理・配信停止用URLのコピー（ダッシュボード案件）。',
   },
   {
+    href: '/admin/outreach-memo-leads.html?v=memo1',
+    title: 'メモリード一覧（フェーズ前）',
+    desc: 'WEBがない・弱い店の店名とリンクメモだけを残し、店舗ドラフト編集へ流し込み。',
+  },
+  {
     href: '/mail-preference.html',
     title: '配信停止ページ（店主向け・確認用）',
     desc: '本番はメールに記載の ?t= 付きURLから開きます。トークンなしでは画面デモのみ。',
