@@ -316,6 +316,76 @@
         padding: 10px;
         background: #0f172a;
       }
+      .tw-batch-scroll {
+        overflow-x: auto;
+        margin-top: 8px;
+        border: 1px solid #2a3b52;
+        border-radius: 8px;
+        background: #0c1220;
+      }
+      .tw-batch-table {
+        border-collapse: collapse;
+        width: max-content;
+        min-width: 100%;
+        font-size: 0.72rem;
+      }
+      .tw-batch-table th,
+      .tw-batch-table td {
+        border: 1px solid #2a3b52;
+        padding: 6px 7px;
+        vertical-align: top;
+      }
+      .tw-batch-table th {
+        background: #1a2438;
+        color: #a5d8ff;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .tw-batch-table .tw-b-th-sub {
+        display: block;
+        font-weight: 400;
+        font-size: 0.62rem;
+        color: #8b9cb3;
+        margin-top: 2px;
+        white-space: normal;
+        max-width: 7rem;
+      }
+      .tw-batch-table textarea.tw-b-ta {
+        width: 9rem;
+        min-height: 2.5rem;
+        max-width: 28vw;
+        margin-top: 0;
+        font-size: 0.72rem;
+        padding: 5px 6px;
+      }
+      .tw-batch-table input.tw-b-inp {
+        width: 6.5rem;
+        max-width: 24vw;
+        margin-top: 0;
+        font-size: 0.72rem;
+        padding: 5px 6px;
+      }
+      .tw-batch-table td.tw-b-cell-muted {
+        color: #7d8fa3;
+        white-space: nowrap;
+        max-width: 5rem;
+      }
+      .tw-batch-table td.tw-b-cell-note {
+        font-size: 0.68rem;
+        color: #c4d4e8;
+        max-width: 8.5rem;
+        word-break: break-word;
+        line-height: 1.35;
+      }
+      .tw-batch-table td.tw-b-cell-res {
+        font-size: 0.68rem;
+        max-width: 9rem;
+        word-break: break-all;
+        line-height: 1.35;
+      }
+      .tw-batch-table td.tw-b-cell-res a {
+        color: #7dd3fc;
+      }
       .repeat-item {
         border: 1px solid #2a3b52;
         border-radius: 8px;
@@ -507,6 +577,49 @@
         ドラフト名（管理用・80文字以内）
         <input type="text" id="draft-name" placeholder="例: 渋谷カフェ 初稿" maxlength="80" />
       </label>
+      <div class="repeat-group tw-batch-wrap" style="margin-top: 12px">
+        <div style="font-size: 0.8rem; color: #9aacbf">一括投入（最大10件・列フロー）</div>
+        <p style="font-size: 0.72rem; color: #8b9cb3; margin: 6px 0 10px; line-height: 1.45">
+          <strong>新規モード</strong>で上のベーステンプレを選んだうえで使います。行ごとに
+          <strong>名前（管理用ドラフト名）</strong>→<strong>重複の初回確認</strong>→<strong>Gemini</strong>→<strong>マップ貼付</strong>→<strong>SNS（IG / X / TikTok）</strong>→<strong>最終確認</strong>→<strong>自動保存</strong>の順で処理します（APIの都合で行ごとに数秒〜数十秒かかります）。類似ドラフトが最終チェックで見つかった行だけ保存をスキップします。「フォームへ」で下の既存フォームに載せて微調整できます。
+        </p>
+        <div class="row-actions" style="margin-bottom: 4px; flex-wrap: wrap">
+          <button type="button" class="btn primary" id="tw-batch-run-all">一括実行（全行を順に処理）</button>
+          <button type="button" class="btn" id="tw-batch-clear-rows">表をクリア</button>
+        </div>
+        <div class="tw-batch-scroll">
+          <table class="tw-batch-table" id="tw-batch-table" aria-label="一括投入10行">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>
+                  名前
+                  <span class="tw-b-th-sub">管理用ドラフト名（80字以内）</span>
+                </th>
+                <th>
+                  重複
+                  <span class="tw-b-th-sub">店名らしさで初回照会</span>
+                </th>
+                <th>Gemini</th>
+                <th>マップ</th>
+                <th>IG</th>
+                <th>X</th>
+                <th>TikTok</th>
+                <th>
+                  確認
+                  <span class="tw-b-th-sub">保存直前の要約</span>
+                </th>
+                <th>
+                  調整
+                  <span class="tw-b-th-sub">詳細フォームへ</span>
+                </th>
+                <th>結果</th>
+              </tr>
+            </thead>
+            <tbody id="tw-batch-tbody"></tbody>
+          </table>
+        </div>
+      </div>
       <div class="repeat-group" style="margin-top: 12px">
         <div style="font-size: 0.8rem; color: #9aacbf">Gemini 一括入力（文章だけ・最大2万文字）</div>
         <p style="font-size: 0.75rem; color: #8b9cb3; margin: 6px 0; line-height: 1.45">
@@ -848,6 +961,7 @@
         /** フォームに無い override キー（旧高度JSON・SEO 等）を保存時まで保持 */
         var workerExtraOverride = {};
         var mapPasteTimer = null;
+        var twBatchLastByRow = {};
         var addBtnIdsBound = false;
         var customizationBaseById = {};
         var dashboardListCache = [];
@@ -1104,6 +1218,37 @@
             .catch(function () {
               /* 一覧失敗時はプルダウンだけ空のまま */
             });
+        }
+
+        /** 一括保存後など：既存カスタムのプルダウンだけ更新（新規モードでフォームを触らない） */
+        function refreshTemplateCustomizationsSelectOnly() {
+          return credFetch(api + '/template-customizations')
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (list) {
+              customizationBaseById = {};
+              var ex = document.getElementById('existing-id');
+              if (!ex) return;
+              var prev = ex.value;
+              ex.innerHTML = '';
+              (list || []).forEach(function (item) {
+                customizationBaseById[item.id] = item.baseTemplateId || '';
+                var o = document.createElement('option');
+                o.value = item.id;
+                o.textContent = (item.name || item.id) + ' · ' + item.id + ' · base:' + (item.baseTemplateId || '');
+                ex.appendChild(o);
+              });
+              if (
+                prev &&
+                Array.prototype.some.call(ex.options, function (opt) {
+                  return opt.value === prev;
+                })
+              ) {
+                ex.value = prev;
+              }
+            })
+            .catch(function () {});
         }
 
         function syncWorkerOutreachPanel() {
@@ -2614,6 +2759,274 @@
             });
         };
 
+        function twBatchSleep(ms) {
+          return new Promise(function (resolve) {
+            setTimeout(resolve, ms);
+          });
+        }
+
+        function twBatchInitTable() {
+          var tb = document.getElementById('tw-batch-tbody');
+          if (!tb || tb.children.length) return;
+          var frag = document.createDocumentFragment();
+          for (var i = 0; i < 10; i++) {
+            var tr = document.createElement('tr');
+            tr.setAttribute('data-tw-b-idx', String(i));
+            tr.innerHTML =
+              '<td>' +
+              (i + 1) +
+              '</td>' +
+              '<td><input type="text" class="tw-b-inp" id="tw-b-name-' +
+              i +
+              '" maxlength="80" autocomplete="off" /></td>' +
+              '<td class="tw-b-cell-muted" id="tw-b-dup-' +
+              i +
+              '">—</td>' +
+              '<td><textarea class="tw-b-ta mono" id="tw-b-gem-' +
+              i +
+              '" rows="2"></textarea></td>' +
+              '<td><textarea class="tw-b-ta mono" id="tw-b-map-' +
+              i +
+              '" rows="2" placeholder="iframe または URL"></textarea></td>' +
+              '<td><input type="url" class="tw-b-inp" id="tw-b-ig-' +
+              i +
+              '" placeholder="https://" autocomplete="off" /></td>' +
+              '<td><input type="url" class="tw-b-inp" id="tw-b-tw-' +
+              i +
+              '" placeholder="https://" autocomplete="off" /></td>' +
+              '<td><input type="url" class="tw-b-inp" id="tw-b-tt-' +
+              i +
+              '" placeholder="https://" autocomplete="off" /></td>' +
+              '<td class="tw-b-cell-note" id="tw-b-ver-' +
+              i +
+              '">—</td>' +
+              '<td><button type="button" class="btn small" id="tw-b-form-' +
+              i +
+              '">フォームへ</button></td>' +
+              '<td class="tw-b-cell-res" id="tw-b-res-' +
+              i +
+              '">—</td>';
+            frag.appendChild(tr);
+          }
+          tb.appendChild(frag);
+          for (var j = 0; j < 10; j++) {
+            (function (idx) {
+              var b = document.getElementById('tw-b-form-' + idx);
+              if (b) {
+                b.onclick = function () {
+                  twBatchLoadRowIntoForm(idx);
+                };
+              }
+            })(j);
+          }
+        }
+
+        function twBatchLoadRowIntoForm(rowIndex) {
+          var ov = twBatchLastByRow[rowIndex];
+          if (!ov) {
+            alert(
+              'この行はまとめて実行されていないか、マージ結果がありません。先に「一括実行」を走らせてください。',
+            );
+            return;
+          }
+          var nameEl = document.getElementById('tw-b-name-' + rowIndex);
+          var name = nameEl && nameEl.value ? String(nameEl.value).trim().slice(0, 80) : '';
+          document.getElementById('mode-select').value = 'new';
+          document.getElementById('wrap-base').style.display = 'block';
+          document.getElementById('wrap-existing').style.display = 'none';
+          currentCustomId = null;
+          document.getElementById('draft-name').value = name;
+          previewBaseTemplateId = document.getElementById('base-template').value || '';
+          fillFormFromOverride(ov);
+          syncRelatedUrlFieldsFromInputs();
+          scheduleLivePreview();
+          applyWorkerFormTemplateVisibility();
+          if (resolveWorkerFormBaseTemplateId() === 'cafe_1') {
+            var g = String((ov.cafeVisualGenre || '').trim());
+            if (g) applyCafeVisualGenreHeroSlides(g);
+          }
+          showErr(
+            'save-msg',
+            '一括表の行 ' +
+              (rowIndex + 1) +
+              ' のマージ結果をフォームに載せました。校正後はいつもの「保存」を押してください。',
+          );
+          showErr('save-err', '');
+        }
+
+        function twBatchResolveMapRaw(raw) {
+          raw = String(raw || '').trim();
+          if (!raw) return Promise.resolve('');
+          return credFetch(api + '/resolve-map-embed-url', {
+            method: 'POST',
+            body: JSON.stringify({ raw: raw }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, status: r.status, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok || !x.j.embedUrl) throw new Error(x.j.error || '地図URL取得に失敗');
+              return extractUrlFromPossiblyMarkdownLink(x.j.embedUrl) || String(x.j.embedUrl).trim();
+            });
+        }
+
+        function twBatchCreateSave(baseTemplateId, name, override, linkedDashboardId) {
+          return credFetch(api + '/template-customizations/save', {
+            method: 'POST',
+            body: JSON.stringify({
+              mode: 'create',
+              baseTemplateId: baseTemplateId,
+              name: name,
+              override: override,
+              status: 'draft',
+              linkedDashboardId: linkedDashboardId || undefined,
+            }),
+          }).then(function (r) {
+            return r.json().then(function (j) {
+              return { ok: r.ok, j: j };
+            });
+          });
+        }
+
+        function twBatchProcessOneRow(rowIndex, baseTemplateId, baseOverrideTemplate) {
+          var nameEl = document.getElementById('tw-b-name-' + rowIndex);
+          var name = nameEl && nameEl.value ? String(nameEl.value).trim().slice(0, 80) : '';
+          var dupCell = document.getElementById('tw-b-dup-' + rowIndex);
+          var verCell = document.getElementById('tw-b-ver-' + rowIndex);
+          var resCell = document.getElementById('tw-b-res-' + rowIndex);
+          if (!name) {
+            twBatchLastByRow[rowIndex] = null;
+            dupCell.textContent = '—';
+            verCell.textContent = '—';
+            resCell.textContent = '—';
+            return Promise.resolve();
+          }
+
+          var gem = String((document.getElementById('tw-b-gem-' + rowIndex) || {}).value || '').trim();
+          var mapRaw = String((document.getElementById('tw-b-map-' + rowIndex) || {}).value || '').trim();
+          var ig = String((document.getElementById('tw-b-ig-' + rowIndex) || {}).value || '').trim();
+          var twU = String((document.getElementById('tw-b-tw-' + rowIndex) || {}).value || '').trim();
+          var tt = String((document.getElementById('tw-b-tt-' + rowIndex) || {}).value || '').trim();
+
+          dupCell.textContent = '…';
+          verCell.textContent = '重複（初回）…';
+          resCell.textContent = '…';
+
+          return credFetch(api + '/template-customizations/duplicate-hint', {
+            method: 'POST',
+            body: JSON.stringify({ siteName: name, footerAddress: '' }),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || '重複確認に失敗');
+              var h0 = x.j.hits || [];
+              dupCell.textContent = h0.length ? '注意 ' + h0.length + '件' : 'なし';
+            })
+            .then(function () {
+              verCell.textContent = gem ? 'Gemini 解析中…' : 'ベース反映中…';
+              var merged = cloneJsonForForm(baseOverrideTemplate);
+              var baseRow = cloneJsonForForm(baseOverrideTemplate);
+              if (!gem) {
+                if (!String(merged.siteName || '').trim()) merged.siteName = name;
+                return Promise.resolve(merged);
+              }
+              var prevG = String((merged.cafeVisualGenre || '').trim());
+              return credFetch(api + '/template-customizations/extract-from-text', {
+                method: 'POST',
+                body: JSON.stringify({ text: gem }),
+              })
+                .then(function (r) {
+                  return r.json().then(function (j) {
+                    return { ok: r.ok, j: j };
+                  });
+                })
+                .then(function (x2) {
+                  if (!x2.ok) throw new Error(x2.j.error || 'Gemini 抽出に失敗');
+                  var patch = x2.j.override && typeof x2.j.override === 'object' ? x2.j.override : {};
+                  delete patch.heroSlides;
+                  delete patch.heroSlideStyles;
+                  merged = mergeExtractPatchIntoOverride(merged, patch);
+                  refreshFooterTextWhenGeminiOmittedFooter(baseRow, merged, patch);
+                  if (baseTemplateId === 'cafe_1') {
+                    var g2 = String((merged.cafeVisualGenre || '').trim());
+                    if (g2 && g2 !== prevG) {
+                      var urls = g2 === 'ramen' ? CAFE_1_RAMEN_HERO_URLS : CAFE_1_DEFAULT_HERO_URLS;
+                      merged.heroSlides = urls.slice();
+                      merged.heroSlideStyles = urls.map(function () {
+                        return { x: 50, y: 50, zoom: 100 };
+                      });
+                    }
+                  }
+                  return merged;
+                });
+            })
+            .then(function (merged) {
+              verCell.textContent = '地図・SNS 反映中…';
+              return twBatchResolveMapRaw(mapRaw).then(function (mapUrl) {
+                if (mapUrl) merged.mapEmbedUrl = mapUrl;
+                if (ig) merged.footerInstagramUrl = ig;
+                if (twU) merged.footerTwitterUrl = twU;
+                if (tt) merged.footerTiktokUrl = tt;
+                syncMapAndSocialUrlsIntoOverride(merged);
+                deriveSeoIntoOverride(merged);
+                twBatchLastByRow[rowIndex] = merged;
+                return merged;
+              });
+            })
+            .then(function (merged) {
+              verCell.textContent = '最終重複確認…';
+              return credFetch(api + '/template-customizations/duplicate-hint', {
+                method: 'POST',
+                body: JSON.stringify({
+                  siteName: String(merged.siteName || name || '').trim(),
+                  footerAddress: String(merged.footerAddress || '').trim(),
+                }),
+              }).then(function (r) {
+                return r.json().then(function (j) {
+                  return { ok: r.ok, j: j, merged: merged };
+                });
+              });
+            })
+            .then(function (x3) {
+              if (!x3.ok) throw new Error(x3.j.error || '最終重複確認に失敗');
+              var merged = x3.merged;
+              var hits = x3.j.hits || [];
+              if (hits.length) {
+                verCell.textContent = '類似ドラフト ' + hits.length + ' 件のため保存しませんでした';
+                resCell.textContent = '未保存';
+                return null;
+              }
+              verCell.textContent = '問題なし・自動保存';
+              var linked = String((document.getElementById('f-linked-dashboard') || {}).value || '').trim();
+              return twBatchCreateSave(baseTemplateId, name, merged, linked);
+            })
+            .then(function (saveX) {
+              if (!saveX) return;
+              if (!saveX.ok) throw new Error(saveX.j.error || '保存に失敗');
+              var id = saveX.j.item && saveX.j.item.id;
+              if (id) {
+                resCell.innerHTML =
+                  '<a href="./template-worker.html?id=' +
+                  encodeURIComponent(id) +
+                  '" target="_blank" rel="noopener noreferrer">' +
+                  escapeHtml(id) +
+                  '</a> 保存';
+              } else {
+                resCell.textContent = '保存済み';
+              }
+            })
+            .catch(function (e) {
+              verCell.textContent = 'エラー';
+              resCell.textContent = e.message || String(e);
+            });
+        }
+
         function applyMapEmbedPasteWorker() {
           showErr('map-paste-err', '');
           showErr('save-err', '');
@@ -2655,6 +3068,88 @@
           clearTimeout(mapPasteTimer);
           mapPasteTimer = setTimeout(applyMapEmbedPasteWorker, 450);
         });
+
+        twBatchInitTable();
+
+        document.getElementById('tw-batch-run-all').onclick = function () {
+          showErr('save-err', '');
+          showErr('save-msg', '');
+          var btn = document.getElementById('tw-batch-run-all');
+          var baseId = String((document.getElementById('base-template') || {}).value || '').trim();
+          if (!baseId) {
+            showErr('save-err', '先にベーステンプレを選んでください。');
+            return;
+          }
+          if (document.getElementById('mode-select').value !== 'new') {
+            showErr(
+              'save-err',
+              '一括投入は「新規ドラフト（ベーステンプレから）」モードに切り替えてから使ってください。',
+            );
+            return;
+          }
+          setButtonLoading(btn, true, '一括処理中…');
+          credFetch(api + '/template-default/' + encodeURIComponent(baseId))
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            })
+            .then(function (x) {
+              if (!x.ok) throw new Error(x.j.error || 'ビルトイン既定の取得に失敗');
+              var baseOv = templateDefaultJsonToOverride(x.j);
+              var chain = Promise.resolve();
+              for (var i = 0; i < 10; i++) {
+                (function (idx) {
+                  chain = chain
+                    .then(function () {
+                      return twBatchProcessOneRow(idx, baseId, baseOv);
+                    })
+                    .then(function () {
+                      return twBatchSleep(450);
+                    });
+                })(i);
+              }
+              return chain;
+            })
+            .then(function () {
+              return refreshTemplateCustomizationsSelectOnly().then(function () {
+                return refreshDashboardCache();
+              });
+            })
+            .then(function () {
+              showErr('save-msg', '一括処理が一通り終わりました。表の「確認」「結果」列をご確認ください。');
+            })
+            .catch(function (e) {
+              showErr('save-err', e.message || String(e));
+            })
+            .finally(function () {
+              setButtonLoading(btn, false);
+            });
+        };
+
+        document.getElementById('tw-batch-clear-rows').onclick = function () {
+          for (var i = 0; i < 10; i++) {
+            twBatchLastByRow[i] = null;
+            var n = document.getElementById('tw-b-name-' + i);
+            var g = document.getElementById('tw-b-gem-' + i);
+            var m = document.getElementById('tw-b-map-' + i);
+            var ig = document.getElementById('tw-b-ig-' + i);
+            var twEl = document.getElementById('tw-b-tw-' + i);
+            var tt = document.getElementById('tw-b-tt-' + i);
+            if (n) n.value = '';
+            if (g) g.value = '';
+            if (m) m.value = '';
+            if (ig) ig.value = '';
+            if (twEl) twEl.value = '';
+            if (tt) tt.value = '';
+            var dupCell = document.getElementById('tw-b-dup-' + i);
+            var verCell = document.getElementById('tw-b-ver-' + i);
+            var resCell = document.getElementById('tw-b-res-' + i);
+            if (dupCell) dupCell.textContent = '—';
+            if (verCell) verCell.textContent = '—';
+            if (resCell) resCell.textContent = '—';
+          }
+        };
 
         document.getElementById('btn-toggle-form-main').onclick = function () {
           var box = document.getElementById('form-main-collapsible');
