@@ -104,11 +104,11 @@ function forcePageSubHeroBg(html, pageId, url) {
   return html.slice(0, start) + chunk + html.slice(end);
 }
 
-/** Salon / FAQ のサブヒーローは内装。Style はヘアカタログ。Staff はスタッフ写真。 */
+/** 各ページサブヒーロー。Style / Staff のトップ帯はギャラリー用の店舗（内装）写真。 */
 function forceSalonStyleFaqInteriorHeroes(html) {
   let out = forcePageSubHeroBg(html, 'salon', '/beauty-salon-mellow/interior-floor.png');
-  out = forcePageSubHeroBg(out, 'style', '/beauty-salon-mellow/style-hair-01.png');
-  out = forcePageSubHeroBg(out, 'staff', '/beauty-salon-mellow/staff-kaito.png');
+  out = forcePageSubHeroBg(out, 'style', '/beauty-salon-mellow/interior-entrance.png');
+  out = forcePageSubHeroBg(out, 'staff', '/beauty-salon-mellow/interior-reception.png');
   out = forcePageSubHeroBg(out, 'faq', '/beauty-salon-mellow/interior-shampoo.png');
   return out;
 }
