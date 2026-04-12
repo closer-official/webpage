@@ -104,10 +104,11 @@ function forcePageSubHeroBg(html, pageId, url) {
   return html.slice(0, start) + chunk + html.slice(end);
 }
 
-/** Salon / FAQ のサブヒーローは内装。Style ページはヘアカタログ先頭画像。 */
+/** Salon / FAQ のサブヒーローは内装。Style はヘアカタログ。Staff はスタッフ写真。 */
 function forceSalonStyleFaqInteriorHeroes(html) {
   let out = forcePageSubHeroBg(html, 'salon', '/beauty-salon-mellow/interior-floor.png');
   out = forcePageSubHeroBg(out, 'style', '/beauty-salon-mellow/style-hair-01.png');
+  out = forcePageSubHeroBg(out, 'staff', '/beauty-salon-mellow/staff-kaito.png');
   out = forcePageSubHeroBg(out, 'faq', '/beauty-salon-mellow/interior-shampoo.png');
   return out;
 }
@@ -136,40 +137,16 @@ function ensureMellowStyleGalleryHairImages(html) {
 export function postProcessBeautySalonMellowBody(body) {
   let out = String(body || '');
 
-  out = out.replace(/<!-- Staff -->[\s\S]*?(?=<!-- Menu -->)/m, HOME_STYLE_SECTION);
-
-  const salonMarker = '<div class="page" id="page-salon">';
-  const salonIdx = out.indexOf(salonMarker);
-  if (salonIdx !== -1) {
-    const before = out.slice(0, salonIdx);
-    const staffPageStart = before.lastIndexOf('<div class="page" id="page-staff">');
-    if (staffPageStart !== -1) {
-      out = before.slice(0, staffPageStart) + salonMarker + out.slice(salonIdx + salonMarker.length);
-    }
-  }
-
-  out = out.replace(/\n\s*<a onclick="showPage\('staff'\)">Staff<\/a>/g, '');
-  out = out.replace(/<a onclick="showPage\('staff'\);closeMobileMenu\(\)">Staff<\/a>\s*\n/g, '');
-  out = out.replace(
-    /<a onclick="showPage\('staff'\)">Staff<\/a>/g,
-    '<a onclick="showPage(\'style\')">Style</a>',
-  );
-  out = out.replace(
-    /<a onclick="showPage\('staff'\);closeMobileMenu\(\)">Staff<\/a>/g,
-    '<a onclick="showPage(\'style\');closeMobileMenu()">Style</a>',
-  );
-
-  if (!out.includes(`if(id==='staff')`)) {
-    out = out.replace(
-      /function showPage\(id\)\{\s*/,
-      `function showPage(id){\n  if(id==='staff')id='style';\n  `,
-    );
+  /** ホーム内「Staff」ブロックの直後に、内装ピックアップ（人物なし）を差し込む */
+  const staffBlockEnd = /(<!-- Staff -->[\s\S]*?<\/section>\s*\n)(?=<!-- Menu -->)/m;
+  if (staffBlockEnd.test(out)) {
+    out = out.replace(staffBlockEnd, `$1${HOME_STYLE_SECTION}\n`);
   }
 
   if (/<nav>[\s\S]*?<\/nav>/.test(out) && !/<nav>[\s\S]*?showPage\('style'\)[\s\S]*?<\/nav>/.test(out)) {
     out = out.replace(
-      /(<a onclick="showPage\('menu'\)">Menu<\/a>)(\s*\n\s*)(<a onclick="showPage\('salon'\)">Salon<\/a>)/,
-      `$1$2<a onclick="showPage('style')">Style</a>$2$3`,
+      /(<a onclick="showPage\('menu'\)">Menu<\/a>)(\s*\n\s*)(<a onclick="showPage\('staff'\)">Staff<\/a>)/,
+      `$1$2$3$2<a onclick="showPage('style')">Style</a>`,
     );
   }
 
