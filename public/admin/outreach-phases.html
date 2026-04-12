@@ -134,6 +134,70 @@
         flex: 1 1 200px;
         line-height: 1.35;
       }
+      .phase-card__title a {
+        color: #e0f2fe;
+        text-decoration: underline;
+        text-decoration-color: rgba(125, 211, 252, 0.45);
+        text-underline-offset: 3px;
+      }
+      .phase-card__title a:hover {
+        color: #7dd3fc;
+        text-decoration-color: #7dd3fc;
+      }
+      .op-send-block {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--phase-line);
+      }
+      .op-send-block label.op-send-lbl {
+        display: block;
+        margin: 0 0 6px;
+        font-size: 0.78rem;
+        color: #8b9cb3;
+      }
+      textarea.op-send-msg {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 5.5rem;
+        padding: 8px 10px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        border-radius: 8px;
+        border: 1px solid #3d5675;
+        background: #0c1222;
+        color: #e8edf5;
+        resize: vertical;
+      }
+      .op-sns-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+        align-items: center;
+      }
+      .op-sns-row .btn.small {
+        min-height: 30px;
+      }
+      .op-sns-hint {
+        flex: 1 1 100%;
+        margin: 4px 0 0;
+        font-size: 0.72rem;
+        color: #6b7c92;
+        line-height: 1.4;
+      }
+      .excel-sheet textarea.op-send-msg--compact {
+        min-height: 3.2rem;
+        min-width: 140px;
+        font-size: 0.74rem;
+        padding: 6px 8px;
+      }
+      .op-sns-cell {
+        white-space: nowrap;
+      }
+      .op-sns-cell .btn.small {
+        margin-right: 4px;
+        margin-bottom: 4px;
+      }
       .phase-card__body {
         padding: 14px 16px 16px;
       }
@@ -587,7 +651,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。区分・検索の表示・各店のプルダウンは<strong>次の7種類だけ</strong>です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（住所は一覧には出しません）。区分・検索の表示・各店のプルダウンは<strong>次の7種類だけ</strong>です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -611,7 +675,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号 1,2,3…、上に列 A〜E の表です。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号 1,2,3…、上に列 A〜G の表です。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -1026,6 +1090,10 @@
         };
 
         var cachedDashboardItems = [];
+        var OP_SEND_DRAFT_KEY = 'closer_outreach_send_draft_by_shop_v1';
+        var pendingOutreachFocusShopId = null;
+        var pendingOutreachOpenChannel = null;
+        var outreachCopyMsgTimer = null;
         var liveSearchQuery = '';
         var OUTREACH_VIEW_STORAGE_KEY = 'closer_outreach_view_mode';
         var outreachViewMode = 'card';
@@ -1047,6 +1115,96 @@
             localStorage.setItem(OUTREACH_VIEW_STORAGE_KEY, outreachViewMode);
           } catch (e) {}
           syncViewToggleButtons();
+        }
+
+        function getSendDraftMap() {
+          try {
+            var raw = sessionStorage.getItem(OP_SEND_DRAFT_KEY);
+            var o = raw ? JSON.parse(raw) : {};
+            return o && typeof o === 'object' ? o : {};
+          } catch (e) {
+            return {};
+          }
+        }
+
+        function setSendDraftForItem(itemId, text) {
+          try {
+            var m = getSendDraftMap();
+            m[String(itemId)] = String(text || '');
+            sessionStorage.setItem(OP_SEND_DRAFT_KEY, JSON.stringify(m));
+          } catch (e) {}
+        }
+
+        function getSendDraftForItem(itemId) {
+          var m = getSendDraftMap();
+          return String(m[String(itemId)] || '');
+        }
+
+        function outreachGoToShopCard(itemId, channel) {
+          pendingOutreachFocusShopId = String(itemId || '').trim();
+          pendingOutreachOpenChannel = channel || null;
+          liveSearchQuery = '';
+          var inp = document.getElementById('phase-search');
+          if (inp) inp.value = '';
+          setOutreachViewMode('card');
+          render(cachedDashboardItems);
+        }
+
+        function applyOutreachShopFocusIfAny(items) {
+          var pid = pendingOutreachFocusShopId;
+          if (!pid) {
+            var raw = (location.hash || '').replace(/^#/, '');
+            if (raw.indexOf('shop=') === 0) {
+              pid = decodeURIComponent(raw.slice(5).split('&')[0] || '').trim();
+            }
+          }
+          var chOpen = pendingOutreachOpenChannel;
+          pendingOutreachFocusShopId = null;
+          pendingOutreachOpenChannel = null;
+          if (!pid || !items || !items.length) return;
+          var it = null;
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].id === pid) {
+              it = items[i];
+              break;
+            }
+          }
+          if (!it) return;
+          var selG = document.getElementById('phase-group-select');
+          var selS = document.getElementById('phase-shop-select');
+          if (!selG || !selS) return;
+          var glist = buildPhaseBrowserGroups();
+          var targetG = '';
+          for (var gi = 0; gi < glist.length; gi++) {
+            if (glist[gi].filter(it)) {
+              targetG = glist[gi].id;
+              break;
+            }
+          }
+          if (!targetG) return;
+          selG.value = targetG;
+          if (typeof selG.onchange === 'function') selG.onchange();
+          selS.value = pid;
+          if (typeof selS.onchange === 'function') selS.onchange();
+          if (chOpen === 'instagram') {
+            var u1 = footerInstagramUrlForItem(it);
+            if (u1) window.open(u1, '_blank', 'noopener,noreferrer');
+          } else if (chOpen === 'twitter') {
+            var u2 = footerTwitterUrlForItem(it);
+            if (u2) window.open(u2, '_blank', 'noopener,noreferrer');
+          } else if (chOpen === 'tiktok') {
+            var u3 = footerTiktokUrlForItem(it);
+            if (u3) window.open(u3, '_blank', 'noopener,noreferrer');
+          }
+          requestAnimationFrame(function () {
+            var dh = document.getElementById('phase-detail-host');
+            if (dh && dh.scrollIntoView) dh.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+              if (location.hash) {
+                history.replaceState(null, '', location.pathname + (location.search || ''));
+              }
+            } catch (e4) {}
+          });
         }
         var searchDebounceTimer = null;
 
@@ -1793,6 +1951,14 @@
           return u;
         }
 
+        function footerTiktokUrlForItem(item) {
+          var c = item.content;
+          var u = (c && c.footerTiktokUrl) || item.footerTiktokUrl || '';
+          u = String(u).trim();
+          if (!u || !/^https?:\/\//i.test(u)) return '';
+          return u;
+        }
+
         function templateWorkerEditUrl(customizationId) {
           var cid = String(customizationId || '').trim();
           if (!cid) return '';
@@ -2022,8 +2188,8 @@
 
         function renderDashboardRow(item, meta, loadFn) {
           var name = (item.researched && item.researched.name) || '（無題）';
-          var addr = (item.researched && item.researched.address) || '';
           var row = el('div', { class: 'phase-card' });
+          row.id = 'op-card-' + item.id;
 
           var header = el('header', { class: 'phase-card__header' });
           if (meta && meta.searchLabel) {
@@ -2034,14 +2200,28 @@
               }),
             );
           }
-          header.appendChild(el('h3', { class: 'phase-card__title', text: name }));
+          var titleEl = document.createElement('h3');
+          titleEl.className = 'phase-card__title';
+          var linkCid = String(item.linkedTemplateCustomizationId || '').trim();
+          var twEdit = templateWorkerEditUrl(linkCid);
+          if (twEdit) {
+            var na = document.createElement('a');
+            na.href = twEdit;
+            na.target = '_blank';
+            na.rel = 'noopener noreferrer';
+            na.setAttribute('title', '店舗ドラフトを編集（別タブ）');
+            na.textContent = name;
+            titleEl.appendChild(na);
+          } else {
+            titleEl.textContent = name;
+          }
+          header.appendChild(titleEl);
           row.appendChild(header);
 
           var body = el('div', { class: 'phase-card__body' });
           var top = el('div', { class: 'phase-card__top' });
 
           var colShop = el('aside', { class: 'phase-card__col phase-card__col--shop' });
-          colShop.appendChild(el('p', { class: 'muted', text: addr || '住所未登録' }));
           var hoursText = openingHoursLinesForItem(item);
           colShop.appendChild(el('p', { class: 'hours-heading', text: '営業時間' }));
           colShop.appendChild(
@@ -2101,6 +2281,63 @@
           top.appendChild(colMain);
           body.appendChild(top);
 
+          var sendWrap = el('div', { class: 'op-send-block' });
+          var taId = 'op-send-' + item.id;
+          var sendLbl = document.createElement('label');
+          sendLbl.className = 'op-send-lbl';
+          sendLbl.setAttribute('for', taId);
+          sendLbl.textContent = '送信メッセージ（このタブの一時保存・表モードと共通）';
+          var sendTa = el('textarea', {
+            id: taId,
+            class: 'op-send-msg',
+            placeholder: 'DM・メール用の本文下書き…',
+            'aria-label': '送信メッセージ',
+          });
+          sendTa.value = getSendDraftForItem(item.id);
+          var sendTimer = null;
+          sendTa.addEventListener('input', function () {
+            clearTimeout(sendTimer);
+            sendTimer = setTimeout(function () {
+              setSendDraftForItem(item.id, sendTa.value);
+            }, 400);
+          });
+          sendWrap.appendChild(sendLbl);
+          sendWrap.appendChild(sendTa);
+          var snsRow = el('div', { class: 'op-sns-row' });
+          function makeSnsBtn(label, channel) {
+            var b = el('button', { type: 'button', class: 'btn small', text: label });
+            b.onclick = function () {
+              var t = String(sendTa.value || '').trim();
+              if (t) {
+                try {
+                  navigator.clipboard.writeText(t);
+                  var cm = document.getElementById('copy-msg');
+                  if (cm) {
+                    cm.style.display = 'block';
+                    cm.textContent = '送信メッセージをクリップボードにコピーしました。';
+                    clearTimeout(outreachCopyMsgTimer);
+                    outreachCopyMsgTimer = setTimeout(function () {
+                      cm.style.display = 'none';
+                    }, 2200);
+                  }
+                } catch (e) {}
+              }
+              outreachGoToShopCard(item.id, channel);
+            };
+            return b;
+          }
+          snsRow.appendChild(makeSnsBtn('Instagram', 'instagram'));
+          snsRow.appendChild(makeSnsBtn('X（Twitter）', 'twitter'));
+          snsRow.appendChild(makeSnsBtn('TikTok', 'tiktok'));
+          snsRow.appendChild(
+            el('p', {
+              class: 'op-sns-hint',
+              text: 'カード（従来）表示に切り替え、この店の詳細カードへスクロールします。本文があるときはコピーします。各SNSの公式URLがドラフトに入っているときは別タブで開きます。',
+            }),
+          );
+          sendWrap.appendChild(snsRow);
+          body.appendChild(sendWrap);
+
           var linksRow = el('div', { class: 'phase-card__links' });
           renderShareUrlsSection(linksRow, item);
           body.appendChild(linksRow);
@@ -2119,7 +2356,7 @@
             el('p', {
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
-              text: '左端が行番号（1,2,3…）。上段の A〜E が列見出し（Excel と同じイメージ）です。行はフェーズ順（送信前→送信済み→…→失注）で上から並び、同一フェーズ内は店名順です。',
+              text: '左端が行番号（1,2,3…）。上段の列見出しは Excel と同じイメージです。住所列は非表示（プライバシー）です。行はフェーズ順（送信前→送信済み→…→失注）で上から並び、同一フェーズ内は店名順です。',
             }),
           );
 
@@ -2145,9 +2382,11 @@
           var headMeta = [
             { letter: 'A', desc: '店舗名' },
             { letter: 'B', desc: 'フェーズ（7種）' },
-            { letter: 'C', desc: 'フッター住所' },
+            { letter: 'C', desc: '住所（非表示）' },
             { letter: 'D', desc: 'ドラフト編集' },
             { letter: 'E', desc: 'プレビュー' },
+            { letter: 'F', desc: '送信メッセージ' },
+            { letter: 'G', desc: 'SNS→カードへ' },
           ];
           headMeta.forEach(function (col) {
             hr.appendChild(
@@ -2165,16 +2404,25 @@
             var tr = el('tr');
             tr.appendChild(el('td', { class: 'row-num', text: String(idx + 1) }));
             var nm = outreachShopName(item) || '（無題）';
-            tr.appendChild(el('td', { class: 'excel-cell-name', text: nm }));
+            var nameTd = el('td', { class: 'excel-cell-name' });
+            var cid = String(item.linkedTemplateCustomizationId || '').trim();
+            var twUrl = templateWorkerEditUrl(cid);
+            if (twUrl) {
+              var na = document.createElement('a');
+              na.href = twUrl;
+              na.target = '_blank';
+              na.rel = 'noopener noreferrer';
+              na.textContent = nm;
+              nameTd.appendChild(na);
+            } else {
+              nameTd.textContent = nm;
+            }
+            tr.appendChild(nameTd);
             var phaseTd = el('td');
             phaseTd.appendChild(renderPhaseSelect(item, loadFn));
             tr.appendChild(phaseTd);
-            var c = item.content || {};
-            var r = item.researched || {};
-            var addr = String(c.footerAddress || r.address || '').trim();
-            tr.appendChild(el('td', { class: 'excel-cell-text', text: addr || '—' }));
+            tr.appendChild(el('td', { class: 'excel-cell-text', text: '—' }));
             var editTd = el('td');
-            var cid = String(item.linkedTemplateCustomizationId || '').trim();
             if (cid) {
               var ea = document.createElement('a');
               ea.href = templateWorkerEditUrl(cid);
@@ -2201,6 +2449,39 @@
               prevTd.appendChild(el('span', { class: 'muted', text: '—' }));
             }
             tr.appendChild(prevTd);
+            var msgTd = el('td');
+            var gTaId = 'op-send-' + item.id;
+            var gTa = el('textarea', {
+              id: gTaId,
+              class: 'op-send-msg op-send-msg--compact',
+              rows: '3',
+              'aria-label': '送信メッセージ',
+            });
+            gTa.value = getSendDraftForItem(item.id);
+            var gTimer = null;
+            gTa.addEventListener('input', function () {
+              clearTimeout(gTimer);
+              gTimer = setTimeout(function () {
+                setSendDraftForItem(item.id, gTa.value);
+              }, 400);
+            });
+            msgTd.appendChild(gTa);
+            tr.appendChild(msgTd);
+            var snsTd = el('td', { class: 'op-sns-cell' });
+            [['IG', 'instagram'], ['X', 'twitter'], ['TK', 'tiktok']].forEach(function (pair) {
+              var sb = el('button', { type: 'button', class: 'btn small', text: pair[0] });
+              sb.onclick = function () {
+                var t = String(gTa.value || '').trim();
+                if (t) {
+                  try {
+                    navigator.clipboard.writeText(t);
+                  } catch (e) {}
+                }
+                outreachGoToShopCard(item.id, pair[1]);
+              };
+              snsTd.appendChild(sb);
+            });
+            tr.appendChild(snsTd);
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
@@ -2338,7 +2619,7 @@
             }
             if (!item) return;
             var card = renderDashboardRow(item, null, load);
-            card.id = 'dash-' + item.id;
+            card.id = 'op-card-' + item.id;
             detailHost.appendChild(card);
           }
 
@@ -2374,22 +2655,33 @@
           host.appendChild(detailHost);
 
           refillShops();
-          var firstIdx = -1;
-          for (var ri = 0; ri < groups.length; ri++) {
-            if (items.filter(groups[ri].filter).length > 0) {
-              firstIdx = ri;
-              break;
-            }
-          }
-          if (firstIdx >= 0) {
-            selG.selectedIndex = firstIdx;
-            refillShops();
-            if (selS.options.length > 1) {
-              selS.selectedIndex = 1;
-              showDetail(selS.value);
-            }
-          } else {
+          var rawHashShop = (location.hash || '').replace(/^#/, '');
+          var hashShopId =
+            rawHashShop.indexOf('shop=') === 0
+              ? decodeURIComponent(rawHashShop.slice(5).split('&')[0] || '').trim()
+              : '';
+          var focusPending = !!(pendingOutreachFocusShopId || hashShopId);
+          if (focusPending) {
             showDetail('');
+            applyOutreachShopFocusIfAny(items);
+          } else {
+            var firstIdx = -1;
+            for (var ri = 0; ri < groups.length; ri++) {
+              if (items.filter(groups[ri].filter).length > 0) {
+                firstIdx = ri;
+                break;
+              }
+            }
+            if (firstIdx >= 0) {
+              selG.selectedIndex = firstIdx;
+              refillShops();
+              if (selS.options.length > 1) {
+                selS.selectedIndex = 1;
+                showDetail(selS.value);
+              }
+            } else {
+              showDetail('');
+            }
           }
 
           updateSendTimingPanel(true);
