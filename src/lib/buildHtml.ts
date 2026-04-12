@@ -1,6 +1,7 @@
 import type { PageContent, SEOData, TemplateOption, BuildHtmlGenOptions } from '../types';
 import type { NavItem } from '../types';
 import { buildJsonLd, getEffectiveCanonicalForBuild } from './seo';
+import { buildBeautySalonMellowFullDocument } from './beautySalonMellowPage';
 import { RESPONSIVE_BASE_CSS } from './responsiveBaseCss';
 import { renderBookingHeadMeta, renderBookingBodyWidget } from './bookingWidgetHtml';
 import { buildNavyDeliverableMainHtmlClient } from './navyDeliverableMainHtml';
@@ -192,6 +193,7 @@ const DEFAULT_CTA: Record<string, { label: string; href: string }> = {
   event: { label: 'お申し込み', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
   ramen_2: { label: 'メニューを見る', href: '#menu' },
+  beauty_salon_mellow: { label: 'WEB予約', href: '#reserve' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
   wiki_ensyuritsu: { label: '相談する', href: '#contact' },
@@ -241,11 +243,21 @@ export function buildHtml(
     metaTags += renderBookingHeadMeta(genOpts.bookingItemId, genOpts.bookingApiOrigin);
   }
 
+  if (tid === 'beauty_salon_mellow') {
+    return buildBeautySalonMellowFullDocument({
+      escapeHtml,
+      content,
+      seo,
+      metaTags,
+      jsonLd,
+    });
+  }
+
   const bodyClass = `page-wrapper template-${template.id}`;
   const overrides = options?.genOptions?.styleOverrides;
   const useDrawerNav = (tid === 'cafe_tea' && overrides?.navStyle !== 'sticky') || tid === 'cafe_1';
   let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);
-  if (tid !== 'event' && tid !== 'cafe_1') {
+  if (tid !== 'event' && tid !== 'cafe_1' && tid !== 'beauty_salon_mellow') {
     navItems = [...navItems, { label: '料金・お支払', href: '#payment' }];
   }
   const cta = content.ctaLabel && content.ctaHref
@@ -901,6 +913,8 @@ ${cafe1ShopLocationsHtml()}
     ramen_2: 'https://images.pexels.com/photos/8969237/pexels-photo-8969237.jpeg?auto=compress&cs=tinysrgb&w=1400',
     cafe_1:
       'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    beauty_salon_mellow:
+      'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=85',
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
     gym_personal_neon:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',

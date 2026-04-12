@@ -1409,6 +1409,9 @@ export function getTemplateFullCss(templateId) {
   if (key === 'wiki_sauna') {
     return WIKI_SAUNA_DELIVERABLE_PAGE_CSS;
   }
+  if (key === 'beauty_salon_mellow') {
+    return '';
+  }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS
     : key === 'cafe_tea' ? CAFE_TEA_CSS
     : key === 'cafe_1' ? CAFE_1_CSS

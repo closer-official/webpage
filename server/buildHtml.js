@@ -18,6 +18,7 @@ import {
   appendPaymentLogosAfterBrContent,
   plainLineAsParagraphWithPaymentLogos,
 } from './paymentLogosHtml.js';
+import { buildBeautySalonMellowFullPage } from './buildBeautySalonMellowPage.js';
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -211,6 +212,7 @@ const DEFAULT_CTA = {
   pet_salon: { label: 'ご予約', href: '#contact' },
   ramen: { label: 'メニューを見る', href: '#menu' },
   ramen_2: { label: 'メニューを見る', href: '#menu' },
+  beauty_salon_mellow: { label: 'WEB予約', href: '#reserve' },
   navy_cyan_consult: { label: 'お問い合わせ', href: '#contact' },
   gym_personal_neon: { label: 'LINEで入会', href: '#top' },
   wiki_ensyuritsu: { label: '相談する', href: '#contact' },
@@ -239,6 +241,8 @@ const defaultHeroImages = {
   wiki_sauna: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
   studio_blush_editorial:
     'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
+  beauty_salon_mellow:
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
 };
 
 /**
@@ -295,7 +299,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       : '';
 
   let navItems = (content.navItems && content.navItems.length) ? content.navItems : (DEFAULT_NAV[tid] || []);
-  if (tid !== 'event' && tid !== 'cafe_1') {
+  if (tid !== 'event' && tid !== 'cafe_1' && tid !== 'beauty_salon_mellow') {
     navItems = [...(Array.isArray(navItems) ? navItems : []), { label: '料金・お支払', href: '#payment' }];
   }
   const purchaseNavHtml = !purchaseUrl ? '' : (tid === 'cafe_tea' || tid === 'cafe_1'
@@ -620,7 +624,39 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
       })),
     });
   }
+  if (tid === 'beauty_salon_mellow') {
+    const hs = {
+      '@context': 'https://schema.org',
+      '@type': 'HairSalon',
+      name: content.siteName,
+      description: seo.metaDescription,
+      url: canonicalTrim || undefined,
+    };
+    if (content.footerPhone) hs.telephone = content.footerPhone;
+    if (content.footerAddress) {
+      hs.address = {
+        '@type': 'PostalAddress',
+        streetAddress: content.footerAddress,
+        addressCountry: 'JP',
+      };
+    }
+    const imgs = (content.heroSlides || [])
+      .map((u) => String(u || '').trim())
+      .filter((u) => /^https?:\/\//i.test(u));
+    if (seo.ogImageUrl && String(seo.ogImageUrl).trim()) imgs.unshift(String(seo.ogImageUrl).trim());
+    if (imgs.length) hs.image = imgs.length === 1 ? imgs[0] : imgs;
+    jsonLdGraphs.push(hs);
+  }
   const jsonLdScript = `<script type="application/ld+json">${JSON.stringify(jsonLdGraphs)}</script>`;
+
+  if (tid === 'beauty_salon_mellow') {
+    return buildBeautySalonMellowFullPage({
+      content,
+      metaTags,
+      jsonLdScript,
+      escapeHtml,
+    });
+  }
 
   function getSectionRhythmClass(i, total) {
     if (total <= 0) return 'section-rhythm-default';

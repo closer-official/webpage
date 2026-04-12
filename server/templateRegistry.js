@@ -22,6 +22,10 @@ export const BUILTIN_BUILD_HTML_TEMPLATES = Object.freeze([
   Object.freeze({ id: 'wiki_ensyuritsu', name: 'wiki円室律（オリジナル・ナレッジ）' }),
   Object.freeze({ id: 'wiki_sauna', name: 'wiki湯環（ウェルネス・サウナWiki）' }),
   Object.freeze({ id: 'ramen_2', name: 'ラーメン弐（ラーメン・クイック情報バー・SNS三種）' }),
+  Object.freeze({
+    id: 'beauty_salon_mellow',
+    name: '美容室 mellow（マルチページ・表参道系デザイン／docs 由来の軽量生成HTML）',
+  }),
 ]);
 
 /** @type {readonly string[]} */

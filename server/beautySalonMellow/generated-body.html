@@ -1,0 +1,808 @@
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+  <a onclick="showPage('home');closeMobileMenu()">Home</a>
+  <a onclick="showPage('concept');closeMobileMenu()">Concept</a>
+  <a onclick="showPage('menu');closeMobileMenu()">Menu</a>
+  <a onclick="showPage('staff');closeMobileMenu()">Staff</a>
+  <a onclick="showPage('salon');closeMobileMenu()">Salon</a>
+  <a onclick="showPage('style');closeMobileMenu()">Style</a>
+  <a onclick="showPage('first');closeMobileMenu()">First Visit</a>
+  <a onclick="showPage('access');closeMobileMenu()">Access</a>
+  <a onclick="showPage('faq');closeMobileMenu()">FAQ</a>
+</div>
+<header id="header">
+  <a class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></a>
+  <nav>
+    <a onclick="showPage('concept')">Concept</a>
+    <a onclick="showPage('menu')">Menu</a>
+    <a onclick="showPage('staff')">Staff</a>
+    <a onclick="showPage('salon')">Salon</a>
+    <a onclick="showPage('first')">First Visit</a>
+    <a onclick="showPage('access')">Access</a>
+    <a class="nav-reserve" onclick="showPage('reserve')">Reserve</a>
+  </nav>
+  <div class="hamburger" onclick="openMobileMenu()"><span></span><span></span><span></span></div>
+</header>
+
+<div class="page active" id="page-home">
+<section class="hero">
+  <div class="hero-img" style="background-image:url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80')"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-label">OMOTESANDO HAIR SALON</div>
+    <h1 class="hero-title">やわらかく、<em>上品に。</em><br>毎日に自然と<br>なじむ髪へ。</h1>
+    <p class="hero-subtitle">ショート・ボブ・ミディアムを中心に、<br>扱いやすさとやわらかな質感を大切にした<br>プライベート感のあるヘアサロン</p>
+    <div class="hero-actions">
+      <a class="btn-primary" onclick="showPage('reserve')">WEB予約はこちら</a>
+      <a class="btn-outline" onclick="showPage('menu')">メニューを見る</a>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL</div>
+</section>
+
+<!-- Concept intro -->
+<section style="background:var(--ivory)">
+  <div class="two-col">
+    <div class="photo-frame portrait deco fade-up">
+      <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="ロングスタイル">
+    </div>
+    <div>
+      <div class="section-label fade-up">Concept</div>
+      <h2 class="section-title fade-up delay-1">光の中で、<br>自分らしく整う。</h2>
+      <p class="section-text fade-up delay-2">表参道の静かな通り沿いにある、<br>光のやわらかい小さなヘアサロン。<br><br>mellow by luceでは、<br>「きれいに見えること」だけではなく、<br>毎朝の扱いやすさや、時間が経っても<br>気分よく過ごせることを大切にしています。</p>
+      <div class="fade-up delay-3" style="margin-top:40px"><a class="btn-outline" onclick="showPage('concept')">About us →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- Style gallery: 人物写真のみ -->
+<section style="background:var(--cream)">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Style</div>
+    <h2 class="section-title fade-up delay-1">得意なスタイル</h2>
+    <p class="section-text fade-up delay-2">ショート・ボブ・ミディアムのやわらかい質感づくりを中心に、一人ひとりに似合うスタイルをご提案します。</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item fade-up"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80" alt="ショート"><div class="gallery-overlay"><span class="gallery-label">Short</span></div></div>
+    <div class="gallery-item fade-up delay-1"><img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80" alt="ボブ"><div class="gallery-overlay"><span class="gallery-label">Bob</span></div></div>
+    <div class="gallery-item fade-up delay-2"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80" alt="ミディアム"><div class="gallery-overlay"><span class="gallery-label">Medium</span></div></div>
+    <div class="gallery-item fade-up"><img src="https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80" alt="ロング"><div class="gallery-overlay"><span class="gallery-label">Long</span></div></div>
+    <div class="gallery-item fade-up delay-1"><img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="ボブ2"><div class="gallery-overlay"><span class="gallery-label">Bob / Clean</span></div></div>
+    <div class="gallery-item fade-up delay-2"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80" alt="ショート2"><div class="gallery-overlay"><span class="gallery-label">Short / Soft</span></div></div>
+  </div>
+  <div style="text-align:center;margin-top:48px"><a class="btn-outline" onclick="showPage('style')">View all styles →</a></div>
+</section>
+
+<!-- Salon interior: 店内写真のみ -->
+<section style="background:var(--ivory)">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Salon</div>
+    <h2 class="section-title fade-up delay-1">木のぬくもりと<br>やわらかな光の空間</h2>
+    <p class="section-text fade-up delay-2">明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。</p>
+  </div>
+  <div class="interior-trio fade-up">
+    <div class="interior-main-img"><img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80" alt="サロン内観"></div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:3px">
+      <div class="interior-sub-img"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80" alt="受付"></div>
+      <div class="interior-sub-img"><img src="https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80" alt="シャンプー台"></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:48px"><a class="btn-outline" onclick="showPage('salon')">More about salon →</a></div>
+</section>
+
+<!-- Staff -->
+<section style="background:var(--cream)">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Staff</div>
+    <h2 class="section-title fade-up delay-1">スタッフ紹介</h2>
+  </div>
+  <div class="staff-grid">
+    <div class="staff-card fade-up">
+      <div class="staff-img"><img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="Kaito Nagase"></div>
+      <div>
+        <div class="staff-name"><small>DIRECTOR / STYLIST</small>Kaito Nagase</div>
+        <p class="staff-desc">やわらかいショートや扱いやすいボブスタイルが得意です。骨格や髪質を見ながら、自然に似合うバランスをご提案します。</p>
+        <div class="staff-tags"><span class="staff-tag">ショート</span><span class="staff-tag">ボブ</span><span class="staff-tag">顔まわり似合わせ</span></div>
+      </div>
+    </div>
+    <div class="staff-card fade-up delay-1">
+      <div class="staff-img"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80" alt="Mizuki Arai"></div>
+      <div>
+        <div class="staff-name"><small>STYLIST</small>Mizuki Arai</div>
+        <p class="staff-desc">ミディアムからロングまで、やわらかさと女性らしさのあるスタイルが得意です。透明感カラーも大切にしています。</p>
+        <div class="staff-tags"><span class="staff-tag">ミディアム</span><span class="staff-tag">透明感カラー</span><span class="staff-tag">ロング</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:48px"><a class="btn-outline" onclick="showPage('staff')">Staff profile →</a></div>
+</section>
+
+<!-- Menu -->
+<section class="menu-bg">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Menu</div>
+    <h2 class="section-title fade-up delay-1">メニュー</h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card fade-up" onclick="showPage('menu')"><div class="menu-card-en">Cut</div><div class="menu-card-jp">カット</div><div class="menu-card-price">¥7,150<span>〜</span></div><div class="menu-card-desc">骨格や毛流れを見ながら、自然に馴染むシルエットに。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+    <div class="menu-card fade-up delay-1" onclick="showPage('menu')"><div class="menu-card-en">Color</div><div class="menu-card-jp">カラー</div><div class="menu-card-price">¥8,250<span>〜</span></div><div class="menu-card-desc">やわらかく透明感のある発色を大切にしたカラーリング。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+    <div class="menu-card fade-up delay-2" onclick="showPage('menu')"><div class="menu-card-en">Perm</div><div class="menu-card-jp">パーマ</div><div class="menu-card-price">¥8,800<span>〜</span></div><div class="menu-card-desc">軽さとまとまりのある、自然なカールスタイルを。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+    <div class="menu-card fade-up" onclick="showPage('menu')"><div class="menu-card-en">Treatment</div><div class="menu-card-jp">トリートメント</div><div class="menu-card-price">¥3,300<span>〜</span></div><div class="menu-card-desc">艶とやわらかさを引き出す丁寧なトリートメント。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+    <div class="menu-card fade-up delay-1" onclick="showPage('menu')"><div class="menu-card-en">Straight</div><div class="menu-card-jp">ストレート</div><div class="menu-card-price">¥12,100<span>〜</span></div><div class="menu-card-desc">扱いやすく、上品にまとまるストレートパーマ。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+    <div class="menu-card fade-up delay-2" onclick="showPage('menu')"><div class="menu-card-en">Head Spa</div><div class="menu-card-jp">ヘッドスパ</div><div class="menu-card-price">¥2,750<span>〜</span></div><div class="menu-card-desc">頭皮からリフレッシュ。日常の疲れをほぐします。</div><div class="menu-card-arrow">VIEW MENU</div></div>
+  </div>
+</section>
+
+<!-- Reserve -->
+<section class="reserve-banner">
+  <div class="section-label fade-up">Reserve</div>
+  <h2 class="section-title fade-up delay-1">ご予約はこちら</h2>
+  <p class="section-text fade-up delay-2">ご予約は24時間WEBから承っております。<br>初めての方も、メニューに迷われている方もお気軽にご相談ください。</p>
+  <div class="reserve-actions fade-up delay-3">
+    <a class="btn-gold" onclick="showPage('reserve')">WEB予約</a>
+    <a class="btn-outline-dark" href="tel:03-0000-1842">お電話はこちら</a>
+    <a class="btn-outline-dark">LINEで相談する</a>
+  </div>
+</section>
+
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-concept">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">About</div><div class="sub-hero-title">Concept</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div class="two-col" style="max-width:1200px;margin:0 auto">
+    <div class="photo-frame portrait deco fade-up">
+      <img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80" alt="施術シーン">
+    </div>
+    <div>
+      <div class="section-label fade-up">Philosophy</div>
+      <h2 class="section-title fade-up delay-1">大きく変えすぎなくても、<br>気持ちは少し<br>軽くなります。</h2>
+      <p class="section-text fade-up delay-2">mellow by luceが大切にしているのは、肩の力を抜いて過ごせる、自然で上品なヘア。<br><br>やわらかな光が入る落ち着いた空間で、一人ひとりの髪の状態と理想を丁寧に伺いながら、無理のない、長く楽しめるスタイルをご提案します。</p>
+    </div>
+  </div>
+</section>
+<section style="background:var(--cream)">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Our Policy</div>
+    <h2 class="section-title fade-up delay-1">私たちの4つのこだわり</h2>
+  </div>
+  <div class="policy-grid">
+    <div class="policy-card fade-up"><div class="policy-num">01</div><div class="policy-title">扱いやすさを大切にしたカット</div><p class="policy-desc">乾かしただけでもまとまりやすく、毎日のスタイリングが少し楽になるように。骨格や毛流れを見ながら、自然に馴染むシルエットに整えます。</p></div>
+    <div class="policy-card fade-up delay-1"><div class="policy-num">02</div><div class="policy-title">やわらかく見える質感づくり</div><p class="policy-desc">軽すぎず、重すぎず。毛先の動きや表面のやわらかさを大切にしながら、上品に見える質感をつくります。</p></div>
+    <div class="policy-card fade-up delay-2"><div class="policy-num">03</div><div class="policy-title">初めての方でも相談しやすい空間</div><p class="policy-desc">「似合う髪型が分からない」「短くしたいけれど不安がある」そんなご相談も歓迎しています。カウンセリングの時間を大切にしながら、無理のないご提案を行います。</p></div>
+    <div class="policy-card fade-up delay-3"><div class="policy-num">04</div><div class="policy-title">落ち着いて過ごせる店内</div><p class="policy-desc">明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。シャンプーブースも落ち着いた雰囲気で、リラックスしやすい設計です。</p></div>
+  </div>
+</section>
+<section class="reserve-banner">
+  <div class="section-label fade-up">Reserve</div>
+  <h2 class="section-title fade-up delay-1">ご予約はこちら</h2>
+  <div class="reserve-actions fade-up delay-2">
+    <a class="btn-gold" onclick="showPage('reserve')">WEB予約</a>
+    <a class="btn-outline-dark" onclick="showPage('first')">初めての方へ</a>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-menu">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80');background-position:top center"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Price Guide</div><div class="sub-hero-title">Menu</div></div>
+</div>
+<div class="menu-section">
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Cut</div><div class="menu-category-jp">カット</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">カット</span><span class="menu-item-price">¥7,150</span></div>
+      <div class="menu-item"><span class="menu-item-name">前髪カット</span><span class="menu-item-price">¥1,650</span></div>
+      <div class="menu-item"><span class="menu-item-name">メンズカット</span><span class="menu-item-price">¥6,600</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Color</div><div class="menu-category-jp">カラー</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">カラー</span><span class="menu-item-price">¥8,250〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">透明感カラー</span><span class="menu-item-price">¥9,350〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">リタッチカラー</span><span class="menu-item-price">¥7,150</span></div>
+      <div class="menu-item"><span class="menu-item-name">デザインカラー</span><span class="menu-item-price">¥4,400〜</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Perm</div><div class="menu-category-jp">パーマ</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">パーマ</span><span class="menu-item-price">¥8,800〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">前髪パーマ</span><span class="menu-item-price">¥4,400〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">デジタルパーマ</span><span class="menu-item-price">¥12,100〜</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Straight</div><div class="menu-category-jp">ストレート</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">ストレートパーマ</span><span class="menu-item-price">¥12,100〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">髪質改善ストレート</span><span class="menu-item-price">¥16,500〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">前髪ストレート</span><span class="menu-item-price">¥5,500〜</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Treatment</div><div class="menu-category-jp">トリートメント</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">ベーシックトリートメント</span><span class="menu-item-price">¥3,300</span></div>
+      <div class="menu-item"><span class="menu-item-name">3stepトリートメント</span><span class="menu-item-price">¥5,500</span></div>
+      <div class="menu-item"><span class="menu-item-name">プレミアムトリートメント</span><span class="menu-item-price">¥7,700</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up">
+    <div class="menu-category-title">Head Spa</div><div class="menu-category-jp">ヘッドスパ</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">クイックスパ 15分</span><span class="menu-item-price">¥2,750</span></div>
+      <div class="menu-item"><span class="menu-item-name">ヘッドスパ 30分</span><span class="menu-item-price">¥4,950</span></div>
+    </div>
+  </div>
+  <div class="menu-category fade-up" style="background:var(--cream);padding:40px;border-bottom:none">
+    <div class="menu-category-title">Set Menu</div><div class="menu-category-jp">おすすめセット</div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="menu-item-name">カット + カラー</span><span class="menu-item-price">¥14,850〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">カット + カラー + トリートメント</span><span class="menu-item-price">¥18,700〜</span></div>
+      <div class="menu-item"><span class="menu-item-name">カット + パーマ</span><span class="menu-item-price">¥15,400〜</span></div>
+    </div>
+    <p class="menu-note">※長さ・デザインにより料金が異なる場合があります。<br>※詳しくはご予約時またはカウンセリング時にご案内いたします。</p>
+  </div>
+</div>
+<section class="reserve-banner">
+  <div class="section-label fade-up">Reserve</div>
+  <h2 class="section-title fade-up delay-1">ご予約はこちら</h2>
+  <div class="reserve-actions fade-up delay-2"><a class="btn-gold" onclick="showPage('reserve')">WEB予約</a></div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-staff">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Our Team</div><div class="sub-hero-title">Staff</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div style="max-width:900px;margin:0 auto">
+    <div class="section-label fade-up">Team</div>
+    <h2 class="section-title fade-up delay-1">担当スタッフ</h2>
+  </div>
+  <div class="staff-grid" style="max-width:900px;margin:60px auto 0">
+    <div class="staff-card fade-up">
+      <div class="staff-img"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80" alt="Kaito Nagase"></div>
+      <div>
+        <div class="staff-name"><small>DIRECTOR / STYLIST</small>Kaito Nagase</div>
+        <p class="staff-desc">やわらかいショートや、扱いやすいボブスタイルが得意です。骨格や髪質を見ながら、自然に似合うバランスをご提案します。初めての方にも緊張せず過ごしていただけるよう、丁寧なカウンセリングを心がけています。</p>
+        <p class="staff-quote">「変えすぎなくても、気分が整うヘアを大切にしています。」</p>
+        <div class="staff-tags"><span class="staff-tag">ショート</span><span class="staff-tag">ボブ</span><span class="staff-tag">メンズ</span><span class="staff-tag">顔まわり</span></div>
+      </div>
+    </div>
+    <div class="staff-card fade-up delay-1">
+      <div class="staff-img"><img src="https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80" alt="Mizuki Arai"></div>
+      <div>
+        <div class="staff-name"><small>STYLIST</small>Mizuki Arai</div>
+        <p class="staff-desc">ミディアムからロングまで、やわらかさと女性らしさのあるスタイルが得意です。髪をきれいに見せたい方、自然に垢抜けたい方、初めてでどう伝えればいいか不安な方も、安心してご相談ください。</p>
+        <p class="staff-quote">「日常に自然になじむ、無理のないきれいさをご提案します。」</p>
+        <div class="staff-tags"><span class="staff-tag">ミディアム</span><span class="staff-tag">ロング</span><span class="staff-tag">透明感カラー</span><span class="staff-tag">質感</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-salon">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Interior</div><div class="sub-hero-title">Salon</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div class="two-col" style="max-width:1200px;margin:0 auto">
+    <div>
+      <div class="section-label fade-up">Salon</div>
+      <h2 class="section-title fade-up delay-1">木のぬくもりと<br>やわらかな光の空間</h2>
+      <p class="section-text fade-up delay-2">木のぬくもりとやわらかな光を感じる、落ち着いた空間です。セット面はゆとりを持って配置し、周囲を気にしすぎず過ごしやすい距離感を大切にしています。<br><br>シャンプーブースは少し照明を落とした、リラックスしやすい落ち着いた雰囲気です。</p>
+    </div>
+    <div class="photo-frame landscape deco fade-up delay-1">
+      <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="受付">
+    </div>
+  </div>
+</section>
+<section style="background:var(--cream);padding-top:0">
+  <div class="salon-trio" style="max-width:1200px;margin:0 auto">
+    <div class="salon-item fade-up"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80" alt="入口"></div>
+    <div class="salon-item fade-up delay-1"><img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80" alt="セット面"></div>
+    <div class="salon-item fade-up delay-2"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80" alt="シャンプー台"></div>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-style">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80');background-position:center top"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Gallery</div><div class="sub-hero-title">Style</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-label fade-up">Style Gallery</div>
+    <h2 class="section-title fade-up delay-1">スタイルギャラリー</h2>
+    <p class="section-text fade-up delay-2">自然体の中に少しの洗練を感じるスタイルを大切にしています。<br>特に、ショート・ボブ・ミディアムのやわらかい質感づくりが得意です。</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item fade-up"><img src="https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80" alt="Short"><div class="gallery-overlay"><span class="gallery-label">Short — やわらかなショート</span></div></div>
+    <div class="gallery-item fade-up delay-1"><img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="Bob Wavy"><div class="gallery-overlay"><span class="gallery-label">Bob — ふわっとしたボブ</span></div></div>
+    <div class="gallery-item fade-up delay-2"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80" alt="Bob Clean"><div class="gallery-overlay"><span class="gallery-label">Bob — すっきりボブ</span></div></div>
+    <div class="gallery-item fade-up"><img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80" alt="Medium"><div class="gallery-overlay"><span class="gallery-label">Medium — ナチュラルウェーブ</span></div></div>
+    <div class="gallery-item fade-up delay-1"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80" alt="Long"><div class="gallery-overlay"><span class="gallery-label">Long — やわらかなロング</span></div></div>
+    <div class="gallery-item fade-up delay-2"><img src="https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80" alt="Short Dark"><div class="gallery-overlay"><span class="gallery-label">Short — ソフトショート</span></div></div>
+  </div>
+</section>
+<section class="reserve-banner">
+  <div class="section-label fade-up">Reserve</div>
+  <h2 class="section-title fade-up delay-1">ご予約はこちら</h2>
+  <div class="reserve-actions fade-up delay-2">
+    <a class="btn-gold" onclick="showPage('reserve')">WEB予約</a>
+    <a class="btn-outline-dark" onclick="showPage('menu')">メニューを見る</a>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-first">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Guide</div><div class="sub-hero-title">First Visit</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div style="max-width:800px;margin:0 auto">
+    <div class="section-label fade-up">Welcome</div>
+    <h2 class="section-title fade-up delay-1">初めての方へ</h2>
+    <p class="section-text fade-up delay-2" style="max-width:none">初めてご来店いただく方にも、できるだけ安心してお過ごしいただけるよう、mellow by luceではカウンセリングの時間を大切にしています。<br><br>「似合う髪型が分からない」「長さは変えたくないけれど雰囲気を変えたい」「ショートにしたいけれど勇気が出ない」<br><br>そんなご相談も歓迎しています。イメージがまだ曖昧な状態でも、気になることをぜひそのままお話しください。</p>
+  </div>
+</section>
+<section style="background:var(--cream)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label fade-up">Flow</div>
+    <h2 class="section-title fade-up delay-1">ご来店の流れ</h2>
+  </div>
+  <div class="flow-steps">
+    <div class="flow-step fade-up"><div class="flow-num">01</div><div class="flow-title">ご予約</div><p class="flow-desc">WEB予約、またはお電話にてご予約ください。メニューに迷われている場合もお気軽にご相談ください。</p></div>
+    <div class="flow-step fade-up delay-1"><div class="flow-num">02</div><div class="flow-title">カウンセリング</div><p class="flow-desc">髪のお悩み、なりたい雰囲気、普段のお手入れ方法などを伺います。</p></div>
+    <div class="flow-step fade-up delay-2"><div class="flow-num">03</div><div class="flow-title">施術</div><p class="flow-desc">髪質や状態に合わせて、無理のない方法で施術を進めます。</p></div>
+    <div class="flow-step fade-up delay-3"><div class="flow-num">04</div><div class="flow-title">お仕上げ</div><p class="flow-desc">ご自宅でも再現しやすいよう、スタイリングのポイントもお伝えします。</p></div>
+  </div>
+</section>
+<section style="background:var(--ivory)">
+  <div style="max-width:800px;margin:0 auto">
+    <div class="section-label fade-up">Info</div>
+    <h2 class="section-title fade-up delay-1">ご来店にあたって</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px" class="fade-up delay-2">
+      <div><div style="font-size:0.65rem;letter-spacing:0.25em;color:var(--gold);margin-bottom:12px">PAYMENT</div><p style="font-size:0.82rem;color:var(--taupe);line-height:2;font-weight:300">現金・各種クレジットカード・交通系IC<br>iD / QUICPay / PayPay</p></div>
+      <div><div style="font-size:0.65rem;letter-spacing:0.25em;color:var(--gold);margin-bottom:12px">DURATION</div><p style="font-size:0.82rem;color:var(--taupe);line-height:2;font-weight:300">カットのみ：約60分<br>カット＋カラー：約2〜3時間<br>カット＋パーマ：約2〜3時間</p></div>
+    </div>
+  </div>
+</section>
+<section class="reserve-banner">
+  <div class="section-label fade-up">Reserve</div>
+  <h2 class="section-title fade-up delay-1">ご予約はこちら</h2>
+  <div class="reserve-actions fade-up delay-2">
+    <a class="btn-gold" onclick="showPage('reserve')">WEB予約</a>
+    <a class="btn-outline-dark" onclick="showPage('faq')">よくある質問</a>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-access">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1595476108010-b4d1f102b31b?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Location</div><div class="sub-hero-title">Access</div></div>
+</div>
+<div class="access-grid">
+  <div class="access-map fade-up">
+    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80" alt="外観">
+    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(42,36,32,0.7);padding:16px 20px;color:var(--ivory);font-size:0.75rem;font-weight:300">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F</div>
+  </div>
+  <div class="fade-up delay-1">
+    <div class="access-info-title">mellow by luce</div>
+    <div class="access-block"><div class="access-block-label">ADDRESS</div><div class="access-block-value">〒150-0001<br>東京都渋谷区神宮前3-18-7<br>Luce表参道 1F</div></div>
+    <div class="access-block"><div class="access-block-label">ACCESS</div><div class="access-block-value">表参道駅 A2出口より徒歩6分<br>明治神宮前駅 5番出口より徒歩8分<br>原宿駅 東口より徒歩11分</div></div>
+    <div class="access-block"><div class="access-block-label">TEL</div><div class="access-block-value">03-0000-1842</div></div>
+    <div class="access-block"><div class="access-block-label">OPEN</div><div class="access-block-value">月 10:00—19:00 ／ 水・木 10:00—20:00<br>金 11:00—21:00 ／ 土 10:00—20:00<br>日・祝 10:00—19:00<br><br>定休日：毎週火曜・第2水曜</div></div>
+    <div class="access-block"><div class="access-block-label">PAYMENT</div><div class="access-block-value">現金・各種クレジットカード<br>交通系IC・iD / QUICPay / PayPay</div></div>
+  </div>
+</div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-faq">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Questions</div><div class="sub-hero-title">FAQ</div></div>
+</div>
+<div style="background:var(--ivory)">
+  <div class="faq-container">
+    <div class="section-label fade-up">FAQ</div>
+    <h2 class="section-title fade-up delay-1">よくあるご質問</h2>
+    <div style="margin-top:60px">
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>初めてですが、スタイルが決まっていなくても大丈夫ですか？</span><span class="faq-icon">+</span></div><div class="faq-a">はい、大丈夫です。カウンセリングで髪質や雰囲気、ご希望を伺いながら、一緒に決めていきます。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>指名はできますか？</span><span class="faq-icon">+</span></div><div class="faq-a">はい、可能です。ご予約時にご希望のスタイリストをお選びください。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>当日予約はできますか？</span><span class="faq-icon">+</span></div><div class="faq-a">空き状況によってご案内可能です。WEB予約、またはお電話にてご確認ください。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>メンズも利用できますか？</span><span class="faq-icon">+</span></div><div class="faq-a">はい、ご利用いただけます。清潔感のあるナチュラルなスタイル提案を大切にしています。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>子ども連れでも来店できますか？</span><span class="faq-icon">+</span></div><div class="faq-a">時間帯によってご案内しやすい場合があります。ご希望の場合は事前にご相談ください。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>支払い方法を教えてください。</span><span class="faq-icon">+</span></div><div class="faq-a">現金、各種クレジットカード、交通系IC、iD / QUICPay / PayPayをご利用いただけます。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>施術にかかる時間を教えてください。</span><span class="faq-icon">+</span></div><div class="faq-a">カットのみの場合は約60分が目安です。カット＋カラー、カット＋パーマは2〜3時間程度です。</div></div>
+      <div class="faq-item fade-up"><div class="faq-q" onclick="toggleFaq(this)"><span>遅刻した場合はどうなりますか？</span><span class="faq-icon">+</span></div><div class="faq-a">遅れる場合はお早めにお電話ください。状況に応じてご対応いたしますが、一部メニューを変更させていただく場合があります。</div></div>
+    </div>
+  </div>
+</div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="page" id="page-reserve">
+<div style="height:70px"></div>
+<div class="sub-hero">
+  <div class="sub-hero-img" style="background-image:url('https://images.unsplash.com/photo-1633681926022-84c79e2bdd89?auto=format&fit=crop&w=1200&q=80')"></div>
+  <div class="sub-hero-overlay"></div>
+  <div class="sub-hero-content"><div class="section-label">Booking</div><div class="sub-hero-title">Reserve</div></div>
+</div>
+<section style="background:var(--ivory)">
+  <div style="max-width:700px;margin:0 auto;text-align:center">
+    <div class="section-label fade-up" style="justify-content:center">Reserve</div>
+    <h2 class="section-title fade-up delay-1">ご予約方法</h2>
+    <p class="section-text fade-up delay-2" style="max-width:none;text-align:center">ご予約は24時間WEBから承っております。<br>初めての方も、メニューに迷われている方もお気軽にご相談ください。</p>
+    <div class="fade-up delay-3" style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:60px;max-width:440px;margin-left:auto;margin-right:auto">
+      <a class="btn-primary" style="text-align:center;padding:20px;font-size:0.8rem">▶ WEB予約（24時間受付）</a>
+      <a href="tel:03-0000-1842" class="btn-outline" style="text-align:center;padding:20px;font-size:0.8rem">☎ 電話予約：03-0000-1842</a>
+      <a class="btn-outline" style="text-align:center;padding:20px;font-size:0.8rem;color:var(--taupe)">LINE@で相談・予約</a>
+    </div>
+    <div class="fade-up" style="margin-top:60px;background:var(--cream);padding:40px;text-align:left">
+      <div style="font-size:0.65rem;letter-spacing:0.25em;color:var(--gold);margin-bottom:20px">HOURS</div>
+      <div style="font-size:0.82rem;color:var(--taupe);line-height:2.4;font-weight:300">月 10:00—19:00 ／ 水・木 10:00—20:00 ／ 金 11:00—21:00<br>土 10:00—20:00 ／ 日・祝 10:00—19:00<br><span style="color:var(--warm-gray);font-size:0.75rem">定休日：毎週火曜・第2水曜</span></div>
+    </div>
+  </div>
+</section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" onclick="showPage('home')" style="cursor:pointer">mellow by luce<span>OMOTESANDO HAIR SALON</span></div>
+        <p class="footer-tagline">やわらかい光の中で、自分らしく整う。<br>表参道のヘアサロン。</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MENU</div>
+        <a onclick="showPage('concept')">Concept</a>
+        <a onclick="showPage('menu')">Menu & Price</a>
+        <a onclick="showPage('staff')">Staff</a>
+        <a onclick="showPage('salon')">Salon</a>
+        <a onclick="showPage('style')">Style Gallery</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">GUIDE</div>
+        <a onclick="showPage('first')">First Visit</a>
+        <a onclick="showPage('faq')">FAQ</a>
+        <a onclick="showPage('access')">Access</a>
+        <a onclick="showPage('reserve')">Reserve</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">INFO</div>
+        <div class="footer-info">〒150-0001 東京都渋谷区神宮前3-18-7 Luce表参道 1F<br><br>TEL 03-0000-1842<br><br>OPEN 10:00 — 20:00<br>CLOSE 毎週火曜・第2水曜</div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 mellow by luce. All rights reserved. | Web production by Closer by divizero</div>
+  </footer>
+
+</div>
+
+<div class="mobile-cta">
+  <a onclick="showPage('reserve')">WEB予約</a>
+  <a href="tel:03-0000-1842">電話する</a>
+</div>
+<script>
+const header=document.getElementById('header');
+window.addEventListener('scroll',()=>{
+  if(window.scrollY>60)header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+});
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('page-'+id);
+  if(t){t.classList.add('active');window.scrollTo(0,0);setTimeout(initFadeUps,100);}
+}
+function openMobileMenu(){document.getElementById('mobileMenu').classList.add('open');}
+function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');}
+function toggleFaq(el){
+  const item=el.parentElement;
+  document.querySelectorAll('.faq-item.open').forEach(i=>{if(i!==item)i.classList.remove('open');});
+  item.classList.toggle('open');
+}
+function initFadeUps(){
+  const els=document.querySelectorAll('.page.active .fade-up:not(.visible)');
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
+  },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(el=>io.observe(el));
+}
+initFadeUps();
+</script>

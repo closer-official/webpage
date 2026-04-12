@@ -222,6 +222,29 @@ export function buildJsonLd(
     graphs.push(restaurant);
   }
 
+  if (templateId === 'beauty_salon_mellow') {
+    const hair: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'HairSalon',
+      name: content.siteName,
+      description: seo.metaDescription,
+      url: url || undefined,
+    };
+    if (content.footerPhone) hair.telephone = content.footerPhone;
+    if (content.footerAddress) {
+      hair.address = {
+        '@type': 'PostalAddress',
+        streetAddress: content.footerAddress,
+        addressCountry: 'JP',
+      };
+    }
+    const imgs = [seo.ogImageUrl, ...(content.heroSlides ?? []).map((u) => (u || '').trim()).filter(Boolean)].filter(
+      Boolean,
+    ) as string[];
+    if (imgs.length) hair.image = imgs.length === 1 ? imgs[0] : imgs;
+    graphs.push(hair);
+  }
+
   const faq = content.faqItems ?? [];
   if (faq.length > 0) {
     graphs.push({

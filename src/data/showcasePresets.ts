@@ -971,6 +971,44 @@ export const SHOWCASE_BY_STYLE_ID: Record<StyleId, { content: PageContent; seo: 
       canonicalUrl: '',
     },
   },
+  beauty_salon_mellow: {
+    content: {
+      siteName: 'LUCERE',
+      title: 'OMOTESANDO HAIR SALON',
+      headline: 'あなたの髪に、やさしい時間を。',
+      subheadline: 'カウンセリングから仕上げまで、ひとりひとりに合わせたスタイルをご提案します。',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      catalogImages: [
+        'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600',
+        'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600',
+        'https://images.unsplash.com/photo-1605497788044-5a32c7068489?auto=format&fit=crop&w=600',
+      ],
+      sections: [
+        { id: 'concept', title: 'コンセプト', content: '髪質とライフスタイルに寄り添う、やわらかなデザインを大切にしています。' },
+        { id: 'menu', title: 'メニュー', content: 'カット・カラー・パーマ・トリートメントなど、ご希望に合わせてご案内します。' },
+        { id: 'hours', title: '営業時間', content: '平日 10:00–20:00\n土日祝 9:00–19:00\n定休日：火曜（不定休あり）' },
+        { id: 'access', title: 'アクセス', content: '東京都渋谷区神南1-2-3 〇〇ビル 2F\n表参道駅 徒歩6分' },
+        { id: 'contact', title: 'ご予約', content: 'WEB予約・お電話にて承っております。' },
+      ],
+      footerText: `© ${new Date().getFullYear()} LUCERE. All rights reserved.`,
+      ctaLabel: 'WEB予約',
+      ctaHref: '#reserve',
+      footerAddress: '東京都渋谷区神南1-2-3 〇〇ビル 2F',
+      footerPhone: '03-XXXX-XXXX',
+      heroSlides: [
+        'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=85',
+        'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1400&q=85',
+      ],
+    },
+    seo: {
+      metaTitle: 'LUCERE — 美容室 | 表参道',
+      metaDescription: '表参道の美容室。カウンセリングから仕上げまで、やさしい時間とスタイルをご提案します。',
+      keywords: '美容室, 表参道, ヘアサロン, カット, カラー',
+      ogImageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200',
+      canonicalUrl: '',
+    },
+  },
 };
 
 /**

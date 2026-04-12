@@ -1180,4 +1180,11 @@ export const TEMPLATES: TemplateOption[] = [
     'テンプレ19：クリーム地×アンバー。ラーメン店向け・クイック情報バー・メニュー写真グリッド・SNS三種（Instagram/X/TikTok）・Googleマップ埋め込み',
     RAMEN_2_TEMPLATE_CSS
   ),
+  makeTemplate(
+    'beauty_salon_mellow',
+    '美容室 mellow',
+    'テンプレ20：美容室向けマルチページ（docs/!DOCTYPE html - コピー.md 由来・base64 は Unsplash に差し替えた生成物）',
+    '/* LP の CSS は server/beautySalonMellow/generated.css（ビルド時生成） */',
+    { omitCommonBase: true }
+  ),
 ];

@@ -579,6 +579,36 @@ export function renderTemplatePreview(templateId, customization = null, options 
       footerAddress: '東京都〇〇区〇〇 1-2-3',
       footerPhone: '03-XXXX-XXXX',
     };
+  } else if (id === 'beauty_salon_mellow') {
+    content = {
+      siteName: 'mellow by luce',
+      title: 'OMOTESANDO HAIR SALON',
+      headline: 'やわらかく、上品に。\n毎日に自然と\nなじむ髪へ。',
+      subheadline:
+        'ショート・ボブ・ミディアムを中心に、\n扱いやすさとやわらかな質感を大切にした\nプライベート感のあるヘアサロン',
+      footerAddress: '〒150-0001 東京都渋谷区神宮前3-18-7',
+      footerPhone: '03-0000-1842',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.747975468381!2d139.7027863152582!3d35.659545280197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5653d2f8a1%3A0x3f62daad6c2a5342!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1234567890',
+      footerInstagramUrl: 'https://www.instagram.com/',
+      footerTwitterUrl: 'https://x.com/',
+      footerTiktokUrl: 'https://www.tiktok.com/',
+      footerText: `© ${now} mellow by luce | 表参道のヘアサロン`,
+      heroSlides: [
+        'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
+      ],
+      faqItems: [
+        { q: '初めてでも大丈夫ですか？', a: 'はい。カウンセリングでご希望を伺いながらご提案します。' },
+        { q: '予約は必要ですか？', a: 'WEBまたはお電話にてご予約をお願いしております。' },
+      ],
+      sections: [
+        { id: 'concept', title: 'コンセプト', content: 'やわらかな質感と扱いやすさを大切にしたご提案です。' },
+        { id: 'menu', title: 'メニュー', content: 'カット・カラー・パーマ・トリートメントなどをご用意しています。' },
+        { id: 'access', title: 'アクセス', content: '表参道駅より徒歩圏内です。' },
+      ],
+      ctaLabel: 'WEB予約',
+      ctaHref: '#reserve',
+    };
   } else {
     content = {
       siteName: name,
@@ -631,7 +661,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
     return { id, content, seo };
   }
   let html = buildHtml(content, seo, id, {
-    contactForm: id === 'cafe_1' ? false : true,
+    contactForm: id === 'cafe_1' || id === 'beauty_salon_mellow' ? false : true,
     formActionUrl: '#',
     instagramLine: true,
     instagramUrl: 'https://instagram.com/',
