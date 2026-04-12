@@ -13,7 +13,7 @@ export function applyBeautySalonMellowReplacements(html, content, escapeHtml) {
 
   const slides = Array.isArray(content.heroSlides) ? content.heroSlides : [];
   const hero = slides.map((u) => String(u || '').trim()).filter(Boolean)[0] || '';
-  if (hero && /^https?:\/\//i.test(hero)) {
+  if (hero && (/^https?:\/\//i.test(hero) || hero.startsWith('/'))) {
     out = out.replace(/(<div class="hero-img" style="background-image:url\(['"])([^'"]+)(['"]\))/m, (_m, a, _b, c) => {
       return a + esc(hero) + c;
     });

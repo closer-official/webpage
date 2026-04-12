@@ -594,9 +594,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
       footerTwitterUrl: 'https://x.com/',
       footerTiktokUrl: 'https://www.tiktok.com/',
       footerText: `© ${now} mellow by luce | 表参道のヘアサロン`,
-      heroSlides: [
-        'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
-      ],
+      heroSlides: ['/beauty-salon-mellow/interior-entrance.png'],
       faqItems: [
         { q: '初めてでも大丈夫ですか？', a: 'はい。カウンセリングでご希望を伺いながらご提案します。' },
         { q: '予約は必要ですか？', a: 'WEBまたはお電話にてご予約をお願いしております。' },

@@ -913,8 +913,7 @@ ${cafe1ShopLocationsHtml()}
     ramen_2: 'https://images.pexels.com/photos/8969237/pexels-photo-8969237.jpeg?auto=compress&cs=tinysrgb&w=1400',
     cafe_1:
       'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=1400',
-    beauty_salon_mellow:
-      'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=85',
+    beauty_salon_mellow: '/beauty-salon-mellow/interior-entrance.png',
     navy_cyan_consult: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400',
     gym_personal_neon:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=85',

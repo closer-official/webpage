@@ -241,8 +241,7 @@ const defaultHeroImages = {
   wiki_sauna: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1400',
   studio_blush_editorial:
     'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=85',
-  beauty_salon_mellow:
-    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
+  beauty_salon_mellow: '/beauty-salon-mellow/interior-entrance.png',
 };
 
 /**
