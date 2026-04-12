@@ -885,6 +885,30 @@
         <label>最寄り駅・アクセス <input type="text" id="f-ramen2Station" placeholder="〇〇駅 北口 徒歩3分" /></label>
       </div>
 
+      <div class="tw-form-block tw-hidden" data-tw-for="beauty_salon_mellow">
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #e8c4a8">美容室 mellow：HP 貼り付け取り込み</h3>
+        <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 10px; line-height: 1.45">
+          ホットペッパービューティー等の店舗説明をそのまま貼り付け、「取り込み」で推測できる項目だけ下のスロットに反映します（写真・評価は無視）。反映後も各欄は自由に直せます。未取り込みの欄は公開時もテンプレの文言のままです。
+        </p>
+        <label style="display: block; margin-bottom: 10px">
+          <span style="display: block; font-size: 0.82rem; margin-bottom: 4px">貼り付け元テキスト</span>
+          <textarea id="f-bsm-paste-raw" rows="8" style="width: 100%; max-width: 100%; box-sizing: border-box; font-family: inherit"></textarea>
+        </label>
+        <div class="row-actions" style="margin-bottom: 14px">
+          <button type="button" class="btn" id="btn-bsm-paste-import">取り込み（スロットに反映）</button>
+        </div>
+        <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #e8c4a8">テキストスロット（LP 全文）</h3>
+        <p style="font-size: 0.72rem; color: #7d8fa3; margin: 0 0 8px">
+          HTML は書かずにここだけで差し替えできます。改行はそのまま反映されます。ヒーロー見出しは「メイン見出し」欄とも連携します（スロットが空のとき共通欄を使います）。
+        </p>
+        <div id="f-bsm-slots-fields"></div>
+        <div class="repeat-group" style="margin-top: 16px">
+          <div style="font-size: 0.8rem; color: #9aacbf">FAQ（よくある質問）</div>
+          <div id="f-bsm-faq-list"></div>
+          <div class="row-actions"><button type="button" class="btn" id="btn-bsm-add-faq">＋ FAQ追加</button></div>
+        </div>
+      </div>
+
       <div class="tw-form-block" data-tw-for="cafe_1">
         <p style="font-size: 0.78rem; color: #8b9cb3; margin: 0 0 12px">
           入力欄は左のプレビューの<strong>上から下</strong>に近い順です。セクションの並びは下のリストがそのままスクロール順になります。
@@ -1521,6 +1545,7 @@
           gym_personal_neon: true,
           wiki_ensyuritsu: true,
           wiki_sauna: true,
+          beauty_salon_mellow: true,
         };
 
         function isEmbedStyleTemplate(tid) {
@@ -1565,6 +1590,11 @@
               el.classList.toggle('tw-hidden', tid !== 'ramen_2');
               return;
             }
+            if (f === 'beauty_salon_mellow') {
+              el.classList.toggle('tw-hidden', tid !== 'beauty_salon_mellow');
+              if (tid === 'beauty_salon_mellow') ensureBsmMellowForm();
+              return;
+            }
             el.classList.add('tw-hidden');
           });
           var badge = document.getElementById('tw-active-template-hint');
@@ -1575,6 +1605,9 @@
             } else if (isCafe1) {
               badge.textContent =
                 '表示中: cafe_1 向け（店主・お品書き・MEO・固定ボタンなど）。店主の顔写真はセクション ID を staff にしてください。';
+            } else if (tid === 'beauty_salon_mellow') {
+              badge.textContent =
+                '表示中: beauty_salon_mellow（マルチページLP）。店名・ヒーローは共通欄とスロットの両方から編集可能です。HPの長文は貼り付け取り込みで推測できる項目だけ反映されます（無い情報はテンプレのまま）。';
             } else if (explicitEmbed) {
               badge.textContent =
                 '表示中: ' +
@@ -1652,6 +1685,188 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
+        }
+
+        function getBsmMellowSlotDef() {
+          var rows = [
+            { id: 'hero.label', label: 'トップ｜ヒーロー上ラベル' },
+            { id: 'hero.headline', label: 'トップ｜ヒーロー見出し（h1）' },
+            { id: 'hero.subtitle', label: 'トップ｜ヒーローリード' },
+            { id: 'home.concept.title', label: 'トップ｜Concept 見出し' },
+            { id: 'home.concept.body', label: 'トップ｜Concept 本文' },
+            { id: 'home.style.title', label: 'トップ｜Style 見出し' },
+            { id: 'home.style.lede', label: 'トップ｜Style リード' },
+            { id: 'home.salon.title', label: 'トップ｜Salon 見出し' },
+            { id: 'home.salon.lede', label: 'トップ｜Salon リード' },
+            { id: 'home.staff.title', label: 'トップ｜Staff 見出し' },
+            { id: 'home.staff1.role', label: 'トップ｜スタッフ1 肩書' },
+            { id: 'home.staff1.name', label: 'トップ｜スタッフ1 名前' },
+            { id: 'home.staff1.desc', label: 'トップ｜スタッフ1 紹介' },
+            { id: 'home.staff2.role', label: 'トップ｜スタッフ2 肩書' },
+            { id: 'home.staff2.name', label: 'トップ｜スタッフ2 名前' },
+            { id: 'home.staff2.desc', label: 'トップ｜スタッフ2 紹介' },
+            { id: 'home.pickup.title', label: 'トップ｜店内ピックアップ見出し' },
+            { id: 'home.pickup.lede', label: 'トップ｜店内ピックアップ注記' },
+            { id: 'home.pickup1.title', label: 'トップ｜内装カード1 見出し' },
+            { id: 'home.pickup1.body', label: 'トップ｜内装カード1 本文' },
+            { id: 'home.pickup2.title', label: 'トップ｜内装カード2 見出し' },
+            { id: 'home.pickup2.body', label: 'トップ｜内装カード2 本文' },
+            { id: 'home.reserve.title', label: 'トップ｜予約バナー見出し' },
+            { id: 'home.reserve.lede', label: 'トップ｜予約バナー本文' },
+            { id: 'footer.tagline', label: '共通｜フッタータグライン' },
+            { id: 'footer.info', label: '共通｜フッター INFO' },
+            { id: 'page.concept.title', label: 'Concept｜見出し' },
+            { id: 'page.concept.body', label: 'Concept｜本文' },
+            { id: 'page.concept.commit.title', label: 'Concept｜Our Policy 見出し' },
+            { id: 'page.staff.title', label: 'Staff ページ｜見出し' },
+            { id: 'page.staff1.desc', label: 'Staff ページ｜スタッフ1 紹介' },
+            { id: 'page.staff2.desc', label: 'Staff ページ｜スタッフ2 紹介' },
+            { id: 'page.staff1.quote', label: 'Staff ページ｜スタッフ1 一言' },
+            { id: 'page.staff2.quote', label: 'Staff ページ｜スタッフ2 一言' },
+            { id: 'page.salon.title', label: 'Salon｜見出し' },
+            { id: 'page.salon.body', label: 'Salon｜本文' },
+            { id: 'page.style.title', label: 'Style｜見出し' },
+            { id: 'page.style.lede', label: 'Style｜リード' },
+            { id: 'page.first.welcome.title', label: 'First Visit｜見出し' },
+            { id: 'page.first.welcome.body', label: 'First Visit｜本文' },
+            { id: 'page.first.policy.title', label: 'First｜ご来店にあたって 見出し' },
+            { id: 'page.first.payment', label: 'First｜支払い案内' },
+            { id: 'page.first.duration', label: 'First｜所要時間案内' },
+            { id: 'access.mapCaption', label: 'Access｜地図キャプション' },
+            { id: 'access.address', label: 'Access｜住所' },
+            { id: 'access.routes', label: 'Access｜経路' },
+            { id: 'access.tel', label: 'Access｜電話' },
+            { id: 'access.hours', label: 'Access｜営業時間' },
+            { id: 'access.payment', label: 'Access｜支払い' },
+            { id: 'page.reserve.title', label: 'Reserve｜見出し' },
+            { id: 'page.reserve.lede', label: 'Reserve｜本文' },
+            { id: 'page.reserve.hoursBlock', label: 'Reserve｜営業時間ブロック' },
+          ];
+          var n, f, s;
+          for (n = 1; n <= 6; n++) {
+            rows.push({ id: 'home.menu.' + n + '.jp', label: 'トップ｜メニューカード' + n + '（日本語）' });
+            rows.push({ id: 'home.menu.' + n + '.price', label: 'トップ｜メニューカード' + n + '（価格）' });
+            rows.push({ id: 'home.menu.' + n + '.desc', label: 'トップ｜メニューカード' + n + '（説明）' });
+          }
+          for (f = 1; f <= 4; f++) {
+            rows.push({ id: 'page.first.flow.' + f + '.title', label: 'First｜流れ' + f + ' タイトル' });
+            rows.push({ id: 'page.first.flow.' + f + '.desc', label: 'First｜流れ' + f + ' 説明' });
+          }
+          for (s = 1; s <= 6; s++) {
+            rows.push({ id: 'style.label.' + s, label: 'Style｜ラベル' + s });
+          }
+          return rows;
+        }
+
+        function ensureBsmMellowForm() {
+          var root = document.getElementById('f-bsm-slots-fields');
+          if (!root || root.getAttribute('data-built') === '1') return;
+          root.setAttribute('data-built', '1');
+          getBsmMellowSlotDef().forEach(function (row) {
+            var wrap = document.createElement('div');
+            wrap.style.marginBottom = '10px';
+            var lab = document.createElement('label');
+            lab.style.display = 'block';
+            var span = document.createElement('span');
+            span.style.fontSize = '0.78rem';
+            span.style.display = 'block';
+            span.style.marginBottom = '4px';
+            span.textContent = row.label + ' (' + row.id + ')';
+            var ta = document.createElement('textarea');
+            ta.className = 'f-bsm-slot';
+            ta.setAttribute('data-bsm-id', row.id);
+            ta.rows = /body|lede|desc|quote|info|welcome|payment|duration|routes|hoursBlock|tagline|salon\.body|reserve\.lede|flow\.\d+\.desc|staff.*\.desc|pickup.*\.body|menu\.\d+\.desc|style\.lede|concept\.body/.test(row.id)
+              ? 4
+              : 2;
+            ta.style.width = '100%';
+            ta.style.maxWidth = '100%';
+            ta.style.boxSizing = 'border-box';
+            ta.style.fontFamily = 'inherit';
+            lab.appendChild(span);
+            lab.appendChild(ta);
+            wrap.appendChild(lab);
+            root.appendChild(wrap);
+          });
+        }
+
+        function parseHotPepperBeautyPasteWorker(raw) {
+          var out = {};
+          var t = String(raw || '').replace(/\r\n/g, '\n');
+          var lines = t
+            .split('\n')
+            .map(function (l) {
+              return l.trim();
+            })
+            .filter(Boolean);
+          function skipLine(l) {
+            return /の写真|（\d+件）|^\d+\.\d+$|スマート支払い|サロン情報|空席確認|ブックマーク|人気のクーポン|予約比率|年代比率|^女性$|^男性$|未設定/.test(l);
+          }
+          var head = lines.find(function (l) {
+            return !skipLine(l) && l.length > 4 && l.length < 200 && !/^¥/.test(l);
+          });
+          if (head) out['hero.headline'] = head.replace(/【[^】]+】/g, '').trim().slice(0, 200);
+          var addr = t.match(/(〒\s*\d{3}-\d{4}[^\n]+)/);
+          if (addr) out['footer.info'] = addr[1].trim();
+          var addrTokyo = t.match(/(東京都[^\n]{10,120})/);
+          if (!out['footer.info'] && addrTokyo) out['access.address'] = addrTokyo[1].trim();
+          var tel = t.match(/(0\d{1,4}-\d{1,4}-\d{3,4})/);
+          if (tel) {
+            out['access.tel'] = tel[1];
+            out['footer.info'] = (out['footer.info'] ? out['footer.info'] + '\n\n' : '') + 'TEL ' + tel[1];
+          }
+          var open = t.match(/(平日[^\n]{0,100}\d{1,2}:\d{2}[^\n]{0,150})/);
+          if (open) out['access.hours'] = open[1].trim();
+          var pay = t.match(/(Visa[／/][^\n]{10,200}PayPay[^\n]*)/i);
+          if (pay) out['access.payment'] = pay[0].trim();
+          var paras = t
+            .split(/\n{2,}/)
+            .map(function (p) {
+              return p.trim();
+            })
+            .filter(function (p) {
+              return p.length > 100 && !skipLine(p);
+            });
+          if (paras[0]) out['home.concept.body'] = paras[0].slice(0, 2000);
+          if (paras[1]) out['page.style.lede'] = paras[1].slice(0, 1500);
+          var couponLines = t.split('\n').filter(function (l) {
+            return /¥[\d,]+/.test(l) && /【|限定|カット|カラー|TR|トリートメント/.test(l);
+          });
+          couponLines.slice(0, 6).forEach(function (line, i) {
+            var n = i + 1;
+            var pr = line.match(/¥([\d,]+)/);
+            if (pr) out['home.menu.' + n + '.price'] = '¥' + pr[1] + '<span>〜</span>';
+            out['home.menu.' + n + '.desc'] = line
+              .replace(/¥[\d,]+.*$/, '')
+              .trim()
+              .slice(0, 200);
+          });
+          return out;
+        }
+
+        function addBsmFaqItem(item) {
+          var it = item || {};
+          var root = document.getElementById('f-bsm-faq-list');
+          if (!root) return;
+          var idx = root.querySelectorAll('.repeat-item').length + 1;
+          root.insertAdjacentHTML(
+            'beforeend',
+            '<div class="repeat-item">' +
+              '<div class="repeat-item-head"><span>FAQ ' +
+              idx +
+              '</span><button type="button" class="btn js-remove-repeat">削除</button></div>' +
+              '<label>質問 <input type="text" class="f-faq-q" value="' +
+              escapeHtml(it.q) +
+              '" /></label>' +
+              '<label>回答 <textarea class="f-faq-a" rows="3">' +
+              escapeHtml(it.a) +
+              '</textarea></label>' +
+              '</div>',
+          );
+          var itemEl = root.lastElementChild;
+          itemEl.querySelector('.js-remove-repeat').onclick = function () {
+            itemEl.remove();
+            if (!root.querySelector('.repeat-item')) addBsmFaqItem({});
+          };
         }
 
         function addFaqItem(item) {
@@ -1988,8 +2203,10 @@
               }
             }
           }
+          var twTidFaq = resolveWorkerFormBaseTemplateId();
+          var faqListSel = twTidFaq === 'beauty_salon_mellow' ? '#f-bsm-faq-list .repeat-item' : '#f-faq-list .repeat-item';
           var faqItems = Array.prototype.map
-            .call(document.querySelectorAll('#f-faq-list .repeat-item'), function (row) {
+            .call(document.querySelectorAll(faqListSel), function (row) {
               return {
                 q: row.querySelector('.f-faq-q').value.trim(),
                 a: row.querySelector('.f-faq-a').value.trim(),
@@ -2101,6 +2318,14 @@
           Object.keys(workerExtraOverride || {}).forEach(function (k) {
             ov[k] = workerExtraOverride[k];
           });
+          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+            ensureBsmMellowForm();
+            ov.beautySalonMellowSlots = {};
+            Array.prototype.forEach.call(document.querySelectorAll('textarea.f-bsm-slot'), function (el) {
+              var id = el.getAttribute('data-bsm-id');
+              if (id) ov.beautySalonMellowSlots[id] = String(el.value || '').trim();
+            });
+          }
           deriveSeoIntoOverride(ov);
           syncMapAndSocialUrlsIntoOverride(ov);
           return ov;
@@ -2161,7 +2386,19 @@
           document.getElementById('f-meo-hours-list').innerHTML = '';
           (Array.isArray(meo.openingHours) && meo.openingHours.length ? meo.openingHours : ['']).forEach(addMeoHourItem);
           document.getElementById('f-faq-list').innerHTML = '';
-          (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addFaqItem);
+          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+            (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addBsmFaqItem);
+          } else {
+            (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addFaqItem);
+          }
+          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+            ensureBsmMellowForm();
+            var bsmSlots = ov.beautySalonMellowSlots && typeof ov.beautySalonMellowSlots === 'object' && !Array.isArray(ov.beautySalonMellowSlots) ? ov.beautySalonMellowSlots : {};
+            Object.keys(bsmSlots).forEach(function (k) {
+              var el = document.querySelector('textarea.f-bsm-slot[data-bsm-id="' + k.replace(/"/g, '') + '"]');
+              if (el) el.value = bsmSlots[k] != null ? String(bsmSlots[k]) : '';
+            });
+          }
           document.getElementById('f-menu-list').innerHTML = '';
           (Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length ? ov.cafeMenuTextRows : [{}]).forEach(addMenuItem);
           document.getElementById('f-shop-list').innerHTML = '';
@@ -2205,6 +2442,7 @@
             cafeInstagramFeedItems: true,
             cafeBranchMenuItems: true,
             cafeVisualGenre: true,
+            beautySalonMellowSlots: true,
           };
           var extra = {};
           Object.keys(ov || {}).forEach(function (k) {
@@ -2258,6 +2496,10 @@
             cafeReviewCtaUrl: c.cafeReviewCtaUrl || '',
             cafeGbPostsEmbedUrl: c.cafeGbPostsEmbedUrl || '',
             cafeInstagramPermalink: c.cafeInstagramPermalink || '',
+            beautySalonMellowSlots:
+              c.beautySalonMellowSlots && typeof c.beautySalonMellowSlots === 'object' && !Array.isArray(c.beautySalonMellowSlots)
+                ? cloneJsonForForm(c.beautySalonMellowSlots)
+                : {},
             metaTitle: s.metaTitle || '',
             metaDescription: s.metaDescription || '',
             ogImageUrl: s.ogImageUrl || '',
@@ -2462,6 +2704,29 @@
           document.getElementById('btn-add-faq').onclick = function () {
             addFaqItem({});
           };
+          var btnBsmFaq = document.getElementById('btn-bsm-add-faq');
+          if (btnBsmFaq) {
+            btnBsmFaq.onclick = function () {
+              addBsmFaqItem({});
+            };
+          }
+          var btnBsmPaste = document.getElementById('btn-bsm-paste-import');
+          if (btnBsmPaste) {
+            btnBsmPaste.onclick = function () {
+              var ta = document.getElementById('f-bsm-paste-raw');
+              var raw = ta ? ta.value : '';
+              var parsed = parseHotPepperBeautyPasteWorker(raw);
+              Object.keys(parsed).forEach(function (k) {
+                var el = document.querySelector('textarea.f-bsm-slot[data-bsm-id="' + k.replace(/"/g, '') + '"]');
+                if (el) el.value = parsed[k];
+              });
+              if (parsed['hero.headline']) {
+                var he = document.getElementById('f-headline');
+                if (he) he.value = parsed['hero.headline'];
+              }
+              scheduleLivePreview();
+            };
+          }
           document.getElementById('btn-add-menu').onclick = function () {
             addMenuItem({});
           };

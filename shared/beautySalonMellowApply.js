@@ -4,9 +4,37 @@
  * @param {Record<string, unknown>} content
  * @param {(s: string) => string} escapeHtml
  */
+import { applyBsmTextSlots, applyBsmFaqItems } from './beautySalonMellowTextSlots.js';
+
 export function applyBeautySalonMellowReplacements(html, content, escapeHtml) {
   let out = String(html || '');
   const esc = escapeHtml;
+  const rawSlots =
+    content.beautySalonMellowSlots && typeof content.beautySalonMellowSlots === 'object' && !Array.isArray(content.beautySalonMellowSlots)
+      ? content.beautySalonMellowSlots
+      : {};
+  const slots = { ...rawSlots };
+  const hl = String(content.headline || '').trim();
+  const sub = String(content.subheadline || '').trim();
+  if (hl && !String(slots['hero.headline'] || '').trim()) slots['hero.headline'] = hl;
+  if (sub && !String(slots['hero.subtitle'] || '').trim()) slots['hero.subtitle'] = sub;
+
+  out = applyBsmTextSlots(out, slots, esc);
+  out = applyBsmFaqItems(out, content.faqItems, esc);
+
+  const hasBsmHero = out.includes('<!--BSM:hero.headline-->');
+  if (!hasBsmHero) {
+    if (hl) {
+      out = out.replace(/<h1 class="hero-title">[\s\S]*?<\/h1>/m, `<h1 class="hero-title">${esc(hl).replace(/\n/g, '<br>')}</h1>`);
+    }
+    if (sub) {
+      out = out.replace(
+        /<p class="hero-subtitle">[\s\S]*?<\/p>/m,
+        `<p class="hero-subtitle">${esc(sub).replace(/\n/g, '<br>')}</p>`,
+      );
+    }
+  }
+
   const brand = String(content.siteName || '').trim() || 'mellow by luce';
   const titleRaw = String(content.title || '').trim();
   const tagEn = titleRaw && titleRaw !== brand ? titleRaw : 'OMOTESANDO HAIR SALON';
@@ -17,18 +45,6 @@ export function applyBeautySalonMellowReplacements(html, content, escapeHtml) {
     out = out.replace(/(<div class="hero-img" style="background-image:url\(['"])([^'"]+)(['"]\))/m, (_m, a, _b, c) => {
       return a + esc(hero) + c;
     });
-  }
-
-  const headline = String(content.headline || '').trim();
-  if (headline) {
-    out = out.replace(/<h1 class="hero-title">[\s\S]*?<\/h1>/m, `<h1 class="hero-title">${esc(headline).replace(/\n/g, '<br>')}</h1>`);
-  }
-  const sub = String(content.subheadline || '').trim();
-  if (sub) {
-    out = out.replace(
-      /<p class="hero-subtitle">[\s\S]*?<\/p>/m,
-      `<p class="hero-subtitle">${esc(sub).replace(/\n/g, '<br>')}</p>`,
-    );
   }
 
   out = out.replace(

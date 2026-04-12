@@ -59,6 +59,10 @@ export interface PageContent {
   catalogImages?: string[];
   /** アクセス用マップURL（iframe埋め込み用・任意） */
   mapEmbedUrl?: string;
+  /**
+   * beauty_salon_mellow: `<!--BSM:id-->` スロットの上書きテキスト（キー未指定・空はテンプレ既定のまま）
+   */
+  beautySalonMellowSlots?: Record<string, string>;
   /** 整骨院テンプレ用：悩み・症状リスト（ファーストビュー直下） */
   symptomItems?: string[];
   /** 整骨院・ジムテンプレ用：選ばれる理由（ナンバリング＋タイトル＋本文） */

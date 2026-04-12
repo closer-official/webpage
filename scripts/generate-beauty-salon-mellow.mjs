@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { spawnSync } from 'child_process';
 import { postProcessBeautySalonMellowBody } from './beautySalonMellowPostProcess.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -59,6 +60,12 @@ function main() {
   fs.writeFileSync(htmlPath, body, 'utf8');
   console.log('wrote', cssPath, '(' + Math.round(fs.statSync(cssPath).size / 1024) + ' KB)');
   console.log('wrote', htmlPath, '(' + Math.round(fs.statSync(htmlPath).size / 1024) + ' KB)');
+
+  const inj = spawnSync(process.execPath, [path.join(root, 'scripts', 'inject-bsm-markers.mjs')], {
+    cwd: root,
+    stdio: 'inherit',
+  });
+  if (inj.status !== 0) process.exit(inj.status ?? 1);
 }
 
 main();
