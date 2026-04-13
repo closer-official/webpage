@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>美容室 — ホットペッパー本文取り込み（data-bind）</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style id="preview-embed-style">
+      #preview-root {
+        --hpb-ink: #2c2418;
+        --hpb-muted: #6b5f52;
+        --hpb-line: #e5ddd4;
+        --hpb-card: #fff;
+        font-family: 'Georgia', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+        color: var(--hpb-ink);
+        line-height: 1.65;
+      }
+      #preview-root .hpb-block {
+        margin-bottom: 1.75rem;
+      }
+      #preview-root .hpb-brand-line {
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      #preview-root .hpb-brand-line .sub {
+        display: block;
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        color: var(--hpb-muted);
+        margin-top: 0.25rem;
+      }
+      #preview-root .hpb-shop-title {
+        font-size: 1rem;
+        color: var(--hpb-muted);
+        margin: 0 0 0.5rem;
+      }
+      #preview-root .hpb-hero-label {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--hpb-muted);
+        margin-bottom: 0.5rem;
+      }
+      #preview-root .hpb-hero-title {
+        font-size: 1.65rem;
+        font-weight: 500;
+        margin: 0 0 0.75rem;
+        line-height: 1.35;
+      }
+      #preview-root .hpb-hero-sub {
+        font-size: 0.95rem;
+        color: var(--hpb-muted);
+        margin: 0;
+      }
+      #preview-root .hpb-meta {
+        font-size: 0.88rem;
+        color: var(--hpb-muted);
+      }
+      #preview-root .hpb-meta .rating {
+        font-weight: 600;
+        color: var(--hpb-ink);
+        margin-right: 0.35em;
+      }
+      #preview-root .hpb-sec-title {
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        color: var(--hpb-muted);
+        margin: 0 0 0.35rem;
+      }
+      #preview-root .hpb-heading {
+        font-size: 1.25rem;
+        margin: 0 0 0.75rem;
+        font-weight: 500;
+      }
+      #preview-root .hpb-body {
+        margin: 0;
+        white-space: pre-wrap;
+      }
+      #preview-root .hpb-grid-2 {
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 520px) {
+        #preview-root .hpb-grid-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      #preview-root .hpb-policy-card,
+      #preview-root .hpb-coupon-card,
+      #preview-root .hpb-atmo-card {
+        background: var(--hpb-card);
+        border: 1px solid var(--hpb-line);
+        border-radius: 10px;
+        padding: 14px 16px;
+      }
+      #preview-root .hpb-policy-card h4,
+      #preview-root .hpb-atmo-card h4 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+      #preview-root .hpb-coupon-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      #preview-root .hpb-coupon-price {
+        font-size: 1.1rem;
+        color: #8b4513;
+        margin-bottom: 6px;
+      }
+      #preview-root .hpb-coupon-body {
+        font-size: 0.88rem;
+        color: var(--hpb-muted);
+      }
+      #preview-root .hpb-staff-card {
+        border-bottom: 1px solid var(--hpb-line);
+        padding: 14px 0;
+      }
+      #preview-root .hpb-staff-card:last-child {
+        border-bottom: none;
+      }
+      #preview-root .hpb-staff-head small {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--hpb-muted);
+        letter-spacing: 0.08em;
+      }
+      #preview-root .hpb-staff-head strong {
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+      #preview-root .hpb-staff-card blockquote {
+        margin: 8px 0 0;
+        padding-left: 12px;
+        border-left: 3px solid var(--hpb-line);
+        font-size: 0.9rem;
+        color: var(--hpb-muted);
+      }
+      #preview-root .hpb-staff-card blockquote:empty {
+        display: none;
+      }
+      #preview-root .hpb-faq-item {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--hpb-line);
+      }
+      #preview-root .hpb-faq-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      #preview-root .hpb-faq-q {
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      #preview-root .hpb-faq-a {
+        font-size: 0.92rem;
+        color: var(--hpb-muted);
+      }
+      #preview-root .hpb-gal-item {
+        margin: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--hpb-line);
+      }
+      #preview-root .hpb-gal-item img {
+        width: 100%;
+        display: block;
+        max-height: 160px;
+        object-fit: cover;
+      }
+      #preview-root .hpb-gal-item figcaption {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+        color: var(--hpb-muted);
+      }
+      #preview-root .hpb-footer-line {
+        font-size: 0.82rem;
+        color: var(--hpb-muted);
+        border-top: 1px solid var(--hpb-line);
+        padding-top: 12px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-head">
+      <h1>美容室テンプレ — ホットペッパー本文取り込み</h1>
+      <p>
+        左に本文を貼り付けて「解析する」→ 中央で修正 → 右がプレビュー。<code>data-bind</code> で DOM に反映します（空のセクションは非表示）。
+      </p>
+    </header>
+    <div class="toolbar">
+      <button type="button" class="primary" id="btn-parse">解析する</button>
+      <button type="button" id="btn-sample-text">サンプル本文を入れる</button>
+      <button type="button" id="btn-sample-json">サンプルJSONを読込</button>
+      <button type="button" id="btn-json">JSONを見る</button>
+      <button type="button" id="btn-html">HTMLに反映（ダウンロード）</button>
+      <button type="button" class="danger" id="btn-reset">リセット</button>
+    </div>
+    <div class="layout">
+      <div class="col">
+        <div class="col-h">生テキスト</div>
+        <div class="col-body">
+          <textarea id="hpb-raw" placeholder="ホットペッパー店舗ページの本文をそのまま貼り付け…"></textarea>
+        </div>
+      </div>
+      <div class="col">
+        <div class="col-h">抽出結果の編集</div>
+        <div class="col-body" id="editor-mount"></div>
+      </div>
+      <div class="col">
+        <div class="col-h">テンプレプレビュー</div>
+        <div class="col-body">
+          <div id="preview-root">
+            <div class="hpb-block" data-section="brand" hidden style="display: none">
+              <div class="hpb-brand-line">
+                <span data-bind="salon.name"></span>
+                <span class="sub" data-bind="salon.brandSubtitle"></span>
+              </div>
+            </div>
+
+            <p class="hpb-shop-title" data-section="shopTitle" data-bind="salon.shopTitle" hidden style="display: none"></p>
+
+            <div class="hpb-block" data-section="hero" hidden style="display: none">
+              <div class="hpb-hero-label" data-bind="salon.heroLabel"></div>
+              <h1 class="hpb-hero-title" data-bind="salon.heroCatch" data-bind-br="true"></h1>
+              <p class="hpb-hero-sub" data-bind="salon.heroSubtitle" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block hpb-meta" data-section="meta" hidden style="display: none">
+              <span class="rating" data-bind="salon.rating"></span>
+              <span data-bind="salon.reviewCount"></span>
+            </div>
+
+            <div class="hpb-block" data-section="intro" hidden style="display: none">
+              <div class="hpb-sec-title">Introduction</div>
+              <p class="hpb-body" data-bind="salon.introduction" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block" data-section="concept" hidden style="display: none">
+              <div class="hpb-sec-title">Concept</div>
+              <h2 class="hpb-heading" data-bind="salon.conceptTitle"></h2>
+              <p class="hpb-body" data-bind="salon.conceptBody" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block" data-section="policies" hidden style="display: none">
+              <div class="hpb-sec-title">Policy</div>
+              <h2 class="hpb-heading" data-bind="salon.policySectionTitle"></h2>
+              <div class="hpb-grid-2" data-bind-list="salon.policies" hidden style="display: none">
+                <template>
+                  <article class="hpb-policy-card">
+                    <h4 data-bind="title"></h4>
+                    <div data-bind="body" data-bind-br="true"></div>
+                  </article>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-block" data-section="message" hidden style="display: none">
+              <div class="hpb-sec-title">サロンからの一言</div>
+              <p class="hpb-body" data-bind="salon.salonMessage" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block" data-section="reserve" hidden style="display: none">
+              <div class="hpb-sec-title">予約</div>
+              <p class="hpb-body" data-bind="salon.reserveNote" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block" data-section="access" hidden style="display: none">
+              <div class="hpb-sec-title">Access</div>
+              <p class="hpb-body" data-bind="salon.address" data-bind-br="true"></p>
+              <p class="hpb-body" data-bind="salon.access" data-bind-br="true"></p>
+            </div>
+
+            <div class="hpb-block" data-section="stats" hidden style="display: none">
+              <div class="hpb-sec-title">予約データ</div>
+              <p class="hpb-body" data-bind="salon.avgReservation"></p>
+              <p class="hpb-body" data-bind="salon.genderRatio"></p>
+              <p class="hpb-body" data-bind="salon.ageRatio"></p>
+            </div>
+
+            <div class="hpb-block" data-section="coupons" hidden style="display: none">
+              <div class="hpb-sec-title">Coupon</div>
+              <div class="hpb-grid-2" data-bind-list="salon.coupons" hidden style="display: none">
+                <template>
+                  <div class="hpb-coupon-card">
+                    <div class="hpb-coupon-title" data-bind="title"></div>
+                    <div class="hpb-coupon-price" data-bind="price"></div>
+                    <div class="hpb-coupon-body" data-bind="body" data-bind-br="true"></div>
+                  </div>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-block" data-section="atmosphere" hidden style="display: none">
+              <div class="hpb-sec-title">雰囲気</div>
+              <div class="hpb-grid-2" data-bind-list="salon.atmosphere" hidden style="display: none">
+                <template>
+                  <article class="hpb-atmo-card">
+                    <h4 data-bind="title"></h4>
+                    <div data-bind="body" data-bind-br="true"></div>
+                  </article>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-block" data-section="staff" hidden style="display: none">
+              <div class="hpb-sec-title">Staff</div>
+              <div data-bind-list="salon.staff" hidden style="display: none">
+                <template>
+                  <article class="hpb-staff-card">
+                    <div class="hpb-staff-head">
+                      <small data-bind="role"></small>
+                      <strong data-bind="name"></strong>
+                    </div>
+                    <p data-bind="desc" data-bind-br="true"></p>
+                    <blockquote data-bind="quote"></blockquote>
+                  </article>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-block" data-section="faq" hidden style="display: none">
+              <div class="hpb-sec-title">FAQ</div>
+              <div data-bind-list="salon.faq" hidden style="display: none">
+                <template>
+                  <div class="hpb-faq-item">
+                    <div class="hpb-faq-q" data-bind="q" data-bind-br="true"></div>
+                    <div class="hpb-faq-a" data-bind="a" data-bind-br="true"></div>
+                  </div>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-block" data-section="gallery" hidden style="display: none">
+              <div class="hpb-sec-title">Gallery</div>
+              <div class="hpb-grid-2" data-bind-list="salon.gallery" hidden style="display: none">
+                <template>
+                  <figure class="hpb-gal-item">
+                    <img data-bind="imageUrl" alt="" />
+                    <figcaption data-bind="caption"></figcaption>
+                  </figure>
+                </template>
+                <div data-bind-list-mount></div>
+              </div>
+            </div>
+
+            <div class="hpb-footer-line" data-section="footer" data-bind="salon.footerTagline" hidden style="display: none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="json-dialog" hidden>
+      <div>
+        <div class="toolbar" style="border: none; padding: 0 0 12px">
+          <strong style="flex: 1">現在の JSON</strong>
+          <button type="button" id="btn-json-close">閉じる</button>
+        </div>
+        <pre id="json-pre"></pre>
+      </div>
+    </div>
+
+    <script src="sampleInput.js"></script>
+    <script src="parser.js"></script>
+    <script src="binder.js"></script>
+    <script src="editor.js"></script>
+    <script src="preview.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
