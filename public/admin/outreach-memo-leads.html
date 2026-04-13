@@ -409,8 +409,8 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、各行で
-            <strong>ウェブの有無・強弱</strong>を選びます。            <strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。            <strong>店名を解析</strong>のあと、各行で
+            <strong>ウェブの有無・強弱</strong>を選びます（<strong>最初はどれも未選択</strong>。済んだ行だけ選んで反映すると、<strong>未選択の行は表に残る</strong>ので進捗が分かります）。<strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
             <strong>SNSなし・ウェブページ制作不可</strong>で載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。            <strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
@@ -421,8 +421,13 @@
           </div>
           <div id="hpb-preview-host"></div>
           <div class="row-actions" id="hpb-submit-row" style="display: none; margin-top: 12px">
-            <button type="button" class="btn-sm primary" id="btn-hpb-submit" title="ウェブなし・弱い行はメモリードへ。強い行のみ送付・フェーズ管理へ">
-              メモリード／送付管理へ反映
+            <button
+              type="button"
+              class="btn-sm primary"
+              id="btn-hpb-submit"
+              title="ラジオで選んだ行だけ登録されます。未選択の行は表に残ります"
+            >
+              選択した行だけ反映
             </button>
           </div>
         </div>
@@ -766,13 +771,12 @@
             ws.className = 'web-str';
             var nm = 'ws-' + idx;
             [['no_site', 'ウェブなし（フォロー対象）'], ['weak_site', 'ウェブあり・弱い（フォロー対象）'], ['strong_site', 'ウェブあり・強い（制作不可→送付管理へ）']].forEach(
-              function (pair, wi) {
+              function (pair) {
                 var lab = document.createElement('label');
                 var rd = document.createElement('input');
                 rd.type = 'radio';
                 rd.name = nm;
                 rd.value = pair[0];
-                if (wi === 0) rd.checked = true;
                 lab.appendChild(rd);
                 lab.appendChild(document.createTextNode(' ' + pair[1]));
                 ws.appendChild(lab);
@@ -976,7 +980,10 @@
           hpbParsedRows = parseHotPepperBeautyBlocks(raw);
           renderHpbPreview(hpbParsedRows);
           if (hpbParsedRows.length) {
-            showOk(hpbParsedRows.length + '件を検出しました。ウェブ強度を確認してから登録してください。');
+            showOk(
+              hpbParsedRows.length +
+                '件を検出しました。各行でウェブなし／弱／強のいずれかを選んでから「選択した行だけ反映」を押してください（未選択のまま残せます）。',
+            );
           } else {
             showErr('店名を検出できませんでした。コピー範囲に「店名(読み)」の行と「ブックマークする」が含まれるか確認してください。');
           }
@@ -990,22 +997,30 @@
 
         document.getElementById('btn-hpb-submit').onclick = function () {
           var entries = [];
+          var pickedIndices = [];
           var nameInputs = document.querySelectorAll('.hpb-name');
           nameInputs.forEach(function (inp, idx) {
             var tr = inp.closest('tr');
             if (!tr) return;
             var accEl = tr.querySelector('.hpb-access');
             var picked = tr.querySelector('.web-str input[type="radio"]:checked');
-            var ws = picked ? picked.value : 'no_site';
+            if (!picked) return;
+            var shopName = inp.value.trim();
+            if (!shopName) return;
             entries.push({
-              shopName: inp.value.trim(),
+              shopName: shopName,
               access: accEl ? accEl.value.trim() : '',
-              webStrength: ws,
+              webStrength: picked.value,
               sourceMemo: (hpbParsedRows[idx] && hpbParsedRows[idx].sourceMemo) || '',
             });
+            pickedIndices.push(idx);
           });
-          if (!entries.length) {
+          if (!nameInputs.length) {
             showErr('先に「店名を解析」を実行してください');
+            return;
+          }
+          if (!entries.length) {
+            showErr('反映する行で「ウェブなし」「ウェブあり・弱い」「ウェブあり・強い」のいずれかを選んでください（未選択の行は登録されず表に残ります）。');
             return;
           }
           showErr('');
@@ -1021,15 +1036,25 @@
               });
             })
             .then(function (j) {
-              document.getElementById('hpb-paste').value = '';
-              hpbParsedRows = [];
-              renderHpbPreview([]);
+              pickedIndices
+                .sort(function (a, b) {
+                  return b - a;
+                })
+                .forEach(function (i) {
+                  hpbParsedRows.splice(i, 1);
+                });
+              renderHpbPreview(hpbParsedRows);
+              if (!hpbParsedRows.length) {
+                document.getElementById('hpb-paste').value = '';
+              }
+              var rest = hpbParsedRows.length;
               showOk(
                 '反映しました（メモリード +' +
                   (j.memosAdded || 0) +
                   '件／送付・フェーズ管理 +' +
                   (j.dashboardAdded || 0) +
-                  '件）。一覧の「WEBの強さ」からあとから変更できます。',
+                  '件）' +
+                  (rest ? '。プレビューに未選択の行が ' + rest + ' 件残っています。' : '。'),
               );
               return loadList();
             })
