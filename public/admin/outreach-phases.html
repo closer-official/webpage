@@ -195,6 +195,28 @@
         overflow-y: auto;
         line-height: 1.35;
       }
+      /* カード（フェーズ確認）：表と同じく送信文を低くし、プルダウンで拡大 */
+      .phase-card textarea.op-send-msg--compact {
+        min-height: 2.5rem;
+        max-height: 3rem;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        resize: none;
+        overflow-y: auto;
+        line-height: 1.35;
+      }
+      .phase-card .op-send-compact-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-width: 100%;
+      }
+      .phase-card .op-send-compact-stack select.excel-longtext-sel {
+        max-width: 100%;
+      }
       .op-sns-cell {
         white-space: nowrap;
       }
@@ -866,7 +888,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -2806,10 +2828,13 @@
           var sendLbl = document.createElement('label');
           sendLbl.className = 'op-send-lbl';
           sendLbl.setAttribute('for', taId);
-          sendLbl.textContent = '送信メッセージ（このタブの一時保存・表モードと共通）';
+          sendLbl.textContent =
+            '送信メッセージ（このタブの一時保存・表モードと共通。一覧は小入力、下のプルダウンで拡大編集）';
+          var sendStack = el('div', { class: 'op-send-compact-stack excel-send-stack' });
           var sendTa = el('textarea', {
             id: taId,
-            class: 'op-send-msg',
+            class: 'op-send-msg op-send-msg--compact',
+            rows: '2',
             placeholder: 'DM・メール用の本文下書き…',
             'aria-label': '送信メッセージ',
           });
@@ -2821,8 +2846,30 @@
               setSendDraftForItem(item.id, sendTa.value);
             }, 400);
           });
+          var sendExpandSel = el('select', {
+            class: 'excel-longtext-sel',
+            'aria-label': '送信メッセージの拡大編集',
+          });
+          sendExpandSel.appendChild(el('option', { value: '', text: '一覧（小入力）' }));
+          sendExpandSel.appendChild(el('option', { value: 'edit', text: '拡大して編集' }));
+          sendExpandSel.addEventListener('change', function () {
+            if (sendExpandSel.value === 'edit') {
+              openExcelLongTextDialog({
+                mode: 'edit',
+                title: '送信メッセージ（拡大）',
+                initial: sendTa.value,
+                onSave: function (v) {
+                  sendTa.value = v;
+                  setSendDraftForItem(item.id, v);
+                },
+              });
+              sendExpandSel.value = '';
+            }
+          });
+          sendStack.appendChild(sendTa);
+          sendStack.appendChild(sendExpandSel);
           sendWrap.appendChild(sendLbl);
-          sendWrap.appendChild(sendTa);
+          sendWrap.appendChild(sendStack);
           var snsRow = el('div', { class: 'op-sns-row' });
           function makeSnsBtn(label, channel) {
             var b = el('button', { type: 'button', class: 'btn small', text: label });
@@ -3008,7 +3055,7 @@
             searchPanel.appendChild(
               el('p', {
                 class: 'muted',
-                text: '検索中はカードをそのまま一覧表示しています。検索を空にすると、フェーズ別の2段プルダウンに戻ります。',
+                text: '検索中はカードをそのまま一覧表示しています（送信メッセージは小入力＋プルダウンで拡大）。検索を空にすると、フェーズ別の2段プルダウンに戻ります。',
               }),
             );
             if (items.length === 0) {
@@ -3048,7 +3095,7 @@
           browserPanel.appendChild(
             el('p', {
               class: 'muted',
-              text: '① 区分（7種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。',
+              text: '① 区分（7種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
             }),
           );
 
