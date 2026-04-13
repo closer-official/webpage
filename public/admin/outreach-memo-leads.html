@@ -290,7 +290,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行を含むと区切りやすいです）。<strong>店名を解析</strong>のあと、各行で
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、各行で
             <strong>ウェブの有無・強弱</strong>を選びます。<strong>ウェブあり（強）</strong>はメモリードには入れず、送付・フェーズ管理に
             <strong>SNSなし・ウェブページ制作不可</strong>で載ります。
           </p>
@@ -352,30 +352,89 @@
           return './template-worker.html?memoLeadId=' + encodeURIComponent(id) + '&v=memo1';
         }
 
-        /** ホットペッパー検索結果のような「ブックマークする」区切りテキストから店名・アクセスを推定 */
+        /** 半角・全角どちらの括弧でも「店名(読み)」行を拾う */
+        function matchSalonParenLine(line) {
+          var m = line.match(/^(.{2,120}?)\s*\(([^)]+)\)\s*$/);
+          if (!m) m = line.match(/^(.{2,120}?)\s*（([^）]+)）\s*$/);
+          return m;
+        }
+
+        function chunkHasSalonNameLine(chunk) {
+          var lines = String(chunk || '')
+            .split('\n')
+            .map(function (l) {
+              return l.trim();
+            });
+          for (var li = 0; li < lines.length; li++) {
+            var line = lines[li];
+            if (!line || line.length > 160) continue;
+            var m = matchSalonParenLine(line);
+            if (!m) continue;
+            var left = m[1].trim();
+            if (!/[\u3000-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(left)) continue;
+            return true;
+          }
+          return false;
+        }
+
+        function parseSalonNameFromChunk(chunk) {
+          var lines = String(chunk || '')
+            .split('\n')
+            .map(function (l) {
+              return l.trim();
+            });
+          for (var li = 0; li < lines.length; li++) {
+            var line = lines[li];
+            if (!line || line.length > 160) continue;
+            var m = matchSalonParenLine(line);
+            if (!m) continue;
+            var left = m[1].trim();
+            if (!/[\u3000-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(left)) continue;
+            return left;
+          }
+          return '';
+        }
+
+        /**
+         * ホットペッパー検索結果の生コピペ想定。
+         * 先頭が「ano 渋谷 【アノ】」だけで次チャンクに「アノ 渋谷(ano)」がある場合は結合する。
+         */
         function parseHotPepperBeautyBlocks(paste) {
           var text = String(paste || '').replace(/\r\n/g, '\n');
-          var chunks = text.split(/\nブックマークする\n/i);
+          var raw = text.split(/\r?\n\s*ブックマークする\s*\r?\n/i);
+          var merged = [];
+          var carry = '';
+          for (var ci = 0; ci < raw.length; ci++) {
+            var piece = (carry ? carry + '\n' : '') + String(raw[ci] || '');
+            piece = piece.replace(/^\n+/, '').replace(/\n+$/, '');
+            carry = '';
+            if (!piece.trim()) continue;
+            if (!chunkHasSalonNameLine(piece)) {
+              carry = piece;
+              continue;
+            }
+            merged.push(piece.trim());
+          }
+          if (carry.trim()) {
+            if (chunkHasSalonNameLine(carry)) {
+              merged.push(carry.trim());
+            } else if (merged.length) {
+              merged[merged.length - 1] = merged[merged.length - 1] + '\n\n' + carry.trim();
+            }
+          }
+
+          var accessStopRe =
+            /^(カット|席数|ブログ|口コミ|スマート支払いOK|スマート支払い|空席確認|空席確認・予約する|一覧へ|60分の空席|↓|メンズ|全員|新規|当日割|平日限定|期間限定|スタイリスト指定|学校|＜|【当日|21時以降)/;
+
           var shops = [];
           var seen = {};
-          chunks.forEach(function (chunk) {
+          merged.forEach(function (chunk) {
             chunk = chunk.trim();
             if (!chunk) return;
             var lines = chunk.split('\n').map(function (l) {
               return l.trim();
             });
-            var displayName = '';
-            var li;
-            for (li = 0; li < lines.length; li++) {
-              var line = lines[li];
-              if (!line || line.length > 140) continue;
-              var m = line.match(/^(.{2,100}?)\s*\(([^)]+)\)\s*$/);
-              if (!m) continue;
-              var left = m[1].trim();
-              if (!/[\u3000-\u9FFF\uFF66-\uFF9F]/.test(left) && !/[ァ-ン]/.test(left)) continue;
-              displayName = left;
-              break;
-            }
+            var displayName = parseSalonNameFromChunk(chunk);
             if (!displayName) return;
             if (seen[displayName]) return;
             seen[displayName] = 1;
@@ -386,12 +445,7 @@
               for (var j = ai + 1; j < lines.length; j++) {
                 var L = lines[j];
                 if (!L) continue;
-                if (
-                  /^(カット|席数|ブログ|口コミ|スマート支払いOK|スマート支払い|空席確認|一覧へ|60分の空席|↓|メンズ|全員|新規|当日割|平日限定|期間限定|スタイリスト指定|学校|＜|【当日)/.test(
-                    L,
-                  )
-                )
-                  break;
+                if (accessStopRe.test(L)) break;
                 if (/^￥[0-9,～\-]+$/.test(L)) break;
                 if (/^\d{1,2}:\d{2}$/.test(L) && accParts.length > 2) break;
                 accParts.push(L);
