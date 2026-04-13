@@ -143,10 +143,29 @@
         letter-spacing: 0.04em;
       }
       .memo-preview {
-        max-width: 360px;
-        white-space: pre-wrap;
-        word-break: break-word;
+        max-width: 280px;
+        vertical-align: top;
+      }
+      .memo-preview-lines {
+        font-size: 0.78rem;
         color: #cbd5e1;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+        margin-bottom: 4px;
+      }
+      select.memo-longtext-sel {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.7rem;
+        padding: 3px 6px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #0f1628;
+        color: var(--text);
       }
       .btn-sm {
         padding: 6px 10px;
@@ -237,10 +256,101 @@
         font-size: 0.8rem;
         padding: 6px 8px;
       }
-      table.hpb-preview textarea {
-        min-height: 56px;
-        font-size: 0.76rem;
+      table.hpb-preview textarea.hpb-access {
+        min-height: 2.4rem;
+        max-height: 3rem;
+        font-size: 0.74rem;
+        resize: none;
+        overflow-y: auto;
+        line-height: 1.35;
+      }
+      .hpb-access-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        max-width: 280px;
+      }
+      .hpb-access-clip {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      select.hpb-longtext-sel {
+        width: 100%;
+        font-size: 0.68rem;
+        padding: 3px 5px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #0f1628;
+        color: var(--text);
+      }
+      .memo-longtext-dlg {
+        max-width: min(94vw, 720px);
+        width: 100%;
+        margin: auto;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0;
+        background: var(--panel);
+        color: var(--text);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+      }
+      .memo-longtext-dlg::backdrop {
+        background: rgba(0, 0, 0, 0.55);
+      }
+      .memo-longtext-dlg__inner {
+        padding: 16px 18px 18px;
+      }
+      .memo-longtext-dlg__title {
+        margin: 0 0 10px;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .memo-longtext-dlg__pre {
+        display: none;
+        margin: 0;
+        padding: 12px;
+        max-height: min(58vh, 460px);
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.82rem;
+        font-family: ui-monospace, monospace;
+        background: #0f1628;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .memo-longtext-dlg__pre.is-visible {
+        display: block;
+      }
+      .memo-longtext-dlg__ta {
+        display: none;
+        width: 100%;
+        min-height: 200px;
+        max-height: min(52vh, 400px);
+        box-sizing: border-box;
+        padding: 10px 12px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #0f1628;
+        color: var(--text);
         resize: vertical;
+      }
+      .memo-longtext-dlg__ta.is-visible {
+        display: block;
+      }
+      .memo-longtext-dlg__bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 12px;
       }
       .web-str {
         display: flex;
@@ -283,7 +393,7 @@
       <h1>メモリード一覧</h1>
       <p class="sub">
         <strong>サイトがない・弱い店</strong>はメモリードに残し、<strong>公式サイトが強い店</strong>は送付管理に
-        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。
+        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -300,8 +410,8 @@
         <div id="block-hpb">
           <p class="hpb-hint">
             まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、各行で
-            <strong>ウェブの有無・強弱</strong>を選びます。<strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
-            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。
+            <strong>ウェブの有無・強弱</strong>を選びます。            <strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
+            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。            <strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -332,11 +442,22 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          更新日の新しい順。ホットペッパー取込行は<strong>WEBの強さ</strong>列のプルダウンで、登録後も<strong>なし／弱／強</strong>を切り替えられます（強にすると送付管理へ移動してメモから消えます）。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
+          更新日の新しい順。ホットペッパー取込行は<strong>WEBの強さ</strong>列のプルダウンで、登録後も<strong>なし／弱／強</strong>を切り替えられます（強にすると送付管理へ移動してメモから消えます）。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
         </p>
         <div id="list-wrap">読み込み中…</div>
       </section>
     </main>
+    <dialog class="memo-longtext-dlg" id="memo-longtext-dlg" aria-labelledby="memo-longtext-dlg-title">
+      <div class="memo-longtext-dlg__inner">
+        <h3 class="memo-longtext-dlg__title" id="memo-longtext-dlg-title"></h3>
+        <pre class="memo-longtext-dlg__pre" id="memo-longtext-dlg-pre"></pre>
+        <textarea class="memo-longtext-dlg__ta" id="memo-longtext-dlg-ta" maxlength="12000" spellcheck="true"></textarea>
+        <div class="memo-longtext-dlg__bar">
+          <button type="button" class="btn-sm" id="memo-longtext-dlg-copy">コピー</button>
+          <button type="button" class="btn-sm primary" id="memo-longtext-dlg-close">閉じる</button>
+        </div>
+      </div>
+    </dialog>
     <script>
       (function () {
         var api = (function () {
@@ -361,8 +482,98 @@
           return fetch(path, Object.assign({ credentials: 'include' }, opts || {}));
         }
 
+        var memoLongTextDlgCtx = { mode: 'read', onSave: null };
+        var memoLongTextDlgBound = false;
+
+        function bindMemoLongTextDialogOnce() {
+          if (memoLongTextDlgBound) return;
+          memoLongTextDlgBound = true;
+          var dlg = document.getElementById('memo-longtext-dlg');
+          var pre = document.getElementById('memo-longtext-dlg-pre');
+          var ta = document.getElementById('memo-longtext-dlg-ta');
+          var btnCopy = document.getElementById('memo-longtext-dlg-copy');
+          var btnClose = document.getElementById('memo-longtext-dlg-close');
+          if (!dlg || !pre || !ta || !btnCopy || !btnClose) return;
+
+          function currentBodyText() {
+            if (memoLongTextDlgCtx.mode === 'edit') return ta.value;
+            return pre.textContent || '';
+          }
+
+          function closeAndSave() {
+            if (memoLongTextDlgCtx.mode === 'edit' && typeof memoLongTextDlgCtx.onSave === 'function') {
+              memoLongTextDlgCtx.onSave(ta.value);
+            }
+            memoLongTextDlgCtx = { mode: 'read', onSave: null };
+            dlg.close();
+          }
+
+          btnClose.addEventListener('click', function () {
+            closeAndSave();
+          });
+          dlg.addEventListener('cancel', function (ev) {
+            ev.preventDefault();
+            closeAndSave();
+          });
+          btnCopy.addEventListener('click', function () {
+            var t = currentBodyText();
+            if (!t || !navigator.clipboard || !navigator.clipboard.writeText) return;
+            navigator.clipboard.writeText(t).catch(function () {});
+          });
+        }
+
+        function openMemoLongTextDialog(opts) {
+          bindMemoLongTextDialogOnce();
+          var dlg = document.getElementById('memo-longtext-dlg');
+          var titleEl = document.getElementById('memo-longtext-dlg-title');
+          var pre = document.getElementById('memo-longtext-dlg-pre');
+          var ta = document.getElementById('memo-longtext-dlg-ta');
+          if (!dlg || !titleEl || !pre || !ta) return;
+
+          titleEl.textContent = String((opts && opts.title) || '');
+          var mode = opts && opts.mode === 'edit' ? 'edit' : 'read';
+          if (mode === 'edit') {
+            memoLongTextDlgCtx = { mode: 'edit', onSave: opts && opts.onSave };
+            pre.classList.remove('is-visible');
+            ta.classList.add('is-visible');
+            var ml = opts && opts.maxLength ? Number(opts.maxLength) : 12000;
+            ta.maxLength = ml > 0 ? ml : 12000;
+            ta.value = String((opts && opts.initial) || '');
+            try {
+              ta.focus();
+            } catch (e0) {}
+          } else {
+            memoLongTextDlgCtx = { mode: 'read', onSave: null };
+            ta.classList.remove('is-visible');
+            pre.classList.add('is-visible');
+            pre.textContent = String((opts && opts.body) || '');
+          }
+          if (typeof dlg.showModal === 'function') dlg.showModal();
+        }
+
+        function hpbAccessClipLine(s) {
+          var t = String(s || '').replace(/\r\n/g, '\n').trim();
+          if (!t) return '—';
+          var line = t.split('\n')[0];
+          return line.length > 56 ? line.slice(0, 55) + '…' : line;
+        }
+
         function workerUrlWithMemo(id) {
           return './template-worker.html?memoLeadId=' + encodeURIComponent(id) + '&v=memo1';
+        }
+
+        /** 「一覧へ」行から先（クーポン一覧・60分空き・時刻）はメモに含めない */
+        function stripHotPepperCouponTail(text) {
+          var lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
+          var cut = -1;
+          for (var hi = 0; hi < lines.length; hi++) {
+            if (lines[hi].trim() === '一覧へ') {
+              cut = hi;
+              break;
+            }
+          }
+          if (cut < 0) return String(text || '').replace(/\r\n/g, '\n').trim();
+          return lines.slice(0, cut).join('\n').trim();
         }
 
         /** 半角・全角どちらの括弧でも「店名(読み)」行を拾う */
@@ -506,12 +717,50 @@
             inp.className = 'hpb-name';
             n1.appendChild(inp);
             var n2 = document.createElement('td');
+            var accStack = document.createElement('div');
+            accStack.className = 'hpb-access-stack';
+            var accClip = document.createElement('div');
+            accClip.className = 'hpb-access-clip';
             var ta = document.createElement('textarea');
             ta.maxLength = 800;
             ta.value = r.access || '';
             ta.className = 'hpb-access';
             ta.setAttribute('data-hpb-idx', String(idx));
-            n2.appendChild(ta);
+            accClip.textContent = hpbAccessClipLine(ta.value);
+            function syncAccClip() {
+              accClip.textContent = hpbAccessClipLine(ta.value);
+            }
+            ta.addEventListener('input', syncAccClip);
+            var accSel = document.createElement('select');
+            accSel.className = 'hpb-longtext-sel';
+            accSel.setAttribute('aria-label', 'アクセス全文の表示・編集');
+            var accO0 = document.createElement('option');
+            accO0.value = '';
+            accO0.textContent = '一覧（小入力）';
+            var accO1 = document.createElement('option');
+            accO1.value = 'full';
+            accO1.textContent = '拡大して編集';
+            accSel.appendChild(accO0);
+            accSel.appendChild(accO1);
+            accSel.addEventListener('change', function () {
+              if (accSel.value === 'full') {
+                openMemoLongTextDialog({
+                  mode: 'edit',
+                  title: 'アクセス（全文・編集）',
+                  initial: ta.value,
+                  maxLength: 800,
+                  onSave: function (v) {
+                    ta.value = v;
+                    syncAccClip();
+                  },
+                });
+                accSel.value = '';
+              }
+            });
+            accStack.appendChild(accClip);
+            accStack.appendChild(ta);
+            accStack.appendChild(accSel);
+            n2.appendChild(accStack);
             var n3 = document.createElement('td');
             var ws = document.createElement('div');
             ws.className = 'web-str';
@@ -629,9 +878,35 @@
               webTd.style.color = 'var(--muted)';
               webTd.textContent = '—';
             }
+            var fullMemo = String((r.memo || '')).trim();
             var memoTd = document.createElement('td');
             memoTd.className = 'memo-preview';
-            memoTd.textContent = (r.memo || '').trim() || '—';
+            var memoPreview = document.createElement('div');
+            memoPreview.className = 'memo-preview-lines';
+            memoPreview.textContent = fullMemo || '—';
+            var memoSel = document.createElement('select');
+            memoSel.className = 'memo-longtext-sel';
+            memoSel.setAttribute('aria-label', 'メモ全文の表示');
+            var m0 = document.createElement('option');
+            m0.value = '';
+            m0.textContent = '一覧（2行まで）';
+            var m1 = document.createElement('option');
+            m1.value = 'full';
+            m1.textContent = '全文を表示';
+            memoSel.appendChild(m0);
+            memoSel.appendChild(m1);
+            memoSel.addEventListener('change', function () {
+              if (memoSel.value === 'full') {
+                openMemoLongTextDialog({
+                  mode: 'read',
+                  title: 'メモ（全文）',
+                  body: fullMemo || '（なし）',
+                });
+                memoSel.value = '';
+              }
+            });
+            memoTd.appendChild(memoPreview);
+            memoTd.appendChild(memoSel);
             var dateTd = document.createElement('td');
             dateTd.className = 'mono';
             dateTd.textContent = (r.updatedAt || r.createdAt || '').slice(0, 19).replace('T', ' ');

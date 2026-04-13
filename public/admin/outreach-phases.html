@@ -186,10 +186,14 @@
         line-height: 1.4;
       }
       .excel-sheet textarea.op-send-msg--compact {
-        min-height: 3.2rem;
-        min-width: 140px;
-        font-size: 0.74rem;
-        padding: 6px 8px;
+        min-height: 2.5rem;
+        max-height: 3rem;
+        min-width: 120px;
+        font-size: 0.72rem;
+        padding: 5px 7px;
+        resize: none;
+        overflow-y: auto;
+        line-height: 1.35;
       }
       .op-sns-cell {
         white-space: nowrap;
@@ -576,7 +580,7 @@
       }
       .excel-sheet-wrap {
         overflow: auto;
-        max-height: min(72vh, 720px);
+        max-height: min(52vh, 520px);
         border: 1px solid var(--phase-line);
         border-radius: 10px;
         background: #0b1323;
@@ -731,6 +735,102 @@
         font-size: 0.78rem;
         color: #e8edf5;
       }
+      .excel-sheet td.excel-cell-address--stack {
+        vertical-align: top;
+        max-width: 280px;
+      }
+      .excel-one-line-clip {
+        font-size: 0.72rem;
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        margin: 0 0 4px;
+        line-height: 1.35;
+      }
+      select.excel-longtext-sel {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.68rem;
+        padding: 3px 5px;
+        border-radius: 6px;
+        background: #121a2e;
+        color: #e8edf5;
+        border: 1px solid #3d5675;
+      }
+      .excel-send-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .op-excel-longtext-dlg {
+        max-width: min(94vw, 720px);
+        width: 100%;
+        margin: auto;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 0;
+        background: #0f172a;
+        color: #e8edf5;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+      }
+      .op-excel-longtext-dlg::backdrop {
+        background: rgba(0, 0, 0, 0.55);
+      }
+      .op-excel-longtext-dlg__inner {
+        padding: 16px 18px 18px;
+      }
+      .op-excel-longtext-dlg__title {
+        margin: 0 0 10px;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .op-excel-longtext-dlg__pre {
+        display: none;
+        margin: 0;
+        padding: 12px;
+        max-height: min(58vh, 460px);
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.82rem;
+        font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+        background: #0c1222;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        color: #e8edf5;
+      }
+      .op-excel-longtext-dlg__pre.is-visible {
+        display: block;
+      }
+      .op-excel-longtext-dlg__ta {
+        display: none;
+        width: 100%;
+        min-height: 220px;
+        max-height: min(52vh, 400px);
+        box-sizing: border-box;
+        padding: 10px 12px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        border-radius: 8px;
+        border: 1px solid #3d5675;
+        background: #0c1222;
+        color: #e8edf5;
+        resize: vertical;
+      }
+      .op-excel-longtext-dlg__ta.is-visible {
+        display: block;
+      }
+      .op-excel-longtext-dlg__bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
     </style>
   </head>
   <body>
@@ -766,7 +866,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -801,6 +901,17 @@
       <p id="load-err" class="err" style="display: none"></p>
     </div>
     <div id="boards"></div>
+    <dialog id="op-excel-longtext-dlg" class="op-excel-longtext-dlg" aria-labelledby="op-excel-longtext-dlg-title">
+      <div class="op-excel-longtext-dlg__inner">
+        <h3 class="op-excel-longtext-dlg__title" id="op-excel-longtext-dlg-title"></h3>
+        <pre class="op-excel-longtext-dlg__pre" id="op-excel-longtext-dlg-pre"></pre>
+        <textarea class="op-excel-longtext-dlg__ta" id="op-excel-longtext-dlg-ta" maxlength="20000" spellcheck="true"></textarea>
+        <div class="op-excel-longtext-dlg__bar">
+          <button type="button" class="btn small" id="op-excel-longtext-dlg-copy">コピー</button>
+          <button type="button" class="btn primary" id="op-excel-longtext-dlg-close">閉じる</button>
+        </div>
+      </div>
+    </dialog>
     <script>
       (function () {
         var STORAGE_SENDER_NAME = 'closer_outreach_sender_name';
@@ -1234,6 +1345,155 @@
         function getSendDraftForItem(itemId) {
           var m = getSendDraftMap();
           return String(m[String(itemId)] || '');
+        }
+
+        var excelLongTextDlgCtx = { mode: 'read', onSave: null };
+        var excelLongTextDlgBound = false;
+
+        function excelGridFirstLine(s, maxLen) {
+          var t = String(s || '').replace(/\r\n/g, '\n').trim();
+          if (!t) return '';
+          var line = t.split('\n')[0].trim();
+          var n = maxLen > 8 ? maxLen : 48;
+          if (line.length > n) return line.slice(0, n - 1) + '…';
+          return line;
+        }
+
+        function bindExcelLongTextDialogOnce() {
+          if (excelLongTextDlgBound) return;
+          excelLongTextDlgBound = true;
+          var dlg = document.getElementById('op-excel-longtext-dlg');
+          var titleEl = document.getElementById('op-excel-longtext-dlg-title');
+          var pre = document.getElementById('op-excel-longtext-dlg-pre');
+          var ta = document.getElementById('op-excel-longtext-dlg-ta');
+          var btnCopy = document.getElementById('op-excel-longtext-dlg-copy');
+          var btnClose = document.getElementById('op-excel-longtext-dlg-close');
+          if (!dlg || !titleEl || !pre || !ta || !btnCopy || !btnClose) return;
+
+          function currentBodyText() {
+            if (excelLongTextDlgCtx.mode === 'edit') return ta.value;
+            return pre.textContent || '';
+          }
+
+          function closeAndSave() {
+            if (excelLongTextDlgCtx.mode === 'edit' && typeof excelLongTextDlgCtx.onSave === 'function') {
+              excelLongTextDlgCtx.onSave(ta.value);
+            }
+            excelLongTextDlgCtx = { mode: 'read', onSave: null };
+            dlg.close();
+          }
+
+          btnClose.addEventListener('click', function () {
+            closeAndSave();
+          });
+          dlg.addEventListener('cancel', function (ev) {
+            ev.preventDefault();
+            closeAndSave();
+          });
+          btnCopy.addEventListener('click', function () {
+            var t = currentBodyText();
+            if (!t) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(t).catch(function () {});
+            }
+          });
+        }
+
+        function openExcelLongTextDialog(opts) {
+          bindExcelLongTextDialogOnce();
+          var dlg = document.getElementById('op-excel-longtext-dlg');
+          var titleEl = document.getElementById('op-excel-longtext-dlg-title');
+          var pre = document.getElementById('op-excel-longtext-dlg-pre');
+          var ta = document.getElementById('op-excel-longtext-dlg-ta');
+          if (!dlg || !titleEl || !pre || !ta) return;
+
+          titleEl.textContent = String((opts && opts.title) || '');
+          var mode = opts && opts.mode === 'edit' ? 'edit' : 'read';
+          if (mode === 'edit') {
+            excelLongTextDlgCtx = { mode: 'edit', onSave: opts && opts.onSave };
+            pre.classList.remove('is-visible');
+            ta.classList.add('is-visible');
+            ta.value = String((opts && opts.initial) || '');
+            try {
+              ta.focus();
+            } catch (e0) {}
+          } else {
+            excelLongTextDlgCtx = { mode: 'read', onSave: null };
+            ta.classList.remove('is-visible');
+            pre.classList.add('is-visible');
+            pre.textContent = String((opts && opts.body) || '');
+          }
+          if (typeof dlg.showModal === 'function') dlg.showModal();
+        }
+
+        function excelGridAddressTd(fullAddr, ariaLabel) {
+          var t = String(fullAddr || '').trim();
+          var td = el('td', { class: 'excel-cell-address excel-cell-address--stack' });
+          var clip = el('div', {
+            class: 'excel-one-line-clip',
+            text: excelGridFirstLine(t, 52) || '—',
+            title: t,
+          });
+          var sel = el('select', { class: 'excel-longtext-sel', 'aria-label': ariaLabel || '住所の表示' });
+          sel.appendChild(el('option', { value: '', text: '一覧（1行）' }));
+          sel.appendChild(el('option', { value: 'full', text: '全文を表示' }));
+          sel.addEventListener('change', function () {
+            if (sel.value === 'full') {
+              openExcelLongTextDialog({
+                mode: 'read',
+                title: '住所（全文）',
+                body: t || '（なし）',
+              });
+              sel.value = '';
+            }
+          });
+          td.appendChild(clip);
+          td.appendChild(sel);
+          return td;
+        }
+
+        function excelGridSendMessageTd(itemId) {
+          var td = el('td', { class: 'excel-cell-send-compact' });
+          var stack = el('div', { class: 'excel-send-stack' });
+          var gTaId = 'op-send-' + itemId;
+          var gTa = el('textarea', {
+            id: gTaId,
+            class: 'op-send-msg op-send-msg--compact',
+            rows: '2',
+            'aria-label': '送信メッセージ',
+          });
+          gTa.value = getSendDraftForItem(itemId);
+          var gTimer = null;
+          gTa.addEventListener('input', function () {
+            clearTimeout(gTimer);
+            gTimer = setTimeout(function () {
+              setSendDraftForItem(itemId, gTa.value);
+            }, 400);
+          });
+          var sel = el('select', {
+            class: 'excel-longtext-sel',
+            'aria-label': '送信メッセージの拡大編集',
+          });
+          sel.appendChild(el('option', { value: '', text: '一覧（小入力）' }));
+          sel.appendChild(el('option', { value: 'edit', text: '拡大して編集' }));
+          sel.addEventListener('change', function () {
+            if (sel.value === 'edit') {
+              openExcelLongTextDialog({
+                mode: 'edit',
+                title: '送信メッセージ（拡大）',
+                initial: gTa.value,
+                onSave: function (v) {
+                  gTa.value = v;
+                  setSendDraftForItem(itemId, v);
+                },
+              });
+              sel.value = '';
+            }
+          });
+          stack.appendChild(gTa);
+          stack.appendChild(sel);
+          td.appendChild(stack);
+          return td;
         }
 
         function outreachGoToShopCard(itemId, channel) {
@@ -2617,7 +2877,7 @@
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
               text:
-                '左端が行番号（1,2,3…）。列は A〜D の4つです（店舗名＋カードへ／住所／フェーズ／送信メッセージ）。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。行はフェーズ順で並び、メモ行は先頭付近です。',
+                '左端が行番号（1,2,3…）。列は A〜D の4つです（店舗名＋カードへ／住所／フェーズ／送信メッセージ）。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
             }),
           );
 
@@ -2694,28 +2954,11 @@
               nameStack.appendChild(cardBtn);
               nameTd.appendChild(nameStack);
               tr.appendChild(nameTd);
-              tr.appendChild(el('td', { class: 'excel-cell-address', text: dashboardItemAddress(item) }));
+              tr.appendChild(excelGridAddressTd(dashboardItemAddress(item), '住所'));
               var phaseTd = el('td');
               phaseTd.appendChild(renderPhaseSelect(item, loadFn));
               tr.appendChild(phaseTd);
-              var msgTd = el('td');
-              var gTaId = 'op-send-' + item.id;
-              var gTa = el('textarea', {
-                id: gTaId,
-                class: 'op-send-msg op-send-msg--compact',
-                rows: '3',
-                'aria-label': '送信メッセージ',
-              });
-              gTa.value = getSendDraftForItem(item.id);
-              var gTimer = null;
-              gTa.addEventListener('input', function () {
-                clearTimeout(gTimer);
-                gTimer = setTimeout(function () {
-                  setSendDraftForItem(item.id, gTa.value);
-                }, 400);
-              });
-              msgTd.appendChild(gTa);
-              tr.appendChild(msgTd);
+              tr.appendChild(excelGridSendMessageTd(item.id));
             } else {
               var memo = row.memo;
               var mname = String(memo.shopName || '').trim() || '（無題）';
@@ -2727,28 +2970,11 @@
               nameStack.appendChild(cardBtn);
               nameTd.appendChild(nameStack);
               tr.appendChild(nameTd);
-              tr.appendChild(el('td', { class: 'excel-cell-address', text: memoLeadAddressCell(memo) }));
+              tr.appendChild(excelGridAddressTd(memoLeadAddressCell(memo), 'メモ由来・住所'));
               var phaseTdM = el('td');
               phaseTdM.appendChild(renderMemoPhaseSelect(memo, loadFn));
               tr.appendChild(phaseTdM);
-              var msgTdM = el('td');
-              var gTaIdM = 'op-send-' + memo.id;
-              var gTaM = el('textarea', {
-                id: gTaIdM,
-                class: 'op-send-msg op-send-msg--compact',
-                rows: '3',
-                'aria-label': '送信メッセージ',
-              });
-              gTaM.value = getSendDraftForItem(memo.id);
-              var gTimerM = null;
-              gTaM.addEventListener('input', function () {
-                clearTimeout(gTimerM);
-                gTimerM = setTimeout(function () {
-                  setSendDraftForItem(memo.id, gTaM.value);
-                }, 400);
-              });
-              msgTdM.appendChild(gTaM);
-              tr.appendChild(msgTdM);
+              tr.appendChild(excelGridSendMessageTd(memo.id));
             }
             tbody.appendChild(tr);
           });

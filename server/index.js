@@ -1957,10 +1957,19 @@ function extractHpbAccessFromMemo(memo) {
   return '';
 }
 
+/** HPB コピペ末尾の「一覧へ」〜クーポン・空き時間ブロックを除く */
+function stripHpbCouponTailFromText(s) {
+  const lines = String(s || '').split('\n');
+  const cut = lines.findIndex((line) => line.trim() === '一覧へ');
+  if (cut < 0) return String(s || '').trim();
+  return lines.slice(0, cut).join('\n').trim();
+}
+
 function extractHpbSourceFromMemo(memo) {
   const parts = String(memo || '').split(/\n\n+/);
-  if (parts.length < 2) return String(memo || '').trim().slice(0, 11000);
-  return parts.slice(1).join('\n\n').trim().slice(0, 11000);
+  const tail =
+    parts.length < 2 ? String(memo || '').trim() : parts.slice(1).join('\n\n').trim();
+  return stripHpbCouponTailFromText(tail).slice(0, 11000);
 }
 
 app.get('/api/dashboard', async (req, res) => {
@@ -2030,7 +2039,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
     const webStrength = String(raw?.webStrength || '').trim();
     if (!STRENGTHS.has(webStrength)) continue;
     const access = String(raw?.access || '').trim().slice(0, 800);
-    const sourceMemo = String(raw?.sourceMemo || '').trim().slice(0, 11000);
+    const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
     if (webStrength === 'strong_site') {
       dashboard.unshift(
         buildStrongWebSalonDashboardRow({
@@ -2092,9 +2101,9 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
       const access = String(memoRow.hpbAccess || '')
         .trim()
         .slice(0, 800) || extractHpbAccessFromMemo(memoRow.memo);
-      const snippet = String(memoRow.hpbBody || '')
-        .trim()
-        .slice(0, 11000) || extractHpbSourceFromMemo(memoRow.memo) || memoText;
+      const snippet = stripHpbCouponTailFromText(
+        String(memoRow.hpbBody || '').trim() || extractHpbSourceFromMemo(memoRow.memo) || memoText,
+      ).slice(0, 11000);
       list.splice(i, 1);
       await store.setMemoLeads(list);
       const dashboard = [...(await store.getDashboard())];
