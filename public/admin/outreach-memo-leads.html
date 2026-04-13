@@ -262,6 +262,15 @@
         color: var(--muted);
         margin: 0 0 10px;
       }
+      select.memo-web-select {
+        max-width: 13.5rem;
+        font-size: 0.72rem;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #0f1628;
+        color: var(--text);
+      }
     </style>
   </head>
   <body>
@@ -291,8 +300,8 @@
         <div id="block-hpb">
           <p class="hpb-hint">
             まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、各行で
-            <strong>ウェブの有無・強弱</strong>を選びます。<strong>ウェブあり（強）</strong>はメモリードには入れず、送付・フェーズ管理に
-            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。
+            <strong>ウェブの有無・強弱</strong>を選びます。<strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
+            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -302,7 +311,9 @@
           </div>
           <div id="hpb-preview-host"></div>
           <div class="row-actions" id="hpb-submit-row" style="display: none; margin-top: 12px">
-            <button type="button" class="btn-sm primary" id="btn-hpb-submit">解析結果をまとめて登録</button>
+            <button type="button" class="btn-sm primary" id="btn-hpb-submit" title="ウェブなし・弱い行はメモリードへ。強い行のみ送付・フェーズ管理へ">
+              メモリード／送付管理へ反映
+            </button>
           </div>
         </div>
 
@@ -320,7 +331,9 @@
 
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
-        <p class="sub" style="margin-top: 0">更新日の新しい順。行の「店舗ドラフトで編集へ」で新規モードに店名・メモを反映します。</p>
+        <p class="sub" style="margin-top: 0">
+          更新日の新しい順。ホットペッパー取込行は<strong>WEBの強さ</strong>列のプルダウンで、登録後も<strong>なし／弱／強</strong>を切り替えられます（強にすると送付管理へ移動してメモから消えます）。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
+        </p>
         <div id="list-wrap">読み込み中…</div>
       </section>
     </main>
@@ -538,6 +551,18 @@
           if (bm) bm.style.display = isManual ? 'block' : 'none';
         }
 
+        function isHpbMemoRow(r) {
+          return String((r && r.memo) || '').trim().startsWith('[HPB取込]');
+        }
+
+        function currentMemoWebSelectValue(r) {
+          var ws = r && r.webStrength;
+          if (ws === 'weak_site' || ws === 'no_site') return ws;
+          var m = String((r && r.memo) || '');
+          if (m.indexOf('ウェブあり（弱）') >= 0) return 'weak_site';
+          return 'no_site';
+        }
+
         function renderList(rows) {
           var w = document.getElementById('list-wrap');
           if (!rows || !rows.length) {
@@ -546,12 +571,64 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th>店名</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th>店名</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
             var nameTd = document.createElement('td');
             nameTd.textContent = r.shopName || '（無題）';
+            var webTd = document.createElement('td');
+            if (isHpbMemoRow(r)) {
+              var sel = document.createElement('select');
+              sel.className = 'memo-web-select';
+              sel.setAttribute('aria-label', '公開サイトの強さ（登録後も変更可）');
+              [
+                ['no_site', 'ウェブなし'],
+                ['weak_site', 'ウェブあり（弱）'],
+                ['strong_site', 'ウェブあり（強→送付管理）'],
+              ].forEach(function (opt) {
+                var o = document.createElement('option');
+                o.value = opt[0];
+                o.textContent = opt[1];
+                if (opt[0] === currentMemoWebSelectValue(r)) o.selected = true;
+                sel.appendChild(o);
+              });
+              sel.onchange = function () {
+                var v = sel.value;
+                var prev = currentMemoWebSelectValue(r);
+                sel.disabled = true;
+                credFetch(api + '/memo-leads/' + encodeURIComponent(r.id), {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ webStrength: v }),
+                })
+                  .then(function (res) {
+                    return res.json().then(function (j) {
+                      if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                      return j;
+                    });
+                  })
+                  .then(function (j) {
+                    sel.disabled = false;
+                    if (j && j.movedToDashboard) {
+                      showOk('送付・フェーズ管理へ移しました（メモリードからは削除されています）');
+                    } else {
+                      showOk('WEBの強さを保存しました');
+                    }
+                    return loadList();
+                  })
+                  .catch(function (e) {
+                    sel.disabled = false;
+                    sel.value = prev;
+                    showErr(e.message || String(e));
+                  });
+              };
+              webTd.appendChild(sel);
+            } else {
+              webTd.className = 'mono';
+              webTd.style.color = 'var(--muted)';
+              webTd.textContent = '—';
+            }
             var memoTd = document.createElement('td');
             memoTd.className = 'memo-preview';
             memoTd.textContent = (r.memo || '').trim() || '—';
@@ -589,6 +666,7 @@
             actTd.appendChild(document.createTextNode(' '));
             actTd.appendChild(del);
             tr.appendChild(nameTd);
+            tr.appendChild(webTd);
             tr.appendChild(memoTd);
             tr.appendChild(dateTd);
             tr.appendChild(actTd);
@@ -672,11 +750,11 @@
               hpbParsedRows = [];
               renderHpbPreview([]);
               showOk(
-                '登録しました（メモリード +' +
+                '反映しました（メモリード +' +
                   (j.memosAdded || 0) +
-                  '／送付管理 +' +
+                  '件／送付・フェーズ管理 +' +
                   (j.dashboardAdded || 0) +
-                  '）。',
+                  '件）。一覧の「WEBの強さ」からあとから変更できます。',
               );
               return loadList();
             })

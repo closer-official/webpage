@@ -1934,6 +1934,35 @@ function addMonthsIso(fromDate, months) {
   return d.toISOString();
 }
 
+const MEMO_WEB_STRENGTH = new Set(['no_site', 'weak_site', 'strong_site']);
+
+function hpbMemoLabelForStrength(ws) {
+  if (ws === 'weak_site') return '[HPB取込] ウェブあり（弱）';
+  return '[HPB取込] ウェブなし';
+}
+
+function rewriteHpbMemoFirstLine(memo, ws) {
+  const m = String(memo || '');
+  if (!m.trim().startsWith('[HPB取込]')) return m;
+  const nl = m.indexOf('\n');
+  const tail = nl === -1 ? '' : m.slice(nl + 1);
+  return `${hpbMemoLabelForStrength(ws)}\n${tail}`;
+}
+
+function extractHpbAccessFromMemo(memo) {
+  for (const line of String(memo || '').split('\n')) {
+    const t = line.trim();
+    if (t.startsWith('アクセス:')) return t.replace(/^アクセス:\s*/, '').trim().slice(0, 800);
+  }
+  return '';
+}
+
+function extractHpbSourceFromMemo(memo) {
+  const parts = String(memo || '').split(/\n\n+/);
+  if (parts.length < 2) return String(memo || '').trim().slice(0, 11000);
+  return parts.slice(1).join('\n\n').trim().slice(0, 11000);
+}
+
 app.get('/api/dashboard', async (req, res) => {
   res.json(await store.getDashboard());
 });
@@ -2022,6 +2051,9 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
       id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
       shopName,
       memo,
+      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
+      hpbAccess: access,
+      hpbBody: sourceMemo.slice(0, 11000),
       createdAt: now,
       updatedAt: now,
     });
@@ -2043,6 +2075,43 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body?.shopName !== undefined) list[i].shopName = String(req.body.shopName || '').trim().slice(0, 200);
   if (req.body?.memo !== undefined) list[i].memo = String(req.body.memo || '').trim().slice(0, 12000);
+
+  if (req.body?.webStrength !== undefined) {
+    const ws = String(req.body.webStrength).trim();
+    if (!MEMO_WEB_STRENGTH.has(ws)) {
+      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site のいずれかです' });
+    }
+    const memoRow = list[i];
+    const memoText = String(memoRow?.memo || '').trim();
+    const isHpb = memoText.startsWith('[HPB取込]') || String(memoRow?.hpbBody || '').trim();
+    if (!isHpb) {
+      return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
+    }
+    if (ws === 'strong_site') {
+      const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
+      const access = String(memoRow.hpbAccess || '')
+        .trim()
+        .slice(0, 800) || extractHpbAccessFromMemo(memoRow.memo);
+      const snippet = String(memoRow.hpbBody || '')
+        .trim()
+        .slice(0, 11000) || extractHpbSourceFromMemo(memoRow.memo) || memoText;
+      list.splice(i, 1);
+      await store.setMemoLeads(list);
+      const dashboard = [...(await store.getDashboard())];
+      dashboard.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: snippet,
+        }),
+      );
+      await store.setDashboard(dashboard);
+      return res.json({ ok: true, movedToDashboard: true });
+    }
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
+    memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
+  }
+
   list[i].updatedAt = new Date().toISOString();
   await store.setMemoLeads(list);
   res.json(list[i]);
