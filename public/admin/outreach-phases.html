@@ -280,6 +280,11 @@
           color 0.12s ease,
           border-color 0.12s ease;
       }
+      select.op-phase-select[data-phase='before_creation'] {
+        background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+        color: #f3f4f6;
+        border-color: #9ca3af;
+      }
       select.op-phase-select[data-phase='before_send'] {
         background: linear-gradient(180deg, #475569 0%, #334155 100%);
         color: #f8fafc;
@@ -641,6 +646,45 @@
         color: #e8edf5;
         border: 1px solid #3d5675;
       }
+      .excel-name-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        max-width: 280px;
+      }
+      .excel-name-stack .excel-shop-title {
+        font-weight: 600;
+        color: #f0f9ff;
+        line-height: 1.35;
+      }
+      a.excel-card-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        font-family: system-ui, sans-serif;
+        text-decoration: none;
+        background: #1d4ed8;
+        color: #fff !important;
+        border: 1px solid #3b82f6;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+      }
+      a.excel-card-btn:hover {
+        background: #2563eb;
+        color: #fff !important;
+      }
+      .excel-sheet td.excel-cell-address {
+        max-width: 320px;
+        min-width: 140px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: system-ui, sans-serif;
+        font-size: 0.78rem;
+        color: #e8edf5;
+      }
     </style>
   </head>
   <body>
@@ -652,7 +696,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（住所は一覧には出しません）。区分・検索の表示・各店のプルダウンは<strong>次の7種類だけ</strong>です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列を表示</strong>します。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし（送信不可）／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -676,7 +720,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号 1,2,3…、上に列 A〜G の表です。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -1090,7 +1134,12 @@
           lost: '失注',
         };
 
+        /** メモリード一覧と表上の対応（UIのみ。サーバの outreachPhase とは別） */
+        var MEMO_PHASE_KEY = 'before_creation';
+        var MEMO_PHASE_LABEL = '作成前';
+
         var cachedDashboardItems = [];
+        var cachedMemoLeads = [];
         var OP_SEND_DRAFT_KEY = 'closer_outreach_send_draft_by_shop_v1';
         var pendingOutreachFocusShopId = null;
         var pendingOutreachOpenChannel = null;
@@ -1417,6 +1466,97 @@
           var k = sevenPhaseKey(item);
           var i = SEVEN_PHASE_KEYS.indexOf(k);
           return i >= 0 ? i : SEVEN_PHASE_KEYS.length;
+        }
+
+        function dashboardItemAddress(item) {
+          var a = item && item.researched && item.researched.address;
+          var t = String(a || '').trim();
+          return t || '—';
+        }
+
+        function memoLeadAddressCell(memo) {
+          var raw = String((memo && memo.memo) || '').trim();
+          if (!raw) return '—';
+          var mapNeedles = extractMapNeedlesFromQuery(raw);
+          var text = stripMapUrlsForTextNeedle(raw, mapNeedles).trim();
+          if (text) return text.length > 500 ? text.slice(0, 500) + '…' : text;
+          if (mapNeedles.length) return '（地図URLのみ・メモ本文なし）';
+          return raw.length > 500 ? raw.slice(0, 500) + '…' : raw;
+        }
+
+        function memoMatchesSearch(memo, rawQuery) {
+          var q = String(rawQuery || '').trim();
+          if (!q) return true;
+          if (memo && memo.id === q) return true;
+          var mapNeedles = extractMapNeedlesFromQuery(q);
+          var textNeedle = stripMapUrlsForTextNeedle(q, mapNeedles).trim();
+          var hasUrl = mapNeedles.length > 0;
+          var hasText = textNeedle.length > 0;
+          if (!hasUrl && !hasText) return false;
+          var memoText = String((memo && memo.memo) || '') + '\n' + String((memo && memo.shopName) || '');
+          var urlHit = false;
+          if (hasUrl) {
+            urlHit = mapNeedles.some(function (n) {
+              return memoText.indexOf(n) >= 0;
+            });
+          }
+          var textHit = false;
+          if (hasText) {
+            textHit = textFieldMatches(memo.shopName || '', textNeedle) || textFieldMatches(memo.memo || '', textNeedle);
+          }
+          if (hasUrl && hasText) return urlHit || textHit;
+          if (hasUrl) return urlHit;
+          return textHit;
+        }
+
+        /** Excel 用：メモ行は作成前として先頭付近、その他は seven 順 */
+        function excelGridRowSortKey(row) {
+          if (row.kind === 'memo') return -1;
+          return sevenPhaseSortIndex(row.item);
+        }
+
+        function buildExcelGridRows(dashboardItems, memoLeads, rawQuery) {
+          var q = String(rawQuery || '').trim();
+          var rows = [];
+          (dashboardItems || []).forEach(function (item) {
+            if (!q || itemMatchesSearch(item, q)) rows.push({ kind: 'dash', item: item });
+          });
+          (memoLeads || []).forEach(function (memo) {
+            if (memo && memo.id && (!q || memoMatchesSearch(memo, q))) rows.push({ kind: 'memo', memo: memo });
+          });
+          rows.sort(function (a, b) {
+            var ka = excelGridRowSortKey(a);
+            var kb = excelGridRowSortKey(b);
+            if (ka !== kb) return ka - kb;
+            var na = a.kind === 'memo' ? String(a.memo.shopName || '').trim() : outreachShopName(a.item) || a.item.id;
+            var nb = b.kind === 'memo' ? String(b.memo.shopName || '').trim() : outreachShopName(b.item) || b.item.id;
+            return na.localeCompare(nb, 'ja');
+          });
+          return rows;
+        }
+
+        function navigateToShopCardFromGrid(shopId) {
+          pendingOutreachFocusShopId = String(shopId || '').trim();
+          pendingOutreachOpenChannel = null;
+          setOutreachViewMode('card');
+          render(cachedDashboardItems);
+        }
+
+        function deleteMemoLeadById(memoId) {
+          return fetch('/api/memo-leads/' + encodeURIComponent(memoId), {
+            method: 'DELETE',
+            credentials: 'include',
+          }).then(function (r) {
+            if (r.status === 204 || r.ok) return;
+            return r
+              .json()
+              .catch(function () {
+                return {};
+              })
+              .then(function (j) {
+                throw new Error((j && j.error) || 'メモリードの更新に失敗しました');
+              });
+          });
         }
 
         function searchStatusLabel(item) {
@@ -1885,6 +2025,10 @@
         function syncOpPhaseSelectVisual(sel) {
           if (!sel) return;
           var v = String(sel.value || '').trim();
+          if (v === MEMO_PHASE_KEY) {
+            sel.setAttribute('data-phase', v);
+            return;
+          }
           if (SEVEN_PHASE_KEYS.indexOf(v) < 0) v = 'before_send';
           sel.setAttribute('data-phase', v);
         }
@@ -1911,6 +2055,44 @@
               .catch(function (e) {
                 showErr(String(e.message || e));
                 sel.value = prev;
+                syncOpPhaseSelectVisual(sel);
+              })
+              .finally(function () {
+                sel.disabled = false;
+                syncOpPhaseSelectVisual(sel);
+              });
+          };
+          return sel;
+        }
+
+        /** メモリード行：常に「作成前」。「送信前」に変えると API でメモを削除 */
+        function renderMemoPhaseSelect(memo, loadFn) {
+          var sel = el('select', { class: 'op-phase-select op-phase-select--memo', 'aria-label': 'メモリードのフェーズ' }, []);
+          sel.appendChild(el('option', { value: MEMO_PHASE_KEY, text: MEMO_PHASE_LABEL, selected: true }));
+          SEVEN_PHASE_KEYS.forEach(function (k) {
+            sel.appendChild(el('option', { value: k, text: SEVEN_PHASE_LABELS[k] }));
+          });
+          syncOpPhaseSelectVisual(sel);
+          sel.onchange = function () {
+            var v = String(sel.value || '').trim();
+            syncOpPhaseSelectVisual(sel);
+            if (v === MEMO_PHASE_KEY) return;
+            if (v !== 'before_send') {
+              showErr(
+                'メモリードの行は「送信前」にしたときだけ一覧から外れます。先に店舗ドラフトで案件化する場合は、メモリード一覧から手動で削除するか、「送信前」を選んでください。',
+              );
+              sel.value = MEMO_PHASE_KEY;
+              syncOpPhaseSelectVisual(sel);
+              return;
+            }
+            sel.disabled = true;
+            deleteMemoLeadById(memo.id)
+              .then(function () {
+                return loadFn();
+              })
+              .catch(function (e) {
+                showErr(String(e.message || e));
+                sel.value = MEMO_PHASE_KEY;
                 syncOpPhaseSelectVisual(sel);
               })
               .finally(function () {
@@ -2346,22 +2528,23 @@
           return row;
         }
 
-        /** 列見出しは Excel と同様（A, B, C…）。左端は行番号 1,2,3… */
-        function renderExcelGridPanel(host, items, loadFn, searchActive) {
+        /** 列見出しは Excel と同様（A〜D の4列＋左端行番号） */
+        function renderExcelGridPanel(host, rows, loadFn, searchActive) {
           var panel = el('div', { class: 'panel excel-panel' });
           var title =
             '一覧表（Excel風）' +
-            (searchActive ? ' · 検索結果 ' + items.length + '件' : ' · 全 ' + items.length + '件');
+            (searchActive ? ' · 検索結果 ' + rows.length + '件' : ' · 全 ' + rows.length + '件');
           panel.appendChild(el('h2', { text: title }));
           panel.appendChild(
             el('p', {
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
-              text: '左端が行番号（1,2,3…）。上段の列見出しは Excel と同じイメージです。住所列は非表示（プライバシー）です。行はフェーズ順（送信前→送信済み→…→失注）で上から並び、同一フェーズ内は店名順です。',
+              text:
+                '左端が行番号（1,2,3…）。列は A〜D の4つです（店舗名＋カードへ／住所／フェーズ／送信メッセージ）。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。行はフェーズ順で並び、メモ行は先頭付近です。',
             }),
           );
 
-          if (!items.length) {
+          if (!rows.length) {
             panel.appendChild(
               el('p', {
                 class: 'muted',
@@ -2381,13 +2564,10 @@
           var hr = el('tr');
           hr.appendChild(el('th', { class: 'excel-corner row-head', text: '' }));
           var headMeta = [
-            { letter: 'A', desc: '店舗名' },
-            { letter: 'B', desc: 'フェーズ（7種）' },
-            { letter: 'C', desc: '住所（非表示）' },
-            { letter: 'D', desc: 'ドラフト編集' },
-            { letter: 'E', desc: 'プレビュー' },
-            { letter: 'F', desc: '送信メッセージ' },
-            { letter: 'G', desc: 'SNS→カードへ' },
+            { letter: 'A', desc: '店舗名・カードへ' },
+            { letter: 'B', desc: '住所' },
+            { letter: 'C', desc: 'フェーズ（作成前＋7種）' },
+            { letter: 'D', desc: '送信メッセージ' },
           ];
           headMeta.forEach(function (col) {
             hr.appendChild(
@@ -2401,88 +2581,87 @@
           table.appendChild(thead);
 
           var tbody = el('tbody');
-          items.forEach(function (item, idx) {
+          rows.forEach(function (row, idx) {
             var tr = el('tr');
             tr.appendChild(el('td', { class: 'row-num', text: String(idx + 1) }));
-            var nm = outreachShopName(item) || '（無題）';
+
             var nameTd = el('td', { class: 'excel-cell-name' });
-            var cid = String(item.linkedTemplateCustomizationId || '').trim();
-            var twUrl = templateWorkerEditUrl(cid);
-            if (twUrl) {
-              var na = document.createElement('a');
-              na.href = twUrl;
-              na.target = '_blank';
-              na.rel = 'noopener noreferrer';
-              na.textContent = nm;
-              nameTd.appendChild(na);
-            } else {
-              nameTd.textContent = nm;
-            }
-            tr.appendChild(nameTd);
-            var phaseTd = el('td');
-            phaseTd.appendChild(renderPhaseSelect(item, loadFn));
-            tr.appendChild(phaseTd);
-            tr.appendChild(el('td', { class: 'excel-cell-text', text: '—' }));
-            var editTd = el('td');
-            if (cid) {
-              var ea = document.createElement('a');
-              ea.href = templateWorkerEditUrl(cid);
-              ea.className = 'btn small';
-              ea.target = '_blank';
-              ea.rel = 'noopener noreferrer';
-              ea.textContent = '開く';
-              editTd.appendChild(ea);
-            } else {
-              editTd.appendChild(el('span', { class: 'muted', text: '—' }));
-            }
-            tr.appendChild(editTd);
-            var prevTd = el('td');
-            var pu = outreachPreviewUrlForItem(item);
-            if (pu) {
-              var pa = document.createElement('a');
-              pa.href = pu;
-              pa.className = 'btn small';
-              pa.target = '_blank';
-              pa.rel = 'noopener noreferrer';
-              pa.textContent = '表示';
-              prevTd.appendChild(pa);
-            } else {
-              prevTd.appendChild(el('span', { class: 'muted', text: '—' }));
-            }
-            tr.appendChild(prevTd);
-            var msgTd = el('td');
-            var gTaId = 'op-send-' + item.id;
-            var gTa = el('textarea', {
-              id: gTaId,
-              class: 'op-send-msg op-send-msg--compact',
-              rows: '3',
-              'aria-label': '送信メッセージ',
+            var nameStack = el('div', { class: 'excel-name-stack' });
+            var cardBtn = el('a', {
+              class: 'excel-card-btn',
+              href: '#',
+              text: 'カードへ',
+              'aria-label': 'カード表示でこの店を開く',
             });
-            gTa.value = getSendDraftForItem(item.id);
-            var gTimer = null;
-            gTa.addEventListener('input', function () {
-              clearTimeout(gTimer);
-              gTimer = setTimeout(function () {
-                setSendDraftForItem(item.id, gTa.value);
-              }, 400);
-            });
-            msgTd.appendChild(gTa);
-            tr.appendChild(msgTd);
-            var snsTd = el('td', { class: 'op-sns-cell' });
-            [['IG', 'instagram'], ['X', 'twitter'], ['TK', 'tiktok']].forEach(function (pair) {
-              var sb = el('button', { type: 'button', class: 'btn small', text: pair[0] });
-              sb.onclick = function () {
-                var t = String(gTa.value || '').trim();
-                if (t) {
-                  try {
-                    navigator.clipboard.writeText(t);
-                  } catch (e) {}
-                }
-                outreachGoToShopCard(item.id, pair[1]);
+
+            if (row.kind === 'dash') {
+              var item = row.item;
+              var nm = outreachShopName(item) || '（無題）';
+              nameStack.appendChild(el('span', { class: 'excel-shop-title', text: nm }));
+              cardBtn.href = '#';
+              cardBtn.onclick = function (e) {
+                e.preventDefault();
+                navigateToShopCardFromGrid(item.id);
               };
-              snsTd.appendChild(sb);
-            });
-            tr.appendChild(snsTd);
+              nameStack.appendChild(cardBtn);
+              nameTd.appendChild(nameStack);
+              tr.appendChild(nameTd);
+              tr.appendChild(el('td', { class: 'excel-cell-address', text: dashboardItemAddress(item) }));
+              var phaseTd = el('td');
+              phaseTd.appendChild(renderPhaseSelect(item, loadFn));
+              tr.appendChild(phaseTd);
+              var msgTd = el('td');
+              var gTaId = 'op-send-' + item.id;
+              var gTa = el('textarea', {
+                id: gTaId,
+                class: 'op-send-msg op-send-msg--compact',
+                rows: '3',
+                'aria-label': '送信メッセージ',
+              });
+              gTa.value = getSendDraftForItem(item.id);
+              var gTimer = null;
+              gTa.addEventListener('input', function () {
+                clearTimeout(gTimer);
+                gTimer = setTimeout(function () {
+                  setSendDraftForItem(item.id, gTa.value);
+                }, 400);
+              });
+              msgTd.appendChild(gTa);
+              tr.appendChild(msgTd);
+            } else {
+              var memo = row.memo;
+              var mname = String(memo.shopName || '').trim() || '（無題）';
+              nameStack.appendChild(el('span', { class: 'excel-shop-title', text: mname }));
+              cardBtn.href = './template-worker.html?memoLeadId=' + encodeURIComponent(memo.id) + '&v=memo1';
+              cardBtn.target = '_blank';
+              cardBtn.rel = 'noopener noreferrer';
+              cardBtn.setAttribute('aria-label', '店舗ドラフト（メモ流し込み）を別タブで開く');
+              nameStack.appendChild(cardBtn);
+              nameTd.appendChild(nameStack);
+              tr.appendChild(nameTd);
+              tr.appendChild(el('td', { class: 'excel-cell-address', text: memoLeadAddressCell(memo) }));
+              var phaseTdM = el('td');
+              phaseTdM.appendChild(renderMemoPhaseSelect(memo, loadFn));
+              tr.appendChild(phaseTdM);
+              var msgTdM = el('td');
+              var gTaIdM = 'op-send-' + memo.id;
+              var gTaM = el('textarea', {
+                id: gTaIdM,
+                class: 'op-send-msg op-send-msg--compact',
+                rows: '3',
+                'aria-label': '送信メッセージ',
+              });
+              gTaM.value = getSendDraftForItem(memo.id);
+              var gTimerM = null;
+              gTaM.addEventListener('input', function () {
+                clearTimeout(gTimerM);
+                gTimerM = setTimeout(function () {
+                  setSendDraftForItem(memo.id, gTaM.value);
+                }, 400);
+              });
+              msgTdM.appendChild(gTaM);
+              tr.appendChild(msgTdM);
+            }
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
@@ -2498,19 +2677,8 @@
           var q = String(liveSearchQuery || '').trim();
 
           if (outreachViewMode === 'grid') {
-            var gridItems = items
-              .filter(function (i) {
-                return q ? itemMatchesSearch(i, q) : true;
-              })
-              .sort(function (a, b) {
-                var ia = sevenPhaseSortIndex(a);
-                var ib = sevenPhaseSortIndex(b);
-                if (ia !== ib) return ia - ib;
-                var na = outreachShopName(a) || a.id;
-                var nb = outreachShopName(b) || b.id;
-                return na.localeCompare(nb, 'ja');
-              });
-            renderExcelGridPanel(host, gridItems, load, !!q);
+            var gridRows = buildExcelGridRows(items, cachedMemoLeads, q);
+            renderExcelGridPanel(host, gridRows, load, !!q);
             updateSendTimingPanel(true);
             return;
           }
@@ -2690,17 +2858,33 @@
 
         function load() {
           showErr('');
-          fetch('/api/dashboard', { credentials: 'include' })
-            .then(function (r) {
+          Promise.all([
+            fetch('/api/dashboard', { credentials: 'include' }).then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j, status: r.status };
+              });
+            }),
+            fetch('/api/memo-leads', { credentials: 'include' }).then(function (r) {
               return r.json().then(function (j) {
                 return { ok: r.ok, j: j };
               });
-            })
-            .then(function (x) {
-              if (!x.ok) {
-                throw new Error((x.j && x.j.error) || '一覧の取得に失敗しました');
+            }),
+          ])
+            .then(function (pair) {
+              var dx = pair[0];
+              var mx = pair[1];
+              if (!dx.ok) {
+                throw new Error((dx.j && dx.j.error) || '一覧の取得に失敗しました');
               }
-              cachedDashboardItems = Array.isArray(x.j) ? x.j : [];
+              cachedDashboardItems = Array.isArray(dx.j) ? dx.j : [];
+              if (mx.ok && Array.isArray(mx.j)) {
+                cachedMemoLeads = mx.j;
+              } else {
+                cachedMemoLeads = [];
+                if (!mx.ok && outreachViewMode === 'grid') {
+                  showErr((mx.j && mx.j.error) || 'メモリード一覧の取得に失敗しました（表のメモ行のみ影響します）。');
+                }
+              }
               render(cachedDashboardItems);
             })
             .catch(function (e) {
