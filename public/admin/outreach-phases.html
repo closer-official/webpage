@@ -684,6 +684,54 @@
         gap: 12px 18px;
         align-items: center;
       }
+      .excel-bulk-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+        margin: 0 0 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid #2a3b52;
+      }
+      .excel-bulk-bar .excel-bulk-count {
+        font-size: 0.74rem;
+        margin: 0;
+      }
+      .excel-sheet tbody td.excel-select-cell {
+        position: sticky;
+        left: 2.25rem;
+        z-index: 2;
+        width: 2.25rem;
+        min-width: 2.25rem;
+        max-width: 2.5rem;
+        padding: 4px 6px;
+        text-align: center;
+        vertical-align: middle;
+        background: #0f172a;
+        box-shadow: 1px 0 0 rgba(42, 59, 82, 0.9);
+      }
+      .excel-sheet thead th.excel-select-head {
+        position: sticky;
+        left: 2.25rem;
+        z-index: 6;
+        width: 2.25rem;
+        min-width: 2.25rem;
+        max-width: 2.5rem;
+        padding: 4px 6px;
+        text-align: center;
+        vertical-align: middle;
+        background: #1c2940;
+        box-shadow: 1px 0 0 rgba(42, 59, 82, 0.9);
+      }
+      .excel-sheet .excel-row-sel,
+      .excel-sheet .excel-grid-master-sel {
+        width: 1rem;
+        height: 1rem;
+        accent-color: #38bdf8;
+        cursor: pointer;
+      }
       .excel-row-legend span {
         display: inline-flex;
         align-items: center;
@@ -876,7 +924,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>に加え、誤登録・重複用の<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -900,7 +948,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜E（5列・最右が削除）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -1942,6 +1990,116 @@
             });
         }
 
+        function deleteDashboardItemByIdPromise(itemId) {
+          return fetch('/api/dashboard/' + encodeURIComponent(itemId), {
+            method: 'DELETE',
+            credentials: 'include',
+          }).then(function (r) {
+            if (r.status === 204) return;
+            return r.json().then(function (j) {
+              if (!r.ok) throw new Error((j && j.error) || r.statusText);
+            });
+          });
+        }
+
+        function excelGridRefreshBulkCount(panel) {
+          var n = panel.querySelectorAll('input.excel-row-sel:checked').length;
+          var elc = panel.querySelector('.excel-bulk-count');
+          if (elc) elc.textContent = '選択: ' + n + '件';
+          var master = panel.querySelector('.excel-grid-master-sel');
+          var rowCbs = panel.querySelectorAll('input.excel-row-sel');
+          if (!master || !rowCbs.length) return;
+          var on = 0;
+          for (var i = 0; i < rowCbs.length; i++) {
+            if (rowCbs[i].checked) on++;
+          }
+          master.indeterminate = on > 0 && on < rowCbs.length;
+          master.checked = on === rowCbs.length;
+        }
+
+        function excelGridBulkDeleteFromPanel(panel, loadFn) {
+          var cbs = panel.querySelectorAll('input.excel-row-sel:checked');
+          if (!cbs.length) {
+            showErr('削除する行にチェックを入れてください。');
+            return;
+          }
+          var dash = [];
+          var memo = [];
+          for (var i = 0; i < cbs.length; i++) {
+            var id = cbs[i].getAttribute('data-grid-id');
+            if (!id) continue;
+            if (cbs[i].getAttribute('data-grid-kind') === 'memo') memo.push(id);
+            else dash.push(id);
+          }
+          var msg =
+            '選択した ' +
+            cbs.length +
+            ' 件を削除しますか？\nダッシュボード ' +
+            dash.length +
+            ' 件・メモリード ' +
+            memo.length +
+            ' 件\n取り消しはできません。';
+          if (!window.confirm(msg)) return;
+
+          var chain = Promise.resolve();
+          dash.forEach(function (id) {
+            chain = chain.then(function () {
+              return deleteDashboardItemByIdPromise(id);
+            });
+          });
+          memo.forEach(function (id) {
+            chain = chain.then(function () {
+              return deleteMemoLeadById(id);
+            });
+          });
+          chain
+            .then(function () {
+              showErr('');
+              loadFn();
+            })
+            .catch(function (e) {
+              showErr(String(e.message || e));
+              loadFn();
+            });
+        }
+
+        function excelGridBindBulkBar(panel, loadFn) {
+          var master = panel.querySelector('.excel-grid-master-sel');
+          var btnDel = panel.querySelector('.excel-bulk-delete');
+          var btnClr = panel.querySelector('.excel-bulk-clear');
+          if (master) {
+            master.addEventListener('change', function () {
+              var on = master.checked;
+              var rowCbs = panel.querySelectorAll('input.excel-row-sel');
+              for (var i = 0; i < rowCbs.length; i++) {
+                rowCbs[i].checked = on;
+              }
+              master.indeterminate = false;
+              excelGridRefreshBulkCount(panel);
+            });
+          }
+          panel.addEventListener('change', function (ev) {
+            var t = ev.target;
+            if (t && t.classList && t.classList.contains('excel-row-sel')) excelGridRefreshBulkCount(panel);
+          });
+          if (btnDel) {
+            btnDel.onclick = function () {
+              excelGridBulkDeleteFromPanel(panel, loadFn);
+            };
+          }
+          if (btnClr) {
+            btnClr.onclick = function () {
+              var rowCbs = panel.querySelectorAll('input.excel-row-sel');
+              for (var i = 0; i < rowCbs.length; i++) rowCbs[i].checked = false;
+              if (master) {
+                master.checked = false;
+                master.indeterminate = false;
+              }
+              excelGridRefreshBulkCount(panel);
+            };
+          }
+        }
+
         function searchStatusLabel(item) {
           var k = sevenPhaseKey(item);
           return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
@@ -2737,13 +2895,7 @@
         function deleteDashboardItem(item, loadFn) {
           var nm = (item.researched && item.researched.name) || item.id;
           if (!window.confirm('「' + nm + '」を一覧から削除しますか？\n取り消しはできません。')) return;
-          fetch('/api/dashboard/' + encodeURIComponent(item.id), { method: 'DELETE', credentials: 'include' })
-            .then(function (r) {
-              if (r.status === 204) return;
-              return r.json().then(function (j) {
-                if (!r.ok) throw new Error((j && j.error) || r.statusText);
-              });
-            })
+          deleteDashboardItemByIdPromise(item.id)
             .then(function () {
               loadFn();
             })
@@ -2936,7 +3088,7 @@
           return row;
         }
 
-        /** 列見出しは Excel と同様（A〜E＋左端行番号。E は削除） */
+        /** 列見出し：行番号・チェック・A〜E（E は単体削除）。表上で複数選択のまとめて削除あり */
         function renderExcelGridPanel(host, rows, loadFn, searchActive) {
           var panel = el('div', { class: 'panel excel-panel' });
           var title =
@@ -2948,7 +3100,7 @@
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
               text:
-                '左端が行番号（1,2,3…）。列は A〜E（店舗名＋カードへ／住所／フェーズ／送信メッセージ／削除）。誤登録・重複は E 列の削除でダッシュボード案件・メモリード行をそれぞれ取り除けます。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
+                '左端が行番号とチェック（複数選んで表の上からまとめて削除）。列は A〜E（店舗名＋カードへ／住所／フェーズ／送信メッセージ／単体削除）。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
             }),
           );
 
@@ -2974,12 +3126,46 @@
           });
           panel.appendChild(leg);
 
+          var bulkBar = el('div', { class: 'excel-bulk-bar' });
+          bulkBar.appendChild(
+            el('button', {
+              type: 'button',
+              class: 'btn small danger excel-bulk-delete',
+              text: '選択をまとめて削除',
+              title: 'チェックした行をまとめて削除（取り消し不可）',
+            }),
+          );
+          bulkBar.appendChild(
+            el('button', {
+              type: 'button',
+              class: 'btn small excel-bulk-clear',
+              text: '選択解除',
+            }),
+          );
+          bulkBar.appendChild(
+            el('span', {
+              class: 'muted excel-bulk-count',
+              text: '選択: 0件',
+            }),
+          );
+          panel.appendChild(bulkBar);
+
           var wrap = el('div', { class: 'excel-sheet-wrap' });
           var table = el('table', { class: 'excel-sheet' });
           table.setAttribute('role', 'grid');
           var thead = el('thead');
           var hr = el('tr');
           hr.appendChild(el('th', { class: 'excel-corner row-head', text: '' }));
+          var thSelHead = el('th', { class: 'excel-select-head', title: '表示中の行を一括選択' });
+          thSelHead.appendChild(
+            el('input', {
+              type: 'checkbox',
+              class: 'excel-grid-master-sel',
+              title: '表示中の行をすべて選択',
+              'aria-label': '一覧の行をすべて選択',
+            }),
+          );
+          hr.appendChild(thSelHead);
           var headMeta = [
             { letter: 'A', desc: '店舗名・カードへ' },
             { letter: 'B', desc: '住所' },
@@ -3004,6 +3190,22 @@
             tr.appendChild(
               el('td', { class: 'row-num ' + excelRowNumClassForGridRow(row), text: String(idx + 1) }),
             );
+            var selTd = el('td', { class: 'excel-select-cell' });
+            var rowCb = el('input', {
+              type: 'checkbox',
+              class: 'excel-row-sel',
+              title: 'まとめて削除の対象にする',
+              'aria-label': 'この行をまとめて削除の対象にする',
+            });
+            if (row.kind === 'dash') {
+              rowCb.setAttribute('data-grid-kind', 'dash');
+              rowCb.setAttribute('data-grid-id', String(row.item.id));
+            } else {
+              rowCb.setAttribute('data-grid-kind', 'memo');
+              rowCb.setAttribute('data-grid-id', String(row.memo.id));
+            }
+            selTd.appendChild(rowCb);
+            tr.appendChild(selTd);
 
             var nameTd = el('td', { class: 'excel-cell-name' });
             var nameStack = el('div', { class: 'excel-name-stack' });
@@ -3079,6 +3281,8 @@
           table.appendChild(tbody);
           wrap.appendChild(table);
           panel.appendChild(wrap);
+          excelGridBindBulkBar(panel, loadFn);
+          excelGridRefreshBulkCount(panel);
           host.appendChild(panel);
         }
 
