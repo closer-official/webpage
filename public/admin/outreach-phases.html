@@ -217,6 +217,18 @@
       .phase-card .op-send-compact-stack select.excel-longtext-sel {
         max-width: 100%;
       }
+      .excel-sheet td.excel-cell-actions {
+        width: 1%;
+        white-space: nowrap;
+        vertical-align: top;
+        text-align: center;
+        padding: 6px 6px;
+      }
+      .excel-sheet td.excel-cell-actions .btn.small {
+        font-size: 0.68rem;
+        padding: 4px 8px;
+        white-space: nowrap;
+      }
       .op-sns-cell {
         white-space: nowrap;
       }
@@ -864,7 +876,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列を表示</strong>します。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>に加え、誤登録・重複用の<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -888,7 +900,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜D（4列）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号、列は<strong>A〜E（5列・最右が削除）</strong>です。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -1918,6 +1930,18 @@
           });
         }
 
+        function deleteMemoLeadRowFromUi(memo, loadFn) {
+          var mname = String((memo && memo.shopName) || '').trim() || (memo && memo.id) || '（無題）';
+          if (!window.confirm('メモリード「' + mname + '」を削除しますか？\n取り消しはできません。')) return;
+          deleteMemoLeadById(memo.id)
+            .then(function () {
+              loadFn();
+            })
+            .catch(function (e) {
+              showErr(String(e.message || e));
+            });
+        }
+
         function searchStatusLabel(item) {
           var k = sevenPhaseKey(item);
           return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
@@ -2912,7 +2936,7 @@
           return row;
         }
 
-        /** 列見出しは Excel と同様（A〜D の4列＋左端行番号） */
+        /** 列見出しは Excel と同様（A〜E＋左端行番号。E は削除） */
         function renderExcelGridPanel(host, rows, loadFn, searchActive) {
           var panel = el('div', { class: 'panel excel-panel' });
           var title =
@@ -2924,7 +2948,7 @@
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
               text:
-                '左端が行番号（1,2,3…）。列は A〜D の4つです（店舗名＋カードへ／住所／フェーズ／送信メッセージ）。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
+                '左端が行番号（1,2,3…）。列は A〜E（店舗名＋カードへ／住所／フェーズ／送信メッセージ／削除）。誤登録・重複は E 列の削除でダッシュボード案件・メモリード行をそれぞれ取り除けます。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
             }),
           );
 
@@ -2961,6 +2985,7 @@
             { letter: 'B', desc: '住所' },
             { letter: 'C', desc: 'フェーズ（作成前＋7種）' },
             { letter: 'D', desc: '送信メッセージ' },
+            { letter: 'E', desc: '削除（誤登録・重複）' },
           ];
           headMeta.forEach(function (col) {
             hr.appendChild(
@@ -3006,6 +3031,19 @@
               phaseTd.appendChild(renderPhaseSelect(item, loadFn));
               tr.appendChild(phaseTd);
               tr.appendChild(excelGridSendMessageTd(item.id));
+              var actTdDash = el('td', { class: 'excel-cell-actions' });
+              var delDash = el('button', {
+                type: 'button',
+                class: 'btn small danger',
+                text: '削除',
+                title: 'ダッシュボードからこの案件を削除（取り消し不可）',
+              });
+              delDash.setAttribute('aria-label', 'ダッシュボードからこの案件を削除');
+              delDash.onclick = function () {
+                deleteDashboardItem(item, loadFn);
+              };
+              actTdDash.appendChild(delDash);
+              tr.appendChild(actTdDash);
             } else {
               var memo = row.memo;
               var mname = String(memo.shopName || '').trim() || '（無題）';
@@ -3022,6 +3060,19 @@
               phaseTdM.appendChild(renderMemoPhaseSelect(memo, loadFn));
               tr.appendChild(phaseTdM);
               tr.appendChild(excelGridSendMessageTd(memo.id));
+              var actTdMemo = el('td', { class: 'excel-cell-actions' });
+              var delMemo = el('button', {
+                type: 'button',
+                class: 'btn small danger',
+                text: '削除',
+                title: 'メモリードからこの行を削除（取り消し不可）',
+              });
+              delMemo.setAttribute('aria-label', 'メモリードからこの行を削除');
+              delMemo.onclick = function () {
+                deleteMemoLeadRowFromUi(memo, loadFn);
+              };
+              actTdMemo.appendChild(delMemo);
+              tr.appendChild(actTdMemo);
             }
             tbody.appendChild(tr);
           });
