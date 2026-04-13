@@ -194,6 +194,22 @@ export function applyTemplateCustomization(content, customization = {}) {
   const genreId = normalizeCafeVisualGenreId(customization.cafeVisualGenre);
   if (genreId) out.cafeVisualGenre = genreId;
 
+  if (customization.beautySalonMellowSlots && typeof customization.beautySalonMellowSlots === 'object' && !Array.isArray(customization.beautySalonMellowSlots)) {
+    const prev = out.beautySalonMellowSlots && typeof out.beautySalonMellowSlots === 'object' ? out.beautySalonMellowSlots : {};
+    out.beautySalonMellowSlots = { ...prev };
+    for (const [k, v] of Object.entries(customization.beautySalonMellowSlots)) {
+      const key = String(k || '').trim();
+      if (!/^[a-z][a-z0-9_.]*$/i.test(key) || key.length > 80) continue;
+      const s = String(v ?? '').trim().slice(0, 12000);
+      if (s) out.beautySalonMellowSlots[key] = s;
+      else delete out.beautySalonMellowSlots[key];
+    }
+  }
+  const brsv = String(customization.beautySalonReserveUrl || '').trim().slice(0, 2000);
+  if (brsv && /^https?:\/\//i.test(brsv)) out.beautySalonReserveUrl = brsv;
+  const meh = String(customization.mapEmbedHtml || '').trim().slice(0, 50000);
+  if (meh) out.mapEmbedHtml = meh;
+
   if (!explicitFooterText) {
     const contributed =
       String(customization.siteName || '').trim() ||

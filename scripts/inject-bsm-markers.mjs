@@ -11,6 +11,32 @@ const root = path.join(__dirname, '..');
 const p = path.join(root, 'server', 'beautySalonMellow', 'generated-body.html');
 
 let h = fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+/** ベースマーカー済みで policy だけ未注入の HTML への追補（MD 再生成のあとなど） */
+if (h.includes('<!--BSM:hero.headline-->') && !h.includes('<!--BSM:page.policy.1.title-->')) {
+  const repP = (a, b) => {
+    if (!h.includes(a)) throw new Error('policy anchor not found: ' + a.slice(0, 80).replace(/\n/g, '\\n'));
+    h = h.split(a).join(b);
+  };
+  repP(
+    '<div class="policy-card fade-up"><div class="policy-num">01</div><div class="policy-title">扱いやすさを大切にしたカット</div><p class="policy-desc">乾かしただけでもまとまりやすく、毎日のスタイリングが少し楽になるように。骨格や毛流れを見ながら、自然に馴染むシルエットに整えます。</p></div>',
+    '<div class="policy-card fade-up"><div class="policy-num">01</div><div class="policy-title"><!--BSM:page.policy.1.title-->扱いやすさを大切にしたカット<!--/BSM:page.policy.1.title--></div><p class="policy-desc"><!--BSM:page.policy.1.desc-->乾かしただけでもまとまりやすく、毎日のスタイリングが少し楽になるように。骨格や毛流れを見ながら、自然に馴染むシルエットに整えます。<!--/BSM:page.policy.1.desc--></p></div>',
+  );
+  repP(
+    '<div class="policy-card fade-up delay-1"><div class="policy-num">02</div><div class="policy-title">やわらかく見える質感づくり</div><p class="policy-desc">軽すぎず、重すぎず。毛先の動きや表面のやわらかさを大切にしながら、上品に見える質感をつくります。</p></div>',
+    '<div class="policy-card fade-up delay-1"><div class="policy-num">02</div><div class="policy-title"><!--BSM:page.policy.2.title-->やわらかく見える質感づくり<!--/BSM:page.policy.2.title--></div><p class="policy-desc"><!--BSM:page.policy.2.desc-->軽すぎず、重すぎず。毛先の動きや表面のやわらかさを大切にしながら、上品に見える質感をつくります。<!--/BSM:page.policy.2.desc--></p></div>',
+  );
+  repP(
+    '<div class="policy-card fade-up delay-2"><div class="policy-num">03</div><div class="policy-title">初めての方でも相談しやすい空間</div><p class="policy-desc">「似合う髪型が分からない」「短くしたいけれど不安がある」そんなご相談も歓迎しています。カウンセリングの時間を大切にしながら、無理のないご提案を行います。</p></div>',
+    '<div class="policy-card fade-up delay-2"><div class="policy-num">03</div><div class="policy-title"><!--BSM:page.policy.3.title-->初めての方でも相談しやすい空間<!--/BSM:page.policy.3.title--></div><p class="policy-desc"><!--BSM:page.policy.3.desc-->「似合う髪型が分からない」「短くしたいけれど不安がある」そんなご相談も歓迎しています。カウンセリングの時間を大切にしながら、無理のないご提案を行います。<!--/BSM:page.policy.3.desc--></p></div>',
+  );
+  repP(
+    '<div class="policy-card fade-up delay-3"><div class="policy-num">04</div><div class="policy-title">落ち着いて過ごせる店内</div><p class="policy-desc">明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。シャンプーブースも落ち着いた雰囲気で、リラックスしやすい設計です。</p></div>',
+    '<div class="policy-card fade-up delay-3"><div class="policy-num">04</div><div class="policy-title"><!--BSM:page.policy.4.title-->落ち着いて過ごせる店内<!--/BSM:page.policy.4.title--></div><p class="policy-desc"><!--BSM:page.policy.4.desc-->明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。シャンプーブースも落ち着いた雰囲気で、リラックスしやすい設計です。<!--/BSM:page.policy.4.desc--></p></div>',
+  );
+  fs.writeFileSync(p, h, 'utf8');
+  console.log('wrote policy-only BSM markers', p);
+  process.exit(0);
+}
 if (h.includes('<!--BSM:hero.headline-->')) {
   console.log('markers already present, skip');
   process.exit(0);
@@ -147,6 +173,23 @@ rep('<div class="section-label fade-up" style="justify-content:center">Reserve</
 rep('</h2>\n    <p class="section-text fade-up delay-2" style="max-width:none;text-align:center">ご予約は24時間WEBから承っております', '<!--/BSM:page.reserve.title--></h2>\n    <p class="section-text fade-up delay-2" style="max-width:none;text-align:center"><!--BSM:page.reserve.lede-->ご予約は24時間WEBから承っております');
 rep('ご相談ください。</p>\n    <div class="fade-up delay-3"', 'ご相談ください。<!--/BSM:page.reserve.lede--></p>\n    <div class="fade-up delay-3"');
 rep('<div style="font-size:0.82rem;color:var(--taupe);line-height:2.4;font-weight:300">月 10:00—19:00 ／ 水・木 10:00—20:00 ／ 金 11:00—21:00<br>土 10:00—20:00 ／ 日・祝 10:00—19:00<br><span style="color:var(--warm-gray);font-size:0.75rem">定休日：毎週火曜・第2水曜</span></div>', '<div style="font-size:0.82rem;color:var(--taupe);line-height:2.4;font-weight:300"><!--BSM:page.reserve.hoursBlock-->月 10:00—19:00 ／ 水・木 10:00—20:00 ／ 金 11:00—21:00<br>土 10:00—20:00 ／ 日・祝 10:00—19:00<br><span style="color:var(--warm-gray);font-size:0.75rem">定休日：毎週火曜・第2水曜</span><!--/BSM:page.reserve.hoursBlock--></div>');
+
+rep(
+  '<div class="policy-card fade-up"><div class="policy-num">01</div><div class="policy-title">扱いやすさを大切にしたカット</div><p class="policy-desc">乾かしただけでもまとまりやすく、毎日のスタイリングが少し楽になるように。骨格や毛流れを見ながら、自然に馴染むシルエットに整えます。</p></div>',
+  '<div class="policy-card fade-up"><div class="policy-num">01</div><div class="policy-title"><!--BSM:page.policy.1.title-->扱いやすさを大切にしたカット<!--/BSM:page.policy.1.title--></div><p class="policy-desc"><!--BSM:page.policy.1.desc-->乾かしただけでもまとまりやすく、毎日のスタイリングが少し楽になるように。骨格や毛流れを見ながら、自然に馴染むシルエットに整えます。<!--/BSM:page.policy.1.desc--></p></div>',
+);
+rep(
+  '<div class="policy-card fade-up delay-1"><div class="policy-num">02</div><div class="policy-title">やわらかく見える質感づくり</div><p class="policy-desc">軽すぎず、重すぎず。毛先の動きや表面のやわらかさを大切にしながら、上品に見える質感をつくります。</p></div>',
+  '<div class="policy-card fade-up delay-1"><div class="policy-num">02</div><div class="policy-title"><!--BSM:page.policy.2.title-->やわらかく見える質感づくり<!--/BSM:page.policy.2.title--></div><p class="policy-desc"><!--BSM:page.policy.2.desc-->軽すぎず、重すぎず。毛先の動きや表面のやわらかさを大切にしながら、上品に見える質感をつくります。<!--/BSM:page.policy.2.desc--></p></div>',
+);
+rep(
+  '<div class="policy-card fade-up delay-2"><div class="policy-num">03</div><div class="policy-title">初めての方でも相談しやすい空間</div><p class="policy-desc">「似合う髪型が分からない」「短くしたいけれど不安がある」そんなご相談も歓迎しています。カウンセリングの時間を大切にしながら、無理のないご提案を行います。</p></div>',
+  '<div class="policy-card fade-up delay-2"><div class="policy-num">03</div><div class="policy-title"><!--BSM:page.policy.3.title-->初めての方でも相談しやすい空間<!--/BSM:page.policy.3.title--></div><p class="policy-desc"><!--BSM:page.policy.3.desc-->「似合う髪型が分からない」「短くしたいけれど不安がある」そんなご相談も歓迎しています。カウンセリングの時間を大切にしながら、無理のないご提案を行います。<!--/BSM:page.policy.3.desc--></p></div>',
+);
+rep(
+  '<div class="policy-card fade-up delay-3"><div class="policy-num">04</div><div class="policy-title">落ち着いて過ごせる店内</div><p class="policy-desc">明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。シャンプーブースも落ち着いた雰囲気で、リラックスしやすい設計です。</p></div>',
+  '<div class="policy-card fade-up delay-3"><div class="policy-num">04</div><div class="policy-title"><!--BSM:page.policy.4.title-->落ち着いて過ごせる店内<!--/BSM:page.policy.4.title--></div><p class="policy-desc"><!--BSM:page.policy.4.desc-->明るくやわらかな光が入る空間で、ゆったりとお過ごしいただけます。シャンプーブースも落ち着いた雰囲気で、リラックスしやすい設計です。<!--/BSM:page.policy.4.desc--></p></div>',
+);
 
 fs.writeFileSync(p, h, 'utf8');
 console.log('wrote BSM markers', p);

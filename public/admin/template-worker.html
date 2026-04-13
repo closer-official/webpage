@@ -886,9 +886,27 @@
       </div>
 
       <div class="tw-form-block tw-hidden" data-tw-for="beauty_salon_mellow">
-        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #e8c4a8">美容室 mellow：HP 貼り付け取り込み</h3>
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #e8c4a8">美容室 mellow：編集の目安（8区分）</h3>
+        <p style="font-size: 0.72rem; color: #9aacbf; margin: 0 0 10px; line-height: 1.55">
+          <span style="color: #e6d85c">黄</span> 店名・副題（サイト名・ページタイトル・ヒーロー）／
+          <span style="color: #7eb8da">青</span> 営業時間／
+          <span style="color: #a8d5a2">黄緑</span> 支払い方法／
+          <span style="color: #e88">赤</span> 電話番号／
+          <span style="color: #9fd">水色</span> 店の想い・こだわり（Concept 本文・Our Policy 各項目）／
+          <span style="color: #c9b6ff">紫</span> メニュー（トップ6カードなど）／
+          <span style="color: #f9c">ピンク</span> スタッフ名・紹介文／
+          <span style="color: #f4b183">橙</span> 住所・地図。写真は<strong>貼り付けでは変えません</strong>（テンプレのまま。ヒーロー画像URLは下の共通欄で手動変更）。
+        </p>
+        <label>WEB予約・ホットペッパー遷移先 URL（https） <input type="url" id="f-beauty-reserve-url" placeholder="https://beauty.hotpepper.jp/…" style="width: 100%; max-width: 100%; box-sizing: border-box" /></label>
+        <p style="font-size: 0.7rem; color: #7d8fa3; margin: 4px 0 12px">「WEB予約」ボタン類はこのURLを別タブで開きます。空欄のときは従来どおりサイト内の予約ページへ遷移します。</p>
+        <label style="display: block; margin-bottom: 12px">
+          <span style="display: block; font-size: 0.82rem; margin-bottom: 4px">Google マップ埋め込み（HTML そのまま・任意）</span>
+          <textarea id="f-beauty-map-html" rows="5" style="width: 100%; max-width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace; font-size: 0.78rem" placeholder='&lt;iframe src="https://www.google.com/maps/embed?..." ...&gt;&lt;/iframe&gt;'></textarea>
+        </label>
+        <p style="font-size: 0.7rem; color: #7d8fa3; margin: -6px 0 12px">ラーメン等と同様、Google が発行する iframe タグを貼ってください。反映時は src のみ検証し、安全な iframe 1本として Access に表示します。空欄時は「地図 iframe 埋め込み URL」（cafe 欄）の URL を利用します。</p>
+        <h3 style="margin: 0.5rem 0 0.5rem; font-size: 0.88rem; font-weight: 600; color: #e8c4a8">HP 貼り付け取り込み</h3>
         <p style="font-size: 0.74rem; color: #7d8fa3; margin: 0 0 10px; line-height: 1.45">
-          ホットペッパービューティー等の店舗説明をそのまま貼り付け、「取り込み」で推測できる項目だけ下のスロットに反映します（写真・評価は無視）。反映後も各欄は自由に直せます。未取り込みの欄は公開時もテンプレの文言のままです。
+          ホットペッパービューティー等の店舗説明をそのまま貼り付け、「取り込み」で上記8区分に推測で流し込みます（写真・星評価は無視）。ホットペッパー店舗URL・地図 iframe が本文に含まれていれば遷移先・地図欄にも入ります。
         </p>
         <label style="display: block; margin-bottom: 10px">
           <span style="display: block; font-size: 0.82rem; margin-bottom: 4px">貼り付け元テキスト</span>
@@ -1718,6 +1736,14 @@
             { id: 'page.concept.title', label: 'Concept｜見出し' },
             { id: 'page.concept.body', label: 'Concept｜本文' },
             { id: 'page.concept.commit.title', label: 'Concept｜Our Policy 見出し' },
+            { id: 'page.policy.1.title', label: 'Concept｜こだわり1 見出し' },
+            { id: 'page.policy.1.desc', label: 'Concept｜こだわり1 本文' },
+            { id: 'page.policy.2.title', label: 'Concept｜こだわり2 見出し' },
+            { id: 'page.policy.2.desc', label: 'Concept｜こだわり2 本文' },
+            { id: 'page.policy.3.title', label: 'Concept｜こだわり3 見出し' },
+            { id: 'page.policy.3.desc', label: 'Concept｜こだわり3 本文' },
+            { id: 'page.policy.4.title', label: 'Concept｜こだわり4 見出し' },
+            { id: 'page.policy.4.desc', label: 'Concept｜こだわり4 本文' },
             { id: 'page.staff.title', label: 'Staff ページ｜見出し' },
             { id: 'page.staff1.desc', label: 'Staff ページ｜スタッフ1 紹介' },
             { id: 'page.staff2.desc', label: 'Staff ページ｜スタッフ2 紹介' },
@@ -1789,6 +1815,7 @@
           });
         }
 
+        /** shared/beautySalonMellowTextSlots.js の parseHotPepperBeautyPaste と同等（管理画面用） */
         function parseHotPepperBeautyPasteWorker(raw) {
           var out = {};
           var t = String(raw || '').replace(/\r\n/g, '\n');
@@ -1801,23 +1828,59 @@
           function skipLine(l) {
             return /の写真|（\d+件）|^\d+\.\d+$|スマート支払い|サロン情報|空席確認|ブックマーク|人気のクーポン|予約比率|年代比率|^女性$|^男性$|未設定/.test(l);
           }
+          var hpSalon = t.match(/https:\/\/beauty\.hotpepper\.jp\/[^\s<'"]+/i);
+          if (hpSalon) {
+            var u = hpSalon[0].trim();
+            var q = u.indexOf('?');
+            if (q !== -1) u = u.slice(0, q);
+            u = u.replace(/["'>,).]+$/, '');
+            out.beautySalonReserveUrl = u.slice(0, 2000);
+          }
+          var iframeBlock = t.match(/<iframe[\s\S]{0,8000}?<\/iframe>/i);
+          if (iframeBlock && /google\.com\/maps|maps\.google|google\.co\.jp\/maps/i.test(iframeBlock[0])) {
+            out.mapEmbedHtml = iframeBlock[0].trim().slice(0, 50000);
+          }
           var head = lines.find(function (l) {
             return !skipLine(l) && l.length > 4 && l.length < 200 && !/^¥/.test(l);
           });
           if (head) out['hero.headline'] = head.replace(/【[^】]+】/g, '').trim().slice(0, 200);
           var addr = t.match(/(〒\s*\d{3}-\d{4}[^\n]+)/);
           if (addr) out['footer.info'] = addr[1].trim();
+          var addrMulti = t.match(/〒\s*\d{3}-\d{4}[\s\S]{0,260}?(?:ビル|丁目|F|階|番地)/);
+          if (addrMulti) out['access.address'] = addrMulti[0].replace(/\s+/g, ' ').trim().slice(0, 400);
           var addrTokyo = t.match(/(東京都[^\n]{10,120})/);
-          if (!out['footer.info'] && addrTokyo) out['access.address'] = addrTokyo[1].trim();
+          if (!out['access.address'] && addrTokyo) out['access.address'] = addrTokyo[1].trim();
           var tel = t.match(/(0\d{1,4}-\d{1,4}-\d{3,4})/);
           if (tel) {
             out['access.tel'] = tel[1];
             out['footer.info'] = (out['footer.info'] ? out['footer.info'] + '\n\n' : '') + 'TEL ' + tel[1];
           }
-          var open = t.match(/(平日[^\n]{0,100}\d{1,2}:\d{2}[^\n]{0,150})/);
-          if (open) out['access.hours'] = open[1].trim();
-          var pay = t.match(/(Visa[／/][^\n]{10,200}PayPay[^\n]*)/i);
-          if (pay) out['access.payment'] = pay[0].trim();
+          var hourLines = lines.filter(function (l) {
+            return /[月火水木金土日祝・／]/.test(l) && /\d{1,2}\s*[:：]\s*\d{1,2}/.test(l) && l.length < 220;
+          });
+          if (hourLines.length) {
+            var hb = hourLines.slice(0, 12).join('\n').slice(0, 800);
+            out['access.hours'] = hb;
+            out['page.reserve.hoursBlock'] = hb;
+          } else {
+            var open = t.match(/(平日[^\n]{0,100}\d{1,2}:\d{2}[^\n]{0,150})/);
+            if (open) {
+              out['access.hours'] = open[1].trim();
+              out['page.reserve.hoursBlock'] = open[1].trim();
+            }
+          }
+          var closed = t.match(/(定休日[：:\s]*[^\n]{2,80})/);
+          if (closed && out['access.hours']) {
+            out['access.hours'] = (out['access.hours'] + '\n\n' + closed[1].trim()).slice(0, 900);
+            out['page.reserve.hoursBlock'] = out['access.hours'];
+          }
+          var pay =
+            t.match(/(Visa[／/][^\n]{10,400}(?:PayPay|ペイペイ)[^\n]*)/i) || t.match(/(お支払い[：:\s]*[^\n]{10,300})/i);
+          if (pay) {
+            var pv = pay[0].trim();
+            out['access.payment'] = pv;
+            out['page.first.payment'] = pv.slice(0, 400);
+          }
           var paras = t
             .split(/\n{2,}/)
             .map(function (p) {
@@ -1826,10 +1889,52 @@
             .filter(function (p) {
               return p.length > 100 && !skipLine(p);
             });
-          if (paras[0]) out['home.concept.body'] = paras[0].slice(0, 2000);
-          if (paras[1]) out['page.style.lede'] = paras[1].slice(0, 1500);
+          if (paras[0]) out['page.concept.body'] = paras[0].slice(0, 2000);
+          if (paras[1]) out['home.concept.body'] = paras[1].slice(0, 1800);
+          if (paras[2]) out['page.style.lede'] = paras[2].slice(0, 1500);
+          var stIdx = t.search(/スタイリスト|ディレクター|DIRECTOR\s*\/\s*STYLIST|スタッフ紹介/i);
+          if (stIdx !== -1) {
+            var tail = t.slice(stIdx, stIdx + 2500);
+            var blocks = tail.split(/\n{2,}/).filter(function (b) {
+              return b.length > 30;
+            });
+            var staffN = 1;
+            for (var bi = 0; bi < blocks.length; bi++) {
+              if (staffN > 2) break;
+              var block = blocks[bi];
+              if (!/[ァ-ヶーA-Za-z]{2,}/.test(block)) continue;
+              var ln = block
+                .split('\n')
+                .map(function (x) {
+                  return x.trim();
+                })
+                .filter(Boolean);
+              var nameLine = ln.find(function (l) {
+                return /[／/]/.test(l) && l.length < 100 && l.length > 3;
+              });
+              if (!nameLine) continue;
+              var parts = nameLine.split(/[／/]/).map(function (x) {
+                return x.trim();
+              });
+              var pre = 'home.staff' + staffN + '.';
+              if (parts.length >= 2) {
+                out[pre + 'role'] = parts[0].slice(0, 80);
+                out[pre + 'name'] = parts[1].slice(0, 80);
+              } else {
+                out[pre + 'name'] = nameLine.slice(0, 80);
+              }
+              var rest = ln
+                .filter(function (l) {
+                  return l !== nameLine && !/^https?:/.test(l);
+                })
+                .join('\n')
+                .trim();
+              if (rest) out[pre + 'desc'] = rest.slice(0, 600);
+              staffN += 1;
+            }
+          }
           var couponLines = t.split('\n').filter(function (l) {
-            return /¥[\d,]+/.test(l) && /【|限定|カット|カラー|TR|トリートメント/.test(l);
+            return /¥[\d,]+/.test(l) && /【|限定|カット|カラー|TR|トリートメント|パーマ|スパ/.test(l);
           });
           couponLines.slice(0, 6).forEach(function (line, i) {
             var n = i + 1;
@@ -2325,6 +2430,10 @@
               var id = el.getAttribute('data-bsm-id');
               if (id) ov.beautySalonMellowSlots[id] = String(el.value || '').trim();
             });
+            var bru = document.getElementById('f-beauty-reserve-url');
+            var bmh = document.getElementById('f-beauty-map-html');
+            if (bru) ov.beautySalonReserveUrl = String(bru.value || '').trim();
+            if (bmh) ov.mapEmbedHtml = String(bmh.value || '').trim();
           }
           deriveSeoIntoOverride(ov);
           syncMapAndSocialUrlsIntoOverride(ov);
@@ -2398,6 +2507,10 @@
               var el = document.querySelector('textarea.f-bsm-slot[data-bsm-id="' + k.replace(/"/g, '') + '"]');
               if (el) el.value = bsmSlots[k] != null ? String(bsmSlots[k]) : '';
             });
+            var bruEl = document.getElementById('f-beauty-reserve-url');
+            if (bruEl) bruEl.value = ov.beautySalonReserveUrl || '';
+            var bmhEl = document.getElementById('f-beauty-map-html');
+            if (bmhEl) bmhEl.value = ov.mapEmbedHtml || '';
           }
           document.getElementById('f-menu-list').innerHTML = '';
           (Array.isArray(ov.cafeMenuTextRows) && ov.cafeMenuTextRows.length ? ov.cafeMenuTextRows : [{}]).forEach(addMenuItem);
@@ -2443,6 +2556,8 @@
             cafeBranchMenuItems: true,
             cafeVisualGenre: true,
             beautySalonMellowSlots: true,
+            beautySalonReserveUrl: true,
+            mapEmbedHtml: true,
           };
           var extra = {};
           Object.keys(ov || {}).forEach(function (k) {
@@ -2500,6 +2615,8 @@
               c.beautySalonMellowSlots && typeof c.beautySalonMellowSlots === 'object' && !Array.isArray(c.beautySalonMellowSlots)
                 ? cloneJsonForForm(c.beautySalonMellowSlots)
                 : {},
+            beautySalonReserveUrl: c.beautySalonReserveUrl || '',
+            mapEmbedHtml: c.mapEmbedHtml || '',
             metaTitle: s.metaTitle || '',
             metaDescription: s.metaDescription || '',
             ogImageUrl: s.ogImageUrl || '',
@@ -2717,12 +2834,29 @@
               var raw = ta ? ta.value : '';
               var parsed = parseHotPepperBeautyPasteWorker(raw);
               Object.keys(parsed).forEach(function (k) {
+                if (k === 'beautySalonReserveUrl' || k === 'mapEmbedHtml') return;
                 var el = document.querySelector('textarea.f-bsm-slot[data-bsm-id="' + k.replace(/"/g, '') + '"]');
                 if (el) el.value = parsed[k];
               });
               if (parsed['hero.headline']) {
                 var he = document.getElementById('f-headline');
                 if (he) he.value = parsed['hero.headline'];
+              }
+              if (parsed.beautySalonReserveUrl) {
+                var rEl = document.getElementById('f-beauty-reserve-url');
+                if (rEl) rEl.value = parsed.beautySalonReserveUrl;
+              }
+              if (parsed.mapEmbedHtml) {
+                var mEl = document.getElementById('f-beauty-map-html');
+                if (mEl) mEl.value = parsed.mapEmbedHtml;
+              }
+              if (parsed['access.tel']) {
+                var fph = document.getElementById('f-footerPhone');
+                if (fph) fph.value = parsed['access.tel'];
+              }
+              if (parsed['access.address']) {
+                var fad = document.getElementById('f-footerAddress');
+                if (fad) fad.value = String(parsed['access.address']).replace(/<br>/g, '\n');
               }
               scheduleLivePreview();
             };

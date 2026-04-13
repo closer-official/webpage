@@ -6,6 +6,48 @@
  */
 import { applyBsmTextSlots, applyBsmFaqItems } from './beautySalonMellowTextSlots.js';
 
+function decodeBasicEntities(s) {
+  return String(s || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+}
+
+function extractFirstIframeSrcFromHtml(html) {
+  const s = decodeBasicEntities(html);
+  const m = s.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+  return m ? m[1].trim() : '';
+}
+
+function isAllowedGoogleMapsIframeSrc(src) {
+  try {
+    const u = new URL(String(src || '').trim());
+    const h = u.hostname.toLowerCase();
+    if (!/^(www\.)?google\.(com|co\.jp)$/i.test(h) && !/^maps\.google\.(com|co\.jp)$/i.test(h)) return false;
+    return /\/maps\//i.test(u.pathname) || /[?&]pb=/.test(u.search);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} html
+ * @param {(s: string) => string} esc
+ */
+function replaceAccessMapWithIframe(html, esc, iframeSrc) {
+  const src = String(iframeSrc || '').trim();
+  if (!src || !isAllowedGoogleMapsIframeSrc(src)) return html;
+  const safe = `<iframe src="${esc(
+    src,
+  )}" title="地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>`;
+  return html.replace(
+    /<div class="access-map fade-up">[\s\S]*?<\/div>(\s*<div class="fade-up delay-1">)/m,
+    `<div class="access-map fade-up" style="position:relative;min-height:280px;aspect-ratio:4/3;background:var(--beige)">${safe}</div>$1`,
+  );
+}
+
 export function applyBeautySalonMellowReplacements(html, content, escapeHtml) {
   let out = String(html || '');
   const esc = escapeHtml;
@@ -56,14 +98,33 @@ export function applyBeautySalonMellowReplacements(html, content, escapeHtml) {
     `<div class="logo" onclick="showPage('home')" style="cursor:pointer">${esc(brand)}<span>${esc(tagEn)}</span></div>`,
   );
 
-  const mapU = String(content.mapEmbedUrl || '').trim();
-  if (mapU && /^https?:\/\//i.test(mapU)) {
+  const rawMapHtml = String(content.mapEmbedHtml || '').trim().slice(0, 50000);
+  const fromHtmlSrc = rawMapHtml ? extractFirstIframeSrcFromHtml(rawMapHtml) : '';
+  if (fromHtmlSrc && isAllowedGoogleMapsIframeSrc(fromHtmlSrc)) {
+    out = replaceAccessMapWithIframe(out, esc, fromHtmlSrc);
+  } else {
+    const mapU = String(content.mapEmbedUrl || '').trim();
+    if (mapU && /^https?:\/\//i.test(mapU) && isAllowedGoogleMapsIframeSrc(mapU)) {
+      out = replaceAccessMapWithIframe(out, esc, mapU);
+    }
+  }
+
+  const resUrl = String(content.beautySalonReserveUrl || '').trim();
+  if (resUrl && /^https?:\/\//i.test(resUrl)) {
+    const safeU = esc(resUrl);
     out = out.replace(
-      /<div class="access-map fade-up">[\s\S]*?<\/div>(\s*<div class="fade-up delay-1">)/m,
-      `<div class="access-map fade-up" style="position:relative;min-height:280px;aspect-ratio:4/3;background:var(--beige)"><iframe src="${esc(
-        mapU,
-      )}" title="地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>$1`,
+      /<a class="btn-gold" onclick="showPage\('reserve'\)">WEB予約<\/a>/g,
+      `<a class="btn-gold" href="${safeU}" target="_blank" rel="noopener noreferrer">WEB予約</a>`,
     );
+    out = out.replace(
+      /<a class="btn-primary" onclick="showPage\('reserve'\)">WEB予約はこちら<\/a>/g,
+      `<a class="btn-primary" href="${safeU}" target="_blank" rel="noopener noreferrer">WEB予約はこちら</a>`,
+    );
+    out = out.replace(
+      /<a class="btn-primary" style="text-align:center;padding:20px;font-size:0\.8rem">▶ WEB予約（24時間受付）<\/a>/g,
+      `<a class="btn-primary" href="${safeU}" target="_blank" rel="noopener noreferrer" style="text-align:center;padding:20px;font-size:0.8rem">▶ WEB予約（24時間受付）</a>`,
+    );
+    out = out.replace(/<a onclick="showPage\('reserve'\)">WEB予約<\/a>/g, `<a href="${safeU}" target="_blank" rel="noopener noreferrer">WEB予約</a>`);
   }
 
   const phoneDigits = String(content.footerPhone || '')

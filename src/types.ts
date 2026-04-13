@@ -63,6 +63,13 @@ export interface PageContent {
    * beauty_salon_mellow: `<!--BSM:id-->` スロットの上書きテキスト（キー未指定・空はテンプレ既定のまま）
    */
   beautySalonMellowSlots?: Record<string, string>;
+  /** beauty_salon_mellow: WEB予約ボタン等の遷移先（ホットペッパー店舗ページなど） */
+  beautySalonReserveUrl?: string;
+  /**
+   * beauty_salon_mellow: Access の Google マップを iframe 全文で埋め込み（URL 単体より優先）。
+   * 許可されるのは Google マップ系 iframe の src のみを抽出した安全なマークアップ。
+   */
+  mapEmbedHtml?: string;
   /** 整骨院テンプレ用：悩み・症状リスト（ファーストビュー直下） */
   symptomItems?: string[];
   /** 整骨院・ジムテンプレ用：選ばれる理由（ナンバリング＋タイトル＋本文） */

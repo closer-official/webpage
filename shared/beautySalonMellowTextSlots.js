@@ -39,6 +39,10 @@ export const BSM_SLOT_UI = [
   { id: 'page.concept.title', label: 'Concept｜見出し' },
   { id: 'page.concept.body', label: 'Concept｜本文' },
   { id: 'page.concept.commit.title', label: 'Concept｜Our Policy 見出し' },
+  ...[1, 2, 3, 4].flatMap((n) => [
+    { id: `page.policy.${n}.title`, label: `Concept｜こだわり${n} 見出し` },
+    { id: `page.policy.${n}.desc`, label: `Concept｜こだわり${n} 本文` },
+  ]),
   { id: 'page.staff.title', label: 'Staff ページ｜見出し' },
   { id: 'page.staff1.desc', label: 'Staff ページ｜スタッフ1 紹介' },
   { id: 'page.staff2.desc', label: 'Staff ページ｜スタッフ2 紹介' },
@@ -135,13 +139,29 @@ export function parseHotPepperBeautyPaste(raw) {
   const skip = (l) =>
     /の写真|（\d+件）|^\d+\.\d+$|スマート支払い|サロン情報|空席確認|ブックマーク|人気のクーポン|予約比率|年代比率|^女性$|^男性$|未設定/.test(l);
 
+  const hpSalon = t.match(/https:\/\/beauty\.hotpepper\.jp\/[^\s<'"]+/i);
+  if (hpSalon) {
+    let u = hpSalon[0].trim();
+    const q = u.indexOf('?');
+    if (q !== -1) u = u.slice(0, q);
+    u = u.replace(/["'>,).]+$/, '');
+    out.beautySalonReserveUrl = u.slice(0, 2000);
+  }
+
+  const iframeBlock = t.match(/<iframe[\s\S]{0,8000}?<\/iframe>/i);
+  if (iframeBlock && /google\.com\/maps|maps\.google|google\.co\.jp\/maps/i.test(iframeBlock[0])) {
+    out.mapEmbedHtml = iframeBlock[0].trim().slice(0, 50000);
+  }
+
   const head = lines.find((l) => !skip(l) && l.length > 4 && l.length < 200 && !/^¥/.test(l));
   if (head) out['hero.headline'] = head.replace(/【[^】]+】/g, '').trim().slice(0, 200);
 
   const addr = t.match(/(〒\s*\d{3}-\d{4}[^\n]+)/);
   if (addr) out['footer.info'] = addr[1].trim();
+  const addrMulti = t.match(/〒\s*\d{3}-\d{4}[\s\S]{0,260}?(?:ビル|丁目|F|階|番地)/);
+  if (addrMulti) out['access.address'] = addrMulti[0].replace(/\s+/g, ' ').trim().slice(0, 400);
   const addrTokyo = t.match(/(東京都[^\n]{10,120})/);
-  if (!out['footer.info'] && addrTokyo) out['access.address'] = addrTokyo[1].trim();
+  if (!out['access.address'] && addrTokyo) out['access.address'] = addrTokyo[1].trim();
 
   const tel = t.match(/(0\d{1,4}-\d{1,4}-\d{3,4})/);
   if (tel) {
@@ -149,17 +169,69 @@ export function parseHotPepperBeautyPaste(raw) {
     out['footer.info'] = (out['footer.info'] ? out['footer.info'] + '\n\n' : '') + `TEL ${tel[1]}`;
   }
 
-  const open = t.match(/(平日[^\n]{0,100}\d{1,2}:\d{2}[^\n]{0,150})/);
-  if (open) out['access.hours'] = open[1].trim();
+  const hourLines = lines.filter((l) => /[月火水木金土日祝・／]/.test(l) && /\d{1,2}\s*[:：]\s*\d{1,2}/.test(l) && l.length < 220);
+  if (hourLines.length) {
+    const hb = hourLines.slice(0, 12).join('\n').slice(0, 800);
+    out['access.hours'] = hb;
+    out['page.reserve.hoursBlock'] = hb;
+  } else {
+    const open = t.match(/(平日[^\n]{0,100}\d{1,2}:\d{2}[^\n]{0,150})/);
+    if (open) {
+      out['access.hours'] = open[1].trim();
+      out['page.reserve.hoursBlock'] = open[1].trim();
+    }
+  }
 
-  const pay = t.match(/(Visa[／\/][^\n]{10,200}PayPay[^\n]*)/i);
-  if (pay) out['access.payment'] = pay[0].trim();
+  const closed = t.match(/(定休日[：:\s]*[^\n]{2,80})/);
+  if (closed && out['access.hours']) {
+    out['access.hours'] = `${out['access.hours']}\n\n${closed[1].trim()}`.slice(0, 900);
+    out['page.reserve.hoursBlock'] = out['access.hours'];
+  }
 
-  const paras = t.split(/\n{2,}/).map((p) => p.trim()).filter((p) => p.length > 100 && !skip(p));
-  if (paras[0]) out['home.concept.body'] = paras[0].slice(0, 2000);
-  if (paras[1]) out['page.style.lede'] = paras[1].slice(0, 1500);
+  const pay = t.match(/(Visa[／\/][^\n]{10,400}(?:PayPay|ペイペイ)[^\n]*)/i) || t.match(/(お支払い[：:\s]*[^\n]{10,300})/i);
+  if (pay) {
+    const pv = pay[0].trim();
+    out['access.payment'] = pv;
+    out['page.first.payment'] = pv.replace(/<br>/g, '\n').slice(0, 400);
+  }
 
-  const couponLines = t.split('\n').filter((l) => /¥[\d,]+/.test(l) && /【|限定|カット|カラー|TR|トリートメント/.test(l));
+  const paras = t
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 100 && !skip(p));
+  if (paras[0]) out['page.concept.body'] = paras[0].slice(0, 2000);
+  if (paras[1]) out['home.concept.body'] = paras[1].slice(0, 1800);
+  if (paras[2]) out['page.style.lede'] = paras[2].slice(0, 1500);
+
+  const stIdx = t.search(/スタイリスト|ディレクター|DIRECTOR\s*\/\s*STYLIST|スタッフ紹介/i);
+  if (stIdx !== -1) {
+    const tail = t.slice(stIdx, stIdx + 2500);
+    const blocks = tail.split(/\n{2,}/).filter((b) => b.length > 30);
+    let staffN = 1;
+    for (const block of blocks) {
+      if (staffN > 2) break;
+      if (!/[ァ-ヶーA-Za-z]{2,}/.test(block)) continue;
+      const ln = block.split('\n').map((x) => x.trim()).filter(Boolean);
+      const nameLine = ln.find((l) => /[／\/]/.test(l) && l.length < 100 && l.length > 3);
+      if (!nameLine) continue;
+      const parts = nameLine.split(/[／\/]/).map((x) => x.trim());
+      const pre = `home.staff${staffN}.`;
+      if (parts.length >= 2) {
+        out[`${pre}role`] = parts[0].slice(0, 80);
+        out[`${pre}name`] = parts[1].slice(0, 80);
+      } else {
+        out[`${pre}name`] = nameLine.slice(0, 80);
+      }
+      const rest = ln
+        .filter((l) => l !== nameLine && !/^https?:/.test(l))
+        .join('\n')
+        .trim();
+      if (rest) out[`${pre}desc`] = rest.slice(0, 600);
+      staffN += 1;
+    }
+  }
+
+  const couponLines = t.split('\n').filter((l) => /¥[\d,]+/.test(l) && /【|限定|カット|カラー|TR|トリートメント|パーマ|スパ/.test(l));
   couponLines.slice(0, 6).forEach((line, i) => {
     const n = i + 1;
     const pr = line.match(/¥([\d,]+)/);

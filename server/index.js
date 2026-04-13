@@ -650,6 +650,18 @@ function sanitizeCafeMeoOverride(raw) {
   return Object.keys(o).length ? o : undefined;
 }
 
+function sanitizeBeautySalonMellowSlots(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const o = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const key = String(k || '').trim();
+    if (!/^[a-z][a-z0-9_.]*$/i.test(key) || key.length > 80) continue;
+    const s = String(v ?? '').trim().slice(0, 12000);
+    if (s) o[key] = s;
+  }
+  return Object.keys(o).length ? o : undefined;
+}
+
 /** カスタム override の正規化（空はキーごと省略。theme は1つでも値があればだけ載せる） */
 function normalizeCustomizationInput(body = {}) {
   const out = {};
@@ -739,6 +751,13 @@ function normalizeCustomizationInput(body = {}) {
   if (cafeBranchMenuItems) out.cafeBranchMenuItems = cafeBranchMenuItems;
   const cafeMeo = sanitizeCafeMeoOverride(body.cafeMeo);
   if (cafeMeo) out.cafeMeo = cafeMeo;
+
+  const bslots = sanitizeBeautySalonMellowSlots(body.beautySalonMellowSlots);
+  if (bslots) out.beautySalonMellowSlots = bslots;
+  const brsv = String(body.beautySalonReserveUrl || '').trim().slice(0, 2000);
+  if (brsv && /^https?:\/\//i.test(brsv)) out.beautySalonReserveUrl = brsv;
+  const meh = String(body.mapEmbedHtml || '').trim().slice(0, 50000);
+  if (meh) out.mapEmbedHtml = meh;
 
   return out;
 }
