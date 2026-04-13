@@ -183,6 +183,85 @@
         font-size: 0.72rem;
         color: var(--muted);
       }
+      .intake-mode {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .intake-mode label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        font-size: 0.88rem;
+        color: var(--text);
+      }
+      .intake-mode input {
+        accent-color: var(--accent);
+      }
+      .intake-mode label:has(input:checked) {
+        border-color: #2563eb;
+        background: rgba(59, 130, 246, 0.12);
+      }
+      .hpb-panel textarea.hpb-paste {
+        min-height: 220px;
+        font-size: 0.8rem;
+      }
+      .hpb-preview-wrap {
+        overflow-x: auto;
+        margin-top: 14px;
+      }
+      table.hpb-preview {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+      }
+      table.hpb-preview th,
+      table.hpb-preview td {
+        border: 1px solid var(--border);
+        padding: 8px 6px;
+        vertical-align: top;
+      }
+      table.hpb-preview th {
+        background: #0f1628;
+        color: var(--muted);
+        font-size: 0.7rem;
+        white-space: nowrap;
+      }
+      table.hpb-preview input[type='text'] {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+      }
+      table.hpb-preview textarea {
+        min-height: 56px;
+        font-size: 0.76rem;
+        resize: vertical;
+      }
+      .web-str {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 10rem;
+      }
+      .web-str label {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 0;
+        font-size: 0.72rem;
+        cursor: pointer;
+        color: #cbd5e1;
+      }
+      .hpb-hint {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
     </style>
   </head>
   <body>
@@ -194,20 +273,48 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        <strong>サイトがない・弱い店</strong>だけ、店名とメモ（Instagram / ホットペッパー / Googleマップ
-        などのURLや覚え書き）を残す場所です。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます（あとから保存して案件化してください）。
+        <strong>サイトがない・弱い店</strong>はメモリードに残し、<strong>公式サイトが強い店</strong>は送付管理に
+        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
 
-      <section class="panel" aria-labelledby="add-h">
-        <h2 id="add-h">新規メモを追加</h2>
-        <label for="new-name">店名</label>
-        <input type="text" id="new-name" maxlength="200" placeholder="例：渋谷カフェ ○○" autocomplete="off" />
-        <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
-        <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://www.instagram.com/...&#10;https://beauty.hotpepper.jp/...&#10;https://maps.google.com/?q=..."></textarea>
-        <div class="row-actions">
-          <button type="button" class="btn-sm primary" id="btn-add">追加する</button>
+      <section class="panel hpb-panel" aria-labelledby="intake-h">
+        <h2 id="intake-h">新規の登録方法</h2>
+        <div class="intake-mode" role="radiogroup" aria-label="登録モード">
+          <label
+            ><input type="radio" name="intake-mode" id="mode-hpb" value="hpb" checked /> 美容室：ホットペッパー風の一覧をコピペして取込</label
+          >
+          <label><input type="radio" name="intake-mode" id="mode-manual" value="manual" /> 手入力（従来）</label>
+        </div>
+
+        <div id="block-hpb">
+          <p class="hpb-hint">
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行を含むと区切りやすいです）。<strong>店名を解析</strong>のあと、各行で
+            <strong>ウェブの有無・強弱</strong>を選びます。<strong>ウェブあり（強）</strong>はメモリードには入れず、送付・フェーズ管理に
+            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。
+          </p>
+          <label for="hpb-paste">ホットペッパー風テキスト</label>
+          <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
+          <div class="row-actions">
+            <button type="button" class="btn-sm primary" id="btn-hpb-parse">店名を解析</button>
+            <button type="button" class="btn-sm" id="btn-hpb-clear">貼り付けをクリア</button>
+          </div>
+          <div id="hpb-preview-host"></div>
+          <div class="row-actions" id="hpb-submit-row" style="display: none; margin-top: 12px">
+            <button type="button" class="btn-sm primary" id="btn-hpb-submit">解析結果をまとめて登録</button>
+          </div>
+        </div>
+
+        <div id="block-manual" style="display: none">
+          <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">手入力でメモを追加</h3>
+          <label for="new-name">店名</label>
+          <input type="text" id="new-name" maxlength="200" placeholder="例：渋谷カフェ ○○" autocomplete="off" />
+          <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
+          <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://www.instagram.com/...&#10;https://beauty.hotpepper.jp/...&#10;https://maps.google.com/?q=..."></textarea>
+          <div class="row-actions">
+            <button type="button" class="btn-sm primary" id="btn-add">追加する</button>
+          </div>
         </div>
       </section>
 
@@ -243,6 +350,138 @@
 
         function workerUrlWithMemo(id) {
           return './template-worker.html?memoLeadId=' + encodeURIComponent(id) + '&v=memo1';
+        }
+
+        /** ホットペッパー検索結果のような「ブックマークする」区切りテキストから店名・アクセスを推定 */
+        function parseHotPepperBeautyBlocks(paste) {
+          var text = String(paste || '').replace(/\r\n/g, '\n');
+          var chunks = text.split(/\nブックマークする\n/i);
+          var shops = [];
+          var seen = {};
+          chunks.forEach(function (chunk) {
+            chunk = chunk.trim();
+            if (!chunk) return;
+            var lines = chunk.split('\n').map(function (l) {
+              return l.trim();
+            });
+            var displayName = '';
+            var li;
+            for (li = 0; li < lines.length; li++) {
+              var line = lines[li];
+              if (!line || line.length > 140) continue;
+              var m = line.match(/^(.{2,100}?)\s*\(([^)]+)\)\s*$/);
+              if (!m) continue;
+              var left = m[1].trim();
+              if (!/[\u3000-\u9FFF\uFF66-\uFF9F]/.test(left) && !/[ァ-ン]/.test(left)) continue;
+              displayName = left;
+              break;
+            }
+            if (!displayName) return;
+            if (seen[displayName]) return;
+            seen[displayName] = 1;
+            var access = '';
+            var ai = lines.indexOf('アクセス');
+            if (ai >= 0) {
+              var accParts = [];
+              for (var j = ai + 1; j < lines.length; j++) {
+                var L = lines[j];
+                if (!L) continue;
+                if (
+                  /^(カット|席数|ブログ|口コミ|スマート支払いOK|スマート支払い|空席確認|一覧へ|60分の空席|↓|メンズ|全員|新規|当日割|平日限定|期間限定|スタイリスト指定|学校|＜|【当日)/.test(
+                    L,
+                  )
+                )
+                  break;
+                if (/^￥[0-9,～\-]+$/.test(L)) break;
+                if (/^\d{1,2}:\d{2}$/.test(L) && accParts.length > 2) break;
+                accParts.push(L);
+              }
+              access = accParts.join(' ').trim();
+            }
+            shops.push({
+              shopName: displayName,
+              access: access.slice(0, 800),
+              sourceMemo: chunk.slice(0, 11000),
+            });
+          });
+          return shops;
+        }
+
+        var hpbParsedRows = [];
+
+        function renderHpbPreview(rows) {
+          var host = document.getElementById('hpb-preview-host');
+          var submitRow = document.getElementById('hpb-submit-row');
+          if (!host) return;
+          host.innerHTML = '';
+          if (submitRow) submitRow.style.display = 'none';
+          if (!rows || !rows.length) {
+            host.innerHTML = '<p class="hpb-hint" style="margin-top:12px">解析結果がありません。「ブックマークする」付近のコピペか、店名（かな）行を含むか確認してください。</p>';
+            return;
+          }
+          var wrap = document.createElement('div');
+          wrap.className = 'hpb-preview-wrap';
+          var tb = document.createElement('table');
+          tb.className = 'hpb-preview';
+          tb.innerHTML =
+            '<thead><tr><th>#</th><th>店名（編集可）</th><th>アクセス（編集可）</th><th>ウェブの有無・強弱</th></tr></thead><tbody></tbody>';
+          var body = tb.querySelector('tbody');
+          rows.forEach(function (r, idx) {
+            var tr = document.createElement('tr');
+            var n0 = document.createElement('td');
+            n0.textContent = String(idx + 1);
+            var n1 = document.createElement('td');
+            var inp = document.createElement('input');
+            inp.type = 'text';
+            inp.maxLength = 200;
+            inp.value = r.shopName;
+            inp.setAttribute('data-hpb-idx', String(idx));
+            inp.className = 'hpb-name';
+            n1.appendChild(inp);
+            var n2 = document.createElement('td');
+            var ta = document.createElement('textarea');
+            ta.maxLength = 800;
+            ta.value = r.access || '';
+            ta.className = 'hpb-access';
+            ta.setAttribute('data-hpb-idx', String(idx));
+            n2.appendChild(ta);
+            var n3 = document.createElement('td');
+            var ws = document.createElement('div');
+            ws.className = 'web-str';
+            var nm = 'ws-' + idx;
+            [['no_site', 'ウェブなし（フォロー対象）'], ['weak_site', 'ウェブあり・弱い（フォロー対象）'], ['strong_site', 'ウェブあり・強い（制作不可→送付管理へ）']].forEach(
+              function (pair, wi) {
+                var lab = document.createElement('label');
+                var rd = document.createElement('input');
+                rd.type = 'radio';
+                rd.name = nm;
+                rd.value = pair[0];
+                if (wi === 0) rd.checked = true;
+                lab.appendChild(rd);
+                lab.appendChild(document.createTextNode(' ' + pair[1]));
+                ws.appendChild(lab);
+              },
+            );
+            n3.appendChild(ws);
+            tr.appendChild(n0);
+            tr.appendChild(n1);
+            tr.appendChild(n2);
+            tr.appendChild(n3);
+            body.appendChild(tr);
+          });
+          wrap.appendChild(tb);
+          host.appendChild(wrap);
+          if (submitRow) submitRow.style.display = 'flex';
+        }
+
+        function syncIntakeMode() {
+          var hpb = document.getElementById('mode-hpb');
+          var manual = document.getElementById('mode-manual');
+          var bh = document.getElementById('block-hpb');
+          var bm = document.getElementById('block-manual');
+          var isManual = manual && manual.checked;
+          if (bh) bh.style.display = isManual ? 'none' : 'block';
+          if (bm) bm.style.display = isManual ? 'block' : 'none';
         }
 
         function renderList(rows) {
@@ -324,18 +563,49 @@
             });
         }
 
-        document.getElementById('btn-add').onclick = function () {
-          var name = document.getElementById('new-name').value.trim();
-          var memo = document.getElementById('new-memo').value.trim();
-          if (!name) {
-            showErr('店名を入力してください');
+        document.getElementById('btn-hpb-parse').onclick = function () {
+          showErr('');
+          var raw = document.getElementById('hpb-paste').value;
+          hpbParsedRows = parseHotPepperBeautyBlocks(raw);
+          renderHpbPreview(hpbParsedRows);
+          if (hpbParsedRows.length) {
+            showOk(hpbParsedRows.length + '件を検出しました。ウェブ強度を確認してから登録してください。');
+          } else {
+            showErr('店名を検出できませんでした。コピー範囲に「店名(読み)」の行と「ブックマークする」が含まれるか確認してください。');
+          }
+        };
+
+        document.getElementById('btn-hpb-clear').onclick = function () {
+          document.getElementById('hpb-paste').value = '';
+          hpbParsedRows = [];
+          renderHpbPreview([]);
+        };
+
+        document.getElementById('btn-hpb-submit').onclick = function () {
+          var entries = [];
+          var nameInputs = document.querySelectorAll('.hpb-name');
+          nameInputs.forEach(function (inp, idx) {
+            var tr = inp.closest('tr');
+            if (!tr) return;
+            var accEl = tr.querySelector('.hpb-access');
+            var picked = tr.querySelector('.web-str input[type="radio"]:checked');
+            var ws = picked ? picked.value : 'no_site';
+            entries.push({
+              shopName: inp.value.trim(),
+              access: accEl ? accEl.value.trim() : '',
+              webStrength: ws,
+              sourceMemo: (hpbParsedRows[idx] && hpbParsedRows[idx].sourceMemo) || '',
+            });
+          });
+          if (!entries.length) {
+            showErr('先に「店名を解析」を実行してください');
             return;
           }
           showErr('');
-          credFetch(api + '/memo-leads', {
+          credFetch(api + '/memo-leads/intake-batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ shopName: name, memo: memo }),
+            body: JSON.stringify({ entries: entries }),
           })
             .then(function (r) {
               return r.json().then(function (j) {
@@ -343,10 +613,17 @@
                 return j;
               });
             })
-            .then(function () {
-              document.getElementById('new-name').value = '';
-              document.getElementById('new-memo').value = '';
-              showOk('追加しました');
+            .then(function (j) {
+              document.getElementById('hpb-paste').value = '';
+              hpbParsedRows = [];
+              renderHpbPreview([]);
+              showOk(
+                '登録しました（メモリード +' +
+                  (j.memosAdded || 0) +
+                  '／送付管理 +' +
+                  (j.dashboardAdded || 0) +
+                  '）。',
+              );
               return loadList();
             })
             .catch(function (e) {
@@ -354,6 +631,45 @@
             });
         };
 
+        ;['mode-hpb', 'mode-manual'].forEach(function (rid) {
+          var el = document.getElementById(rid);
+          if (el) el.addEventListener('change', syncIntakeMode);
+        });
+
+        var btnAdd = document.getElementById('btn-add');
+        if (btnAdd) {
+          btnAdd.onclick = function () {
+            var name = document.getElementById('new-name').value.trim();
+            var memo = document.getElementById('new-memo').value.trim();
+            if (!name) {
+              showErr('店名を入力してください');
+              return;
+            }
+            showErr('');
+            credFetch(api + '/memo-leads', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ shopName: name, memo: memo }),
+            })
+              .then(function (r) {
+                return r.json().then(function (j) {
+                  if (!r.ok) throw new Error((j && j.error) || r.statusText);
+                  return j;
+                });
+              })
+              .then(function () {
+                document.getElementById('new-name').value = '';
+                document.getElementById('new-memo').value = '';
+                showOk('追加しました');
+                return loadList();
+              })
+              .catch(function (e) {
+                showErr(e.message || String(e));
+              });
+          };
+        }
+
+        syncIntakeMode();
         loadList();
       })();
     </script>

@@ -68,6 +68,7 @@ import {
 } from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { ensureDashboardForWorkerDraft } from './dashboardFromWorkerDraft.js';
+import { buildStrongWebSalonDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -1971,6 +1972,67 @@ app.post('/api/memo-leads', async (req, res) => {
   list.unshift(row);
   await store.setMemoLeads(list);
   res.status(201).json(row);
+});
+
+/**
+ * メモリード／送付管理への一括取込（美容室HPB想定）。
+ * webStrength: no_site | weak_site → memo-leads、strong_site → dashboard（no_outreach_channel）
+ */
+app.post('/api/memo-leads/intake-batch', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const entries = req.body?.entries;
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return res.status(400).json({ error: 'entries（配列）が必要です' });
+  }
+  if (entries.length > 80) {
+    return res.status(400).json({ error: '一度に登録できるのは80件までです' });
+  }
+  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
+  const rawMemo = await store.getMemoLeads();
+  const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
+  const dashboard = [...(await store.getDashboard())];
+  const now = new Date().toISOString();
+  let memosAdded = 0;
+  let dashboardAdded = 0;
+  for (let ei = 0; ei < entries.length; ei++) {
+    const raw = entries[ei];
+    const shopName = String(raw?.shopName || '').trim().slice(0, 200);
+    if (!shopName) continue;
+    const webStrength = String(raw?.webStrength || '').trim();
+    if (!STRENGTHS.has(webStrength)) continue;
+    const access = String(raw?.access || '').trim().slice(0, 800);
+    const sourceMemo = String(raw?.sourceMemo || '').trim().slice(0, 11000);
+    if (webStrength === 'strong_site') {
+      dashboard.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: sourceMemo,
+        }),
+      );
+      dashboardAdded += 1;
+      continue;
+    }
+    const label = webStrength === 'weak_site' ? 'ウェブあり（弱）' : 'ウェブなし';
+    const memo = ['[HPB取込] ' + label, access ? 'アクセス: ' + access : '', '', sourceMemo]
+      .filter(Boolean)
+      .join('\n')
+      .slice(0, 12000);
+    memoList.unshift({
+      id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
+      shopName,
+      memo,
+      createdAt: now,
+      updatedAt: now,
+    });
+    memosAdded += 1;
+  }
+  if (memosAdded === 0 && dashboardAdded === 0) {
+    return res.status(400).json({ error: '有効な行がありません（店名とウェブ強度を確認してください）' });
+  }
+  await store.setMemoLeads(memoList);
+  await store.setDashboard(dashboard);
+  res.json({ ok: true, memosAdded, dashboardAdded });
 });
 
 app.patch('/api/memo-leads/:id', async (req, res) => {
