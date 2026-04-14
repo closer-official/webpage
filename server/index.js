@@ -663,6 +663,27 @@ function sanitizeBeautySalonMellowSlots(raw) {
   return Object.keys(o).length ? o : undefined;
 }
 
+/** 美容室独立テンプレ用サロン JSON（クライアントの editor 出力をそのまま保存） */
+function sanitizeBeautyStandaloneSalon(raw) {
+  if (raw == null) return undefined;
+  let o = raw;
+  if (typeof raw === 'string') {
+    try {
+      o = JSON.parse(raw);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return undefined;
+  try {
+    const s = JSON.stringify(o);
+    if (s.length > 200000) return undefined;
+    return JSON.parse(s);
+  } catch {
+    return undefined;
+  }
+}
+
 /** カスタム override の正規化（空はキーごと省略。theme は1つでも値があればだけ載せる） */
 function normalizeCustomizationInput(body = {}) {
   const out = {};
@@ -759,6 +780,9 @@ function normalizeCustomizationInput(body = {}) {
   if (brsv && /^https?:\/\//i.test(brsv)) out.beautySalonReserveUrl = brsv;
   const meh = String(body.mapEmbedHtml || '').trim().slice(0, 50000);
   if (meh) out.mapEmbedHtml = meh;
+
+  const beautyStandaloneSalon = sanitizeBeautyStandaloneSalon(body.beautyStandaloneSalon);
+  if (beautyStandaloneSalon) out.beautyStandaloneSalon = beautyStandaloneSalon;
 
   return out;
 }

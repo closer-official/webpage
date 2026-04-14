@@ -79,6 +79,7 @@ export const INTAKE_BESPOKE_TEMPLATE_ID = 'intake_bespoke';
 export function isValidTemplateId(id, customizations = []) {
   const tid = String(id || '');
   if (tid === INTAKE_BESPOKE_TEMPLATE_ID) return true;
+  if (tid === 'beauty_standalone') return true;
   if (TEMPLATE_IDS.has(tid)) return true;
   return !!findTemplateCandidate(tid, customizations);
 }
@@ -262,7 +263,16 @@ function labelOf(id) {
   if (id === 'academy_lp') return '高CVセールスLP（レガシー）';
   if (id === 'gym_yoga') return 'ジム・フィットネスLP（レガシー・gym_yoga）';
   if (id === 'studio_blush_editorial') return 'ブラッシュ・創作スタジオ（レガシー・ギャラリー非掲載）';
+  if (id === 'beauty_standalone') return '美容室テンプレ（独立版）';
   return TEMPLATE_CANDIDATES.find((t) => t.id === id)?.name || id;
+}
+
+function escapeHtmlPreview(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /** カスタム保存オブジェクト { override: {...} } とフラットな上書きの両方に対応 */
@@ -357,6 +367,65 @@ export function renderTemplatePreview(templateId, customization = null, options 
 
   let id = String(templateId || '');
   if (id === INTAKE_BESPOKE_TEMPLATE_ID) id = 'navy_cyan_consult';
+
+  if (id === 'beauty_standalone') {
+    const ov = resolveTemplateOverride(customization);
+    const salon = ov?.beautyStandaloneSalon && typeof ov.beautyStandaloneSalon === 'object' ? ov.beautyStandaloneSalon : {};
+    const shopName =
+      String(salon.name || '')
+        .trim()
+        .slice(0, 200) ||
+      String((cust && cust.name) || '')
+        .trim()
+        .slice(0, 200) ||
+      '美容室（独立LP）';
+    const address = String(salon.address || '')
+      .trim()
+      .slice(0, 400);
+    const concept = String(salon.introText || salon.messageText || '')
+      .trim()
+      .slice(0, 500);
+    const content = {
+      siteName: shopName,
+      title: shopName,
+      headline: shopName,
+      subheadline: concept,
+      footerAddress: address,
+      sections: [],
+      footerText: '',
+    };
+    let seo = buildDefaultSeoFromMergedContent(id, shopName, content);
+    if (options && options.previewSocialFromContent) {
+      const snapTitle = seo.metaTitle;
+      const snapDesc = seo.metaDescription;
+      seo = applySeoCustomization(seo, ov);
+      seo.metaTitle = snapTitle;
+      seo.metaDescription = snapDesc;
+    } else {
+      seo = applySeoCustomization(seo, ov);
+    }
+    if (options && options.previewCanonicalUrl) {
+      seo.canonicalUrl = options.previewCanonicalUrl;
+    }
+    const previewOrigin = options && options.previewAbsoluteOrigin ? String(options.previewAbsoluteOrigin).replace(/\/$/, '') : '';
+    if (previewOrigin) {
+      if (seo.ogImageUrl && seo.ogImageUrl.startsWith('/')) {
+        seo.ogImageUrl = previewOrigin + seo.ogImageUrl;
+      }
+    }
+    if (options && options.returnResolvedData) {
+      return { id: 'beauty_standalone', content, seo };
+    }
+    const bodyHtml = `<main style="font-family:system-ui,sans-serif;padding:2rem;max-width:36rem;line-height:1.55">
+<h1 style="font-size:1.2rem;margin:0 0 0.75rem">${escapeHtmlPreview(shopName)}</h1>
+${address ? `<p style="margin:0 0 1rem;color:#333">${escapeHtmlPreview(address)}</p>` : ''}
+<p style="margin:0;color:#555;font-size:0.95rem">この店舗ドラフトは<strong>美容室テンプレ（独立版）</strong>です。LPの編集・公開用HTMLは管理画面の独立エディタで行います（この画面は一覧・共有用の簡易プレビューです）。</p>
+</main>`;
+    return `<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtmlPreview(
+      shopName,
+    )}</title></head><body style="margin:0;background:#fafafa">${bodyHtml}</body></html>`;
+  }
+
   if (!TEMPLATE_IDS.has(id) && !LEGACY_TEMPLATE_IDS.has(id)) return null;
 
   const ov = resolveTemplateOverride(customization);

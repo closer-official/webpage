@@ -81,6 +81,7 @@ export function buildDashboardItemFromCustomization(customizationItem) {
       createdAt: new Date().toISOString(),
       unsubscribeToken: randomBytes(24).toString('hex'),
       linkedTemplateCustomizationId: cid,
+      linkedTemplateBaseId: baseId,
     };
   }
 
@@ -117,6 +118,7 @@ export function buildDashboardItemFromCustomization(customizationItem) {
     createdAt: new Date().toISOString(),
     unsubscribeToken: randomBytes(24).toString('hex'),
     linkedTemplateCustomizationId: cid,
+    linkedTemplateBaseId: baseId,
   };
 }
 

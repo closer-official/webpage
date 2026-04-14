@@ -3147,6 +3147,10 @@
               showErr('save-err', 'URL の id が一覧にありません: ' + cid);
               return Promise.resolve();
             }
+            if (String(customizationBaseById[cid] || '').trim() === 'beauty_standalone') {
+              window.location.replace('./beauty-standalone-template/index.html?id=' + encodeURIComponent(cid));
+              return Promise.resolve();
+            }
             ex.value = cid;
             return loadExistingCustomizationById(cid, {
               successMsg: '指定された店舗ドラフトを読み込みました。',
@@ -3217,6 +3221,7 @@
               baseSel.innerHTML = '';
               templates.forEach(function (t) {
                 if (t.isCustom) return;
+                if (t.id !== 'cafe_1') return;
                 var o = document.createElement('option');
                 o.value = t.id;
                 o.textContent = t.name + ' (' + t.id + ')';
