@@ -17,7 +17,7 @@
       <div class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</div>
     </div>
     <div class="header-actions">
-      <a class="btn btn-ghost-admin" href="./outreach-phases.html?v=7phase">送付・フェーズ管理</a>
+      <a class="btn btn-ghost-admin" href="/admin/outreach-phases.html?v=7phase">送付・フェーズ管理</a>
       <a class="btn btn-ghost-admin" href="/admin/template-worker.html">店舗ドラフト編集（cafe）</a>
       <button class="btn btn-primary-admin" id="btn-save-server" type="button">サーバーに保存</button>
       <button class="btn btn-ghost-admin" id="btn-json" type="button">JSON を見る</button>
@@ -98,11 +98,46 @@ import {
 } from './editor.js';
 import { renderLP } from './renderer.js';
 
-function apiRoot() {
-  const idx = location.pathname.indexOf('/admin/');
-  const origin = location.origin.replace(/\/$/, '');
-  if (idx < 0) return origin + '/api';
-  return origin + location.pathname.slice(0, idx) + '/api';
+/** template-worker.html と同じ相対パス（サイト直下の /api へ届く） */
+function apiBase() {
+  const p = location.pathname.indexOf('/admin/');
+  if (p >= 0) return location.pathname.slice(0, p) + '/api';
+  return '/api';
+}
+
+function previewPublicUrl(customizationId) {
+  const id = String(customizationId || '').trim();
+  if (!id) return '';
+  return location.origin.replace(/\/$/, '') + apiBase() + '/template-preview/' + encodeURIComponent(id);
+}
+
+/**
+ * 管理者 API（JSON）。401 や HTML 404 も本文を拾ってメッセージにする。
+ */
+async function fetchAdminJson(path, opts = {}) {
+  const url = apiBase() + path;
+  const headers = { ...(opts.headers || {}) };
+  if (opts.body && typeof opts.body === 'string' && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+  const r = await fetch(url, { credentials: 'include', ...opts, headers });
+  const text = await r.text();
+  let j = null;
+  if (text) {
+    try {
+      j = JSON.parse(text);
+    } catch {
+      j = null;
+    }
+  }
+  if (!r.ok) {
+    const msg =
+      (j && (j.error || j.message)) ||
+      (text && String(text).trim().replace(/\s+/g, ' ').slice(0, 280)) ||
+      r.status + ' ' + r.statusText;
+    throw new Error(msg);
+  }
+  return j;
 }
 
 const previewEl = document.getElementById('lp-preview');
@@ -126,9 +161,7 @@ const BEAUTY_OPEN_COMPAT_BASES = {
 };
 
 async function loadDraftFromServer(id) {
-  const r = await fetch(apiRoot() + '/template-customizations', { credentials: 'include' });
-  const j = await r.json().catch(() => []);
-  if (!r.ok) throw new Error((j && j.error) || '店舗ドラフト一覧の取得に失敗しました（管理者ログインが必要です）');
+  const j = await fetchAdminJson('/template-customizations', { method: 'GET' });
   const list = Array.isArray(j) ? j : [];
   const item = list.find((x) => x && x.id === id);
   if (!item) throw new Error('指定 id のドラフトが見つかりません');
@@ -254,10 +287,8 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
   flushSalonDraft();
   try {
     if (linkedDraftId) {
-      const r = await fetch(apiRoot() + '/template-customizations/save', {
+      const j = await fetchAdminJson('/template-customizations/save', {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'update',
           id: linkedDraftId,
@@ -266,25 +297,21 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
           override: { beautyStandaloneSalon: salon },
         }),
       });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || r.statusText);
       linkedDraftName = String(j.item && j.item.name ? j.item.name : linkedDraftName);
       setSaveStatus('サーバーに保存しました（店舗ドラフトを更新し、未登録ならフェーズ用一覧に1件追加します）。', 'success');
-      const pv = location.origin + '/api/template-preview/' + encodeURIComponent(linkedDraftId);
+      const pv = previewPublicUrl(linkedDraftId);
       draftHintEl.textContent =
         'ドラフト ID: ' +
         linkedDraftId +
         (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
         ' ／ 共有プレビューURL: ' +
         pv +
-        ' ／ 送付・フェーズ管理: このページ左上のリンクから開けます。';
+        ' ／ 送付・フェーズ: 上部リンク（/admin/outreach-phases.html）から。';
       return;
     }
     if (!window.confirm('新しい店舗ドラフトとしてサーバーに作成しますか？（base: beauty_standalone）')) return;
-    const r = await fetch(apiRoot() + '/template-customizations/save', {
+    const j = await fetchAdminJson('/template-customizations/save', {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'create',
         baseTemplateId: 'beauty_standalone',
@@ -292,21 +319,19 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
         override: { beautyStandaloneSalon: salon },
       }),
     });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || r.statusText);
     const newId = j.item && j.item.id;
     if (newId) {
       linkedDraftId = newId;
       const u = new URL(location.href);
       u.searchParams.set('id', newId);
       history.replaceState({}, '', u.toString());
-      const pv = location.origin + '/api/template-preview/' + encodeURIComponent(newId);
+      const pv = previewPublicUrl(newId);
       draftHintEl.textContent =
         '新規ドラフト ID: ' +
         newId +
         '（このタブの URL に id が付きました。ブックマーク推奨） ／ 共有プレビュー: ' +
         pv +
-        ' ／ 送付・フェーズ一覧には自動で1件追加されます（左上「送付・フェーズ管理」で確認）。';
+        ' ／ 送付・フェーズ一覧には自動で1件追加されます（上部「送付・フェーズ管理」で確認）。';
     }
     setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
   } catch (e) {
