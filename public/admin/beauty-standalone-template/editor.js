@@ -85,11 +85,13 @@ function renderForm(salon) {
   addArrayGroup(form, 'staff', 'スタイリスト', salon.staff,
     item => [
       field('text', 'name', '名前', item.name),
+      field('text', 'avatarUrl', '写真URL（任意）', item.avatarUrl || ''),
+      field('text', 'avatarText', '丸内テキスト（任意）', item.avatarText || ''),
       field('text', 'specialty', '専門', item.specialty),
       field('text', 'experience', '経験', item.experience),
       field('text', 'catch', 'キャッチ', item.catch),
     ],
-    () => ({ name: '', specialty: '', experience: '', catch: '' })
+    () => ({ name: '', avatarUrl: '', avatarText: '', specialty: '', experience: '', catch: '' })
   );
 }
 

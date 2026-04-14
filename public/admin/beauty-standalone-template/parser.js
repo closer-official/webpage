@@ -282,7 +282,7 @@ function extractStaff(text) {
       const specialty = sLines[i + 2] || '';
       const experience = (sLines[i + 3] || '').match(/（歴\d+年）/)?.[0] || '';
       const catchLine = (sLines[i + 4] || '');
-      staff.push({ name, specialty, experience, catch: catchLine });
+      staff.push({ name, specialty, experience, catch: catchLine, avatarUrl: '', avatarText: '' });
       i += 5;
       continue;
     }

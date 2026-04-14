@@ -153,7 +153,7 @@ function buildStaff(salon) {
   const el = el_('section', 'lp-section lp-staff');
   const cards = salon.staff.map((s, i) => `
     <div class="staff-card" style="--i:${i}">
-      <div class="staff-avatar">${getInitials(s.name)}</div>
+      ${buildStaffAvatar(s)}
       <h3 class="staff-name">${esc(s.name)}</h3>
       ${s.specialty ? `<p class="staff-specialty">${esc(s.specialty)}</p>` : ''}
       ${s.experience ? `<span class="staff-exp">${esc(s.experience)}</span>` : ''}
@@ -320,4 +320,14 @@ function getInitials(name) {
   if (/[\u3040-\u30FF\u4E00-\u9FFF]/.test(name)) return name.charAt(0);
   // ローマ字の場合は頭文字
   return name.split(/\s+/).map(w => w.charAt(0)).join('').toUpperCase().substring(0, 2);
+}
+
+function buildStaffAvatar(staff) {
+  const rawUrl = String((staff && staff.avatarUrl) || '').trim();
+  const rawText = String((staff && staff.avatarText) || '').trim();
+  const fallbackText = rawText || getInitials(staff && staff.name);
+  if (rawUrl) {
+    return `<div class="staff-avatar has-image"><img src="${esc(rawUrl)}" alt="${esc((staff && staff.name) || 'staff')}" loading="lazy" decoding="async"></div>`;
+  }
+  return `<div class="staff-avatar">${esc(fallbackText)}</div>`;
 }

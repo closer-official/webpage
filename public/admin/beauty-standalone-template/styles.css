@@ -774,6 +774,18 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   align-items: center;
   justify-content: center;
   margin: 0 auto 14px;
+  overflow: hidden;
+}
+
+.staff-avatar.has-image {
+  background: #ddd;
+}
+
+.staff-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .staff-name {

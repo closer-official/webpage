@@ -26,7 +26,7 @@ export function createEmptySalon() {
     features: [],      // { title, text }
     atmosphere: [],    // string[]
     coupons: [],       // { type, categories[], price, title, conditions }
-    staff: [],         // { name, specialty, catch, experience }
+    staff: [],         // { name, specialty, catch, experience, avatarUrl, avatarText }
     stats: {
       firstVisitPrice: '',
       repeatVisitPrice: '',
