@@ -634,6 +634,7 @@
       <nav class="tw-fixed-nav__inner" aria-label="管理メニュー">
         <a href="../" class="btn" style="display: inline-flex; border-color: #2a3b52; background: #121a2e">← 運営トップ</a>
         <a href="./template-hub.html" class="btn" style="display: inline-flex">テンプレ・ギャラリーハブ</a>
+        <a href="./beauty-hpb-editor/index.html" class="btn" style="display: inline-flex">美容室HPB編集ツール</a>
         <a href="./outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">送付・フェーズ管理</a>
       </nav>
     </header>
@@ -1565,10 +1566,16 @@
           wiki_ensyuritsu: true,
           wiki_sauna: true,
           beauty_salon_mellow: true,
+          beauty_salon_hpb: true,
         };
 
         function isEmbedStyleTemplate(tid) {
           return !!EMBED_STYLE_TEMPLATE_IDS[String(tid || '')];
+        }
+
+        function isBeautySalonTemplate(tid) {
+          var key = String(tid || '');
+          return key === 'beauty_salon_mellow' || key === 'beauty_salon_hpb';
         }
 
         function resolveWorkerFormBaseTemplateId() {
@@ -1610,8 +1617,9 @@
               return;
             }
             if (f === 'beauty_salon_mellow') {
-              el.classList.toggle('tw-hidden', tid !== 'beauty_salon_mellow');
-              if (tid === 'beauty_salon_mellow') ensureBsmMellowForm();
+              var showBeautyBlock = isBeautySalonTemplate(tid);
+              el.classList.toggle('tw-hidden', !showBeautyBlock);
+              if (showBeautyBlock) ensureBsmMellowForm();
               return;
             }
             el.classList.add('tw-hidden');
@@ -1624,9 +1632,11 @@
             } else if (isCafe1) {
               badge.textContent =
                 '表示中: cafe_1 向け（店主・お品書き・MEO・固定ボタンなど）。店主の顔写真はセクション ID を staff にしてください。';
-            } else if (tid === 'beauty_salon_mellow') {
+            } else if (isBeautySalonTemplate(tid)) {
               badge.textContent =
-                '表示中: beauty_salon_mellow（マルチページLP）。店名・ヒーローは共通欄とスロットの両方から編集可能です。HPの長文は貼り付け取り込みで推測できる項目だけ反映されます（無い情報はテンプレのまま）。';
+                '表示中: ' +
+                tid +
+                '（美容室マルチページLP）。店名・ヒーローは共通欄とスロットの両方から編集可能です。HPの長文は貼り付け取り込みで推測できる項目だけ反映されます（無い情報はテンプレのまま）。';
             } else if (explicitEmbed) {
               badge.textContent =
                 '表示中: ' +
@@ -2310,7 +2320,7 @@
             }
           }
           var twTidFaq = resolveWorkerFormBaseTemplateId();
-          var faqListSel = twTidFaq === 'beauty_salon_mellow' ? '#f-bsm-faq-list .repeat-item' : '#f-faq-list .repeat-item';
+          var faqListSel = isBeautySalonTemplate(twTidFaq) ? '#f-bsm-faq-list .repeat-item' : '#f-faq-list .repeat-item';
           var faqItems = Array.prototype.map
             .call(document.querySelectorAll(faqListSel), function (row) {
               return {
@@ -2424,7 +2434,7 @@
           Object.keys(workerExtraOverride || {}).forEach(function (k) {
             ov[k] = workerExtraOverride[k];
           });
-          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+          if (isBeautySalonTemplate(resolveWorkerFormBaseTemplateId())) {
             ensureBsmMellowForm();
             ov.beautySalonMellowSlots = {};
             Array.prototype.forEach.call(document.querySelectorAll('textarea.f-bsm-slot'), function (el) {
@@ -2496,12 +2506,12 @@
           document.getElementById('f-meo-hours-list').innerHTML = '';
           (Array.isArray(meo.openingHours) && meo.openingHours.length ? meo.openingHours : ['']).forEach(addMeoHourItem);
           document.getElementById('f-faq-list').innerHTML = '';
-          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+          if (isBeautySalonTemplate(resolveWorkerFormBaseTemplateId())) {
             (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addBsmFaqItem);
           } else {
             (Array.isArray(ov.faqItems) && ov.faqItems.length ? ov.faqItems : [{}]).forEach(addFaqItem);
           }
-          if (resolveWorkerFormBaseTemplateId() === 'beauty_salon_mellow') {
+          if (isBeautySalonTemplate(resolveWorkerFormBaseTemplateId())) {
             ensureBsmMellowForm();
             var bsmSlots = ov.beautySalonMellowSlots && typeof ov.beautySalonMellowSlots === 'object' && !Array.isArray(ov.beautySalonMellowSlots) ? ov.beautySalonMellowSlots : {};
             Object.keys(bsmSlots).forEach(function (k) {

@@ -595,7 +595,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
       footerAddress: '東京都〇〇区〇〇 1-2-3',
       footerPhone: '03-XXXX-XXXX',
     };
-  } else if (id === 'beauty_salon_mellow') {
+  } else if (id === 'beauty_salon_mellow' || id === 'beauty_salon_hpb') {
     content = {
       siteName: 'mellow by luce',
       title: 'OMOTESANDO HAIR SALON',
@@ -675,7 +675,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
     return { id, content, seo };
   }
   let html = buildHtml(content, seo, id, {
-    contactForm: id === 'cafe_1' || id === 'beauty_salon_mellow' ? false : true,
+    contactForm: id === 'cafe_1' || id === 'beauty_salon_mellow' || id === 'beauty_salon_hpb' ? false : true,
     formActionUrl: '#',
     instagramLine: true,
     instagramUrl: 'https://instagram.com/',

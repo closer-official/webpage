@@ -222,7 +222,7 @@ export function buildJsonLd(
     graphs.push(restaurant);
   }
 
-  if (templateId === 'beauty_salon_mellow') {
+  if (templateId === 'beauty_salon_mellow' || templateId === 'beauty_salon_hpb') {
     const hair: Record<string, unknown> = {
       '@context': 'https://schema.org',
       '@type': 'HairSalon',

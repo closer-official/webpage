@@ -208,7 +208,8 @@ export function buildHtml(
   template: TemplateOption,
   options?: { inlineCss?: boolean; genOptions?: BuildHtmlGenOptions }
 ): string {
-  const tid = template.id;
+  const tidRaw = template.id;
+  const tid = tidRaw === 'beauty_salon_hpb' ? 'beauty_salon_mellow' : tidRaw;
   const genOpts = options?.genOptions;
   const bookingOn = !!(
     genOpts?.bookingEnabled &&
@@ -253,7 +254,7 @@ export function buildHtml(
     });
   }
 
-  const bodyClass = `page-wrapper template-${template.id}`;
+  const bodyClass = `page-wrapper template-${tidRaw}`;
   const overrides = options?.genOptions?.styleOverrides;
   const useDrawerNav = (tid === 'cafe_tea' && overrides?.navStyle !== 'sticky') || tid === 'cafe_1';
   let navItems: { label: string; href: string }[] = content.navItems?.length ? content.navItems : (DEFAULT_NAV[tid] ?? []);

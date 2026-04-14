@@ -55,6 +55,12 @@ export const BUILTIN_CATALOG_META = Object.freeze({
     popularity: 89,
     tags: ['ラーメン', 'ramen_2', '麺', 'メニュー写真', 'クイック情報', 'Instagram', 'LINE', 'TikTok'],
   }),
+  beauty_salon_hpb: Object.freeze({
+    category: '美容室・サロン',
+    categories: ['美容室', 'サロン', 'HPB', '管理画面'],
+    popularity: 87,
+    tags: ['美容室', 'hotpepper', '取り込み', 'data-bind', 'mellow'],
+  }),
 });
 
 function simpleHash(str) {

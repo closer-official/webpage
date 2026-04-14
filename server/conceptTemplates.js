@@ -1409,7 +1409,7 @@ export function getTemplateFullCss(templateId) {
   if (key === 'wiki_sauna') {
     return WIKI_SAUNA_DELIVERABLE_PAGE_CSS;
   }
-  if (key === 'beauty_salon_mellow') {
+  if (key === 'beauty_salon_mellow' || key === 'beauty_salon_hpb') {
     return '';
   }
   const css = key === 'salon_barber' ? SALON_BARBER_CSS

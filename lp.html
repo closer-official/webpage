@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>サロン LP</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* LP ページ固有スタイル */
+    body { margin: 0; }
+    .lp-root { min-height: 100vh; }
+
+    /* スムーズスクロール用のナビリンク */
+    .lp-nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .lp-nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: rgba(245,240,232,0.55);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .lp-nav-links a:hover { color: var(--gold-l); }
+
+    @media (max-width: 600px) {
+      .lp-nav-links { display: none; }
+    }
+
+    /* セクション区切り */
+    .lp-section + .lp-section {
+      border-top: 1px solid rgba(28,26,23,0.05);
+    }
+
+    /* フッター */
+    .lp-footer {
+      background: var(--ink);
+      color: rgba(245,240,232,0.35);
+      text-align: center;
+      padding: 40px 24px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+    }
+
+    .lp-footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .back-to-admin {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 20px;
+      border: 1px solid rgba(184,151,90,0.3);
+      border-radius: 4px;
+      color: rgba(245,240,232,0.4);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .back-to-admin:hover {
+      color: var(--gold-l);
+      border-color: rgba(184,151,90,0.6);
+    }
+
+    /* ページ内アニメーション（IntersectionObserver対応） */
+    .lp-section {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .lp-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="lp-root" id="lp-root">
+  <div class="lp-empty"><p>データを読み込み中...</p></div>
+</div>
+
+<script type="module">
+import { renderLP } from './renderer.js';
+
+const root = document.getElementById('lp-root');
+
+function init() {
+  // sessionStorageからsalonデータを取得
+  const raw = sessionStorage.getItem('salonLP');
+  if (!raw) {
+    root.innerHTML = `
+      <div class="lp-empty" style="min-height:100vh;">
+        <div>
+          <p style="margin-bottom:16px;">サロンデータがありません</p>
+          <a href="index.html" style="color:var(--gold); font-family:var(--font-mono); font-size:0.8rem;">← 管理画面に戻る</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const salon = JSON.parse(raw);
+
+  // ナビゲーション
+  const nav = document.createElement('nav');
+  nav.className = 'lp-nav';
+  nav.innerHTML = `
+    <div class="lp-nav-name">${escHtml(salon.name)}</div>
+    <ul class="lp-nav-links">
+      <li><a href="#features">こだわり</a></li>
+      <li><a href="#coupons">クーポン</a></li>
+      <li><a href="#staff">スタッフ</a></li>
+      <li><a href="#access">アクセス</a></li>
+    </ul>
+    <a href="index.html" class="back-to-admin">← 編集</a>
+  `;
+
+  // LP本体を描画
+  renderLP(salon, root);
+
+  // navをlp-heroの前に挿入
+  root.insertBefore(nav, root.firstChild);
+
+  // セクションにID付与（ナビ用）
+  const sectionMap = {
+    'lp-features':   'features',
+    'lp-coupons':    'coupons',
+    'lp-atmosphere': 'atmosphere',
+    'lp-staff':      'staff',
+    'lp-access':     'access',
+    'lp-cta':        'cta'
+  };
+  root.querySelectorAll('.lp-section').forEach(sec => {
+    const cls = [...sec.classList].find(c => sectionMap[c]);
+    if (cls) sec.id = sectionMap[cls];
+  });
+
+  // ページタイトル
+  document.title = `${salon.name} — サロン公式サイト`;
+
+  // IntersectionObserver でフェードイン
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  root.querySelectorAll('.lp-section').forEach(sec => observer.observe(sec));
+
+  // フッター
+  const footer = document.createElement('footer');
+  footer.className = 'lp-footer';
+  footer.innerHTML = `
+    <p>${escHtml(salon.name)}</p>
+    ${salon.address ? `<p style="margin-top:6px;">${escHtml(salon.address)}</p>` : ''}
+    ${salon.homepageUrl ? `<p style="margin-top:8px;"><a href="${escHtml(salon.homepageUrl)}" target="_blank">${escHtml(salon.homepageUrl)}</a></p>` : ''}
+    <a href="index.html" class="back-to-admin" style="margin-top:20px;">← 管理画面に戻る</a>
+  `;
+  root.appendChild(footer);
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+init();
+</script>
+
+</body>
+</html>

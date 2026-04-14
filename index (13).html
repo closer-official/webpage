@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salon LP Generator — 管理画面</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app-root">
+
+  <!-- ── Header ── -->
+  <header class="app-header">
+    <div>
+      <h1>Salon LP Generator</h1>
+      <div class="header-sub">ホットペッパー全文 → LP 自動生成</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost-admin" id="btn-json">JSON を見る</button>
+      <button class="btn btn-secondary-admin" id="btn-reset">リセット</button>
+      <button class="btn btn-primary-admin" id="btn-export">LP を開く →</button>
+    </div>
+  </header>
+
+  <!-- ── Input Panel ── -->
+  <div class="panel panel-input">
+    <div class="panel-header">
+      <span class="panel-title">① ホットペッパー本文を貼る</span>
+    </div>
+    <div class="input-body">
+      <textarea
+        class="input-textarea"
+        id="hp-input"
+        placeholder="ホットペッパービューティーのサロンページを全選択してここに貼り付けてください。&#10;&#10;解析ボタンを押すと自動で情報を抽出してLPを生成します。"
+        spellcheck="false"
+      ></textarea>
+      <div class="input-actions">
+        <button class="btn btn-primary-admin" id="btn-parse">解析する</button>
+        <button class="btn btn-secondary-admin" id="btn-apply">反映する</button>
+      </div>
+      <div class="parse-status" id="parse-status"></div>
+    </div>
+  </div>
+
+  <!-- ── Editor Panel ── -->
+  <div class="panel panel-editor">
+    <div class="panel-header">
+      <span class="panel-title">② 内容を確認・編集</span>
+    </div>
+    <div class="editor-body">
+      <div id="editor-form">
+        <div class="lp-empty" style="min-height:200px;">
+          <p>解析結果がここに表示されます</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Preview Panel ── -->
+  <div class="panel panel-preview">
+    <div class="panel-header">
+      <span class="panel-title">③ ライブプレビュー</span>
+    </div>
+    <div class="preview-body">
+      <div class="lp-root" id="lp-preview">
+        <div class="lp-empty">
+          <p>ここにLPプレビューが表示されます</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── JSON Modal ── -->
+<div class="json-modal" id="json-modal">
+  <div class="json-modal-inner" id="json-content"></div>
+  <div class="json-modal-close" onclick="document.getElementById('json-modal').classList.remove('open')">× 閉じる</div>
+</div>
+
+<script type="module">
+import { parseHotpepper } from './parser.js';
+import { initEditor, loadIntoEditor, getCurrentSalon } from './editor.js';
+import { renderLP } from './renderer.js';
+
+const previewEl = document.getElementById('lp-preview');
+initEditor(previewEl);
+
+// ── Parse ──
+document.getElementById('btn-parse').addEventListener('click', () => {
+  const text = document.getElementById('hp-input').value.trim();
+  const status = document.getElementById('parse-status');
+
+  if (!text) {
+    status.textContent = 'テキストを入力してください';
+    status.className = 'parse-status error';
+    return;
+  }
+
+  try {
+    const salon = parseHotpepper(text);
+    if (!salon.name) {
+      status.textContent = '店名を抽出できませんでした。ホットペッパーの全文が含まれているか確認してください。';
+      status.className = 'parse-status error';
+      return;
+    }
+    loadIntoEditor(salon);
+    const count = [salon.name, salon.address, salon.introText, salon.messageText].filter(Boolean).length;
+    status.textContent = `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`;
+    status.className = 'parse-status success';
+  } catch (e) {
+    console.error(e);
+    status.textContent = `解析エラー: ${e.message}`;
+    status.className = 'parse-status error';
+  }
+});
+
+// ── Apply (re-render from current editor state) ──
+document.getElementById('btn-apply').addEventListener('click', () => {
+  const salon = getCurrentSalon();
+  if (salon) renderLP(salon, previewEl);
+});
+
+// ── JSON modal ──
+document.getElementById('btn-json').addEventListener('click', () => {
+  const salon = getCurrentSalon();
+  document.getElementById('json-content').textContent = JSON.stringify(salon, null, 2);
+  document.getElementById('json-modal').classList.add('open');
+});
+
+// ── Reset ──
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('すべてリセットしますか？')) return;
+  document.getElementById('hp-input').value = '';
+  document.getElementById('parse-status').className = 'parse-status';
+  document.getElementById('editor-form').innerHTML = '<div class="lp-empty" style="min-height:200px;"><p>解析結果がここに表示されます</p></div>';
+  previewEl.innerHTML = '<div class="lp-empty"><p>ここにLPプレビューが表示されます</p></div>';
+});
+
+// ── Export LP ──
+document.getElementById('btn-export').addEventListener('click', () => {
+  const salon = getCurrentSalon();
+  if (!salon) { alert('先に解析してください'); return; }
+  // salonをURLパラメータ経由で lp.html へ渡す（localStorageを使わずsessionStorageを使用）
+  sessionStorage.setItem('salonLP', JSON.stringify(salon));
+  window.open('lp.html', '_blank');
+});
+
+// ── JSON modal close on backdrop ──
+document.getElementById('json-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+</script>
+
+</body>
+</html>

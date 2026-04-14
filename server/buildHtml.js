@@ -272,6 +272,7 @@ export function buildHtml(content, seo, templateId, genOptions = {}) {
 
   let tid = templateId === 'bakery' ? 'cafe_tea' : templateId;
   if (tid === 'intake_bespoke') tid = 'navy_cyan_consult';
+  if (tid === 'beauty_salon_hpb') tid = 'beauty_salon_mellow';
   const envCanonicalHost = (process.env.AUTO_CANONICAL_HOST || process.env.VITE_AUTO_CANONICAL_HOST || '').trim();
   const effectiveCanonical = resolveEffectiveCanonicalUrl(
     seo,

@@ -221,6 +221,7 @@ export type StyleId =
   | 'ramen'              // 12. ラーメン
   | 'ramen_2'            // 12b. ラーメン弐（クイック情報バー・SNS・buildHtml ビルトイン）
   | 'beauty_salon_mellow' // 12c. 美容室 mellow（マルチページ・docs 由来の生成 HTML + shared 差し替え）
+  | 'beauty_salon_hpb' // 12d. 美容室 HPB編集用（mellow互換）
   | 'academy_lp'         // 13. 高CVセールスLP
   | 'navy_cyan_consult' // 14. ダークネイビー×シアン（既定LP: web-closer-intro）
   | 'gym_personal_neon' // 15. パーソナルジム・ネオンシアン（固定HTML: gym-valx-intro）
@@ -271,6 +272,7 @@ export const STYLES: { id: StyleId; name: string }[] = [
   { id: 'wiki_ensyuritsu', name: 'wiki円室律（オリジナル・ナレッジ）' },
   { id: 'wiki_sauna', name: 'wiki湯環（ウェルネス・サウナWiki）' },
   { id: 'beauty_salon_mellow', name: '美容室 mellow（マルチページ）' },
+  { id: 'beauty_salon_hpb', name: '美容室 HPB編集用（取り込み対応）' },
 ];
 
 // --- ターゲット収集・キュー・検閲用 ---

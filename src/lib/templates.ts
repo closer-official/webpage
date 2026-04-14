@@ -1187,4 +1187,11 @@ export const TEMPLATES: TemplateOption[] = [
     '/* LP の CSS は server/beautySalonMellow/generated.css（ビルド時生成） */',
     { omitCommonBase: true }
   ),
+  makeTemplate(
+    'beauty_salon_hpb',
+    '美容室 HPB編集用',
+    'テンプレ21：美容室向け（beauty_salon_mellow互換）・HPB本文取り込み管理画面と併用',
+    '/* LP の CSS は server/beautySalonMellow/generated.css（ビルド時生成） */',
+    { omitCommonBase: true }
+  ),
 ];

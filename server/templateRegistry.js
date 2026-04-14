@@ -26,6 +26,10 @@ export const BUILTIN_BUILD_HTML_TEMPLATES = Object.freeze([
     id: 'beauty_salon_mellow',
     name: '美容室 mellow（マルチページ・表参道系デザイン／docs 由来の軽量生成HTML）',
   }),
+  Object.freeze({
+    id: 'beauty_salon_hpb',
+    name: '美容室 HPB編集用（取り込み管理画面対応）',
+  }),
 ]);
 
 /** @type {readonly string[]} */
