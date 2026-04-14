@@ -2688,19 +2688,25 @@
         function templateDraftEditUrl(customizationId, item) {
           var cid = String(customizationId || '').trim();
           if (!cid) return '';
-          var base =
-            (item && item.linkedTemplateBaseId) || cachedCustomizationBaseById[cid] || '';
-          if (base === 'beauty_standalone') {
+          if (shouldOpenBeautyStandaloneEditor(item, cid)) {
             return './beauty-standalone-template/index.html?id=' + encodeURIComponent(cid);
           }
           return './template-worker.html?id=' + encodeURIComponent(cid);
         }
 
-        function isBeautyStandaloneDraft(item, customizationId) {
+        /**
+         * 表の行色（row-num--beauty）または美容系ドラフト base と一致するとき、独立版 LP 編集へ誘導する。
+         */
+        function shouldOpenBeautyStandaloneEditor(item, customizationId) {
           var cid = String(customizationId || '').trim();
+          if (!cid || !item) return false;
           var base =
-            (item && item.linkedTemplateBaseId) || (cid && cachedCustomizationBaseById[cid]) || '';
-          return base === 'beauty_standalone';
+            String((item && item.linkedTemplateBaseId) || '').trim() ||
+            String((cid && cachedCustomizationBaseById[cid]) || '').trim();
+          if (base === 'beauty_standalone') return true;
+          if (base === 'beauty_salon_mellow' || base === 'beauty_salon_hpb') return true;
+          if (excelDashboardRowNumClass(item) === 'row-num--beauty') return true;
+          return false;
         }
 
         function renderInstagramFooterBlock(container, item) {
@@ -2814,7 +2820,7 @@
           ed.href = templateDraftEditUrl(cid, item);
           ed.target = '_blank';
           ed.rel = 'noopener noreferrer';
-          ed.textContent = isBeautyStandaloneDraft(item, cid)
+          ed.textContent = shouldOpenBeautyStandaloneEditor(item, cid)
             ? '美容室LPを編集（独立）'
             : '店舗ドラフトを再編集';
           er.appendChild(ed);
@@ -3243,7 +3249,7 @@
               cardBtn.onclick = function (e) {
                 e.preventDefault();
                 var linkCid = String(item.linkedTemplateCustomizationId || '').trim();
-                if (isBeautyStandaloneDraft(item, linkCid) && linkCid) {
+                if (shouldOpenBeautyStandaloneEditor(item, linkCid) && linkCid) {
                   window.open(templateDraftEditUrl(linkCid, item), '_blank', 'noopener,noreferrer');
                   return;
                 }

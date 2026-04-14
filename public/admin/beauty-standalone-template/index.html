@@ -17,6 +17,7 @@
       <div class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</div>
     </div>
     <div class="header-actions">
+      <a class="btn btn-ghost-admin" href="./outreach-phases.html?v=7phase">送付・フェーズ管理</a>
       <a class="btn btn-ghost-admin" href="/admin/template-worker.html">店舗ドラフト編集（cafe）</a>
       <button class="btn btn-primary-admin" id="btn-save-server" type="button">サーバーに保存</button>
       <button class="btn btn-ghost-admin" id="btn-json" type="button">JSON を見る</button>
@@ -98,9 +99,10 @@ import {
 import { renderLP } from './renderer.js';
 
 function apiRoot() {
-  const p = location.pathname.indexOf('/admin/');
-  if (p >= 0) return location.pathname.slice(0, p) + '/api';
-  return '/api';
+  const idx = location.pathname.indexOf('/admin/');
+  const origin = location.origin.replace(/\/$/, '');
+  if (idx < 0) return origin + '/api';
+  return origin + location.pathname.slice(0, idx) + '/api';
 }
 
 const previewEl = document.getElementById('lp-preview');
@@ -117,6 +119,12 @@ function setSaveStatus(msg, kind) {
   saveStatusEl.className = 'parse-status' + (kind ? ' ' + kind : '');
 }
 
+const BEAUTY_OPEN_COMPAT_BASES = {
+  beauty_standalone: true,
+  beauty_salon_mellow: true,
+  beauty_salon_hpb: true,
+};
+
 async function loadDraftFromServer(id) {
   const r = await fetch(apiRoot() + '/template-customizations', { credentials: 'include' });
   const j = await r.json().catch(() => []);
@@ -124,19 +132,30 @@ async function loadDraftFromServer(id) {
   const list = Array.isArray(j) ? j : [];
   const item = list.find((x) => x && x.id === id);
   if (!item) throw new Error('指定 id のドラフトが見つかりません');
-  if (String(item.baseTemplateId || '') !== 'beauty_standalone') {
-    throw new Error('このドラフトは美容室独立テンプレではありません（base: ' + (item.baseTemplateId || '—') + '）');
+  const base = String(item.baseTemplateId || '').trim();
+  if (!BEAUTY_OPEN_COMPAT_BASES[base]) {
+    throw new Error('このドラフトは美容室向けではありません（base: ' + (base || '—') + '）');
   }
   linkedDraftName = String(item.name || '').trim();
   const salon = item.override && item.override.beautyStandaloneSalon;
   if (salon && typeof salon === 'object' && salon.name) {
     loadIntoEditor(salon);
+  } else if (base !== 'beauty_standalone') {
+    draftHintEl.textContent =
+      'ドラフト base: ' +
+      base +
+      '。独立版用データ（beautyStandaloneSalon）がまだありません。下の①にホットペッパー全文を貼り「解析する」で取り込んでから保存すると、独立版に移行できます。';
+    return;
   }
   draftHintEl.textContent =
     'サーバー連携ドラフト ID: ' +
     id +
     (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
-    '。送付・フェーズ管理は従来どおりこのドラフト ID で動きます。';
+    '。共有用プレビュー: ' +
+    location.origin +
+    '/api/template-preview/' +
+    encodeURIComponent(id) +
+    ' ／ 送付・フェーズは「送付・フェーズ管理」から。';
 }
 
 initEditor(previewEl);
@@ -242,6 +261,7 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
         body: JSON.stringify({
           mode: 'update',
           id: linkedDraftId,
+          baseTemplateId: 'beauty_standalone',
           name: String(salon.name).trim().slice(0, 80),
           override: { beautyStandaloneSalon: salon },
         }),
@@ -249,12 +269,15 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || r.statusText);
       linkedDraftName = String(j.item && j.item.name ? j.item.name : linkedDraftName);
-      setSaveStatus('サーバーに保存しました。', 'success');
+      setSaveStatus('サーバーに保存しました（店舗ドラフトを更新し、未登録ならフェーズ用一覧に1件追加します）。', 'success');
+      const pv = location.origin + '/api/template-preview/' + encodeURIComponent(linkedDraftId);
       draftHintEl.textContent =
-        'サーバー連携ドラフト ID: ' +
+        'ドラフト ID: ' +
         linkedDraftId +
         (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
-        '。';
+        ' ／ 共有プレビューURL: ' +
+        pv +
+        ' ／ 送付・フェーズ管理: このページ左上のリンクから開けます。';
       return;
     }
     if (!window.confirm('新しい店舗ドラフトとしてサーバーに作成しますか？（base: beauty_standalone）')) return;
@@ -277,10 +300,15 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
       const u = new URL(location.href);
       u.searchParams.set('id', newId);
       history.replaceState({}, '', u.toString());
+      const pv = location.origin + '/api/template-preview/' + encodeURIComponent(newId);
       draftHintEl.textContent =
-        'サーバー連携ドラフト ID: ' + newId + '。この URL をブックマークすると再編集できます。フェーズ管理へは店舗ドラフト編集から紐づけてください。';
+        '新規ドラフト ID: ' +
+        newId +
+        '（このタブの URL に id が付きました。ブックマーク推奨） ／ 共有プレビュー: ' +
+        pv +
+        ' ／ 送付・フェーズ一覧には自動で1件追加されます（左上「送付・フェーズ管理」で確認）。';
     }
-    setSaveStatus('新規ドラフトを作成して保存しました。', 'success');
+    setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
   } catch (e) {
     console.error(e);
     setSaveStatus(String(e.message || e), 'error');

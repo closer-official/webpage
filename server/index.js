@@ -1466,6 +1466,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
       if (lid) nextItem.linkedDashboardId = lid;
       else delete nextItem.linkedDashboardId;
     }
+    const reqBase = String(body.baseTemplateId || '').trim();
+    if (reqBase === 'beauty_standalone' && isValidTemplateId('beauty_standalone', customizations)) {
+      nextItem.baseTemplateId = 'beauty_standalone';
+    }
     customizations[i] = nextItem;
     const dashUpdate = await store.getDashboard();
     ensureDashboardForWorkerDraft(nextItem, body, dashUpdate);
