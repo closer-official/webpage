@@ -7,6 +7,25 @@ import { renderLP } from './renderer.js';
 let currentSalon = null;
 let previewContainer = null;
 
+/** LP を別タブで開いたあと戻っても状態が残るよう sessionStorage に保存 */
+const STORAGE_SALON = 'beautyStandaloneAdminSalon';
+const STORAGE_HP = 'beautyStandaloneAdminHpInput';
+
+function persistDraft() {
+  try {
+    if (currentSalon && currentSalon.name) {
+      sessionStorage.setItem(STORAGE_SALON, JSON.stringify(currentSalon));
+    }
+  } catch (e) {
+    /* ignore quota / private mode */
+  }
+}
+
+/** 「LP を開く」直前など、明示的に最新 JSON を書き出す */
+export function flushSalonDraft() {
+  persistDraft();
+}
+
 export function initEditor(previewEl) {
   previewContainer = previewEl;
 }
@@ -15,10 +34,48 @@ export function loadIntoEditor(salon) {
   currentSalon = JSON.parse(JSON.stringify(salon)); // deep copy
   renderForm(currentSalon);
   renderLP(currentSalon, previewContainer);
+  persistDraft();
 }
 
 export function getCurrentSalon() {
   return currentSalon;
+}
+
+export function resetEditor() {
+  currentSalon = null;
+}
+
+/** ページ初期表示用: 直前の編集内容を復元 */
+export function loadStoredSalon() {
+  try {
+    var raw = sessionStorage.getItem(STORAGE_SALON);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    return o && o.name ? o : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function clearStoredDraft() {
+  try {
+    sessionStorage.removeItem(STORAGE_SALON);
+    sessionStorage.removeItem(STORAGE_HP);
+  } catch (e) {}
+}
+
+export function saveHpInputDraft(value) {
+  try {
+    sessionStorage.setItem(STORAGE_HP, value != null ? String(value) : '');
+  } catch (e) {}
+}
+
+export function loadHpInputDraft() {
+  try {
+    return sessionStorage.getItem(STORAGE_HP) || '';
+  } catch (e) {
+    return '';
+  }
 }
 
 // ---- フォーム描画 ----
@@ -181,6 +238,7 @@ function renderStringArray(arrayKey, arr, list) {
     input.addEventListener('input', () => {
       currentSalon[arrayKey][idx] = input.value;
       renderLP(currentSalon, previewContainer);
+      persistDraft();
     });
     const del = document.createElement('button');
     del.className = 'btn-del-item'; del.textContent = '✕';
@@ -188,6 +246,7 @@ function renderStringArray(arrayKey, arr, list) {
       currentSalon[arrayKey].splice(idx, 1);
       renderStringArray(arrayKey, currentSalon[arrayKey], list);
       renderLP(currentSalon, previewContainer);
+      persistDraft();
     });
     row.appendChild(input); row.appendChild(del);
     list.appendChild(row);
@@ -216,6 +275,7 @@ function addArrayGroup(form, arrayKey, title, arr, fieldsFn, newItemFn) {
     currentSalon[arrayKey].push(newItemFn());
     renderObjectArray(arrayKey, currentSalon[arrayKey], list, fieldsFn);
     renderLP(currentSalon, previewContainer);
+    persistDraft();
   });
 }
 
@@ -234,6 +294,7 @@ function renderObjectArray(arrayKey, arr, list, fieldsFn) {
       arr.splice(idx, 1);
       renderObjectArray(arrayKey, arr, list, fieldsFn);
       renderLP(currentSalon, previewContainer);
+      persistDraft();
     });
     header.appendChild(del);
     card.appendChild(header);
@@ -270,6 +331,7 @@ function renderObjectArray(arrayKey, arr, list, fieldsFn) {
           item[f.key] = input.value;
         }
         renderLP(currentSalon, previewContainer);
+        persistDraft();
       });
 
       row.appendChild(input);

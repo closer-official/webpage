@@ -17,7 +17,7 @@
       <div class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</div>
     </div>
     <div class="header-actions">
-      <a class="btn btn-ghost-admin" href="/admin/template-hub.html">管理ハブへ</a>
+      <a class="btn btn-ghost-admin" href="/admin/template-worker.html">店舗ドラフト編集</a>
       <button class="btn btn-ghost-admin" id="btn-json">JSON を見る</button>
       <button class="btn btn-secondary-admin" id="btn-reset">リセット</button>
       <button class="btn btn-primary-admin" id="btn-export">LP を開く →</button>
@@ -82,11 +82,40 @@
 
 <script type="module">
 import { parseHotpepper } from './parser.js';
-import { initEditor, loadIntoEditor, getCurrentSalon } from './editor.js';
+import {
+  initEditor,
+  loadIntoEditor,
+  getCurrentSalon,
+  loadStoredSalon,
+  clearStoredDraft,
+  saveHpInputDraft,
+  loadHpInputDraft,
+  resetEditor,
+  flushSalonDraft,
+} from './editor.js';
 import { renderLP } from './renderer.js';
 
 const previewEl = document.getElementById('lp-preview');
+const hpInputEl = document.getElementById('hp-input');
+
 initEditor(previewEl);
+
+hpInputEl.value = loadHpInputDraft();
+hpInputEl.addEventListener('input', () => {
+  saveHpInputDraft(hpInputEl.value);
+});
+
+const savedSalon = loadStoredSalon();
+if (savedSalon) {
+  loadIntoEditor(savedSalon);
+}
+
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const s = loadStoredSalon();
+  if (s) loadIntoEditor(s);
+  hpInputEl.value = loadHpInputDraft();
+});
 
 // ── Parse ──
 document.getElementById('btn-parse').addEventListener('click', () => {
@@ -133,7 +162,9 @@ document.getElementById('btn-json').addEventListener('click', () => {
 // ── Reset ──
 document.getElementById('btn-reset').addEventListener('click', () => {
   if (!confirm('すべてリセットしますか？')) return;
-  document.getElementById('hp-input').value = '';
+  clearStoredDraft();
+  resetEditor();
+  hpInputEl.value = '';
   document.getElementById('parse-status').className = 'parse-status';
   document.getElementById('editor-form').innerHTML = '<div class="lp-empty" style="min-height:200px;"><p>解析結果がここに表示されます</p></div>';
   previewEl.innerHTML = '<div class="lp-empty"><p>ここにLPプレビューが表示されます</p></div>';
@@ -143,6 +174,8 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 document.getElementById('btn-export').addEventListener('click', () => {
   const salon = getCurrentSalon();
   if (!salon) { alert('先に解析してください'); return; }
+  flushSalonDraft();
+  saveHpInputDraft(hpInputEl.value);
   // salonをURLパラメータ経由で lp.html へ渡す（localStorageを使わずsessionStorageを使用）
   sessionStorage.setItem('salonLP', JSON.stringify(salon));
   window.open('lp.html', '_blank');

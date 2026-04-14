@@ -12,14 +12,14 @@
 | 何をするか | URL（パス） |
 |------------|-------------|
 | **運営の入口**（メニュー・各ツールへのリンク） | `/` |
-| **テンプレ・ギャラリーハブ**（プレビュー・公開切替・手順コピー） | `/admin/template-hub.html` |
+| **テンプレ・ギャラリーハブ**（廃止・`/admin/template-worker.html` へリダイレクト） | `/admin/template-hub.html` |
 | **店舗ドラフト編集**（文章・画像URL・SEO の保存。API ログイン要のことが多い） | `/admin/template-worker.html` |
 | **店舗セットアップ**（納品テンプレ・店舗キー・購入者用URL） | `/admin/store-wizard.html` |
 | **売上コンソール**（使っている場合） | `/admin/sales-console.html` |
 | **ジムLP 管理**（使っている場合） | `/admin/gym-lp.html` |
 
 **例（フル URL）:**  
-`https://webpage.closer-official.com/admin/template-hub.html`
+`https://webpage.closer-official.com/admin/template-worker.html`
 
 ---
 
