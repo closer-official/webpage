@@ -68,6 +68,12 @@ import {
 } from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { ensureDashboardForWorkerDraft } from './dashboardFromWorkerDraft.js';
+import { customizationBaseIsBeauty, dashboardItemIsBeauty } from './outreachSegment.js';
+import {
+  patchOutreachDashboardRowFields,
+  buildBeautyOutreachDashboardMerged,
+  resolveBeautyOutreachDashboardPatchTarget,
+} from './outreachDashboardMutate.js';
 import { buildStrongWebSalonDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
@@ -1471,10 +1477,14 @@ app.post('/api/template-customizations/save', async (req, res) => {
       nextItem.baseTemplateId = 'beauty_standalone';
     }
     customizations[i] = nextItem;
-    const dashUpdate = await store.getDashboard();
+    const isBeauty = customizationBaseIsBeauty(nextItem.baseTemplateId);
+    const dashUpdate = isBeauty
+      ? [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])]
+      : [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
     ensureDashboardForWorkerDraft(nextItem, body, dashUpdate);
     await store.setTemplateCustomizations(customizations);
-    await store.setDashboard(dashUpdate);
+    if (isBeauty) await store.setBeautyDashboard(dashUpdate);
+    else await store.setDashboard(dashUpdate);
     return res.json({ ok: true, item: customizations[i] });
   }
 
@@ -1503,10 +1513,14 @@ app.post('/api/template-customizations/save', async (req, res) => {
     updatedAt: now,
   };
   customizations.unshift(item);
-  const dashCreate = await store.getDashboard();
+  const isBeautyCreate = customizationBaseIsBeauty(item.baseTemplateId);
+  const dashCreate = isBeautyCreate
+    ? [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])]
+    : [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
   ensureDashboardForWorkerDraft(item, body, dashCreate);
   await store.setTemplateCustomizations(customizations);
-  await store.setDashboard(dashCreate);
+  if (isBeautyCreate) await store.setBeautyDashboard(dashCreate);
+  else await store.setDashboard(dashCreate);
   res.json({ ok: true, item });
 });
 
@@ -2000,8 +2014,28 @@ function extractHpbSourceFromMemo(memo) {
   return stripHpbCouponTailFromText(tail).slice(0, 11000);
 }
 
+async function findDashboardRowInAnyStoreByItemId(itemId) {
+  const id = String(itemId || '');
+  const main = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
+  let idx = main.findIndex((d) => d && d.id === id);
+  if (idx >= 0) return { pool: 'main', list: main, idx };
+  const beauty = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+  idx = beauty.findIndex((d) => d && d.id === id);
+  if (idx >= 0) return { pool: 'beauty', list: beauty, idx };
+  return null;
+}
+
+async function persistDashboardPoolHit(hit) {
+  if (!hit) return;
+  if (hit.pool === 'beauty') await store.setBeautyDashboard(hit.list);
+  else await store.setDashboard(hit.list);
+}
+
 app.get('/api/dashboard', async (req, res) => {
-  res.json(await store.getDashboard());
+  const customs = await store.getTemplateCustomizations();
+  const main = Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [];
+  const out = main.filter((row) => !dashboardItemIsBeauty(row, customs));
+  res.json(out);
 });
 
 /** 送付・フェーズ前の軽量メモ（店名＋リンク等のみ。ダッシュボード案件とは別ストア） */
@@ -2104,6 +2138,67 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
   res.json({ ok: true, memosAdded, dashboardAdded });
 });
 
+/** HPB 一括取込（美容室フェーズ専用ストア） */
+app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const entries = req.body?.entries;
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return res.status(400).json({ error: 'entries（配列）が必要です' });
+  }
+  if (entries.length > 80) {
+    return res.status(400).json({ error: '一度に登録できるのは80件までです' });
+  }
+  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
+  const rawMemo = await store.getBeautyMemoLeads();
+  const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
+  const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+  const now = new Date().toISOString();
+  let memosAdded = 0;
+  let dashboardAdded = 0;
+  for (let ei = 0; ei < entries.length; ei++) {
+    const raw = entries[ei];
+    const shopName = String(raw?.shopName || '').trim().slice(0, 200);
+    if (!shopName) continue;
+    const webStrength = String(raw?.webStrength || '').trim();
+    if (!STRENGTHS.has(webStrength)) continue;
+    const access = String(raw?.access || '').trim().slice(0, 800);
+    const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
+    if (webStrength === 'strong_site') {
+      dashboard.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: sourceMemo,
+        }),
+      );
+      dashboardAdded += 1;
+      continue;
+    }
+    const label = webStrength === 'weak_site' ? 'ウェブあり（弱）' : 'ウェブなし';
+    const memo = ['[HPB取込] ' + label, access ? 'アクセス: ' + access : '', '', sourceMemo]
+      .filter(Boolean)
+      .join('\n')
+      .slice(0, 12000);
+    memoList.unshift({
+      id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
+      shopName,
+      memo,
+      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
+      hpbAccess: access,
+      hpbBody: sourceMemo.slice(0, 11000),
+      createdAt: now,
+      updatedAt: now,
+    });
+    memosAdded += 1;
+  }
+  if (memosAdded === 0 && dashboardAdded === 0) {
+    return res.status(400).json({ error: '有効な行がありません（店名とウェブ強度を確認してください）' });
+  }
+  await store.setBeautyMemoLeads(memoList);
+  await store.setBeautyDashboard(dashboard);
+  res.json({ ok: true, memosAdded, dashboardAdded });
+});
+
 app.patch('/api/memo-leads/:id', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const raw = await store.getMemoLeads();
@@ -2164,76 +2259,198 @@ app.delete('/api/memo-leads/:id', async (req, res) => {
   res.status(204).end();
 });
 
+// ---------- 美容室専用：送付・フェーズ（ダッシュボード／メモリードは飲食側と別ストア） ----------
+app.get('/api/beauty-outreach/dashboard', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  res.json(await buildBeautyOutreachDashboardMerged(store));
+});
+
+app.get('/api/beauty-outreach/memo-leads', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getBeautyMemoLeads();
+  res.json(Array.isArray(raw) ? raw : []);
+});
+
+app.get('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getBeautyMemoLeads();
+  const list = Array.isArray(raw) ? raw : [];
+  const item = list.find((x) => x && x.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Not found' });
+  res.json(item);
+});
+
+app.post('/api/beauty-outreach/memo-leads', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const shopName = String(req.body?.shopName || '').trim().slice(0, 200);
+  const memo = String(req.body?.memo || '').trim().slice(0, 12000);
+  if (!shopName) return res.status(400).json({ error: '店名（shopName）が必要です' });
+  const raw = await store.getBeautyMemoLeads();
+  const list = [...(Array.isArray(raw) ? raw : [])];
+  const now = new Date().toISOString();
+  const row = {
+    id: `ml-${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`,
+    shopName,
+    memo,
+    createdAt: now,
+    updatedAt: now,
+  };
+  list.unshift(row);
+  await store.setBeautyMemoLeads(list);
+  res.status(201).json(row);
+});
+
+app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getBeautyMemoLeads();
+  const list = [...(Array.isArray(raw) ? raw : [])];
+  const i = list.findIndex((x) => x && x.id === req.params.id);
+  if (i === -1) return res.status(404).json({ error: 'Not found' });
+  if (req.body?.shopName !== undefined) list[i].shopName = String(req.body.shopName || '').trim().slice(0, 200);
+  if (req.body?.memo !== undefined) list[i].memo = String(req.body.memo || '').trim().slice(0, 12000);
+
+  if (req.body?.webStrength !== undefined) {
+    const ws = String(req.body.webStrength).trim();
+    if (!MEMO_WEB_STRENGTH.has(ws)) {
+      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site のいずれかです' });
+    }
+    const memoRow = list[i];
+    const memoText = String(memoRow?.memo || '').trim();
+    const isHpb = memoText.startsWith('[HPB取込]') || String(memoRow?.hpbBody || '').trim();
+    if (!isHpb) {
+      return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
+    }
+    if (ws === 'strong_site') {
+      const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
+      const access =
+        String(memoRow.hpbAccess || '')
+          .trim()
+          .slice(0, 800) || extractHpbAccessFromMemo(memoRow.memo);
+      const snippet = stripHpbCouponTailFromText(
+        String(memoRow.hpbBody || '').trim() || extractHpbSourceFromMemo(memoRow.memo) || memoText,
+      ).slice(0, 11000);
+      list.splice(i, 1);
+      await store.setBeautyMemoLeads(list);
+      const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+      dashboard.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: snippet,
+        }),
+      );
+      await store.setBeautyDashboard(dashboard);
+      return res.json({ ok: true, movedToDashboard: true });
+    }
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
+    memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
+  }
+
+  list[i].updatedAt = new Date().toISOString();
+  await store.setBeautyMemoLeads(list);
+  res.json(list[i]);
+});
+
+app.delete('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getBeautyMemoLeads();
+  const list = Array.isArray(raw) ? raw : [];
+  const next = list.filter((x) => !x || x.id !== req.params.id);
+  if (next.length === list.length) return res.status(404).json({ error: 'Not found' });
+  await store.setBeautyMemoLeads(next);
+  res.status(204).end();
+});
+
+app.patch('/api/beauty-outreach/dashboard/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  const list = t.pool === 'beauty' ? t.beauty : t.main;
+  const err = patchOutreachDashboardRowFields(list[t.idx], req.body || {}, {
+    randomBytes,
+    canonicalizeOutreachPhaseInput,
+    addMonthsIso,
+  });
+  if (err) return res.status(err.status).json({ error: err.error });
+  if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
+  else await store.setDashboard(t.main);
+  res.json(list[t.idx]);
+});
+
+app.delete('/api/beauty-outreach/dashboard/:id', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  const list = t.pool === 'beauty' ? t.beauty : t.main;
+  const next = list.filter((d) => d.id !== req.params.id);
+  if (next.length === list.length) return res.status(404).json({ error: 'Not found' });
+  if (t.pool === 'beauty') await store.setBeautyDashboard(next);
+  else await store.setDashboard(next);
+  res.status(204).end();
+});
+
+app.post('/api/beauty-outreach/dashboard/:id/duplicate', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  const list = t.pool === 'beauty' ? t.beauty : t.main;
+  const src = list[t.idx];
+  const label = String(req.body?.personalizationLabel || '')
+    .trim()
+    .slice(0, 120);
+  const newItem = JSON.parse(JSON.stringify(src));
+  newItem.id = `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  newItem.createdAt = new Date().toISOString();
+  newItem.status = 'pending';
+  newItem.personalizationLabel = label || undefined;
+  newItem.viewCount = 0;
+  newItem.unsubscribeToken = randomBytes(24).toString('hex');
+  newItem.outreachPhase = undefined;
+  newItem.sleepUntil = undefined;
+  newItem.optOutFeedback = undefined;
+  newItem.optedOutAt = undefined;
+  delete newItem.linkedTemplateCustomizationId;
+  list.unshift(newItem);
+  if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
+  else await store.setDashboard(t.main);
+  res.status(201).json(newItem);
+});
+
+app.post('/api/beauty-outreach/dashboard/:id/approve', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  const list = t.pool === 'beauty' ? t.beauty : t.main;
+  const row = list[t.idx];
+  row.status = 'approved';
+  if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
+  if (!row.outreachPhase) row.outreachPhase = 'pre_contact';
+  if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
+  else await store.setDashboard(t.main);
+  res.json(row);
+});
+
+app.post('/api/beauty-outreach/dashboard/:id/reject', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  const list = t.pool === 'beauty' ? t.beauty : t.main;
+  list[t.idx].status = 'rejected';
+  if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
+  else await store.setDashboard(t.main);
+  res.json(list[t.idx]);
+});
+
 app.patch('/api/dashboard/:id', async (req, res) => {
-  const dashboard = await store.getDashboard();
+  const dashboard = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
-  if (req.body.dmBody !== undefined) dashboard[i].dmBody = req.body.dmBody;
-  if (req.body.outreachDmPattern !== undefined) {
-    const p = String(req.body.outreachDmPattern || '').trim();
-    if (/^[1-5]$/.test(p)) dashboard[i].outreachDmPattern = p;
-  }
-  if (req.body.outreachDmCustomFirstLine !== undefined) {
-    dashboard[i].outreachDmCustomFirstLine = String(req.body.outreachDmCustomFirstLine || '')
-      .trim()
-      .slice(0, 500);
-  }
-  if (req.body.status === 'approved') {
-    if (dashboard[i].status !== 'email_sent' && dashboard[i].status !== 'rejected') {
-      return res.status(400).json({ error: '送信済みまたは失注の案件だけ、送信前に戻せます。' });
-    }
-    dashboard[i].status = 'approved';
-    const pBack = canonicalizeOutreachPhaseInput(req.body.outreachPhase);
-    dashboard[i].outreachPhase = pBack && ['pre_contact', 'first_contact'].includes(pBack) ? pBack : 'pre_contact';
-    dashboard[i].replyWaitStartedAt = undefined;
-    dashboard[i].sleepUntil = undefined;
-    if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
-  }
-  if (req.body.status === 'email_sent') {
-    dashboard[i].status = 'email_sent';
-    const ph = dashboard[i].outreachPhase;
-    const bumpToMessageSent =
-      !ph ||
-      ph === 'sent' ||
-      ph === 'pending_send' ||
-      ph === 'pre_contact' ||
-      ph === 'first_contact' ||
-      ph === 'hearing' ||
-      ph === 'no_outreach_channel' ||
-      ph === 'appointment';
-    if (bumpToMessageSent) {
-      dashboard[i].outreachPhase = 'message_sent';
-      dashboard[i].replyWaitStartedAt = undefined;
-    } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !dashboard[i].replyWaitStartedAt) {
-      dashboard[i].replyWaitStartedAt = new Date().toISOString();
-    }
-    if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
-  }
-  if (req.body.content !== undefined) dashboard[i].content = req.body.content;
-  if (req.body.seo !== undefined) dashboard[i].seo = req.body.seo;
-  if (req.body.previewEditCss !== undefined) dashboard[i].previewEditCss = req.body.previewEditCss;
-  if (req.body.contentVariants !== undefined) dashboard[i].contentVariants = req.body.contentVariants;
-  if (req.body.outreachPhase !== undefined) {
-    if (!['approved', 'email_sent'].includes(dashboard[i].status)) {
-      return res.status(400).json({ error: '送信前または送信済みの案件のみフェーズを変更できます。' });
-    }
-    const pRaw = String(req.body.outreachPhase);
-    const p = canonicalizeOutreachPhaseInput(pRaw);
-    if (!p) return res.status(400).json({ error: 'Invalid outreachPhase' });
-    dashboard[i].outreachPhase = p;
-    if (p === 'proposal' || p === 'awaiting_reply') {
-      if (!dashboard[i].replyWaitStartedAt) {
-        dashboard[i].replyWaitStartedAt = new Date().toISOString();
-      }
-    } else {
-      dashboard[i].replyWaitStartedAt = undefined;
-    }
-    if (pRaw === 'sleep') {
-      dashboard[i].sleepUntil = addMonthsIso(new Date(), 3);
-    } else {
-      dashboard[i].sleepUntil = undefined;
-    }
-  }
+  const err = patchOutreachDashboardRowFields(dashboard[i], req.body || {}, {
+    randomBytes,
+    canonicalizeOutreachPhaseInput,
+    addMonthsIso,
+  });
+  if (err) return res.status(err.status).json({ error: err.error });
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
@@ -2279,10 +2496,16 @@ app.post('/api/outreach/opt-out', async (req, res) => {
     const token = String(req.body?.token || '').trim();
     const feedback = String(req.body?.feedback || '').trim().slice(0, 2000);
     if (!token) return res.status(400).json({ error: 'トークンが必要です。' });
-    const dashboard = await store.getDashboard();
-    const idx = dashboard.findIndex((d) => d.unsubscribeToken === token);
-    if (idx === -1) return res.status(404).json({ error: 'リンクが無効か、すでに処理済みです。' });
-    const row = dashboard[idx];
+    const main = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
+    const beauty = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+    let idx = main.findIndex((d) => d.unsubscribeToken === token);
+    let pool = 'main';
+    if (idx < 0) {
+      idx = beauty.findIndex((d) => d.unsubscribeToken === token);
+      pool = 'beauty';
+    }
+    if (idx < 0) return res.status(404).json({ error: 'リンクが無効か、すでに処理済みです。' });
+    const row = pool === 'main' ? main[idx] : beauty[idx];
     if (!['approved', 'email_sent'].includes(row.status)) {
       return res.status(400).json({ error: 'このリンクは現在ご利用いただけません。' });
     }
@@ -2291,7 +2514,8 @@ app.post('/api/outreach/opt-out', async (req, res) => {
     row.sleepUntil = undefined;
     row.optOutFeedback = feedback || undefined;
     row.optedOutAt = new Date().toISOString();
-    await store.setDashboard(dashboard);
+    if (pool === 'main') await store.setDashboard(main);
+    else await store.setBeautyDashboard(beauty);
     res.json({ ok: true });
   } catch (e) {
     console.error('[outreach/opt-out]', e);
@@ -2310,20 +2534,28 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
     if (!ok) return res.status(401).type('text/plain').send('Unauthorized');
   }
   try {
-    const dashboard = await store.getDashboard();
+    const main = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
+    const beauty = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
     let bumped = 0;
-    for (const row of dashboard) {
-      const ph = row.outreachPhase;
-      const inProposalWait = ph === 'proposal' || ph === 'awaiting_reply';
-      if (!inProposalWait || !row.replyWaitStartedAt) continue;
-      const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
-      if (new Date(deadline).getTime() <= Date.now()) {
-        row.outreachPhase = 'message_sent';
-        row.replyWaitStartedAt = undefined;
-        bumped += 1;
+    const bumpList = (arr) => {
+      for (const row of arr) {
+        const ph = row.outreachPhase;
+        const inProposalWait = ph === 'proposal' || ph === 'awaiting_reply';
+        if (!inProposalWait || !row.replyWaitStartedAt) continue;
+        const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
+        if (new Date(deadline).getTime() <= Date.now()) {
+          row.outreachPhase = 'message_sent';
+          row.replyWaitStartedAt = undefined;
+          bumped += 1;
+        }
       }
+    };
+    bumpList(main);
+    bumpList(beauty);
+    if (bumped) {
+      await store.setDashboard(main);
+      await store.setBeautyDashboard(beauty);
     }
-    if (bumped) await store.setDashboard(dashboard);
     res.json({ ok: true, bumped });
   } catch (e) {
     console.error('[outreach/phase-tick]', e);
@@ -2357,9 +2589,9 @@ app.get('/api/booking/availability/:itemId', async (req, res) => {
     if (!bookingBillingEnabled(billing)) {
       return res.status(403).json({ error: '予約システムが有効ではありません。オプション契約後にご利用いただけます。' });
     }
-    const dashboard = await store.getDashboard();
-    const item = dashboard.find((d) => d.id === req.params.itemId);
-    if (!item) return res.status(404).json({ error: 'not found' });
+    const hit = await findDashboardRowInAnyStoreByItemId(req.params.itemId);
+    if (!hit) return res.status(404).json({ error: 'not found' });
+    const item = hit.list[hit.idx];
     const booked = new Set(item.bookingSlots || []);
     const dates = upcomingDateKeys(14);
     const times = getBookingTimeLabels();
@@ -2403,9 +2635,10 @@ app.post('/api/booking/:itemId', async (req, res) => {
     if (isSlotPastJst(dateKey, time)) {
       return res.status(400).json({ error: 'この枠は選択できません。' });
     }
-    const dashboard = await store.getDashboard();
-    const idx = dashboard.findIndex((d) => d.id === req.params.itemId);
-    if (idx === -1) return res.status(404).json({ error: 'not found' });
+    const hit = await findDashboardRowInAnyStoreByItemId(req.params.itemId);
+    if (!hit) return res.status(404).json({ error: 'not found' });
+    const dashboard = hit.list;
+    const idx = hit.idx;
     const item = dashboard[idx];
     const sk = slotKey(dateKey, time);
     const slots = [...(item.bookingSlots || [])];
@@ -2413,7 +2646,7 @@ app.post('/api/booking/:itemId', async (req, res) => {
     slots.push(sk);
     item.bookingSlots = slots;
     dashboard[idx] = item;
-    await store.setDashboard(dashboard);
+    await persistDashboardPoolHit(hit);
 
     const site = String(item.content?.siteName || item.researched?.name || 'Web予約').trim();
     const customerEmail = String(body.customerEmail || '').trim();
@@ -2467,12 +2700,11 @@ ${calUrl}
 /** 共有用プレビュー: 案件IDでHTMLを返す。スマホ等別端末で同じURLを開ける。Stripe 有効時はメニューに「購入」を追加。閲覧時に viewCount を加算。 */
 app.get('/api/preview/:id', async (req, res) => {
   try {
-    const dashboard = await store.getDashboard();
-    const idx = dashboard.findIndex((d) => d.id === req.params.id);
-    if (idx === -1) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
-    const item = dashboard[idx];
+    const hit = await findDashboardRowInAnyStoreByItemId(req.params.id);
+    if (!hit) return res.status(404).setHeader('Content-Type', 'text/plain; charset=utf-8').send('Not found');
+    const item = hit.list[hit.idx];
     item.viewCount = (item.viewCount || 0) + 1;
-    await store.setDashboard(dashboard);
+    await persistDashboardPoolHit(hit);
     const options = await store.getOptions();
     const billing = await store.getBilling();
     const origin = (req.headers.origin || (req.protocol + '://' + req.get('host')) || '').replace(/\/$/, '');

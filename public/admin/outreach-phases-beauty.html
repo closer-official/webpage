@@ -918,12 +918,13 @@
   <body>
     <nav class="outreach-sticky-nav" aria-label="ページ内ナビ">
       <a class="back" href="../">← 運営トップ</a>
-      <a href="./outreach-phases-beauty.html?v=7phase" class="btn primary" style="display: inline-flex">美容室フェーズ</a>
-      <a href="./outreach-memo-leads.html?v=memo1" class="btn" style="display: inline-flex">メモリード一覧</a>
-      <a href="./template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト編集</a>
+      <a href="./outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">飲食・その他フェーズ</a>
+      <a href="./outreach-memo-leads-beauty.html?v=memo1" class="btn primary" style="display: inline-flex">メモリード一覧（美容）</a>
+      <a href="./template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト（cafe）</a>
+      <a href="./beauty-standalone-template/index.html" class="btn" style="display: inline-flex">美容室LP編集</a>
     </nav>
     <div class="app-head">
-      <h1>送付・フェーズ管理</h1>
+      <h1>送付・フェーズ管理（美容室）</h1>
       <p class="sub">
         案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
@@ -997,8 +998,8 @@
     </dialog>
     <script>
       (function () {
-        var STORAGE_SENDER_NAME = 'closer_outreach_sender_name';
-        var STORAGE_PERSONAL_EMAIL = 'closer_outreach_personal_email';
+        var STORAGE_SENDER_NAME = 'closer_outreach_sender_name_beauty';
+        var STORAGE_PERSONAL_EMAIL = 'closer_outreach_personal_email_beauty';
 
         function getSavedSenderName() {
           try {
@@ -1221,7 +1222,7 @@
         }
 
         function patchOutreachDmFields(itemId, payload) {
-          return apiJson('/api/dashboard/' + encodeURIComponent(itemId), {
+          return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(itemId), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -1382,12 +1383,12 @@
         var cachedMemoLeads = [];
         /** 店舗ドラフト id → baseTemplateId（美容室独立のリンク先判定用） */
         var cachedCustomizationBaseById = {};
-        var OP_SEND_DRAFT_KEY = 'closer_outreach_send_draft_by_shop_v1';
+        var OP_SEND_DRAFT_KEY = 'closer_outreach_send_draft_by_shop_v1_beauty';
         var pendingOutreachFocusShopId = null;
         var pendingOutreachOpenChannel = null;
         var outreachCopyMsgTimer = null;
         var liveSearchQuery = '';
-        var OUTREACH_VIEW_STORAGE_KEY = 'closer_outreach_view_mode';
+        var OUTREACH_VIEW_STORAGE_KEY = 'closer_outreach_view_mode_beauty';
         var outreachViewMode = 'card';
         try {
           var _ovm = localStorage.getItem(OUTREACH_VIEW_STORAGE_KEY);
@@ -1965,7 +1966,7 @@
         }
 
         function deleteMemoLeadById(memoId) {
-          return fetch('/api/memo-leads/' + encodeURIComponent(memoId), {
+          return fetch('/api/beauty-outreach/memo-leads/' + encodeURIComponent(memoId), {
             method: 'DELETE',
             credentials: 'include',
           }).then(function (r) {
@@ -1994,7 +1995,7 @@
         }
 
         function deleteDashboardItemByIdPromise(itemId) {
-          return fetch('/api/dashboard/' + encodeURIComponent(itemId), {
+          return fetch('/api/beauty-outreach/dashboard/' + encodeURIComponent(itemId), {
             method: 'DELETE',
             credentials: 'include',
           }).then(function (r) {
@@ -2514,17 +2515,17 @@
           }
 
           function patch(body) {
-            return apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
+            return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id), {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(body),
             });
           }
           function postApprove() {
-            return apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' });
+            return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id) + '/approve', { method: 'POST' });
           }
           function postReject() {
-            return apiJson('/api/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' });
+            return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id) + '/reject', { method: 'POST' });
           }
 
           var st = item.status;
@@ -2686,10 +2687,28 @@
           return u;
         }
 
-        function templateDraftEditUrl(customizationId) {
+        function templateDraftEditUrl(customizationId, item) {
           var cid = String(customizationId || '').trim();
           if (!cid) return '';
+          if (shouldOpenBeautyStandaloneEditor(item, cid)) {
+            return './beauty-standalone-template/index.html?id=' + encodeURIComponent(cid);
+          }
           return './template-worker.html?id=' + encodeURIComponent(cid);
+        }
+
+        /**
+         * 表の行色（row-num--beauty）または美容系ドラフト base と一致するとき、独立版 LP 編集へ誘導する。
+         */
+        function shouldOpenBeautyStandaloneEditor(item, customizationId) {
+          var cid = String(customizationId || '').trim();
+          if (!cid || !item) return false;
+          var base =
+            String((item && item.linkedTemplateBaseId) || '').trim() ||
+            String((cid && cachedCustomizationBaseById[cid]) || '').trim();
+          if (base === 'beauty_standalone') return true;
+          if (base === 'beauty_salon_mellow' || base === 'beauty_salon_hpb') return true;
+          if (excelDashboardRowNumClass(item) === 'row-num--beauty') return true;
+          return false;
         }
 
         function renderInstagramFooterBlock(container, item) {
@@ -2800,10 +2819,12 @@
           var er = el('div', { class: 'url-row', style: 'margin-top:10px' });
           var ed = document.createElement('a');
           ed.className = 'btn small primary';
-          ed.href = templateDraftEditUrl(cid);
+          ed.href = templateDraftEditUrl(cid, item);
           ed.target = '_blank';
           ed.rel = 'noopener noreferrer';
-          ed.textContent = '店舗ドラフトを再編集';
+          ed.textContent = shouldOpenBeautyStandaloneEditor(item, cid)
+            ? '美容室LPを編集（独立）'
+            : '店舗ドラフトを再編集';
           er.appendChild(ed);
           container.appendChild(er);
         }
@@ -2924,13 +2945,16 @@
           var titleEl = document.createElement('h3');
           titleEl.className = 'phase-card__title';
           var linkCid = String(item.linkedTemplateCustomizationId || '').trim();
-          var twEdit = templateDraftEditUrl(linkCid);
+          var twEdit = templateDraftEditUrl(linkCid, item);
           if (twEdit) {
             var na = document.createElement('a');
             na.href = twEdit;
             na.target = '_blank';
             na.rel = 'noopener noreferrer';
-            na.setAttribute('title', '店舗ドラフトを編集（別タブ）');
+            na.setAttribute(
+              'title',
+              shouldOpenBeautyStandaloneEditor(item, linkCid) ? '美容室LP（独立）を編集（別タブ）' : '店舗ドラフトを編集（別タブ）',
+            );
             na.textContent = name;
             titleEl.appendChild(na);
           } else {
@@ -3227,6 +3251,10 @@
               cardBtn.onclick = function (e) {
                 e.preventDefault();
                 var linkCid = String(item.linkedTemplateCustomizationId || '').trim();
+                if (shouldOpenBeautyStandaloneEditor(item, linkCid) && linkCid) {
+                  window.open(templateDraftEditUrl(linkCid, item), '_blank', 'noopener,noreferrer');
+                  return;
+                }
                 navigateToShopCardFromGrid(item.id);
               };
               nameStack.appendChild(cardBtn);
@@ -3254,7 +3282,7 @@
               var memo = row.memo;
               var mname = String(memo.shopName || '').trim() || '（無題）';
               nameStack.appendChild(el('span', { class: 'excel-shop-title', text: mname }));
-              cardBtn.href = './template-worker.html?memoLeadId=' + encodeURIComponent(memo.id) + '&v=memo1';
+              cardBtn.href = './outreach-memo-leads-beauty.html?memoLeadId=' + encodeURIComponent(memo.id) + '&v=memo1';
               cardBtn.target = '_blank';
               cardBtn.rel = 'noopener noreferrer';
               cardBtn.setAttribute('aria-label', '店舗ドラフト（メモ流し込み）を別タブで開く');
@@ -3479,22 +3507,34 @@
         function load() {
           showErr('');
           Promise.all([
-            fetch('/api/dashboard', { credentials: 'include' }).then(function (r) {
+            fetch('/api/beauty-outreach/dashboard', { credentials: 'include' }).then(function (r) {
               return r.json().then(function (j) {
                 return { ok: r.ok, j: j, status: r.status };
               });
             }),
-            fetch('/api/memo-leads', { credentials: 'include' }).then(function (r) {
+            fetch('/api/beauty-outreach/memo-leads', { credentials: 'include' }).then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, j: j };
+              });
+            }),
+            fetch('/api/template-customizations', { credentials: 'include' }).then(function (r) {
               return r.json().then(function (j) {
                 return { ok: r.ok, j: j };
               });
             }),
           ])
-            .then(function (pair) {
-              var dx = pair[0];
-              var mx = pair[1];
+            .then(function (triple) {
+              var dx = triple[0];
+              var mx = triple[1];
+              var tx = triple[2];
               if (!dx.ok) {
                 throw new Error((dx.j && dx.j.error) || '一覧の取得に失敗しました');
+              }
+              cachedCustomizationBaseById = {};
+              if (tx.ok && Array.isArray(tx.j)) {
+                tx.j.forEach(function (c) {
+                  if (c && c.id) cachedCustomizationBaseById[c.id] = String(c.baseTemplateId || '').trim();
+                });
               }
               cachedDashboardItems = Array.isArray(dx.j) ? dx.j : [];
               if (mx.ok && Array.isArray(mx.j)) {

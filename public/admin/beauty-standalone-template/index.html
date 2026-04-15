@@ -17,7 +17,7 @@
       <div class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</div>
     </div>
     <div class="header-actions">
-      <a class="btn btn-ghost-admin" href="/admin/outreach-phases.html?v=7phase">送付・フェーズ管理</a>
+      <a class="btn btn-ghost-admin" href="/admin/outreach-phases-beauty.html?v=7phase">送付・フェーズ管理（美容）</a>
       <a class="btn btn-ghost-admin" href="/admin/template-worker.html">店舗ドラフト編集（cafe）</a>
       <button class="btn btn-primary-admin" id="btn-save-server" type="button">サーバーに保存</button>
       <button class="btn btn-ghost-admin" id="btn-json" type="button">JSON を見る</button>
@@ -185,10 +185,8 @@ async function loadDraftFromServer(id) {
     id +
     (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
     '。共有用プレビュー: ' +
-    location.origin +
-    '/api/template-preview/' +
-    encodeURIComponent(id) +
-    ' ／ 送付・フェーズは「送付・フェーズ管理」から。';
+    previewPublicUrl(id) +
+    ' ／ 送付・フェーズは「送付・フェーズ管理（美容）」（/admin/outreach-phases-beauty.html）から。';
 }
 
 initEditor(previewEl);
@@ -306,7 +304,7 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
         (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
         ' ／ 共有プレビューURL: ' +
         pv +
-        ' ／ 送付・フェーズ: 上部リンク（/admin/outreach-phases.html）から。';
+        ' ／ 送付・フェーズ: 上部「送付・フェーズ管理（美容）」（/admin/outreach-phases-beauty.html）から。';
       return;
     }
     if (!window.confirm('新しい店舗ドラフトとしてサーバーに作成しますか？（base: beauty_standalone）')) return;
@@ -331,7 +329,7 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
         newId +
         '（このタブの URL に id が付きました。ブックマーク推奨） ／ 共有プレビュー: ' +
         pv +
-        ' ／ 送付・フェーズ一覧には自動で1件追加されます（上部「送付・フェーズ管理」で確認）。';
+        ' ／ 送付・フェーズ一覧（美容専用）に自動で1件追加されます（上部「送付・フェーズ管理（美容）」で確認）。';
     }
     setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
   } catch (e) {

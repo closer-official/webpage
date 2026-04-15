@@ -10,6 +10,8 @@ const DATA_DIR = path.join(__dirname, 'json');
 const FILES = {
   queue: 'queue.json',
   dashboard: 'dashboard.json',
+  beautyDashboard: 'beautyDashboard.json',
+  beautyMemoLeads: 'beautyMemoLeads.json',
   options: 'options.json',
   billing: 'billing.json',
   customerIntake: 'customerIntake.json',
@@ -48,6 +50,8 @@ function getDefault(name) {
   if (
     name === 'queue' ||
     name === 'dashboard' ||
+    name === 'beautyDashboard' ||
+    name === 'beautyMemoLeads' ||
     name === 'memoLeads' ||
     name === 'referenceSites' ||
     name === 'customerIntake' ||
@@ -68,6 +72,11 @@ const fileStore = {
   setQueue: (arr) => { write('queue', arr); return Promise.resolve(); },
   getDashboard: () => Promise.resolve(read('dashboard')),
   setDashboard: (arr) => { write('dashboard', arr); return Promise.resolve(); },
+  getBeautyDashboard: () => Promise.resolve(read('beautyDashboard')),
+  setBeautyDashboard: (arr) => {
+    write('beautyDashboard', arr);
+    return Promise.resolve();
+  },
   getOptions: () => Promise.resolve(read('options')),
   setOptions: async (o) => { const current = read('options'); write('options', { ...current, ...o }); return Promise.resolve(); },
   getBilling: () => Promise.resolve(read('billing')),
@@ -152,6 +161,11 @@ const fileStore = {
   getMemoLeads: () => Promise.resolve(read('memoLeads')),
   setMemoLeads: (arr) => {
     write('memoLeads', arr);
+    return Promise.resolve();
+  },
+  getBeautyMemoLeads: () => Promise.resolve(read('beautyMemoLeads')),
+  setBeautyMemoLeads: (arr) => {
+    write('beautyMemoLeads', arr);
     return Promise.resolve();
   },
   getGalleryDraftBuiltins: () => Promise.resolve(read('galleryDraftBuiltins')),

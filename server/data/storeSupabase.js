@@ -7,6 +7,8 @@ const KEYS = {
   lpAnalytics: 'lpAnalytics',
   lpCmsAccounts: 'lpCmsAccounts',
   dashboard: 'dashboard',
+  beautyDashboard: 'beautyDashboard',
+  beautyMemoLeads: 'beautyMemoLeads',
   options: 'options',
   billing: 'billing',
   customerIntake: 'customerIntake',
@@ -128,6 +130,8 @@ export const storeSupabase = {
   },
   getDashboard: () => get(KEYS.dashboard),
   setDashboard: (arr) => set(KEYS.dashboard, arr),
+  getBeautyDashboard: () => get(KEYS.beautyDashboard),
+  setBeautyDashboard: (arr) => set(KEYS.beautyDashboard, arr),
   getOptions: () => get(KEYS.options),
   setOptions: async (o) => {
     const current = await get(KEYS.options);
@@ -168,6 +172,8 @@ export const storeSupabase = {
   },
   getMemoLeads: () => get(KEYS.memoLeads),
   setMemoLeads: (arr) => set(KEYS.memoLeads, arr),
+  getBeautyMemoLeads: () => get(KEYS.beautyMemoLeads),
+  setBeautyMemoLeads: (arr) => set(KEYS.beautyMemoLeads, arr),
   getGalleryDraftBuiltins: async () => {
     const data = await get(KEYS.galleryDraftBuiltins);
     const d = data && typeof data === 'object' ? data : {};
