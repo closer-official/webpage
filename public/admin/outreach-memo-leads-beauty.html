@@ -394,8 +394,7 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        <strong>サイトがない・弱い店</strong>はメモリードに保存し、<strong>公式サイトが強い店</strong>は送付管理に
-        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。<strong>「選択した行だけ反映」</strong>を押すとメモが保存され、<strong>送付・フェーズ管理（美容）</strong>の一覧にも<strong>「作成前」</strong>の行として現れます（そこでフェーズや送信文を編集できます）。<strong>作成前</strong>以外のフェーズに変えると、このメモリード一覧からは消えます。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
+        ホットペッパー風の取込では、<strong>店名が取れた行はすべてメモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>送付・フェーズ管理（美容）</strong>の一覧表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -411,9 +410,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。            <strong>店名を解析</strong>のあと、各行で
-            <strong>ウェブの有無・強弱</strong>を選びます（<strong>最初はどれも未選択</strong>。済んだ行だけ選んで反映すると、<strong>未選択の行は表に残る</strong>ので進捗が分かります）。            <strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>のうえ、<strong>送付・フェーズ管理（美容）</strong>にも<strong>作成前</strong>として載ります。<strong>ウェブあり（強）</strong>だけ<strong>メモリードには載せず</strong>送付・フェーズ管理に
-            <strong>SNSなし・ウェブページ制作不可</strong>で直接載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。フェーズ画面で<strong>作成前</strong>以外にすると、この一覧からは消えます。            <strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>送付・フェーズ管理（美容）</strong>の表に載せるかどうかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -427,9 +424,9 @@
               type="button"
               class="btn-sm primary"
               id="btn-hpb-submit"
-              title="ラジオで選んだ行だけ登録されます。未選択の行は表に残ります"
+              title="店名が入っている行はすべてメモリードに登録されます（ウェブ強度未選択はウェブなし）"
             >
-              選択した行だけ反映
+              プレビューの行をすべて反映
             </button>
           </div>
         </div>
@@ -449,7 +446,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          更新日の新しい順。ホットペッパー取込行は<strong>WEBの強さ</strong>列のプルダウンで、登録後も<strong>なし／弱／強</strong>を切り替えられます（強にすると送付管理へ移動してメモから消えます）。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
+          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
         </p>
         <div id="list-wrap">読み込み中…</div>
       </section>
@@ -772,7 +769,7 @@
             var ws = document.createElement('div');
             ws.className = 'web-str';
             var nm = 'ws-' + idx;
-            [['no_site', 'ウェブなし（フォロー対象）'], ['weak_site', 'ウェブあり・弱い（フォロー対象）'], ['strong_site', 'ウェブあり・強い（制作不可→送付管理へ）']].forEach(
+            [['no_site', 'ウェブなし（フォロー対象）'], ['weak_site', 'ウェブあり・弱い（フォロー対象）'], ['strong_site', 'ウェブあり・強い']].forEach(
               function (pair) {
                 var lab = document.createElement('label');
                 var rd = document.createElement('input');
@@ -812,9 +809,10 @@
 
         function currentMemoWebSelectValue(r) {
           var ws = r && r.webStrength;
-          if (ws === 'weak_site' || ws === 'no_site') return ws;
+          if (ws === 'weak_site' || ws === 'no_site' || ws === 'strong_site') return ws;
           var m = String((r && r.memo) || '');
           if (m.indexOf('ウェブあり（弱）') >= 0) return 'weak_site';
+          if (m.indexOf('ウェブあり（強）') >= 0) return 'strong_site';
           return 'no_site';
         }
 
@@ -826,12 +824,48 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th>店名</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th>店名</th><th>送付一覧に表示</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
             var nameTd = document.createElement('td');
             nameTd.textContent = r.shopName || '（無題）';
+            var boardTd = document.createElement('td');
+            var boardLab = document.createElement('label');
+            boardLab.style.cssText = 'display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;';
+            var boardCb = document.createElement('input');
+            boardCb.type = 'checkbox';
+            boardCb.checked = !!(r && r.onOutreachBoard);
+            boardCb.setAttribute('aria-label', '送付・フェーズ管理の一覧表に表示する');
+            boardCb.title = 'オンにすると送付・フェーズ管理（美容）の一覧に「送信前」として出ます';
+            boardCb.addEventListener('change', function () {
+              var want = boardCb.checked;
+              boardCb.disabled = true;
+              credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ onOutreachBoard: want }),
+              })
+                .then(function (res) {
+                  return res.json().then(function (j) {
+                    if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                    return j;
+                  });
+                })
+                .then(function () {
+                  boardCb.disabled = false;
+                  showOk(want ? '送付一覧に表示するようにしました' : '送付一覧から外しました');
+                  return loadList();
+                })
+                .catch(function (e) {
+                  boardCb.disabled = false;
+                  boardCb.checked = !want;
+                  showErr(e.message || String(e));
+                });
+            });
+            boardLab.appendChild(boardCb);
+            boardLab.appendChild(document.createTextNode('表示'));
+            boardTd.appendChild(boardLab);
             var webTd = document.createElement('td');
             if (isHpbMemoRow(r)) {
               var sel = document.createElement('select');
@@ -840,7 +874,7 @@
               [
                 ['no_site', 'ウェブなし'],
                 ['weak_site', 'ウェブあり（弱）'],
-                ['strong_site', 'ウェブあり（強→送付管理）'],
+                ['strong_site', 'ウェブあり（強）'],
               ].forEach(function (opt) {
                 var o = document.createElement('option');
                 o.value = opt[0];
@@ -863,13 +897,9 @@
                       return j;
                     });
                   })
-                  .then(function (j) {
+                  .then(function () {
                     sel.disabled = false;
-                    if (j && j.movedToDashboard) {
-                      showOk('送付・フェーズ管理へ移しました（メモリードからは削除されています）');
-                    } else {
-                      showOk('WEBの強さを保存しました');
-                    }
+                    showOk('WEBの強さを保存しました');
                     return loadList();
                   })
                   .catch(function (e) {
@@ -947,6 +977,7 @@
             actTd.appendChild(document.createTextNode(' '));
             actTd.appendChild(del);
             tr.appendChild(nameTd);
+            tr.appendChild(boardTd);
             tr.appendChild(webTd);
             tr.appendChild(memoTd);
             tr.appendChild(dateTd);
@@ -984,7 +1015,7 @@
           if (hpbParsedRows.length) {
             showOk(
               hpbParsedRows.length +
-                '件を検出しました。各行でウェブなし／弱／強のいずれかを選んでから「選択した行だけ反映」を押してください（未選択のまま残せます）。',
+                '件を検出しました。必要なら各行でウェブ強度を選び、「プレビューの行をすべて反映」でメモリードに登録できます（未選択はウェブなしとして登録されます）。',
             );
           } else {
             showErr('店名を検出できませんでした。コピー範囲に「店名(読み)」の行と「ブックマークする」が含まれるか確認してください。');
@@ -1006,13 +1037,13 @@
             if (!tr) return;
             var accEl = tr.querySelector('.hpb-access');
             var picked = tr.querySelector('.web-str input[type="radio"]:checked');
-            if (!picked) return;
             var shopName = inp.value.trim();
             if (!shopName) return;
+            var ws = picked && picked.value ? picked.value : 'no_site';
             entries.push({
               shopName: shopName,
               access: accEl ? accEl.value.trim() : '',
-              webStrength: picked.value,
+              webStrength: ws,
               sourceMemo: (hpbParsedRows[idx] && hpbParsedRows[idx].sourceMemo) || '',
             });
             pickedIndices.push(idx);
@@ -1022,7 +1053,7 @@
             return;
           }
           if (!entries.length) {
-            showErr('反映する行で「ウェブなし」「ウェブあり・弱い」「ウェブあり・強い」のいずれかを選んでください（未選択の行は登録されず表に残ります）。');
+            showErr('店名が入っている行がありません。プレビューで店名を確認するか、解析をやり直してください。');
             return;
           }
           showErr('');
@@ -1051,12 +1082,10 @@
               }
               var rest = hpbParsedRows.length;
               showOk(
-                '反映しました（メモリード +' +
+                'メモリードに ' +
                   (j.memosAdded || 0) +
-                  '件／送付・フェーズ管理（強ウェブのみ）+' +
-                  (j.dashboardAdded || 0) +
-                  '件）。ウェブなし・弱は「送付・フェーズ管理（美容）」に作成前の行でも出ます。' +
-                  (rest ? ' プレビューに未選択の行が ' + rest + ' 件残っています。' : ''),
+                  ' 件登録しました。送付・フェーズ管理の表に出すには、保存済み一覧で「送付一覧に表示」をオンにしてください。' +
+                  (rest ? ' プレビューに残り ' + rest + ' 件あります。' : ''),
               );
               return loadList();
             })

@@ -1980,6 +1980,7 @@ const MEMO_WEB_STRENGTH = new Set(['no_site', 'weak_site', 'strong_site']);
 
 function hpbMemoLabelForStrength(ws) {
   if (ws === 'weak_site') return '[HPB取込] ウェブあり（弱）';
+  if (ws === 'strong_site') return '[HPB取込] ウェブあり（強）';
   return '[HPB取込] ウェブなし';
 }
 
@@ -2151,52 +2152,38 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
   const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
   const rawMemo = await store.getBeautyMemoLeads();
   const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
-  const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
   const now = new Date().toISOString();
   let memosAdded = 0;
-  let dashboardAdded = 0;
   for (let ei = 0; ei < entries.length; ei++) {
     const raw = entries[ei];
     const shopName = String(raw?.shopName || '').trim().slice(0, 200);
     if (!shopName) continue;
-    const webStrength = String(raw?.webStrength || '').trim();
-    if (!STRENGTHS.has(webStrength)) continue;
+    const rawWs = String(raw?.webStrength || '').trim();
+    const webStrength = STRENGTHS.has(rawWs) ? rawWs : 'no_site';
     const access = String(raw?.access || '').trim().slice(0, 800);
     const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
-    if (webStrength === 'strong_site') {
-      dashboard.unshift(
-        buildStrongWebSalonDashboardRow({
-          shopName,
-          accessText: access,
-          sourceSnippet: sourceMemo,
-        }),
-      );
-      dashboardAdded += 1;
-      continue;
-    }
-    const label = webStrength === 'weak_site' ? 'ウェブあり（弱）' : 'ウェブなし';
-    const memo = ['[HPB取込] ' + label, access ? 'アクセス: ' + access : '', '', sourceMemo]
+    const memoText = [hpbMemoLabelForStrength(webStrength), access ? 'アクセス: ' + access : '', '', sourceMemo]
       .filter(Boolean)
       .join('\n')
       .slice(0, 12000);
     memoList.unshift({
       id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
       shopName,
-      memo,
-      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
+      memo: memoText,
+      webStrength,
       hpbAccess: access,
       hpbBody: sourceMemo.slice(0, 11000),
+      onOutreachBoard: false,
       createdAt: now,
       updatedAt: now,
     });
     memosAdded += 1;
   }
-  if (memosAdded === 0 && dashboardAdded === 0) {
-    return res.status(400).json({ error: '有効な行がありません（店名とウェブ強度を確認してください）' });
+  if (memosAdded === 0) {
+    return res.status(400).json({ error: '有効な行がありません（店名を確認してください）' });
   }
   await store.setBeautyMemoLeads(memoList);
-  await store.setBeautyDashboard(dashboard);
-  res.json({ ok: true, memosAdded, dashboardAdded });
+  res.json({ ok: true, memosAdded, dashboardAdded: 0 });
 });
 
 app.patch('/api/memo-leads/:id', async (req, res) => {
@@ -2292,6 +2279,7 @@ app.post('/api/beauty-outreach/memo-leads', async (req, res) => {
     id: `ml-${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`,
     shopName,
     memo,
+    onOutreachBoard: false,
     createdAt: now,
     updatedAt: now,
   };
@@ -2308,6 +2296,9 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body?.shopName !== undefined) list[i].shopName = String(req.body.shopName || '').trim().slice(0, 200);
   if (req.body?.memo !== undefined) list[i].memo = String(req.body.memo || '').trim().slice(0, 12000);
+  if (req.body?.onOutreachBoard !== undefined) {
+    list[i].onOutreachBoard = !!(req.body.onOutreachBoard === true || req.body.onOutreachBoard === 'true');
+  }
 
   if (req.body?.webStrength !== undefined) {
     const ws = String(req.body.webStrength).trim();
@@ -2320,29 +2311,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
     if (!isHpb) {
       return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
     }
-    if (ws === 'strong_site') {
-      const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
-      const access =
-        String(memoRow.hpbAccess || '')
-          .trim()
-          .slice(0, 800) || extractHpbAccessFromMemo(memoRow.memo);
-      const snippet = stripHpbCouponTailFromText(
-        String(memoRow.hpbBody || '').trim() || extractHpbSourceFromMemo(memoRow.memo) || memoText,
-      ).slice(0, 11000);
-      list.splice(i, 1);
-      await store.setBeautyMemoLeads(list);
-      const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
-      dashboard.unshift(
-        buildStrongWebSalonDashboardRow({
-          shopName,
-          accessText: access,
-          sourceSnippet: snippet,
-        }),
-      );
-      await store.setBeautyDashboard(dashboard);
-      return res.json({ ok: true, movedToDashboard: true });
-    }
-    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
+    memoRow.webStrength = ws;
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 
@@ -2361,7 +2330,7 @@ app.delete('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   res.status(204).end();
 });
 
-/** メモリード1件を美容ダッシュボードの正式案件にし、メモ一覧から外す（作成前→7フェーズのいずれか） */
+/** メモリード1件を美容ダッシュボードの正式案件にし、メモ一覧から外す（送付一覧表示オンかつ7フェーズのいずれかへ） */
 app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = String(req.params.id || '').trim();
@@ -2383,6 +2352,9 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
   const idx = list.findIndex((x) => x && x.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const memo = list[idx];
+  if (!memo.onOutreachBoard) {
+    return res.status(400).json({ error: 'メモ一覧で「送付一覧に表示」をオンにしてからフェーズを変更してください' });
+  }
   const shopName = String(memo.shopName || '').trim().slice(0, 200);
   if (!shopName) {
     return res.status(400).json({ error: '店名が空のメモは昇格できません' });
