@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="beauty-admin-outreach">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,14 +9,14 @@
     <title>送付・フェーズ管理 | Closer</title>
     <style>
       :root {
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-        background: #080f1a;
-        color: #e8edf5;
+        font-family: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+        background: #f5f0e8;
+        color: #1c1a17;
         line-height: 1.55;
-        --phase-line: #2a3b52;
-        --phase-glow: rgba(56, 189, 248, 0.14);
-        --phase-surface: #0f172a;
-        --phase-surface2: rgba(15, 23, 42, 0.92);
+        --phase-line: rgba(28, 26, 23, 0.14);
+        --phase-glow: rgba(184, 151, 90, 0.16);
+        --phase-surface: #ffffff;
+        --phase-surface2: #ede7d8;
       }
       body {
         margin: 0;
@@ -33,7 +33,7 @@
         margin: 0 0 0.35rem;
       }
       .sub {
-        color: #8b9cb3;
+        color: #8e8880;
         font-size: 0.86rem;
         margin: 0 0 1rem;
       }
@@ -54,20 +54,20 @@
         font-size: 0.82rem;
         font-weight: 600;
         border-radius: 8px;
-        border: 1px solid #3d5675;
-        background: #1c2940;
-        color: #e0f2fe;
+        border: 1px solid rgba(28, 26, 23, 0.18);
+        background: #ede7d8;
+        color: #1c1a17;
         cursor: pointer;
         text-decoration: none;
       }
       a.back {
-        border-color: #2a3b52;
-        background: #121a2e;
+        border-color: rgba(28, 26, 23, 0.14);
+        background: #f5f0e8;
       }
       .btn:hover,
       a.back:hover {
-        border-color: #38bdf8;
-        color: #fff;
+        border-color: #b8975a;
+        color: #1c1a17;
       }
       .btn.small {
         min-height: 32px;
@@ -75,8 +75,13 @@
         font-size: 0.78rem;
       }
       .btn.primary {
-        background: #0c4a6e;
-        border-color: #22d3ee;
+        background: #b8975a;
+        border-color: #9a7d48;
+        color: #1c1a17;
+      }
+      .btn.primary:hover {
+        background: #d4b47a;
+        border-color: #b8975a;
       }
       .btn.danger {
         border-color: #7f1d1d;
@@ -91,16 +96,16 @@
       .panel {
         max-width: 1100px;
         margin: 0 auto 1.25rem;
-        background: linear-gradient(180deg, #141d30 0%, #121a2e 100%);
+        background: linear-gradient(180deg, #ffffff 0%, #ede7d8 100%);
         border: 1px solid var(--phase-line);
         border-radius: 14px;
         padding: 1rem 1.15rem 1.15rem;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 12px 40px rgba(28, 26, 23, 0.08);
       }
       .panel h2 {
         font-size: 0.95rem;
         margin: 0 0 0.75rem;
-        color: #a5d8ff;
+        color: #b8975a;
         letter-spacing: 0.02em;
         padding-bottom: 0.5rem;
         border-bottom: 1px solid var(--phase-line);
@@ -109,9 +114,9 @@
       .phase-card {
         margin: 0 0 14px;
         border-radius: 12px;
-        border: 1px solid rgba(56, 189, 248, 0.18);
-        background: linear-gradient(155deg, rgba(28, 41, 64, 0.9) 0%, rgba(12, 18, 32, 0.95) 55%, rgba(8, 15, 26, 0.98) 100%);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(184, 151, 90, 0.28);
+        background: linear-gradient(155deg, #ffffff 0%, #ede7d8 55%, #f0ebe1 100%);
+        box-shadow: 0 4px 20px rgba(28, 26, 23, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.65);
         overflow: hidden;
       }
       .phase-card:last-child {
@@ -123,8 +128,8 @@
         align-items: center;
         gap: 10px 14px;
         padding: 12px 14px 12px 16px;
-        background: rgba(6, 12, 24, 0.55);
-        border-bottom: 1px solid var(--phase-line);
+        background: #1c1a17;
+        border-bottom: 1px solid rgba(184, 151, 90, 0.35);
       }
       .phase-card__title {
         margin: 0;
@@ -135,14 +140,14 @@
         line-height: 1.35;
       }
       .phase-card__title a {
-        color: #e0f2fe;
+        color: #f5f0e8;
         text-decoration: underline;
-        text-decoration-color: rgba(125, 211, 252, 0.45);
+        text-decoration-color: rgba(212, 180, 122, 0.55);
         text-underline-offset: 3px;
       }
       .phase-card__title a:hover {
-        color: #7dd3fc;
-        text-decoration-color: #7dd3fc;
+        color: #d4b47a;
+        text-decoration-color: #d4b47a;
       }
       .op-send-block {
         margin-top: 12px;
@@ -153,7 +158,7 @@
         display: block;
         margin: 0 0 6px;
         font-size: 0.78rem;
-        color: #8b9cb3;
+        color: #8e8880;
       }
       textarea.op-send-msg {
         width: 100%;
@@ -163,9 +168,9 @@
         font-size: 0.82rem;
         line-height: 1.45;
         border-radius: 8px;
-        border: 1px solid #3d5675;
-        background: #0c1222;
-        color: #e8edf5;
+        border: 1px solid rgba(28, 26, 23, 0.18);
+        background: #fff;
+        color: #1c1a17;
         resize: vertical;
       }
       .op-sns-row {
@@ -182,7 +187,7 @@
         flex: 1 1 100%;
         margin: 4px 0 0;
         font-size: 0.72rem;
-        color: #6b7c92;
+        color: #8e8880;
         line-height: 1.4;
       }
       .excel-sheet textarea.op-send-msg--compact {
@@ -293,7 +298,7 @@
         margin: 0 0 4px;
       }
       .muted {
-        color: #8b9cb3;
+        color: #8e8880;
         font-size: 0.8rem;
         margin: 0;
       }
@@ -304,9 +309,9 @@
         box-sizing: border-box;
         padding: 8px 10px;
         border-radius: 8px;
-        border: 1px solid #2a3b52;
-        background: #0f172a;
-        color: #e8edf5;
+        border: 1px solid rgba(28, 26, 23, 0.14);
+        background: #ffffff;
+        color: #1c1a17;
         font-size: 0.82rem;
       }
       /* 7フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
@@ -390,19 +395,20 @@
         font-size: 0.72rem;
         padding: 2px 8px;
         border-radius: 6px;
-        background: #1e293b;
-        color: #94a3b8;
+        background: #ede7d8;
+        color: #3d3930;
+        border: 1px solid rgba(28, 26, 23, 0.1);
       }
       .feedback {
         margin-top: 8px;
         padding: 8px 10px;
-        background: #0f172a;
+        background: #ffffff;
         border-radius: 8px;
         font-size: 0.8rem;
-        color: #cbd5e1;
+        color: #3d3930;
       }
       .empty {
-        color: #64748b;
+        color: #8e8880;
         font-size: 0.88rem;
         margin: 0;
       }
@@ -426,7 +432,7 @@
         font-size: 0.74rem;
         font-weight: 600;
         letter-spacing: 0.04em;
-        color: #7dd3fc;
+        color: #b8975a;
         margin: 0 0 8px;
         line-height: 1.4;
       }
@@ -436,7 +442,7 @@
       .sender-panel label {
         display: block;
         font-size: 0.78rem;
-        color: #9aacbf;
+        color: #8e8880;
         margin-top: 10px;
       }
       .sender-panel label:first-of-type {
@@ -451,7 +457,7 @@
       .search-panel label {
         display: block;
         font-size: 0.78rem;
-        color: #9aacbf;
+        color: #8e8880;
         margin-bottom: 6px;
       }
       .search-panel .search-row {
@@ -478,31 +484,31 @@
         margin: 10px 0 2px;
         font-size: 0.72rem;
         font-weight: 600;
-        color: #7dd3fc;
+        color: #b8975a;
         letter-spacing: 0.03em;
       }
       .hours-value {
         margin: 0 0 4px;
         font-size: 0.8rem;
-        color: #9aacbf;
+        color: #8e8880;
         white-space: pre-wrap;
         line-height: 1.45;
         max-height: 9em;
         overflow-y: auto;
       }
       .hours-value.missing {
-        color: #64748b;
+        color: #8e8880;
         font-style: italic;
       }
       .dm-pattern-block {
         margin-top: 10px;
         padding-top: 10px;
-        border-top: 1px dashed rgba(56, 189, 248, 0.2);
+        border-top: 1px dashed rgba(184, 151, 90, 0.28);
       }
       .dm-pattern-block label {
         display: block;
         font-size: 0.72rem;
-        color: #9aacbf;
+        color: #8e8880;
         margin: 8px 0 4px;
       }
       .dm-pattern-block label:first-of-type {
@@ -521,41 +527,41 @@
       .send-timing-panel .tokyo-clock {
         font-family: ui-monospace, monospace;
         font-size: 0.95rem;
-        color: #7dd3fc;
+        color: #b8975a;
         margin: 0 0 10px;
         letter-spacing: 0.04em;
       }
       .send-timing-panel .timing-hint {
         font-size: 0.78rem;
-        color: #8b9cb3;
+        color: #8e8880;
         margin: 0 0 12px;
       }
       .send-timing-panel h3 {
         font-size: 0.82rem;
         margin: 14px 0 8px;
-        color: #a5d8ff;
+        color: #b8975a;
         font-weight: 600;
       }
       .send-timing-panel ul {
         margin: 0;
         padding-left: 1.15rem;
         font-size: 0.82rem;
-        color: #cbd5e1;
+        color: #3d3930;
       }
       .send-timing-panel li {
         margin: 4px 0;
       }
       .send-timing-panel a.timing-jump {
-        color: #38bdf8;
+        color: #b8975a;
         text-decoration: none;
-        border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+        border-bottom: 1px solid rgba(184, 151, 90, 0.45);
       }
       .send-timing-panel a.timing-jump:hover {
-        color: #fff;
-        border-bottom-color: #fff;
+        color: #1c1a17;
+        border-bottom-color: #1c1a17;
       }
       .send-timing-panel .timing-empty {
-        color: #64748b;
+        color: #8e8880;
         font-size: 0.82rem;
         margin: 0;
       }
@@ -573,7 +579,7 @@
       .phase-browser-field label {
         display: block;
         font-size: 0.78rem;
-        color: #9aacbf;
+        color: #8e8880;
         margin-bottom: 6px;
       }
       .phase-detail-host {
@@ -594,12 +600,12 @@
         gap: 8px;
         padding: 10px 1rem;
         margin: 0 -1rem;
-        background: rgba(8, 15, 26, 0.92);
+        background: rgba(28, 26, 23, 0.96);
         backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--phase-line, #2a3b52);
+        border-bottom: 1px solid var(--phase-line, rgba(28, 26, 23, 0.14));
       }
       .outreach-sticky-nav a.back {
-        color: #7dd3fc;
+        color: #b8975a;
         text-decoration: none;
         font-weight: 600;
       }
@@ -607,7 +613,7 @@
         text-decoration: underline;
       }
       .view-mode-toggle .btn.primary {
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+        box-shadow: 0 0 0 1px rgba(184, 151, 90, 0.45);
       }
       .excel-panel h2 {
         margin-top: 0;
@@ -617,7 +623,7 @@
         max-height: min(52vh, 520px);
         border: 1px solid var(--phase-line);
         border-radius: 10px;
-        background: #0b1323;
+        background: #f0ebe1;
       }
       .excel-sheet {
         border-collapse: collapse;
@@ -627,14 +633,14 @@
       }
       .excel-sheet th,
       .excel-sheet td {
-        border: 1px solid #2a3b52;
+        border: 1px solid rgba(28, 26, 23, 0.14);
         padding: 6px 8px;
         vertical-align: middle;
         text-align: left;
       }
       .excel-sheet thead th {
-        background: #1c2940;
-        color: #a5d8ff;
+        background: #ede7d8;
+        color: #b8975a;
         font-weight: 600;
         position: sticky;
         top: 0;
@@ -642,21 +648,21 @@
         white-space: nowrap;
       }
       .excel-sheet .excel-corner {
-        background: #121a2e;
+        background: #ede7d8;
         min-width: 28px;
         z-index: 3;
       }
       .excel-sheet tbody td.row-num,
       .excel-sheet thead th.row-head {
-        background: #0f172a;
-        color: #7d8fa3;
+        background: #ffffff;
+        color: #8e8880;
         text-align: center;
         font-weight: 600;
         position: sticky;
         left: 0;
         z-index: 1;
         min-width: 2.25rem;
-        box-shadow: 1px 0 0 rgba(42, 59, 82, 0.9);
+        box-shadow: 1px 0 0 rgba(28, 26, 23, 0.12);
       }
       .excel-sheet tbody td.row-num.row-num--food {
         background: linear-gradient(165deg, #9f1239 0%, #7f1d1d 55%, #7f1d1d 100%);
@@ -669,8 +675,8 @@
         text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
       }
       .excel-sheet tbody td.row-num.row-num--default {
-        background: linear-gradient(165deg, #334155 0%, #1e293b 100%);
-        color: #cbd5e1;
+        background: linear-gradient(165deg, #d6d0c4 0%, #c4bdb0 100%);
+        color: #1c1a17;
       }
       .excel-sheet thead th.row-head {
         z-index: 4;
@@ -678,7 +684,7 @@
       .excel-row-legend {
         margin: 0 0 10px;
         font-size: 0.72rem;
-        color: #8da0b8;
+        color: #8e8880;
         display: flex;
         flex-wrap: wrap;
         gap: 12px 18px;
@@ -692,8 +698,8 @@
         margin: 0 0 10px;
         padding: 8px 10px;
         border-radius: 8px;
-        background: rgba(15, 23, 42, 0.65);
-        border: 1px solid #2a3b52;
+        background: rgba(237, 231, 216, 0.92);
+        border: 1px solid rgba(28, 26, 23, 0.14);
       }
       .excel-bulk-bar .excel-bulk-count {
         font-size: 0.74rem;
@@ -709,8 +715,8 @@
         padding: 4px 6px;
         text-align: center;
         vertical-align: middle;
-        background: #0f172a;
-        box-shadow: 1px 0 0 rgba(42, 59, 82, 0.9);
+        background: #ffffff;
+        box-shadow: 1px 0 0 rgba(28, 26, 23, 0.12);
       }
       .excel-sheet thead th.excel-select-head {
         position: sticky;
@@ -722,14 +728,14 @@
         padding: 4px 6px;
         text-align: center;
         vertical-align: middle;
-        background: #1c2940;
-        box-shadow: 1px 0 0 rgba(42, 59, 82, 0.9);
+        background: #ede7d8;
+        box-shadow: 1px 0 0 rgba(28, 26, 23, 0.12);
       }
       .excel-sheet .excel-row-sel,
       .excel-sheet .excel-grid-master-sel {
         width: 1rem;
         height: 1rem;
-        accent-color: #38bdf8;
+        accent-color: #b8975a;
         cursor: pointer;
       }
       .excel-row-legend span {
@@ -752,7 +758,7 @@
         background: linear-gradient(165deg, #78716c, #44403c);
       }
       .excel-row-legend i.leg-def {
-        background: linear-gradient(165deg, #334155, #1e293b);
+        background: linear-gradient(165deg, #d6d0c4, #a8a29e);
       }
       .excel-sheet td.excel-cell-text {
         max-width: 220px;
@@ -760,13 +766,13 @@
         word-break: break-word;
         font-family: system-ui, sans-serif;
         font-size: 0.78rem;
-        color: #e8edf5;
+        color: #1c1a17;
       }
       .excel-sheet td.excel-cell-name {
         max-width: 160px;
         font-family: system-ui, sans-serif;
         font-weight: 600;
-        color: #f0f9ff;
+        color: #1c1a17;
       }
       .excel-sheet select {
         min-width: 10.5em;
@@ -774,9 +780,9 @@
         font-size: 0.76rem;
         padding: 4px 6px;
         border-radius: 6px;
-        background: #121a2e;
-        color: #e8edf5;
-        border: 1px solid #3d5675;
+        background: #ede7d8;
+        color: #1c1a17;
+        border: 1px solid rgba(28, 26, 23, 0.2);
       }
       .excel-name-stack {
         display: flex;
@@ -787,7 +793,7 @@
       }
       .excel-name-stack .excel-shop-title {
         font-weight: 600;
-        color: #f0f9ff;
+        color: #1c1a17;
         line-height: 1.35;
       }
       a.excel-card-btn {
@@ -799,14 +805,14 @@
         font-weight: 600;
         font-family: system-ui, sans-serif;
         text-decoration: none;
-        background: #1d4ed8;
-        color: #fff !important;
-        border: 1px solid #3b82f6;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        background: #b8975a;
+        color: #1c1a17 !important;
+        border: 1px solid #9a7d48;
+        box-shadow: 0 1px 0 rgba(28, 26, 23, 0.12);
       }
       a.excel-card-btn:hover {
-        background: #2563eb;
-        color: #fff !important;
+        background: #d4b47a;
+        color: #1c1a17 !important;
       }
       .excel-sheet td.excel-cell-address {
         max-width: 320px;
@@ -815,7 +821,7 @@
         word-break: break-word;
         font-family: system-ui, sans-serif;
         font-size: 0.78rem;
-        color: #e8edf5;
+        color: #1c1a17;
       }
       .excel-sheet td.excel-cell-address--stack {
         vertical-align: top;
@@ -823,7 +829,7 @@
       }
       .excel-one-line-clip {
         font-size: 0.72rem;
-        color: #cbd5e1;
+        color: #3d3930;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -837,9 +843,9 @@
         font-size: 0.68rem;
         padding: 3px 5px;
         border-radius: 6px;
-        background: #121a2e;
-        color: #e8edf5;
-        border: 1px solid #3d5675;
+        background: #ede7d8;
+        color: #1c1a17;
+        border: 1px solid rgba(28, 26, 23, 0.2);
       }
       .excel-send-stack {
         display: flex;
@@ -852,12 +858,12 @@
         max-width: min(94vw, 720px);
         width: 100%;
         margin: auto;
-        border: 1px solid #334155;
+        border: 1px solid rgba(28, 26, 23, 0.16);
         border-radius: 12px;
         padding: 0;
-        background: #0f172a;
-        color: #e8edf5;
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+        background: #fff;
+        color: #1c1a17;
+        box-shadow: 0 24px 48px rgba(28, 26, 23, 0.14);
       }
       .op-excel-longtext-dlg::backdrop {
         background: rgba(0, 0, 0, 0.55);
@@ -880,10 +886,10 @@
         word-break: break-word;
         font-size: 0.82rem;
         font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-        background: #0c1222;
+        background: #f5f0e8;
         border-radius: 8px;
-        border: 1px solid #334155;
-        color: #e8edf5;
+        border: 1px solid rgba(28, 26, 23, 0.12);
+        color: #1c1a17;
       }
       .op-excel-longtext-dlg__pre.is-visible {
         display: block;
@@ -898,9 +904,9 @@
         font-size: 0.82rem;
         line-height: 1.45;
         border-radius: 8px;
-        border: 1px solid #3d5675;
-        background: #0c1222;
-        color: #e8edf5;
+        border: 1px solid rgba(28, 26, 23, 0.18);
+        background: #fff;
+        color: #1c1a17;
         resize: vertical;
       }
       .op-excel-longtext-dlg__ta.is-visible {
@@ -914,6 +920,7 @@
         margin-top: 12px;
       }
     </style>
+    <link rel="stylesheet" href="/admin/beauty-admin-outreach.css?v=3" />
   </head>
   <body>
     <nav class="outreach-sticky-nav" aria-label="ページ内ナビ">

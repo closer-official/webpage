@@ -1,26 +1,26 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="beauty-admin-outreach">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>メモリード一覧（美容室・フェーズ確認前） — CLOSER</title>
     <style>
       :root {
-        --bg: #0c1220;
-        --panel: #141c2e;
-        --text: #e8edf5;
-        --muted: #9aacbf;
-        --accent: #3b82f6;
-        --accent2: #22c55e;
-        --border: #2a3a55;
-        --err: #f87171;
+        --bg: #f5f0e8;
+        --panel: #ffffff;
+        --text: #1c1a17;
+        --muted: #8e8880;
+        --accent: #b8975a;
+        --accent2: #7a8c72;
+        --border: rgba(28, 26, 23, 0.14);
+        --err: #c45c52;
       }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-family: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
         background: var(--bg);
         color: var(--text);
         line-height: 1.5;
@@ -61,13 +61,13 @@
       }
       .nav .btn.primary {
         background: var(--accent);
-        border-color: #2563eb;
-        color: #fff;
+        border-color: #9a7d48;
+        color: #1c1a17;
       }
       .nav .btn.success {
-        background: #14532d;
+        background: rgba(122, 140, 114, 0.35);
         border-color: var(--accent2);
-        color: #dcfce7;
+        color: #f5f0e8;
       }
       main {
         max-width: 1100px;
@@ -107,7 +107,7 @@
         padding: 10px 12px;
         border-radius: 8px;
         border: 1px solid var(--border);
-        background: #0f1628;
+        background: #fff;
         color: var(--text);
         font-size: 0.9rem;
       }
@@ -148,7 +148,7 @@
       }
       .memo-preview-lines {
         font-size: 0.78rem;
-        color: #cbd5e1;
+        color: #3d3930;
         line-height: 1.4;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -164,7 +164,7 @@
         padding: 3px 6px;
         border-radius: 6px;
         border: 1px solid var(--border);
-        background: #0f1628;
+        background: #fff;
         color: var(--text);
       }
       .btn-sm {
@@ -172,7 +172,7 @@
         font-size: 0.75rem;
         border-radius: 6px;
         border: 1px solid var(--border);
-        background: #1e293b;
+        background: #ede7d8;
         color: var(--text);
         cursor: pointer;
       }
@@ -182,8 +182,8 @@
       }
       .btn-sm.primary {
         background: var(--accent);
-        border-color: #2563eb;
-        color: #fff;
+        border-color: #9a7d48;
+        color: #1c1a17;
       }
       #err {
         display: none;
@@ -224,8 +224,8 @@
         accent-color: var(--accent);
       }
       .intake-mode label:has(input:checked) {
-        border-color: #2563eb;
-        background: rgba(59, 130, 246, 0.12);
+        border-color: #b8975a;
+        background: rgba(184, 151, 90, 0.14);
       }
       .hpb-panel textarea.hpb-paste {
         min-height: 220px;
@@ -247,7 +247,7 @@
         vertical-align: top;
       }
       table.hpb-preview th {
-        background: #0f1628;
+        background: #fff;
         color: var(--muted);
         font-size: 0.7rem;
         white-space: nowrap;
@@ -273,7 +273,7 @@
       }
       .hpb-access-clip {
         font-size: 0.72rem;
-        color: #94a3b8;
+        color: var(--muted);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -284,7 +284,7 @@
         padding: 3px 5px;
         border-radius: 6px;
         border: 1px solid var(--border);
-        background: #0f1628;
+        background: #fff;
         color: var(--text);
       }
       .memo-longtext-dlg {
@@ -296,7 +296,7 @@
         padding: 0;
         background: var(--panel);
         color: var(--text);
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 24px 48px rgba(28, 26, 23, 0.14);
       }
       .memo-longtext-dlg::backdrop {
         background: rgba(0, 0, 0, 0.55);
@@ -319,7 +319,7 @@
         word-break: break-word;
         font-size: 0.82rem;
         font-family: ui-monospace, monospace;
-        background: #0f1628;
+        background: #fff;
         border-radius: 8px;
         border: 1px solid var(--border);
         color: var(--text);
@@ -338,7 +338,7 @@
         line-height: 1.45;
         border-radius: 8px;
         border: 1px solid var(--border);
-        background: #0f1628;
+        background: #fff;
         color: var(--text);
         resize: vertical;
       }
@@ -365,7 +365,7 @@
         margin: 0;
         font-size: 0.72rem;
         cursor: pointer;
-        color: #cbd5e1;
+        color: var(--muted);
       }
       .hpb-hint {
         font-size: 0.78rem;
@@ -378,10 +378,11 @@
         padding: 6px 8px;
         border-radius: 6px;
         border: 1px solid var(--border);
-        background: #0f1628;
+        background: #fff;
         color: var(--text);
       }
     </style>
+    <link rel="stylesheet" href="/admin/beauty-admin-outreach.css?v=3" />
   </head>
   <body>
     <nav class="nav" aria-label="メモリード・関連ページ">

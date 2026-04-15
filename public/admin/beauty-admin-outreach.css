@@ -1,0 +1,564 @@
+/**
+ * 美容向け管理画面の共通トーン（独立版 LP 編集 / beauty-standalone-template と同系色）
+ * outreach-phases-beauty.html / outreach-memo-leads-beauty.html から
+ * html.beauty-admin-outreach を付けたうえで、このファイルを <style> の後に読み込む。
+ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+html.beauty-admin-outreach {
+  --b-cream: #f5f0e8;
+  --b-cream-d: #ede7d8;
+  --b-preview: #f0ebe1;
+  --b-ink: #1c1a17;
+  --b-ink-l: #3d3930;
+  --b-gold: #b8975a;
+  --b-gold-l: #d4b47a;
+  --b-stone: #8e8880;
+  --b-sage: #7a8c72;
+  --b-line: rgba(28, 26, 23, 0.12);
+  --b-line-strong: rgba(28, 26, 23, 0.2);
+  --b-shadow: 0 6px 24px rgba(28, 26, 23, 0.1);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+  background: var(--b-cream);
+  color: var(--b-ink);
+}
+
+html.beauty-admin-outreach body {
+  background: var(--b-cream);
+  color: var(--b-ink);
+}
+
+/* ── 送付・フェーズ（美容）: ヘッダー・見出し ── */
+html.beauty-admin-outreach .app-head h1 {
+  font-family: 'Cormorant Garamond', 'Hiragino Mincho ProN', serif;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--b-gold);
+}
+
+html.beauty-admin-outreach .sub {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .outreach-sticky-nav {
+  background: rgba(28, 26, 23, 0.96) !important;
+  border-bottom-color: rgba(184, 151, 90, 0.35) !important;
+  backdrop-filter: blur(10px);
+}
+
+html.beauty-admin-outreach .outreach-sticky-nav a.back {
+  color: var(--b-gold-l) !important;
+}
+
+html.beauty-admin-outreach .outreach-sticky-nav a.back:hover {
+  color: #fff !important;
+}
+
+/* ボタン（編集画面の admin ボタンに寄せる） */
+html.beauty-admin-outreach .btn,
+html.beauty-admin-outreach a.back {
+  border: 1px solid var(--b-line-strong) !important;
+  background: var(--b-cream-d) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach a.back {
+  background: rgba(237, 231, 216, 0.85) !important;
+}
+
+html.beauty-admin-outreach .btn:hover,
+html.beauty-admin-outreach a.back:hover {
+  border-color: var(--b-gold) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .btn.primary {
+  background: var(--b-gold) !important;
+  border-color: var(--b-gold) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .btn.primary:hover {
+  background: var(--b-gold-l) !important;
+  border-color: var(--b-gold-l) !important;
+}
+
+html.beauty-admin-outreach .btn.danger {
+  border-color: rgba(127, 29, 29, 0.65) !important;
+  background: rgba(254, 226, 226, 0.95) !important;
+  color: #7f1d1d !important;
+}
+
+html.beauty-admin-outreach .btn.danger:hover {
+  border-color: #991b1b !important;
+  background: #fecaca !important;
+}
+
+html.beauty-admin-outreach .view-mode-toggle .btn.primary {
+  box-shadow: 0 0 0 1px rgba(184, 151, 90, 0.45) !important;
+}
+
+html.beauty-admin-outreach .err {
+  color: #9a5c52 !important;
+}
+
+html.beauty-admin-outreach .ok-msg {
+  color: var(--b-sage) !important;
+}
+
+/* パネル・カード */
+html.beauty-admin-outreach .panel {
+  background: linear-gradient(180deg, #fff 0%, var(--b-cream-d) 100%) !important;
+  border: 1px solid var(--b-line) !important;
+  box-shadow: var(--b-shadow) !important;
+}
+
+html.beauty-admin-outreach .panel h2 {
+  color: var(--b-gold) !important;
+  border-bottom-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .phase-card {
+  border: 1px solid rgba(184, 151, 90, 0.28) !important;
+  background: linear-gradient(155deg, #fff 0%, var(--b-cream-d) 55%, var(--b-preview) 100%) !important;
+  box-shadow: 0 4px 20px rgba(28, 26, 23, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+html.beauty-admin-outreach .phase-card__header {
+  background: var(--b-ink) !important;
+  border-bottom-color: rgba(184, 151, 90, 0.35) !important;
+}
+
+html.beauty-admin-outreach .phase-card__title,
+html.beauty-admin-outreach .phase-card__title a {
+  color: #f5f0e8 !important;
+}
+
+html.beauty-admin-outreach .phase-card__title a {
+  text-decoration-color: rgba(212, 180, 122, 0.55) !important;
+}
+
+html.beauty-admin-outreach .phase-card__title a:hover {
+  color: var(--b-gold-l) !important;
+  text-decoration-color: var(--b-gold-l) !important;
+}
+
+html.beauty-admin-outreach .phase-card__body {
+  background: transparent;
+}
+
+html.beauty-admin-outreach .phase-card__col--shop {
+  background: #fff !important;
+  border-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .muted {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .op-send-block {
+  border-top-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .op-send-block label.op-send-lbl {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach textarea.op-send-msg {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .op-sns-hint {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .op-sns-row .btn.small {
+  border-color: var(--b-line-strong) !important;
+  background: var(--b-cream-d) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach select:not(.op-phase-select),
+html.beauty-admin-outreach input[type='text'],
+html.beauty-admin-outreach input[type='search'] {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .badge {
+  background: var(--b-cream-d) !important;
+  color: var(--b-ink-l) !important;
+  border: 1px solid var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .feedback {
+  background: var(--b-cream-d) !important;
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach .empty {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .link-tile {
+  background: #fff !important;
+  border: 1px solid var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .link-tile > p.muted:first-of-type {
+  color: var(--b-gold) !important;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+html.beauty-admin-outreach .phase-card__links {
+  border-top-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .sender-panel label,
+html.beauty-admin-outreach .search-panel label,
+html.beauty-admin-outreach .phase-browser-field label {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .not-registered {
+  color: #b45309 !important;
+}
+
+html.beauty-admin-outreach .hours-heading {
+  color: var(--b-gold) !important;
+}
+
+html.beauty-admin-outreach .hours-value {
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach .hours-value.missing {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .dm-pattern-block {
+  border-top-color: rgba(184, 151, 90, 0.25) !important;
+}
+
+html.beauty-admin-outreach .dm-pattern-block label {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .dm-gate-err {
+  color: #9a5c52 !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel .tokyo-clock {
+  color: var(--b-gold) !important;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+html.beauty-admin-outreach .send-timing-panel .timing-hint {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel h3 {
+  color: var(--b-gold) !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel ul {
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel a.timing-jump {
+  color: var(--b-gold) !important;
+  border-bottom-color: rgba(184, 151, 90, 0.45) !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel a.timing-jump:hover {
+  color: var(--b-ink) !important;
+  border-bottom-color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .send-timing-panel .timing-empty {
+  color: var(--b-stone) !important;
+}
+
+/* Excel 風一覧 */
+html.beauty-admin-outreach .excel-sheet-wrap {
+  border: 1px solid var(--b-line) !important;
+  background: var(--b-preview) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet th,
+html.beauty-admin-outreach .excel-sheet td {
+  border-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet thead th {
+  background: var(--b-ink) !important;
+  color: var(--b-gold-l) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet .excel-corner {
+  background: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet tbody td.row-num,
+html.beauty-admin-outreach .excel-sheet thead th.row-head {
+  background: var(--b-cream-d) !important;
+  color: var(--b-ink-l) !important;
+  box-shadow: 1px 0 0 var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet tbody td.row-num.row-num--default {
+  background: linear-gradient(165deg, #d6d0c4 0%, #c4bdb0 100%) !important;
+  color: var(--b-ink) !important;
+  text-shadow: none !important;
+}
+
+html.beauty-admin-outreach .excel-row-legend {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .excel-bulk-bar {
+  background: rgba(237, 231, 216, 0.85) !important;
+  border: 1px solid var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet tbody td.excel-select-cell {
+  background: #fff !important;
+  box-shadow: 1px 0 0 var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet thead th.excel-select-head {
+  background: var(--b-ink) !important;
+  box-shadow: 1px 0 0 rgba(184, 151, 90, 0.25) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet .excel-row-sel,
+html.beauty-admin-outreach .excel-sheet .excel-grid-master-sel {
+  accent-color: var(--b-gold) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet td.excel-cell-text,
+html.beauty-admin-outreach .excel-sheet td.excel-cell-address {
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet td.excel-cell-name,
+html.beauty-admin-outreach .excel-name-stack .excel-shop-title {
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .excel-sheet select {
+  background: #fff !important;
+  color: var(--b-ink) !important;
+  border: 1px solid var(--b-line-strong) !important;
+}
+
+html.beauty-admin-outreach .excel-one-line-clip {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach select.excel-longtext-sel {
+  background: #fff !important;
+  color: var(--b-ink) !important;
+  border: 1px solid var(--b-line-strong) !important;
+}
+
+html.beauty-admin-outreach a.excel-card-btn {
+  background: var(--b-gold) !important;
+  color: var(--b-ink) !important;
+  border: 1px solid var(--b-gold) !important;
+  box-shadow: 0 1px 0 rgba(28, 26, 23, 0.12) !important;
+}
+
+html.beauty-admin-outreach a.excel-card-btn:hover {
+  background: var(--b-gold-l) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .op-excel-longtext-dlg {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+  box-shadow: 0 24px 48px rgba(28, 26, 23, 0.18) !important;
+}
+
+html.beauty-admin-outreach .op-excel-longtext-dlg__pre,
+html.beauty-admin-outreach .op-excel-longtext-dlg__ta {
+  background: var(--b-cream) !important;
+  border: 1px solid var(--b-line) !important;
+  color: var(--b-ink) !important;
+}
+
+/* コンパクト送信欄（表・カード） */
+html.beauty-admin-outreach .excel-sheet textarea.op-send-msg--compact,
+html.beauty-admin-outreach .phase-card textarea.op-send-msg--compact {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach select.excel-longtext-sel,
+html.beauty-admin-outreach select.memo-longtext-sel {
+  background: #fff !important;
+  color: var(--b-ink) !important;
+}
+
+/* ── メモリード一覧（美容） outreach-memo-leads-beauty.html ── */
+html.beauty-admin-outreach .nav {
+  background: rgba(28, 26, 23, 0.96) !important;
+  border-bottom: 1px solid rgba(184, 151, 90, 0.35) !important;
+  backdrop-filter: blur(8px);
+}
+
+html.beauty-admin-outreach .nav a:not(.btn) {
+  color: rgba(245, 240, 232, 0.88) !important;
+}
+
+html.beauty-admin-outreach .nav a:not(.btn):hover {
+  color: #fff !important;
+}
+
+html.beauty-admin-outreach .nav .btn {
+  border: 1px solid rgba(245, 240, 232, 0.22) !important;
+  background: rgba(237, 231, 216, 0.12) !important;
+  color: rgba(245, 240, 232, 0.92) !important;
+}
+
+html.beauty-admin-outreach .nav .btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+html.beauty-admin-outreach .nav .btn.primary {
+  background: var(--b-gold) !important;
+  border-color: var(--b-gold) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .nav .btn.success {
+  background: rgba(122, 140, 114, 0.35) !important;
+  border-color: var(--b-sage) !important;
+  color: #f5f0e8 !important;
+}
+
+html.beauty-admin-outreach main h1 {
+  font-family: 'Cormorant Garamond', 'Hiragino Mincho ProN', serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--b-gold);
+}
+
+html.beauty-admin-outreach main .sub {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach main .panel {
+  background: linear-gradient(180deg, #fff 0%, var(--b-cream-d) 100%) !important;
+  border: 1px solid var(--b-line) !important;
+  box-shadow: var(--b-shadow) !important;
+}
+
+html.beauty-admin-outreach main .panel h2 {
+  color: var(--b-ink);
+}
+
+html.beauty-admin-outreach main input[type='text'],
+html.beauty-admin-outreach main textarea,
+html.beauty-admin-outreach main select,
+html.beauty-admin-outreach main select.memo-longtext-sel,
+html.beauty-admin-outreach main select.memo-web-select,
+html.beauty-admin-outreach main select.hpb-longtext-sel {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach main label {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach main table th {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach main table th,
+html.beauty-admin-outreach main table td {
+  border-bottom-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach main .btn-sm {
+  background: var(--b-cream-d) !important;
+  border-color: var(--b-line-strong) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach main .btn-sm.primary {
+  background: var(--b-gold) !important;
+  border-color: var(--b-gold) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach main .memo-preview-lines {
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach main .mono {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach main .intake-mode label {
+  border-color: var(--b-line) !important;
+  background: #fff;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach main .intake-mode label:has(input:checked) {
+  border-color: var(--b-gold) !important;
+  background: rgba(184, 151, 90, 0.12) !important;
+}
+
+html.beauty-admin-outreach main .intake-mode input {
+  accent-color: var(--b-gold) !important;
+}
+
+html.beauty-admin-outreach table.hpb-preview th {
+  background: var(--b-ink) !important;
+  color: var(--b-gold-l) !important;
+  border-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach table.hpb-preview td {
+  border-color: var(--b-line) !important;
+}
+
+html.beauty-admin-outreach .hpb-access-clip {
+  color: var(--b-stone) !important;
+}
+
+html.beauty-admin-outreach .memo-longtext-dlg {
+  border: 1px solid var(--b-line-strong) !important;
+  background: #fff !important;
+  color: var(--b-ink) !important;
+  box-shadow: 0 24px 48px rgba(28, 26, 23, 0.18) !important;
+}
+
+html.beauty-admin-outreach .memo-longtext-dlg__pre,
+html.beauty-admin-outreach .memo-longtext-dlg__ta {
+  background: var(--b-cream) !important;
+  border-color: var(--b-line) !important;
+  color: var(--b-ink) !important;
+}
+
+html.beauty-admin-outreach .web-str label {
+  color: var(--b-ink-l) !important;
+}
+
+html.beauty-admin-outreach #ok-msg {
+  color: var(--b-sage) !important;
+}
+
+html.beauty-admin-outreach #err {
+  color: #9a5c52 !important;
+}
