@@ -325,7 +325,7 @@ function buildNavHtml(salon) {
 }
 
 function buildFooterHtml(salon) {
-  return `<footer class="lp-footer lp-footer--preview">
+  return `<footer class="lp-footer">
     <p>${esc(salon.name)}</p>
     ${salon.address ? `<p style="margin-top:6px;">${esc(salon.address)}</p>` : ''}
     ${
@@ -385,20 +385,7 @@ export function buildBeautyStandalonePreviewDocument(opts) {
 
   const extraStyle = `
     body { margin: 0; }
-    .lp-nav-links a { cursor: default; }
-    .lp-footer, .lp-footer--preview {
-      background: var(--ink);
-      color: rgba(245,240,232,0.35);
-      text-align: center;
-      padding: 40px 24px;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-    }
-    .lp-footer a, .lp-footer--preview a {
-      color: var(--gold);
-      text-decoration: none;
-    }
+    .lp-nav-links a { pointer-events: none; cursor: default; }
   `;
 
   return `<!DOCTYPE html>

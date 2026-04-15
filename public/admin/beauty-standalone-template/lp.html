@@ -6,67 +6,9 @@
   <title>美容室テンプレ（独立版）LP</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* LP ページ固有スタイル */
-    body { margin: 0; }
-    .lp-root { min-height: 100vh; }
-
-    /* スムーズスクロール用のナビリンク */
-    .lp-nav-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-    .lp-nav-links a {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      color: rgba(245,240,232,0.55);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .lp-nav-links a:hover { color: var(--gold-l); }
-
-    @media (max-width: 600px) {
-      .lp-nav-links { display: none; }
-    }
-
-    /* セクション区切り */
-    .lp-section + .lp-section {
-      border-top: 1px solid rgba(28,26,23,0.05);
-    }
-
-    /* フッター */
-    .lp-footer {
-      background: var(--ink);
-      color: rgba(245,240,232,0.35);
-      text-align: center;
-      padding: 40px 24px;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-    }
-
-    .lp-footer a {
-      color: var(--gold);
-      text-decoration: none;
-    }
-
-    .back-to-admin {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 8px 20px;
-      border: 1px solid rgba(184,151,90,0.3);
-      border-radius: 4px;
-      color: rgba(245,240,232,0.4);
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-decoration: none;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .back-to-admin:hover {
-      color: var(--gold-l);
-      border-color: rgba(184,151,90,0.6);
+    /* ナビ・フッター等は styles.css（プレビュー API と共通） */
+    body {
+      margin: 0;
     }
 
     /* ページ内アニメーション（IntersectionObserver対応） */

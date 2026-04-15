@@ -1070,11 +1070,121 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-weight: 400;
   color: var(--cream);
   letter-spacing: 0.06em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+/* lp.html と /api/template-preview 共通（後者は styles.css のみ読み込むためここに必須） */
+.lp-nav-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.lp-nav-links li {
+  margin: 0;
+  padding: 0;
+}
+
+.lp-nav-links a {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: rgba(245,240,232,0.55);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.lp-nav-links a:hover {
+  color: var(--gold-l);
+}
+
+/* ナビ内「← 編集」— .back-to-admin の margin-top はフッター用のみ（ナビでは 0） */
+.lp-nav .back-to-admin {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0 16px;
+  padding: 8px 16px;
+  border: 1px solid rgba(184,151,90,0.35);
+  border-radius: var(--r-sm);
+  color: rgba(245,240,232,0.55);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.lp-nav .back-to-admin:hover {
+  color: var(--gold-l);
+  border-color: rgba(184,151,90,0.55);
 }
 
 .lp-nav-actions {
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .lp-nav-links {
+    display: none;
+  }
+}
+
+/* LP 全画面（lp.html）— フッター・セクション区切り */
+.lp-root {
+  min-height: 100vh;
+}
+
+.lp-section + .lp-section {
+  border-top: 1px solid rgba(28,26,23,0.05);
+}
+
+.lp-footer {
+  background: var(--ink);
+  color: rgba(245,240,232,0.35);
+  text-align: center;
+  padding: 40px 24px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.lp-footer a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.lp-footer .back-to-admin {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 20px;
+  border: 1px solid rgba(184,151,90,0.3);
+  border-radius: 4px;
+  color: rgba(245,240,232,0.4);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.lp-footer .back-to-admin:hover {
+  color: var(--gold-l);
+  border-color: rgba(184,151,90,0.6);
 }
 
 /* ── Responsive ── */
