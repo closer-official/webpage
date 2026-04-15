@@ -389,12 +389,12 @@
       <a href="../">← 運営トップ</a>
       <a href="./outreach-phases.html?v=memo1" class="btn">飲食・その他フェーズ</a>
       <a href="./outreach-phases-beauty.html?v=7phase" class="btn primary">送付・フェーズ管理（美容）</a>
-      <a href="./template-worker.html?v=memo1" class="btn success">店舗ドラフト編集（空で開く）</a>
+      <a href="./beauty-standalone-template/index.html?v=memo1" class="btn success">美容室LP編集（空で開く）</a>
     </nav>
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        ホットペッパー風の取込では、<strong>店名が取れた行はすべてメモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>送付・フェーズ管理（美容）</strong>の一覧表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
+        ホットペッパー風の取込では、<strong>店名が取れた行はすべてメモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>送付・フェーズ管理（美容）</strong>の一覧表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモが①の欄とフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -446,7 +446,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「店舗ドラフトで編集へ」で新規モードに店名・メモを流し込みます。
+          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
         </p>
         <div id="list-wrap">読み込み中…</div>
       </section>
@@ -563,7 +563,7 @@
         }
 
         function workerUrlWithMemo(id) {
-          return './template-worker.html?memoLeadId=' + encodeURIComponent(id) + '&v=memo1';
+          return './beauty-standalone-template/index.html?memoLeadId=' + encodeURIComponent(id) + '&v=memo1';
         }
 
         /** 「一覧へ」行から先（クーポン一覧・60分空き・時刻）はメモに含めない */
@@ -950,8 +950,8 @@
             var go = document.createElement('a');
             go.className = 'btn-sm primary';
             go.href = workerUrlWithMemo(r.id);
-            go.textContent = '店舗ドラフトで編集へ';
-            go.title = '店舗ドラフトを新規モードで開き、店名・メモを流し込みます';
+            go.textContent = '美容室LPで編集';
+            go.title = '美容室LP編集（独立版）を開き、店名・メモを流し込みます';
             var del = document.createElement('button');
             del.type = 'button';
             del.className = 'btn-sm danger';

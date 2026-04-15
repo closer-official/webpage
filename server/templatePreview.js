@@ -11,6 +11,7 @@ import {
 import { buildHtml } from './buildHtml.js';
 import { renderBlueprintHtml } from './renderBlueprintHtml.js';
 import { BUILTIN_BUILD_HTML_TEMPLATES } from './templateRegistry.js';
+import { buildBeautyStandalonePreviewDocument } from './beautyStandalonePreviewHtml.js';
 
 /** 運営「⓪ デザイン」等。ビルトイン定義の正は templateRegistry.js（旧IDの描画は server/buildHtml.js に残る） */
 export const TEMPLATE_CANDIDATES = [...BUILTIN_BUILD_HTML_TEMPLATES];
@@ -369,8 +370,9 @@ export function renderTemplatePreview(templateId, customization = null, options 
   if (id === INTAKE_BESPOKE_TEMPLATE_ID) id = 'navy_cyan_consult';
 
   if (id === 'beauty_standalone') {
-    const ov = resolveTemplateOverride(customization);
-    const salon = ov?.beautyStandaloneSalon && typeof ov.beautyStandaloneSalon === 'object' ? ov.beautyStandaloneSalon : {};
+    const ov = resolveTemplateOverride(cust);
+    const salonRaw = ov?.beautyStandaloneSalon && typeof ov.beautyStandaloneSalon === 'object' ? ov.beautyStandaloneSalon : {};
+    const salon = { ...salonRaw };
     const shopName =
       String(salon.name || '')
         .trim()
@@ -379,6 +381,7 @@ export function renderTemplatePreview(templateId, customization = null, options 
         .trim()
         .slice(0, 200) ||
       '美容室（独立LP）';
+    if (!String(salon.name || '').trim()) salon.name = shopName;
     const address = String(salon.address || '')
       .trim()
       .slice(0, 400);
@@ -416,14 +419,14 @@ export function renderTemplatePreview(templateId, customization = null, options 
     if (options && options.returnResolvedData) {
       return { id: 'beauty_standalone', content, seo };
     }
-    const bodyHtml = `<main style="font-family:system-ui,sans-serif;padding:2rem;max-width:36rem;line-height:1.55">
-<h1 style="font-size:1.2rem;margin:0 0 0.75rem">${escapeHtmlPreview(shopName)}</h1>
-${address ? `<p style="margin:0 0 1rem;color:#333">${escapeHtmlPreview(address)}</p>` : ''}
-<p style="margin:0;color:#555;font-size:0.95rem">この店舗ドラフトは<strong>美容室テンプレ（独立版）</strong>です。LPの編集・公開用HTMLは管理画面の独立エディタで行います（この画面は一覧・共有用の簡易プレビューです）。</p>
-</main>`;
-    return `<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtmlPreview(
-      shopName,
-    )}</title></head><body style="margin:0;background:#fafafa">${bodyHtml}</body></html>`;
+    const stylesheetHref = previewOrigin
+      ? `${previewOrigin}/admin/beauty-standalone-template/styles.css`
+      : '/admin/beauty-standalone-template/styles.css';
+    return buildBeautyStandalonePreviewDocument({
+      salon,
+      seo,
+      stylesheetHref,
+    });
   }
 
   if (!TEMPLATE_IDS.has(id) && !LEGACY_TEMPLATE_IDS.has(id)) return null;
