@@ -933,7 +933,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理（美容室）</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>から登録した案件は、ここでは<strong>作成前</strong>の行としても表示されます。<strong>作成前</strong>から<strong>送信前</strong>など7種のいずれかに変えると、<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として同じ店を引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -957,7 +957,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え<strong>メモリード</strong>の行が<strong>作成前</strong>で載ります（メモ側で「反映」した直後からここにも出ます）。<strong>作成前</strong>以外のフェーズに変えるとメモ一覧からは外れ、こちらの案件として残ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -2617,7 +2617,10 @@
           return sel;
         }
 
-        /** メモリード行：常に「作成前」。「送信前」に変えると API でメモを削除 */
+        /**
+         * メモリード行：UI 上は「作成前」。いずれかの営業フェーズに変えると
+         * メモは削除され、同じ内容のダッシュボード案件が追加される（メモリード一覧からは消える）。
+         */
         function renderMemoPhaseSelect(memo, loadFn) {
           var sel = el('select', { class: 'op-phase-select op-phase-select--memo', 'aria-label': 'メモリードのフェーズ' }, []);
           sel.appendChild(el('option', { value: MEMO_PHASE_KEY, text: MEMO_PHASE_LABEL, selected: true }));
@@ -2629,16 +2632,12 @@
             var v = String(sel.value || '').trim();
             syncOpPhaseSelectVisual(sel);
             if (v === MEMO_PHASE_KEY) return;
-            if (v !== 'before_send') {
-              showErr(
-                'メモリードの行は「送信前」にしたときだけ一覧から外れます。先に店舗ドラフトで案件化する場合は、メモリード一覧から手動で削除するか、「送信前」を選んでください。',
-              );
-              sel.value = MEMO_PHASE_KEY;
-              syncOpPhaseSelectVisual(sel);
-              return;
-            }
             sel.disabled = true;
-            deleteMemoLeadById(memo.id)
+            apiJson('/api/beauty-outreach/memo-leads/' + encodeURIComponent(memo.id) + '/promote', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ outreachPhaseUi: v }),
+            })
               .then(function () {
                 return loadFn();
               })
@@ -3134,7 +3133,7 @@
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
               text:
-                '左端が行番号とチェック（複数選んで表の上からまとめて削除）。列は A〜E（店舗名＋カードへ／住所／フェーズ／送信メッセージ／単体削除）。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行はフェーズが「作成前」で始まり、「送信前」にするとメモリード一覧から自動で外れます。',
+                '左端が行番号とチェック（複数選んで表の上からまとめて削除）。列は A〜E（店舗名＋カードへ／住所／フェーズ／送信メッセージ／単体削除）。住所・送信文は一覧では1行＋小入力に抑え、行のプルダウンから全文・拡大編集できます。メモリード由来の行は「作成前」で始まり、送信前など7種のいずれかに変えるとメモ一覧から外れ、通常の案件行として残ります。',
             }),
           );
 

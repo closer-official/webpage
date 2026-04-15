@@ -394,8 +394,8 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        <strong>サイトがない・弱い店</strong>はメモリードに残し、<strong>公式サイトが強い店</strong>は送付管理に
-        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
+        <strong>サイトがない・弱い店</strong>はメモリードに保存し、<strong>公式サイトが強い店</strong>は送付管理に
+        <strong>SNSなし・ウェブページ制作不可</strong>として直接登録できます（美容室モード／ホットペッパー想定のコピペ取込）。<strong>「選択した行だけ反映」</strong>を押すとメモが保存され、<strong>送付・フェーズ管理（美容）</strong>の一覧にも<strong>「作成前」</strong>の行として現れます（そこでフェーズや送信文を編集できます）。<strong>作成前</strong>以外のフェーズに変えると、このメモリード一覧からは消えます。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>店舗ドラフト編集</strong>へ飛ぶと、店名とメモがフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -412,8 +412,8 @@
         <div id="block-hpb">
           <p class="hpb-hint">
             まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。            <strong>店名を解析</strong>のあと、各行で
-            <strong>ウェブの有無・強弱</strong>を選びます（<strong>最初はどれも未選択</strong>。済んだ行だけ選んで反映すると、<strong>未選択の行は表に残る</strong>ので進捗が分かります）。<strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>、<strong>ウェブあり（強）</strong>だけ<strong>メモリードではなく</strong>送付・フェーズ管理に
-            <strong>SNSなし・ウェブページ制作不可</strong>で載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。            <strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            <strong>ウェブの有無・強弱</strong>を選びます（<strong>最初はどれも未選択</strong>。済んだ行だけ選んで反映すると、<strong>未選択の行は表に残る</strong>ので進捗が分かります）。            <strong>ウェブなし／弱い</strong>は<strong>メモリードに登録</strong>のうえ、<strong>送付・フェーズ管理（美容）</strong>にも<strong>作成前</strong>として載ります。<strong>ウェブあり（強）</strong>だけ<strong>メモリードには載せず</strong>送付・フェーズ管理に
+            <strong>SNSなし・ウェブページ制作不可</strong>で直接載ります。登録後も、下の<strong>保存済みメモ</strong>一覧から同じ3択に変更できます（「強」に変えるとメモから消えて送付管理へ移ります）。フェーズ画面で<strong>作成前</strong>以外にすると、この一覧からは消えます。            <strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -1053,10 +1053,10 @@
               showOk(
                 '反映しました（メモリード +' +
                   (j.memosAdded || 0) +
-                  '件／送付・フェーズ管理 +' +
+                  '件／送付・フェーズ管理（強ウェブのみ）+' +
                   (j.dashboardAdded || 0) +
-                  '件）' +
-                  (rest ? '。プレビューに未選択の行が ' + rest + ' 件残っています。' : '。'),
+                  '件）。ウェブなし・弱は「送付・フェーズ管理（美容）」に作成前の行でも出ます。' +
+                  (rest ? ' プレビューに未選択の行が ' + rest + ' 件残っています。' : ''),
               );
               return loadList();
             })

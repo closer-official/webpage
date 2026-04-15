@@ -74,7 +74,7 @@ import {
   buildBeautyOutreachDashboardMerged,
   resolveBeautyOutreachDashboardPatchTarget,
 } from './outreachDashboardMutate.js';
-import { buildStrongWebSalonDashboardRow } from './memoHpbIntake.js';
+import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
@@ -2359,6 +2359,51 @@ app.delete('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   if (next.length === list.length) return res.status(404).json({ error: 'Not found' });
   await store.setBeautyMemoLeads(next);
   res.status(204).end();
+});
+
+/** メモリード1件を美容ダッシュボードの正式案件にし、メモ一覧から外す（作成前→7フェーズのいずれか） */
+app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const id = String(req.params.id || '').trim();
+  const uiPhase = String(req.body?.outreachPhaseUi || '').trim();
+  const allowed = new Set([
+    'before_send',
+    'message_sent',
+    'no_outreach_channel',
+    'hearing',
+    'proposal',
+    'contracted',
+    'lost',
+  ]);
+  if (!allowed.has(uiPhase)) {
+    return res.status(400).json({ error: 'outreachPhaseUi が無効です（7フェーズのいずれかを指定してください）' });
+  }
+  const raw = await store.getBeautyMemoLeads();
+  const list = [...(Array.isArray(raw) ? raw : [])];
+  const idx = list.findIndex((x) => x && x.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  const memo = list[idx];
+  const shopName = String(memo.shopName || '').trim().slice(0, 200);
+  if (!shopName) {
+    return res.status(400).json({ error: '店名が空のメモは昇格できません' });
+  }
+  const access =
+    String(memo.hpbAccess || '')
+      .trim()
+      .slice(0, 800) || extractHpbAccessFromMemo(memo.memo);
+  const snippet = [String(memo.memo || '').trim(), String(memo.hpbBody || '').trim()].filter(Boolean).join('\n\n').trim();
+  const dashboardRow = buildBeautyMemoPromotedDashboardRow({
+    shopName,
+    accessText: access,
+    memoSnippet: snippet,
+    uiPhase,
+  });
+  list.splice(idx, 1);
+  const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+  dash.unshift(dashboardRow);
+  await store.setBeautyMemoLeads(list);
+  await store.setBeautyDashboard(dash);
+  res.status(201).json({ ok: true, item: dashboardRow });
 });
 
 app.patch('/api/beauty-outreach/dashboard/:id', async (req, res) => {
