@@ -44,6 +44,7 @@
         <button class="btn btn-secondary-admin" id="btn-apply">反映する</button>
       </div>
       <div class="parse-status" id="parse-status"></div>
+      <div class="parse-status" id="save-server-status" style="margin-top: 8px"></div>
     </div>
   </div>
 
@@ -150,6 +151,7 @@ let linkedDraftId = String(params.get('id') || '').trim();
 let linkedDraftName = '';
 
 function setSaveStatus(msg, kind) {
+  if (!saveStatusEl) return;
   saveStatusEl.textContent = msg || '';
   saveStatusEl.className = 'parse-status' + (kind ? ' ' + kind : '');
 }
