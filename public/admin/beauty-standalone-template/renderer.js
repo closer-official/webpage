@@ -42,11 +42,63 @@ export function renderLP(salon, container) {
   sections.push(buildCTA(salon));
 
   sections.forEach(s => container.appendChild(s));
+  container.appendChild(buildSiteFooter(salon));
+}
+
+/** 予約・指名リンクの既定（reserveUrl → homepageUrl） */
+function primaryBookingUrl(salon) {
+  const r = String(salon.reserveUrl || '').trim();
+  if (/^https?:\/\//i.test(r)) return r;
+  const h = String(salon.homepageUrl || '').trim();
+  if (/^https?:\/\//i.test(h)) return h;
+  return '';
+}
+
+function staffListUrlResolved(salon) {
+  const u = String(salon.staffListUrl || '').trim();
+  if (/^https?:\/\//i.test(u)) return u;
+  return primaryBookingUrl(salon);
+}
+
+function staffMemberReserveUrl(salon, staff) {
+  const u = String((staff && staff.reserveUrl) || '').trim();
+  if (/^https?:\/\//i.test(u)) return u;
+  return primaryBookingUrl(salon);
+}
+
+function buildSiteFooter(salon) {
+  const el = el_('footer', 'lp-footer lp-site-footer');
+  const ig = String(salon.instagramUrl || '').trim();
+  const ln = String(salon.lineUrl || '').trim();
+  const snsBtns = [];
+  if (/^https?:\/\//i.test(ig)) {
+    snsBtns.push(
+      `<a class="lp-footer-sns-btn lp-footer-sns-ig" href="${esc(ig)}" target="_blank" rel="noopener noreferrer">Instagram</a>`,
+    );
+  }
+  if (/^https?:\/\//i.test(ln)) {
+    snsBtns.push(
+      `<a class="lp-footer-sns-btn lp-footer-sns-line" href="${esc(ln)}" target="_blank" rel="noopener noreferrer">LINE</a>`,
+    );
+  }
+  const sns = snsBtns.length ? `<div class="lp-footer-sns">${snsBtns.join('')}</div>` : '';
+  const hp = String(salon.homepageUrl || '').trim();
+  const hpRow =
+    /^https?:\/\//i.test(hp) ? `<p class="lp-footer-line"><a href="${esc(hp)}" target="_blank" rel="noopener noreferrer">${esc(hp)}</a></p>` : '';
+  el.innerHTML = `
+    <p>${esc(salon.name)}</p>
+    ${salon.address ? `<p class="lp-footer-line">${esc(salon.address)}</p>` : ''}
+    ${hpRow}
+    ${sns}
+    <p class="lp-footer-credit"><a href="https://divizero.jp/" target="_blank" rel="noopener noreferrer">Presented by divizero</a></p>
+  `;
+  return el;
 }
 
 // ── Hero ──
 function buildHero(salon) {
   const el = el_('section', 'lp-section lp-hero');
+  el.id = 'hero';
   const rating = salon.rating ? `<span class="hero-rating"><span class="rating-star">★</span>${salon.rating}</span>` : '';
   const reviews = salon.reviewCount ? `<span class="hero-reviews">${salon.reviewCount.toLocaleString()}件の口コミ</span>` : '';
   const badge = salon.heroCatch ? `<div class="hero-badge">${salon.heroCatch}</div>` : '';
@@ -73,6 +125,7 @@ function buildHero(salon) {
 // ── Intro ──
 function buildIntro(salon) {
   const el = el_('section', 'lp-section lp-intro');
+  el.id = 'about';
   el.innerHTML = `
     <div class="section-inner">
       <div class="section-label">ABOUT</div>
@@ -86,6 +139,7 @@ function buildIntro(salon) {
 // ── Features ──
 function buildFeatures(salon) {
   const el = el_('section', 'lp-section lp-features');
+  el.id = 'features';
   const cards = salon.features.map((f, i) => `
     <div class="feature-card" style="--i:${i}">
       <div class="feature-num">${String(i + 1).padStart(2, '0')}</div>
@@ -106,6 +160,8 @@ function buildFeatures(salon) {
 // ── Coupons ──
 function buildCoupons(salon) {
   const el = el_('section', 'lp-section lp-coupons');
+  el.id = 'coupons';
+  const couponJump = primaryBookingUrl(salon);
   const cards = salon.coupons.slice(0, 6).map(c => {
     const typeClass = c.type === '新規' ? 'coupon-new' : c.type === '再来' ? 'coupon-repeat' : 'coupon-all';
     const cats = (c.categories || []).join(' · ');
@@ -132,6 +188,7 @@ function buildCoupons(salon) {
 // ── Atmosphere ──
 function buildAtmosphere(salon) {
   const el = el_('section', 'lp-section lp-atmosphere');
+  el.id = 'atmosphere';
   const items = salon.atmosphere.map((a, i) => `
     <div class="atmo-item" style="--i:${i}">
       <div class="atmo-num">${String(i + 1).padStart(2, '0')}</div>
@@ -173,6 +230,7 @@ function buildStaff(salon) {
 // ── Message ──
 function buildMessage(salon) {
   const el = el_('section', 'lp-section lp-message');
+  el.id = 'message';
   el.innerHTML = `
     <div class="section-inner">
       <div class="section-label">MESSAGE</div>
@@ -191,6 +249,7 @@ function hasStats(salon) {
 
 function buildStats(salon) {
   const el = el_('section', 'lp-section lp-stats');
+  el.id = 'stats';
   const s = salon.stats;
   const priceRows = [
     s.firstVisitPrice ? `<tr><td>初来店</td><td>${esc(s.firstVisitPrice)}</td></tr>` : '',
@@ -283,14 +342,25 @@ function buildAccess(salon) {
 // ── CTA ──
 function buildCTA(salon) {
   const el = el_('section', 'lp-section lp-cta');
+  el.id = 'cta';
+  const book = primaryBookingUrl(salon);
+  const hp = String(salon.homepageUrl || '').trim();
+  const hpOk = /^https?:\/\//i.test(hp);
+  const primaryBtn = book
+    ? `<a href="${esc(book)}" class="btn-primary" target="_blank" rel="noopener noreferrer">今すぐ予約する</a>`
+    : `<span class="btn-primary btn-primary--disabled" title="リンク（LP・予約）で予約ページURLを入力してください">今すぐ予約する</span>`;
+  const secondary =
+    hpOk && book && hp !== book
+      ? `<a href="${esc(hp)}" class="btn-secondary" target="_blank" rel="noopener noreferrer">公式サイトへ</a>`
+      : '';
   el.innerHTML = `
     <div class="cta-inner">
       <div class="section-label light">RESERVE</div>
       <h2 class="cta-title">${esc(salon.name)}<br><span>でお待ちしています</span></h2>
       ${salon.accessShort ? `<p class="cta-access">${esc(salon.accessShort)}</p>` : ''}
       <div class="cta-btns">
-        <a href="#" class="btn-primary">今すぐ予約する</a>
-        ${salon.homepageUrl ? `<a href="${esc(salon.homepageUrl)}" class="btn-secondary" target="_blank" rel="noopener">公式サイトへ</a>` : ''}
+        ${primaryBtn}
+        ${secondary}
       </div>
     </div>
   `;
@@ -330,4 +400,6 @@ function buildStaffAvatar(staff) {
     return `<div class="staff-avatar has-image"><img src="${esc(rawUrl)}" alt="${esc((staff && staff.name) || 'staff')}" loading="lazy" decoding="async"></div>`;
   }
   return `<div class="staff-avatar">${esc(fallbackText)}</div>`;
+}
+ackText)}</div>`;
 }

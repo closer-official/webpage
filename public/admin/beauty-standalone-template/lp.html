@@ -100,16 +100,11 @@ function init() {
 
   root.querySelectorAll('.lp-section').forEach(sec => observer.observe(sec));
 
-  // フッター
-  const footer = document.createElement('footer');
-  footer.className = 'lp-footer';
-  footer.innerHTML = `
-    <p>${escHtml(salon.name)}</p>
-    ${salon.address ? `<p style="margin-top:6px;">${escHtml(salon.address)}</p>` : ''}
-    ${salon.homepageUrl ? `<p style="margin-top:8px;"><a href="${escHtml(salon.homepageUrl)}" target="_blank">${escHtml(salon.homepageUrl)}</a></p>` : ''}
-    <a href="index.html" class="back-to-admin" style="margin-top:20px;">← 管理画面に戻る</a>
-  `;
-  root.appendChild(footer);
+  // LP 本文フッターは renderLP 内のサイトフッター（SNS・divizero）を使用。ここは管理画面へ戻るだけ。
+  const adminBar = document.createElement('div');
+  adminBar.className = 'lp-footer-admin';
+  adminBar.innerHTML = '<a href="index.html" class="back-to-admin">← 管理画面に戻る</a>';
+  root.appendChild(adminBar);
 }
 
 function escHtml(str) {

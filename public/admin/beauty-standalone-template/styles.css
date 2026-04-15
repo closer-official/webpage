@@ -823,6 +823,39 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   margin-top: 6px;
 }
 
+.staff-reserve-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(184,151,90,0.4);
+  padding-bottom: 2px;
+}
+
+.staff-reserve-link:hover {
+  color: var(--gold-l);
+  border-bottom-color: rgba(184,151,90,0.65);
+}
+
+.staff-view-all {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.staff-card--linkout {
+  cursor: pointer;
+}
+
+.staff-avatar--icon {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: var(--white);
+}
+
 /* ── Message ── */
 .lp-message {
   background: var(--ink);
@@ -1018,6 +1051,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .btn-primary:hover { background: var(--ink-l); transform: translateY(-1px); text-decoration: none; }
 
+.btn-primary--disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  user-select: none;
+}
+
 .btn-secondary {
   display: inline-block;
   padding: 14px 36px;
@@ -1183,6 +1222,95 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .lp-footer .back-to-admin:hover {
+  color: var(--gold-l);
+  border-color: rgba(184,151,90,0.6);
+}
+
+.lp-site-footer > p:first-child {
+  color: rgba(245,240,232,0.82);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.lp-footer-line {
+  margin-top: 10px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.lp-footer-sns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.lp-footer-sns-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 10px 18px;
+  border: 1px solid rgba(184,151,90,0.45);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: rgba(245,240,232,0.75);
+  text-decoration: none;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.lp-footer-sns-btn:hover {
+  color: var(--gold-l);
+  border-color: rgba(184,151,90,0.75);
+  background: rgba(245,240,232,0.06);
+}
+
+.lp-footer-credit {
+  margin-top: 24px;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+}
+
+.lp-footer-credit a {
+  color: rgba(245,240,232,0.42);
+  text-decoration: none;
+}
+
+.lp-footer-credit a:hover {
+  color: var(--gold-l);
+}
+
+.lp-footer-admin {
+  text-align: center;
+  padding: 18px 16px 32px;
+  background: var(--ink);
+  border-top: 1px solid rgba(245,240,232,0.06);
+}
+
+.lp-footer-admin .back-to-admin {
+  display: inline-block;
+  margin-top: 0;
+  padding: 8px 20px;
+  border: 1px solid rgba(184,151,90,0.3);
+  border-radius: 4px;
+  color: rgba(245,240,232,0.45);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.lp-footer-admin .back-to-admin:hover {
   color: var(--gold-l);
   border-color: rgba(184,151,90,0.6);
 }

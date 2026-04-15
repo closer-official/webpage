@@ -99,6 +99,13 @@ function renderForm(salon) {
     field('text', 'homepageUrl', '公式サイトURL', salon.homepageUrl),
   ]);
 
+  addGroup(form, 'リンク（LP・予約）', [
+    field('text', 'reserveUrl', '予約ページURL（ホットペッパー等）', salon.reserveUrl || ''),
+    field('text', 'staffListUrl', 'スタイリスト一覧URL（空なら予約URLと同じ扱い）', salon.staffListUrl || ''),
+    field('text', 'instagramUrl', 'Instagram URL（空ならフッターに出しません）', salon.instagramUrl || ''),
+    field('text', 'lineUrl', 'LINE URL（空ならフッターに出しません）', salon.lineUrl || ''),
+  ]);
+
   // 店舗データ
   addGroup(form, '店舗データ', [
     field('text', 'openingHours', '営業時間', salon.openingHours),
@@ -147,8 +154,17 @@ function renderForm(salon) {
       field('text', 'specialty', '専門', item.specialty),
       field('text', 'experience', '経験', item.experience),
       field('text', 'catch', 'キャッチ', item.catch),
+      field('text', 'reserveUrl', '指名予約URL（空なら上の予約ページ）', item.reserveUrl || ''),
     ],
-    () => ({ name: '', avatarUrl: '', avatarText: '', specialty: '', experience: '', catch: '' })
+    () => ({
+      name: '',
+      avatarUrl: '',
+      avatarText: '',
+      specialty: '',
+      experience: '',
+      catch: '',
+      reserveUrl: '',
+    })
   );
 }
 
@@ -193,6 +209,7 @@ function addGroup(form, title, fields) {
     input.addEventListener('input', () => {
       currentSalon[f.key] = input.value;
       renderLP(currentSalon, previewContainer);
+      persistDraft();
     });
 
     row.appendChild(input);

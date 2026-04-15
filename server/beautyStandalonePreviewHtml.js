@@ -13,6 +13,26 @@ function esc(str) {
     .replace(/'/g, '&#039;');
 }
 
+function primaryBookingUrl(salon) {
+  const r = String(salon.reserveUrl || '').trim();
+  if (/^https?:\/\//i.test(r)) return r;
+  const h = String(salon.homepageUrl || '').trim();
+  if (/^https?:\/\//i.test(h)) return h;
+  return '';
+}
+
+function staffListUrlResolved(salon) {
+  const u = String(salon.staffListUrl || '').trim();
+  if (/^https?:\/\//i.test(u)) return u;
+  return primaryBookingUrl(salon);
+}
+
+function staffMemberReserveUrl(salon, staff) {
+  const u = String((staff && staff.reserveUrl) || '').trim();
+  if (/^https?:\/\//i.test(u)) return u;
+  return primaryBookingUrl(salon);
+}
+
 function getInitials(name) {
   if (!name) return '?';
   if (/[\u3040-\u30FF\u4E00-\u9FFF]/.test(name)) return name.charAt(0);
@@ -106,6 +126,7 @@ function buildFeaturesHtml(salon) {
 }
 
 function buildCouponsHtml(salon) {
+  const couponJump = primaryBookingUrl(salon);
   const cards = salon.coupons.slice(0, 6).map((c) => {
     const typeClass = c.type === '新規' ? 'coupon-new' : c.type === '再来' ? 'coupon-repeat' : 'coupon-all';
     const cats = (c.categories || []).join(' · ');
@@ -152,23 +173,39 @@ function buildAtmosphereHtml(salon) {
 }
 
 function buildStaffHtml(salon) {
+  const listJump = staffListUrlResolved(salon);
   const cards = salon.staff
-    .map(
-      (s, i) => `
+    .map((s, i) => {
+      const href = staffMemberReserveUrl(salon, s);
+      const reserve = href
+        ? `<a class="staff-reserve-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer">指名して予約する</a>`
+        : '';
+      return `
     <div class="staff-card" style="--i:${i}">
       ${buildStaffAvatarHtml(s)}
       <h3 class="staff-name">${esc(s.name)}</h3>
       ${s.specialty ? `<p class="staff-specialty">${esc(s.specialty)}</p>` : ''}
       ${s.experience ? `<span class="staff-exp">${esc(s.experience)}</span>` : ''}
       ${s.catch ? `<p class="staff-catch">${esc(s.catch)}</p>` : ''}
-    </div>`,
-    )
+      ${reserve}
+    </div>`;
+    })
     .join('');
+  const viewAll =
+    listJump && salon.staff.length
+      ? `<a class="staff-view-all" href="${esc(listJump)}" target="_blank" rel="noopener noreferrer">
+      <div class="staff-card staff-card--linkout" style="--i:${salon.staff.length}">
+        <div class="staff-avatar staff-avatar--icon" aria-hidden="true">→</div>
+        <h3 class="staff-name">このサロンのすべてのスタイリストを見る</h3>
+        <p class="staff-specialty">公式の一覧・予約ページへ</p>
+      </div>
+    </a>`
+      : '';
   return `<section class="lp-section lp-staff" id="staff">
     <div class="section-inner">
       <div class="section-label">STAFF</div>
       <h2 class="section-title">スタイリスト</h2>
-      <div class="staff-grid">${cards}</div>
+      <div class="staff-grid">${cards}${viewAll}</div>
     </div>
   </section>`;
 }
@@ -283,9 +320,9 @@ function buildAccessHtml(salon) {
         ${salon.address ? `<div class="access-address"><span class="pin">📍</span>${esc(salon.address)}</div>` : ''}
         <table class="access-table">${tableRows}</table>
         ${
-          salon.homepageUrl
-            ? `<div class="access-url"><a href="${esc(salon.homepageUrl)}" target="_blank" rel="noopener">${esc(
-                salon.homepageUrl,
+          /^https?:\/\//i.test(String(salon.homepageUrl || '').trim())
+            ? `<div class="access-url"><a href="${esc(String(salon.homepageUrl).trim())}" target="_blank" rel="noopener noreferrer">${esc(
+                String(salon.homepageUrl).trim(),
               )}</a></div>`
             : ''
         }
@@ -324,18 +361,30 @@ function buildNavHtml(salon) {
   </nav>`;
 }
 
-function buildFooterHtml(salon) {
-  return `<footer class="lp-footer">
+function buildSiteFooterHtml(salon) {
+  const ig = String(salon.instagramUrl || '').trim();
+  const ln = String(salon.lineUrl || '').trim();
+  const snsBtns = [];
+  if (/^https?:\/\//i.test(ig)) {
+    snsBtns.push(
+      `<a class="lp-footer-sns-btn lp-footer-sns-ig" href="${esc(ig)}" target="_blank" rel="noopener noreferrer">Instagram</a>`,
+    );
+  }
+  if (/^https?:\/\//i.test(ln)) {
+    snsBtns.push(
+      `<a class="lp-footer-sns-btn lp-footer-sns-line" href="${esc(ln)}" target="_blank" rel="noopener noreferrer">LINE</a>`,
+    );
+  }
+  const sns = snsBtns.length ? `<div class="lp-footer-sns">${snsBtns.join('')}</div>` : '';
+  const hp = String(salon.homepageUrl || '').trim();
+  const hpRow =
+    /^https?:\/\//i.test(hp) ? `<p class="lp-footer-line"><a href="${esc(hp)}" target="_blank" rel="noopener noreferrer">${esc(hp)}</a></p>` : '';
+  return `<footer class="lp-footer lp-site-footer">
     <p>${esc(salon.name)}</p>
-    ${salon.address ? `<p style="margin-top:6px;">${esc(salon.address)}</p>` : ''}
-    ${
-      salon.homepageUrl
-        ? `<p style="margin-top:8px;"><a href="${esc(salon.homepageUrl)}" target="_blank" rel="noopener">${esc(
-            salon.homepageUrl,
-          )}</a></p>`
-        : ''
-    }
-    <p style="margin-top:16px;opacity:0.55;font-size:0.65rem;">共有プレビュー（/api/template-preview）</p>
+    ${salon.address ? `<p class="lp-footer-line">${esc(salon.address)}</p>` : ''}
+    ${hpRow}
+    ${sns}
+    <p class="lp-footer-credit"><a href="https://divizero.jp/" target="_blank" rel="noopener noreferrer">Presented by divizero</a></p>
   </footer>`;
 }
 
@@ -358,7 +407,7 @@ export function buildBeautyStandalonePreviewBodyHtml(salon) {
   if (hasStats(salon)) parts.push(buildStatsHtml(salon));
   parts.push(buildAccessHtml(salon));
   parts.push(buildCtaHtml(salon));
-  parts.push(buildFooterHtml(salon));
+  parts.push(buildSiteFooterHtml(salon));
   return `<div class="lp-root" id="lp-preview-root">${parts.join('\n')}</div>`;
 }
 
@@ -385,7 +434,6 @@ export function buildBeautyStandalonePreviewDocument(opts) {
 
   const extraStyle = `
     body { margin: 0; }
-    .lp-nav-links a { pointer-events: none; cursor: default; }
   `;
 
   return `<!DOCTYPE html>

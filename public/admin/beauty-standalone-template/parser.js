@@ -385,6 +385,11 @@ export function parseHotpepper(rawText) {
   salon.parking = salonData.parking;
   salon.cutPrice = salonData.cutPrice;
   salon.homepageUrl = salonData.homepageUrl;
+  const hp = String(salon.homepageUrl || '').trim();
+  if (hp && /^https?:\/\//i.test(hp)) {
+    if (!String(salon.reserveUrl || '').trim()) salon.reserveUrl = hp;
+    if (!String(salon.staffListUrl || '').trim()) salon.staffListUrl = hp;
+  }
 
   salon.stats = extractStats(rawText);
 

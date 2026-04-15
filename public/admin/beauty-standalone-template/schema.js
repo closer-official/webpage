@@ -16,6 +16,12 @@ export function createEmptySalon() {
     messageTitle: '',
     messageText: '',
     homepageUrl: '',
+    /** 予約（ホットペッパー等）— 未設定時は CTA・指名リンクは homepageUrl にフォールバック */
+    reserveUrl: '',
+    /** スタイリスト一覧ページ — 未設定時は reserveUrl / homepageUrl */
+    staffListUrl: '',
+    instagramUrl: '',
+    lineUrl: '',
     openingHours: '',
     closedDays: '',
     paymentMethods: '',
@@ -26,7 +32,7 @@ export function createEmptySalon() {
     features: [],      // { title, text }
     atmosphere: [],    // string[]
     coupons: [],       // { type, categories[], price, title, conditions }
-    staff: [],         // { name, specialty, catch, experience, avatarUrl, avatarText }
+    staff: [],         // { name, specialty, catch, experience, avatarUrl, avatarText, reserveUrl? }
     stats: {
       firstVisitPrice: '',
       repeatVisitPrice: '',
