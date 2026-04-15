@@ -62,9 +62,19 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 56px;
+  gap: 16px;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  min-height: 56px;
+  padding: 12px clamp(16px, 4vw, 28px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
   border-bottom: 1px solid rgba(184,151,90,0.3);
+}
+
+.app-header-brand {
+  flex: 1 1 auto;
+  min-width: min(100%, 14rem);
 }
 
 .app-header h1 {
@@ -73,25 +83,51 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--gold-l);
+  line-height: 1.25;
 }
 
 .app-header .header-sub {
+  margin-top: 2px;
   font-size: 0.7rem;
   font-family: var(--font-mono);
-  color: var(--stone);
+  color: rgba(184, 176, 160, 0.95);
   letter-spacing: 0.08em;
+  line-height: 1.45;
 }
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
   align-items: center;
+  flex: 0 1 auto;
+}
+
+/* ダークヘッダー上のボタン（コントラスト） */
+.app-header .btn-ghost-admin {
+  color: rgba(245, 240, 232, 0.9);
+  border-color: rgba(245, 240, 232, 0.22);
+}
+.app-header .btn-ghost-admin:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.07);
+  text-decoration: none;
+}
+
+.app-header .btn-secondary-admin {
+  color: rgba(245, 240, 232, 0.92);
+  border-color: rgba(245, 240, 232, 0.35);
+}
+.app-header .btn-secondary-admin:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Panel base ── */
 .panel {
   overflow-y: auto;
-  height: calc(100vh - 56px);
+  min-height: 0;
+  height: 100%;
   position: relative;
 }
 
@@ -180,47 +216,6 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   padding: 0;
 }
 
-/* ── JSON Modal ── */
-.json-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(28,26,23,0.7);
-  align-items: center;
-  justify-content: center;
-}
-
-.json-modal.open {
-  display: flex;
-}
-
-.json-modal-inner {
-  background: var(--ink);
-  color: #a8c090;
-  padding: 24px;
-  border-radius: var(--r-lg);
-  width: 90%;
-  max-width: 640px;
-  max-height: 80vh;
-  overflow-y: auto;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.json-modal-close {
-  display: block;
-  margin-top: 16px;
-  text-align: right;
-  color: var(--stone);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
 /* ── Buttons ── */
 .btn {
   display: inline-flex;
@@ -278,6 +273,13 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: rgba(201,160,154,0.15);
   color: var(--blush);
   border: 1px solid rgba(201,160,154,0.3);
+}
+
+.parse-status.hint {
+  display: block;
+  background: rgba(184, 151, 90, 0.12);
+  color: var(--ink-l);
+  border: 1px solid rgba(184, 151, 90, 0.28);
 }
 
 /* ── Editor form ── */

@@ -12,19 +12,17 @@
 
   <!-- ── Header ── -->
   <header class="app-header">
-    <div>
+    <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
-      <div class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</div>
+      <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
     </div>
-    <div class="header-actions">
+    <nav class="header-actions" aria-label="主要操作">
       <a class="btn btn-ghost-admin" href="/admin/outreach-phases-beauty.html?v=7phase">送付・フェーズ管理（美容）</a>
       <a class="btn btn-ghost-admin" href="/admin/template-worker.html">店舗ドラフト編集（cafe）</a>
       <button class="btn btn-primary-admin" id="btn-save-server" type="button">サーバーに保存</button>
-      <button class="btn btn-ghost-admin" id="btn-json" type="button">JSON を見る</button>
       <button class="btn btn-secondary-admin" id="btn-reset" type="button">リセット</button>
       <button class="btn btn-primary-admin" id="btn-export" type="button">LP を開く →</button>
-    </div>
-    <p id="draft-server-hint" class="header-sub" style="margin-top: 8px; max-width: 52rem"></p>
+    </nav>
   </header>
 
   <!-- ── Input Panel ── -->
@@ -76,12 +74,6 @@
     </div>
   </div>
 
-</div>
-
-<!-- ── JSON Modal ── -->
-<div class="json-modal" id="json-modal">
-  <div class="json-modal-inner" id="json-content"></div>
-  <div class="json-modal-close" onclick="document.getElementById('json-modal').classList.remove('open')">× 閉じる</div>
 </div>
 
 <script type="module">
@@ -144,7 +136,6 @@ async function fetchAdminJson(path, opts = {}) {
 const previewEl = document.getElementById('lp-preview');
 const hpInputEl = document.getElementById('hp-input');
 const saveStatusEl = document.getElementById('save-server-status');
-const draftHintEl = document.getElementById('draft-server-hint');
 
 const params = new URLSearchParams(location.search || '');
 let linkedDraftId = String(params.get('id') || '').trim();
@@ -176,19 +167,22 @@ async function loadDraftFromServer(id) {
   if (salon && typeof salon === 'object' && salon.name) {
     loadIntoEditor(salon);
   } else if (base !== 'beauty_standalone') {
-    draftHintEl.textContent =
+    setSaveStatus(
       'ドラフト base: ' +
-      base +
-      '。独立版用データ（beautyStandaloneSalon）がまだありません。下の①にホットペッパー全文を貼り「解析する」で取り込んでから保存すると、独立版に移行できます。';
+        base +
+        '。① にホットペッパー全文を貼り「解析する」で取り込み、「サーバーに保存」で独立版に移行できます。',
+      'hint',
+    );
     return;
   }
-  draftHintEl.textContent =
-    'サーバー連携ドラフト ID: ' +
-    id +
-    (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
-    '。共有用プレビュー: ' +
-    previewPublicUrl(id) +
-    ' ／ 送付・フェーズは「送付・フェーズ管理（美容）」（/admin/outreach-phases-beauty.html）から。';
+  setSaveStatus(
+    'サーバーからドラフトを読み込みました（' +
+      id +
+      (linkedDraftName ? '／' + linkedDraftName : '') +
+      '）。共有プレビュー: ' +
+      previewPublicUrl(id),
+    'hint',
+  );
 }
 
 initEditor(previewEl);
@@ -209,15 +203,13 @@ try {
     await loadDraftFromServer(linkedDraftId);
     hpInputEl.value = loadHpInputDraft();
   } else {
-    draftHintEl.textContent =
-      'URL に ?id=店舗ドラフトID があるときサーバーへ保存できます。未指定のときは「サーバーに保存」で新規ドラフトを作成し、URL に id を付けます。';
     hpInputEl.value = loadHpInputDraft();
     const savedSalon = loadStoredSalon();
     if (savedSalon) loadIntoEditor(savedSalon);
   }
 } catch (e) {
   console.error(e);
-  draftHintEl.textContent = String(e.message || e);
+  setSaveStatus(String(e.message || e), 'error');
   hpInputEl.value = loadHpInputDraft();
   const savedSalon = loadStoredSalon();
   if (savedSalon) loadIntoEditor(savedSalon);
@@ -257,13 +249,6 @@ document.getElementById('btn-apply').addEventListener('click', () => {
   if (salon) renderLP(salon, previewEl);
 });
 
-// ── JSON modal ──
-document.getElementById('btn-json').addEventListener('click', () => {
-  const salon = getCurrentSalon();
-  document.getElementById('json-content').textContent = JSON.stringify(salon, null, 2);
-  document.getElementById('json-modal').classList.add('open');
-});
-
 // ── Reset ──
 document.getElementById('btn-reset').addEventListener('click', () => {
   if (!confirm('すべてリセットしますか？')) return;
@@ -298,15 +283,13 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
         }),
       });
       linkedDraftName = String(j.item && j.item.name ? j.item.name : linkedDraftName);
-      setSaveStatus('サーバーに保存しました（店舗ドラフトを更新し、未登録ならフェーズ用一覧に1件追加します）。', 'success');
       const pv = previewPublicUrl(linkedDraftId);
-      draftHintEl.textContent =
-        'ドラフト ID: ' +
-        linkedDraftId +
-        (linkedDraftName ? '（登録名: ' + linkedDraftName + '）' : '') +
-        ' ／ 共有プレビューURL: ' +
-        pv +
-        ' ／ 送付・フェーズ: 上部「送付・フェーズ管理（美容）」（/admin/outreach-phases-beauty.html）から。';
+      setSaveStatus(
+        'サーバーに保存しました。共有プレビュー: ' +
+          pv +
+          ' ／ 送付・フェーズは上部の「送付・フェーズ管理（美容）」で確認できます。',
+        'success',
+      );
       return;
     }
     if (!window.confirm('新しい店舗ドラフトとしてサーバーに作成しますか？（base: beauty_standalone）')) return;
@@ -326,14 +309,15 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
       u.searchParams.set('id', newId);
       history.replaceState({}, '', u.toString());
       const pv = previewPublicUrl(newId);
-      draftHintEl.textContent =
-        '新規ドラフト ID: ' +
-        newId +
-        '（このタブの URL に id が付きました。ブックマーク推奨） ／ 共有プレビュー: ' +
-        pv +
-        ' ／ 送付・フェーズ一覧（美容専用）に自動で1件追加されます（上部「送付・フェーズ管理（美容）」で確認）。';
+      setSaveStatus(
+        '新規ドラフトを保存しました（URL に id を付けました）。共有プレビュー: ' +
+          pv +
+          ' ／ フェーズ一覧は「送付・フェーズ管理（美容）」で確認できます。',
+        'success',
+      );
+    } else {
+      setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
     }
-    setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
   } catch (e) {
     console.error(e);
     setSaveStatus(String(e.message || e), 'error');
@@ -353,10 +337,6 @@ document.getElementById('btn-export').addEventListener('click', () => {
   window.open('lp.html', '_blank');
 });
 
-// ── JSON modal close on backdrop ──
-document.getElementById('json-modal').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-});
 </script>
 
 </body>
