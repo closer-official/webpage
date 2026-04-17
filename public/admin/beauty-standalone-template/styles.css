@@ -260,6 +260,19 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .btn-ghost-admin:hover { color: var(--ink); }
 
+/* ── デプロイ確認用（左上・キャッシュ切り分け） ── */
+.beauty-standalone-rev-badge {
+  position: fixed;
+  top: 6px;
+  left: 8px;
+  z-index: 10050;
+  font: 11px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: rgba(46, 42, 36, 0.42);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.04em;
+}
+
 /* ── Parse status ── */
 .parse-status {
   margin-top: 10px;

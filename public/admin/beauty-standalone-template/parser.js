@@ -106,6 +106,41 @@ function extractNameFromPatterns(text) {
   return '';
 }
 
+/**
+ * HP 先頭の「ブラウザ用の長いタイトル行」対策。
+ * 例: `Hairsalon F …【ヘアサロン　エフ】` の次行 `ヘアサロンエフ` や【】内の屋号を店名にする。
+ */
+function extractNameHotpepperHead(rawLines) {
+  if (!rawLines || !rawLines.length) return '';
+  const line0 = String(rawLines[0] || '').trim();
+  const line1 = rawLines.length > 1 ? String(rawLines[1] || '').trim() : '';
+
+  const inBrackets = [];
+  const re = /【([\u3040-\u30FF\u4E00-\u9FFF\w・　\s]{2,30})】/g;
+  let m;
+  while ((m = re.exec(line0)) !== null) {
+    const inner = m[1].replace(/[ 　\t]+/g, '').trim();
+    if (inner.length >= 2) inBrackets.push(inner);
+  }
+  if (inBrackets.length) {
+    const serviceish = /^(ブリーチ|カラー|カット|メンズ|レディース|当日|空き|改善|韓国|渋谷|表参道)/;
+    for (let i = inBrackets.length - 1; i >= 0; i--) {
+      const c = inBrackets[i];
+      if (!serviceish.test(c) && c.length <= 20) return c;
+    }
+    const last = inBrackets[inBrackets.length - 1];
+    if (!serviceish.test(last)) return last.slice(0, 22);
+  }
+
+  if (line1 && !isUnlikelySalonNameLine(line1)) {
+    const jpShort = /^[\u3040-\u30FF\u4E00-\u9FFF・\s]{2,22}$/.test(line1);
+    const longTitle0 =
+      line0.length > 24 && (/[/／]/.test(line0) || /【/.test(line0) || /[A-Za-z]{4,}/.test(line0));
+    if (jpShort && longTitle0) return line1.replace(/\s+/g, '');
+  }
+  return '';
+}
+
 /** 本文全体から、ノイズでない短い日本語行を店名候補に */
 function extractNameLoose(rawLines) {
   for (let i = 0; i < Math.min(60, rawLines.length); i++) {
@@ -119,11 +154,20 @@ function extractNameLoose(rawLines) {
   return '';
 }
 
+/** ブラウザタブ用の長い英日混じりタイトル（店名ではない） */
+function isBrowserTitleNoiseLine(l) {
+  const s = String(l || '').trim();
+  if (s.length < 32) return false;
+  if (/【.+】/.test(s) && /[A-Za-z]/.test(s) && (/[/／]/.test(s) || s.length > 45)) return true;
+  return false;
+}
+
 function extractName(rawLines) {
   // 先頭数行から、ページタイトルになりうる行を探す
   for (let i = 0; i < Math.min(25, rawLines.length); i++) {
     const l = rawLines[i];
     if (!l || isUnlikelySalonNameLine(l)) continue;
+    if (isBrowserTitleNoiseLine(l)) continue;
     // 「（英語名）」パターン or 単純な店名（長い説明文は除外しつつ少し緩める）
     if (/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l) && l.length < 40 && !l.includes('HOT PEPPER') && !l.includes('検索') && !l.includes('サイト') && !l.includes('トップ')) {
       return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
@@ -132,6 +176,7 @@ function extractName(rawLines) {
   for (let i = 0; i < Math.min(40, rawLines.length); i++) {
     const l = rawLines[i];
     if (!l || isUnlikelySalonNameLine(l)) continue;
+    if (isBrowserTitleNoiseLine(l)) continue;
     if (/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l) && l.length >= 2 && l.length <= 58 && !l.includes('HOT PEPPER') && !l.includes('検索') && !l.includes('サイト') && !l.includes('トップ')) {
       return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
     }
@@ -420,6 +465,7 @@ export function parseHotpepper(rawText) {
   const cleanedText = removeHotpepperNoise(rawText);
 
   let nameGuess =
+    extractNameHotpepperHead(rawLines) ||
     extractNameFromPatterns(rawText) ||
     extractName(rawLines) ||
     extractNameLoose(rawLines) ||
