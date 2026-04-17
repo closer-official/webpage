@@ -63,14 +63,76 @@ function removeHotpepperNoise(text) {
 
 // ---- 個別抽出関数 ----
 
+/** メニュー・価格・クーポン行など（先頭に来ても店名ではない） */
+function isUnlikelySalonNameLine(l) {
+  if (!l) return true;
+  const s = String(l).trim();
+  if (s.length < 2) return true;
+  if (/HOT\s*PEPPER|検索|サイトトップ|国内最大級/.test(s)) return true;
+  if (/(初来店|2回目以降|リピート|再来店|新規).{0,16}[¥￥,，\d]/.test(s)) return true;
+  if (/[¥￥]\s*[\d,]+/.test(s)) return true;
+  if (/[\d,]+\s*円/.test(s)) return true;
+  if (/\t/.test(s) && /[¥￥\d]/.test(s)) return true;
+  if (/対象\s*[：:]/.test(s) && s.length < 40) return true;
+  if (/所要時間|施術時間/.test(s) && /\d+\s*分/.test(s)) return true;
+  if (/空席確認|ブックマーク|会員登録|ログイン/.test(s)) return true;
+  if (/クーポン|メニュー一覧|スタイリスト一覧/.test(s) && s.length < 30) return true;
+  return false;
+}
+
+function extractNameFromPatterns(text) {
+  const t = String(text || '').replace(/\r\n/g, '\n');
+  const labelRe = [
+    /店\s*名\s*[：:･・\t]\s*([^\n\r]+)/,
+    /サロン名\s*[：:･・\t]\s*([^\n\r]+)/,
+    /お店の名前\s*[：:]\s*([^\n\r]+)/,
+    /(?:^|\n)店名\s*[：:]\s*([^\n\r]+)/,
+  ];
+  for (const p of labelRe) {
+    const m = t.match(p);
+    if (m && m[1]) {
+      const cand = m[1]
+        .replace(/\s*[|｜].*$/, '')
+        .replace(/HOT\s*PEPPER.*/i, '')
+        .trim();
+      if (cand.length >= 2 && cand.length <= 60 && !isUnlikelySalonNameLine(cand)) return cand.slice(0, 60);
+    }
+  }
+  const pipe = t.match(/([\u3040-\u30FF\u4E00-\u9FFF\w][\u3040-\u30FF\u4E00-\u9FFF\w\s·．・]{1,40})\s*[|｜]\s*HOT\s*PEPPER/i);
+  if (pipe && pipe[1]) {
+    const cand = pipe[1].replace(/\s+/g, ' ').trim();
+    if (!isUnlikelySalonNameLine(cand)) return cand.slice(0, 60);
+  }
+  return '';
+}
+
+/** 本文全体から、ノイズでない短い日本語行を店名候補に */
+function extractNameLoose(rawLines) {
+  for (let i = 0; i < Math.min(60, rawLines.length); i++) {
+    const l = rawLines[i];
+    if (!l || isUnlikelySalonNameLine(l)) continue;
+    if (!/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l)) continue;
+    if (l.length < 2 || l.length > 52) continue;
+    if (/^https?:\/\//i.test(l)) continue;
+    return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim().slice(0, 52);
+  }
+  return '';
+}
+
 function extractName(rawLines) {
   // 先頭数行から、ページタイトルになりうる行を探す
-  for (let i = 0; i < Math.min(15, rawLines.length); i++) {
+  for (let i = 0; i < Math.min(25, rawLines.length); i++) {
     const l = rawLines[i];
-    if (!l) continue;
-    // 「（英語名）」パターン or 単純な店名
+    if (!l || isUnlikelySalonNameLine(l)) continue;
+    // 「（英語名）」パターン or 単純な店名（長い説明文は除外しつつ少し緩める）
     if (/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l) && l.length < 40 && !l.includes('HOT PEPPER') && !l.includes('検索') && !l.includes('サイト') && !l.includes('トップ')) {
-      // 括弧除去してクリーンな店名を取得
+      return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
+    }
+  }
+  for (let i = 0; i < Math.min(40, rawLines.length); i++) {
+    const l = rawLines[i];
+    if (!l || isUnlikelySalonNameLine(l)) continue;
+    if (/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l) && l.length >= 2 && l.length <= 58 && !l.includes('HOT PEPPER') && !l.includes('検索') && !l.includes('サイト') && !l.includes('トップ')) {
       return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
     }
   }
@@ -348,13 +410,22 @@ function extractStats(text) {
 
 // ---- メインパーサー ----
 
+/** 本文に十分な情報があるが店名だけ取れないときの仮名（②で差し替え前提） */
+export const SALON_NAME_PLACEHOLDER = '（店名を自動判定できませんでした）';
+
 export function parseHotpepper(rawText) {
   const salon = createEmptySalon();
   const rawLines = rawText.split(/\r?\n/).map(l => l.trim());
   const cleanedLines = rawLines.map(cleanLine).filter(Boolean);
   const cleanedText = removeHotpepperNoise(rawText);
 
-  salon.name = extractName(rawLines);
+  let nameGuess =
+    extractNameFromPatterns(rawText) ||
+    extractName(rawLines) ||
+    extractNameLoose(rawLines) ||
+    '';
+  if (nameGuess && isUnlikelySalonNameLine(nameGuess)) nameGuess = '';
+  salon.name = nameGuess.trim();
   salon.title = extractTitle(rawLines);
 
   const { rating, reviewCount } = extractRatingAndReviews(rawText);
@@ -392,6 +463,22 @@ export function parseHotpepper(rawText) {
   }
 
   salon.stats = extractStats(rawText);
+
+  if (String(salon.name || '').trim() && isUnlikelySalonNameLine(salon.name)) {
+    salon.name = '';
+  }
+  if (!String(salon.name || '').trim()) {
+    const rawCompact = String(rawText || '').replace(/\s/g, '');
+    const hasJp = /[\u30A0-\u30FF\u4E00-\u9FFF]/.test(rawText);
+    const hasBody =
+      (String(salon.introText || '').replace(/\s/g, '').length > 50) ||
+      (Array.isArray(salon.coupons) && salon.coupons.length > 0) ||
+      (Array.isArray(salon.features) && salon.features.length > 0) ||
+      (Array.isArray(salon.staff) && salon.staff.length > 0) ||
+      rawCompact.length > 100 ||
+      (hasJp && rawCompact.length > 15);
+    if (hasBody) salon.name = SALON_NAME_PLACEHOLDER;
+  }
 
   return salon;
 }

@@ -91,7 +91,7 @@
 </div>
 
 <script type="module">
-import { parseHotpepper } from './parser.js';
+import { parseHotpepper, SALON_NAME_PLACEHOLDER } from './parser.js';
 import {
   initEditor,
   loadIntoEditor,
@@ -272,21 +272,29 @@ document.getElementById('btn-parse').addEventListener('click', () => {
   }
 
   btn.disabled = true;
+  setParseStatus('解析しています…', 'notice');
   try {
     const salon = parseHotpepper(text);
     if (!salon.name) {
       setParseStatus(
-        '店名を抽出できませんでした。ホットペッパーの全文が含まれているか確認してください。',
+        '店名や本文をうまく読み取れませんでした。ホットペッパーのサロンページを「全選択」して①に貼るか、①の先頭に「店名: ○○サロン」と追記してから再度お試しください。',
         'error',
       );
       return;
     }
     loadIntoEditor(salon);
     saveHpInputDraft(document.getElementById('hp-input').value);
-    setParseStatus(
-      `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
-      'success',
-    );
+    if (salon.name === SALON_NAME_PLACEHOLDER) {
+      setParseStatus(
+        `取り込み済み（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名が本文から特定できなかったため、②の「店名」に正しいサロン名を入力してください。`,
+        'notice',
+      );
+    } else {
+      setParseStatus(
+        `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
+        'success',
+      );
+    }
   } catch (e) {
     console.error(e);
     setParseStatus(`解析エラー: ${e.message}`, 'error');
