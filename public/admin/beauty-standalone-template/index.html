@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=25" />
+  <link rel="stylesheet" href="styles.css?v=26" />
 </head>
 <body>
 
@@ -18,7 +18,7 @@
       class="beauty-standalone-rev-badge"
       title="デプロイ・キャッシュ確認用。数字を上げたリリースかどうかの目印です（ヘッダー左端）。"
       aria-hidden="true"
-    >25</span>
+    >26</span>
     <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
       <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
@@ -98,7 +98,7 @@
 </div>
 
 <script type="module">
-import { parseHotpepper, buildSalonForAdminImport } from './parser.js';
+import { buildSalonForAdminImport, SALON_NAME_PLACEHOLDER } from './parser.js';
 import {
   initEditor,
   loadIntoEditor,
@@ -146,7 +146,25 @@ async function fetchAdminJson(path, opts = {}) {
   if (opts.body && typeof opts.body === 'string' && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
-  const r = await fetch(url, { credentials: 'include', ...opts, headers });
+  const ctrl = new AbortController();
+  const timeoutMs = 28000;
+  const tid = setTimeout(() => ctrl.abort(), timeoutMs);
+  let r;
+  try {
+    r = await fetch(url, {
+      credentials: 'include',
+      ...opts,
+      headers,
+      signal: ctrl.signal,
+    });
+  } catch (e) {
+    if (e && e.name === 'AbortError') {
+      throw new Error('通信がタイムアウトしました（' + timeoutMs / 1000 + '秒）。ページは操作できますが、サーバー読み込みは後から再試行してください。');
+    }
+    throw e;
+  } finally {
+    clearTimeout(tid);
+  }
   const text = await r.text();
   let j = null;
   if (text) {
@@ -181,14 +199,11 @@ async function applyBeautyMemoLeadFromQuery(mid) {
   const memoText = String(row.memo || '').trim();
   const shop = String(row.shopName || '').trim();
   const hpText = memoText || (shop ? `店名: ${shop}\n\n（メモ本文なし）` : '');
-  hpInputEl.value = hpText;
-  saveHpInputDraft(hpInputEl.value);
-  const salon = parseHotpepper(hpText || '\n');
-  if (!String(salon.name || '').trim() && shop) {
-    salon.name = shop;
-  }
-  if (memoText && !String(salon.introText || '').trim()) {
-    salon.introText = memoText.slice(0, 8000);
+  if (hpInputEl) hpInputEl.value = hpText;
+  saveHpInputDraft(hpInputEl ? hpInputEl.value : hpText);
+  const salon = buildSalonForAdminImport(hpText || '\n');
+  if (shop && (!String(salon.name || '').trim() || salon.name === SALON_NAME_PLACEHOLDER)) {
+    salon.name = shop.slice(0, 80);
   }
   loadIntoEditor(salon);
   setSaveStatus(
@@ -241,131 +256,170 @@ async function loadDraftFromServer(id) {
   );
 }
 
-initEditor(previewEl);
+function showFatalParse(msg) {
+  const el = document.getElementById('parse-status');
+  if (el) {
+    el.textContent = msg;
+    el.className = 'parse-status error';
+  } else {
+    document.body.insertAdjacentHTML(
+      'afterbegin',
+      `<div style="margin:12px;padding:12px;border:1px solid #c9a09a;background:#f5e0dc;font-size:14px;">${msg}</div>`,
+    );
+  }
+}
 
-hpInputEl.addEventListener('input', () => {
-  saveHpInputDraft(hpInputEl.value);
-});
+if (previewEl) {
+  initEditor(previewEl);
+} else {
+  showFatalParse('初期化エラー: #lp-preview がありません。');
+}
+
+if (hpInputEl) {
+  hpInputEl.addEventListener('input', () => saveHpInputDraft(hpInputEl.value));
+} else {
+  showFatalParse('初期化エラー: #hp-input がありません。');
+}
 
 window.addEventListener('pageshow', (ev) => {
-  if (!ev.persisted) return;
+  if (!ev.persisted || !hpInputEl) return;
   const s = loadStoredSalon();
   if (s) loadIntoEditor(s);
   hpInputEl.value = loadHpInputDraft();
 });
 
-try {
-  if (linkedDraftId) {
-    await loadDraftFromServer(linkedDraftId);
-    hpInputEl.value = loadHpInputDraft();
-  } else if (memoLeadId) {
-    await applyBeautyMemoLeadFromQuery(memoLeadId);
+function bindParseApply() {
+  const btnParse = document.getElementById('btn-parse');
+  const btnApply = document.getElementById('btn-apply');
+  const hpEl = document.getElementById('hp-input');
+
+  if (btnParse && hpEl) {
+    btnParse.addEventListener('click', () => {
+      const text = hpEl.value.trim();
+      if (!text) {
+        setParseStatus('テキストを入力してください', 'error');
+        return;
+      }
+      btnParse.disabled = true;
+      btnParse.classList.add('is-busy');
+      btnParse.setAttribute('aria-busy', 'true');
+      setParseStatus('取り込み中…', 'notice');
+      const run = () => {
+        try {
+          const salon = buildSalonForAdminImport(text);
+          loadIntoEditor(salon);
+          saveHpInputDraft(hpEl.value);
+          setParseStatus(
+            `①→②→③に反映しました。紹介文に全文（最大約5万文字）を入れています。店名: ${salon.name}`,
+            'notice',
+          );
+        } catch (e) {
+          console.error(e);
+          setParseStatus('反映エラー: ' + (e && e.message ? e.message : String(e)), 'error');
+        } finally {
+          btnParse.disabled = false;
+          btnParse.classList.remove('is-busy');
+          btnParse.removeAttribute('aria-busy');
+        }
+      };
+      setTimeout(run, 0);
+    });
   } else {
-    hpInputEl.value = loadHpInputDraft();
+    showFatalParse('「解析する」ボタンまたは #hp-input が見つかりません。');
+  }
+
+  if (btnApply && hpEl && previewEl) {
+    btnApply.addEventListener('click', () => {
+      const hpRaw = hpEl.value.trim();
+      let salon = getCurrentSalon();
+      btnApply.disabled = true;
+      btnApply.classList.add('is-busy');
+      btnApply.setAttribute('aria-busy', 'true');
+      const run = () => {
+        try {
+          if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
+            loadIntoEditor(buildSalonForAdminImport(hpRaw));
+            saveHpInputDraft(hpEl.value);
+            setParseStatus('①の内容を②・③に取り込みました。', 'notice');
+            return;
+          }
+          if (!salon || !String(salon.name || '').trim()) {
+            setParseStatus('①が空です。本文を貼ってから「解析する」か「反映する」を押してください。', 'error');
+            return;
+          }
+          renderLP(salon, previewEl);
+          saveHpInputDraft(hpEl.value);
+          flushSalonDraft();
+          setParseStatus('②の内容で③を更新しました。', 'notice');
+        } catch (e) {
+          console.error(e);
+          setParseStatus('反映エラー: ' + (e && e.message ? e.message : String(e)), 'error');
+        } finally {
+          btnApply.disabled = false;
+          btnApply.classList.remove('is-busy');
+          btnApply.removeAttribute('aria-busy');
+        }
+      };
+      setTimeout(run, 0);
+    });
+  } else {
+    showFatalParse('「反映する」ボタン・#hp-input・#lp-preview のいずれかが見つかりません。');
+  }
+}
+
+bindParseApply();
+
+async function bootFromServerAsync() {
+  try {
+    if (linkedDraftId) {
+      await loadDraftFromServer(linkedDraftId);
+      if (hpInputEl) hpInputEl.value = loadHpInputDraft();
+    } else if (memoLeadId) {
+      await applyBeautyMemoLeadFromQuery(memoLeadId);
+    } else {
+      if (hpInputEl) hpInputEl.value = loadHpInputDraft();
+      const savedSalon = loadStoredSalon();
+      if (savedSalon) loadIntoEditor(savedSalon);
+    }
+  } catch (e) {
+    console.error(e);
+    setSaveStatus(String(e.message || e), 'error');
+    if (hpInputEl) hpInputEl.value = loadHpInputDraft();
     const savedSalon = loadStoredSalon();
     if (savedSalon) loadIntoEditor(savedSalon);
   }
-} catch (e) {
-  console.error(e);
-  setSaveStatus(String(e.message || e), 'error');
-  hpInputEl.value = loadHpInputDraft();
-  const savedSalon = loadStoredSalon();
-  if (savedSalon) loadIntoEditor(savedSalon);
 }
 
-// ── Parse ──
-document.getElementById('btn-parse').addEventListener('click', () => {
-  const text = document.getElementById('hp-input').value.trim();
-  const btn = document.getElementById('btn-parse');
-
-  if (!text) {
-    setParseStatus('テキストを入力してください', 'error');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.classList.add('is-busy');
-  btn.setAttribute('aria-busy', 'true');
-  setParseStatus('解析しています…', 'notice');
-
-  const run = () => {
-    try {
-      const salon = buildSalonForAdminImport(text);
-      loadIntoEditor(salon);
-      saveHpInputDraft(document.getElementById('hp-input').value);
-      setParseStatus(
-        `①の全文（最大約5万文字）を②の「紹介文」に入れました。取れた項目はクーポン・住所などに反映済みです。店名: ${salon.name} …②で直すと③も追従します。`,
-        'notice',
-      );
-    } catch (e) {
-      console.error(e);
-      setParseStatus(`反映エラー: ${e.message}`, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove('is-busy');
-      btn.removeAttribute('aria-busy');
-    }
-  };
-
-  setTimeout(run, 0);
-});
-
-// ── Apply: ②→③の再描画。②が空で①だけあるときは解析にフォールバック ──
-document.getElementById('btn-apply').addEventListener('click', () => {
-  const btn = document.getElementById('btn-apply');
-  const hpEl = document.getElementById('hp-input');
-  const hpRaw = hpEl.value.trim();
-  let salon = getCurrentSalon();
-
-  btn.disabled = true;
-  btn.classList.add('is-busy');
-  btn.setAttribute('aria-busy', 'true');
-  const run = () => {
-    try {
-      if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
-        loadIntoEditor(buildSalonForAdminImport(hpRaw));
-        saveHpInputDraft(hpEl.value);
-        setParseStatus('①の内容を②・③に取り込みました。②で直したあと必要なら「反映する」で③を更新できます。', 'notice');
-        return;
-      }
-      if (!salon || !String(salon.name || '').trim()) {
-        setParseStatus('先に①にホットペッパー本文を貼り、「解析する」か「反映する」で取り込んでください。', 'error');
-        return;
-      }
-      renderLP(salon, previewEl);
-      saveHpInputDraft(hpEl.value);
-      flushSalonDraft();
-      setParseStatus('✓ ②の内容で③プレビューを更新しました。（①を変えた場合は「解析する」で取り直してください）', 'notice');
-    } catch (e) {
-      console.error(e);
-      setParseStatus('反映エラー: ' + (e.message || String(e)), 'error');
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove('is-busy');
-      btn.removeAttribute('aria-busy');
-    }
-  };
-  setTimeout(run, 0);
-});
+void bootFromServerAsync();
 
 // ── Reset ──
-document.getElementById('btn-reset').addEventListener('click', () => {
-  if (!confirm('すべてリセットしますか？')) return;
-  clearStoredDraft();
-  resetEditor();
-  hpInputEl.value = '';
-  const ps = document.getElementById('parse-status');
-  if (ps) {
-    ps.textContent = '';
-    ps.className = 'parse-status';
-  }
-  setSaveStatus('', '');
-  document.getElementById('editor-form').innerHTML = '<div class="lp-empty" style="min-height:200px;"><p>解析結果がここに表示されます</p></div>';
-  previewEl.innerHTML = '<div class="lp-empty"><p>ここにLPプレビューが表示されます</p></div>';
-});
+const btnReset = document.getElementById('btn-reset');
+if (btnReset) {
+  btnReset.addEventListener('click', () => {
+    if (!confirm('すべてリセットしますか？')) return;
+    clearStoredDraft();
+    resetEditor();
+    if (hpInputEl) hpInputEl.value = '';
+    const ps = document.getElementById('parse-status');
+    if (ps) {
+      ps.textContent = '';
+      ps.className = 'parse-status';
+    }
+    setSaveStatus('', '');
+    const ef = document.getElementById('editor-form');
+    if (ef) {
+      ef.innerHTML = '<div class="lp-empty" style="min-height:200px;"><p>解析結果がここに表示されます</p></div>';
+    }
+    if (previewEl) {
+      previewEl.innerHTML = '<div class="lp-empty"><p>ここにLPプレビューが表示されます</p></div>';
+    }
+  });
+}
 
 // ── Server save ──
-document.getElementById('btn-save-server').addEventListener('click', async () => {
+const btnSaveServer = document.getElementById('btn-save-server');
+if (btnSaveServer) {
+  btnSaveServer.addEventListener('click', async () => {
   const salon = getCurrentSalon();
   setSaveStatus('', '');
   if (!salon || !String(salon.name || '').trim()) {
@@ -425,20 +479,26 @@ document.getElementById('btn-save-server').addEventListener('click', async () =>
     console.error(e);
     setSaveStatus(String(e.message || e), 'error');
   }
-});
+  });
+} else {
+  console.warn('[beauty-standalone] #btn-save-server が見つかりません');
+}
 
 // ── Export LP ──
-document.getElementById('btn-export').addEventListener('click', () => {
-  const salon = getCurrentSalon();
-  if (!salon) {
-    alert('先に解析してください');
-    return;
-  }
-  flushSalonDraft();
-  saveHpInputDraft(hpInputEl.value);
-  sessionStorage.setItem('salonLP', JSON.stringify(salon));
-  window.open('lp.html', '_blank');
-});
+const btnExport = document.getElementById('btn-export');
+if (btnExport) {
+  btnExport.addEventListener('click', () => {
+    const salon = getCurrentSalon();
+    if (!salon) {
+      alert('先に「解析する」で取り込んでください');
+      return;
+    }
+    flushSalonDraft();
+    if (hpInputEl) saveHpInputDraft(hpInputEl.value);
+    sessionStorage.setItem('salonLP', JSON.stringify(salon));
+    window.open('lp.html', '_blank');
+  });
+}
 
 </script>
 

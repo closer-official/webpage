@@ -592,32 +592,51 @@ function pickDefaultImportName(raw) {
 }
 
 export function buildSalonForAdminImport(rawTextIn) {
-  const norm = String(rawTextIn == null ? '' : rawTextIn)
-    .replace(/^\uFEFF/, '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .trim();
-  const body = norm.slice(0, 50000);
-
-  let parsed;
   try {
-    parsed = parseHotpepper(rawTextIn);
-  } catch {
-    parsed = createEmptySalon();
-  }
-  const salon = JSON.parse(JSON.stringify(parsed));
-  salon.introText = body;
+    const norm = String(rawTextIn == null ? '' : rawTextIn)
+      .replace(/^\uFEFF/, '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .trim();
+    const body = norm.slice(0, 50000);
 
-  const pn = String(parsed.name || '').trim();
-  const fallback = pickDefaultImportName(norm);
-  if (pn && pn !== SALON_NAME_PLACEHOLDER) {
-    salon.name = pn.slice(0, 80);
-  } else if (fallback) {
-    salon.name = fallback;
-  } else {
-    salon.name = SALON_NAME_PLACEHOLDER;
-  }
-  if (!String(salon.name || '').trim()) salon.name = SALON_NAME_PLACEHOLDER;
+    let parsed;
+    try {
+      parsed = parseHotpepper(rawTextIn);
+    } catch {
+      parsed = createEmptySalon();
+    }
+    let salon;
+    try {
+      salon = JSON.parse(JSON.stringify(parsed));
+    } catch {
+      salon = createEmptySalon();
+    }
+    salon.introText = body;
 
-  return salon;
+    const pn = String(parsed.name || '').trim();
+    const fallback = pickDefaultImportName(norm);
+    if (pn && pn !== SALON_NAME_PLACEHOLDER) {
+      salon.name = pn.slice(0, 80);
+    } else if (fallback) {
+      salon.name = fallback;
+    } else {
+      salon.name = SALON_NAME_PLACEHOLDER;
+    }
+    if (!String(salon.name || '').trim()) salon.name = SALON_NAME_PLACEHOLDER;
+
+    return salon;
+  } catch (e) {
+    console.error('buildSalonForAdminImport', e);
+    const s = createEmptySalon();
+    const t = String(rawTextIn == null ? '' : rawTextIn)
+      .replace(/^\uFEFF/, '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .trim()
+      .slice(0, 50000);
+    s.introText = t;
+    s.name = pickDefaultImportName(t) || SALON_NAME_PLACEHOLDER;
+    return s;
+  }
 }

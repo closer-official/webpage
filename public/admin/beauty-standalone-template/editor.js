@@ -31,10 +31,32 @@ export function initEditor(previewEl) {
 }
 
 export function loadIntoEditor(salon) {
-  currentSalon = JSON.parse(JSON.stringify(salon)); // deep copy
-  renderForm(currentSalon);
-  renderLP(currentSalon, previewContainer);
-  persistDraft();
+  if (!salon || typeof salon !== 'object') {
+    console.warn('loadIntoEditor: salon が不正です');
+    return;
+  }
+  try {
+    currentSalon = JSON.parse(JSON.stringify(salon));
+  } catch (e) {
+    console.error('loadIntoEditor: コピーに失敗', e);
+    return;
+  }
+  try {
+    renderForm(currentSalon);
+  } catch (e) {
+    console.error('loadIntoEditor: renderForm', e);
+  }
+  try {
+    if (previewContainer) renderLP(currentSalon, previewContainer);
+    else console.warn('loadIntoEditor: previewContainer 未設定');
+  } catch (e) {
+    console.error('loadIntoEditor: renderLP', e);
+  }
+  try {
+    persistDraft();
+  } catch {
+    /* quota 等 */
+  }
 }
 
 export function getCurrentSalon() {
