@@ -2139,7 +2139,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
   res.json({ ok: true, memosAdded, dashboardAdded });
 });
 
-/** HPB 一括取込（美容室フェーズ専用ストア） */
+/** HPB 一括取込（美容室フェーズ専用ストア）。strong_site はメモに載せず美容ダッシュボードへ（no_outreach_channel）。 */
 app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const entries = req.body?.entries;
@@ -2152,16 +2152,30 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
   const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
   const rawMemo = await store.getBeautyMemoLeads();
   const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
+  const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
   const now = new Date().toISOString();
   let memosAdded = 0;
+  let dashboardAdded = 0;
   for (let ei = 0; ei < entries.length; ei++) {
     const raw = entries[ei];
     const shopName = String(raw?.shopName || '').trim().slice(0, 200);
     if (!shopName) continue;
     const rawWs = String(raw?.webStrength || '').trim();
-    const webStrength = STRENGTHS.has(rawWs) ? rawWs : 'no_site';
+    if (!STRENGTHS.has(rawWs)) continue;
+    const webStrength = rawWs;
     const access = String(raw?.access || '').trim().slice(0, 800);
     const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
+    if (webStrength === 'strong_site') {
+      dashboard.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: sourceMemo,
+        }),
+      );
+      dashboardAdded += 1;
+      continue;
+    }
     const memoText = [hpbMemoLabelForStrength(webStrength), access ? 'アクセス: ' + access : '', '', sourceMemo]
       .filter(Boolean)
       .join('\n')
@@ -2170,7 +2184,7 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
       id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
       shopName,
       memo: memoText,
-      webStrength,
+      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
       hpbAccess: access,
       hpbBody: sourceMemo.slice(0, 11000),
       onOutreachBoard: false,
@@ -2179,11 +2193,12 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
     });
     memosAdded += 1;
   }
-  if (memosAdded === 0) {
-    return res.status(400).json({ error: '有効な行がありません（店名を確認してください）' });
+  if (memosAdded === 0 && dashboardAdded === 0) {
+    return res.status(400).json({ error: '有効な行がありません（店名とウェブ強度を確認してください）' });
   }
   await store.setBeautyMemoLeads(memoList);
-  res.json({ ok: true, memosAdded, dashboardAdded: 0 });
+  await store.setBeautyDashboard(dashboard);
+  res.json({ ok: true, memosAdded, dashboardAdded });
 });
 
 app.patch('/api/memo-leads/:id', async (req, res) => {
@@ -2311,7 +2326,29 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
     if (!isHpb) {
       return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
     }
-    memoRow.webStrength = ws;
+    if (ws === 'strong_site') {
+      const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
+      const access =
+        String(memoRow.hpbAccess || '')
+          .trim()
+          .slice(0, 800) || extractHpbAccessFromMemo(memoRow.memo);
+      const snippet = stripHpbCouponTailFromText(
+        String(memoRow.hpbBody || '').trim() || extractHpbSourceFromMemo(memoRow.memo) || memoText,
+      ).slice(0, 11000);
+      list.splice(i, 1);
+      await store.setBeautyMemoLeads(list);
+      const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+      dash.unshift(
+        buildStrongWebSalonDashboardRow({
+          shopName,
+          accessText: access,
+          sourceSnippet: snippet,
+        }),
+      );
+      await store.setBeautyDashboard(dash);
+      return res.json({ ok: true, movedToDashboard: true });
+    }
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 

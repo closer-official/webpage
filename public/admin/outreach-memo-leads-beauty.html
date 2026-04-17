@@ -394,7 +394,7 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        ホットペッパー風の取込では、<strong>店名が取れた行はすべてメモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>送付・フェーズ管理（美容）</strong>の一覧表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモが①の欄とフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
+        ホットペッパー風の取込では、<strong>ウェブなし・弱い</strong>の行だけ<strong>メモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>ウェブあり・強い</strong>はメモリードには入れず、<strong>送付・フェーズ管理（美容）</strong>の一覧に<strong>SNSなし・ウェブページ制作不可</strong>相当の案件として載せます。メモリード由来の行を表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモが①の欄とフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -410,7 +410,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>送付・フェーズ管理（美容）</strong>の表に載せるかどうかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。メモリードの<strong>弱・なし</strong>を表に載せるかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -424,7 +424,7 @@
               type="button"
               class="btn-sm primary"
               id="btn-hpb-submit"
-              title="店名が入っている行はすべてメモリードに登録されます（ウェブ強度未選択はウェブなし）"
+              title="弱・なしはメモリードへ。強は送付・フェーズ管理（SNSなし・ウェブページ制作不可）へ。未選択はウェブなしでメモリードへ"
             >
               プレビューの行をすべて反映
             </button>
@@ -769,7 +769,11 @@
             var ws = document.createElement('div');
             ws.className = 'web-str';
             var nm = 'ws-' + idx;
-            [['no_site', 'ウェブなし（フォロー対象）'], ['weak_site', 'ウェブあり・弱い（フォロー対象）'], ['strong_site', 'ウェブあり・強い']].forEach(
+            [
+              ['no_site', 'ウェブなし（フォロー対象）'],
+              ['weak_site', 'ウェブあり・弱い（フォロー対象）'],
+              ['strong_site', 'ウェブあり・強い（送付管理へ・メモには残さない）'],
+            ].forEach(
               function (pair) {
                 var lab = document.createElement('label');
                 var rd = document.createElement('input');
@@ -874,7 +878,7 @@
               [
                 ['no_site', 'ウェブなし'],
                 ['weak_site', 'ウェブあり（弱）'],
-                ['strong_site', 'ウェブあり（強）'],
+                ['strong_site', 'ウェブあり（強→送付管理）'],
               ].forEach(function (opt) {
                 var o = document.createElement('option');
                 o.value = opt[0];
@@ -897,9 +901,15 @@
                       return j;
                     });
                   })
-                  .then(function () {
+                  .then(function (j) {
                     sel.disabled = false;
-                    showOk('WEBの強さを保存しました');
+                    if (j && j.movedToDashboard) {
+                      showOk(
+                        '送付・フェーズ管理（美容）へ移しました。「SNSなし・ウェブページ制作不可」相当で登録し、メモリード一覧からは削除しました。',
+                      );
+                    } else {
+                      showOk('WEBの強さを保存しました');
+                    }
                     return loadList();
                   })
                   .catch(function (e) {
@@ -1082,9 +1092,11 @@
               }
               var rest = hpbParsedRows.length;
               showOk(
-                'メモリードに ' +
+                '反映しました（メモリード +' +
                   (j.memosAdded || 0) +
-                  ' 件登録しました。送付・フェーズ管理の表に出すには、保存済み一覧で「送付一覧に表示」をオンにしてください。' +
+                  '件／送付・フェーズ管理（美容）+' +
+                  (j.dashboardAdded || 0) +
+                  '件。強い店は「SNSなし・ウェブページ制作不可」相当で表に載り、メモリードには入りません。弱・なしはメモリードに入り、表に出すには保存済み一覧で「送付一覧に表示」をオンにしてください。' +
                   (rest ? ' プレビューに残り ' + rest + ' 件あります。' : ''),
               );
               return loadList();
