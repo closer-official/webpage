@@ -434,6 +434,35 @@
       .link-tile .url-row:first-of-type {
         margin-top: 0;
       }
+      .phase-dm-preview-wrap {
+        margin-top: 12px;
+        border-top: 1px solid var(--phase-line);
+        padding-top: 10px;
+      }
+      .phase-dm-preview-wrap > summary {
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #b8975a;
+        list-style: none;
+      }
+      .phase-dm-preview-wrap > summary::-webkit-details-marker {
+        display: none;
+      }
+      .phase-dm-preview-pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.72rem;
+        line-height: 1.45;
+        max-height: min(38vh, 280px);
+        overflow: auto;
+        margin: 8px 0 0;
+        padding: 10px 12px;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        border: 1px solid #1e293b;
+      }
       .sender-panel label {
         display: block;
         font-size: 0.78rem;
@@ -1324,6 +1353,48 @@
           row.appendChild(bMail);
           row.appendChild(bDm);
           container.appendChild(row);
+
+          var dmPv = el('details', { class: 'phase-dm-preview-wrap' });
+          dmPv.appendChild(
+            el('summary', {
+              text: 'DM文面プレビュー（褒めポイント・プレビューURL・送信者名を反映）',
+            }),
+          );
+          var preDm = el('pre', { class: 'phase-dm-preview-pre' });
+          var dmPvTimer = null;
+          function refreshDmPreview() {
+            var merged = Object.assign({}, item, {
+              outreachDmPattern: sel.value,
+              outreachDmCustomFirstLine: String(inp.value || '').trim(),
+            });
+            preDm.textContent = buildOutreachDmBody(merged);
+          }
+          refreshDmPreview();
+          sel.addEventListener('change', refreshDmPreview);
+          inp.addEventListener('input', function () {
+            clearTimeout(dmPvTimer);
+            dmPvTimer = setTimeout(refreshDmPreview, 250);
+          });
+          dmPv.addEventListener('toggle', function () {
+            if (dmPv.open) refreshDmPreview();
+          });
+          dmPv.appendChild(preDm);
+          var rowPv = el('div', { class: 'url-row' });
+          var bPv = el('button', { type: 'button', class: 'btn small', text: 'プレビュー文をコピー' });
+          bPv.onclick = function () {
+            refreshDmPreview();
+            copyTextWithFeedback(preDm.textContent, 'DMプレビュー');
+          };
+          rowPv.appendChild(bPv);
+          dmPv.appendChild(rowPv);
+          dmPv.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'margin:8px 0 0;font-size:0.68rem',
+              text: '褒めポイント未入力時は【褒めポイント】のまま表示されます（コピーは「DM用テンプレ」側で必須チェックあり）。',
+            }),
+          );
+          container.appendChild(dmPv);
         }
 
         (function initSenderProfileFields() {
@@ -1377,6 +1448,8 @@
         var cachedMemoLeads = [];
         /** 店舗ドラフト id → baseTemplateId（美容室独立のリンク先判定用） */
         var cachedCustomizationBaseById = {};
+        /** 店舗ドラフト id → 美容室LP（独立版）の salon JSON 抜粋（Instagram/LINE 等・フェーズ画面表示用） */
+        var cachedBeautyStandaloneSalonByCustomizationId = {};
         var OP_SEND_DRAFT_KEY = 'closer_outreach_send_draft_by_shop_v1_beauty';
         var pendingOutreachFocusShopId = null;
         var pendingOutreachOpenChannel = null;
@@ -1631,6 +1704,9 @@
           } else if (chOpen === 'tiktok') {
             var u3 = footerTiktokUrlForItem(it);
             if (u3) window.open(u3, '_blank', 'noopener,noreferrer');
+          } else if (chOpen === 'line') {
+            var u4 = footerLineUrlForItem(it);
+            if (u4) window.open(u4, '_blank', 'noopener,noreferrer');
           }
           requestAnimationFrame(function () {
             var dh = document.getElementById('phase-detail-host');
@@ -2652,11 +2728,35 @@
           );
         }
 
-        /** LP の「Instagram（フッターアイコン）URL」またはキュー由来のスナップショット */
+        /** 紐づく美容室LP（独立版）ドラフトの salon（キャッシュ）。 */
+        function beautyLinkedStandaloneSalon(item) {
+          var cid = String((item && item.linkedTemplateCustomizationId) || '').trim();
+          if (!cid) return null;
+          return cachedBeautyStandaloneSalonByCustomizationId[cid] || null;
+        }
+
+        /** LP の「Instagram（フッターアイコン）URL」またはキュー由来のスナップショット、または美容室LP（独立版）フォーム入力 */
         function footerInstagramUrlForItem(item) {
           var c = item.content;
           var u = (c && c.footerInstagramUrl) || item.footerInstagramUrl || '';
           u = String(u).trim();
+          if (!u || !/^https?:\/\//i.test(u)) {
+            var sal = beautyLinkedStandaloneSalon(item);
+            if (sal && sal.instagramUrl && /^https?:\/\//i.test(sal.instagramUrl)) u = sal.instagramUrl;
+          }
+          if (!u || !/^https?:\/\//i.test(u)) return '';
+          return u;
+        }
+
+        /** LINE（フッター）または美容室LP（独立版）の LINE URL */
+        function footerLineUrlForItem(item) {
+          var c = item.content;
+          var u = (c && c.footerLineUrl) || item.footerLineUrl || '';
+          u = String(u).trim();
+          if (!u || !/^https?:\/\//i.test(u)) {
+            var sal2 = beautyLinkedStandaloneSalon(item);
+            if (sal2 && sal2.lineUrl && /^https?:\/\//i.test(sal2.lineUrl)) u = sal2.lineUrl;
+          }
           if (!u || !/^https?:\/\//i.test(u)) return '';
           return u;
         }
@@ -2704,14 +2804,18 @@
 
         function renderInstagramFooterBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: 'Instagram（店舗ドラフトのフッターに入力したURL）' }),
+            el('p', {
+              class: 'muted',
+              text: 'Instagram（店舗ドラフトのフッター、または美容室LP（独立版）の「Instagram URL」）',
+            }),
           );
           var u = footerInstagramUrlForItem(item);
           if (!u) {
             container.appendChild(
               el('p', {
                 class: 'muted',
-                text: '※ 未設定（作業者用編集の「Instagram（フッターアイコン）URL」に入力するとここに表示されます）',
+                text:
+                  '※ 未設定（店舗ドラフト編集のフッター欄、または美容室LP（独立版）のフォームに URL を入れるとここに表示されます）',
               }),
             );
             return;
@@ -2723,6 +2827,47 @@
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
           a.textContent = 'Instagram を開く';
+          ur.appendChild(a);
+          var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
+          cp.onclick = function () {
+            navigator.clipboard.writeText(u);
+          };
+          ur.appendChild(cp);
+          container.appendChild(ur);
+          container.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'font-size:0.72rem;word-break:break-all;margin-top:6px',
+              text: u,
+            }),
+          );
+        }
+
+        function renderLineFooterBlock(container, item) {
+          container.appendChild(
+            el('p', {
+              class: 'muted',
+              text: 'LINE（店舗ドラフトのフッター、または美容室LP（独立版）の「LINE URL」）',
+            }),
+          );
+          var u = footerLineUrlForItem(item);
+          if (!u) {
+            container.appendChild(
+              el('p', {
+                class: 'muted',
+                text:
+                  '※ 未設定（店舗ドラフト編集のフッター欄、または美容室LP（独立版）のフォームに URL を入れるとここに表示されます）',
+              }),
+            );
+            return;
+          }
+          var ur = el('div', { class: 'url-row' });
+          var a = document.createElement('a');
+          a.href = u;
+          a.className = 'btn small';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = 'LINE を開く';
           ur.appendChild(a);
           var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
           cp.onclick = function () {
@@ -2857,16 +3002,19 @@
           var wrap = el('div', { class: 'share-links-grid' });
           var pv = el('div', { class: 'link-tile' });
           var ig = el('div', { class: 'link-tile' });
+          var ln = el('div', { class: 'link-tile' });
           var tw = el('div', { class: 'link-tile' });
           var us = el('div', { class: 'link-tile' });
           var tm = el('div', { class: 'link-tile' });
           renderTemplatePreviewBlock(pv, item);
           renderInstagramFooterBlock(ig, item);
+          renderLineFooterBlock(ln, item);
           renderTwitterFooterBlock(tw, item);
           renderUnsubscribeBlock(us, item);
           renderOutreachTemplatesBlock(tm, item);
           wrap.appendChild(pv);
           wrap.appendChild(ig);
+          wrap.appendChild(ln);
           wrap.appendChild(tw);
           wrap.appendChild(us);
           wrap.appendChild(tm);
@@ -3088,12 +3236,13 @@
             return b;
           }
           snsRow.appendChild(makeSnsBtn('Instagram', 'instagram'));
+          snsRow.appendChild(makeSnsBtn('LINE', 'line'));
           snsRow.appendChild(makeSnsBtn('X（Twitter）', 'twitter'));
           snsRow.appendChild(makeSnsBtn('TikTok', 'tiktok'));
           snsRow.appendChild(
             el('p', {
               class: 'op-sns-hint',
-              text: 'カード（従来）表示に切り替え、この店の詳細カードへスクロールします。本文があるときはコピーします。各SNSの公式URLがドラフトに入っているときは別タブで開きます。',
+              text: 'カード表示に切り替え、この店の詳細へスクロールします。本文があるときはコピーします。Instagram／LINE／X／TikTok の URL は店舗ドラフトまたは美容室LP（独立版）に入っていると別タブで開きます。',
             }),
           );
           sendWrap.appendChild(snsRow);
@@ -3522,9 +3671,19 @@
                 throw new Error((dx.j && dx.j.error) || '一覧の取得に失敗しました');
               }
               cachedCustomizationBaseById = {};
+              cachedBeautyStandaloneSalonByCustomizationId = {};
               if (tx.ok && Array.isArray(tx.j)) {
                 tx.j.forEach(function (c) {
-                  if (c && c.id) cachedCustomizationBaseById[c.id] = String(c.baseTemplateId || '').trim();
+                  if (c && c.id) {
+                    cachedCustomizationBaseById[c.id] = String(c.baseTemplateId || '').trim();
+                    var salon = c.override && c.override.beautyStandaloneSalon;
+                    if (salon && typeof salon === 'object') {
+                      cachedBeautyStandaloneSalonByCustomizationId[c.id] = {
+                        instagramUrl: String(salon.instagramUrl || '').trim(),
+                        lineUrl: String(salon.lineUrl || '').trim(),
+                      };
+                    }
+                  }
                 });
               }
               cachedDashboardItems = Array.isArray(dx.j) ? dx.j : [];
