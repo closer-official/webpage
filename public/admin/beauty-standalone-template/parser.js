@@ -572,15 +572,52 @@ export function parseHotpepper(rawTextIn) {
     salon.name = '';
   }
 
-  /** 型や文字数に依存せず「まず②に出す」— 店名は必ず埋め、紹介が薄いときは①全文を入れる */
+  /** 店名だけは必ず埋める（呼び出し側で紹介文を上書きする場合もある） */
   const rawInTrim = String(rawTextIn || '').trim();
   if (!String(salon.name || '').trim() && rawInTrim.length > 2) {
     salon.name = SALON_NAME_PLACEHOLDER;
   }
-  const introCompact = String(salon.introText || '').replace(/\s/g, '').length;
-  if (rawInTrim.length > 100 && introCompact < 30) {
-    salon.introText = rawInTrim.slice(0, 32000);
+
+  return salon;
+}
+
+/** ①のテキストを必ず②・③に載せるための統合（美容室テンプレ管理画面用） */
+function pickDefaultImportName(raw) {
+  const lines = String(raw).split('\n');
+  for (let i = 0; i < Math.min(lines.length, 400); i++) {
+    const L = lines[i].trim();
+    if (L.length > 0) return L.slice(0, 80);
   }
+  return '';
+}
+
+export function buildSalonForAdminImport(rawTextIn) {
+  const norm = String(rawTextIn == null ? '' : rawTextIn)
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+  const body = norm.slice(0, 50000);
+
+  let parsed;
+  try {
+    parsed = parseHotpepper(rawTextIn);
+  } catch {
+    parsed = createEmptySalon();
+  }
+  const salon = JSON.parse(JSON.stringify(parsed));
+  salon.introText = body;
+
+  const pn = String(parsed.name || '').trim();
+  const fallback = pickDefaultImportName(norm);
+  if (pn && pn !== SALON_NAME_PLACEHOLDER) {
+    salon.name = pn.slice(0, 80);
+  } else if (fallback) {
+    salon.name = fallback;
+  } else {
+    salon.name = SALON_NAME_PLACEHOLDER;
+  }
+  if (!String(salon.name || '').trim()) salon.name = SALON_NAME_PLACEHOLDER;
 
   return salon;
 }

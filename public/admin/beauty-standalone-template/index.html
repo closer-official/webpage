@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=24" />
+  <link rel="stylesheet" href="styles.css?v=25" />
 </head>
 <body>
 
@@ -18,7 +18,7 @@
       class="beauty-standalone-rev-badge"
       title="デプロイ・キャッシュ確認用。数字を上げたリリースかどうかの目印です（ヘッダー左端）。"
       aria-hidden="true"
-    >23</span>
+    >25</span>
     <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
       <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
@@ -98,8 +98,7 @@
 </div>
 
 <script type="module">
-import { parseHotpepper, SALON_NAME_PLACEHOLDER } from './parser.js';
-import { createEmptySalon } from './schema.js';
+import { parseHotpepper, buildSalonForAdminImport } from './parser.js';
 import {
   initEditor,
   loadIntoEditor,
@@ -291,37 +290,13 @@ document.getElementById('btn-parse').addEventListener('click', () => {
 
   const run = () => {
     try {
-      let salon;
-      try {
-        salon = parseHotpepper(text);
-      } catch (err) {
-        console.error(err);
-        salon = createEmptySalon();
-        salon.name = SALON_NAME_PLACEHOLDER;
-        salon.introText = text.slice(0, 32000);
-        loadIntoEditor(salon);
-        saveHpInputDraft(document.getElementById('hp-input').value);
-        setParseStatus(
-          '自動ルールの解析でエラーが出ましたが、①の全文を②の「紹介文」に入れました。店名・各欄を②で整えてください。（' +
-            (err.message || String(err)) +
-            '）',
-          'notice',
-        );
-        return;
-      }
+      const salon = buildSalonForAdminImport(text);
       loadIntoEditor(salon);
       saveHpInputDraft(document.getElementById('hp-input').value);
-      if (salon.name === SALON_NAME_PLACEHOLDER) {
-        setParseStatus(
-          `①を②に流し込みました（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名は②の「店名」で必ず直してください。紹介文に全文が入っているときは、必要な部分だけ残して編集してください。`,
-          'notice',
-        );
-      } else {
-        setParseStatus(
-          `✓ ①→②に反映しました — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件（足りない項目は②で手直しできます）`,
-          'success',
-        );
-      }
+      setParseStatus(
+        `①の全文（最大約5万文字）を②の「紹介文」に入れました。取れた項目はクーポン・住所などに反映済みです。店名: ${salon.name} …②で直すと③も追従します。`,
+        'notice',
+      );
     } catch (e) {
       console.error(e);
       setParseStatus(`反映エラー: ${e.message}`, 'error');
@@ -348,17 +323,9 @@ document.getElementById('btn-apply').addEventListener('click', () => {
   const run = () => {
     try {
       if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
-        const parsed = parseHotpepper(hpRaw);
-        if (parsed && String(parsed.name || '').trim()) {
-          loadIntoEditor(parsed);
-          saveHpInputDraft(hpEl.value);
-          setParseStatus('✓ ①の本文から取り込みました（②③を更新）。細かく直す場合は②を編集のうえ、再度「反映する」で③を更新できます。', 'notice');
-          return;
-        }
-        setParseStatus(
-          '店名を取得できませんでした。①の内容を確認するか、「解析する」を押してメッセージを確認してください。',
-          'error',
-        );
+        loadIntoEditor(buildSalonForAdminImport(hpRaw));
+        saveHpInputDraft(hpEl.value);
+        setParseStatus('①の内容を②・③に取り込みました。②で直したあと必要なら「反映する」で③を更新できます。', 'notice');
         return;
       }
       if (!salon || !String(salon.name || '').trim()) {
