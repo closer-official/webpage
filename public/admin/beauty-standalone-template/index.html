@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=22" />
+  <link rel="stylesheet" href="styles.css?v=23" />
 </head>
 <body>
 
@@ -18,7 +18,7 @@
       class="beauty-standalone-rev-badge"
       title="デプロイ・キャッシュ確認用。数字を上げたリリースかどうかの目印です（ヘッダー左端）。"
       aria-hidden="true"
-    >22</span>
+    >23</span>
     <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
       <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
@@ -117,6 +117,11 @@ function setParseStatus(msg, kind) {
   if (!status) return;
   status.textContent = msg || '';
   status.className = 'parse-status' + (kind ? ' ' + kind : '');
+  try {
+    status.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } catch {
+    /* ignore */
+  }
 }
 
 /** template-worker.html と同じ相対パス（サイト直下の /api へ届く） */

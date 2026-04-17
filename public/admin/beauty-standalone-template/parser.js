@@ -77,7 +77,28 @@ function isUnlikelySalonNameLine(l) {
   if (/所要時間|施術時間/.test(s) && /\d+\s*分/.test(s)) return true;
   if (/空席確認|ブックマーク|会員登録|ログイン/.test(s)) return true;
   if (/クーポン|メニュー一覧|スタイリスト一覧/.test(s) && s.length < 30) return true;
+  if (/^\d\.\d{1,2}$/.test(s)) return true;
+  if (/^[（(]?\d+件[）)]$/.test(s)) return true;
+  if (/^総合トップ|^\s*>\s*$|美容院・美容室・ヘアサロン検索トップ/.test(s)) return true;
+  if (/^東京都|^大阪府|^神奈川県|^埼玉県|^千葉県|^愛知県|^福岡県|^北海道/.test(s) && s.length < 56) return true;
   return false;
+}
+
+/**
+ * 全文コピーで先頭がパンくずでも、「…(F)\nHOT PEPPER Beauty」の直前行を店名に。
+ * strip 前の raw に対して呼ぶ（strip 後だとナビの HOT PEPPER が無いことがある）。
+ */
+function extractNameBeforeHotPepperBanner(text) {
+  const t = String(text || '').replace(/\r\n/g, '\n');
+  const hp = /\nHOT\s*PEPPER\s*Beauty/i.exec(t);
+  if (!hp || hp.index < 1) return '';
+  const before = t.slice(0, hp.index);
+  const line = (before.split('\n').pop() || '').trim();
+  if (line.length < 2 || line.length > 52) return '';
+  if (!/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(line)) return '';
+  if (isUnlikelySalonNameLine(line)) return '';
+  const cleaned = line.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
+  return cleaned || line;
 }
 
 function extractNameFromPatterns(text) {
@@ -143,7 +164,7 @@ function extractNameHotpepperHead(rawLines) {
 
 /** 本文全体から、ノイズでない短い日本語行を店名候補に */
 function extractNameLoose(rawLines) {
-  for (let i = 0; i < Math.min(60, rawLines.length); i++) {
+  for (let i = 0; i < Math.min(160, rawLines.length); i++) {
     const l = rawLines[i];
     if (!l || isUnlikelySalonNameLine(l)) continue;
     if (!/[\u30A0-\u30FF\u4E00-\u9FFF]/.test(l)) continue;
@@ -163,8 +184,8 @@ function isBrowserTitleNoiseLine(l) {
 }
 
 function extractName(rawLines) {
-  // 先頭数行から、ページタイトルになりうる行を探す
-  for (let i = 0; i < Math.min(25, rawLines.length); i++) {
+  // 先頭〜中盤まで走査（全文コピーでナビが数十行続く場合がある）
+  for (let i = 0; i < Math.min(120, rawLines.length); i++) {
     const l = rawLines[i];
     if (!l || isUnlikelySalonNameLine(l)) continue;
     if (isBrowserTitleNoiseLine(l)) continue;
@@ -173,7 +194,7 @@ function extractName(rawLines) {
       return l.replace(/\(.*?\)/g, '').replace(/（.*?）/g, '').trim();
     }
   }
-  for (let i = 0; i < Math.min(40, rawLines.length); i++) {
+  for (let i = 0; i < Math.min(160, rawLines.length); i++) {
     const l = rawLines[i];
     if (!l || isUnlikelySalonNameLine(l)) continue;
     if (isBrowserTitleNoiseLine(l)) continue;
@@ -246,8 +267,9 @@ function extractHeroCatch(rawLines) {
 }
 
 function extractIntroText(text) {
-  // 「＜＞」〜次の「空席確認」まで（全文コピーで紹介文が400字超えてもマッチさせる）
-  const m = text.match(/＜＞\s*([\s\S]+?)(?=\s*空席確認)/);
+  // 「＜＞」または半角「<>」〜次の「空席確認」まで
+  let m = text.match(/＜＞\s*([\s\S]+?)(?=\s*空席確認)/);
+  if (!m) m = text.match(/<>\s*([\s\S]+?)(?=\s*空席確認)/);
   if (m) return m[1].trim().slice(0, 12000);
   // フォールバック: 最初の長い段落
   const paras = text.split(/\n{2,}/);
@@ -462,23 +484,31 @@ export const SALON_NAME_PLACEHOLDER = '（店名を自動判定できません�
  * （元テキストは壊さず、解析用のコピーだけ短くする）
  */
 export function stripHpFullPageNoise(text) {
-  let t = String(text || '').replace(/^\uFEFF/, '');
+  let t = String(text || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  if (t.length > 220000) t = t.slice(0, 220000);
   if (t.length < 800) return t;
 
-  const mH = t.match(/\n(Hairsalon F[^\n]{8,220})\n/);
-  if (mH && mH.index != null && mH.index > 0) {
-    return t.slice(mH.index + 1);
-  }
+  // タイトル行（ページ中盤の目印）。先頭に無いケースもあるので ^ も許容
+  const idxH = t.search(/\nHairsalon F[^\n]{6,240}\n/);
+  if (idxH !== -1) return t.slice(idxH + 1);
+  if (/^Hairsalon F[^\n]{6,240}\n/m.test(t)) return t;
 
-  const mA = t.match(/\n(＜＞\s*\n)/);
-  if (mA && mA.index != null && mA.index > 80) {
-    return t.slice(mA.index + 1);
+  // ＜＞ の「直後だけ」に切ると店名・評価ブロックを捨てて名前抽出が壊れる。
+  // ＜＞の少し手前まで残す（全文コピーでナビだけ落とす用途）
+  const idxA = t.search(/\n＜＞\s*\n/);
+  if (idxA > 600) {
+    const back = Math.max(0, idxA - 4500);
+    return t.slice(back);
   }
 
   const mR = t.match(/\n(\d\.\d{1,2})\s*\n\s*[（(](\d+)件[）)]\s*\n\s*(東京都[^\n]{8,})/);
-  if (mR && mR.index != null && mR.index > 120 && mR.index < 30000) {
+  if (mR && mR.index != null && mR.index > 120 && mR.index < 200000) {
     const cut = t.lastIndexOf('\n\n', mR.index);
-    return cut > 0 ? t.slice(cut + 2) : t;
+    if (cut > 0) return t.slice(cut + 2);
+    return t.slice(Math.max(0, mR.index - 3500));
   }
 
   return t;
@@ -493,6 +523,7 @@ export function parseHotpepper(rawTextIn) {
 
   let nameGuess =
     extractNameHotpepperHead(rawLines) ||
+    extractNameBeforeHotPepperBanner(rawTextIn) ||
     extractNameFromPatterns(rawText) ||
     extractName(rawLines) ||
     extractNameLoose(rawLines) ||
