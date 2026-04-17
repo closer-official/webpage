@@ -264,6 +264,22 @@
         overflow-y: auto;
         line-height: 1.35;
       }
+      table.hpb-preview tbody tr.hpb-dup-maybe {
+        background: rgba(196, 92, 82, 0.1);
+        box-shadow: inset 3px 0 0 0 rgba(196, 92, 82, 0.55);
+      }
+      table.hpb-preview tbody tr.hpb-dup-maybe td {
+        border-color: rgba(196, 92, 82, 0.22);
+      }
+      .hpb-dup-hint {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #9a3d36;
+        line-height: 1.35;
+        max-width: 11rem;
+      }
       .hpb-access-stack {
         display: flex;
         flex-direction: column;
@@ -410,7 +426,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。メモリードの<strong>弱・なし</strong>を表に載せるかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。メモリードの<strong>弱・なし</strong>を表に載せるかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。解析後のプレビューで、<strong>既存メモまたは送付管理に店名が近い行</strong>は色が変わります（二重登録の目安）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -689,18 +705,122 @@
           return shops;
         }
 
+        /** メモリード／送付管理との店名照合（登録済みの可能性） */
+        function normalizeShopForDup(s) {
+          var t = String(s || '').trim();
+          try {
+            if (typeof t.normalize === 'function') t = t.normalize('NFKC');
+          } catch (e0) {}
+          return t
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .replace(/[ 　]/g, '')
+            .replace(/[・･·]/g, '')
+            .replace(/[（）()［］\[\]【】「」『』"'｢｣]/g, '');
+        }
+
+        function shopNamesStronglyMatch(a, b) {
+          var na = normalizeShopForDup(a);
+          var nb = normalizeShopForDup(b);
+          if (!na || !nb) return false;
+          if (na === nb) return true;
+          var short = na.length <= nb.length ? na : nb;
+          var long = na.length > nb.length ? na : nb;
+          if (short.length < 3) return false;
+          if (long.indexOf(short) >= 0) return true;
+          if (short.indexOf(long) >= 0) return true;
+          return false;
+        }
+
+        function matchShopAgainstLists(shopName, ctx) {
+          if (!ctx || !String(shopName || '').trim()) return null;
+          var hits = { memo: false, dashboard: false };
+          var i;
+          for (i = 0; i < ctx.memoShops.length; i++) {
+            if (shopNamesStronglyMatch(shopName, ctx.memoShops[i])) {
+              hits.memo = true;
+              break;
+            }
+          }
+          for (i = 0; i < ctx.dashShops.length; i++) {
+            if (shopNamesStronglyMatch(shopName, ctx.dashShops[i])) {
+              hits.dashboard = true;
+              break;
+            }
+          }
+          if (!hits.memo && !hits.dashboard) return null;
+          return hits;
+        }
+
+        function fetchHpbDuplicateContext() {
+          return Promise.all([
+            credFetch(api + '/beauty-outreach/memo-leads'),
+            credFetch(api + '/beauty-outreach/dashboard'),
+          ]).then(function (responses) {
+            return Promise.all(
+              responses.map(function (r) {
+                return r.json().then(function (j) {
+                  return { ok: r.ok, j: j };
+                });
+              }),
+            ).then(function (pair) {
+              if (!pair[0].ok) throw new Error((pair[0].j && pair[0].j.error) || 'memo-leads');
+              if (!pair[1].ok) throw new Error((pair[1].j && pair[1].j.error) || 'dashboard');
+              var memoShops = [];
+              (Array.isArray(pair[0].j) ? pair[0].j : []).forEach(function (row) {
+                var n = String((row && row.shopName) || '').trim();
+                if (n) memoShops.push(n);
+              });
+              var dashShops = [];
+              (Array.isArray(pair[1].j) ? pair[1].j : []).forEach(function (item) {
+                var n =
+                  (item && item.researched && item.researched.name) ||
+                  (item && item.content && item.content.siteName) ||
+                  '';
+                n = String(n).trim();
+                if (n) dashShops.push(n);
+              });
+              return { memoShops: memoShops, dashShops: dashShops };
+            });
+          });
+        }
+
+        function applyDupToPreviewRow(tr, shopName, ctx) {
+          if (!tr) return;
+          tr.classList.remove('hpb-dup-maybe');
+          tr.removeAttribute('title');
+          var oldHint = tr.querySelector('.hpb-dup-hint');
+          if (oldHint) oldHint.remove();
+          var hit = matchShopAgainstLists(shopName, ctx);
+          if (!hit) return;
+          tr.classList.add('hpb-dup-maybe');
+          var parts = [];
+          if (hit.memo) parts.push('メモリード一覧');
+          if (hit.dashboard) parts.push('送付・フェーズ管理');
+          tr.title = parts.join('・') + 'に店名などが近い行があります。登録済みの可能性があります。';
+          var n0 = tr.querySelector('td:first-child');
+          if (n0) {
+            var sp = document.createElement('span');
+            sp.className = 'hpb-dup-hint';
+            sp.textContent = '※ ' + parts.join('・') + 'に類似店名（要確認）';
+            n0.appendChild(sp);
+          }
+        }
+
         var hpbParsedRows = [];
 
-        function renderHpbPreview(rows) {
+        function renderHpbPreview(rows, dupCtx) {
           var host = document.getElementById('hpb-preview-host');
           var submitRow = document.getElementById('hpb-submit-row');
           if (!host) return;
           host.innerHTML = '';
           if (submitRow) submitRow.style.display = 'none';
           if (!rows || !rows.length) {
+            window.hpbDupCtx = null;
             host.innerHTML = '<p class="hpb-hint" style="margin-top:12px">解析結果がありません。「ブックマークする」付近のコピペか、店名（かな）行を含むか確認してください。</p>';
             return;
           }
+          if (dupCtx) window.hpbDupCtx = dupCtx;
           var wrap = document.createElement('div');
           wrap.className = 'hpb-preview-wrap';
           var tb = document.createElement('table');
@@ -719,6 +839,9 @@
             inp.value = r.shopName;
             inp.setAttribute('data-hpb-idx', String(idx));
             inp.className = 'hpb-name';
+            inp.addEventListener('input', function () {
+              applyDupToPreviewRow(tr, inp.value.trim(), window.hpbDupCtx);
+            });
             n1.appendChild(inp);
             var n2 = document.createElement('td');
             var accStack = document.createElement('div');
@@ -791,6 +914,7 @@
             tr.appendChild(n2);
             tr.appendChild(n3);
             body.appendChild(tr);
+            applyDupToPreviewRow(tr, r.shopName, dupCtx != null ? dupCtx : window.hpbDupCtx);
           });
           wrap.appendChild(tb);
           host.appendChild(wrap);
@@ -1021,20 +1145,42 @@
           showErr('');
           var raw = document.getElementById('hpb-paste').value;
           hpbParsedRows = parseHotPepperBeautyBlocks(raw);
-          renderHpbPreview(hpbParsedRows);
-          if (hpbParsedRows.length) {
-            showOk(
-              hpbParsedRows.length +
-                '件を検出しました。必要なら各行でウェブ強度を選び、「プレビューの行をすべて反映」でメモリードに登録できます（未選択はウェブなしとして登録されます）。',
-            );
-          } else {
+          var host = document.getElementById('hpb-preview-host');
+          var submitRow = document.getElementById('hpb-submit-row');
+          if (!hpbParsedRows.length) {
+            window.hpbDupCtx = null;
+            renderHpbPreview([]);
             showErr('店名を検出できませんでした。コピー範囲に「店名(読み)」の行と「ブックマークする」が含まれるか確認してください。');
+            return;
           }
+          if (host) {
+            host.innerHTML =
+              '<p class="hpb-hint" style="margin-top:12px">メモリード一覧・送付・フェーズ管理の店名と照合しています…</p>';
+          }
+          if (submitRow) submitRow.style.display = 'none';
+          fetchHpbDuplicateContext()
+            .then(function (ctx) {
+              window.hpbDupCtx = ctx;
+              renderHpbPreview(hpbParsedRows, ctx);
+              showOk(
+                hpbParsedRows.length +
+                  '件を検出しました。赤みがかった行は、保存済みメモまたは送付管理に店名が近い行がある可能性があります。',
+              );
+            })
+            .catch(function () {
+              window.hpbDupCtx = null;
+              renderHpbPreview(hpbParsedRows, null);
+              showOk(
+                hpbParsedRows.length +
+                  '件を検出しました（既存一覧との照合はできませんでした。ログインと通信を確認してください）。',
+              );
+            });
         };
 
         document.getElementById('btn-hpb-clear').onclick = function () {
           document.getElementById('hpb-paste').value = '';
           hpbParsedRows = [];
+          window.hpbDupCtx = null;
           renderHpbPreview([]);
         };
 
@@ -1086,10 +1232,6 @@
                 .forEach(function (i) {
                   hpbParsedRows.splice(i, 1);
                 });
-              renderHpbPreview(hpbParsedRows);
-              if (!hpbParsedRows.length) {
-                document.getElementById('hpb-paste').value = '';
-              }
               var rest = hpbParsedRows.length;
               showOk(
                 '反映しました（メモリード +' +
@@ -1099,7 +1241,24 @@
                   '件。強い店は「SNSなし・ウェブページ制作不可」相当で表に載り、メモリードには入りません。弱・なしはメモリードに入り、表に出すには保存済み一覧で「送付一覧に表示」をオンにしてください。' +
                   (rest ? ' プレビューに残り ' + rest + ' 件あります。' : ''),
               );
-              return loadList();
+              if (!hpbParsedRows.length) {
+                document.getElementById('hpb-paste').value = '';
+                window.hpbDupCtx = null;
+                renderHpbPreview([]);
+                return loadList();
+              }
+              return fetchHpbDuplicateContext()
+                .then(function (ctx) {
+                  window.hpbDupCtx = ctx;
+                  renderHpbPreview(hpbParsedRows, ctx);
+                })
+                .catch(function () {
+                  window.hpbDupCtx = null;
+                  renderHpbPreview(hpbParsedRows, null);
+                })
+                .then(function () {
+                  return loadList();
+                });
             })
             .catch(function (e) {
               showErr(e.message || String(e));
