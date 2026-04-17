@@ -401,5 +401,3 @@ function buildStaffAvatar(staff) {
   }
   return `<div class="staff-avatar">${esc(fallbackText)}</div>`;
 }
-ackText)}</div>`;
-}
