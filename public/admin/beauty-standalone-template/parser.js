@@ -2,7 +2,7 @@
  * parser.js — ホットペッパー全文テキストからサロンデータを抽出
  */
 
-import { createEmptySalon } from './schema.js';
+import { createEmptySalon } from './schema.js?v=20';
 
 // ---- ユーティリティ ----
 
