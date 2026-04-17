@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=23" />
+  <link rel="stylesheet" href="styles.css?v=24" />
 </head>
 <body>
 
@@ -99,6 +99,7 @@
 
 <script type="module">
 import { parseHotpepper, SALON_NAME_PLACEHOLDER } from './parser.js';
+import { createEmptySalon } from './schema.js';
 import {
   initEditor,
   loadIntoEditor,
@@ -290,11 +291,21 @@ document.getElementById('btn-parse').addEventListener('click', () => {
 
   const run = () => {
     try {
-      const salon = parseHotpepper(text);
-      if (!salon.name) {
+      let salon;
+      try {
+        salon = parseHotpepper(text);
+      } catch (err) {
+        console.error(err);
+        salon = createEmptySalon();
+        salon.name = SALON_NAME_PLACEHOLDER;
+        salon.introText = text.slice(0, 32000);
+        loadIntoEditor(salon);
+        saveHpInputDraft(document.getElementById('hp-input').value);
         setParseStatus(
-          '店名や本文をうまく読み取れませんでした。ホットペッパーのサロンページを「全選択」して①に貼るか、①の先頭に「店名: ○○サロン」と追記してから再度お試しください。',
-          'error',
+          '自動ルールの解析でエラーが出ましたが、①の全文を②の「紹介文」に入れました。店名・各欄を②で整えてください。（' +
+            (err.message || String(err)) +
+            '）',
+          'notice',
         );
         return;
       }
@@ -302,18 +313,18 @@ document.getElementById('btn-parse').addEventListener('click', () => {
       saveHpInputDraft(document.getElementById('hp-input').value);
       if (salon.name === SALON_NAME_PLACEHOLDER) {
         setParseStatus(
-          `取り込み済み（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名が本文から特定できなかったため、②の「店名」に正しいサロン名を入力してください。`,
+          `①を②に流し込みました（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名は②の「店名」で必ず直してください。紹介文に全文が入っているときは、必要な部分だけ残して編集してください。`,
           'notice',
         );
       } else {
         setParseStatus(
-          `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
+          `✓ ①→②に反映しました — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件（足りない項目は②で手直しできます）`,
           'success',
         );
       }
     } catch (e) {
       console.error(e);
-      setParseStatus(`解析エラー: ${e.message}`, 'error');
+      setParseStatus(`反映エラー: ${e.message}`, 'error');
     } finally {
       btn.disabled = false;
       btn.classList.remove('is-busy');

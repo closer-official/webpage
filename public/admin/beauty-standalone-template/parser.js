@@ -571,17 +571,15 @@ export function parseHotpepper(rawTextIn) {
   if (String(salon.name || '').trim() && isUnlikelySalonNameLine(salon.name)) {
     salon.name = '';
   }
-  if (!String(salon.name || '').trim()) {
-    const rawCompact = String(rawText || '').replace(/\s/g, '');
-    const hasJp = /[\u30A0-\u30FF\u4E00-\u9FFF]/.test(rawText);
-    const hasBody =
-      (String(salon.introText || '').replace(/\s/g, '').length > 50) ||
-      (Array.isArray(salon.coupons) && salon.coupons.length > 0) ||
-      (Array.isArray(salon.features) && salon.features.length > 0) ||
-      (Array.isArray(salon.staff) && salon.staff.length > 0) ||
-      rawCompact.length > 100 ||
-      (hasJp && rawCompact.length > 15);
-    if (hasBody) salon.name = SALON_NAME_PLACEHOLDER;
+
+  /** 型や文字数に依存せず「まず②に出す」— 店名は必ず埋め、紹介が薄いときは①全文を入れる */
+  const rawInTrim = String(rawTextIn || '').trim();
+  if (!String(salon.name || '').trim() && rawInTrim.length > 2) {
+    salon.name = SALON_NAME_PLACEHOLDER;
+  }
+  const introCompact = String(salon.introText || '').replace(/\s/g, '').length;
+  if (rawInTrim.length > 100 && introCompact < 30) {
+    salon.introText = rawInTrim.slice(0, 32000);
   }
 
   return salon;
