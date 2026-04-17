@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=20" />
+  <link rel="stylesheet" href="styles.css?v=22" />
 </head>
 <body>
 
@@ -18,7 +18,7 @@
       class="beauty-standalone-rev-badge"
       title="デプロイ・キャッシュ確認用。数字を上げたリリースかどうかの目印です（ヘッダー左端）。"
       aria-hidden="true"
-    >20</span>
+    >22</span>
     <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
       <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
@@ -98,7 +98,7 @@
 </div>
 
 <script type="module">
-import { parseHotpepper, SALON_NAME_PLACEHOLDER } from './parser.js?v=20';
+import { parseHotpepper, SALON_NAME_PLACEHOLDER } from './parser.js';
 import {
   initEditor,
   loadIntoEditor,
@@ -109,8 +109,8 @@ import {
   loadHpInputDraft,
   resetEditor,
   flushSalonDraft,
-} from './editor.js?v=20';
-import { renderLP } from './renderer.js?v=20';
+} from './editor.js';
+import { renderLP } from './renderer.js';
 
 function setParseStatus(msg, kind) {
   const status = document.getElementById('parse-status');
@@ -279,35 +279,44 @@ document.getElementById('btn-parse').addEventListener('click', () => {
   }
 
   btn.disabled = true;
+  btn.classList.add('is-busy');
+  btn.setAttribute('aria-busy', 'true');
   setParseStatus('解析しています…', 'notice');
-  try {
-    const salon = parseHotpepper(text);
-    if (!salon.name) {
-      setParseStatus(
-        '店名や本文をうまく読み取れませんでした。ホットペッパーのサロンページを「全選択」して①に貼るか、①の先頭に「店名: ○○サロン」と追記してから再度お試しください。',
-        'error',
-      );
-      return;
+
+  const run = () => {
+    try {
+      const salon = parseHotpepper(text);
+      if (!salon.name) {
+        setParseStatus(
+          '店名や本文をうまく読み取れませんでした。ホットペッパーのサロンページを「全選択」して①に貼るか、①の先頭に「店名: ○○サロン」と追記してから再度お試しください。',
+          'error',
+        );
+        return;
+      }
+      loadIntoEditor(salon);
+      saveHpInputDraft(document.getElementById('hp-input').value);
+      if (salon.name === SALON_NAME_PLACEHOLDER) {
+        setParseStatus(
+          `取り込み済み（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名が本文から特定できなかったため、②の「店名」に正しいサロン名を入力してください。`,
+          'notice',
+        );
+      } else {
+        setParseStatus(
+          `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
+          'success',
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      setParseStatus(`解析エラー: ${e.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('is-busy');
+      btn.removeAttribute('aria-busy');
     }
-    loadIntoEditor(salon);
-    saveHpInputDraft(document.getElementById('hp-input').value);
-    if (salon.name === SALON_NAME_PLACEHOLDER) {
-      setParseStatus(
-        `取り込み済み（クーポン${salon.coupons.length}件・こだわり${salon.features.length}件・スタッフ${salon.staff.length}人）。店名が本文から特定できなかったため、②の「店名」に正しいサロン名を入力してください。`,
-        'notice',
-      );
-    } else {
-      setParseStatus(
-        `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
-        'success',
-      );
-    }
-  } catch (e) {
-    console.error(e);
-    setParseStatus(`解析エラー: ${e.message}`, 'error');
-  } finally {
-    btn.disabled = false;
-  }
+  };
+
+  setTimeout(run, 0);
 });
 
 // ── Apply: ②→③の再描画。②が空で①だけあるときは解析にフォールバック ──
@@ -318,35 +327,42 @@ document.getElementById('btn-apply').addEventListener('click', () => {
   let salon = getCurrentSalon();
 
   btn.disabled = true;
-  try {
-    if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
-      const parsed = parseHotpepper(hpRaw);
-      if (parsed && String(parsed.name || '').trim()) {
-        loadIntoEditor(parsed);
-        saveHpInputDraft(hpEl.value);
-        setParseStatus('✓ ①の本文から取り込みました（②③を更新）。細かく直す場合は②を編集のうえ、再度「反映する」で③を更新できます。', 'notice');
+  btn.classList.add('is-busy');
+  btn.setAttribute('aria-busy', 'true');
+  const run = () => {
+    try {
+      if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
+        const parsed = parseHotpepper(hpRaw);
+        if (parsed && String(parsed.name || '').trim()) {
+          loadIntoEditor(parsed);
+          saveHpInputDraft(hpEl.value);
+          setParseStatus('✓ ①の本文から取り込みました（②③を更新）。細かく直す場合は②を編集のうえ、再度「反映する」で③を更新できます。', 'notice');
+          return;
+        }
+        setParseStatus(
+          '店名を取得できませんでした。①の内容を確認するか、「解析する」を押してメッセージを確認してください。',
+          'error',
+        );
         return;
       }
-      setParseStatus(
-        '店名を取得できませんでした。①の内容を確認するか、「解析する」を押してメッセージを確認してください。',
-        'error',
-      );
-      return;
+      if (!salon || !String(salon.name || '').trim()) {
+        setParseStatus('先に①にホットペッパー本文を貼り、「解析する」か「反映する」で取り込んでください。', 'error');
+        return;
+      }
+      renderLP(salon, previewEl);
+      saveHpInputDraft(hpEl.value);
+      flushSalonDraft();
+      setParseStatus('✓ ②の内容で③プレビューを更新しました。（①を変えた場合は「解析する」で取り直してください）', 'notice');
+    } catch (e) {
+      console.error(e);
+      setParseStatus('反映エラー: ' + (e.message || String(e)), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('is-busy');
+      btn.removeAttribute('aria-busy');
     }
-    if (!salon || !String(salon.name || '').trim()) {
-      setParseStatus('先に①にホットペッパー本文を貼り、「解析する」か「反映する」で取り込んでください。', 'error');
-      return;
-    }
-    renderLP(salon, previewEl);
-    saveHpInputDraft(hpEl.value);
-    flushSalonDraft();
-    setParseStatus('✓ ②の内容で③プレビューを更新しました。（①を変えた場合は「解析する」で取り直してください）', 'notice');
-  } catch (e) {
-    console.error(e);
-    setParseStatus('反映エラー: ' + (e.message || String(e)), 'error');
-  } finally {
-    btn.disabled = false;
-  }
+  };
+  setTimeout(run, 0);
 });
 
 // ── Reset ──

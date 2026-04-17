@@ -2,7 +2,7 @@
  * parser.js — ホットペッパー全文テキストからサロンデータを抽出
  */
 
-import { createEmptySalon } from './schema.js?v=20';
+import { createEmptySalon } from './schema.js';
 
 // ---- ユーティリティ ----
 
@@ -246,15 +246,14 @@ function extractHeroCatch(rawLines) {
 }
 
 function extractIntroText(text) {
-  // 「サロンヘッダー」部分の後の長めの紹介文
-  // 「＜＞」の直後のまとまりを探す
-  const m = text.match(/＜＞\s*([\s\S]{40,400})(?=\s*空席確認)/);
-  if (m) return m[1].trim();
+  // 「＜＞」〜次の「空席確認」まで（全文コピーで紹介文が400字超えてもマッチさせる）
+  const m = text.match(/＜＞\s*([\s\S]+?)(?=\s*空席確認)/);
+  if (m) return m[1].trim().slice(0, 12000);
   // フォールバック: 最初の長い段落
   const paras = text.split(/\n{2,}/);
   for (const p of paras) {
     const t = p.trim();
-    if (t.length > 60 && t.length < 500 && !t.includes('HOT PEPPER') && !t.includes('検索') && /[\u4E00-\u9FFF]/.test(t)) {
+    if (t.length > 60 && t.length < 12000 && !t.includes('HOT PEPPER') && !t.includes('検索') && /[\u4E00-\u9FFF]/.test(t)) {
       return t;
     }
   }
@@ -458,8 +457,36 @@ function extractStats(text) {
 /** 本文に十分な情報があるが店名だけ取れないときの仮名（②で差し替え前提） */
 export const SALON_NAME_PLACEHOLDER = '（店名を自動判定できませんでした）';
 
-export function parseHotpepper(rawText) {
+/**
+ * ブラウザで「全選択」したときのパンくず・グローバルナビ等を削り、本編に近づける。
+ * （元テキストは壊さず、解析用のコピーだけ短くする）
+ */
+export function stripHpFullPageNoise(text) {
+  let t = String(text || '').replace(/^\uFEFF/, '');
+  if (t.length < 800) return t;
+
+  const mH = t.match(/\n(Hairsalon F[^\n]{8,220})\n/);
+  if (mH && mH.index != null && mH.index > 0) {
+    return t.slice(mH.index + 1);
+  }
+
+  const mA = t.match(/\n(＜＞\s*\n)/);
+  if (mA && mA.index != null && mA.index > 80) {
+    return t.slice(mA.index + 1);
+  }
+
+  const mR = t.match(/\n(\d\.\d{1,2})\s*\n\s*[（(](\d+)件[）)]\s*\n\s*(東京都[^\n]{8,})/);
+  if (mR && mR.index != null && mR.index > 120 && mR.index < 30000) {
+    const cut = t.lastIndexOf('\n\n', mR.index);
+    return cut > 0 ? t.slice(cut + 2) : t;
+  }
+
+  return t;
+}
+
+export function parseHotpepper(rawTextIn) {
   const salon = createEmptySalon();
+  const rawText = stripHpFullPageNoise(rawTextIn);
   const rawLines = rawText.split(/\r?\n/).map(l => l.trim());
   const cleanedLines = rawLines.map(cleanLine).filter(Boolean);
   const cleanedText = removeHotpepperNoise(rawText);

@@ -2,7 +2,7 @@
  * editor.js — 抽出結果をフォームへ反映し、編集・再描画を管理
  */
 
-import { renderLP } from './renderer.js?v=20';
+import { renderLP } from './renderer.js';
 
 let currentSalon = null;
 let previewContainer = null;
