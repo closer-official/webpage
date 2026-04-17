@@ -362,7 +362,7 @@ export interface DashboardItem {
   dmBody: string;
   /** 送付用 DM のテンプレパターン（1–5）。未指定時はクライアントで①扱い */
   outreachDmPattern?: '1' | '2' | '3' | '4' | '5';
-  /** DM 先頭のカスタム1行（任意） */
+  /** 美容送付DM: 本文の「【褒めポイント】」に差し込む短文（飲食側では先頭1行として使う場合あり） */
   outreachDmCustomFirstLine?: string;
   /** キュー経由時など、フッター用 Instagram URL のスナップショット（content.footerInstagramUrl と併用可） */
   footerInstagramUrl?: string;
