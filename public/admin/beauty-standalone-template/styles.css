@@ -231,6 +231,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   white-space: nowrap;
 }
 
+.btn-primary-admin:disabled,
+.btn-secondary-admin:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .btn-primary-admin {
   background: var(--gold);
   color: var(--ink);
@@ -280,6 +286,13 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: rgba(184, 151, 90, 0.12);
   color: var(--ink-l);
   border: 1px solid rgba(184, 151, 90, 0.28);
+}
+
+.parse-status.notice {
+  display: block;
+  background: rgba(61, 57, 48, 0.06);
+  color: var(--ink-l);
+  border: 1px solid rgba(28, 26, 23, 0.12);
 }
 
 /* ── Editor form ── */

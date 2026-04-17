@@ -38,10 +38,24 @@
         spellcheck="false"
       ></textarea>
       <div class="input-actions">
-        <button class="btn btn-primary-admin" id="btn-parse">解析する</button>
-        <button class="btn btn-secondary-admin" id="btn-apply">反映する</button>
+        <button
+          class="btn btn-primary-admin"
+          id="btn-parse"
+          type="button"
+          title="①の全文を解析して②フォームと③プレビューに反映します"
+        >
+          解析する
+        </button>
+        <button
+          class="btn btn-secondary-admin"
+          id="btn-apply"
+          type="button"
+          title="②の編集内容で③を再描画。①だけ入っているときは取り込みを試みます"
+        >
+          反映する
+        </button>
       </div>
-      <div class="parse-status" id="parse-status"></div>
+      <div class="parse-status" id="parse-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="parse-status" id="save-server-status" style="margin-top: 8px"></div>
     </div>
   </div>
@@ -90,6 +104,13 @@ import {
   flushSalonDraft,
 } from './editor.js';
 import { renderLP } from './renderer.js';
+
+function setParseStatus(msg, kind) {
+  const status = document.getElementById('parse-status');
+  if (!status) return;
+  status.textContent = msg || '';
+  status.className = 'parse-status' + (kind ? ' ' + kind : '');
+}
 
 /** template-worker.html と同じ相対パス（サイト直下の /api へ届く） */
 function apiBase() {
@@ -243,35 +264,74 @@ try {
 // ── Parse ──
 document.getElementById('btn-parse').addEventListener('click', () => {
   const text = document.getElementById('hp-input').value.trim();
-  const status = document.getElementById('parse-status');
+  const btn = document.getElementById('btn-parse');
 
   if (!text) {
-    status.textContent = 'テキストを入力してください';
-    status.className = 'parse-status error';
+    setParseStatus('テキストを入力してください', 'error');
     return;
   }
 
+  btn.disabled = true;
   try {
     const salon = parseHotpepper(text);
     if (!salon.name) {
-      status.textContent = '店名を抽出できませんでした。ホットペッパーの全文が含まれているか確認してください。';
-      status.className = 'parse-status error';
+      setParseStatus(
+        '店名を抽出できませんでした。ホットペッパーの全文が含まれているか確認してください。',
+        'error',
+      );
       return;
     }
     loadIntoEditor(salon);
-    status.textContent = `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`;
-    status.className = 'parse-status success';
+    saveHpInputDraft(document.getElementById('hp-input').value);
+    setParseStatus(
+      `✓ 解析完了 — ${salon.name} ／ クーポン${salon.coupons.length}件 ／ スタッフ${salon.staff.length}人 ／ こだわり${salon.features.length}件`,
+      'success',
+    );
   } catch (e) {
     console.error(e);
-    status.textContent = `解析エラー: ${e.message}`;
-    status.className = 'parse-status error';
+    setParseStatus(`解析エラー: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
   }
 });
 
-// ── Apply (re-render from current editor state) ──
+// ── Apply: ②→③の再描画。②が空で①だけあるときは解析にフォールバック ──
 document.getElementById('btn-apply').addEventListener('click', () => {
-  const salon = getCurrentSalon();
-  if (salon) renderLP(salon, previewEl);
+  const btn = document.getElementById('btn-apply');
+  const hpEl = document.getElementById('hp-input');
+  const hpRaw = hpEl.value.trim();
+  let salon = getCurrentSalon();
+
+  btn.disabled = true;
+  try {
+    if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
+      const parsed = parseHotpepper(hpRaw);
+      if (parsed && String(parsed.name || '').trim()) {
+        loadIntoEditor(parsed);
+        saveHpInputDraft(hpEl.value);
+        setParseStatus('✓ ①の本文から取り込みました（②③を更新）。細かく直す場合は②を編集のうえ、再度「反映する」で③を更新できます。', 'notice');
+        return;
+      }
+      setParseStatus(
+        '店名を取得できませんでした。①の内容を確認するか、「解析する」を押してメッセージを確認してください。',
+        'error',
+      );
+      return;
+    }
+    if (!salon || !String(salon.name || '').trim()) {
+      setParseStatus('先に①にホットペッパー本文を貼り、「解析する」か「反映する」で取り込んでください。', 'error');
+      return;
+    }
+    renderLP(salon, previewEl);
+    saveHpInputDraft(hpEl.value);
+    flushSalonDraft();
+    setParseStatus('✓ ②の内容で③プレビューを更新しました。（①を変えた場合は「解析する」で取り直してください）', 'notice');
+  } catch (e) {
+    console.error(e);
+    setParseStatus('反映エラー: ' + (e.message || String(e)), 'error');
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 // ── Reset ──
@@ -280,7 +340,11 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   clearStoredDraft();
   resetEditor();
   hpInputEl.value = '';
-  document.getElementById('parse-status').className = 'parse-status';
+  const ps = document.getElementById('parse-status');
+  if (ps) {
+    ps.textContent = '';
+    ps.className = 'parse-status';
+  }
   setSaveStatus('', '');
   document.getElementById('editor-form').innerHTML = '<div class="lp-empty" style="min-height:200px;"><p>解析結果がここに表示されます</p></div>';
   previewEl.innerHTML = '<div class="lp-empty"><p>ここにLPプレビューが表示されます</p></div>';
