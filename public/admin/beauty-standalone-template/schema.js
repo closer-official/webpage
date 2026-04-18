@@ -22,6 +22,10 @@ export function createEmptySalon() {
     staffListUrl: '',
     instagramUrl: '',
     lineUrl: '',
+    /** スタッフ募集など。フッター「Presented by divizero」の直上にリンクとして表示（http(s) のみ） */
+    staffRecruitUrl: '',
+    /** 上記リンクの表示文言（空なら「スタッフ募集」） */
+    staffRecruitLabel: '',
     openingHours: '',
     closedDays: '',
     paymentMethods: '',

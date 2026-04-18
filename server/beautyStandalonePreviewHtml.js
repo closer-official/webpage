@@ -379,11 +379,19 @@ function buildSiteFooterHtml(salon) {
   const hp = String(salon.homepageUrl || '').trim();
   const hpRow =
     /^https?:\/\//i.test(hp) ? `<p class="lp-footer-line"><a href="${esc(hp)}" target="_blank" rel="noopener noreferrer">${esc(hp)}</a></p>` : '';
+  const recruitUrl = String(salon.staffRecruitUrl || '').trim();
+  const recruitLabelRaw = String(salon.staffRecruitLabel || '').trim();
+  const recruitLabel = recruitLabelRaw || 'スタッフ募集';
+  const recruitRow =
+    /^https?:\/\//i.test(recruitUrl) && recruitLabel
+      ? `<p class="lp-footer-recruit"><a href="${esc(recruitUrl)}" target="_blank" rel="noopener noreferrer">${esc(recruitLabel)}</a></p>`
+      : '';
   return `<footer class="lp-footer lp-site-footer">
     <p>${esc(salon.name)}</p>
     ${salon.address ? `<p class="lp-footer-line">${esc(salon.address)}</p>` : ''}
     ${hpRow}
     ${sns}
+    ${recruitRow}
     <p class="lp-footer-credit"><a href="https://divizero.jp/" target="_blank" rel="noopener noreferrer">Presented by divizero</a></p>
   </footer>`;
 }

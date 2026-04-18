@@ -126,6 +126,18 @@ function renderForm(salon) {
     field('text', 'staffListUrl', 'スタイリスト一覧URL（空なら予約URLと同じ扱い）', salon.staffListUrl || ''),
     field('text', 'instagramUrl', 'Instagram URL（空ならフッターに出しません）', salon.instagramUrl || ''),
     field('text', 'lineUrl', 'LINE URL（空ならフッターに出しません）', salon.lineUrl || ''),
+    field(
+      'text',
+      'staffRecruitUrl',
+      'スタッフ募集リンクURL（「Presented by divizero」の直上。空なら非表示）',
+      salon.staffRecruitUrl || '',
+    ),
+    field(
+      'text',
+      'staffRecruitLabel',
+      'そのリンクの表示テキスト（空なら「スタッフ募集」）',
+      salon.staffRecruitLabel || '',
+    ),
   ]);
 
   // 店舗データ

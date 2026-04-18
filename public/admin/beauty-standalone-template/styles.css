@@ -1314,6 +1314,32 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: rgba(245,240,232,0.06);
 }
 
+.lp-footer-recruit {
+  margin-top: 22px;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+
+.lp-footer-recruit a {
+  display: inline-block;
+  padding: 8px 18px;
+  border: 1px solid rgba(184, 151, 90, 0.45);
+  border-radius: 6px;
+  color: var(--gold-l);
+  text-decoration: none;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.lp-footer-recruit a:hover {
+  color: #f5f0e8;
+  border-color: rgba(184, 151, 90, 0.75);
+  background: rgba(184, 151, 90, 0.12);
+}
+
 .lp-footer-credit {
   margin-top: 24px;
   font-size: 0.65rem;
