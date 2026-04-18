@@ -34,7 +34,6 @@ function removeHotpepperNoise(text) {
     /サロン情報クーポン.*/g,
     /メニューこだわりスタイリスト.*/g,
     /\(C\) Recruit.*/g,
-    /スタッフ募集\s*https?.*/g,
     /おすすめクーポンをもっと見る.*/g,
     /このサロンのすべての.*/g,
     /メニューを追加して予約.*/g,
@@ -228,27 +227,40 @@ function extractRatingAndReviews(text) {
 }
 
 function extractAddress(rawLines) {
+  let best = '';
   for (const l of rawLines) {
-    if (/東京都|大阪府|神奈川県|埼玉県|千葉県|京都府|兵庫県|愛知県|福岡県|北海道|[都道府県]/.test(l) && l.length < 60) {
-      return l.trim();
-    }
+    const t = l.trim();
+    if (!t) continue;
+    if (!/(東京都|大阪府|神奈川県|埼玉県|千葉県|京都府|兵庫県|愛知県|福岡県|北海道|都道府県)/.test(t)) continue;
+    if (t.length > 130) continue;
+    if (t.length > best.length) best = t;
   }
-  return '';
+  return best;
 }
 
 function extractAccessShort(rawLines) {
   for (const l of rawLines) {
-    if ((l.includes('徒歩') || l.includes('駅')) && l.length < 80 && !l.includes('アクセス・道案内')) {
-      return l.trim();
+    const t = l.trim();
+    if (!t || t.includes('アクセス・道案内')) continue;
+    if (t.length > 130) continue;
+    if (
+      (t.includes('徒歩') || t.includes('駅') || /\d+\s*分/.test(t)) &&
+      (t.includes('注目') || t.includes('当日') || t.includes('人気') || t.includes('徒歩') || t.includes('駅'))
+    ) {
+      return t;
     }
+  }
+  for (const l of rawLines) {
+    const t = l.trim();
+    if (t.includes('徒歩') && t.length < 130 && !t.includes('アクセス・道案内')) return t;
   }
   return '';
 }
 
 function extractAccessFull(text) {
-  const m = text.match(/アクセス・道案内[\t\s]+([\s\S]+?)(?=\n営業時間|\n定休日|\n支払い)/);
+  const m = text.match(/アクセス・道案内[\t\s]+([\s\S]+?)(?=\n営業時間|\n定休日|\n支払い|\n席数|\nスタッフ数)/);
   if (m) {
-    return m[1].replace(/髪質改善.*$/, '').trim();
+    return m[1].replace(/髪質改善.*$/, '').trim().slice(0, 2500);
   }
   return '';
 }
@@ -283,58 +295,67 @@ function extractIntroText(text) {
 }
 
 function extractKodawari(text) {
-  // 「のこだわり」以降から特徴を抽出
   const features = [];
-  const section = text.match(/のこだわり\s*([\s\S]+?)(?=からの一言|の雰囲気|のPICK UP)/);
+  // 見出しが「サロン名のこだわり」のように前に付く場合がある
+  const section = text.match(/[^\n]{0,120}のこだわり\s*([\s\S]+?)(?=[^\n]{0,100}からの一言|の雰囲気|のPICK UP)/);
   if (!section) return features;
 
   const blocks = section[1].split(/詳細を見る/);
   for (const block of blocks) {
     const blockLines = block.split('\n').map(l => l.trim()).filter(Boolean);
     if (blockLines.length < 2) continue;
-    const title = blockLines[0];
-    // タイトルの重複行をスキップ
-    const textLines = blockLines.slice(1).filter(l => l !== title && l.length > 10);
+    let title = blockLines[0].replace(/のこだわり\s*$/, '').trim();
+    if (/の写真|HOT PEPPER|空席確認/.test(title)) continue;
+    const textLines = blockLines.slice(1).filter(l => l !== title && l.length > 10 && !/の写真/.test(l));
     if (title && textLines.length > 0) {
-      features.push({ title, text: textLines.join(' ').substring(0, 200) });
+      features.push({ title: title.slice(0, 120), text: textLines.join(' ').substring(0, 500) });
     }
   }
   return features;
 }
 
 function extractMessage(text) {
-  const section = text.match(/からの一言\s*([\s\S]+?)(?=の雰囲気|のPICK UP|のCHECK|のサロンデータ)/);
+  const section = text.match(/[^\n]{0,120}からの一言\s*([\s\S]+?)(?=の雰囲気|のPICK UP|のCHECK|のサロンデータ)/);
   if (!section) return { title: '', text: '' };
 
   const blockLines = section[1].split('\n').map(l => l.trim()).filter(Boolean);
-  // 最初の行がタイトル（ハッシュタグを含む可能性）
-  let titleIdx = -1;
   let mainText = '';
-
   for (let i = 0; i < blockLines.length; i++) {
-    if (blockLines[i].startsWith('#')) continue;
-    if (blockLines[i].length > 30 && !blockLines[i].startsWith('空席')) {
-      if (mainText === '') {
-        mainText = blockLines[i];
+    const l = blockLines[i];
+    if (!l || l.startsWith('#') || l.startsWith('空席')) continue;
+    if (/の写真|^https?:\/\//i.test(l)) continue;
+    if (l.length > 40) {
+      mainText = l;
+      break;
+    }
+  }
+  if (!mainText) {
+    for (let i = 0; i < blockLines.length; i++) {
+      const l = blockLines[i];
+      if (l && l.length > 25 && !l.startsWith('空席') && !/の写真/.test(l)) {
+        mainText = l;
+        break;
       }
     }
   }
 
   const hashLine = blockLines.find(l => l.startsWith('#'));
-  const title = hashLine ? hashLine.replace(/#/g, '').trim().split('　')[0] : '';
+  const title = hashLine
+    ? hashLine.replace(/#/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
+    : '';
 
-  return { title, text: mainText.substring(0, 300) };
+  return { title, text: mainText.substring(0, 900) };
 }
 
 function extractAtmosphere(text) {
-  const section = text.match(/の雰囲気\s*([\s\S]+?)(?=サロンの利用傾向|のPICK UP|のCHECK)/);
+  const section = text.match(/[^\n]{0,120}の雰囲気\s*([\s\S]+?)(?=サロンの利用傾向|のPICK UP|のCHECK|人気のクーポン)/);
   if (!section) return [];
 
-  const atmoLines = section[1].split('\n').map(l => l.trim()).filter(l => l.length > 5 && l.length < 60);
-  // 「サロン名の雰囲気（...）」形式から括弧内テキストを抽出 or 短い説明文
+  const atmoLines = section[1].split('\n').map(l => l.trim()).filter(l => l.length > 5 && l.length < 120);
   const results = [];
   for (const l of atmoLines) {
-    const m = l.match(/）\s*(.+)$/) || l.match(/^([^（(]+)$/);
+    if (/の写真|HOT PEPPER/.test(l)) continue;
+    const m = l.match(/の雰囲気（([^）]+)）/) || l.match(/）\s*(.+)$/) || l.match(/^([^（(]+)$/);
     if (m && m[1] && m[1].length > 4 && !m[1].includes('の雰囲気')) {
       results.push(m[1].trim());
     }
@@ -344,8 +365,10 @@ function extractAtmosphere(text) {
 
 function extractCoupons(text) {
   const coupons = [];
-  // クーポンセクションを探す
-  const couponSection = text.match(/のクーポン\s*([\s\S]+?)(?=の口コミ|よくある問い合わせ|$)/);
+  let couponSection = text.match(/のクーポン\s*([\s\S]+?)(?=の口コミ|よくある問い合わせ|ピックアップ|$)/);
+  if (!couponSection) {
+    couponSection = text.match(/人気のクーポン\s*([\s\S]+?)(?=人気のスタイル|サロンの利用傾向|予約比率|$)/);
+  }
   const src = couponSection ? couponSection[1] : text;
 
   // 新規/再来/全員ブロックを分割
@@ -395,28 +418,50 @@ function extractCoupons(text) {
   return coupons.slice(0, 8);
 }
 
+function cleanStaffNameFromLine(line) {
+  const l = String(line || '').trim();
+  if (!l || /の写真|空席確認|指名して/.test(l)) return '';
+  const m = l.match(/(?:^|\)\s*)([\u3040-\u30FF\u4E00-\u9FFF\w・\s]{2,36})\s*(【渋谷】|【表参道】|メンズ渋谷|【原宿】|【新宿】)\s*$/);
+  if (m) return `${m[1].trim()} ${m[2]}`.replace(/\s+/g, ' ').trim();
+  if (l.length < 36 && /【|メンズ渋谷/.test(l) && !l.includes('（歴')) return l;
+  return '';
+}
+
 function extractStaff(text) {
   const staff = [];
-  const section = text.match(/のPICK UPスタイリスト\s*([\s\S]+?)(?=のCHECKスタイル|のサロンデータ)/);
+  const section = text.match(/[^\n]{0,120}のPICK UPスタイリスト\s*([\s\S]+?)(?=のCHECKスタイル|のサロンデータ)/);
   if (!section) return staff;
 
-  const sLines = section[1].split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = section[1].split('\n').map(l => l.trim()).filter(Boolean);
   let i = 0;
-  while (i < sLines.length) {
-    const l = sLines[i];
-    // スタイリスト名行: 日本語またはローマ字で短め、ふりがな行が続く
-    if (l.length < 30 && l.length > 1 && !l.includes('歴') && !l.includes('◎') && !l.includes('♪')) {
-      const name = l;
-      const specialty = sLines[i + 2] || '';
-      const experience = (sLines[i + 3] || '').match(/（歴\d+年）/)?.[0] || '';
-      const catchLine = (sLines[i + 4] || '');
-      staff.push({ name, specialty, experience, catch: catchLine, avatarUrl: '', avatarText: '' });
-      i += 5;
+  while (i < lines.length) {
+    const name = cleanStaffNameFromLine(lines[i]);
+    if (!name) {
+      i += 1;
       continue;
     }
-    i++;
+    let j = i + 1;
+    while (j < lines.length && /^[\u30A0-\u30FF\u3000\s・]+$/.test(lines[j])) j += 1;
+
+    const specRaw = String(lines[j] || '');
+    const expInLine = specRaw.match(/（歴\d+年）/);
+    let experience = expInLine ? expInLine[0] : '';
+    const specialty = specRaw.replace(/（歴\d+年）/g, '').trim();
+    j += 1;
+
+    if (!experience && lines[j] && /（歴\d+年）/.test(lines[j])) {
+      const em = lines[j].match(/（歴\d+年）/);
+      experience = em ? em[0] : '';
+      j += 1;
+    }
+
+    const catchLine = String(lines[j] || '').trim();
+    j += 1;
+
+    staff.push({ name, specialty, experience, catch: catchLine, avatarUrl: '', avatarText: '' });
+    i = j;
   }
-  return staff.slice(0, 5);
+  return staff.slice(0, 8);
 }
 
 function extractSalonData(text) {
@@ -472,6 +517,46 @@ function extractStats(text) {
     },
     ageRatio
   };
+}
+
+/** 住所のみから Google マップ検索 URL（api=1） */
+export function buildGoogleMapsSearchUrl(address) {
+  const q = String(address || '').trim();
+  if (!q || q.length > 400) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
+/** 貼り付け本文から地図短縮 URL / Google Maps を拾う（募集 URL 等は除外） */
+function extractEmbeddedMapsUrl(text) {
+  const t = String(text || '');
+  const candidates = [];
+  const reList = [
+    /https?:\/\/maps\.app\.goo\.gl\/[a-zA-Z0-9_-]+/gi,
+    /https?:\/\/goo\.gl\/maps\/[a-zA-Z0-9_-]+/gi,
+    /https?:\/\/www\.google\.(?:com|co\.jp)\/maps[^\s"'<>)]{0,900}/gi,
+  ];
+  for (const re of reList) {
+    let m;
+    while ((m = re.exec(t)) !== null) {
+      if (m[0]) candidates.push(m[0]);
+    }
+  }
+  if (!candidates.length) return '';
+  const pick = candidates.sort((a, b) => b.length - a.length)[0];
+  return String(pick).replace(/[),.;]+$/, '');
+}
+
+/** ホットペッパー「スタッフ募集」行の URL */
+function extractStaffRecruit(text) {
+  const t = String(text || '');
+  const m =
+    t.match(/スタッフ募集\s*(?:\n|\t)+\s*(https?:\/\/\S+)/i) ||
+    t.match(/スタッフ募集[^\S\n]*\n[^\S\n]*(https?:\/\/\S+)/i) ||
+    t.match(/スタッフ募集[^\n]*?(https?:\/\/\S+)/i);
+  if (!m) return { url: '', label: '' };
+  let url = String(m[1] || '').trim().replace(/[）)。\],.;]+$/u, '');
+  if (!/^https?:\/\//i.test(url)) return { url: '', label: '' };
+  return { url, label: 'スタッフ募集' };
 }
 
 // ---- メインパーサー ----
@@ -537,6 +622,18 @@ export function parseHotpepper(rawTextIn) {
   salon.reviewCount = reviewCount;
 
   salon.address = extractAddress(rawLines);
+  const recruit = extractStaffRecruit(rawTextIn);
+  if (recruit.url) {
+    salon.staffRecruitUrl = recruit.url;
+    salon.staffRecruitLabel = recruit.label || 'スタッフ募集';
+  }
+
+  const embeddedMap = extractEmbeddedMapsUrl(rawTextIn) || extractEmbeddedMapsUrl(rawText);
+  salon.addressMapUrl = embeddedMap || '';
+  if (!String(salon.addressMapUrl || '').trim() && salon.address) {
+    salon.addressMapUrl = buildGoogleMapsSearchUrl(salon.address);
+  }
+
   salon.accessShort = extractAccessShort(rawLines);
   salon.accessFull = extractAccessFull(rawText);
   salon.heroCatch = extractHeroCatch(cleanedLines);

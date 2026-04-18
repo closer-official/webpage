@@ -114,6 +114,12 @@ function renderForm(salon) {
     field('text', 'rating', '評価', salon.rating ?? ''),
     field('text', 'reviewCount', '口コミ件数', salon.reviewCount ?? ''),
     field('text', 'address', '住所', salon.address),
+    field(
+      'text',
+      'addressMapUrl',
+      'GoogleマップURL（空なら住所から検索用リンクを自動生成。maps.app.goo.gl 等）',
+      salon.addressMapUrl || '',
+    ),
     field('text', 'accessShort', 'アクセス（短縮）', salon.accessShort),
     field('textarea', 'accessFull', 'アクセス（詳細）', salon.accessFull),
     field('textarea', 'heroCatch', 'キャッチコピー', salon.heroCatch),

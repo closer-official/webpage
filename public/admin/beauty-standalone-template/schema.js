@@ -9,6 +9,8 @@ export function createEmptySalon() {
     rating: null,
     reviewCount: null,
     address: '',
+    /** Googleマップ等のURL（ヒーロー・ACCESSの📍から開く）。空のときは住所から検索用URLを自動生成 */
+    addressMapUrl: '',
     accessShort: '',
     accessFull: '',
     heroCatch: '',

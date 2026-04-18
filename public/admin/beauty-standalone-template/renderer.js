@@ -92,9 +92,16 @@ function buildSiteFooter(salon) {
     /^https?:\/\//i.test(recruitUrl) && recruitLabel
       ? `<p class="lp-footer-recruit"><a href="${esc(recruitUrl)}" target="_blank" rel="noopener noreferrer">${esc(recruitLabel)}</a></p>`
       : '';
+  const footMap = effectiveAddressMapUrl(salon);
+  const footAddr =
+    salon.address && footMap
+      ? `<a class="lp-footer-map-link" href="${esc(footMap)}" target="_blank" rel="noopener noreferrer">${esc(salon.address)}</a>`
+      : salon.address
+        ? esc(salon.address)
+        : '';
   el.innerHTML = `
     <p>${esc(salon.name)}</p>
-    ${salon.address ? `<p class="lp-footer-line">${esc(salon.address)}</p>` : ''}
+    ${footAddr ? `<p class="lp-footer-line">${footAddr}</p>` : ''}
     ${hpRow}
     ${sns}
     ${recruitRow}
@@ -110,7 +117,16 @@ function buildHero(salon) {
   const rating = salon.rating ? `<span class="hero-rating"><span class="rating-star">★</span>${salon.rating}</span>` : '';
   const reviews = salon.reviewCount ? `<span class="hero-reviews">${salon.reviewCount.toLocaleString()}件の口コミ</span>` : '';
   const badge = salon.heroCatch ? `<div class="hero-badge">${salon.heroCatch}</div>` : '';
-  const access = salon.accessShort ? `<div class="hero-access"><span class="access-icon">📍</span>${salon.accessShort}</div>` : '';
+  const mapUrl = effectiveAddressMapUrl(salon);
+  const addr = String(salon.address || '').trim();
+  let access = '';
+  if (addr && mapUrl) {
+    access = `<div class="hero-access"><span class="access-icon">📍</span><a class="hero-access-link" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(addr)}</a></div>`;
+  } else if (addr) {
+    access = `<div class="hero-access"><span class="access-icon">📍</span>${esc(addr)}</div>`;
+  } else if (salon.accessShort) {
+    access = `<div class="hero-access"><span class="access-icon">📍</span>${esc(salon.accessShort)}</div>`;
+  }
 
   el.innerHTML = `
     <div class="hero-inner">
@@ -314,31 +330,46 @@ function buildStats(salon) {
 // ── Access ──
 function buildAccess(salon) {
   const el = el_('section', 'lp-section lp-access');
+  const mapUrl = effectiveAddressMapUrl(salon);
+  const addr = String(salon.address || '').trim();
+  const addressCell =
+    addr && mapUrl
+      ? `<a class="access-map-link" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(addr)}</a>`
+      : esc(addr);
   const rows = [
-    ['住所', salon.address],
-    ['アクセス', salon.accessFull || salon.accessShort],
-    ['営業時間', salon.openingHours],
-    ['定休日', salon.closedDays],
-    ['支払い方法', salon.paymentMethods],
-    ['席数', salon.seatCount],
-    ['スタッフ', salon.staffCount],
-    ['駐車場', salon.parking],
-    ['カット価格', salon.cutPrice],
-  ].filter(([_, v]) => v && v.trim());
+    ['住所', addressCell, true],
+    ['アクセス', salon.accessFull || salon.accessShort, false],
+    ['営業時間', salon.openingHours, false],
+    ['定休日', salon.closedDays, false],
+    ['支払い方法', salon.paymentMethods, false],
+    ['席数', salon.seatCount, false],
+    ['スタッフ', salon.staffCount, false],
+    ['駐車場', salon.parking, false],
+    ['カット価格', salon.cutPrice, false],
+  ].filter(([_, v]) => v && String(v).trim());
 
-  const tableRows = rows.map(([k, v]) => `
+  const tableRows = rows
+    .map(([k, v, rawHtml]) => `
     <tr>
       <th>${esc(k)}</th>
-      <td>${esc(v)}</td>
+      <td>${rawHtml ? v : esc(v)}</td>
     </tr>
-  `).join('');
+  `)
+    .join('');
+
+  const addressBanner =
+    addr && mapUrl
+      ? `<div class="access-address"><span class="pin">📍</span><a class="access-map-link" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(addr)}</a></div>`
+      : addr
+        ? `<div class="access-address"><span class="pin">📍</span>${esc(addr)}</div>`
+        : '';
 
   el.innerHTML = `
     <div class="section-inner">
       <div class="section-label">ACCESS</div>
       <h2 class="section-title">アクセス・店舗情報</h2>
       <div class="access-content">
-        ${salon.address ? `<div class="access-address"><span class="pin">📍</span>${esc(salon.address)}</div>` : ''}
+        ${addressBanner}
         <table class="access-table">${tableRows}</table>
         ${salon.homepageUrl ? `<div class="access-url"><a href="${esc(salon.homepageUrl)}" target="_blank" rel="noopener">${esc(salon.homepageUrl)}</a></div>` : ''}
       </div>
@@ -390,6 +421,15 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/** 表示用：手入力 addressMapUrl があれば優先、なければ住所から検索 URL */
+function effectiveAddressMapUrl(salon) {
+  const u = String(salon.addressMapUrl || '').trim();
+  if (/^https?:\/\//i.test(u)) return u;
+  const addr = String(salon.address || '').trim();
+  if (!addr) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
 }
 
 function getInitials(name) {

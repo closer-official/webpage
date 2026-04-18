@@ -586,6 +586,18 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   line-height: 1.5;
 }
 
+.hero-access-link {
+  color: rgba(232, 214, 180, 0.95);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(184, 151, 90, 0.45);
+}
+
+.hero-access-link:hover {
+  color: var(--gold-l);
+  text-decoration-color: rgba(184, 151, 90, 0.75);
+}
+
 .hero-deco {
   position: absolute;
   right: -40px;
@@ -1003,6 +1015,29 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   align-items: flex-start;
   gap: 8px;
   color: var(--ink);
+}
+
+.access-map-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(28, 26, 23, 0.22);
+}
+
+.access-map-link:hover {
+  color: #5c4a2a;
+  text-decoration-color: rgba(184, 151, 90, 0.55);
+}
+
+.lp-footer-map-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(245, 240, 232, 0.35);
+}
+
+.lp-footer-map-link:hover {
+  text-decoration-color: rgba(245, 240, 232, 0.6);
 }
 
 .pin { font-style: normal; }
