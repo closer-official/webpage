@@ -1432,6 +1432,17 @@ app.post('/api/resolve-map-embed-url', async (req, res) => {
   }
 });
 
+/** 美容室独立LP保存後にメモリード1件を削除する（ドラフト保存で付くダッシュ行とメモ行の二重表示を防ぐ） */
+async function consumeBeautyMemoLeadAfterDraftSave(store, memoId) {
+  const mid = String(memoId || '').trim();
+  if (!mid) return;
+  const raw = await store.getBeautyMemoLeads();
+  const list = Array.isArray(raw) ? raw : [];
+  const next = list.filter((x) => !x || x.id !== mid);
+  if (next.length === list.length) return;
+  await store.setBeautyMemoLeads(next);
+}
+
 app.post('/api/template-customizations/save', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const body = req.body || {};
@@ -1485,6 +1496,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
     await store.setTemplateCustomizations(customizations);
     if (isBeauty) await store.setBeautyDashboard(dashUpdate);
     else await store.setDashboard(dashUpdate);
+    if (isBeauty) {
+      const memoConsume = String(body.memoLeadId || body.beautyMemoLeadId || '').trim();
+      if (memoConsume) await consumeBeautyMemoLeadAfterDraftSave(store, memoConsume);
+    }
     return res.json({ ok: true, item: customizations[i] });
   }
 
@@ -1521,6 +1536,10 @@ app.post('/api/template-customizations/save', async (req, res) => {
   await store.setTemplateCustomizations(customizations);
   if (isBeautyCreate) await store.setBeautyDashboard(dashCreate);
   else await store.setDashboard(dashCreate);
+  if (isBeautyCreate) {
+    const memoConsume = String(body.memoLeadId || body.beautyMemoLeadId || '').trim();
+    if (memoConsume) await consumeBeautyMemoLeadAfterDraftSave(store, memoConsume);
+  }
   res.json({ ok: true, item });
 });
 

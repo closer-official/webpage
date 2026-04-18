@@ -18,7 +18,7 @@
       class="beauty-standalone-rev-badge"
       title="デプロイ・キャッシュ確認用。数字を上げたリリースかどうかの目印です（ヘッダー左端）。"
       aria-hidden="true"
-    >27</span>
+    >28</span>
     <div class="app-header-brand">
       <h1>美容室テンプレ（独立版）</h1>
       <p class="header-sub">ホットペッパー全文 → LP 自動生成（mellowとは別管理）</p>
@@ -192,6 +192,10 @@ const params = new URLSearchParams(location.search || '');
 let linkedDraftId = String(params.get('id') || '').trim();
 const memoLeadId = String(params.get('memoLeadId') || '').trim();
 let linkedDraftName = '';
+
+function getBeautyMemoLeadIdFromUrl() {
+  return String(new URLSearchParams(location.search || '').get('memoLeadId') || '').trim();
+}
 
 /** メモリード一覧（美容）から `?memoLeadId=` で開いたとき（`?id=` 併用時は id を優先） */
 async function applyBeautyMemoLeadFromQuery(mid) {
@@ -427,6 +431,16 @@ if (btnSaveServer) {
     return;
   }
   flushSalonDraft();
+  const memoFromUrl = getBeautyMemoLeadIdFromUrl();
+  const memoSavePayload = memoFromUrl ? { beautyMemoLeadId: memoFromUrl } : {};
+  const stripMemoLeadFromUrl = () => {
+    if (!memoFromUrl) return;
+    const u = new URL(location.href);
+    u.searchParams.delete('memoLeadId');
+    history.replaceState({}, '', u.toString());
+  };
+  const memoConsumedHint =
+    ' メモリード一覧からは外れ、送付・フェーズ管理（美容）の案件としてのみ表示されます（送信前相当）。';
   try {
     if (linkedDraftId) {
       const j = await fetchAdminJson('/template-customizations/save', {
@@ -437,14 +451,17 @@ if (btnSaveServer) {
           baseTemplateId: 'beauty_standalone',
           name: String(salon.name).trim().slice(0, 80),
           override: { beautyStandaloneSalon: salon },
+          ...memoSavePayload,
         }),
       });
       linkedDraftName = String(j.item && j.item.name ? j.item.name : linkedDraftName);
       const pv = previewPublicUrl(linkedDraftId);
+      stripMemoLeadFromUrl();
       setSaveStatus(
         'サーバーに保存しました。共有プレビュー: ' +
           pv +
-          ' ／ 送付・フェーズは上部の「送付・フェーズ管理（美容）」で確認できます。',
+          ' ／ 送付・フェーズは上部の「送付・フェーズ管理（美容）」で確認できます。' +
+          (memoFromUrl ? memoConsumedHint : ''),
         'success',
       );
       return;
@@ -457,6 +474,7 @@ if (btnSaveServer) {
         baseTemplateId: 'beauty_standalone',
         name: String(salon.name).trim().slice(0, 80),
         override: { beautyStandaloneSalon: salon },
+        ...memoSavePayload,
       }),
     });
     const newId = j.item && j.item.id;
@@ -464,16 +482,22 @@ if (btnSaveServer) {
       linkedDraftId = newId;
       const u = new URL(location.href);
       u.searchParams.set('id', newId);
+      u.searchParams.delete('memoLeadId');
       history.replaceState({}, '', u.toString());
       const pv = previewPublicUrl(newId);
       setSaveStatus(
         '新規ドラフトを保存しました（URL に id を付けました）。共有プレビュー: ' +
           pv +
-          ' ／ フェーズ一覧は「送付・フェーズ管理（美容）」で確認できます。',
+          ' ／ フェーズ一覧は「送付・フェーズ管理（美容）」で確認できます。' +
+          (memoFromUrl ? memoConsumedHint : ''),
         'success',
       );
     } else {
-      setSaveStatus('新規店舗ドラフトを作成して保存しました。', 'success');
+      stripMemoLeadFromUrl();
+      setSaveStatus(
+        '新規店舗ドラフトを作成して保存しました。' + (memoFromUrl ? memoConsumedHint : ''),
+        'success',
+      );
     }
   } catch (e) {
     console.error(e);
