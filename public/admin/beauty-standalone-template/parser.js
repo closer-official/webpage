@@ -6,6 +6,15 @@ import { createEmptySalon } from './schema.js';
 
 // ---- ユーティリティ ----
 
+/** ABOUT 用：ホットペッパーの「空席確認・予約する」CTA より手前だけ残す */
+export function truncateSalonIntroBeforeReserveCta(text) {
+  const s = String(text || '');
+  const needle = '空席確認・予約する';
+  const i = s.indexOf(needle);
+  if (i < 0) return s.trim();
+  return s.slice(0, i).trim();
+}
+
 function lines(text) {
   return text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 }
@@ -279,16 +288,16 @@ function extractHeroCatch(rawLines) {
 }
 
 function extractIntroText(text) {
-  // 「＜＞」または半角「<>」〜次の「空席確認」まで
-  let m = text.match(/＜＞\s*([\s\S]+?)(?=\s*空席確認)/);
-  if (!m) m = text.match(/<>\s*([\s\S]+?)(?=\s*空席確認)/);
-  if (m) return m[1].trim().slice(0, 12000);
+  // 「＜＞」または半角「<>」〜次の「空席確認・予約する」まで（CTA 文言は含めない）
+  let m = text.match(/＜＞\s*([\s\S]+?)(?=\s*空席確認・予約する)/);
+  if (!m) m = text.match(/<>\s*([\s\S]+?)(?=\s*空席確認・予約する)/);
+  if (m) return truncateSalonIntroBeforeReserveCta(m[1].trim()).slice(0, 12000);
   // フォールバック: 最初の長い段落
   const paras = text.split(/\n{2,}/);
   for (const p of paras) {
     const t = p.trim();
     if (t.length > 60 && t.length < 12000 && !t.includes('HOT PEPPER') && !t.includes('検索') && /[\u4E00-\u9FFF]/.test(t)) {
-      return t;
+      return truncateSalonIntroBeforeReserveCta(t).slice(0, 12000);
     }
   }
   return '';
@@ -318,10 +327,37 @@ function extractMessage(text) {
   const section = text.match(/[^\n]{0,120}からの一言\s*([\s\S]+?)(?=の雰囲気|のPICK UP|のCHECK|のサロンデータ)/);
   if (!section) return { title: '', text: '' };
 
-  const blockLines = section[1].split('\n').map(l => l.trim()).filter(Boolean);
+  let chunk = String(section[1] || '');
+  const ctaIdx = chunk.indexOf('空席確認・予約する');
+  if (ctaIdx >= 0) chunk = chunk.slice(0, ctaIdx);
+  chunk = chunk.trim();
+
+  const blockLines = chunk.split('\n').map(l => l.trim()).filter(Boolean);
+  const firstHashIdx = blockLines.findIndex((l) => l.startsWith('#'));
+
+  if (firstHashIdx >= 0) {
+    let i = firstHashIdx;
+    const hashLines = [];
+    while (i < blockLines.length && blockLines[i].startsWith('#')) {
+      hashLines.push(blockLines[i]);
+      i += 1;
+    }
+    const title = hashLines
+      .join(' ')
+      .replace(/#/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 80);
+    const bodyLines = blockLines
+      .slice(i)
+      .filter((l) => l && !/^空席確認/.test(l) && !/の写真|^https?:\/\//i.test(l));
+    const mainText = bodyLines.join('\n').trim().slice(0, 2000);
+    return { title, text: mainText };
+  }
+
   let mainText = '';
-  for (let i = 0; i < blockLines.length; i++) {
-    const l = blockLines[i];
+  for (let j = 0; j < blockLines.length; j++) {
+    const l = blockLines[j];
     if (!l || l.startsWith('#') || l.startsWith('空席')) continue;
     if (/の写真|^https?:\/\//i.test(l)) continue;
     if (l.length > 40) {
@@ -330,21 +366,15 @@ function extractMessage(text) {
     }
   }
   if (!mainText) {
-    for (let i = 0; i < blockLines.length; i++) {
-      const l = blockLines[i];
+    for (let j = 0; j < blockLines.length; j++) {
+      const l = blockLines[j];
       if (l && l.length > 25 && !l.startsWith('空席') && !/の写真/.test(l)) {
         mainText = l;
         break;
       }
     }
   }
-
-  const hashLine = blockLines.find(l => l.startsWith('#'));
-  const title = hashLine
-    ? hashLine.replace(/#/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
-    : '';
-
-  return { title, text: mainText.substring(0, 900) };
+  return { title: '', text: mainText.substring(0, 2000) };
 }
 
 function extractAtmosphere(text) {
@@ -637,7 +667,7 @@ export function parseHotpepper(rawTextIn) {
   salon.accessShort = extractAccessShort(rawLines);
   salon.accessFull = extractAccessFull(rawText);
   salon.heroCatch = extractHeroCatch(cleanedLines);
-  salon.introText = extractIntroText(rawText);
+  salon.introText = truncateSalonIntroBeforeReserveCta(extractIntroText(rawText));
 
   const { title: msgTitle, text: msgText } = extractMessage(rawText);
   salon.messageTitle = msgTitle;
@@ -695,7 +725,7 @@ export function buildSalonForAdminImport(rawTextIn) {
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
       .trim();
-    const body = norm.slice(0, 50000);
+    const body = truncateSalonIntroBeforeReserveCta(norm.slice(0, 50000));
 
     let parsed;
     try {
@@ -726,12 +756,14 @@ export function buildSalonForAdminImport(rawTextIn) {
   } catch (e) {
     console.error('buildSalonForAdminImport', e);
     const s = createEmptySalon();
-    const t = String(rawTextIn == null ? '' : rawTextIn)
-      .replace(/^\uFEFF/, '')
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      .trim()
-      .slice(0, 50000);
+    const t = truncateSalonIntroBeforeReserveCta(
+      String(rawTextIn == null ? '' : rawTextIn)
+        .replace(/^\uFEFF/, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .trim()
+        .slice(0, 50000),
+    );
     s.introText = t;
     s.name = pickDefaultImportName(t) || SALON_NAME_PLACEHOLDER;
     return s;
