@@ -54,6 +54,13 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
   const isPublicTranslate = p === '/api/public/translate-ui';
   /** LP 本文から参照するロゴ（Basic 保護下でもテンプレプレビュー HTML と同じ未ログインで読める必要がある） */
   const isBrandAssetPath = p.startsWith('/payment-logos/') || p.startsWith('/social-icons/');
+  /**
+   * 美容室独立LPの共有プレビュー（GET /api/template-preview/…）は Basic なしだが、
+   * HTML が参照するこの CSS だけが保護下だとサブリソースで 401 → Safari 等が認証を求め、未ログインでは素の HTML に見える。
+   */
+  const isBeautyStandalonePreviewStylesheet =
+    p === '/admin/beauty-standalone-template/styles.css' &&
+    (m === 'GET' || m === 'HEAD' || m === 'OPTIONS');
   /** ブラウザが自動取得（Basic 401 だと認証ダイアログが先に出る） */
   const isPublicRootAsset =
     (m === 'GET' || m === 'HEAD') &&
@@ -67,6 +74,7 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
       isTemplateGallery ||
       isPublicTranslate ||
       isBrandAssetPath ||
+      isBeautyStandalonePreviewStylesheet ||
       isMailPreferencePage ||
       isOutreachOptOutApi ||
       isDashboardPreview ||
@@ -92,6 +100,7 @@ function isPublicHearingPath(method: string, pathname: string): boolean {
   if ((m === 'GET' || m === 'HEAD') && isTemplatePreview) return true;
   if ((m === 'GET' || m === 'HEAD') && isTemplateGallery) return true;
   if ((m === 'GET' || m === 'HEAD') && isBrandAssetPath) return true;
+  if (isBeautyStandalonePreviewStylesheet) return true;
   if (isPublicRootAsset) return true;
   if (m === 'POST' && isPublicTranslate) return true;
   if (m === 'POST' && p === '/api/customer-intake-draft') return true;
