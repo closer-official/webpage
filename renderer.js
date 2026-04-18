@@ -271,7 +271,6 @@ function buildAccess(salon) {
       <div class="section-label">ACCESS</div>
       <h2 class="section-title">アクセス・店舗情報</h2>
       <div class="access-content">
-        ${salon.address ? `<div class="access-address"><span class="pin">📍</span>${esc(salon.address)}</div>` : ''}
         <table class="access-table">${tableRows}</table>
         ${salon.homepageUrl ? `<div class="access-url"><a href="${esc(salon.homepageUrl)}" target="_blank" rel="noopener">${esc(salon.homepageUrl)}</a></div>` : ''}
       </div>

@@ -333,19 +333,11 @@ function buildAccessHtml(salon) {
     )
     .join('');
 
-  const addressBanner =
-    addr && mapUrl
-      ? `<div class="access-address"><span class="pin">📍</span><a class="access-map-link" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${esc(addr)}</a></div>`
-      : addr
-        ? `<div class="access-address"><span class="pin">📍</span>${esc(addr)}</div>`
-        : '';
-
   return `<section class="lp-section lp-access" id="access">
     <div class="section-inner">
       <div class="section-label">ACCESS</div>
       <h2 class="section-title">アクセス・店舗情報</h2>
       <div class="access-content">
-        ${addressBanner}
         <table class="access-table">${tableRows}</table>
         ${
           /^https?:\/\//i.test(String(salon.homepageUrl || '').trim())
