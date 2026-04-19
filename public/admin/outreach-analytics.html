@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>送付・フェーズ分析 | Closer</title>
+    <style>
+      :root {
+        --bg: #0c1220;
+        --panel: #141c2e;
+        --text: #e8edf5;
+        --muted: #9aacbf;
+        --border: #2a3a55;
+        --err: #f87171;
+        --accent: #38bdf8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(12, 18, 32, 0.95);
+      }
+      .nav a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .nav a:hover {
+        color: var(--text);
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 20px 80px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.35rem;
+      }
+      .sub {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 18px;
+      }
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px 16px;
+        align-items: end;
+      }
+      label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #0c1528;
+        color: var(--text);
+        font-size: 0.88rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 16px;
+        border-radius: 8px;
+        border: 1px solid #0e7490;
+        background: #0c4a6e;
+        color: #e0f2fe;
+        font-weight: 600;
+        font-size: 0.86rem;
+        cursor: pointer;
+      }
+      .btn:hover {
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px 24px;
+        font-size: 0.92rem;
+      }
+      .summary strong {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .err {
+        color: var(--err);
+        margin: 0 0 12px;
+        font-size: 0.9rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 8px 6px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .mono {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.78rem;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+      .pill-sent {
+        background: #14532d;
+        color: #bbf7d0;
+      }
+      .pill-phase {
+        background: #1e3a5f;
+        color: #bae6fd;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav" aria-label="ナビ">
+      <a href="../">← 運営トップ</a>
+      <a href="./outreach-phases.html?v=7phase">飲食・その他フェーズ</a>
+      <a href="./outreach-phases-beauty.html?v=7phase">美容室フェーズ</a>
+    </nav>
+    <main>
+      <h1>送付・フェーズ分析</h1>
+      <p class="sub">
+        管理画面で「送信済み」にした操作（<code>status: email_sent</code>）と、送信後の<strong>明示的なフェーズ変更</strong>（自動で付く送信直後のフェーズ更新は除く）を記録します。担当者は各フェーズ画面の<strong>送信者名</strong>入力から送られます。過去に遡及したログはありません。
+      </p>
+      <p id="err" class="err" style="display: none"></p>
+      <div class="panel">
+        <div class="filters">
+          <div>
+            <label for="f-from">開始（日時・任意）</label>
+            <input type="datetime-local" id="f-from" />
+          </div>
+          <div>
+            <label for="f-to">終了（日時・任意）</label>
+            <input type="datetime-local" id="f-to" />
+          </div>
+          <div>
+            <label for="f-pool">保存先</label>
+            <select id="f-pool">
+              <option value="">すべて</option>
+              <option value="beauty">美容ダッシュ（beautyDashboard）</option>
+              <option value="main">メインダッシュ（dashboard）</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-seg">区分（テンプレ推定）</label>
+            <select id="f-seg">
+              <option value="">すべて</option>
+              <option value="1">美容室寄り行のみ</option>
+              <option value="0">飲食寄り行のみ</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-tpl">templateId（完全一致・任意）</label>
+            <input type="text" id="f-tpl" placeholder="例: modern" maxlength="80" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button type="button" class="btn" id="btn-load">再読み込み</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel summary" id="summary" style="display: none"></div>
+      <div class="panel" style="overflow-x: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>時刻</th>
+              <th>種別</th>
+              <th>担当</th>
+              <th>店名</th>
+              <th>template</th>
+              <th>DMパターン</th>
+              <th>保存先</th>
+              <th>区分</th>
+              <th>詳細</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr>
+              <td colspan="9" class="muted">読み込み中…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <script>
+      (function () {
+        var api = '';
+        try {
+          api = new URLSearchParams(location.search).get('api') || '';
+        } catch (e) {}
+        if (!api) api = '';
+
+        function qs(sel) {
+          return document.querySelector(sel);
+        }
+
+        function credFetch(url, opts) {
+          return fetch(url, Object.assign({ credentials: 'include' }, opts || {}));
+        }
+
+        function buildQuery() {
+          var p = [];
+          var fromEl = qs('#f-from');
+          var toEl = qs('#f-to');
+          var pool = String(qs('#f-pool').value || '').trim();
+          var seg = String(qs('#f-seg').value || '').trim();
+          var tpl = String(qs('#f-tpl').value || '').trim();
+          if (fromEl && fromEl.value) p.push('from=' + encodeURIComponent(fromEl.value));
+          if (toEl && toEl.value) p.push('to=' + encodeURIComponent(toEl.value));
+          if (pool) p.push('storagePool=' + encodeURIComponent(pool));
+          if (seg) p.push('segmentBeauty=' + encodeURIComponent(seg));
+          if (tpl) p.push('templateId=' + encodeURIComponent(tpl));
+          return p.length ? '?' + p.join('&') : '';
+        }
+
+        function esc(s) {
+          return String(s == null ? '' : s)
+            .split('&')
+            .join('&amp;')
+            .split('<')
+            .join('&lt;')
+            .split('>')
+            .join('&gt;');
+        }
+
+        function render(data) {
+          var err = qs('#err');
+          err.style.display = 'none';
+          err.textContent = '';
+          var sum = qs('#summary');
+          if (data && data.summary) {
+            sum.style.display = 'flex';
+            sum.innerHTML =
+              '<span>件数（フィルタ後）: <strong>' +
+              esc(data.summary.total) +
+              '</strong></span>' +
+              '<span>送信済み操作: <strong>' +
+              esc(data.summary.messageSent) +
+              '</strong></span>' +
+              '<span>フェーズ変更: <strong>' +
+              esc(data.summary.phaseChange) +
+              '</strong></span>' +
+              '<span>表示行: <strong>' +
+              esc(data.summary.returned) +
+              '</strong>（最大2000件・新しい順）</span>';
+          }
+          var tb = qs('#tbody');
+          var rows = (data && data.events) || [];
+          if (!rows.length) {
+            tb.innerHTML = '<tr><td colspan="9">該当するイベントがありません。</td></tr>';
+            return;
+          }
+          tb.innerHTML = rows
+            .map(function (e) {
+              var typ = String(e.type || '');
+              var pill =
+                typ === 'message_sent'
+                  ? '<span class="pill pill-sent">送信済み操作</span>'
+                  : '<span class="pill pill-phase">フェーズ変更</span>';
+              var det = '';
+              if (typ === 'message_sent') {
+                det =
+                  esc(e.fromStatus) +
+                  ' → ' +
+                  esc(e.toStatus) +
+                  ' / フェーズ: ' +
+                  esc(e.phase);
+              } else {
+                det = esc(e.fromPhase) + ' → ' + esc(e.toPhase);
+              }
+              var seg = e.segmentBeauty ? '美容寄り' : '飲食寄り';
+              var pool = esc(e.storagePool);
+              return (
+                '<tr>' +
+                '<td class="mono">' +
+                esc(e.at) +
+                '</td>' +
+                '<td>' +
+                pill +
+                '</td>' +
+                '<td>' +
+                esc(e.actorName) +
+                '</td>' +
+                '<td>' +
+                esc(e.shopName) +
+                '</td>' +
+                '<td class="mono">' +
+                esc(e.templateId) +
+                '</td>' +
+                '<td>' +
+                esc(e.outreachDmPattern) +
+                '</td>' +
+                '<td>' +
+                pool +
+                '</td>' +
+                '<td>' +
+                seg +
+                '</td>' +
+                '<td class="mono">' +
+                det +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
+        }
+
+        function load() {
+          var err = qs('#err');
+          err.style.display = 'none';
+          credFetch((api || '') + '/api/outreach/analytics-events' + buildQuery())
+            .then(function (r) {
+              if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
+              return r.json().then(function (j) {
+                if (!r.ok) throw new Error((j && j.error) || r.statusText);
+                return j;
+              });
+            })
+            .then(render)
+            .catch(function (e) {
+              err.style.display = 'block';
+              err.textContent = String(e.message || e);
+              qs('#tbody').innerHTML = '<tr><td colspan="9">読み込みに失敗しました。</td></tr>';
+              qs('#summary').style.display = 'none';
+            });
+        }
+
+        qs('#btn-load').addEventListener('click', load);
+        load();
+      })();
+    </script>
+  </body>
+</html>

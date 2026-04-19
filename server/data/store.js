@@ -24,6 +24,7 @@ const FILES = {
   salesAgency: 'salesAgency.json',
   galleryDraftBuiltins: 'galleryDraftBuiltins.json',
   memoLeads: 'memoLeads.json',
+  outreachAnalyticsEvents: 'outreachAnalyticsEvents.json',
 };
 
 function ensureDir() {
@@ -53,6 +54,7 @@ function getDefault(name) {
     name === 'beautyDashboard' ||
     name === 'beautyMemoLeads' ||
     name === 'memoLeads' ||
+    name === 'outreachAnalyticsEvents' ||
     name === 'referenceSites' ||
     name === 'customerIntake' ||
     name === 'templateCustomizations'
@@ -166,6 +168,17 @@ const fileStore = {
   getBeautyMemoLeads: () => Promise.resolve(read('beautyMemoLeads')),
   setBeautyMemoLeads: (arr) => {
     write('beautyMemoLeads', arr);
+    return Promise.resolve();
+  },
+  getOutreachAnalyticsEvents: () => Promise.resolve(read('outreachAnalyticsEvents')),
+  appendOutreachAnalyticsEvents: (incoming) => {
+    const add = Array.isArray(incoming) ? incoming : [];
+    if (!add.length) return Promise.resolve();
+    const cur = read('outreachAnalyticsEvents');
+    const arr = Array.isArray(cur) ? cur : [];
+    const cap = 8000;
+    const next = [...arr, ...add].slice(-cap);
+    write('outreachAnalyticsEvents', next);
     return Promise.resolve();
   },
   getGalleryDraftBuiltins: () => Promise.resolve(read('galleryDraftBuiltins')),

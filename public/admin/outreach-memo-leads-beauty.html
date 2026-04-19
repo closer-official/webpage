@@ -278,6 +278,12 @@
       #list-wrap table tbody tr.hpb-dup-maybe td {
         border-color: rgba(196, 92, 82, 0.22);
       }
+      #list-wrap table th.memo-cb-col,
+      #list-wrap table td.memo-cb-col {
+        width: 40px;
+        text-align: center;
+        vertical-align: middle;
+      }
       .hpb-dup-hint {
         display: block;
         margin-top: 4px;
@@ -469,7 +475,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
+          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
         </p>
         <div class="memo-list-toolbar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px">
           <label for="memo-list-sort" style="font-size: 0.82rem; color: var(--muted); margin: 0">並び順</label>
@@ -478,6 +484,9 @@
             <option value="gojuon">店名（五十音順）</option>
             <option value="alpha">店名（アルファベット順）</option>
           </select>
+          <button type="button" class="btn-sm danger" id="memo-bulk-delete-btn" disabled style="margin-left: auto">
+            選択をまとめて削除
+          </button>
         </div>
         <div id="list-wrap">読み込み中…</div>
       </section>
@@ -847,7 +856,7 @@
 
         function applyDupToMemoListRow(tr, shopName, ctx, memoRowId) {
           applyDupHighlight(tr, shopName, ctx, {
-            hintTdSelector: 'td:first-child',
+            hintTdSelector: 'td:nth-child(2)',
             excludeMemoId: memoRowId,
           });
         }
@@ -1048,18 +1057,35 @@
           renderList(sorted, window.memoListDupCtx);
         }
 
+        function syncBulkDeleteBtn() {
+          var btn = document.getElementById('memo-bulk-delete-btn');
+          if (!btn) return;
+          var n = document.querySelectorAll('#list-wrap input.memo-row-sel:checked').length;
+          btn.disabled = n === 0;
+          btn.textContent = n ? '選択をまとめて削除（' + n + '件）' : '選択をまとめて削除';
+        }
+
         function renderList(rows, dupCtx) {
           var w = document.getElementById('list-wrap');
           if (!rows || !rows.length) {
             w.innerHTML = '<p class="sub" style="margin:0">まだメモがありません。上のフォームから追加してください。</p>';
+            syncBulkDeleteBtn();
             return;
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th>店名</th><th>送付一覧に表示</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>送付一覧に表示</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
+            var cbTd = document.createElement('td');
+            cbTd.className = 'memo-cb-col';
+            var rowCb = document.createElement('input');
+            rowCb.type = 'checkbox';
+            rowCb.className = 'memo-row-sel';
+            rowCb.setAttribute('data-memo-id', String(r.id));
+            rowCb.setAttribute('aria-label', 'まとめ削除の対象に含める');
+            cbTd.appendChild(rowCb);
             var nameTd = document.createElement('td');
             nameTd.appendChild(document.createTextNode(r.shopName || '（無題）'));
             var boardTd = document.createElement('td');
@@ -1214,6 +1240,7 @@
             actTd.appendChild(go);
             actTd.appendChild(document.createTextNode(' '));
             actTd.appendChild(del);
+            tr.appendChild(cbTd);
             tr.appendChild(nameTd);
             tr.appendChild(boardTd);
             tr.appendChild(webTd);
@@ -1225,8 +1252,23 @@
               applyDupToMemoListRow(tr, String((r && r.shopName) || '').trim(), dupCtx, r && r.id);
             }
           });
+          var bulkAll = tb.querySelector('.memo-bulk-all');
+          if (bulkAll) {
+            bulkAll.checked = false;
+            bulkAll.addEventListener('change', function () {
+              var on = bulkAll.checked;
+              body.querySelectorAll('input.memo-row-sel').forEach(function (cb) {
+                cb.checked = on;
+              });
+              syncBulkDeleteBtn();
+            });
+          }
+          body.querySelectorAll('input.memo-row-sel').forEach(function (cb) {
+            cb.addEventListener('change', syncBulkDeleteBtn);
+          });
           w.innerHTML = '';
           w.appendChild(tb);
+          syncBulkDeleteBtn();
         }
 
         function loadList() {
@@ -1480,6 +1522,47 @@
               localStorage.setItem(MEMO_LIST_SORT_LS, memoSortSel.value);
             } catch (eMs2) {}
             refreshMemoListDisplay();
+          });
+        }
+
+        var memoBulkDelBtn = document.getElementById('memo-bulk-delete-btn');
+        if (memoBulkDelBtn) {
+          memoBulkDelBtn.addEventListener('click', function () {
+            var boxes = document.querySelectorAll('#list-wrap input.memo-row-sel:checked');
+            var ids = [];
+            boxes.forEach(function (cb) {
+              var id = cb.getAttribute('data-memo-id');
+              if (id) ids.push(id);
+            });
+            if (!ids.length) {
+              showErr('削除する行を選択してください');
+              return;
+            }
+            if (!window.confirm(ids.length + '件のメモを削除しますか？\n取り消しはできません。')) return;
+            memoBulkDelBtn.disabled = true;
+            Promise.all(
+              ids.map(function (id) {
+                return credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(id), {
+                  method: 'DELETE',
+                }).then(function (res) {
+                  if (res.status === 204) return;
+                  return res.json().then(function (j) {
+                    throw new Error((j && j.error) || res.statusText || 'DELETE failed');
+                  });
+                });
+              }),
+            )
+              .then(function () {
+                showOk(ids.length + '件削除しました');
+                return loadList();
+              })
+              .catch(function (e) {
+                showErr(e.message || String(e));
+                return loadList();
+              })
+              .finally(function () {
+                syncBulkDeleteBtn();
+              });
           });
         }
 

@@ -74,6 +74,7 @@ import {
   buildBeautyOutreachDashboardMerged,
   resolveBeautyOutreachDashboardPatchTarget,
 } from './outreachDashboardMutate.js';
+import { buildOutreachAnalyticsEventsFromPatch } from './outreachAnalyticsLog.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
@@ -2286,6 +2287,53 @@ app.get('/api/beauty-outreach/dashboard', async (req, res) => {
   res.json(await buildBeautyOutreachDashboardMerged(store));
 });
 
+/** 送付ダッシュの PATCH 由来イベント（送信済み操作・フェーズ変更）を集計用に返す */
+app.get('/api/outreach/analytics-events', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const raw = await store.getOutreachAnalyticsEvents();
+  let list = Array.isArray(raw) ? raw : [];
+  const from = String(req.query.from || '').trim();
+  const to = String(req.query.to || '').trim();
+  const storagePool = String(req.query.storagePool || '').trim();
+  const segment = String(req.query.segmentBeauty || '').trim();
+  const templateId = String(req.query.templateId || '').trim();
+  if (from) {
+    const t0 = new Date(from).getTime();
+    if (!Number.isNaN(t0)) list = list.filter((e) => e && !Number.isNaN(new Date(e.at).getTime()) && new Date(e.at).getTime() >= t0);
+  }
+  if (to) {
+    const t1 = new Date(to).getTime();
+    if (!Number.isNaN(t1)) list = list.filter((e) => e && !Number.isNaN(new Date(e.at).getTime()) && new Date(e.at).getTime() <= t1);
+  }
+  if (storagePool === 'beauty' || storagePool === 'main') {
+    list = list.filter((e) => e && e.storagePool === storagePool);
+  }
+  if (segment === '1' || segment === 'true') {
+    list = list.filter((e) => e && e.segmentBeauty);
+  } else if (segment === '0' || segment === 'false') {
+    list = list.filter((e) => e && !e.segmentBeauty);
+  }
+  if (templateId) {
+    list = list.filter((e) => e && String(e.templateId || '') === templateId);
+  }
+  const sends = list.filter((e) => e.type === 'message_sent').length;
+  const phases = list.filter((e) => e.type === 'phase_change').length;
+  const cap = 2000;
+  const tail = list.length > cap ? list.slice(-cap) : list;
+  const events = tail.slice().reverse();
+  res.json({
+    filters: {
+      from: from || null,
+      to: to || null,
+      storagePool: storagePool || null,
+      segmentBeauty: segment || null,
+      templateId: templateId || null,
+    },
+    summary: { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length },
+    events,
+  });
+});
+
 app.get('/api/beauty-outreach/memo-leads', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const raw = await store.getBeautyMemoLeads();
@@ -2439,6 +2487,7 @@ app.patch('/api/beauty-outreach/dashboard/:id', async (req, res) => {
   const t = await resolveBeautyOutreachDashboardPatchTarget(store, req.params.id);
   if (!t) return res.status(404).json({ error: 'Not found' });
   const list = t.pool === 'beauty' ? t.beauty : t.main;
+  const rowBefore = JSON.parse(JSON.stringify(list[t.idx]));
   const err = patchOutreachDashboardRowFields(list[t.idx], req.body || {}, {
     randomBytes,
     canonicalizeOutreachPhaseInput,
@@ -2447,6 +2496,15 @@ app.patch('/api/beauty-outreach/dashboard/:id', async (req, res) => {
   if (err) return res.status(err.status).json({ error: err.error });
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
+  const rowAfter = list[t.idx];
+  const ev = buildOutreachAnalyticsEventsFromPatch({
+    body: req.body || {},
+    rowBefore,
+    rowAfter,
+    storagePool: t.pool,
+    segmentBeauty: true,
+  });
+  if (ev.length) await store.appendOutreachAnalyticsEvents(ev);
   res.json(list[t.idx]);
 });
 
@@ -2518,6 +2576,8 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   const dashboard = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
+  const customs = await store.getTemplateCustomizations();
+  const rowBefore = JSON.parse(JSON.stringify(dashboard[i]));
   const err = patchOutreachDashboardRowFields(dashboard[i], req.body || {}, {
     randomBytes,
     canonicalizeOutreachPhaseInput,
@@ -2525,6 +2585,15 @@ app.patch('/api/dashboard/:id', async (req, res) => {
   });
   if (err) return res.status(err.status).json({ error: err.error });
   await store.setDashboard(dashboard);
+  const rowAfter = dashboard[i];
+  const ev = buildOutreachAnalyticsEventsFromPatch({
+    body: req.body || {},
+    rowBefore,
+    rowAfter,
+    storagePool: 'main',
+    segmentBeauty: dashboardItemIsBeauty(rowAfter, customs),
+  });
+  if (ev.length) await store.appendOutreachAnalyticsEvents(ev);
   res.json(dashboard[i]);
 });
 

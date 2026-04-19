@@ -20,6 +20,7 @@ const KEYS = {
   salesAgency: 'salesAgency',
   galleryDraftBuiltins: 'galleryDraftBuiltins',
   memoLeads: 'memoLeads',
+  outreachAnalyticsEvents: 'outreachAnalyticsEvents',
 };
 
 function getDefault(name) {
@@ -27,6 +28,7 @@ function getDefault(name) {
     name === 'queue' ||
     name === 'dashboard' ||
     name === 'memoLeads' ||
+    name === 'outreachAnalyticsEvents' ||
     name === 'referenceSites' ||
     name === 'customerIntake' ||
     name === 'templateCustomizations'
@@ -174,6 +176,16 @@ export const storeSupabase = {
   setMemoLeads: (arr) => set(KEYS.memoLeads, arr),
   getBeautyMemoLeads: () => get(KEYS.beautyMemoLeads),
   setBeautyMemoLeads: (arr) => set(KEYS.beautyMemoLeads, arr),
+  getOutreachAnalyticsEvents: () => get(KEYS.outreachAnalyticsEvents),
+  appendOutreachAnalyticsEvents: async (incoming) => {
+    const add = Array.isArray(incoming) ? incoming : [];
+    if (!add.length) return;
+    const cur = await get(KEYS.outreachAnalyticsEvents);
+    const arr = Array.isArray(cur) ? cur : [];
+    const cap = 8000;
+    const next = [...arr, ...add].slice(-cap);
+    await set(KEYS.outreachAnalyticsEvents, next);
+  },
   getGalleryDraftBuiltins: async () => {
     const data = await get(KEYS.galleryDraftBuiltins);
     const d = data && typeof data === 'object' ? data : {};

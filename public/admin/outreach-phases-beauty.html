@@ -950,6 +950,7 @@
     <nav class="outreach-sticky-nav" aria-label="ページ内ナビ">
       <a class="back" href="../">← 運営トップ</a>
       <a href="./outreach-phases.html?v=7phase" class="btn" style="display: inline-flex">飲食・その他フェーズ</a>
+      <a href="./outreach-analytics.html" class="btn" style="display: inline-flex">送信・フェーズ分析</a>
       <a href="./outreach-memo-leads-beauty.html?v=memo1" class="btn primary" style="display: inline-flex">メモリード一覧（美容）</a>
       <a href="./template-worker.html?v=7phase" class="btn" style="display: inline-flex">店舗ドラフト（cafe）</a>
       <a href="./beauty-standalone-template/index.html?v=26" class="btn" style="display: inline-flex">美容室LP編集</a>
@@ -1038,6 +1039,12 @@
           } catch (e) {
             return '';
           }
+        }
+
+        function outreachPatchPayload(base) {
+          var o = base && typeof base === 'object' ? Object.assign({}, base) : {};
+          o.actorName = String(getSavedSenderName() || '').trim().slice(0, 80);
+          return o;
         }
 
         function getSavedPersonalEmail() {
@@ -1252,7 +1259,7 @@
           return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(itemId), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(outreachPatchPayload(payload)),
           }).then(function (updated) {
             mergeDashboardItemIntoCache(updated);
           });
@@ -2589,7 +2596,7 @@
             return apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id), {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body),
+              body: JSON.stringify(outreachPatchPayload(body)),
             });
           }
           function postApprove() {
