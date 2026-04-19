@@ -453,16 +453,100 @@ function cleanStaffNameFromLine(line) {
   if (!l || /の写真|空席確認|指名して/.test(l)) return '';
   const m = l.match(/(?:^|\)\s*)([\u3040-\u30FF\u4E00-\u9FFF\w・\s]{2,36})\s*(【渋谷】|【表参道】|メンズ渋谷|【原宿】|【新宿】)\s*$/);
   if (m) return `${m[1].trim()} ${m[2]}`.replace(/\s+/g, ' ').trim();
+  const mGen = l.match(/^([\u3040-\u30FF\u4E00-\u9FFF\w・\s]{2,36})\s*【[^】\n]{1,22}】\s*$/);
+  if (mGen && !/（歴|Instagram|Stylist/i.test(l)) {
+    const br = l.match(/【[^】]+】/);
+    return `${mGen[1].trim()}${br ? ' ' + br[0] : ''}`.replace(/\s+/g, ' ').trim();
+  }
   if (l.length < 36 && /【|メンズ渋谷/.test(l) && !l.includes('（歴')) return l;
   return '';
 }
 
-function extractStaff(text) {
+/** ホットペッパー本文中の「名前 【駅】」＋読み仮名＋【Stylist】Instagram…＋専門行 ブロック */
+function parseInlineStylistNameLine(line) {
+  const l = String(line || '').trim();
+  if (!l || l.length > 52) return '';
+  if (/の写真|空席確認|指名して|Instagram|【Stylist】|（歴\d+年）/.test(l)) return '';
+  const m = l.match(/^([\u4E00-\u9FFF\u3040-\u30FF](?:[\u4E00-\u9FFF\u3040-\u30FF0-9A-Za-z・\s])*)\s*【[^】\n]{1,24}】\s*$/);
+  if (!m) return '';
+  return m[1].replace(/\s+/g, ' ').trim().slice(0, 40);
+}
+
+function isLikelyStylistReadingLine(line, nameCore) {
+  const l = String(line || '').trim();
+  if (!l || l.length > 32) return false;
+  if (l === nameCore) return false;
+  if (/【|Instagram|Stylist|（歴/.test(l)) return false;
+  if (/[／/]/.test(l) && l.length > 14) return false;
+  if (/^[\u30A0-\u30FF゠-ヿ\s・ー-]+$/.test(l)) return true;
+  if (l.length <= 18 && /[\u30A0-\u30FF]/.test(l)) return true;
+  return false;
+}
+
+function isStylistExperienceLine(line) {
+  const l = String(line || '').trim();
+  return /【Stylist】|Instagram\s*:|（歴\d+年）/.test(l);
+}
+
+function isStylistSpecialtyLine(line) {
+  const l = String(line || '').trim();
+  if (!l || l.length < 6 || l.length > 220) return false;
+  if (isStylistExperienceLine(l)) return false;
+  if (/指名して予約|空席確認|ブックマーク|Instagram|【Stylist】/.test(l)) return false;
+  if (/^メニュー|^クーポン|^スタイリスト一覧|^サロン|^HOT\s*PEPPER/i.test(l)) return false;
+  return true;
+}
+
+const STAFF_CATCH_RESERVE = '指名して予約する';
+
+function extractStaffFromInlineStylistBlocks(text) {
+  const raw = String(text || '').replace(/\r/g, '\n');
+  const lines = raw.split('\n').map((l) => l.trim());
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const nameCore = parseInlineStylistNameLine(lines[i]);
+    if (!nameCore) {
+      i += 1;
+      continue;
+    }
+    let j = i + 1;
+    while (j < lines.length && lines[j] === '') j += 1;
+    while (j < lines.length && isLikelyStylistReadingLine(lines[j], nameCore)) j += 1;
+    while (j < lines.length && lines[j] === '') j += 1;
+    const expLine = lines[j] || '';
+    if (!isStylistExperienceLine(expLine)) {
+      i += 1;
+      continue;
+    }
+    j += 1;
+    while (j < lines.length && lines[j] === '') j += 1;
+    const specLine = lines[j] || '';
+    if (!isStylistSpecialtyLine(specLine)) {
+      i += 1;
+      continue;
+    }
+    j += 1;
+    out.push({
+      name: nameCore,
+      specialty: specLine,
+      experience: expLine,
+      catch: STAFF_CATCH_RESERVE,
+      reserveUrl: '',
+      avatarUrl: '',
+      avatarText: '',
+    });
+    i = j;
+  }
+  return out;
+}
+
+function extractStaffFromPickUpSection(text) {
   const staff = [];
   const section = text.match(/[^\n]{0,120}のPICK UPスタイリスト\s*([\s\S]+?)(?=のCHECKスタイル|のサロンデータ)/);
   if (!section) return staff;
 
-  const lines = section[1].split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = section[1].split('\n').map((l) => l.trim()).filter(Boolean);
   let i = 0;
   while (i < lines.length) {
     const name = cleanStaffNameFromLine(lines[i]);
@@ -488,10 +572,33 @@ function extractStaff(text) {
     const catchLine = String(lines[j] || '').trim();
     j += 1;
 
-    staff.push({ name, specialty, experience, catch: catchLine, avatarUrl: '', avatarText: '' });
+    staff.push({
+      name,
+      specialty,
+      experience,
+      catch: catchLine || STAFF_CATCH_RESERVE,
+      avatarUrl: '',
+      avatarText: '',
+      reserveUrl: '',
+    });
     i = j;
   }
-  return staff.slice(0, 8);
+  return staff;
+}
+
+function extractStaff(text) {
+  const pickUp = extractStaffFromPickUpSection(text);
+  const inline = extractStaffFromInlineStylistBlocks(text);
+  const seen = new Set(pickUp.map((s) => String(s.name || '').trim()));
+  const out = [...pickUp];
+  for (const s of inline) {
+    const n = String(s.name || '').trim();
+    if (n && !seen.has(n)) {
+      seen.add(n);
+      out.push(s);
+    }
+  }
+  return out.slice(0, 8);
 }
 
 function extractSalonData(text) {

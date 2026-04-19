@@ -240,6 +240,57 @@ function getBeautyMemoLeadIdFromUrl() {
   return String(new URLSearchParams(location.search || '').get('memoLeadId') || '').trim();
 }
 
+const MEMO_PINNED_URLS_KEY = 'beautyStandaloneMemoPinnedUrls';
+
+function readMemoPinnedUrls() {
+  try {
+    const raw = sessionStorage.getItem(MEMO_PINNED_URLS_KEY);
+    if (!raw) return null;
+    const o = JSON.parse(raw);
+    if (!o || typeof o !== 'object') return null;
+    return {
+      addressMapUrl: String(o.addressMapUrl ?? '').slice(0, 2000),
+      instagramUrl: String(o.instagramUrl ?? '').slice(0, 2000),
+      reserveUrl: String(o.reserveUrl ?? '').slice(0, 2000),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeMemoPinnedUrls(mapU, igU, hpU) {
+  try {
+    sessionStorage.setItem(
+      MEMO_PINNED_URLS_KEY,
+      JSON.stringify({
+        addressMapUrl: String(mapU ?? '').slice(0, 2000),
+        instagramUrl: String(igU ?? '').slice(0, 2000),
+        reserveUrl: String(hpU ?? '').slice(0, 2000),
+      }),
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearMemoPinnedUrls() {
+  try {
+    sessionStorage.removeItem(MEMO_PINNED_URLS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** メモ一覧で登録した3 URL を解析結果で上書きしない */
+function applyMemoPinnedUrlsToSalon(salon) {
+  if (!salon) return;
+  const pin = readMemoPinnedUrls();
+  if (!pin) return;
+  salon.addressMapUrl = pin.addressMapUrl;
+  salon.instagramUrl = pin.instagramUrl;
+  salon.reserveUrl = pin.reserveUrl;
+}
+
 /** メモリード一覧（美容）から `?memoLeadId=` で開いたとき（`?id=` 併用時は id を優先） */
 async function applyBeautyMemoLeadFromQuery(mid) {
   const row = await fetchAdminJson('/beauty-outreach/memo-leads/' + encodeURIComponent(mid), { method: 'GET' });
@@ -340,7 +391,10 @@ if (hpInputEl) {
 window.addEventListener('pageshow', (ev) => {
   if (!ev.persisted || !hpInputEl) return;
   const s = loadStoredSalon();
-  if (s) loadIntoEditor(s);
+  if (s) {
+    applyMemoPinnedUrlsToSalon(s);
+    loadIntoEditor(s);
+  }
   hpInputEl.value = loadHpInputDraft();
 });
 
@@ -363,6 +417,7 @@ function bindParseApply() {
       const run = () => {
         try {
           const salon = buildSalonForAdminImport(text);
+          applyMemoPinnedUrlsToSalon(salon);
           loadIntoEditor(salon);
           saveHpInputDraft(hpEl.value);
           setParseStatus(
@@ -394,7 +449,9 @@ function bindParseApply() {
       const run = () => {
         try {
           if ((!salon || !String(salon.name || '').trim()) && hpRaw) {
-            loadIntoEditor(buildSalonForAdminImport(hpRaw));
+            const merged = buildSalonForAdminImport(hpRaw);
+            applyMemoPinnedUrlsToSalon(merged);
+            loadIntoEditor(merged);
             saveHpInputDraft(hpEl.value);
             setParseStatus('①の内容を②・③に取り込みました。', 'notice');
             return;
@@ -428,21 +485,29 @@ bindParseApply();
 async function bootFromServerAsync() {
   try {
     if (linkedDraftId) {
+      clearMemoPinnedUrls();
       await loadDraftFromServer(linkedDraftId);
       if (hpInputEl) hpInputEl.value = loadHpInputDraft();
     } else if (memoLeadId) {
       await applyBeautyMemoLeadFromQuery(memoLeadId);
     } else {
+      clearMemoPinnedUrls();
       if (hpInputEl) hpInputEl.value = loadHpInputDraft();
       const savedSalon = loadStoredSalon();
-      if (savedSalon) loadIntoEditor(savedSalon);
+      if (savedSalon) {
+        applyMemoPinnedUrlsToSalon(savedSalon);
+        loadIntoEditor(savedSalon);
+      }
     }
   } catch (e) {
     console.error(e);
     setSaveStatus(String(e.message || e), 'error');
     if (hpInputEl) hpInputEl.value = loadHpInputDraft();
     const savedSalon = loadStoredSalon();
-    if (savedSalon) loadIntoEditor(savedSalon);
+    if (savedSalon) {
+      applyMemoPinnedUrlsToSalon(savedSalon);
+      loadIntoEditor(savedSalon);
+    }
   }
 }
 
@@ -453,6 +518,7 @@ const btnReset = document.getElementById('btn-reset');
 if (btnReset) {
   btnReset.addEventListener('click', () => {
     if (!confirm('すべてリセットしますか？')) return;
+    clearMemoPinnedUrls();
     clearStoredDraft();
     resetEditor();
     if (hpInputEl) hpInputEl.value = '';
@@ -487,6 +553,7 @@ if (btnSaveServer) {
   const memoSavePayload = memoFromUrl ? { beautyMemoLeadId: memoFromUrl } : {};
   const stripMemoLeadFromUrl = () => {
     if (!memoFromUrl) return;
+    clearMemoPinnedUrls();
     const u = new URL(location.href);
     u.searchParams.delete('memoLeadId');
     history.replaceState({}, '', u.toString());
