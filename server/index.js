@@ -75,6 +75,7 @@ import {
   resolveBeautyOutreachDashboardPatchTarget,
 } from './outreachDashboardMutate.js';
 import { buildOutreachAnalyticsEventsFromPatch } from './outreachAnalyticsLog.js';
+import { computeOutreachAnalyticsAggregates } from './outreachAnalyticsAggregate.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
@@ -2318,6 +2319,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
   }
   const sends = list.filter((e) => e.type === 'message_sent').length;
   const phases = list.filter((e) => e.type === 'phase_change').length;
+  const aggregates = computeOutreachAnalyticsAggregates(list);
   const cap = 2000;
   const tail = list.length > cap ? list.slice(-cap) : list;
   const events = tail.slice().reverse();
@@ -2330,6 +2332,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       templateId: templateId || null,
     },
     summary: { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length },
+    aggregates,
     events,
   });
 });
