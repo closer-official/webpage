@@ -7,6 +7,20 @@ import { renderLP } from './renderer.js';
 let currentSalon = null;
 let previewContainer = null;
 
+/** ①パネル直下の外部リンク等を更新（index.html が window に登録） */
+const SALON_LINK_FIELD_KEYS = new Set(['addressMapUrl', 'instagramUrl', 'reserveUrl']);
+
+function notifySalonUiHooks(reason) {
+  if (typeof window === 'undefined') return;
+  const fn = window.__beautyEditorSalonChanged;
+  if (typeof fn !== 'function') return;
+  try {
+    fn({ reason: reason || '' });
+  } catch (e) {
+    console.warn('__beautyEditorSalonChanged', e);
+  }
+}
+
 /** LP を別タブで開いたあと戻っても状態が残るよう sessionStorage に保存 */
 const STORAGE_SALON = 'beautyStandaloneAdminSalon';
 const STORAGE_HP = 'beautyStandaloneAdminHpInput';
@@ -57,6 +71,7 @@ export function loadIntoEditor(salon) {
   } catch {
     /* quota 等 */
   }
+  notifySalonUiHooks('loadIntoEditor');
 }
 
 export function getCurrentSalon() {
@@ -65,6 +80,7 @@ export function getCurrentSalon() {
 
 export function resetEditor() {
   currentSalon = null;
+  notifySalonUiHooks('reset');
 }
 
 /** ページ初期表示用: 直前の編集内容を復元 */
@@ -250,6 +266,7 @@ function addGroup(form, title, fields) {
       currentSalon[f.key] = input.value;
       renderLP(currentSalon, previewContainer);
       persistDraft();
+      if (SALON_LINK_FIELD_KEYS.has(f.key)) notifySalonUiHooks('field:' + f.key);
     });
 
     row.appendChild(input);

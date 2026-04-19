@@ -195,6 +195,35 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   gap: 8px;
 }
 
+/* ①パネル: 解析ボタン直下の外部リンク */
+.quick-external-links {
+  margin-top: 12px;
+  padding: 8px 0 2px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-l);
+}
+.quick-external-links[hidden] {
+  display: none !important;
+}
+.quick-ext-label {
+  color: var(--stone);
+  margin-right: 4px;
+}
+.quick-ext-sep {
+  color: var(--stone);
+  margin: 0 2px;
+}
+.quick-ext-link {
+  color: #8b5a2b;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.quick-ext-link:hover {
+  color: var(--ink);
+}
+
 /* ── Editor panel (middle) ── */
 .panel-editor {
   grid-area: editor;

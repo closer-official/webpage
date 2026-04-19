@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>美容室テンプレ（独立版）— 管理画面</title>
-  <link rel="stylesheet" href="styles.css?v=27" />
+  <link rel="stylesheet" href="styles.css?v=28" />
 </head>
 <body>
 
@@ -62,6 +62,7 @@
           反映する
         </button>
       </div>
+      <div id="quick-external-links" class="quick-external-links" aria-label="外部参照リンク" hidden></div>
       <div class="parse-status" id="parse-status" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="parse-status" id="save-server-status" style="margin-top: 8px"></div>
     </div>
@@ -111,6 +112,48 @@ import {
   flushSalonDraft,
 } from './editor.js';
 import { renderLP } from './renderer.js';
+
+/** ①の「解析する」の直下: Google / Instagram / ホットペッパー（②の予約URL） */
+function updateQuickExternalLinks() {
+  const wrap = document.getElementById('quick-external-links');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  wrap.hidden = true;
+  const salon = typeof getCurrentSalon === 'function' ? getCurrentSalon() : null;
+  if (!salon) return;
+  const map = String(salon.addressMapUrl || '').trim();
+  const ig = String(salon.instagramUrl || '').trim();
+  const hp = String(salon.reserveUrl || '').trim();
+  const items = [];
+  if (/^https?:\/\//i.test(map)) items.push({ href: map, label: 'Googleマップ' });
+  if (/^https?:\/\//i.test(ig)) items.push({ href: ig, label: 'Instagram' });
+  if (/^https?:\/\//i.test(hp)) items.push({ href: hp, label: 'ホットペッパー（予約）' });
+  if (!items.length) return;
+  wrap.hidden = false;
+  const lab = document.createElement('span');
+  lab.className = 'quick-ext-label';
+  lab.textContent = '参照（新しいタブ）: ';
+  wrap.appendChild(lab);
+  items.forEach((x, i) => {
+    if (i > 0) {
+      const s = document.createElement('span');
+      s.className = 'quick-ext-sep';
+      s.textContent = ' · ';
+      wrap.appendChild(s);
+    }
+    const a = document.createElement('a');
+    a.className = 'quick-ext-link';
+    a.href = x.href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = x.label;
+    wrap.appendChild(a);
+  });
+}
+
+window.__beautyEditorSalonChanged = () => {
+  updateQuickExternalLinks();
+};
 
 function setParseStatus(msg, kind) {
   const status = document.getElementById('parse-status');
@@ -211,8 +254,10 @@ async function applyBeautyMemoLeadFromQuery(mid) {
   }
   const mapU = String(row.addressMapUrl || '').trim().slice(0, 2000);
   const igU = String(row.instagramUrl || '').trim().slice(0, 2000);
+  const hpU = String(row.hotPepperUrl || '').trim().slice(0, 2000);
   if (mapU) salon.addressMapUrl = mapU;
   if (igU) salon.instagramUrl = igU;
+  if (hpU) salon.reserveUrl = hpU;
   loadIntoEditor(salon);
   setSaveStatus(
     'メモリード（美容）から読み込みました。① の本文を編集したあと「解析する」で取り直せます。',

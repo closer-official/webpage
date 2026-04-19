@@ -423,7 +423,7 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        ホットペッパー風の取込では、<strong>ウェブなし・弱い</strong>の行だけ<strong>メモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>ウェブあり・強い</strong>はメモリードには入れず、<strong>送付・フェーズ管理（美容）</strong>の一覧に<strong>SNSなし・ウェブページ制作不可</strong>相当の案件として載せます。メモリードの行は<strong>送付・フェーズ管理（美容）</strong>の表にも<strong>送信前</strong>相当として出ます（表側でフェーズを変えるとメモリード一覧からは消え、通常の案件行になります）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモに加え<strong>GoogleマップURL・Instagram URL</strong>がフォームに流し込まれます。
+        ホットペッパー風の取込では、<strong>ウェブなし・弱い</strong>の行だけ<strong>メモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>ウェブあり・強い</strong>はメモリードには入れず、<strong>送付・フェーズ管理（美容）</strong>の一覧に<strong>SNSなし・ウェブページ制作不可</strong>相当の案件として載せます。メモリードの行は<strong>送付・フェーズ管理（美容）</strong>の表にも<strong>送信前</strong>相当として出ます（表側でフェーズを変えるとメモリード一覧からは消え、通常の案件行になります）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモに加え<strong>Googleマップ・Instagram・ホットペッパー（予約）URL</strong>がフォームに流し込まれます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -439,7 +439,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。登録後も<strong>保存済みメモ</strong>一覧から<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。取込後は一覧の<strong>GoogleマップURL／Instagram</strong>列にURLを入れると、LP編集画面に引き継がれます。解析後のプレビューで、<strong>既存メモまたは送付管理に店名が近い行</strong>は色が変わります（二重登録の目安）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。登録後も<strong>保存済みメモ</strong>一覧から<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。取込後は一覧の<strong>Googleマップ／Instagram／ホットペッパー</strong>列にURLを入れると、LP編集画面に引き継がれます。解析後のプレビューで、<strong>既存メモまたは送付管理に店名が近い行</strong>は色が変わります（二重登録の目安）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -468,6 +468,8 @@
           <input type="text" id="new-address-map" maxlength="2000" placeholder="https://maps.app.goo.gl/… など" autocomplete="off" />
           <label for="new-instagram" style="margin-top: 12px">Instagram URL</label>
           <input type="text" id="new-instagram" maxlength="2000" placeholder="https://www.instagram.com/…" autocomplete="off" />
+          <label for="new-hot-pepper" style="margin-top: 12px">ホットペッパー（予約ページ）URL</label>
+          <input type="text" id="new-hot-pepper" maxlength="2000" placeholder="https://beauty.hotpepper.jp/…" autocomplete="off" />
           <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
           <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://beauty.hotpepper.jp/...&#10;（ホットペッパー等・覚え書き）"></textarea>
           <div class="row-actions">
@@ -479,7 +481,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>GoogleマップURL</strong>と<strong>Instagram URL</strong>は一覧から直接編集でき（フォーカスを外すと保存）、<strong>美容室LPで編集</strong>を開いたときに編集画面の同項目へ流し込みます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。
+          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>Googleマップ・Instagram・ホットペッパー（予約）</strong>の各URLは一覧から直接編集でき（フォーカスを外すと保存）、<strong>美容室LPで編集</strong>を開いたときに編集画面の対応項目へ流し込みます（HPBは<strong>予約ページURL</strong>欄）。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。
         </p>
         <div class="memo-list-toolbar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px">
           <label for="memo-list-sort" style="font-size: 0.82rem; color: var(--muted); margin: 0">並び順</label>
@@ -1092,14 +1094,14 @@
             cbTd.appendChild(rowCb);
             var nameTd = document.createElement('td');
             nameTd.appendChild(document.createTextNode(r.shopName || '（無題）'));
-            function makeUrlCell(initialVal, fieldKey) {
+            function makeUrlCell(initialVal, fieldKey, ph) {
               var td = document.createElement('td');
               var inp = document.createElement('input');
               inp.type = 'text';
               inp.className = 'mono';
               inp.style.cssText = 'width:100%;max-width:280px;font-size:0.78rem;padding:4px 6px;box-sizing:border-box;';
               inp.maxLength = 2000;
-              inp.placeholder = 'https://…';
+              inp.placeholder = ph || 'https://…';
               var v0 = String(initialVal || '').trim();
               inp.value = v0;
               inp.setAttribute('data-saved', v0);
@@ -1142,6 +1144,7 @@
             }
             var mapTd = makeUrlCell(r.addressMapUrl, 'addressMapUrl');
             var igTd = makeUrlCell(r.instagramUrl, 'instagramUrl');
+            var hpTd = makeUrlCell(r.hotPepperUrl, 'hotPepperUrl', 'https://beauty.hotpepper.jp/…');
             var webTd = document.createElement('td');
             if (isHpbMemoRow(r)) {
               var sel = document.createElement('select');
@@ -1233,6 +1236,7 @@
             tr.appendChild(nameTd);
             tr.appendChild(mapTd);
             tr.appendChild(igTd);
+            tr.appendChild(hpTd);
             tr.appendChild(webTd);
             tr.appendChild(dateTd);
             tr.appendChild(actTd);
@@ -1478,6 +1482,9 @@
             var igU = document.getElementById('new-instagram')
               ? document.getElementById('new-instagram').value.trim().slice(0, 2000)
               : '';
+            var hpU = document.getElementById('new-hot-pepper')
+              ? document.getElementById('new-hot-pepper').value.trim().slice(0, 2000)
+              : '';
             if (!name) {
               showErr('店名を入力してください');
               return;
@@ -1491,6 +1498,7 @@
                 memo: memo,
                 addressMapUrl: mapU,
                 instagramUrl: igU,
+                hotPepperUrl: hpU,
               }),
             })
               .then(function (r) {
@@ -1504,8 +1512,10 @@
                 document.getElementById('new-memo').value = '';
                 var nm = document.getElementById('new-address-map');
                 var ni = document.getElementById('new-instagram');
+                var nh = document.getElementById('new-hot-pepper');
                 if (nm) nm.value = '';
                 if (ni) ni.value = '';
+                if (nh) nh.value = '';
                 showOk('追加しました');
                 return loadList();
               })

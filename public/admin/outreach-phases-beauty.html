@@ -1969,7 +1969,9 @@
             '\n' +
             String((memo && memo.addressMapUrl) || '') +
             '\n' +
-            String((memo && memo.instagramUrl) || '');
+            String((memo && memo.instagramUrl) || '') +
+            '\n' +
+            String((memo && memo.hotPepperUrl) || '');
           var urlHit = false;
           if (hasUrl) {
             urlHit = mapNeedles.some(function (n) {

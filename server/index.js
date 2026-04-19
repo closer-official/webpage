@@ -2211,6 +2211,7 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
       hpbBody: sourceMemo.slice(0, 11000),
       addressMapUrl: '',
       instagramUrl: '',
+      hotPepperUrl: '',
       onOutreachBoard: true,
       createdAt: now,
       updatedAt: now,
@@ -2371,6 +2372,7 @@ app.post('/api/beauty-outreach/memo-leads', async (req, res) => {
     memo,
     addressMapUrl: String(req.body?.addressMapUrl || '').trim().slice(0, 2000),
     instagramUrl: String(req.body?.instagramUrl || '').trim().slice(0, 2000),
+    hotPepperUrl: String(req.body?.hotPepperUrl || '').trim().slice(0, 2000),
     onOutreachBoard: true,
     createdAt: now,
     updatedAt: now,
@@ -2393,6 +2395,9 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   }
   if (req.body?.instagramUrl !== undefined) {
     list[i].instagramUrl = String(req.body.instagramUrl || '').trim().slice(0, 2000);
+  }
+  if (req.body?.hotPepperUrl !== undefined) {
+    list[i].hotPepperUrl = String(req.body.hotPepperUrl || '').trim().slice(0, 2000);
   }
   if (req.body?.onOutreachBoard !== undefined) {
     list[i].onOutreachBoard = !!(req.body.onOutreachBoard === true || req.body.onOutreachBoard === 'true');
