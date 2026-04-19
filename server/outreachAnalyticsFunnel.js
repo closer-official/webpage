@@ -1,8 +1,13 @@
 /**
  * フェーズ遷移ログからファネル集計・送信済→ヒアリングのさかのぼり一覧を作る
+ *
+ * ファネル％の分母は「当該ステップの両フェーズのダッシュボード件数の合計」
+ * （例: 送信済相当→ヒアリング ＝ 送信済相当件数 + ヒアリング件数。分子は次フェーズ側の件数）
  */
 
 import { hourInTokyo, weekdayLabelTokyo } from './outreachAnalyticsAggregate.js';
+import { dashboardItemIsBeauty } from './outreachSegment.js';
+import { buildBeautyOutreachDashboardMerged } from './outreachDashboardMutate.js';
 
 const LEGACY_PHASE = {
   pending_send: 'pre_contact',
@@ -20,10 +25,78 @@ export function normalizeOutreachPhase(p) {
   return LEGACY_PHASE[s] || s;
 }
 
+const SNAPSHOT_PHASE_KEYS = [
+  'pre_contact',
+  'first_contact',
+  'message_sent',
+  'no_outreach_channel',
+  'hearing',
+  'proposal',
+  'contracted',
+  'payment_confirmed',
+  'lost',
+];
+
+/**
+ * 送付分析と同じ絞り込みでダッシュボード行を取得（現在フェーズの件数用）
+ * @param {{ storagePool?: string, segmentBeauty?: string, templateId?: string }} filters
+ */
+export async function loadOutreachDashboardRowsForAnalytics(store, filters = {}) {
+  const rawCust = await store.getTemplateCustomizations();
+  const customs = Array.isArray(rawCust) ? rawCust : [];
+  const storagePool = String(filters.storagePool || '').trim();
+  const seg = String(filters.segmentBeauty || '').trim();
+  const templateId = String(filters.templateId || '').trim();
+
+  let rows = [];
+  if (storagePool === 'beauty') {
+    rows = await buildBeautyOutreachDashboardMerged(store);
+  } else if (storagePool === 'main') {
+    const main = Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [];
+    rows = main.filter((r) => r && !dashboardItemIsBeauty(r, customs));
+  } else {
+    const merged = await buildBeautyOutreachDashboardMerged(store);
+    const main = Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [];
+    const seen = new Set(merged.map((r) => r && r.id).filter(Boolean));
+    rows = [...merged, ...main.filter((r) => r && r.id && !seen.has(r.id))];
+  }
+
+  if (seg === '1' || seg === 'true') {
+    rows = rows.filter((r) => dashboardItemIsBeauty(r, customs));
+  } else if (seg === '0' || seg === 'false') {
+    rows = rows.filter((r) => !dashboardItemIsBeauty(r, customs));
+  }
+
+  if (templateId) {
+    rows = rows.filter((r) => String(r.templateId || '').trim() === templateId);
+  }
+
+  return rows;
+}
+
+/**
+ * 送信済み（メール送信済）案件のみ、正規化した outreachPhase の件数
+ * @param {object[]} rows loadOutreachDashboardRowsForAnalytics の戻り
+ * @returns {Record<string, number>}
+ */
+export function computeSnapshotPhaseCounts(rows) {
+  /** @type {Record<string, number>} */
+  const out = Object.fromEntries(SNAPSHOT_PHASE_KEYS.map((k) => [k, 0]));
+  const arr = Array.isArray(rows) ? rows : [];
+  for (const r of arr) {
+    if (!r || r.status !== 'email_sent') continue;
+    const p = normalizeOutreachPhase(r.outreachPhase) || 'pre_contact';
+    if (out[p] == null) continue;
+    out[p] += 1;
+  }
+  return out;
+}
+
 /**
  * @param {object[]} list フィルタ済みイベント（時系列混在）
+ * @param {{ snapCounts?: Record<string, number> | null }} [options]
  */
-export function computeOutreachFunnelAndDrilldown(list) {
+export function computeOutreachFunnelAndDrilldown(list, options = {}) {
   const arr = Array.isArray(list) ? list : [];
   const phaseChanges = arr.filter((e) => e && e.type === 'phase_change' && e.itemId);
   const messageSents = arr.filter((e) => e && e.type === 'message_sent' && e.itemId);
@@ -75,12 +148,63 @@ export function computeOutreachFunnelAndDrilldown(list) {
     return Math.round((10000 * count) / denom) / 100;
   }
 
+  const snap = options.snapCounts && typeof options.snapCounts === 'object' ? options.snapCounts : null;
+
   const sentToHearing = normalizedChanges.filter((x) => isPostSendLike(x.from) && x.to === 'hearing').length;
   const sentOutbound = normalizedChanges.filter((x) => isPostSendLike(x.from)).length;
   const hearToProp = edgeCount('hearing', 'proposal');
   const hearOutbound = outboundFrom('hearing');
   const propToContract = edgeCount('proposal', 'contracted');
   const propOutbound = outboundFrom('proposal');
+
+  /** ダッシュボード現在件数ベース（分母＝当該2フェーズの合計） */
+  let postSendHearingBlock;
+  let hearingProposalBlock;
+  let proposalContractedBlock;
+  if (snap) {
+    const nHearing = snap.hearing || 0;
+    const nPostSendLike = (snap.message_sent || 0) + (snap.no_outreach_channel || 0);
+    const denom01 = nPostSendLike + nHearing;
+    postSendHearingBlock = {
+      count: nHearing,
+      outbound: denom01,
+      percent: pct(nHearing, denom01),
+      fromPhases: ['message_sent', 'no_outreach_channel'],
+    };
+
+    const nProposal = snap.proposal || 0;
+    const denom12 = nHearing + nProposal;
+    hearingProposalBlock = {
+      count: nProposal,
+      outbound: denom12,
+      percent: pct(nProposal, denom12),
+    };
+
+    const nContracted = snap.contracted || 0;
+    const denom23 = nProposal + nContracted;
+    proposalContractedBlock = {
+      count: nContracted,
+      outbound: denom23,
+      percent: pct(nContracted, denom23),
+    };
+  } else {
+    postSendHearingBlock = {
+      count: sentToHearing,
+      outbound: sentOutbound,
+      percent: pct(sentToHearing, sentOutbound),
+      fromPhases: ['message_sent', 'no_outreach_channel'],
+    };
+    hearingProposalBlock = {
+      count: hearToProp,
+      outbound: hearOutbound,
+      percent: pct(hearToProp, hearOutbound),
+    };
+    proposalContractedBlock = {
+      count: propToContract,
+      outbound: propOutbound,
+      percent: pct(propToContract, propOutbound),
+    };
+  }
 
   const phasesForLost = [
     'pre_contact',
@@ -95,7 +219,8 @@ export function computeOutreachFunnelAndDrilldown(list) {
 
   const phaseToLost = phasesForLost.map((from) => {
     const toLost = edgeCount(from, 'lost');
-    const denom = outboundFrom(from);
+    const nFromSnap = snap ? snap[from] || 0 : 0;
+    const denom = snap ? nFromSnap + toLost : outboundFrom(from);
     return {
       fromPhase: from,
       toLost,
@@ -137,22 +262,9 @@ export function computeOutreachFunnelAndDrilldown(list) {
 
   return {
     funnel: {
-      postSend_to_hearing: {
-        count: sentToHearing,
-        outbound: sentOutbound,
-        percent: pct(sentToHearing, sentOutbound),
-        fromPhases: ['message_sent', 'no_outreach_channel'],
-      },
-      hearing_to_proposal: {
-        count: hearToProp,
-        outbound: hearOutbound,
-        percent: pct(hearToProp, hearOutbound),
-      },
-      proposal_to_contracted: {
-        count: propToContract,
-        outbound: propOutbound,
-        percent: pct(propToContract, propOutbound),
-      },
+      postSend_to_hearing: postSendHearingBlock,
+      hearing_to_proposal: hearingProposalBlock,
+      proposal_to_contracted: proposalContractedBlock,
     },
     phaseToLost,
     sentToHearingDrilldown,

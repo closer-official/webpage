@@ -207,7 +207,8 @@
       <h1>送付・フェーズ分析</h1>
       <p class="sub">
         メインは<strong>送信済み相当（フェーズ <code>message_sent</code> または <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
-        <strong>templateId</strong> と <strong>曜日・時（日本時間）</strong>をさかのぼって表示します。パーセントは「そのフェーズから<strong>出た全フェーズ変更</strong>のうち、次の行き先が該当する割合」です。
+        <strong>templateId</strong> と <strong>曜日・時（日本時間）</strong>をさかのぼって表示します。ファネルのパーセントは<strong>ダッシュボード上の現在フェーズ件数</strong>で、例として送信済相当→ヒアリングは
+        <strong>ヒアリング件数 ÷（送信済相当件数＋ヒアリング件数）</strong>です（絞り込みと同じ条件の送信済み案件のみ）。
       </p>
       <p id="err" class="err" style="display: none"></p>
       <div class="panel">
@@ -253,7 +254,7 @@
       <div class="panel" id="funnel-panel">
         <h2>ファネル（件数・割合）</h2>
         <p class="hint">
-          先頭の「送信済み相当→ヒアリング」% ＝ 上記2フェーズから出た遷移のうち <code>hearing</code> へ進んだ割合。契約は内部値
+          先頭の「送信済み相当→ヒアリング」% ＝ <strong>ヒアリング件数</strong>を分母<strong>（送信済相当＋ヒアリング）</strong>で割った値。2段目以降も同様に<strong>次フェーズ件数 ÷（前段＋次段）</strong>。件数はいずれもダッシュボードの現在状態（メール送信済み案件）。契約は内部値
           <code>contracted</code>（画面の契約済）です。
         </p>
         <div class="funnel-grid" id="funnel-cards"></div>
@@ -289,14 +290,16 @@
 
       <div class="panel">
         <h2>各フェーズ → 失注</h2>
-        <p class="hint">そのフェーズから出た変更のうち、<code>lost</code> へ進んだ件数と割合。</p>
+        <p class="hint">
+          期間内ログの <code>lost</code> への遷移件数を分子に、分母は<strong>ダッシュボード上の当該フェーズ件数＋その失注遷移件数</strong>です。
+        </p>
         <div style="overflow-x: auto">
           <table>
             <thead>
               <tr>
                 <th>元フェーズ</th>
                 <th>失注へ</th>
-                <th>そのフェーズからの全遷移</th>
+                <th>分母（当該フェーズ件数＋失注遷移）</th>
                 <th>パーセント</th>
               </tr>
             </thead>
@@ -391,11 +394,12 @@
           return String(p) + '%';
         }
 
-        function funnelCard(title, block) {
+        function funnelCard(title, block, denCaption) {
           if (!block) return '';
           var c = block.count != null ? block.count : 0;
           var d = block.outbound != null ? block.outbound : 0;
           var p = fmtPct(block.percent);
+          var cap = denCaption ? String(denCaption) : '分母の内訳';
           return (
             '<div class="funnel-card">' +
             '<div class="label">' +
@@ -407,7 +411,9 @@
             '<div class="pct">' +
             esc(p) +
             '</div>' +
-            '<div class="den">分母: そのフェーズからの遷移 ' +
+            '<div class="den">' +
+            esc(cap) +
+            ' 合計 ' +
             esc(d) +
             ' 件</div>' +
             '</div>'
@@ -425,9 +431,10 @@
             funnelCard(
               '送信済み相当 → ヒアリング',
               fv.postSend_to_hearing || fv.messageSent_to_hearing,
+              '送信済相当＋ヒアリング',
             ) +
-            funnelCard('ヒアリング → 提案中', fv.hearing_to_proposal) +
-            funnelCard('提案中 → 契約済（contracted）', fv.proposal_to_contracted);
+            funnelCard('ヒアリング → 提案中', fv.hearing_to_proposal, 'ヒアリング＋提案中') +
+            funnelCard('提案中 → 契約済（contracted）', fv.proposal_to_contracted, '提案中＋契約済');
         }
 
         function renderLost(rows) {
