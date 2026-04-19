@@ -469,8 +469,16 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
+          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
         </p>
+        <div class="memo-list-toolbar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px">
+          <label for="memo-list-sort" style="font-size: 0.82rem; color: var(--muted); margin: 0">並び順</label>
+          <select id="memo-list-sort" aria-label="保存済みメモの並び順" style="max-width: 100%; font-size: 0.85rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--text)">
+            <option value="date_desc">更新日（新しい順）</option>
+            <option value="gojuon">店名（五十音順）</option>
+            <option value="alpha">店名（アルファベット順）</option>
+          </select>
+        </div>
         <div id="list-wrap">読み込み中…</div>
       </section>
     </main>
@@ -981,6 +989,65 @@
           return 'no_site';
         }
 
+        var MEMO_LIST_SORT_LS = 'beautyMemoLeadsListSortMode';
+        window.memoListRawRows = null;
+        window.memoListDupCtx = null;
+
+        function getMemoListSortMode() {
+          var sel = document.getElementById('memo-list-sort');
+          if (sel && sel.value) {
+            var v = sel.value;
+            if (v === 'gojuon' || v === 'alpha' || v === 'date_desc') return v;
+          }
+          try {
+            var s = localStorage.getItem(MEMO_LIST_SORT_LS);
+            if (s === 'gojuon' || s === 'alpha' || s === 'date_desc') return s;
+          } catch (e0) {}
+          return 'date_desc';
+        }
+
+        function foldShopNameForAlphaSort(s) {
+          var t = String(s || '').trim();
+          try {
+            if (typeof t.normalize === 'function') t = t.normalize('NFKC');
+          } catch (e1) {}
+          return t;
+        }
+
+        function sortMemoRowsForDisplay(rows, mode) {
+          var arr = (rows || []).slice();
+          if (mode === 'gojuon') {
+            arr.sort(function (a, b) {
+              var na = String((a && a.shopName) || '').trim();
+              var nb = String((b && b.shopName) || '').trim();
+              return na.localeCompare(nb, 'ja-JP', { sensitivity: 'base', numeric: true });
+            });
+            return arr;
+          }
+          if (mode === 'alpha') {
+            arr.sort(function (a, b) {
+              var na = foldShopNameForAlphaSort((a && a.shopName) || '');
+              var nb = foldShopNameForAlphaSort((b && b.shopName) || '');
+              return na.localeCompare(nb, 'en', { sensitivity: 'base', numeric: true });
+            });
+            return arr;
+          }
+          arr.sort(function (a, b) {
+            var ta = String((a && a.updatedAt) || (a && a.createdAt) || '').trim();
+            var tb = String((b && b.updatedAt) || (b && b.createdAt) || '').trim();
+            return tb.localeCompare(ta);
+          });
+          return arr;
+        }
+
+        function refreshMemoListDisplay() {
+          if (!window.memoListRawRows) {
+            return;
+          }
+          var sorted = sortMemoRowsForDisplay(window.memoListRawRows, getMemoListSortMode());
+          renderList(sorted, window.memoListDupCtx);
+        }
+
         function renderList(rows, dupCtx) {
           var w = document.getElementById('list-wrap');
           if (!rows || !rows.length) {
@@ -1200,11 +1267,15 @@
                   var memoShops = memoEntries.map(function (e) {
                     return e.shopName;
                   });
-                  renderList(rows, {
+                  var dupCtx = {
                     memoShops: memoShops,
                     memoEntries: memoEntries,
                     dashShops: dashShops,
-                  });
+                  };
+                  window.memoListRawRows = rows.slice();
+                  window.memoListDupCtx = dupCtx;
+                  var sorted = sortMemoRowsForDisplay(rows, getMemoListSortMode());
+                  renderList(sorted, dupCtx);
                 })
                 .catch(function () {
                   var memoEntries = [];
@@ -1216,14 +1287,20 @@
                   var memoShops = memoEntries.map(function (e) {
                     return e.shopName;
                   });
-                  renderList(rows, {
+                  var dupCtx = {
                     memoShops: memoShops,
                     memoEntries: memoEntries,
                     dashShops: [],
-                  });
+                  };
+                  window.memoListRawRows = rows.slice();
+                  window.memoListDupCtx = dupCtx;
+                  var sorted = sortMemoRowsForDisplay(rows, getMemoListSortMode());
+                  renderList(sorted, dupCtx);
                 });
             })
             .catch(function (e) {
+              window.memoListRawRows = null;
+              window.memoListDupCtx = null;
               document.getElementById('list-wrap').innerHTML =
                 '<p class="sub">一覧を取得できませんでした。ログイン状態を確認してください。</p>';
               showErr(e.message || String(e));
@@ -1390,6 +1467,20 @@
                 showErr(e.message || String(e));
               });
           };
+        }
+
+        var memoSortSel = document.getElementById('memo-list-sort');
+        if (memoSortSel) {
+          try {
+            var sv = localStorage.getItem(MEMO_LIST_SORT_LS);
+            if (sv === 'gojuon' || sv === 'alpha' || sv === 'date_desc') memoSortSel.value = sv;
+          } catch (eMs) {}
+          memoSortSel.addEventListener('change', function () {
+            try {
+              localStorage.setItem(MEMO_LIST_SORT_LS, memoSortSel.value);
+            } catch (eMs2) {}
+            refreshMemoListDisplay();
+          });
         }
 
         syncIntakeMode();
