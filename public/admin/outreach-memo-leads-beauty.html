@@ -271,6 +271,13 @@
       table.hpb-preview tbody tr.hpb-dup-maybe td {
         border-color: rgba(196, 92, 82, 0.22);
       }
+      #list-wrap table tbody tr.hpb-dup-maybe {
+        background: rgba(196, 92, 82, 0.1);
+        box-shadow: inset 3px 0 0 0 rgba(196, 92, 82, 0.55);
+      }
+      #list-wrap table tbody tr.hpb-dup-maybe td {
+        border-color: rgba(196, 92, 82, 0.22);
+      }
       .hpb-dup-hint {
         display: block;
         margin-top: 4px;
@@ -462,7 +469,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
+          更新日の新しい順。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
         </p>
         <div id="list-wrap">読み込み中…</div>
       </section>
@@ -732,14 +739,27 @@
           return false;
         }
 
-        function matchShopAgainstLists(shopName, ctx) {
+        function matchShopAgainstLists(shopName, ctx, excludeMemoId) {
           if (!ctx || !String(shopName || '').trim()) return null;
           var hits = { memo: false, dashboard: false };
+          var exId = excludeMemoId != null && excludeMemoId !== '' ? String(excludeMemoId) : '';
           var i;
-          for (i = 0; i < ctx.memoShops.length; i++) {
-            if (shopNamesStronglyMatch(shopName, ctx.memoShops[i])) {
-              hits.memo = true;
-              break;
+          if (ctx.memoEntries && ctx.memoEntries.length) {
+            for (i = 0; i < ctx.memoEntries.length; i++) {
+              var ent = ctx.memoEntries[i];
+              if (!ent || !ent.shopName) continue;
+              if (exId && String(ent.id || '') === exId) continue;
+              if (shopNamesStronglyMatch(shopName, ent.shopName)) {
+                hits.memo = true;
+                break;
+              }
+            }
+          } else {
+            for (i = 0; i < ctx.memoShops.length; i++) {
+              if (shopNamesStronglyMatch(shopName, ctx.memoShops[i])) {
+                hits.memo = true;
+                break;
+              }
             }
           }
           for (i = 0; i < ctx.dashShops.length; i++) {
@@ -766,10 +786,14 @@
             ).then(function (pair) {
               if (!pair[0].ok) throw new Error((pair[0].j && pair[0].j.error) || 'memo-leads');
               if (!pair[1].ok) throw new Error((pair[1].j && pair[1].j.error) || 'dashboard');
-              var memoShops = [];
+              var memoEntries = [];
               (Array.isArray(pair[0].j) ? pair[0].j : []).forEach(function (row) {
                 var n = String((row && row.shopName) || '').trim();
-                if (n) memoShops.push(n);
+                var rid = row && row.id;
+                if (n && rid) memoEntries.push({ id: String(rid), shopName: n });
+              });
+              var memoShops = memoEntries.map(function (e) {
+                return e.shopName;
               });
               var dashShops = [];
               (Array.isArray(pair[1].j) ? pair[1].j : []).forEach(function (item) {
@@ -780,31 +804,44 @@
                 n = String(n).trim();
                 if (n) dashShops.push(n);
               });
-              return { memoShops: memoShops, dashShops: dashShops };
+              return { memoShops: memoShops, memoEntries: memoEntries, dashShops: dashShops };
             });
           });
         }
 
-        function applyDupToPreviewRow(tr, shopName, ctx) {
+        function applyDupHighlight(tr, shopName, ctx, opts) {
+          opts = opts || {};
           if (!tr) return;
           tr.classList.remove('hpb-dup-maybe');
           tr.removeAttribute('title');
           var oldHint = tr.querySelector('.hpb-dup-hint');
           if (oldHint) oldHint.remove();
-          var hit = matchShopAgainstLists(shopName, ctx);
+          var hit = matchShopAgainstLists(shopName, ctx, opts.excludeMemoId);
           if (!hit) return;
           tr.classList.add('hpb-dup-maybe');
           var parts = [];
           if (hit.memo) parts.push('メモリード一覧');
           if (hit.dashboard) parts.push('送付・フェーズ管理');
           tr.title = parts.join('・') + 'に店名などが近い行があります。登録済みの可能性があります。';
-          var n0 = tr.querySelector('td:first-child');
-          if (n0) {
+          var sel = opts.hintTdSelector || 'td:nth-child(2)';
+          var host = tr.querySelector(sel) || tr.querySelector('td:first-child');
+          if (host) {
             var sp = document.createElement('span');
             sp.className = 'hpb-dup-hint';
             sp.textContent = '※ ' + parts.join('・') + 'に類似店名（要確認）';
-            n0.appendChild(sp);
+            host.appendChild(sp);
           }
+        }
+
+        function applyDupToPreviewRow(tr, shopName, ctx) {
+          applyDupHighlight(tr, shopName, ctx, { hintTdSelector: 'td:nth-child(2)' });
+        }
+
+        function applyDupToMemoListRow(tr, shopName, ctx, memoRowId) {
+          applyDupHighlight(tr, shopName, ctx, {
+            hintTdSelector: 'td:first-child',
+            excludeMemoId: memoRowId,
+          });
         }
 
         var hpbParsedRows = [];
@@ -944,7 +981,7 @@
           return 'no_site';
         }
 
-        function renderList(rows) {
+        function renderList(rows, dupCtx) {
           var w = document.getElementById('list-wrap');
           if (!rows || !rows.length) {
             w.innerHTML = '<p class="sub" style="margin:0">まだメモがありません。上のフォームから追加してください。</p>';
@@ -957,7 +994,7 @@
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
             var nameTd = document.createElement('td');
-            nameTd.textContent = r.shopName || '（無題）';
+            nameTd.appendChild(document.createTextNode(r.shopName || '（無題）'));
             var boardTd = document.createElement('td');
             var boardLab = document.createElement('label');
             boardLab.style.cssText = 'display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;';
@@ -1117,6 +1154,9 @@
             tr.appendChild(dateTd);
             tr.appendChild(actTd);
             body.appendChild(tr);
+            if (dupCtx) {
+              applyDupToMemoListRow(tr, String((r && r.shopName) || '').trim(), dupCtx, r && r.id);
+            }
           });
           w.innerHTML = '';
           w.appendChild(tb);
@@ -1132,7 +1172,56 @@
               });
             })
             .then(function (data) {
-              renderList(Array.isArray(data) ? data : []);
+              var rows = Array.isArray(data) ? data : [];
+              return credFetch(api + '/beauty-outreach/dashboard')
+                .then(function (dr) {
+                  return dr.json().then(function (dj) {
+                    return { ok: dr.ok, j: dj };
+                  });
+                })
+                .then(function (dashRes) {
+                  var dashShops = [];
+                  if (dashRes.ok && Array.isArray(dashRes.j)) {
+                    dashRes.j.forEach(function (item) {
+                      var n =
+                        (item && item.researched && item.researched.name) ||
+                        (item && item.content && item.content.siteName) ||
+                        '';
+                      n = String(n).trim();
+                      if (n) dashShops.push(n);
+                    });
+                  }
+                  var memoEntries = [];
+                  rows.forEach(function (row) {
+                    var n = String((row && row.shopName) || '').trim();
+                    var id = row && row.id;
+                    if (n && id) memoEntries.push({ id: String(id), shopName: n });
+                  });
+                  var memoShops = memoEntries.map(function (e) {
+                    return e.shopName;
+                  });
+                  renderList(rows, {
+                    memoShops: memoShops,
+                    memoEntries: memoEntries,
+                    dashShops: dashShops,
+                  });
+                })
+                .catch(function () {
+                  var memoEntries = [];
+                  rows.forEach(function (row) {
+                    var n = String((row && row.shopName) || '').trim();
+                    var id = row && row.id;
+                    if (n && id) memoEntries.push({ id: String(id), shopName: n });
+                  });
+                  var memoShops = memoEntries.map(function (e) {
+                    return e.shopName;
+                  });
+                  renderList(rows, {
+                    memoShops: memoShops,
+                    memoEntries: memoEntries,
+                    dashShops: [],
+                  });
+                });
             })
             .catch(function (e) {
               document.getElementById('list-wrap').innerHTML =
