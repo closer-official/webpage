@@ -487,6 +487,28 @@
           return fetch(path, Object.assign({ credentials: 'include' }, opts || {}));
         }
 
+        /** API の ISO 時刻（UTC 等）を日本標準時で YYYY-MM-DD HH:mm:ss 表示 */
+        function formatIsoAsTokyo(raw) {
+          var s = String(raw || '').trim();
+          if (!s) return '';
+          var d = new Date(s);
+          if (Number.isNaN(d.getTime())) return s.slice(0, 19).replace('T', ' ');
+          try {
+            return new Intl.DateTimeFormat('sv-SE', {
+              timeZone: 'Asia/Tokyo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hourCycle: 'h23',
+            }).format(d);
+          } catch (e) {
+            return s.slice(0, 19).replace('T', ' ');
+          }
+        }
+
         var memoLongTextDlgCtx = { mode: 'read', onSave: null };
         var memoLongTextDlgBound = false;
 
@@ -824,7 +846,7 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th>店名</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th>店名</th><th>WEBの強さ</th><th>メモ</th><th>更新（日本時間）</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
@@ -913,7 +935,7 @@
             memoTd.appendChild(memoSel);
             var dateTd = document.createElement('td');
             dateTd.className = 'mono';
-            dateTd.textContent = (r.updatedAt || r.createdAt || '').slice(0, 19).replace('T', ' ');
+            dateTd.textContent = formatIsoAsTokyo(r.updatedAt || r.createdAt);
             var actTd = document.createElement('td');
             var go = document.createElement('a');
             go.className = 'btn-sm primary';

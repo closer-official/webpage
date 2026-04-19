@@ -416,7 +416,7 @@ function esc(str) {
 }
 
 /** 表示用：手入力 addressMapUrl があれば優先、なければ住所から検索 URL */
-function effectiveAddressMapUrl(salon) {
+export function effectiveAddressMapUrl(salon) {
   const u = String(salon.addressMapUrl || '').trim();
   if (/^https?:\/\//i.test(u)) return u;
   const addr = String(salon.address || '').trim();

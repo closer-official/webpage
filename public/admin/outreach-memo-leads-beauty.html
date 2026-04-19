@@ -481,12 +481,12 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>Googleマップ・Instagram・ホットペッパー（予約）</strong>の各URLは一覧から直接編集でき（フォーカスを外すと保存）、<strong>美容室LPで編集</strong>を開いたときに編集画面の対応項目へ流し込みます（HPBは<strong>予約ページURL</strong>欄）。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。
+          <strong>並び順</strong>は下のメニューで選べます（初期は更新日・日本時間の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>Googleマップ・Instagram・ホットペッパー（予約）</strong>の各URLは一覧から直接編集でき（フォーカスを外すと保存）、<strong>美容室LPで編集</strong>を開いたときに編集画面の対応項目へ流し込みます（HPBは<strong>予約ページURL</strong>欄）。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。
         </p>
         <div class="memo-list-toolbar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px">
           <label for="memo-list-sort" style="font-size: 0.82rem; color: var(--muted); margin: 0">並び順</label>
           <select id="memo-list-sort" aria-label="保存済みメモの並び順" style="max-width: 100%; font-size: 0.85rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--text)">
-            <option value="date_desc">更新日（新しい順）</option>
+            <option value="date_desc">更新日・日本時間（新しい順）</option>
             <option value="gojuon">店名（五十音順）</option>
             <option value="alpha">店名（アルファベット順）</option>
           </select>
@@ -530,6 +530,28 @@
 
         function credFetch(path, opts) {
           return fetch(path, Object.assign({ credentials: 'include' }, opts || {}));
+        }
+
+        /** API の ISO 時刻（UTC 等）を日本標準時で YYYY-MM-DD HH:mm:ss 表示 */
+        function formatIsoAsTokyo(raw) {
+          var s = String(raw || '').trim();
+          if (!s) return '';
+          var d = new Date(s);
+          if (Number.isNaN(d.getTime())) return s.slice(0, 19).replace('T', ' ');
+          try {
+            return new Intl.DateTimeFormat('sv-SE', {
+              timeZone: 'Asia/Tokyo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hourCycle: 'h23',
+            }).format(d);
+          } catch (e) {
+            return s.slice(0, 19).replace('T', ' ');
+          }
         }
 
         var memoLongTextDlgCtx = { mode: 'read', onSave: null };
@@ -1080,7 +1102,7 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>WEBの強さ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>ホットペッパーURL</th><th>WEBの強さ</th><th>更新（日本時間）</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
@@ -1201,13 +1223,14 @@
             }
             var dateTd = document.createElement('td');
             dateTd.className = 'mono';
-            dateTd.textContent = (r.updatedAt || r.createdAt || '').slice(0, 19).replace('T', ' ');
+            dateTd.textContent = formatIsoAsTokyo(r.updatedAt || r.createdAt);
             var actTd = document.createElement('td');
             var go = document.createElement('a');
             go.className = 'btn-sm primary';
             go.href = workerUrlWithMemo(r.id);
             go.textContent = '美容室LPで編集';
-            go.title = '美容室LP編集（独立版）を開き、店名・メモ・マップ／Instagram URLを流し込みます';
+            go.title =
+              '美容室LP編集（独立版）を開き、店名・メモに加え、一覧の Googleマップ／Instagram／ホットペッパー（予約）の各URLを②の対応欄へそのまま反映します（空欄は上書きでクリアされます）';
             var del = document.createElement('button');
             del.type = 'button';
             del.className = 'btn-sm danger';

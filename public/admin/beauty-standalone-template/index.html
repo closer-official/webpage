@@ -111,7 +111,7 @@ import {
   resetEditor,
   flushSalonDraft,
 } from './editor.js';
-import { renderLP } from './renderer.js';
+import { renderLP, effectiveAddressMapUrl } from './renderer.js';
 
 /** ①の「解析する」の直下: Google / Instagram / ホットペッパー（②の予約URL） */
 function updateQuickExternalLinks() {
@@ -255,12 +255,15 @@ async function applyBeautyMemoLeadFromQuery(mid) {
   const mapU = String(row.addressMapUrl || '').trim().slice(0, 2000);
   const igU = String(row.instagramUrl || '').trim().slice(0, 2000);
   const hpU = String(row.hotPepperUrl || '').trim().slice(0, 2000);
-  if (mapU) salon.addressMapUrl = mapU;
-  if (igU) salon.instagramUrl = igU;
-  if (hpU) salon.reserveUrl = hpU;
+  /** メモ一覧の3 URL を②の該当欄へそのまま反映（空も上書きして解析結果の残骸を消す） */
+  salon.addressMapUrl = mapU;
+  salon.instagramUrl = igU;
+  salon.reserveUrl = hpU;
+  /** 空欄時は予約URLと同じ扱いになるよう、一覧から入るときはスタイリスト一覧URLを明示的に空に */
+  salon.staffListUrl = '';
   loadIntoEditor(salon);
   setSaveStatus(
-    'メモリード（美容）から読み込みました。① の本文を編集したあと「解析する」で取り直せます。',
+    'メモリード（美容）から読み込みました。一覧の Googleマップ／Instagram／ホットペッパー（予約）URLは②の該当欄へ反映済みです。① の本文を編集したあと「解析する」で取り直せます。',
     'hint',
   );
 }
