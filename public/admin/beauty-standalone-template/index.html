@@ -209,6 +209,10 @@ async function applyBeautyMemoLeadFromQuery(mid) {
   if (shop && (!String(salon.name || '').trim() || salon.name === SALON_NAME_PLACEHOLDER)) {
     salon.name = shop.slice(0, 80);
   }
+  const mapU = String(row.addressMapUrl || '').trim().slice(0, 2000);
+  const igU = String(row.instagramUrl || '').trim().slice(0, 2000);
+  if (mapU) salon.addressMapUrl = mapU;
+  if (igU) salon.instagramUrl = igU;
   loadIntoEditor(salon);
   setSaveStatus(
     'メモリード（美容）から読み込みました。① の本文を編集したあと「解析する」で取り直せます。',

@@ -958,7 +958,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理（美容室）</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>で<strong>送付一覧に表示</strong>をオンにした案件だけが、ここに<strong>送信前</strong>相当の行として現れます（プルダウンは7種すべて選べます）。<strong>送信前</strong>以外に変えると<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧（美容）</strong>に残っている案件が、ここに<strong>送信前</strong>相当の行としても現れます（プルダウンは7種すべて選べます）。<strong>送信前</strong>以外に変えると<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。
       </p>
@@ -982,7 +982,7 @@
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え、メモリード一覧で<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送信前</strong>相当で載ります。<strong>送信前</strong>以外のフェーズに変えるとメモ一覧からは外れ、こちらの案件として残ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え、メモリード一覧（美容）の行が<strong>送信前</strong>相当で載ります。<strong>送信前</strong>以外のフェーズに変えるとメモ一覧からは外れ、こちらの案件として残ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
@@ -1962,7 +1962,14 @@
           var hasUrl = mapNeedles.length > 0;
           var hasText = textNeedle.length > 0;
           if (!hasUrl && !hasText) return false;
-          var memoText = String((memo && memo.memo) || '') + '\n' + String((memo && memo.shopName) || '');
+          var memoText =
+            String((memo && memo.memo) || '') +
+            '\n' +
+            String((memo && memo.shopName) || '') +
+            '\n' +
+            String((memo && memo.addressMapUrl) || '') +
+            '\n' +
+            String((memo && memo.instagramUrl) || '');
           var urlHit = false;
           if (hasUrl) {
             urlHit = mapNeedles.some(function (n) {
@@ -2022,8 +2029,7 @@
             if (!q || itemMatchesSearch(item, q)) rows.push({ kind: 'dash', item: item });
           });
           (memoLeads || []).forEach(function (memo) {
-            if (memo && memo.id && memo.onOutreachBoard && (!q || memoMatchesSearch(memo, q)))
-              rows.push({ kind: 'memo', memo: memo });
+            if (memo && memo.id && (!q || memoMatchesSearch(memo, q))) rows.push({ kind: 'memo', memo: memo });
           });
           rows.sort(function (a, b) {
             var ka = excelGridRowSortKey(a);

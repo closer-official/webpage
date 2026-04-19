@@ -423,7 +423,7 @@
     <main>
       <h1>メモリード一覧</h1>
       <p class="sub">
-        ホットペッパー風の取込では、<strong>ウェブなし・弱い</strong>の行だけ<strong>メモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>ウェブあり・強い</strong>はメモリードには入れず、<strong>送付・フェーズ管理（美容）</strong>の一覧に<strong>SNSなし・ウェブページ制作不可</strong>相当の案件として載せます。メモリード由来の行を表に出すには、保存済み一覧の<strong>送付一覧に表示</strong>をオンにしてください（オンにした行だけが表の<strong>送信前</strong>相当として現れます）。表側で<strong>送信前</strong>以外のフェーズに変えると、メモリード一覧からは消え、通常の案件行になります。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモが①の欄とフォームに流し込まれます。一覧の<strong>メモ列は2行まで</strong>に抑え、<strong>プルダウンから全文表示</strong>できます。
+        ホットペッパー風の取込では、<strong>ウェブなし・弱い</strong>の行だけ<strong>メモリードに保存</strong>されます（ウェブ強度を選ばなかった行は<strong>ウェブなし</strong>として登録）。<strong>ウェブあり・強い</strong>はメモリードには入れず、<strong>送付・フェーズ管理（美容）</strong>の一覧に<strong>SNSなし・ウェブページ制作不可</strong>相当の案件として載せます。メモリードの行は<strong>送付・フェーズ管理（美容）</strong>の表にも<strong>送信前</strong>相当として出ます（表側でフェーズを変えるとメモリード一覧からは消え、通常の案件行になります）。フル入力やドラフト作成の時間がないときの<strong>下書き置き場</strong>です。各行から<strong>美容室LP編集（独立版）</strong>へ飛ぶと、店名・メモに加え<strong>GoogleマップURL・Instagram URL</strong>がフォームに流し込まれます。
       </p>
       <p id="err" role="alert"></p>
       <p id="ok-msg" aria-live="polite"></p>
@@ -439,7 +439,7 @@
 
         <div id="block-hpb">
           <p class="hpb-hint">
-            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。メモリードの<strong>弱・なし</strong>を表に載せるかは、登録後に保存済み一覧の<strong>送付一覧に表示</strong>で切り替えます。登録後も<strong>保存済みメモ</strong>一覧のプルダウンから<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。解析後のプレビューで、<strong>既存メモまたは送付管理に店名が近い行</strong>は色が変わります（二重登録の目安）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
+            まずテンプレで<strong>美容室</strong>を選んだうえで、検索結果の<strong>店名ブロックをまとめてコピペ</strong>してください（「ブックマークする」行の前後に改行があればそのままで構いません。先頭が「ano 渋谷 【アノ】」のような<strong>リスト見出しだけ</strong>の区切りでも、次のブロックと自動でつなげます）。<strong>店名を解析</strong>のあと、必要な行だけ<strong>ウェブの有無・強弱</strong>をラジオで選べます（<strong>未選択のまま反映</strong>した行は<strong>ウェブなし</strong>としてメモリードに登録されます）。<strong>ウェブあり・強い</strong>にした行はメモリードには入らず、送付・フェーズ管理の表に<strong>SNSなし・ウェブページ制作不可</strong>相当で載ります。登録後も<strong>保存済みメモ</strong>一覧から<strong>なし／弱／強</strong>を変更できます（<strong>強</strong>にするとメモから消えて送付管理へ移ります）。取込後は一覧の<strong>GoogleマップURL／Instagram</strong>列にURLを入れると、LP編集画面に引き継がれます。解析後のプレビューで、<strong>既存メモまたは送付管理に店名が近い行</strong>は色が変わります（二重登録の目安）。<strong>「一覧へ」</strong>から下（クーポン・空き時間の列）は<strong>自動で省きます</strong>。解析プレビューの<strong>アクセス列</strong>は一覧では1行に省略し、<strong>プルダウンから全文の確認・編集</strong>ができます。
           </p>
           <label for="hpb-paste">ホットペッパー風テキスト</label>
           <textarea id="hpb-paste" class="hpb-paste" maxlength="200000" placeholder="検索結果ページからそのまま貼り付け…"></textarea>
@@ -464,8 +464,12 @@
           <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">手入力でメモを追加</h3>
           <label for="new-name">店名</label>
           <input type="text" id="new-name" maxlength="200" placeholder="例：渋谷カフェ ○○" autocomplete="off" />
+          <label for="new-address-map" style="margin-top: 12px">GoogleマップURL</label>
+          <input type="text" id="new-address-map" maxlength="2000" placeholder="https://maps.app.goo.gl/… など" autocomplete="off" />
+          <label for="new-instagram" style="margin-top: 12px">Instagram URL</label>
+          <input type="text" id="new-instagram" maxlength="2000" placeholder="https://www.instagram.com/…" autocomplete="off" />
           <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
-          <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://www.instagram.com/...&#10;https://beauty.hotpepper.jp/...&#10;https://maps.google.com/?q=..."></textarea>
+          <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://beauty.hotpepper.jp/...&#10;（ホットペッパー等・覚え書き）"></textarea>
           <div class="row-actions">
             <button type="button" class="btn-sm primary" id="btn-add">追加する</button>
           </div>
@@ -475,7 +479,7 @@
       <section class="panel" aria-labelledby="list-h">
         <h2 id="list-h">保存済みメモ</h2>
         <p class="sub" style="margin-top: 0">
-          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>送付一覧に表示</strong>をオンにした行だけが<strong>送付・フェーズ管理（美容）</strong>の表に出ます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます（自分自身は照合から除きます）。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。<strong>メモ列</strong>は2行までに省略し、プルダウンで全文表示できます。「美容室LPで編集」で独立版エディタに店名・メモを流し込みます。
+          <strong>並び順</strong>は下のメニューで選べます（初期は更新日の新しい順）。左端のチェックで複数選び、<strong>選択をまとめて削除</strong>できます。<strong>GoogleマップURL</strong>と<strong>Instagram URL</strong>は一覧から直接編集でき（フォーカスを外すと保存）、<strong>美容室LPで編集</strong>を開いたときに編集画面の同項目へ流し込みます。他のメモ行または送付管理に<strong>店名が近い行</strong>がある場合は、解析プレビューと同様に<strong>行のハイライトと注記</strong>が付きます。ホットペッパー取込行は<strong>WEBの強さ</strong>列で<strong>なし／弱／強</strong>を切り替えられます。
         </p>
         <div class="memo-list-toolbar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px">
           <label for="memo-list-sort" style="font-size: 0.82rem; color: var(--muted); margin: 0">並び順</label>
@@ -1074,7 +1078,7 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>送付一覧に表示</th><th>WEBの強さ</th><th>メモ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>WEBの強さ</th><th>更新</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
@@ -1088,42 +1092,56 @@
             cbTd.appendChild(rowCb);
             var nameTd = document.createElement('td');
             nameTd.appendChild(document.createTextNode(r.shopName || '（無題）'));
-            var boardTd = document.createElement('td');
-            var boardLab = document.createElement('label');
-            boardLab.style.cssText = 'display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;';
-            var boardCb = document.createElement('input');
-            boardCb.type = 'checkbox';
-            boardCb.checked = !!(r && r.onOutreachBoard);
-            boardCb.setAttribute('aria-label', '送付・フェーズ管理の一覧表に表示する');
-            boardCb.title = 'オンにすると送付・フェーズ管理（美容）の一覧に「送信前」として出ます';
-            boardCb.addEventListener('change', function () {
-              var want = boardCb.checked;
-              boardCb.disabled = true;
-              credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ onOutreachBoard: want }),
-              })
-                .then(function (res) {
-                  return res.json().then(function (j) {
-                    if (!res.ok) throw new Error((j && j.error) || res.statusText);
-                    return j;
+            function makeUrlCell(initialVal, fieldKey) {
+              var td = document.createElement('td');
+              var inp = document.createElement('input');
+              inp.type = 'text';
+              inp.className = 'mono';
+              inp.style.cssText = 'width:100%;max-width:280px;font-size:0.78rem;padding:4px 6px;box-sizing:border-box;';
+              inp.maxLength = 2000;
+              inp.placeholder = 'https://…';
+              var v0 = String(initialVal || '').trim();
+              inp.value = v0;
+              inp.setAttribute('data-saved', v0);
+              inp.addEventListener('blur', function () {
+                var v = String(inp.value || '').trim().slice(0, 2000);
+                if (v === String(inp.getAttribute('data-saved') || '')) return;
+                inp.disabled = true;
+                var payload = {};
+                payload[fieldKey] = v;
+                credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                })
+                  .then(function (res) {
+                    return res.json().then(function (j) {
+                      if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                      return j;
+                    });
+                  })
+                  .then(function () {
+                    inp.setAttribute('data-saved', v);
+                    inp.disabled = false;
+                    if (window.memoListRawRows) {
+                      var ix = window.memoListRawRows.findIndex(function (x) {
+                        return x && x.id === r.id;
+                      });
+                      if (ix >= 0) window.memoListRawRows[ix][fieldKey] = v;
+                    }
+                    showOk('URLを保存しました');
+                  })
+                  .catch(function (e) {
+                    inp.disabled = false;
+                    inp.value = String(inp.getAttribute('data-saved') || '');
+                    showErr(e.message || String(e));
                   });
-                })
-                .then(function () {
-                  boardCb.disabled = false;
-                  showOk(want ? '送付一覧に表示するようにしました' : '送付一覧から外しました');
-                  return loadList();
-                })
-                .catch(function (e) {
-                  boardCb.disabled = false;
-                  boardCb.checked = !want;
-                  showErr(e.message || String(e));
-                });
-            });
-            boardLab.appendChild(boardCb);
-            boardLab.appendChild(document.createTextNode('表示'));
-            boardTd.appendChild(boardLab);
+              });
+              td.appendChild(inp);
+              return td;
+            }
+            var mapTd = makeUrlCell(r.addressMapUrl, 'addressMapUrl');
+            var igTd = makeUrlCell(r.instagramUrl, 'instagramUrl');
             var webTd = document.createElement('td');
             if (isHpbMemoRow(r)) {
               var sel = document.createElement('select');
@@ -1178,35 +1196,6 @@
               webTd.style.color = 'var(--muted)';
               webTd.textContent = '—';
             }
-            var fullMemo = String((r.memo || '')).trim();
-            var memoTd = document.createElement('td');
-            memoTd.className = 'memo-preview';
-            var memoPreview = document.createElement('div');
-            memoPreview.className = 'memo-preview-lines';
-            memoPreview.textContent = fullMemo || '—';
-            var memoSel = document.createElement('select');
-            memoSel.className = 'memo-longtext-sel';
-            memoSel.setAttribute('aria-label', 'メモ全文の表示');
-            var m0 = document.createElement('option');
-            m0.value = '';
-            m0.textContent = '一覧（2行まで）';
-            var m1 = document.createElement('option');
-            m1.value = 'full';
-            m1.textContent = '全文を表示';
-            memoSel.appendChild(m0);
-            memoSel.appendChild(m1);
-            memoSel.addEventListener('change', function () {
-              if (memoSel.value === 'full') {
-                openMemoLongTextDialog({
-                  mode: 'read',
-                  title: 'メモ（全文）',
-                  body: fullMemo || '（なし）',
-                });
-                memoSel.value = '';
-              }
-            });
-            memoTd.appendChild(memoPreview);
-            memoTd.appendChild(memoSel);
             var dateTd = document.createElement('td');
             dateTd.className = 'mono';
             dateTd.textContent = (r.updatedAt || r.createdAt || '').slice(0, 19).replace('T', ' ');
@@ -1215,7 +1204,7 @@
             go.className = 'btn-sm primary';
             go.href = workerUrlWithMemo(r.id);
             go.textContent = '美容室LPで編集';
-            go.title = '美容室LP編集（独立版）を開き、店名・メモを流し込みます';
+            go.title = '美容室LP編集（独立版）を開き、店名・メモ・マップ／Instagram URLを流し込みます';
             var del = document.createElement('button');
             del.type = 'button';
             del.className = 'btn-sm danger';
@@ -1242,9 +1231,9 @@
             actTd.appendChild(del);
             tr.appendChild(cbTd);
             tr.appendChild(nameTd);
-            tr.appendChild(boardTd);
+            tr.appendChild(mapTd);
+            tr.appendChild(igTd);
             tr.appendChild(webTd);
-            tr.appendChild(memoTd);
             tr.appendChild(dateTd);
             tr.appendChild(actTd);
             body.appendChild(tr);
@@ -1483,6 +1472,12 @@
           btnAdd.onclick = function () {
             var name = document.getElementById('new-name').value.trim();
             var memo = document.getElementById('new-memo').value.trim();
+            var mapU = document.getElementById('new-address-map')
+              ? document.getElementById('new-address-map').value.trim().slice(0, 2000)
+              : '';
+            var igU = document.getElementById('new-instagram')
+              ? document.getElementById('new-instagram').value.trim().slice(0, 2000)
+              : '';
             if (!name) {
               showErr('店名を入力してください');
               return;
@@ -1491,7 +1486,12 @@
             credFetch(api + '/beauty-outreach/memo-leads', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ shopName: name, memo: memo }),
+              body: JSON.stringify({
+                shopName: name,
+                memo: memo,
+                addressMapUrl: mapU,
+                instagramUrl: igU,
+              }),
             })
               .then(function (r) {
                 return r.json().then(function (j) {
@@ -1502,6 +1502,10 @@
               .then(function () {
                 document.getElementById('new-name').value = '';
                 document.getElementById('new-memo').value = '';
+                var nm = document.getElementById('new-address-map');
+                var ni = document.getElementById('new-instagram');
+                if (nm) nm.value = '';
+                if (ni) ni.value = '';
                 showOk('追加しました');
                 return loadList();
               })

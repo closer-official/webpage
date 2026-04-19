@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>送付・フェーズ分析 | Closer</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
     <style>
       :root {
         --bg: #0c1220;
@@ -15,7 +14,7 @@
         --border: #2a3a55;
         --err: #f87171;
         --accent: #38bdf8;
-        --chart-h: 300px;
+        --ok: #4ade80;
       }
       * {
         box-sizing: border-box;
@@ -45,7 +44,7 @@
         color: var(--text);
       }
       main {
-        max-width: 1280px;
+        max-width: 1180px;
         margin: 0 auto;
         padding: 24px 20px 80px;
       }
@@ -54,9 +53,9 @@
         font-size: 1.35rem;
       }
       .sub {
-        margin: 0 0 20px;
+        margin: 0 0 18px;
         color: var(--muted);
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         max-width: 52rem;
       }
       .panel {
@@ -67,13 +66,13 @@
         margin-bottom: 18px;
       }
       .panel h2 {
-        margin: 0 0 4px;
-        font-size: 1rem;
+        margin: 0 0 6px;
+        font-size: 1.02rem;
         color: #bae6fd;
         font-weight: 650;
       }
       .panel .hint {
-        margin: 0 0 12px;
+        margin: 0 0 14px;
         font-size: 0.78rem;
         color: var(--muted);
       }
@@ -120,65 +119,58 @@
       .summary {
         display: flex;
         flex-wrap: wrap;
-        gap: 14px 22px;
-        font-size: 0.9rem;
-        align-items: center;
+        gap: 14px 20px;
+        font-size: 0.88rem;
       }
       .summary strong {
         color: var(--accent);
-        font-weight: 700;
       }
       .err {
         color: var(--err);
         margin: 0 0 12px;
         font-size: 0.9rem;
       }
-      .chart-grid {
+      .funnel-grid {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
       }
-      @media (min-width: 960px) {
-        .chart-grid.two {
-          grid-template-columns: 1fr 1fr;
-        }
+      .funnel-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: rgba(12, 22, 40, 0.65);
       }
-      .chart-wrap {
-        position: relative;
-        height: var(--chart-h);
-        max-height: min(42vh, 360px);
-      }
-      .chart-wrap.tall {
-        --chart-h: 340px;
-        max-height: min(48vh, 400px);
-      }
-      .chart-wrap.wide-y {
-        height: auto;
-        min-height: 280px;
-        max-height: none;
-      }
-      details.raw-log {
-        margin-top: 8px;
-      }
-      details.raw-log > summary {
-        cursor: pointer;
+      .funnel-card .label {
+        font-size: 0.8rem;
         color: var(--muted);
-        font-size: 0.88rem;
-        user-select: none;
+        margin-bottom: 6px;
       }
-      details.raw-log > summary:hover {
-        color: var(--text);
+      .funnel-card .num {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: var(--ok);
+        letter-spacing: 0.02em;
+      }
+      .funnel-card .pct {
+        font-size: 0.88rem;
+        color: #e0f2fe;
+        margin-top: 4px;
+      }
+      .funnel-card .den {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 6px;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.78rem;
-        margin-top: 10px;
+        font-size: 0.8rem;
       }
       th,
       td {
         border-bottom: 1px solid var(--border);
-        padding: 6px 5px;
+        padding: 8px 6px;
         text-align: left;
         vertical-align: top;
       }
@@ -191,25 +183,17 @@
         font-family: ui-monospace, Consolas, monospace;
         font-size: 0.76rem;
       }
-      .pill {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 600;
+      details.raw-log {
+        margin-top: 8px;
       }
-      .pill-sent {
-        background: #14532d;
-        color: #bbf7d0;
-      }
-      .pill-phase {
-        background: #1e3a5f;
-        color: #bae6fd;
-      }
-      .empty-charts {
+      details.raw-log > summary {
+        cursor: pointer;
         color: var(--muted);
-        font-size: 0.9rem;
-        padding: 12px 0;
+        font-size: 0.86rem;
+      }
+      .pill-warn {
+        color: #fdba74;
+        font-size: 0.75rem;
       }
     </style>
   </head>
@@ -222,12 +206,13 @@
     <main>
       <h1>送付・フェーズ分析</h1>
       <p class="sub">
-        <strong>テンプレ別・時間帯・曜日・DMパターン</strong>などの<strong>分布</strong>を棒グラフで見る画面です（日付の折れ線グラフは置いていません）。集計はフィルタ後の<strong>全ログ件数</strong>に対してサーバー側で行います。生ログ表は最大2000件までです。
+        メインは<strong>送信済み相当（フェーズ <code>message_sent</code> または <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
+        <strong>templateId</strong> と <strong>曜日・時（日本時間）</strong>をさかのぼって表示します。パーセントは「そのフェーズから<strong>出た全フェーズ変更</strong>のうち、次の行き先が該当する割合」です。
       </p>
       <p id="err" class="err" style="display: none"></p>
       <div class="panel">
         <h2>絞り込み</h2>
-        <p class="hint">期間は「その範囲だけ集計」用です。メインの見方はグラフの形（どのテンプレ・何時に操作が集中したか）です。</p>
+        <p class="hint">下の集計・表は、ここで絞った期間・保存先・区分のログだけを対象にします。</p>
         <div class="filters">
           <div>
             <label for="f-from">期間・開始（任意）</label>
@@ -255,7 +240,7 @@
           </div>
           <div>
             <label for="f-tpl">templateId 完全一致（任意）</label>
-            <input type="text" id="f-tpl" placeholder="1テンプレに絞るとき" maxlength="80" />
+            <input type="text" id="f-tpl" maxlength="80" />
           </div>
           <div>
             <label>&nbsp;</label>
@@ -264,11 +249,64 @@
         </div>
       </div>
       <div class="panel summary" id="summary" style="display: none"></div>
-      <div id="charts-root">
-        <p class="empty-charts">読み込み中…</p>
+
+      <div class="panel" id="funnel-panel">
+        <h2>ファネル（件数・割合）</h2>
+        <p class="hint">
+          先頭の「送信済み相当→ヒアリング」% ＝ 上記2フェーズから出た遷移のうち <code>hearing</code> へ進んだ割合。契約は内部値
+          <code>contracted</code>（画面の契約済）です。
+        </p>
+        <div class="funnel-grid" id="funnel-cards"></div>
       </div>
+
+      <div class="panel">
+        <h2>送信済み相当 → ヒアリング（さかのぼり）</h2>
+        <p class="hint">
+          上記遷移がログに残っている案件のみ。送信操作ログが無い場合は template / 曜日・時が空または「不明」になります。
+        </p>
+        <div style="overflow-x: auto">
+          <table>
+            <thead>
+              <tr>
+                <th>店名</th>
+                <th>遷移元フェーズ</th>
+                <th>templateId</th>
+                <th>送信（曜・JST）</th>
+                <th>送信（時・JST）</th>
+                <th>送信ログ時刻（UTC表記）</th>
+                <th>ヒアリング遷移時刻</th>
+                <th>保存先</th>
+              </tr>
+            </thead>
+            <tbody id="drill-tbody">
+              <tr>
+                <td colspan="8">読み込み中…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>各フェーズ → 失注</h2>
+        <p class="hint">そのフェーズから出た変更のうち、<code>lost</code> へ進んだ件数と割合。</p>
+        <div style="overflow-x: auto">
+          <table>
+            <thead>
+              <tr>
+                <th>元フェーズ</th>
+                <th>失注へ</th>
+                <th>そのフェーズからの全遷移</th>
+                <th>パーセント</th>
+              </tr>
+            </thead>
+            <tbody id="lost-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <details class="raw-log">
-        <summary>生ログ（表・最大2000件）</summary>
+        <summary>生ログ（最大2000件）</summary>
         <div class="panel" style="overflow-x: auto; margin-top: 10px; border: none; padding: 0">
           <table>
             <thead>
@@ -279,13 +317,12 @@
                 <th>店名</th>
                 <th>template</th>
                 <th>DM</th>
-                <th>保存先</th>
                 <th>詳細</th>
               </tr>
             </thead>
             <tbody id="tbody">
               <tr>
-                <td colspan="8">—</td>
+                <td colspan="7">—</td>
               </tr>
             </tbody>
           </table>
@@ -294,24 +331,23 @@
     </main>
     <script>
       (function () {
-        if (typeof Chart === 'undefined') {
-          document.getElementById('err').textContent =
-            'Chart.js の読み込みに失敗しました。ネットワークまたは CDN を確認してください。';
-          document.getElementById('err').style.display = 'block';
-          return;
-        }
-
-        Chart.defaults.color = '#9aacbf';
-        Chart.defaults.borderColor = 'rgba(42, 58, 85, 0.9)';
-        Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+        var PHASE_JA = {
+          pre_contact: '接触前',
+          first_contact: '初回接触',
+          message_sent: '送信済',
+          hearing: 'ヒアリング',
+          proposal: '提案中',
+          contracted: '契約済',
+          payment_confirmed: '入金確認',
+          lost: '失注',
+          no_outreach_channel: 'SNSなし等',
+        };
 
         var api = '';
         try {
           api = new URLSearchParams(location.search).get('api') || '';
         } catch (e) {}
         if (!api) api = '';
-
-        var chartList = [];
 
         function qs(sel) {
           return document.querySelector(sel);
@@ -346,59 +382,136 @@
             .join('&gt;');
         }
 
-        function destroyCharts() {
-          chartList.forEach(function (c) {
-            try {
-              c.destroy();
-            } catch (e) {}
-          });
-          chartList = [];
+        function jaPhase(k) {
+          return PHASE_JA[k] || esc(k);
         }
 
-        function barColors(n, alpha) {
-          var a = alpha == null ? 0.75 : alpha;
-          var base = [
-            [56, 189, 248],
-            [52, 211, 153],
-            [251, 191, 36],
-            [167, 139, 250],
-            [251, 113, 133],
-            [94, 234, 212],
-            [147, 197, 253],
-            [253, 186, 116],
-          ];
-          var out = [];
-          for (var i = 0; i < n; i++) {
-            var b = base[i % base.length];
-            out.push('rgba(' + b[0] + ',' + b[1] + ',' + b[2] + ',' + a + ')');
+        function fmtPct(p) {
+          if (p == null || Number.isNaN(p)) return '—';
+          return String(p) + '%';
+        }
+
+        function funnelCard(title, block) {
+          if (!block) return '';
+          var c = block.count != null ? block.count : 0;
+          var d = block.outbound != null ? block.outbound : 0;
+          var p = fmtPct(block.percent);
+          return (
+            '<div class="funnel-card">' +
+            '<div class="label">' +
+            esc(title) +
+            '</div>' +
+            '<div class="num">' +
+            esc(c) +
+            ' 件</div>' +
+            '<div class="pct">' +
+            esc(p) +
+            '</div>' +
+            '<div class="den">分母: そのフェーズからの遷移 ' +
+            esc(d) +
+            ' 件</div>' +
+            '</div>'
+          );
+        }
+
+        function renderFunnel(f) {
+          var el = qs('#funnel-cards');
+          if (!f || !f.funnel) {
+            el.innerHTML = '<p class="hint" style="margin:0">ファネルデータがありません。</p>';
+            return;
           }
-          return out;
+          var fv = f.funnel;
+          el.innerHTML =
+            funnelCard(
+              '送信済み相当 → ヒアリング',
+              fv.postSend_to_hearing || fv.messageSent_to_hearing,
+            ) +
+            funnelCard('ヒアリング → 提案中', fv.hearing_to_proposal) +
+            funnelCard('提案中 → 契約済（contracted）', fv.proposal_to_contracted);
         }
 
-        function makePanel(title, hint, canvasId, tall, wideY) {
-          var h2 = document.createElement('h2');
-          h2.textContent = title;
-          var p = document.createElement('p');
-          p.className = 'hint';
-          p.textContent = hint || '';
-          var wrap = document.createElement('div');
-          wrap.className = 'chart-wrap' + (tall ? ' tall' : '') + (wideY ? ' wide-y' : '');
-          var cv = document.createElement('canvas');
-          cv.id = canvasId;
-          cv.setAttribute('role', 'img');
-          wrap.appendChild(cv);
-          var panel = document.createElement('div');
-          panel.className = 'panel';
-          panel.appendChild(h2);
-          if (hint) panel.appendChild(p);
-          panel.appendChild(wrap);
-          return { panel: panel, canvas: cv };
+        function renderLost(rows) {
+          var tb = qs('#lost-tbody');
+          if (!rows || !rows.length) {
+            tb.innerHTML = '<tr><td colspan="4">データなし</td></tr>';
+            return;
+          }
+          tb.innerHTML = rows
+            .map(function (r) {
+              return (
+                '<tr>' +
+                '<td>' +
+                jaPhase(r.fromPhase) +
+                ' <span class="mono">(' +
+                esc(r.fromPhase) +
+                ')</span></td>' +
+                '<td>' +
+                esc(r.toLost) +
+                ' 件</td>' +
+                '<td>' +
+                esc(r.outbound) +
+                ' 件</td>' +
+                '<td>' +
+                fmtPct(r.percent) +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
+        }
+
+        function renderDrill(rows) {
+          var tb = qs('#drill-tbody');
+          if (!rows || !rows.length) {
+            tb.innerHTML =
+              '<tr><td colspan="8">該当する遷移がありません（ログ開始後のデータのみ）。</td></tr>';
+            return;
+          }
+          tb.innerHTML = rows
+            .map(function (r) {
+              var warn = r.sentKnown ? '' : ' <span class="pill-warn">（送信ログ未検出）</span>';
+              var h = r.hourJst;
+              var hourStr = typeof h === 'number' && h >= 0 && h <= 23 ? String(h) + ' 時' : '—';
+              var wd = r.weekdayJst ? esc(r.weekdayJst) : '—';
+              var tpl = r.templateId ? esc(r.templateId) : '—';
+              var sentAt = r.sentAt ? esc(r.sentAt) : '—';
+              return (
+                '<tr>' +
+                '<td>' +
+                esc(r.shopName) +
+                warn +
+                '</td>' +
+                '<td class="mono">' +
+                esc(r.fromPhase || '') +
+                '</td>' +
+                '<td class="mono">' +
+                tpl +
+                '</td>' +
+                '<td>' +
+                wd +
+                '</td>' +
+                '<td>' +
+                esc(hourStr) +
+                '</td>' +
+                '<td class="mono">' +
+                sentAt +
+                '</td>' +
+                '<td class="mono">' +
+                esc(r.heardAt) +
+                '</td>' +
+                '<td class="mono">' +
+                esc(r.storagePool || '') +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
         }
 
         function renderTable(rows) {
           var tb = qs('#tbody');
           if (!rows.length) {
-            tb.innerHTML = '<tr><td colspan="8">該当するイベントがありません。</td></tr>';
+            tb.innerHTML = '<tr><td colspan="7">該当なし</td></tr>';
             return;
           }
           tb.innerHTML = rows
@@ -406,11 +519,11 @@
               var typ = String(e.type || '');
               var pill =
                 typ === 'message_sent'
-                  ? '<span class="pill pill-sent">送信済み</span>'
-                  : '<span class="pill pill-phase">フェーズ</span>';
+                  ? '<span class="mono">送信済操作</span>'
+                  : '<span class="mono">フェーズ変更</span>';
               var det =
                 typ === 'message_sent'
-                  ? esc(e.fromStatus) + '→' + esc(e.toStatus) + ' / ' + esc(e.phase)
+                  ? esc(e.fromStatus) + '→' + esc(e.toStatus)
                   : esc(e.fromPhase) + '→' + esc(e.toPhase);
               return (
                 '<tr>' +
@@ -432,9 +545,6 @@
                 '<td>' +
                 esc(e.outreachDmPattern) +
                 '</td>' +
-                '<td>' +
-                esc(e.storagePool) +
-                '</td>' +
                 '<td class="mono">' +
                 det +
                 '</td>' +
@@ -442,256 +552,6 @@
               );
             })
             .join('');
-        }
-
-        function setHBarHeight(panelEl, rowCount) {
-          var wrap = panelEl.querySelector('.chart-wrap');
-          if (!wrap || !rowCount) return;
-          var px = Math.min(900, Math.max(220, 48 + rowCount * 26));
-          wrap.style.height = px + 'px';
-        }
-
-        function renderCharts(agg) {
-          destroyCharts();
-          var root = qs('#charts-root');
-          root.innerHTML = '';
-          if (!agg) {
-            root.innerHTML =
-              '<div class="panel"><p class="empty-charts">集計データがありません。</p></div>';
-            return;
-          }
-          var nSend = Number(agg.messageSentCount) || 0;
-          var nPhase = Number(agg.phaseChangeCount) || 0;
-          if (!nSend && !nPhase) {
-            root.innerHTML =
-              '<div class="panel"><p class="empty-charts">まだイベントがありません。フェーズ画面で送信済み／フェーズ変更を行うとここに溜まります。</p></div>';
-            return;
-          }
-
-          if (!nSend) {
-            var info = document.createElement('div');
-            info.className = 'panel';
-            info.innerHTML =
-              '<p class="empty-charts" style="margin:0">送信済み操作のログが0件のため、<strong>テンプレ・時間帯・曜日・DMパターン</strong>のグラフは出しません。フェーズ変更のグラフのみ表示します。</p>';
-            root.appendChild(info);
-          }
-
-          if (nSend) {
-          var grid1 = document.createElement('div');
-          grid1.className = 'chart-grid two';
-
-          var tpl = makePanel(
-            'テンプレ別（templateId）',
-            '送信済み操作の件数。どの LP テンプレ経由の案件で送っているかの偏りを見る用途です。',
-            'ch-template',
-            false,
-            true,
-          );
-          var labelsT = (agg.byTemplate || []).map(function (x) {
-            return x.key.length > 42 ? x.key.slice(0, 40) + '…' : x.key;
-          });
-          var dataT = (agg.byTemplate || []).map(function (x) {
-            return x.count;
-          });
-          setHBarHeight(tpl.panel, labelsT.length);
-          chartList.push(
-            new Chart(tpl.canvas.getContext('2d'), {
-              type: 'bar',
-              data: {
-                labels: labelsT,
-                datasets: [
-                  {
-                    label: '送信済み操作（件）',
-                    data: dataT,
-                    backgroundColor: barColors(labelsT.length),
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { beginAtZero: true, ticks: { precision: 0 } },
-                  y: { ticks: { autoSkip: false, font: { size: 11 } } },
-                },
-              },
-            }),
-          );
-          grid1.appendChild(tpl.panel);
-
-          var hr = makePanel(
-            '時間帯別（日本時間・時）',
-            '送信済み操作を押した時刻の「時」0–23 の分布。狙い目の時間帯の探索用です。',
-            'ch-hour',
-            false,
-            false,
-          );
-          var labelsH = (agg.byHourJst || []).map(function (x) {
-            return String(x.hour);
-          });
-          var dataH = (agg.byHourJst || []).map(function (x) {
-            return x.count;
-          });
-          chartList.push(
-            new Chart(hr.canvas.getContext('2d'), {
-              type: 'bar',
-              data: {
-                labels: labelsH,
-                datasets: [
-                  {
-                    label: '件数',
-                    data: dataH,
-                    backgroundColor: 'rgba(56, 189, 248, 0.75)',
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { title: { display: true, text: '時（Asia/Tokyo）' } },
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                },
-              },
-            }),
-          );
-          grid1.appendChild(hr.panel);
-          root.appendChild(grid1);
-
-          var grid2 = document.createElement('div');
-          grid2.className = 'chart-grid two';
-
-          var wd = makePanel(
-            '曜日別（日本時間）',
-            '月〜日の分布。週のどこに偏っているかをざっくり見る用途です。',
-            'ch-wd',
-            false,
-            false,
-          );
-          var labelsW = (agg.byWeekdayJst || []).map(function (x) {
-            return x.key;
-          });
-          var dataW = (agg.byWeekdayJst || []).map(function (x) {
-            return x.count;
-          });
-          chartList.push(
-            new Chart(wd.canvas.getContext('2d'), {
-              type: 'bar',
-              data: {
-                labels: labelsW,
-                datasets: [
-                  {
-                    label: '件数',
-                    data: dataW,
-                    backgroundColor: 'rgba(167, 139, 250, 0.78)',
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                },
-              },
-            }),
-          );
-          grid2.appendChild(wd.panel);
-
-          var dm = makePanel(
-            'DMパターン別（1–5）',
-            '送信済み操作時点で行に保存されていた outreachDmPattern の分布です。',
-            'ch-dm',
-            false,
-            false,
-          );
-          var labelsD = (agg.byDmPattern || []).map(function (x) {
-            return x.key;
-          });
-          var dataD = (agg.byDmPattern || []).map(function (x) {
-            return x.count;
-          });
-          chartList.push(
-            new Chart(dm.canvas.getContext('2d'), {
-              type: 'bar',
-              data: {
-                labels: labelsD,
-                datasets: [
-                  {
-                    label: '件数',
-                    data: dataD,
-                    backgroundColor: barColors(labelsD.length),
-                    borderWidth: 0,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                },
-              },
-            }),
-          );
-          grid2.appendChild(dm.panel);
-          root.appendChild(grid2);
-          }
-
-          if (nPhase > 0) {
-            var ph = makePanel(
-              'フェーズ変更の「移動先」',
-              '明示的なフェーズ変更イベントの、toPhase ごとの件数です。',
-              'ch-phase',
-              true,
-              true,
-            );
-            var labelsP = (agg.phaseChangeToPhase || []).map(function (x) {
-              return x.key.length > 36 ? x.key.slice(0, 34) + '…' : x.key;
-            });
-            var dataP = (agg.phaseChangeToPhase || []).map(function (x) {
-              return x.count;
-            });
-            setHBarHeight(ph.panel, labelsP.length);
-            var phWrap = document.createElement('div');
-            phWrap.className = 'chart-grid';
-            chartList.push(
-              new Chart(ph.canvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                  labels: labelsP,
-                  datasets: [
-                    {
-                      label: '件数',
-                      data: dataP,
-                      backgroundColor: 'rgba(52, 211, 153, 0.72)',
-                      borderWidth: 0,
-                    },
-                  ],
-                },
-                options: {
-                  indexAxis: 'y',
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: { beginAtZero: true, ticks: { precision: 0 } },
-                    y: { ticks: { font: { size: 11 } } },
-                  },
-                },
-              }),
-            );
-            phWrap.appendChild(ph.panel);
-            root.appendChild(phWrap);
-          }
         }
 
         function render(data) {
@@ -705,17 +565,16 @@
               '<span>全イベント: <strong>' +
               esc(data.summary.total) +
               '</strong></span>' +
-              '<span>送信済み: <strong>' +
+              '<span>送信ログ: <strong>' +
               esc(data.summary.messageSent) +
               '</strong></span>' +
               '<span>フェーズ変更: <strong>' +
               esc(data.summary.phaseChange) +
-              '</strong></span>' +
-              '<span>表の行数: <strong>' +
-              esc(data.summary.returned) +
               '</strong></span>';
           }
-          renderCharts(data.aggregates || null);
+          renderFunnel(data.funnel || null);
+          renderLost((data.funnel && data.funnel.phaseToLost) || []);
+          renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
           renderTable((data && data.events) || []);
         }
 
@@ -734,11 +593,10 @@
             .catch(function (e) {
               err.style.display = 'block';
               err.textContent = String(e.message || e);
-              destroyCharts();
-              qs('#charts-root').innerHTML =
-                '<div class="panel"><p class="empty-charts">読み込みに失敗しました。</p></div>';
-              qs('#tbody').innerHTML = '<tr><td colspan="8">—</td></tr>';
               qs('#summary').style.display = 'none';
+              qs('#funnel-cards').innerHTML = '';
+              qs('#lost-tbody').innerHTML = '';
+              qs('#drill-tbody').innerHTML = '<tr><td colspan="8">読み込み失敗</td></tr>';
             });
         }
 

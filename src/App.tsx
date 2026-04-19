@@ -22,7 +22,7 @@ const OPS_LINKS: { href: string; title: string; desc: string }[] = [
   {
     href: '/admin/outreach-analytics.html',
     title: '送信・フェーズ分析',
-    desc: 'テンプレ別・時間帯・曜日などの棒グラフ集計（期間は補助フィルタ）。',
+    desc: '送信済み相当→ヒアリングのさかのぼりと、フェーズ間ファネル・失注率。',
   },
   {
     href: '/admin/outreach-memo-leads.html?v=memo1',

@@ -76,6 +76,7 @@ import {
 } from './outreachDashboardMutate.js';
 import { buildOutreachAnalyticsEventsFromPatch } from './outreachAnalyticsLog.js';
 import { computeOutreachAnalyticsAggregates } from './outreachAnalyticsAggregate.js';
+import { computeOutreachFunnelAndDrilldown } from './outreachAnalyticsFunnel.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
@@ -2208,7 +2209,9 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
       webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
       hpbAccess: access,
       hpbBody: sourceMemo.slice(0, 11000),
-      onOutreachBoard: false,
+      addressMapUrl: '',
+      instagramUrl: '',
+      onOutreachBoard: true,
       createdAt: now,
       updatedAt: now,
     });
@@ -2320,6 +2323,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
   const sends = list.filter((e) => e.type === 'message_sent').length;
   const phases = list.filter((e) => e.type === 'phase_change').length;
   const aggregates = computeOutreachAnalyticsAggregates(list);
+  const funnel = computeOutreachFunnelAndDrilldown(list);
   const cap = 2000;
   const tail = list.length > cap ? list.slice(-cap) : list;
   const events = tail.slice().reverse();
@@ -2333,6 +2337,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     },
     summary: { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length },
     aggregates,
+    funnel,
     events,
   });
 });
@@ -2364,7 +2369,9 @@ app.post('/api/beauty-outreach/memo-leads', async (req, res) => {
     id: `ml-${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`,
     shopName,
     memo,
-    onOutreachBoard: false,
+    addressMapUrl: String(req.body?.addressMapUrl || '').trim().slice(0, 2000),
+    instagramUrl: String(req.body?.instagramUrl || '').trim().slice(0, 2000),
+    onOutreachBoard: true,
     createdAt: now,
     updatedAt: now,
   };
@@ -2381,6 +2388,12 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   if (req.body?.shopName !== undefined) list[i].shopName = String(req.body.shopName || '').trim().slice(0, 200);
   if (req.body?.memo !== undefined) list[i].memo = String(req.body.memo || '').trim().slice(0, 12000);
+  if (req.body?.addressMapUrl !== undefined) {
+    list[i].addressMapUrl = String(req.body.addressMapUrl || '').trim().slice(0, 2000);
+  }
+  if (req.body?.instagramUrl !== undefined) {
+    list[i].instagramUrl = String(req.body.instagramUrl || '').trim().slice(0, 2000);
+  }
   if (req.body?.onOutreachBoard !== undefined) {
     list[i].onOutreachBoard = !!(req.body.onOutreachBoard === true || req.body.onOutreachBoard === 'true');
   }
@@ -2459,9 +2472,6 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
   const idx = list.findIndex((x) => x && x.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const memo = list[idx];
-  if (!memo.onOutreachBoard) {
-    return res.status(400).json({ error: 'メモ一覧で「送付一覧に表示」をオンにしてからフェーズを変更してください' });
-  }
   const shopName = String(memo.shopName || '').trim().slice(0, 200);
   if (!shopName) {
     return res.status(400).json({ error: '店名が空のメモは昇格できません' });
