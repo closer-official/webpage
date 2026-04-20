@@ -394,6 +394,31 @@
           return String(p) + '%';
         }
 
+        /** ISO を日本時間「2026-04-19-20:46」表記に（秒・T・Z なし） */
+        function fmtIsoJstCompact(raw) {
+          var s = String(raw || '').trim();
+          if (!s) return '';
+          var d = new Date(s);
+          if (Number.isNaN(d.getTime())) {
+            return s.replace(/\.\d{3}Z?$/i, '').replace('T', '-').replace(/Z$/i, '').slice(0, 16);
+          }
+          try {
+            return new Intl.DateTimeFormat('sv-SE', {
+              timeZone: 'Asia/Tokyo',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              hourCycle: 'h23',
+            })
+              .format(d)
+              .replace(' ', '-');
+          } catch (e) {
+            return s.slice(0, 16).replace('T', '-');
+          }
+        }
+
         function funnelCard(title, block, denCaption) {
           if (!block) return '';
           var c = block.count != null ? block.count : 0;
