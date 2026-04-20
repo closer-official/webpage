@@ -274,8 +274,8 @@
                 <th>templateId</th>
                 <th>送信（曜・JST）</th>
                 <th>送信（時・JST）</th>
-                <th>送信ログ時刻（UTC表記）</th>
-                <th>ヒアリング遷移時刻</th>
+                <th>送信ログ時刻（日本時間）</th>
+                <th>ヒアリング遷移時刻（日本時間）</th>
                 <th>保存先</th>
               </tr>
             </thead>
@@ -481,7 +481,7 @@
               var hourStr = typeof h === 'number' && h >= 0 && h <= 23 ? String(h) + ' 時' : '—';
               var wd = r.weekdayJst ? esc(r.weekdayJst) : '—';
               var tpl = r.templateId ? esc(r.templateId) : '—';
-              var sentAt = r.sentAt ? esc(r.sentAt) : '—';
+              var sentAt = r.sentAt ? esc(fmtIsoJstCompact(r.sentAt)) : '—';
               return (
                 '<tr>' +
                 '<td>' +
@@ -504,7 +504,7 @@
                 sentAt +
                 '</td>' +
                 '<td class="mono">' +
-                esc(r.heardAt) +
+                (r.heardAt ? esc(fmtIsoJstCompact(r.heardAt)) : '—') +
                 '</td>' +
                 '<td class="mono">' +
                 esc(r.storagePool || '') +
@@ -535,7 +535,7 @@
               return (
                 '<tr>' +
                 '<td class="mono">' +
-                esc(e.at) +
+                esc(fmtIsoJstCompact(e.at)) +
                 '</td>' +
                 '<td>' +
                 pill +

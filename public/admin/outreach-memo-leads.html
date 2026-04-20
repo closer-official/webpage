@@ -487,12 +487,14 @@
           return fetch(path, Object.assign({ credentials: 'include' }, opts || {}));
         }
 
-        /** API の ISO 時刻（UTC 等）を日本標準時で YYYY-MM-DD HH:mm:ss 表示 */
+        /** API の ISO 時刻を日本標準時で「2026-04-19-20:46」形式（秒なし） */
         function formatIsoAsTokyo(raw) {
           var s = String(raw || '').trim();
           if (!s) return '';
           var d = new Date(s);
-          if (Number.isNaN(d.getTime())) return s.slice(0, 19).replace('T', ' ');
+          if (Number.isNaN(d.getTime())) {
+            return s.replace(/\.\d{3}Z?$/i, '').replace('T', '-').replace(/Z$/i, '').slice(0, 16);
+          }
           try {
             return new Intl.DateTimeFormat('sv-SE', {
               timeZone: 'Asia/Tokyo',
@@ -501,11 +503,12 @@
               day: '2-digit',
               hour: '2-digit',
               minute: '2-digit',
-              second: '2-digit',
               hourCycle: 'h23',
-            }).format(d);
+            })
+              .format(d)
+              .replace(' ', '-');
           } catch (e) {
-            return s.slice(0, 19).replace('T', ' ');
+            return s.slice(0, 16).replace('T', '-');
           }
         }
 
