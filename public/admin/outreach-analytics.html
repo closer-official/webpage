@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>送付・フェーズ分析 | Closer</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       :root {
         --bg: #0c1220;
@@ -196,32 +195,48 @@
         color: #fdba74;
         font-size: 0.75rem;
       }
-      .jp-map {
-        width: 100%;
-        min-height: 420px;
+      .area-viz-grid {
+        display: grid;
+        gap: 10px;
+      }
+      .area-viz-row {
         border: 1px solid var(--border);
         border-radius: 10px;
-        overflow: hidden;
-        background: #0b1324;
+        padding: 9px 11px;
+        background: rgba(12, 22, 40, 0.55);
       }
-      .jp-map-legend {
+      .area-viz-head {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px 10px;
-        margin-top: 10px;
-        font-size: 0.76rem;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        margin-bottom: 6px;
+      }
+      .area-viz-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+      .area-viz-meta {
+        font-size: 0.75rem;
         color: var(--muted);
       }
-      .jp-map-legend-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+      .area-bar {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: #0a162d;
+        overflow: hidden;
+        border: 1px solid #22324d;
       }
-      .jp-map-legend-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+      .area-bar > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #38bdf8, #22d3ee);
+      }
+      .area-rate {
+        margin-top: 6px;
+        font-size: 0.78rem;
+        color: #e0f2fe;
       }
     </style>
   </head>
@@ -280,12 +295,12 @@
       <div class="panel summary" id="summary" style="display: none"></div>
 
       <div class="panel">
-        <h2>日本地図ピン（住所・フェーズ色）</h2>
+        <h2>エリア別 送信数・進行率</h2>
         <p class="hint">
-          店名と住所を使って都道府県の代表座標へピンを表示します（住所に都道府県が無い行は除外）。色は現在フェーズ。
+          住所の都道府県ごとに、送信数（message_sent）と進行率（送信済み相当→ヒアリング）を図式化しています。進行率の分母は
+          <code>送信数 + ヒアリング遷移数</code> です。
         </p>
-        <div id="jp-map" class="jp-map" aria-label="日本地図ピン"></div>
-        <div id="jp-map-legend" class="jp-map-legend"></div>
+        <div id="area-viz" class="area-viz-grid"></div>
       </div>
 
       <div class="panel" id="funnel-panel">
@@ -369,7 +384,6 @@
         </div>
       </details>
     </main>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
       (function () {
         var PHASE_JA = {
@@ -385,72 +399,10 @@
         };
 
         var api = '';
-        var jpMap = null;
-        var jpMarkerLayer = null;
         try {
           api = new URLSearchParams(location.search).get('api') || '';
         } catch (e) {}
         if (!api) api = '';
-        var PHASE_COLOR = {
-          pre_contact: '#93c5fd',
-          first_contact: '#60a5fa',
-          message_sent: '#22d3ee',
-          no_outreach_channel: '#a3a3a3',
-          hearing: '#f59e0b',
-          proposal: '#a78bfa',
-          contracted: '#22c55e',
-          payment_confirmed: '#16a34a',
-          lost: '#ef4444',
-        };
-        var PREFECTURE_CENTER = {
-          北海道: [43.06417, 141.34694],
-          青森県: [40.82444, 140.74],
-          岩手県: [39.70361, 141.1525],
-          宮城県: [38.26889, 140.87194],
-          秋田県: [39.71861, 140.1025],
-          山形県: [38.24056, 140.36333],
-          福島県: [37.75, 140.46778],
-          茨城県: [36.34139, 140.44667],
-          栃木県: [36.56583, 139.88361],
-          群馬県: [36.39111, 139.06083],
-          埼玉県: [35.85694, 139.64889],
-          千葉県: [35.60472, 140.12333],
-          東京都: [35.68944, 139.69167],
-          神奈川県: [35.44778, 139.6425],
-          新潟県: [37.90222, 139.02361],
-          富山県: [36.69528, 137.21139],
-          石川県: [36.59444, 136.62556],
-          福井県: [36.06528, 136.22194],
-          山梨県: [35.66389, 138.56833],
-          長野県: [36.65139, 138.18111],
-          岐阜県: [35.39111, 136.72222],
-          静岡県: [34.97694, 138.38306],
-          愛知県: [35.18028, 136.90667],
-          三重県: [34.73028, 136.50861],
-          滋賀県: [35.00444, 135.86833],
-          京都府: [35.02139, 135.75556],
-          大阪府: [34.68639, 135.52],
-          兵庫県: [34.69139, 135.18306],
-          奈良県: [34.68528, 135.83278],
-          和歌山県: [34.22611, 135.1675],
-          鳥取県: [35.50361, 134.23833],
-          島根県: [35.47222, 133.05056],
-          岡山県: [34.66167, 133.935],
-          広島県: [34.39639, 132.45944],
-          山口県: [34.18583, 131.47139],
-          徳島県: [34.06583, 134.55944],
-          香川県: [34.34028, 134.04333],
-          愛媛県: [33.84167, 132.76611],
-          高知県: [33.55972, 133.53111],
-          福岡県: [33.60639, 130.41806],
-          佐賀県: [33.24944, 130.29889],
-          長崎県: [32.74472, 129.87361],
-          熊本県: [32.78972, 130.74167],
-          大分県: [33.23806, 131.6125],
-          宮崎県: [31.91111, 131.42389],
-          鹿児島県: [31.56028, 130.55806],
-          沖縄県: [26.2125, 127.68111],
-        };
 
         function qs(sel) {
           return document.querySelector(sel);
@@ -523,94 +475,66 @@
           var m = s.match(/(東京都|北海道|(?:京都|大阪)府|.{2,3}県)/);
           return m ? m[1] : '';
         }
-        function phaseLabel(phase) {
-          return PHASE_JA[phase] || phase || '未設定';
-        }
-        function ensureJpMap() {
-          if (!window.L) return null;
-          var host = qs('#jp-map');
-          if (!host) return null;
-          if (!jpMap) {
-            jpMap = L.map(host, { zoomControl: true, scrollWheelZoom: false }).setView([36.2, 138.3], 5);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '&copy; OpenStreetMap contributors',
-              minZoom: 4,
-              maxZoom: 10,
-            }).addTo(jpMap);
-            jpMarkerLayer = L.layerGroup().addTo(jpMap);
-          }
-          return jpMap;
-        }
-        function renderMapLegend(phaseCounts) {
-          var wrap = qs('#jp-map-legend');
-          if (!wrap) return;
-          var entries = Object.entries(phaseCounts || {}).filter(function (x) {
-            return x[1] > 0;
+        function renderAreaViz(data) {
+          var host = qs('#area-viz');
+          if (!host) return;
+          var events = Array.isArray(data && data.events) ? data.events : [];
+          var drill = Array.isArray(data?.funnel?.sentToHearingDrilldown) ? data.funnel.sentToHearingDrilldown : [];
+          var byPref = {};
+
+          events.forEach(function (e) {
+            if (!e || e.type !== 'message_sent') return;
+            var pref = extractPrefecture(e.address);
+            if (!pref) return;
+            if (!byPref[pref]) byPref[pref] = { pref: pref, sent: 0, hearing: 0 };
+            byPref[pref].sent += 1;
           });
-          if (!entries.length) {
-            wrap.innerHTML = '<span class="hint">表示できる住所データがありません。</span>';
+          drill.forEach(function (r) {
+            var pref = extractPrefecture(r.address);
+            if (!pref) return;
+            if (!byPref[pref]) byPref[pref] = { pref: pref, sent: 0, hearing: 0 };
+            byPref[pref].hearing += 1;
+          });
+
+          var rows = Object.values(byPref);
+          if (!rows.length) {
+            host.innerHTML = '<p class="hint" style="margin:0">住所つきデータが不足しているため、エリア図を表示できません。</p>';
             return;
           }
-          wrap.innerHTML = entries
-            .sort(function (a, b) {
-              return b[1] - a[1];
-            })
-            .map(function (x) {
-              var phase = x[0];
-              var count = x[1];
-              var color = PHASE_COLOR[phase] || '#94a3b8';
+          rows.forEach(function (r) {
+            var den = r.sent + r.hearing;
+            r.progressPct = den ? Math.round((10000 * r.hearing) / den) / 100 : null;
+          });
+          rows.sort(function (a, b) {
+            return b.sent - a.sent || b.hearing - a.hearing || a.pref.localeCompare(b.pref, 'ja');
+          });
+          var maxSent = rows.reduce(function (m, r) {
+            return Math.max(m, r.sent);
+          }, 0);
+          var top = rows.slice(0, 15);
+          host.innerHTML = top
+            .map(function (r) {
+              var w = maxSent > 0 ? Math.max(4, Math.round((100 * r.sent) / maxSent)) : 0;
+              var pctText = r.progressPct == null ? '—' : String(r.progressPct) + '%';
               return (
-                '<span class="jp-map-legend-item">' +
-                '<span class="jp-map-legend-dot" style="background:' +
-                esc(color) +
-                '"></span>' +
-                esc(phaseLabel(phase)) +
-                ' ' +
-                esc(count) +
-                '件</span>'
+                '<div class="area-viz-row">' +
+                '<div class="area-viz-head"><div class="area-viz-name">' +
+                esc(r.pref) +
+                '</div><div class="area-viz-meta">送信 ' +
+                esc(r.sent) +
+                '件 / ヒアリング遷移 ' +
+                esc(r.hearing) +
+                '件</div></div>' +
+                '<div class="area-bar"><span style="width:' +
+                esc(w) +
+                '%"></span></div>' +
+                '<div class="area-rate">進行率（送信→ヒアリング）: <strong>' +
+                esc(pctText) +
+                '</strong></div>' +
+                '</div>'
               );
             })
             .join('');
-        }
-        function renderJapanPins(data) {
-          var map = ensureJpMap();
-          if (!map || !jpMarkerLayer) return;
-          jpMarkerLayer.clearLayers();
-          var pins = Array.isArray(data && data.mapPins) ? data.mapPins : [];
-          var bounds = [];
-          var phaseCounts = {};
-          pins.forEach(function (p) {
-            var pref = extractPrefecture(p.address);
-            var coord = PREFECTURE_CENTER[pref];
-            if (!coord) return;
-            var phase = String(p.phase || '').trim();
-            var color = PHASE_COLOR[phase] || '#94a3b8';
-            phaseCounts[phase || ''] = (phaseCounts[phase || ''] || 0) + 1;
-            var marker = L.circleMarker(coord, {
-              radius: 7,
-              color: color,
-              fillColor: color,
-              fillOpacity: 0.85,
-              weight: 1,
-            });
-            marker.bindPopup(
-              '<strong>' +
-                esc(p.shopName || '（店名なし）') +
-                '</strong><br>' +
-                esc(p.address || '') +
-                '<br><span class="mono">' +
-                esc(phaseLabel(phase)) +
-                '</span>',
-            );
-            marker.addTo(jpMarkerLayer);
-            bounds.push(coord);
-          });
-          renderMapLegend(phaseCounts);
-          if (bounds.length > 0) {
-            map.fitBounds(bounds, { padding: [24, 24], maxZoom: 8 });
-          } else {
-            map.setView([36.2, 138.3], 5);
-          }
         }
 
         function funnelCard(title, block, denCaption) {
@@ -801,7 +725,7 @@
           renderFunnel(data.funnel || null);
           renderLost((data.funnel && data.funnel.phaseToLost) || []);
           renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
-          renderJapanPins(data || {});
+          renderAreaViz(data || {});
           renderTable((data && data.events) || []);
         }
 
