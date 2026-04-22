@@ -80,6 +80,7 @@ import {
   computeOutreachFunnelAndDrilldown,
   computeSnapshotPhaseCounts,
   loadOutreachDashboardRowsForAnalytics,
+  normalizeOutreachPhase,
 } from './outreachAnalyticsFunnel.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
@@ -2333,11 +2334,67 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     segmentBeauty: segment,
     templateId,
   });
+  const rowById = new Map(
+    snapshotRows
+      .filter((r) => r && r.id)
+      .map((r) => [String(r.id), r]),
+  );
+  const pickShopName = (row) =>
+    String(row?.shopName || row?.researched?.name || row?.content?.siteName || '').trim().slice(0, 200);
+  const pickAddress = (row) =>
+    String(
+      row?.address ||
+        row?.researched?.address ||
+        row?.content?.footerAddress ||
+        row?.content?.address ||
+        row?.content?.beautyStandaloneSalon?.address ||
+        '',
+    )
+      .trim()
+      .slice(0, 240);
   const snapCounts = computeSnapshotPhaseCounts(snapshotRows);
   const funnel = computeOutreachFunnelAndDrilldown(list, { snapCounts });
+  if (Array.isArray(funnel?.sentToHearingDrilldown)) {
+    funnel.sentToHearingDrilldown = funnel.sentToHearingDrilldown.map((r) => {
+      const row = rowById.get(String(r?.itemId || '').trim());
+      const shopName = String(r?.shopName || '').trim() || pickShopName(row);
+      return {
+        ...r,
+        shopName,
+        address: String(r?.address || '').trim() || pickAddress(row),
+      };
+    });
+  }
+  const mapPins = snapshotRows
+    .map((row) => {
+      const itemId = String(row?.id || '').trim();
+      if (!itemId) return null;
+      const shopName = pickShopName(row);
+      const address = pickAddress(row);
+      if (!shopName || !address) return null;
+      return {
+        itemId,
+        shopName,
+        address,
+        phase: normalizeOutreachPhase(row?.outreachPhase) || '',
+        storagePool: row?.storagePool || '',
+      };
+    })
+    .filter(Boolean);
   const cap = 2000;
   const tail = list.length > cap ? list.slice(-cap) : list;
-  const events = tail.slice().reverse();
+  const events = tail
+    .slice()
+    .reverse()
+    .map((e) => {
+      const row = rowById.get(String(e?.itemId || '').trim());
+      const shopName = String(e?.shopName || '').trim() || pickShopName(row);
+      return {
+        ...e,
+        shopName,
+        address: String(e?.address || '').trim() || pickAddress(row),
+      };
+    });
   res.json({
     filters: {
       from: from || null,
@@ -2349,6 +2406,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     summary: { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length },
     aggregates,
     funnel,
+    mapPins,
     events,
   });
 });

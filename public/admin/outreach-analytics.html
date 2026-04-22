@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>送付・フェーズ分析 | Closer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       :root {
         --bg: #0c1220;
@@ -195,6 +196,33 @@
         color: #fdba74;
         font-size: 0.75rem;
       }
+      .jp-map {
+        width: 100%;
+        min-height: 420px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: #0b1324;
+      }
+      .jp-map-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        margin-top: 10px;
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
+      .jp-map-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .jp-map-legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
     </style>
   </head>
   <body>
@@ -250,6 +278,15 @@
         </div>
       </div>
       <div class="panel summary" id="summary" style="display: none"></div>
+
+      <div class="panel">
+        <h2>日本地図ピン（住所・フェーズ色）</h2>
+        <p class="hint">
+          店名と住所を使って都道府県の代表座標へピンを表示します（住所に都道府県が無い行は除外）。色は現在フェーズ。
+        </p>
+        <div id="jp-map" class="jp-map" aria-label="日本地図ピン"></div>
+        <div id="jp-map-legend" class="jp-map-legend"></div>
+      </div>
 
       <div class="panel" id="funnel-panel">
         <h2>ファネル（件数・割合）</h2>
@@ -332,6 +369,7 @@
         </div>
       </details>
     </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
       (function () {
         var PHASE_JA = {
@@ -347,10 +385,72 @@
         };
 
         var api = '';
+        var jpMap = null;
+        var jpMarkerLayer = null;
         try {
           api = new URLSearchParams(location.search).get('api') || '';
         } catch (e) {}
         if (!api) api = '';
+        var PHASE_COLOR = {
+          pre_contact: '#93c5fd',
+          first_contact: '#60a5fa',
+          message_sent: '#22d3ee',
+          no_outreach_channel: '#a3a3a3',
+          hearing: '#f59e0b',
+          proposal: '#a78bfa',
+          contracted: '#22c55e',
+          payment_confirmed: '#16a34a',
+          lost: '#ef4444',
+        };
+        var PREFECTURE_CENTER = {
+          北海道: [43.06417, 141.34694],
+          青森県: [40.82444, 140.74],
+          岩手県: [39.70361, 141.1525],
+          宮城県: [38.26889, 140.87194],
+          秋田県: [39.71861, 140.1025],
+          山形県: [38.24056, 140.36333],
+          福島県: [37.75, 140.46778],
+          茨城県: [36.34139, 140.44667],
+          栃木県: [36.56583, 139.88361],
+          群馬県: [36.39111, 139.06083],
+          埼玉県: [35.85694, 139.64889],
+          千葉県: [35.60472, 140.12333],
+          東京都: [35.68944, 139.69167],
+          神奈川県: [35.44778, 139.6425],
+          新潟県: [37.90222, 139.02361],
+          富山県: [36.69528, 137.21139],
+          石川県: [36.59444, 136.62556],
+          福井県: [36.06528, 136.22194],
+          山梨県: [35.66389, 138.56833],
+          長野県: [36.65139, 138.18111],
+          岐阜県: [35.39111, 136.72222],
+          静岡県: [34.97694, 138.38306],
+          愛知県: [35.18028, 136.90667],
+          三重県: [34.73028, 136.50861],
+          滋賀県: [35.00444, 135.86833],
+          京都府: [35.02139, 135.75556],
+          大阪府: [34.68639, 135.52],
+          兵庫県: [34.69139, 135.18306],
+          奈良県: [34.68528, 135.83278],
+          和歌山県: [34.22611, 135.1675],
+          鳥取県: [35.50361, 134.23833],
+          島根県: [35.47222, 133.05056],
+          岡山県: [34.66167, 133.935],
+          広島県: [34.39639, 132.45944],
+          山口県: [34.18583, 131.47139],
+          徳島県: [34.06583, 134.55944],
+          香川県: [34.34028, 134.04333],
+          愛媛県: [33.84167, 132.76611],
+          高知県: [33.55972, 133.53111],
+          福岡県: [33.60639, 130.41806],
+          佐賀県: [33.24944, 130.29889],
+          長崎県: [32.74472, 129.87361],
+          熊本県: [32.78972, 130.74167],
+          大分県: [33.23806, 131.6125],
+          宮崎県: [31.91111, 131.42389],
+          鹿児島県: [31.56028, 130.55806],
+          沖縄県: [26.2125, 127.68111],
+        };
 
         function qs(sel) {
           return document.querySelector(sel);
@@ -416,6 +516,100 @@
               .replace(' ', '-');
           } catch (e) {
             return s.slice(0, 16).replace('T', '-');
+          }
+        }
+        function extractPrefecture(address) {
+          var s = String(address || '');
+          var m = s.match(/(東京都|北海道|(?:京都|大阪)府|.{2,3}県)/);
+          return m ? m[1] : '';
+        }
+        function phaseLabel(phase) {
+          return PHASE_JA[phase] || phase || '未設定';
+        }
+        function ensureJpMap() {
+          if (!window.L) return null;
+          var host = qs('#jp-map');
+          if (!host) return null;
+          if (!jpMap) {
+            jpMap = L.map(host, { zoomControl: true, scrollWheelZoom: false }).setView([36.2, 138.3], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors',
+              minZoom: 4,
+              maxZoom: 10,
+            }).addTo(jpMap);
+            jpMarkerLayer = L.layerGroup().addTo(jpMap);
+          }
+          return jpMap;
+        }
+        function renderMapLegend(phaseCounts) {
+          var wrap = qs('#jp-map-legend');
+          if (!wrap) return;
+          var entries = Object.entries(phaseCounts || {}).filter(function (x) {
+            return x[1] > 0;
+          });
+          if (!entries.length) {
+            wrap.innerHTML = '<span class="hint">表示できる住所データがありません。</span>';
+            return;
+          }
+          wrap.innerHTML = entries
+            .sort(function (a, b) {
+              return b[1] - a[1];
+            })
+            .map(function (x) {
+              var phase = x[0];
+              var count = x[1];
+              var color = PHASE_COLOR[phase] || '#94a3b8';
+              return (
+                '<span class="jp-map-legend-item">' +
+                '<span class="jp-map-legend-dot" style="background:' +
+                esc(color) +
+                '"></span>' +
+                esc(phaseLabel(phase)) +
+                ' ' +
+                esc(count) +
+                '件</span>'
+              );
+            })
+            .join('');
+        }
+        function renderJapanPins(data) {
+          var map = ensureJpMap();
+          if (!map || !jpMarkerLayer) return;
+          jpMarkerLayer.clearLayers();
+          var pins = Array.isArray(data && data.mapPins) ? data.mapPins : [];
+          var bounds = [];
+          var phaseCounts = {};
+          pins.forEach(function (p) {
+            var pref = extractPrefecture(p.address);
+            var coord = PREFECTURE_CENTER[pref];
+            if (!coord) return;
+            var phase = String(p.phase || '').trim();
+            var color = PHASE_COLOR[phase] || '#94a3b8';
+            phaseCounts[phase || ''] = (phaseCounts[phase || ''] || 0) + 1;
+            var marker = L.circleMarker(coord, {
+              radius: 7,
+              color: color,
+              fillColor: color,
+              fillOpacity: 0.85,
+              weight: 1,
+            });
+            marker.bindPopup(
+              '<strong>' +
+                esc(p.shopName || '（店名なし）') +
+                '</strong><br>' +
+                esc(p.address || '') +
+                '<br><span class="mono">' +
+                esc(phaseLabel(phase)) +
+                '</span>',
+            );
+            marker.addTo(jpMarkerLayer);
+            bounds.push(coord);
+          });
+          renderMapLegend(phaseCounts);
+          if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [24, 24], maxZoom: 8 });
+          } else {
+            map.setView([36.2, 138.3], 5);
           }
         }
 
@@ -607,6 +801,7 @@
           renderFunnel(data.funnel || null);
           renderLost((data.funnel && data.funnel.phaseToLost) || []);
           renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
+          renderJapanPins(data || {});
           renderTable((data && data.events) || []);
         }
 
