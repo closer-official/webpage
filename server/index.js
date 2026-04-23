@@ -80,7 +80,6 @@ import {
   computeOutreachFunnelAndDrilldown,
   computeSnapshotPhaseCounts,
   loadOutreachDashboardRowsForAnalytics,
-  normalizeOutreachPhase,
 } from './outreachAnalyticsFunnel.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
@@ -2326,19 +2325,18 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
   if (templateId) {
     list = list.filter((e) => e && String(e.templateId || '') === templateId);
   }
-  const sends = list.filter((e) => e.type === 'message_sent').length;
-  const phases = list.filter((e) => e.type === 'phase_change').length;
-  const aggregates = computeOutreachAnalyticsAggregates(list);
+  const includeSummary = String(req.query.includeSummary || '1') !== '0';
+  const includeEvents = String(req.query.includeEvents || '1') !== '0';
+  const eventOffset = Math.max(0, Number.parseInt(String(req.query.eventOffset || '0'), 10) || 0);
+  const eventLimitRaw = Number.parseInt(String(req.query.eventLimit || '100'), 10) || 100;
+  const eventLimit = Math.max(1, Math.min(eventLimitRaw, 500));
+
   const snapshotRows = await loadOutreachDashboardRowsForAnalytics(store, {
     storagePool,
     segmentBeauty: segment,
     templateId,
   });
-  const rowById = new Map(
-    snapshotRows
-      .filter((r) => r && r.id)
-      .map((r) => [String(r.id), r]),
-  );
+  const rowById = new Map(snapshotRows.filter((r) => r && r.id).map((r) => [String(r.id), r]));
   const pickShopName = (row) =>
     String(row?.shopName || row?.researched?.name || row?.content?.siteName || '').trim().slice(0, 200);
   const pickAddress = (row) =>
@@ -2352,41 +2350,12 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     )
       .trim()
       .slice(0, 240);
-  const snapCounts = computeSnapshotPhaseCounts(snapshotRows);
-  const funnel = computeOutreachFunnelAndDrilldown(list, { snapCounts });
-  if (Array.isArray(funnel?.sentToHearingDrilldown)) {
-    funnel.sentToHearingDrilldown = funnel.sentToHearingDrilldown.map((r) => {
-      const row = rowById.get(String(r?.itemId || '').trim());
-      const shopName = String(r?.shopName || '').trim() || pickShopName(row);
-      return {
-        ...r,
-        shopName,
-        address: String(r?.address || '').trim() || pickAddress(row),
-      };
-    });
-  }
-  const mapPins = snapshotRows
-    .map((row) => {
-      const itemId = String(row?.id || '').trim();
-      if (!itemId) return null;
-      const shopName = pickShopName(row);
-      const address = pickAddress(row);
-      if (!shopName || !address) return null;
-      return {
-        itemId,
-        shopName,
-        address,
-        phase: normalizeOutreachPhase(row?.outreachPhase) || '',
-        storagePool: row?.storagePool || '',
-      };
-    })
-    .filter(Boolean);
-  const cap = 2000;
-  const tail = list.length > cap ? list.slice(-cap) : list;
-  const events = tail
-    .slice()
-    .reverse()
-    .map((e) => {
+
+  /** ページング対象（新しい順） */
+  const ordered = list.slice().reverse();
+  let events = [];
+  if (includeEvents) {
+    events = ordered.slice(eventOffset, eventOffset + eventLimit).map((e) => {
       const row = rowById.get(String(e?.itemId || '').trim());
       const shopName = String(e?.shopName || '').trim() || pickShopName(row);
       return {
@@ -2395,6 +2364,58 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
         address: String(e?.address || '').trim() || pickAddress(row),
       };
     });
+  }
+
+  /** 軽量サマリ（必要時のみ） */
+  let summary = null;
+  let aggregates = null;
+  let funnel = null;
+  let areaStats = [];
+  if (includeSummary) {
+    const sends = list.filter((e) => e.type === 'message_sent').length;
+    const phases = list.filter((e) => e.type === 'phase_change').length;
+    aggregates = computeOutreachAnalyticsAggregates(list);
+    const snapCounts = computeSnapshotPhaseCounts(snapshotRows);
+    funnel = computeOutreachFunnelAndDrilldown(list, { snapCounts });
+    if (Array.isArray(funnel?.sentToHearingDrilldown)) {
+      funnel.sentToHearingDrilldown = funnel.sentToHearingDrilldown.map((r) => {
+        const row = rowById.get(String(r?.itemId || '').trim());
+        const shopName = String(r?.shopName || '').trim() || pickShopName(row);
+        return {
+          ...r,
+          shopName,
+          address: String(r?.address || '').trim() || pickAddress(row),
+        };
+      });
+    }
+    const prefFromAddr = (addr) => {
+      const m = String(addr || '').match(/(東京都|北海道|(?:京都|大阪)府|.{2,3}県)/);
+      return m ? m[1] : '';
+    };
+    const byPref = new Map();
+    for (const e of list) {
+      if (!e || e.type !== 'message_sent') continue;
+      const row = rowById.get(String(e.itemId || '').trim());
+      const pref = prefFromAddr(String(e.address || '').trim() || pickAddress(row));
+      if (!pref) continue;
+      if (!byPref.has(pref)) byPref.set(pref, { pref, sent: 0, hearing: 0 });
+      byPref.get(pref).sent += 1;
+    }
+    for (const r of funnel?.sentToHearingDrilldown || []) {
+      const pref = prefFromAddr(r?.address);
+      if (!pref) continue;
+      if (!byPref.has(pref)) byPref.set(pref, { pref, sent: 0, hearing: 0 });
+      byPref.get(pref).hearing += 1;
+    }
+    areaStats = [...byPref.values()]
+      .map((x) => {
+        const denom = x.sent + x.hearing;
+        return { ...x, progressPct: denom ? Math.round((10000 * x.hearing) / denom) / 100 : null };
+      })
+      .sort((a, b) => b.sent - a.sent || b.hearing - a.hearing || a.pref.localeCompare(b.pref, 'ja'));
+    summary = { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length };
+  }
+
   res.json({
     filters: {
       from: from || null,
@@ -2403,10 +2424,18 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       segmentBeauty: segment || null,
       templateId: templateId || null,
     },
-    summary: { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length },
+    summary,
     aggregates,
     funnel,
-    mapPins,
+    areaStats,
+    eventsPage: includeEvents
+      ? {
+          offset: eventOffset,
+          limit: eventLimit,
+          total: ordered.length,
+          nextOffset: eventOffset + events.length < ordered.length ? eventOffset + events.length : null,
+        }
+      : null,
     events,
   });
 });

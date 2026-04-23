@@ -191,6 +191,9 @@
         color: var(--muted);
         font-size: 0.86rem;
       }
+      .more-row {
+        margin-top: 10px;
+      }
       .pill-warn {
         color: #fdba74;
         font-size: 0.75rem;
@@ -381,6 +384,9 @@
               </tr>
             </tbody>
           </table>
+          <div class="more-row">
+            <button type="button" class="btn" id="btn-more-events" style="display: none">生ログをさらに読み込む</button>
+          </div>
         </div>
       </details>
     </main>
@@ -399,6 +405,9 @@
         };
 
         var api = '';
+        var eventsRows = [];
+        var eventsNextOffset = 0;
+        var isLoading = false;
         try {
           api = new URLSearchParams(location.search).get('api') || '';
         } catch (e) {}
@@ -412,7 +421,7 @@
           return fetch(url, Object.assign({ credentials: 'include' }, opts || {}));
         }
 
-        function buildQuery() {
+        function buildQueryCore() {
           var p = [];
           var fromEl = qs('#f-from');
           var toEl = qs('#f-to');
@@ -424,6 +433,16 @@
           if (pool) p.push('storagePool=' + encodeURIComponent(pool));
           if (seg) p.push('segmentBeauty=' + encodeURIComponent(seg));
           if (tpl) p.push('templateId=' + encodeURIComponent(tpl));
+          return p.join('&');
+        }
+
+        function buildQuery(extraPairs) {
+          var p = [];
+          var base = buildQueryCore();
+          if (base) p.push(base);
+          (extraPairs || []).forEach(function (pair) {
+            if (pair) p.push(pair);
+          });
           return p.length ? '?' + p.join('&') : '';
         }
 
@@ -478,36 +497,11 @@
         function renderAreaViz(data) {
           var host = qs('#area-viz');
           if (!host) return;
-          var events = Array.isArray(data && data.events) ? data.events : [];
-          var drill = Array.isArray(data?.funnel?.sentToHearingDrilldown) ? data.funnel.sentToHearingDrilldown : [];
-          var byPref = {};
-
-          events.forEach(function (e) {
-            if (!e || e.type !== 'message_sent') return;
-            var pref = extractPrefecture(e.address);
-            if (!pref) return;
-            if (!byPref[pref]) byPref[pref] = { pref: pref, sent: 0, hearing: 0 };
-            byPref[pref].sent += 1;
-          });
-          drill.forEach(function (r) {
-            var pref = extractPrefecture(r.address);
-            if (!pref) return;
-            if (!byPref[pref]) byPref[pref] = { pref: pref, sent: 0, hearing: 0 };
-            byPref[pref].hearing += 1;
-          });
-
-          var rows = Object.values(byPref);
+          var rows = Array.isArray(data && data.areaStats) ? data.areaStats.slice() : [];
           if (!rows.length) {
             host.innerHTML = '<p class="hint" style="margin:0">住所つきデータが不足しているため、エリア図を表示できません。</p>';
             return;
           }
-          rows.forEach(function (r) {
-            var den = r.sent + r.hearing;
-            r.progressPct = den ? Math.round((10000 * r.hearing) / den) / 100 : null;
-          });
-          rows.sort(function (a, b) {
-            return b.sent - a.sent || b.hearing - a.hearing || a.pref.localeCompare(b.pref, 'ja');
-          });
           var maxSent = rows.reduce(function (m, r) {
             return Math.max(m, r.sent);
           }, 0);
@@ -704,7 +698,7 @@
             .join('');
         }
 
-        function render(data) {
+        function renderSummary(data) {
           var err = qs('#err');
           err.style.display = 'none';
           err.textContent = '';
@@ -726,21 +720,54 @@
           renderLost((data.funnel && data.funnel.phaseToLost) || []);
           renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
           renderAreaViz(data || {});
-          renderTable((data && data.events) || []);
         }
 
-        function load() {
+        function renderEventPage(data, reset) {
+          if (reset) eventsRows = [];
+          var rows = Array.isArray(data && data.events) ? data.events : [];
+          eventsRows = eventsRows.concat(rows);
+          renderTable(eventsRows);
+          var page = data && data.eventsPage;
+          eventsNextOffset = page && page.nextOffset != null ? page.nextOffset : null;
+          var moreBtn = qs('#btn-more-events');
+          if (moreBtn) {
+            moreBtn.style.display = eventsNextOffset != null ? 'inline-flex' : 'none';
+            moreBtn.disabled = false;
+          }
+        }
+
+        function loadSummaryAndFirstEvents() {
+          if (isLoading) return;
+          isLoading = true;
           var err = qs('#err');
           err.style.display = 'none';
-          credFetch((api || '') + '/api/outreach/analytics-events' + buildQuery())
-            .then(function (r) {
+          var moreBtn = qs('#btn-more-events');
+          if (moreBtn) moreBtn.disabled = true;
+          eventsRows = [];
+          renderTable([]);
+          var qSummary = buildQuery(['includeSummary=1', 'includeEvents=0']);
+          var qEvents = buildQuery(['includeSummary=0', 'includeEvents=1', 'eventOffset=0', 'eventLimit=100']);
+
+          Promise.all([
+            credFetch((api || '') + '/api/outreach/analytics-events' + qSummary).then(function (r) {
               if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
               return r.json().then(function (j) {
                 if (!r.ok) throw new Error((j && j.error) || r.statusText);
                 return j;
               });
+            }),
+            credFetch((api || '') + '/api/outreach/analytics-events' + qEvents).then(function (r) {
+              if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
+              return r.json().then(function (j) {
+                if (!r.ok) throw new Error((j && j.error) || r.statusText);
+                return j;
+              });
+            }),
+          ])
+            .then(function (arr) {
+              renderSummary(arr[0] || {});
+              renderEventPage(arr[1] || {}, true);
             })
-            .then(render)
             .catch(function (e) {
               err.style.display = 'block';
               err.textContent = String(e.message || e);
@@ -748,11 +775,48 @@
               qs('#funnel-cards').innerHTML = '';
               qs('#lost-tbody').innerHTML = '';
               qs('#drill-tbody').innerHTML = '<tr><td colspan="8">読み込み失敗</td></tr>';
+              renderTable([]);
+            })
+            .finally(function () {
+              isLoading = false;
             });
         }
 
-        qs('#btn-load').addEventListener('click', load);
-        load();
+        function loadMoreEvents() {
+          if (isLoading || eventsNextOffset == null) return;
+          isLoading = true;
+          var moreBtn = qs('#btn-more-events');
+          if (moreBtn) moreBtn.disabled = true;
+          var q = buildQuery([
+            'includeSummary=0',
+            'includeEvents=1',
+            'eventOffset=' + encodeURIComponent(String(eventsNextOffset)),
+            'eventLimit=100',
+          ]);
+          credFetch((api || '') + '/api/outreach/analytics-events' + q)
+            .then(function (r) {
+              if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
+              return r.json().then(function (j) {
+                if (!r.ok) throw new Error((j && j.error) || r.statusText);
+                return j;
+              });
+            })
+            .then(function (j) {
+              renderEventPage(j || {}, false);
+            })
+            .catch(function (e) {
+              var err = qs('#err');
+              err.style.display = 'block';
+              err.textContent = String(e.message || e);
+            })
+            .finally(function () {
+              isLoading = false;
+            });
+        }
+
+        qs('#btn-load').addEventListener('click', loadSummaryAndFirstEvents);
+        qs('#btn-more-events').addEventListener('click', loadMoreEvents);
+        loadSummaryAndFirstEvents();
       })();
     </script>
   </body>
