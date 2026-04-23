@@ -1146,12 +1146,12 @@
 
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
-          return /^[1-5]$/.test(p) ? p : '1';
+          return /^[1-6]$/.test(p) ? p : '1';
         }
 
         /**
-         * DM本文5パターン（美容室向け）。コピー時に置換:
-         * 【褒めポイント】←入力欄、【名前】←上部の送信者名、[URL]←プレビューURL
+         * DM本文6パターン（美容室向け）。コピー時に置換:
+         * 【褒めポイント】／⑥の【魅力】←入力欄、【名前】←上部の送信者名、[URL]←プレビューURL
          */
         function buildDmBodyForPattern(pattern) {
           var bodies = {
@@ -1226,6 +1226,24 @@
               'もし方向性が合いそうでしたら、参考までに見てもらえたら嬉しいです。\n' +
               'WEBページ制作をしている【名前】です。\n' +
               '不要でしたらご返信不要です。',
+            '6':
+              '突然のDM失礼いたします。\n' +
+              '\n' +
+              '【魅力】がとても素敵でしたので、その魅力がより伝わるような「予約の受け皿」のサンプルを勝手に作成してしまいました。\n' +
+              '（※Web制作をしている【名前】と申します）\n' +
+              '\n' +
+              '【店舗専用サンプルページ】\n' +
+              '\n' +
+              '[URL]\n' +
+              '\n' +
+              '※公開されている情報を元にした「仮のイメージ」です。\n' +
+              '\n' +
+              'Instagramから予約する際、DMだとお客様が「面倒」と感じたり、ホットペッパーだと「他店に目移り」して離脱したりするケースが多いです。\n' +
+              '\n' +
+              'それらを防ぐため、Square予約などの「自社予約」へ自然につなげるページを、1年間の管理費込み5万円から制作しております。Squareの設定方法なども含めてサポート可能です。\n' +
+              '\n' +
+              'お忙しいと思いますので、不要な場合はスルーしていただいて構いません。\n' +
+              'もし活用方法に少しでもご興味があれば、一言「詳細希望」とだけ返信いただければ幸いです。',
           };
           return bodies[pattern] || bodies['1'];
         }
@@ -1237,10 +1255,14 @@
           var sig = String(getSavedSenderName() || '').trim();
           if (!sig) sig = '【名前】';
           var praise = String((item && item.outreachDmCustomFirstLine) || '').trim();
+          var praiseRepl = praise || '【褒めポイント】';
+          var charmRepl = praise || '【魅力】';
           var tpl = buildDmBodyForPattern(pattern);
           return tpl
             .split('【褒めポイント】')
-            .join(praise || '【褒めポイント】')
+            .join(praiseRepl)
+            .split('【魅力】')
+            .join(charmRepl)
             .split('[URL]')
             .join(prev)
             .split('【名前】')
@@ -1267,14 +1289,14 @@
 
         function renderOutreachTemplatesBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：5パターン・褒めポイント・プレビューURL・送信者名）' }),
+            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：6パターン・褒めポイント・プレビューURL・送信者名）' }),
           );
 
           var dmWrap = el('div', { class: 'dm-pattern-block' });
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは5パターン（本文の骨子が異なります）。店ごとにパターンを選び、褒めポイントを入力してからコピーしてください（【名前】は上部の送信者名、[URL]はプレビューURLに自動置換）。送るたびにパターンをローテーションすると固定感が減ります。',
+              text: 'DMは6パターン（本文の骨子が異なります）。店ごとにパターンを選び、褒めポイントを入力してからコピーしてください（⑥では本文の「【魅力】」に差し込みます。【名前】は上部の送信者名、[URL]はプレビューURLに自動置換）。送るたびにパターンをローテーションすると固定感が減ります。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -1285,6 +1307,7 @@
             { v: '3', t: '③ Instagram→予約の受け皿' },
             { v: '4', t: '④ 既存予約先につなぐ型' },
             { v: '5', t: '⑤ Googleマップ・複数流入の受け皿' },
+            { v: '6', t: '⑥ Square予約・受け皿訴求（長文）' },
           ].forEach(function (o) {
             sel.appendChild(el('option', { value: o.v, text: o.t }));
           });
@@ -1343,7 +1366,10 @@
           bDm.onclick = function () {
             var oneLine = String(inp.value || '').trim();
             if (!oneLine) {
-              dmGateErr.textContent = '褒めポイント（【褒めポイント】に入る一文）を入力してからコピーしてください。';
+              dmGateErr.textContent =
+                sel.value === '6'
+                  ? '褒めポイント（⑥の本文「【魅力】」に入る一文）を入力してからコピーしてください。'
+                  : '褒めポイント（【褒めポイント】に入る一文）を入力してからコピーしてください。';
               dmGateErr.style.display = 'block';
               inp.focus();
               return;

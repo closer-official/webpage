@@ -9,7 +9,7 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
   if (body.dmBody !== undefined) row.dmBody = body.dmBody;
   if (body.outreachDmPattern !== undefined) {
     const p = String(body.outreachDmPattern || '').trim();
-    if (/^[1-5]$/.test(p)) row.outreachDmPattern = p;
+    if (/^[1-6]$/.test(p)) row.outreachDmPattern = p;
   }
   if (body.outreachDmCustomFirstLine !== undefined) {
     row.outreachDmCustomFirstLine = String(body.outreachDmCustomFirstLine || '')

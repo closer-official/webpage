@@ -1114,7 +1114,7 @@
 
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
-          return /^[1-5]$/.test(p) ? p : '1';
+          return /^[1-6]$/.test(p) ? p : '1';
         }
 
         function buildDmBodyForPattern(pattern, prevUrl, signatureName) {
@@ -1204,6 +1204,31 @@
               name +
               '\n' +
               'ディビゼロ認定パートナー',
+            '6':
+              '突然のDM失礼いたします。\n' +
+              '\n' +
+              '【褒めポイント】がとても素敵でしたので、その魅力がより伝わるような「予約の受け皿」のサンプルを勝手に作成してしまいました。\n' +
+              '（※Web制作をしている' +
+              name +
+              'と申します）\n' +
+              '\n' +
+              '【店舗専用サンプルページ】\n' +
+              '\n' +
+              prev +
+              '\n' +
+              '\n' +
+              '※公開されている情報を元にした「仮のイメージ」です。\n' +
+              '\n' +
+              'Instagramから予約する際、DMだとお客様が「面倒」と感じたり、ホットペッパーだと「他店に目移り」して離脱したりするケースが多いです。\n' +
+              '\n' +
+              'それらを防ぐため、Square予約などの「自社予約」へ自然につなげるページを、1年間の管理費込み5万円から制作しております。Squareの設定方法なども含めてサポート可能です。\n' +
+              '\n' +
+              'お忙しいと思いますので、不要な場合はスルーしていただいて構いません。\n' +
+              'もし活用方法に少しでもご興味があれば、一言「詳細希望」とだけ返信いただければ幸いです。\n' +
+              '\n' +
+              name +
+              '\n' +
+              'ディビゼロ認定パートナー',
           };
           return bodies[pattern] || bodies['1'];
         }
@@ -1215,6 +1240,9 @@
           var sig = String(getSavedSenderName() || '').trim() || '○○';
           var custom = String((item && item.outreachDmCustomFirstLine) || '').trim();
           var core = buildDmBodyForPattern(pattern, prev, sig);
+          if (pattern === '6') {
+            return core.split('【褒めポイント】').join(custom || '【褒めポイント】');
+          }
           if (custom) return custom + '\n\n' + core;
           return core;
         }
@@ -1246,7 +1274,7 @@
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは5パターンから選択。一言コメント（下の1行）を入力しないとDM用テンプレはコピーできません（メール用はそのまま）。パターンと1行は自動保存されます。',
+              text: 'DMは6パターンから選択。一言コメント（下の1行）を入力しないとDM用テンプレはコピーできません（⑥は本文の「【褒めポイント】」に差し込み、先頭への重複付与はしません。メール用はそのまま）。パターンと1行は自動保存されます。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -1257,6 +1285,7 @@
             { v: '3', t: '③ HPあり・弱い／古い（比較用）' },
             { v: '4', t: '④ 口コミ・評価が強い店' },
             { v: '5', t: '⑤ 忙しそうな店向け・短文' },
+            { v: '6', t: '⑥ Square予約・受け皿訴求（長文）' },
           ].forEach(function (o) {
             sel.appendChild(el('option', { value: o.v, text: o.t }));
           });
@@ -1315,7 +1344,10 @@
           bDm.onclick = function () {
             var oneLine = String(inp.value || '').trim();
             if (!oneLine) {
-              dmGateErr.textContent = '一言コメント（DMの先頭1行）を入力してからコピーしてください。';
+              dmGateErr.textContent =
+                sel.value === '6'
+                  ? '一言コメント（⑥の本文「【褒めポイント】」に入る一文）を入力してからコピーしてください。'
+                  : '一言コメント（DMの先頭1行）を入力してからコピーしてください。';
               dmGateErr.style.display = 'block';
               inp.focus();
               return;
