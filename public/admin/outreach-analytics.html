@@ -306,7 +306,7 @@
       <div class="panel" id="funnel-panel">
         <h2>ファネル（件数・割合）</h2>
         <p class="hint">
-          先頭の「送信済み相当→ヒアリング」% ＝ <strong>ヒアリング件数</strong>を分母<strong>（送信済相当＋ヒアリング）</strong>で割った値。2段目以降も同様に<strong>次フェーズ件数 ÷（前段＋次段）</strong>。件数はいずれもダッシュボードの現在状態（メール送信済み案件）。契約は内部値
+          先頭の「送信済み→ヒアリング」% ＝ <strong>ヒアリング件数</strong>を分母<strong>（送信済＋ヒアリング）</strong>で割った値（SNSなしは分母に含めません）。2段目以降も同様に<strong>次フェーズ件数 ÷（前段＋次段）</strong>。件数はいずれもダッシュボードの現在状態（メール送信済み案件）。契約は内部値
           <code>contracted</code>（画面の契約済）です。
         </p>
         <div class="funnel-grid" id="funnel-cards"></div>
@@ -572,9 +572,9 @@
           var fv = f.funnel;
           el.innerHTML =
             funnelCard(
-              '送信済み相当 → ヒアリング',
+              '送信済み → ヒアリング',
               fv.postSend_to_hearing || fv.messageSent_to_hearing,
-              '送信済相当＋ヒアリング',
+              '送信済＋ヒアリング',
             ) +
             funnelCard('ヒアリング → 提案中', fv.hearing_to_proposal, 'ヒアリング＋提案中') +
             funnelCard('提案中 → 契約済（contracted）', fv.proposal_to_contracted, '提案中＋契約済');

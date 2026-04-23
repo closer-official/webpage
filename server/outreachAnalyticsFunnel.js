@@ -163,13 +163,13 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
   let proposalContractedBlock;
   if (snap) {
     const nHearing = snap.hearing || 0;
-    const nPostSendLike = (snap.message_sent || 0) + (snap.no_outreach_channel || 0);
-    const denom01 = nPostSendLike + nHearing;
+    const nMessageSent = snap.message_sent || 0;
+    const denom01 = nMessageSent + nHearing;
     postSendHearingBlock = {
       count: nHearing,
       outbound: denom01,
       percent: pct(nHearing, denom01),
-      fromPhases: ['message_sent', 'no_outreach_channel'],
+      fromPhases: ['message_sent'],
     };
 
     const nProposal = snap.proposal || 0;
