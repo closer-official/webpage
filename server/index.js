@@ -2686,6 +2686,7 @@ app.post('/api/beauty-outreach/dashboard/:id/duplicate', async (req, res) => {
   newItem.sleepUntil = undefined;
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
+  newItem.outreachLostAt = undefined;
   delete newItem.linkedTemplateCustomizationId;
   list.unshift(newItem);
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
@@ -2702,6 +2703,7 @@ app.post('/api/beauty-outreach/dashboard/:id/approve', async (req, res) => {
   row.status = 'approved';
   if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   if (!row.outreachPhase) row.outreachPhase = 'pre_contact';
+  row.outreachLostAt = undefined;
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
   res.json(row);
@@ -2713,6 +2715,7 @@ app.post('/api/beauty-outreach/dashboard/:id/reject', async (req, res) => {
   if (!t) return res.status(404).json({ error: 'Not found' });
   const list = t.pool === 'beauty' ? t.beauty : t.main;
   list[t.idx].status = 'rejected';
+  list[t.idx].outreachLostAt = new Date().toISOString();
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
   res.json(list[t.idx]);
@@ -2772,6 +2775,7 @@ app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   newItem.sleepUntil = undefined;
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
+  newItem.outreachLostAt = undefined;
   delete newItem.linkedTemplateCustomizationId;
   dashboard.unshift(newItem);
   await store.setDashboard(dashboard);
@@ -2811,8 +2815,36 @@ app.post('/api/outreach/opt-out', async (req, res) => {
   }
 });
 
+function tickBackfillOutreachLostAt(row) {
+  if (row.optedOutAt) return false;
+  const isLost = row.status === 'rejected' || (row.status === 'email_sent' && row.outreachPhase === 'lost');
+  if (!isLost || row.outreachLostAt) return false;
+  row.outreachLostAt = row.updatedAt || row.createdAt || new Date().toISOString();
+  return true;
+}
+
+/**
+ * 失注から3か月経過 → 送信前（approved / pre_contact）へ戻す（再アプローチ用）。
+ * 配信停止済み（optedOutAt あり）は除外。
+ */
+function tickMaybeResetLostToPreSend(row) {
+  if (row.optedOutAt) return false;
+  const isLost = row.status === 'rejected' || (row.status === 'email_sent' && row.outreachPhase === 'lost');
+  if (!isLost || !row.outreachLostAt) return false;
+  const deadline = addMonthsIso(row.outreachLostAt, 3);
+  if (new Date(deadline).getTime() > Date.now()) return false;
+  row.status = 'approved';
+  row.outreachPhase = 'pre_contact';
+  row.replyWaitStartedAt = undefined;
+  row.sleepUntil = undefined;
+  row.outreachLostAt = undefined;
+  if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
+  return true;
+}
+
 /**
  * 提案中でフォロー開始から3か月経過 → 自動で送信済み（再アプローチ用）
+ * 失注（却下 or 送信済み＋lost）から3か月経過 → 送信前へ戻す
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
 app.get('/api/outreach/phase-tick', async (req, res) => {
@@ -2825,26 +2857,35 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
     const main = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
     const beauty = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
     let bumped = 0;
+    let lostReset = 0;
+    let changed = false;
     const bumpList = (arr) => {
       for (const row of arr) {
         const ph = row.outreachPhase;
         const inProposalWait = ph === 'proposal' || ph === 'awaiting_reply';
-        if (!inProposalWait || !row.replyWaitStartedAt) continue;
-        const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
-        if (new Date(deadline).getTime() <= Date.now()) {
-          row.outreachPhase = 'message_sent';
-          row.replyWaitStartedAt = undefined;
-          bumped += 1;
+        if (inProposalWait && row.replyWaitStartedAt) {
+          const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
+          if (new Date(deadline).getTime() <= Date.now()) {
+            row.outreachPhase = 'message_sent';
+            row.replyWaitStartedAt = undefined;
+            bumped += 1;
+            changed = true;
+          }
+        }
+        if (tickBackfillOutreachLostAt(row)) changed = true;
+        if (tickMaybeResetLostToPreSend(row)) {
+          lostReset += 1;
+          changed = true;
         }
       }
     };
     bumpList(main);
     bumpList(beauty);
-    if (bumped) {
+    if (changed) {
       await store.setDashboard(main);
       await store.setBeautyDashboard(beauty);
     }
-    res.json({ ok: true, bumped });
+    res.json({ ok: true, bumped, lostReset });
   } catch (e) {
     console.error('[outreach/phase-tick]', e);
     res.status(500).json({ error: e?.message || 'tick failed' });
@@ -2858,6 +2899,7 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   dashboard[i].status = 'approved';
   if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
   if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pre_contact';
+  dashboard[i].outreachLostAt = undefined;
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
@@ -2867,6 +2909,7 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'rejected';
+  dashboard[i].outreachLostAt = new Date().toISOString();
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

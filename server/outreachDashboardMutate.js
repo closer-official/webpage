@@ -25,10 +25,13 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     row.outreachPhase = pBack && ['pre_contact', 'first_contact'].includes(pBack) ? pBack : 'pre_contact';
     row.replyWaitStartedAt = undefined;
     row.sleepUntil = undefined;
+    row.outreachLostAt = undefined;
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   }
   if (body.status === 'email_sent') {
+    const wasRejected = row.status === 'rejected';
     row.status = 'email_sent';
+    if (wasRejected) row.outreachLostAt = undefined;
     const ph = row.outreachPhase;
     const bumpToMessageSent =
       !ph ||
@@ -59,6 +62,11 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     const p = canonicalizeOutreachPhaseInput(pRaw);
     if (!p) return { status: 400, error: 'Invalid outreachPhase' };
     row.outreachPhase = p;
+    if (p === 'lost') {
+      row.outreachLostAt = new Date().toISOString();
+    } else {
+      row.outreachLostAt = undefined;
+    }
     if (p === 'proposal' || p === 'awaiting_reply') {
       if (!row.replyWaitStartedAt) {
         row.replyWaitStartedAt = new Date().toISOString();

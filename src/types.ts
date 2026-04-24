@@ -384,6 +384,11 @@ export interface DashboardItem {
   optOutFeedback?: string;
   /** 配信停止が記録された日時（ISO） */
   optedOutAt?: string;
+  /**
+   * 失注（却下 or 送信済みかつ outreachPhase === lost）に入った日時（ISO）。
+   * 未設定の旧データは phase-tick 初回で createdAt/updatedAt から補完され、3か月後に送信前へ戻る。
+   */
+  outreachLostAt?: string;
   /** 管理者画面用: プレビューURLの閲覧回数（サーバーで加算） */
   viewCount?: number;
   /** 検閲プレビュー編集で保存した追加CSS（data-pe セレクタ） */
