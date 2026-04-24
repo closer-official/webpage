@@ -83,6 +83,7 @@ import {
 } from './outreachAnalyticsFunnel.js';
 import { buildStrongWebSalonDashboardRow, buildBeautyMemoPromotedDashboardRow } from './memoHpbIntake.js';
 import { findDuplicateDraftHints } from './duplicateDraftHint.js';
+import { extractJapanesePrefecture } from './japanesePrefectureFromAddress.js';
 import { fetchReferenceHtml } from './referenceFetch.js';
 import { buildFingerprintFromHtml } from './styleFingerprint.js';
 import { buildDesignBlueprintFromHtml } from './designBlueprint.js';
@@ -1209,6 +1210,9 @@ function templatePreviewPublicHandler(req, res) {
         res.setHeader('Content-Length', Buffer.byteLength(html, 'utf8'));
         return res.end();
       }
+      void store.recordTemplatePreviewView(templateId).catch((err) => {
+        console.error('[template-preview view]', err);
+      });
       return res.send(html);
     })
     .catch((e) => {
@@ -2371,6 +2375,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
   let aggregates = null;
   let funnel = null;
   let areaStats = [];
+  let previewOpenStats = null;
   if (includeSummary) {
     const sends = list.filter((e) => e.type === 'message_sent').length;
     const phases = list.filter((e) => e.type === 'phase_change').length;
@@ -2388,10 +2393,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
         };
       });
     }
-    const prefFromAddr = (addr) => {
-      const m = String(addr || '').match(/(東京都|北海道|(?:京都|大阪)府|.{2,3}県)/);
-      return m ? m[1] : '';
-    };
+    const prefFromAddr = (addr) => extractJapanesePrefecture(addr);
     const byPref = new Map();
     for (const e of list) {
       if (!e || e.type !== 'message_sent') continue;
@@ -2414,6 +2416,34 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       })
       .sort((a, b) => b.sent - a.sent || b.hearing - a.hearing || a.pref.localeCompare(b.pref, 'ja'));
     summary = { total: list.length, messageSent: sends, phaseChange: phases, returned: events.length };
+
+    const viewMapRaw = await store.getTemplatePreviewViews();
+    const viewMap =
+      viewMapRaw && typeof viewMapRaw === 'object' && !Array.isArray(viewMapRaw) ? viewMapRaw : {};
+    let messageSentWithLinkedPreview = 0;
+    let linkedPreviewOpenedAtLeastOnce = 0;
+    let totalPreviewGetsOnLinked = 0;
+    for (const e of list) {
+      if (!e || e.type !== 'message_sent') continue;
+      const row = rowById.get(String(e.itemId || '').trim());
+      const cid = String(row?.linkedTemplateCustomizationId || '').trim();
+      if (!cid) continue;
+      messageSentWithLinkedPreview += 1;
+      const rec = viewMap[cid];
+      const n = rec && typeof rec === 'object' ? Number(rec.count) || 0 : 0;
+      if (n > 0) {
+        linkedPreviewOpenedAtLeastOnce += 1;
+        totalPreviewGetsOnLinked += n;
+      }
+    }
+    previewOpenStats = {
+      messageSentInFilter: sends,
+      messageSentWithLinkedPreview,
+      linkedPreviewOpenedAtLeastOnce,
+      totalPreviewGetsOnLinked,
+      note:
+        '「開封」は /api/template-preview/… への GET を数えます。自分の確認・リンクプレビュー・ボットも含まれる場合があります。',
+    };
   }
 
   res.json({
@@ -2428,6 +2458,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     aggregates,
     funnel,
     areaStats,
+    previewOpenStats,
     eventsPage: includeEvents
       ? {
           offset: eventOffset,

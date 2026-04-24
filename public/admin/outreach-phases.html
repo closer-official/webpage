@@ -1112,6 +1112,27 @@
           );
         }
 
+        /** 送信済み（メール送信後）向けの追いメッセージ。DM・メール兼用。 */
+        function buildOutreachFollowupMessageBody() {
+          var sig = String(getSavedSenderName() || '').trim();
+          if (!sig) sig = '（※上部パネルで送信者名を登録してください）';
+          return (
+            '先日、勝手ながらサンプルページをお送りした' +
+            sig +
+            'です。\n' +
+            'お忙しいところ、何度も失礼いたします。\n' +
+            '\n' +
+            'もし前回のメッセージが埋もれてしまっていたら申し訳ございません。\n' +
+            'その後、ページの導線やSquare予約の連携について、何か気になる点などはございませんでしたでしょうか？\n' +
+            '\n' +
+            'こちらのサンプルは、そのまま置いておくと紛らわしいかと思いますので、数日中に一度取り下げさせていただきますね。\n' +
+            '\n' +
+            'もし少しでも「活用のイメージが湧いた」ということであれば、その際に改めて再構築も可能ですので、一言いただければ幸いです。\n' +
+            '\n' +
+            'ご確認、ありがとうございました！'
+          );
+        }
+
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
           return /^[1-6]$/.test(p) ? p : '1';
@@ -1364,6 +1385,31 @@
           row.appendChild(bMail);
           row.appendChild(bDm);
           container.appendChild(row);
+
+          if (item.status === 'email_sent') {
+            var fu = el('div', {
+              class: 'followup-template-block',
+              style:
+                'margin-top:14px;padding-top:14px;border-top:1px solid rgba(42,58,85,0.7);max-width:720px',
+            });
+            fu.appendChild(
+              el('p', {
+                class: 'muted',
+                style: 'margin:0 0 10px',
+                text: '追いメッセージ（メール送信済みの案件向け・DM／メール兼用・1種類）',
+              }),
+            );
+            var bFu = el('button', { type: 'button', class: 'btn small', text: '追いメッセージをコピー' });
+            bFu.onclick = function () {
+              persistSenderProfile();
+              if (!getSavedSenderName()) {
+                if (!window.confirm('送信者名が未登録です。プレースホルダ付きでコピーしますか？')) return;
+              }
+              copyTextWithFeedback(buildOutreachFollowupMessageBody(), '追いメッセージ');
+            };
+            fu.appendChild(bFu);
+            container.appendChild(fu);
+          }
         }
 
         (function initSenderProfileFields() {

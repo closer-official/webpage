@@ -25,6 +25,7 @@ const FILES = {
   galleryDraftBuiltins: 'galleryDraftBuiltins.json',
   memoLeads: 'memoLeads.json',
   outreachAnalyticsEvents: 'outreachAnalyticsEvents.json',
+  templatePreviewViews: 'templatePreviewViews.json',
 };
 
 function ensureDir() {
@@ -66,6 +67,7 @@ function getDefault(name) {
   if (name === 'billing') return { plan: 'normal' };
   if (name === 'lpCmsAccounts') return {};
   if (name === 'galleryDraftBuiltins') return { draftBuiltinIds: [] };
+  if (name === 'templatePreviewViews') return {};
   return {};
 }
 
@@ -171,6 +173,26 @@ const fileStore = {
     return Promise.resolve();
   },
   getOutreachAnalyticsEvents: () => Promise.resolve(read('outreachAnalyticsEvents')),
+  getTemplatePreviewViews: () => {
+    const cur = read('templatePreviewViews');
+    return Promise.resolve(cur && typeof cur === 'object' && !Array.isArray(cur) ? cur : {});
+  },
+  recordTemplatePreviewView: (templateId) => {
+    const id = String(templateId || '').trim();
+    if (!id) return Promise.resolve();
+    const cur = read('templatePreviewViews');
+    const map = cur && typeof cur === 'object' && !Array.isArray(cur) ? { ...cur } : {};
+    const prev = map[id] && typeof map[id] === 'object' ? map[id] : { count: 0 };
+    const count = (Number(prev.count) || 0) + 1;
+    const now = new Date().toISOString();
+    map[id] = {
+      count,
+      firstAt: prev.firstAt || now,
+      lastAt: now,
+    };
+    write('templatePreviewViews', map);
+    return Promise.resolve();
+  },
   appendOutreachAnalyticsEvents: (incoming) => {
     const add = Array.isArray(incoming) ? incoming : [];
     if (!add.length) return Promise.resolve();

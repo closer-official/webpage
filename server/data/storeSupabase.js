@@ -21,6 +21,7 @@ const KEYS = {
   galleryDraftBuiltins: 'galleryDraftBuiltins',
   memoLeads: 'memoLeads',
   outreachAnalyticsEvents: 'outreachAnalyticsEvents',
+  templatePreviewViews: 'templatePreviewViews',
 };
 
 function getDefault(name) {
@@ -53,6 +54,7 @@ function getDefault(name) {
     };
   }
   if (name === 'galleryDraftBuiltins') return { draftBuiltinIds: [] };
+  if (name === 'templatePreviewViews') return {};
   return {};
 }
 
@@ -177,6 +179,25 @@ export const storeSupabase = {
   getBeautyMemoLeads: () => get(KEYS.beautyMemoLeads),
   setBeautyMemoLeads: (arr) => set(KEYS.beautyMemoLeads, arr),
   getOutreachAnalyticsEvents: () => get(KEYS.outreachAnalyticsEvents),
+  getTemplatePreviewViews: async () => {
+    const cur = await get(KEYS.templatePreviewViews);
+    return cur && typeof cur === 'object' && !Array.isArray(cur) ? cur : {};
+  },
+  recordTemplatePreviewView: async (templateId) => {
+    const id = String(templateId || '').trim();
+    if (!id) return;
+    const cur = await get(KEYS.templatePreviewViews);
+    const map = cur && typeof cur === 'object' && !Array.isArray(cur) ? { ...cur } : {};
+    const prev = map[id] && typeof map[id] === 'object' ? map[id] : { count: 0 };
+    const count = (Number(prev.count) || 0) + 1;
+    const now = new Date().toISOString();
+    map[id] = {
+      count,
+      firstAt: prev.firstAt || now,
+      lastAt: now,
+    };
+    await set(KEYS.templatePreviewViews, map);
+  },
   appendOutreachAnalyticsEvents: async (incoming) => {
     const add = Array.isArray(incoming) ? incoming : [];
     if (!add.length) return;

@@ -297,6 +297,8 @@
       </div>
       <div class="panel summary" id="summary" style="display: none"></div>
 
+      <div class="panel" id="preview-open-stats" style="display: none"></div>
+
       <div class="panel">
         <h2>エリア別 送信数・進行率</h2>
         <p class="hint">
@@ -489,10 +491,42 @@
             return s.slice(0, 16).replace('T', '-');
           }
         }
-        function extractPrefecture(address) {
-          var s = String(address || '');
-          var m = s.match(/(東京都|北海道|(?:京都|大阪)府|.{2,3}県)/);
-          return m ? m[1] : '';
+        function renderPreviewOpenStats(st) {
+          var host = qs('#preview-open-stats');
+          if (!host) return;
+          if (!st || typeof st.messageSentWithLinkedPreview !== 'number') {
+            host.style.display = 'none';
+            host.innerHTML = '';
+            return;
+          }
+          host.style.display = 'block';
+          var denom = st.messageSentWithLinkedPreview;
+          var opened = st.linkedPreviewOpenedAtLeastOnce;
+          var pct =
+            denom > 0 && typeof opened === 'number' ? Math.round((10000 * opened) / denom) / 100 : null;
+          var pctStr = pct == null ? '—' : String(pct) + '%';
+          host.innerHTML =
+            '<h2>デモURL開封（記録）</h2>' +
+            '<p class="hint" style="margin:0 0 12px">' +
+            esc(st.note || '') +
+            '</p>' +
+            '<div class="summary" style="display:flex;flex-wrap:wrap;gap:12px 20px;margin:0">' +
+            '<span>絞込内・送信ログ件数: <strong>' +
+            esc(st.messageSentInFilter != null ? st.messageSentInFilter : '—') +
+            '</strong></span>' +
+            '<span>うち店舗ドラフト紐づけあり: <strong>' +
+            esc(denom) +
+            '</strong></span>' +
+            '<span>そのうちプレビューGET≥1回: <strong>' +
+            esc(typeof opened === 'number' ? opened : '—') +
+            '</strong></span>' +
+            '<span>紐づけ分のGET合計: <strong>' +
+            esc(st.totalPreviewGetsOnLinked != null ? st.totalPreviewGetsOnLinked : '—') +
+            '</strong></span>' +
+            '<span>開封率（紐づけ分母）: <strong>' +
+            esc(pctStr) +
+            '</strong></span>' +
+            '</div>';
         }
         function renderAreaViz(data) {
           var host = qs('#area-viz');
@@ -719,6 +753,7 @@
           renderFunnel(data.funnel || null);
           renderLost((data.funnel && data.funnel.phaseToLost) || []);
           renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
+          renderPreviewOpenStats(data.previewOpenStats || null);
           renderAreaViz(data || {});
         }
 
@@ -772,6 +807,11 @@
               err.style.display = 'block';
               err.textContent = String(e.message || e);
               qs('#summary').style.display = 'none';
+              var pv = qs('#preview-open-stats');
+              if (pv) {
+                pv.style.display = 'none';
+                pv.innerHTML = '';
+              }
               qs('#funnel-cards').innerHTML = '';
               qs('#lost-tbody').innerHTML = '';
               qs('#drill-tbody').innerHTML = '<tr><td colspan="8">読み込み失敗</td></tr>';
