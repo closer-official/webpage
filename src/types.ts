@@ -330,8 +330,12 @@ export interface ResearchedShop {
 export type OutreachPhase =
   | 'pre_contact'
   | 'first_contact'
-  /** 送信後・フォロー前（いわゆる「送信済み」段階） */
+  /** 初回送信後（5日で再送待ちへ自動遷移） */
   | 'message_sent'
+  /** 初回送信から5日経過後の待機フェーズ */
+  | 'resend_wait'
+  /** 再送を実施した状態（7日間変化なしで失注へ自動遷移） */
+  | 'resend_sent'
   | 'hearing'
   | 'proposal'
   | 'contracted'
@@ -371,11 +375,13 @@ export interface DashboardItem {
   status: 'pending' | 'approved' | 'rejected' | 'email_sent';
   createdAt: string;
   /**
-   * ダッシュボード案件の送付フェーズ（UI では7種に集約表示）。
+   * ダッシュボード案件の送付フェーズ（UI では9種に集約表示）。
    */
   outreachPhase?: OutreachPhase;
   /** outreachPhase === proposal のときフォロー開始（この日時から3か月後に自動で message_sent） */
   replyWaitStartedAt?: string;
+  /** 送付フェーズを最後に変更した日時（message_sent→再送待ち→再送済み等の自動遷移判定に利用） */
+  outreachPhaseChangedAt?: string;
   /** 旧 sleep のときの再送目安（ISO）。no_outreach_channel 移行後は未使用になり得る */
   sleepUntil?: string;
   /** 配信停止ページ用の秘密トークン（URLに含める） */

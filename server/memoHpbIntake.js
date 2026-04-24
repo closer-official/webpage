@@ -99,6 +99,8 @@ export function buildBeautyMemoPromotedDashboardRow({ shopName, accessText, memo
   } else {
     const postMap = {
       message_sent: 'message_sent',
+      resend_wait: 'resend_wait',
+      resend_sent: 'resend_sent',
       no_outreach_channel: 'no_outreach_channel',
       hearing: 'hearing',
       proposal: 'proposal',
@@ -136,6 +138,7 @@ export function buildBeautyMemoPromotedDashboardRow({ shopName, accessText, memo
     dmBody: '',
     status,
     outreachPhase,
+    outreachPhaseChangedAt: outreachPhase ? new Date().toISOString() : undefined,
     createdAt: new Date().toISOString(),
     unsubscribeToken: randomBytes(24).toString('hex'),
   };

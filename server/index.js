@@ -1977,6 +1977,8 @@ const OUTREACH_PHASE_CANONICAL = new Set([
   'pre_contact',
   'first_contact',
   'message_sent',
+  'resend_wait',
+  'resend_sent',
   'hearing',
   'proposal',
   'contracted',
@@ -2003,6 +2005,12 @@ function canonicalizeOutreachPhaseInput(p) {
 function addMonthsIso(fromDate, months) {
   const d = new Date(fromDate);
   d.setMonth(d.getMonth() + months);
+  return d.toISOString();
+}
+
+function addDaysIso(fromDate, days) {
+  const d = new Date(fromDate);
+  d.setDate(d.getDate() + days);
   return d.toISOString();
 }
 
@@ -2591,6 +2599,8 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
   const allowed = new Set([
     'before_send',
     'message_sent',
+    'resend_wait',
+    'resend_sent',
     'no_outreach_channel',
     'hearing',
     'proposal',
@@ -2598,7 +2608,7 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     'lost',
   ]);
   if (!allowed.has(uiPhase)) {
-    return res.status(400).json({ error: 'outreachPhaseUi が無効です（7フェーズのいずれかを指定してください）' });
+    return res.status(400).json({ error: 'outreachPhaseUi が無効です（9フェーズのいずれかを指定してください）' });
   }
   const raw = await store.getBeautyMemoLeads();
   const list = [...(Array.isArray(raw) ? raw : [])];
@@ -2683,6 +2693,7 @@ app.post('/api/beauty-outreach/dashboard/:id/duplicate', async (req, res) => {
   newItem.viewCount = 0;
   newItem.unsubscribeToken = randomBytes(24).toString('hex');
   newItem.outreachPhase = undefined;
+  newItem.outreachPhaseChangedAt = undefined;
   newItem.sleepUntil = undefined;
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
@@ -2703,6 +2714,7 @@ app.post('/api/beauty-outreach/dashboard/:id/approve', async (req, res) => {
   row.status = 'approved';
   if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   if (!row.outreachPhase) row.outreachPhase = 'pre_contact';
+  row.outreachPhaseChangedAt = new Date().toISOString();
   row.outreachLostAt = undefined;
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
@@ -2715,6 +2727,7 @@ app.post('/api/beauty-outreach/dashboard/:id/reject', async (req, res) => {
   if (!t) return res.status(404).json({ error: 'Not found' });
   const list = t.pool === 'beauty' ? t.beauty : t.main;
   list[t.idx].status = 'rejected';
+  list[t.idx].outreachPhaseChangedAt = new Date().toISOString();
   list[t.idx].outreachLostAt = new Date().toISOString();
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
@@ -2772,6 +2785,7 @@ app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   newItem.viewCount = 0;
   newItem.unsubscribeToken = randomBytes(24).toString('hex');
   newItem.outreachPhase = undefined;
+  newItem.outreachPhaseChangedAt = undefined;
   newItem.sleepUntil = undefined;
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
@@ -2803,6 +2817,7 @@ app.post('/api/outreach/opt-out', async (req, res) => {
     }
     row.status = 'email_sent';
     row.outreachPhase = 'lost';
+    row.outreachPhaseChangedAt = new Date().toISOString();
     row.sleepUntil = undefined;
     row.optOutFeedback = feedback || undefined;
     row.optedOutAt = new Date().toISOString();
@@ -2823,6 +2838,15 @@ function tickBackfillOutreachLostAt(row) {
   return true;
 }
 
+function tickBackfillOutreachPhaseChangedAt(row) {
+  if (row.outreachPhaseChangedAt) return false;
+  const ph = String(row.outreachPhase || '').trim();
+  if (!ph) return false;
+  if (row.status !== 'email_sent' && row.status !== 'approved') return false;
+  row.outreachPhaseChangedAt = row.updatedAt || row.createdAt || new Date().toISOString();
+  return true;
+}
+
 /**
  * 失注から3か月経過 → 送信前（approved / pre_contact）へ戻す（再アプローチ用）。
  * 配信停止済み（optedOutAt あり）は除外。
@@ -2835,6 +2859,7 @@ function tickMaybeResetLostToPreSend(row) {
   if (new Date(deadline).getTime() > Date.now()) return false;
   row.status = 'approved';
   row.outreachPhase = 'pre_contact';
+  row.outreachPhaseChangedAt = new Date().toISOString();
   row.replyWaitStartedAt = undefined;
   row.sleepUntil = undefined;
   row.outreachLostAt = undefined;
@@ -2842,8 +2867,37 @@ function tickMaybeResetLostToPreSend(row) {
   return true;
 }
 
+function tickMaybePromoteMessageSentToResendWait(row) {
+  if (row.optedOutAt) return false;
+  if (row.status !== 'email_sent') return false;
+  if (String(row.outreachPhase || '') !== 'message_sent') return false;
+  const baseAt = row.outreachPhaseChangedAt || row.updatedAt || row.createdAt;
+  if (!baseAt) return false;
+  const deadline = addDaysIso(baseAt, 5);
+  if (new Date(deadline).getTime() > Date.now()) return false;
+  row.outreachPhase = 'resend_wait';
+  row.outreachPhaseChangedAt = new Date().toISOString();
+  return true;
+}
+
+function tickMaybeMoveResendSentToLost(row) {
+  if (row.optedOutAt) return false;
+  if (row.status !== 'email_sent') return false;
+  if (String(row.outreachPhase || '') !== 'resend_sent') return false;
+  const baseAt = row.outreachPhaseChangedAt || row.updatedAt || row.createdAt;
+  if (!baseAt) return false;
+  const deadline = addDaysIso(baseAt, 7);
+  if (new Date(deadline).getTime() > Date.now()) return false;
+  row.outreachPhase = 'lost';
+  row.outreachPhaseChangedAt = new Date().toISOString();
+  row.outreachLostAt = new Date().toISOString();
+  return true;
+}
+
 /**
  * 提案中でフォロー開始から3か月経過 → 自動で送信済み（再アプローチ用）
+ * 送信済みから5日経過 → 再送待ち
+ * 再送済みから7日間フェーズ変更なし → 失注
  * 失注（却下 or 送信済み＋lost）から3か月経過 → 送信前へ戻す
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
@@ -2857,6 +2911,8 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
     const main = [...(Array.isArray(await store.getDashboard()) ? await store.getDashboard() : [])];
     const beauty = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
     let bumped = 0;
+    let resendWaitAuto = 0;
+    let lostFromResendAuto = 0;
     let lostReset = 0;
     let changed = false;
     const bumpList = (arr) => {
@@ -2867,12 +2923,22 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
           const deadline = addMonthsIso(row.replyWaitStartedAt, 3);
           if (new Date(deadline).getTime() <= Date.now()) {
             row.outreachPhase = 'message_sent';
+            row.outreachPhaseChangedAt = new Date().toISOString();
             row.replyWaitStartedAt = undefined;
             bumped += 1;
             changed = true;
           }
         }
         if (tickBackfillOutreachLostAt(row)) changed = true;
+        if (tickBackfillOutreachPhaseChangedAt(row)) changed = true;
+        if (tickMaybePromoteMessageSentToResendWait(row)) {
+          resendWaitAuto += 1;
+          changed = true;
+        }
+        if (tickMaybeMoveResendSentToLost(row)) {
+          lostFromResendAuto += 1;
+          changed = true;
+        }
         if (tickMaybeResetLostToPreSend(row)) {
           lostReset += 1;
           changed = true;
@@ -2885,7 +2951,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
       await store.setDashboard(main);
       await store.setBeautyDashboard(beauty);
     }
-    res.json({ ok: true, bumped, lostReset });
+    res.json({ ok: true, bumped, resendWaitAuto, lostFromResendAuto, lostReset });
   } catch (e) {
     console.error('[outreach/phase-tick]', e);
     res.status(500).json({ error: e?.message || 'tick failed' });
@@ -2899,6 +2965,7 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   dashboard[i].status = 'approved';
   if (!dashboard[i].unsubscribeToken) dashboard[i].unsubscribeToken = randomBytes(24).toString('hex');
   if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pre_contact';
+  dashboard[i].outreachPhaseChangedAt = new Date().toISOString();
   dashboard[i].outreachLostAt = undefined;
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
@@ -2909,6 +2976,7 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   const i = dashboard.findIndex((d) => d.id === req.params.id);
   if (i === -1) return res.status(404).json({ error: 'Not found' });
   dashboard[i].status = 'rejected';
+  dashboard[i].outreachPhaseChangedAt = new Date().toISOString();
   dashboard[i].outreachLostAt = new Date().toISOString();
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);

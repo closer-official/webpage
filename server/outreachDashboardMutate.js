@@ -23,6 +23,7 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     row.status = 'approved';
     const pBack = canonicalizeOutreachPhaseInput(body.outreachPhase);
     row.outreachPhase = pBack && ['pre_contact', 'first_contact'].includes(pBack) ? pBack : 'pre_contact';
+    row.outreachPhaseChangedAt = new Date().toISOString();
     row.replyWaitStartedAt = undefined;
     row.sleepUntil = undefined;
     row.outreachLostAt = undefined;
@@ -44,6 +45,7 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
       ph === 'appointment';
     if (bumpToMessageSent) {
       row.outreachPhase = 'message_sent';
+      row.outreachPhaseChangedAt = new Date().toISOString();
       row.replyWaitStartedAt = undefined;
     } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !row.replyWaitStartedAt) {
       row.replyWaitStartedAt = new Date().toISOString();
@@ -62,6 +64,7 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     const p = canonicalizeOutreachPhaseInput(pRaw);
     if (!p) return { status: 400, error: 'Invalid outreachPhase' };
     row.outreachPhase = p;
+    row.outreachPhaseChangedAt = new Date().toISOString();
     if (p === 'lost') {
       row.outreachLostAt = new Date().toISOString();
     } else {

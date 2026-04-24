@@ -309,7 +309,7 @@
         color: #e8edf5;
         font-size: 0.82rem;
       }
-      /* 7フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
+      /* 9フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
       select.op-phase-select {
         font-weight: 600;
         border-width: 2px;
@@ -926,7 +926,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の7種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧</strong>の案件は表に<strong>作成前</strong>として載り、フェーズを<strong>送信前</strong>に変えるとメモリードから自動で外れます。区分・検索の表示・各店のプルダウンは<strong>次の9種類</strong>（表のダッシュボード行は＋メモ行のみ<strong>作成前</strong>）です：送信前／送信済み／再送待ち／再送済み／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。<strong>失注</strong>（却下、または送信済みで失注フェーズ）から<strong>3か月</strong>経過すると、自動で<strong>送信前</strong>（承認待ち相当）に戻ります（店主が<strong>配信停止</strong>した案件は除外）。
       </p>
@@ -1427,10 +1427,12 @@
           }
         })();
 
-        /** 保存値の正規化用（UIは seven で統一） */
+        /** 保存値の正規化用（UIは9種で統一） */
         var APPROVED_PHASE_KEYS = ['pre_contact', 'first_contact'];
         var SENT_PHASE_KEYS = [
           'message_sent',
+          'resend_wait',
+          'resend_sent',
           'no_outreach_channel',
           'hearing',
           'proposal',
@@ -1439,10 +1441,12 @@
           'lost',
         ];
 
-        /** 検索・区分・店ごとプルダウン共通の7種（表記はこれだけ） */
+        /** 検索・区分・店ごとプルダウン共通の9種（表記はこれだけ） */
         var SEVEN_PHASE_KEYS = [
           'before_send',
           'message_sent',
+          'resend_wait',
+          'resend_sent',
           'no_outreach_channel',
           'hearing',
           'proposal',
@@ -1452,6 +1456,8 @@
         var SEVEN_PHASE_LABELS = {
           before_send: '送信前',
           message_sent: '送信済み',
+          resend_wait: '再送待ち',
+          resend_sent: '再送済み',
           no_outreach_channel: 'SNSなし・ウェブページ制作不可',
           hearing: 'ヒアリング中',
           proposal: '提案中',
@@ -1922,7 +1928,7 @@
           return 'pre_contact';
         }
 
-        /** 7種のどれに相当するか（契約済み＝contracted／支払い確認済み、失注＝lost／却下） */
+        /** 9種のどれに相当するか（契約済み＝contracted／支払い確認済み、失注＝lost／却下） */
         function sevenPhaseKey(item) {
           if (item.status === 'pending' || item.status === 'approved') return 'before_send';
           if (item.status === 'rejected') return 'lost';
@@ -1930,6 +1936,8 @@
           var ph = normalizePhase(item);
           if (ph === 'contracted' || ph === 'payment_confirmed') return 'contracted';
           if (ph === 'message_sent') return 'message_sent';
+          if (ph === 'resend_wait') return 'resend_wait';
+          if (ph === 'resend_sent') return 'resend_sent';
           if (ph === 'no_outreach_channel') return 'no_outreach_channel';
           if (ph === 'hearing') return 'hearing';
           if (ph === 'proposal') return 'proposal';
@@ -1937,7 +1945,7 @@
           return 'message_sent';
         }
 
-        /** Excel風一覧の並び：7区分の定義順（上から送信前→失注） */
+        /** Excel風一覧の並び：9区分の定義順（上から送信前→失注） */
         function sevenPhaseSortIndex(item) {
           var k = sevenPhaseKey(item);
           var i = SEVEN_PHASE_KEYS.indexOf(k);
@@ -2193,7 +2201,7 @@
           return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
         }
 
-        /** フェーズ確認用：1段目プルダウンの区分一覧（7件） */
+        /** フェーズ確認用：1段目プルダウンの区分一覧（9件） */
         function buildPhaseBrowserGroups() {
           return [
             {
@@ -2208,6 +2216,20 @@
               label: SEVEN_PHASE_LABELS.message_sent,
               filter: function (i) {
                 return sevenPhaseKey(i) === 'message_sent';
+              },
+            },
+            {
+              id: 'g_resend_wait',
+              label: SEVEN_PHASE_LABELS.resend_wait,
+              filter: function (i) {
+                return sevenPhaseKey(i) === 'resend_wait';
+              },
+            },
+            {
+              id: 'g_resend_sent',
+              label: SEVEN_PHASE_LABELS.resend_sent,
+              filter: function (i) {
+                return sevenPhaseKey(i) === 'resend_sent';
               },
             },
             {
@@ -2631,6 +2653,8 @@
 
           var postMap = {
             message_sent: 'message_sent',
+            resend_wait: 'resend_wait',
+            resend_sent: 'resend_sent',
             no_outreach_channel: 'no_outreach_channel',
             hearing: 'hearing',
             proposal: 'proposal',
@@ -2664,7 +2688,7 @@
 
         function renderPhaseSelect(item, loadFn) {
           var eff = sevenPhaseKey(item);
-          var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（7種）' }, []);
+          var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（9種）' }, []);
           SEVEN_PHASE_KEYS.forEach(function (k) {
             var opt = el('option', { value: k, text: SEVEN_PHASE_LABELS[k] });
             if (k === eff) opt.selected = true;
@@ -3046,7 +3070,7 @@
             el('p', {
               class: 'muted',
               style: 'margin: 0 0 6px; font-size: 0.8rem',
-              text: 'フェーズ（送信前でも次の7種から変更できます）',
+              text: 'フェーズ（送信前でも次の9種から変更できます）',
             }),
           );
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
@@ -3257,7 +3281,7 @@
           var headMeta = [
             { letter: 'A', desc: '店舗名・カードへ' },
             { letter: 'B', desc: '住所' },
-            { letter: 'C', desc: 'フェーズ（作成前＋7種）' },
+            { letter: 'C', desc: 'フェーズ（作成前＋9種）' },
             { letter: 'D', desc: '送信メッセージ' },
             { letter: 'E', desc: '削除（誤登録・重複）' },
           ];
@@ -3439,7 +3463,7 @@
           browserPanel.appendChild(
             el('p', {
               class: 'muted',
-              text: '① 区分（7種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
+              text: '① 区分（9種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
             }),
           );
 
