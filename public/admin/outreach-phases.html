@@ -382,6 +382,11 @@
         opacity: 0.72;
         cursor: wait;
       }
+      /* Windows のネイティブ候補リストで文字が薄くならないよう固定 */
+      select.op-phase-select option {
+        color: #1f2937;
+        background: #ffffff;
+      }
       .actions {
         display: flex;
         flex-wrap: wrap;
@@ -433,6 +438,9 @@
       @media (min-width: 920px) {
         .share-links-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .share-links-grid .link-tile--templates {
+          grid-column: 1 / -1;
         }
       }
       .link-tile {
@@ -3128,7 +3136,7 @@
           var pv = el('div', { class: 'link-tile' });
           var ig = el('div', { class: 'link-tile' });
           var tw = el('div', { class: 'link-tile' });
-          var tm = el('div', { class: 'link-tile' });
+          var tm = el('div', { class: 'link-tile link-tile--templates' });
           renderTemplatePreviewBlock(pv, item);
           renderInstagramFooterBlock(ig, item);
           renderTwitterFooterBlock(tw, item);
@@ -3280,81 +3288,6 @@
           top.appendChild(colShop);
           top.appendChild(colMain);
           body.appendChild(top);
-
-          var sendWrap = el('div', { class: 'op-send-block' });
-          var taId = 'op-send-' + item.id;
-          var sendLbl = document.createElement('label');
-          sendLbl.className = 'op-send-lbl';
-          sendLbl.setAttribute('for', taId);
-          sendLbl.textContent = '送信メッセージ';
-          var sendStack = el('div', { class: 'op-send-compact-stack excel-send-stack' });
-          var sendTa = el('textarea', {
-            id: taId,
-            class: 'op-send-msg op-send-msg--compact',
-            rows: '2',
-            placeholder: '本文下書き…',
-            'aria-label': '送信メッセージ',
-          });
-          sendTa.value = getSendDraftForItem(item.id);
-          var sendTimer = null;
-          sendTa.addEventListener('input', function () {
-            clearTimeout(sendTimer);
-            sendTimer = setTimeout(function () {
-              setSendDraftForItem(item.id, sendTa.value);
-            }, 400);
-          });
-          var sendExpandSel = el('select', {
-            class: 'excel-longtext-sel',
-            'aria-label': '送信メッセージの拡大編集',
-          });
-          sendExpandSel.appendChild(el('option', { value: '', text: '一覧（小入力）' }));
-          sendExpandSel.appendChild(el('option', { value: 'edit', text: '拡大して編集' }));
-          sendExpandSel.addEventListener('change', function () {
-            if (sendExpandSel.value === 'edit') {
-              openExcelLongTextDialog({
-                mode: 'edit',
-                title: '送信メッセージ（拡大）',
-                initial: sendTa.value,
-                onSave: function (v) {
-                  sendTa.value = v;
-                  setSendDraftForItem(item.id, v);
-                },
-              });
-              sendExpandSel.value = '';
-            }
-          });
-          sendStack.appendChild(sendTa);
-          sendStack.appendChild(sendExpandSel);
-          sendWrap.appendChild(sendLbl);
-          sendWrap.appendChild(sendStack);
-          var snsRow = el('div', { class: 'op-sns-row' });
-          function makeSnsBtn(label, channel) {
-            var b = el('button', { type: 'button', class: 'btn small', text: label });
-            b.onclick = function () {
-              var t = String(sendTa.value || '').trim();
-              if (t) {
-                try {
-                  navigator.clipboard.writeText(t);
-                  var cm = document.getElementById('copy-msg');
-                  if (cm) {
-                    cm.style.display = 'block';
-                    cm.textContent = '送信メッセージをクリップボードにコピーしました。';
-                    clearTimeout(outreachCopyMsgTimer);
-                    outreachCopyMsgTimer = setTimeout(function () {
-                      cm.style.display = 'none';
-                    }, 2200);
-                  }
-                } catch (e) {}
-              }
-              outreachGoToShopCard(item.id, channel);
-            };
-            return b;
-          }
-          snsRow.appendChild(makeSnsBtn('Instagram', 'instagram'));
-          snsRow.appendChild(makeSnsBtn('X（Twitter）', 'twitter'));
-          snsRow.appendChild(makeSnsBtn('TikTok', 'tiktok'));
-          sendWrap.appendChild(snsRow);
-          body.appendChild(sendWrap);
 
           var linksRow = el('div', { class: 'phase-card__links' });
           renderShareUrlsSection(linksRow, item);
