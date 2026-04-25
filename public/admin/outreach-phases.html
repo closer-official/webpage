@@ -976,13 +976,13 @@
       <p class="sub">
         まずは「区分 → 店名」で1件ずつ確認、必要時だけ検索・一覧表を使う運用です。フェーズは11種、詳細ルールは下の折りたたみを参照してください。
       </p>
-      <details class="panel" style="margin-bottom:1rem">
+      <details class="panel" id="panel-phase-spec" style="margin-bottom:1rem">
         <summary style="cursor:pointer;font-weight:700">表示・フェーズ仕様（詳細）</summary>
         <p class="muted" style="margin-top:10px">
           メモリードは作成前として表示され、送信前にすると正式案件化されます。11フェーズ：送信前／送信済み／再送待ち／再送済み／インスタ制限中／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。提案中3か月で送信済みに戻り、失注3か月で送信前に戻ります（配信停止は除外）。
         </p>
       </details>
-      <details class="panel sender-panel" style="margin-bottom: 1rem">
+      <details class="panel sender-panel" id="panel-sender-profile" style="margin-bottom: 1rem">
         <summary style="cursor:pointer;font-weight:700">送付文面プロフィール（必要時に開く）</summary>
         <p class="muted" style="margin: 10px 0 8px">
           DM/メール差し込み用です（送信者名は未設定だとコピー時に確認が出ます）。
@@ -1037,6 +1037,18 @@
     </dialog>
     <script>
       (function () {
+        (function reorderLessUsedPanels() {
+          var boards = document.getElementById('boards');
+          var searchPanel = document.querySelector('.search-panel');
+          var spec = document.getElementById('panel-phase-spec');
+          var sender = document.getElementById('panel-sender-profile');
+          if (!boards || !searchPanel || !spec || !sender) return;
+          var parent = boards.parentNode;
+          if (!parent) return;
+          parent.insertBefore(spec, searchPanel);
+          parent.insertBefore(sender, searchPanel);
+        })();
+
         var STORAGE_SENDER_NAME = 'closer_outreach_sender_name';
         var STORAGE_PERSONAL_EMAIL = 'closer_outreach_personal_email';
 
@@ -3116,17 +3128,14 @@
           var pv = el('div', { class: 'link-tile' });
           var ig = el('div', { class: 'link-tile' });
           var tw = el('div', { class: 'link-tile' });
-          var us = el('div', { class: 'link-tile' });
           var tm = el('div', { class: 'link-tile' });
           renderTemplatePreviewBlock(pv, item);
           renderInstagramFooterBlock(ig, item);
           renderTwitterFooterBlock(tw, item);
-          renderUnsubscribeBlock(us, item);
           renderOutreachTemplatesBlock(tm, item);
           wrap.appendChild(pv);
           wrap.appendChild(ig);
           wrap.appendChild(tw);
-          wrap.appendChild(us);
           wrap.appendChild(tm);
           container.appendChild(wrap);
         }
@@ -3277,14 +3286,13 @@
           var sendLbl = document.createElement('label');
           sendLbl.className = 'op-send-lbl';
           sendLbl.setAttribute('for', taId);
-          sendLbl.textContent =
-            '送信メッセージ（このタブの一時保存・表モードと共通。一覧は小入力、下のプルダウンで拡大編集）';
+          sendLbl.textContent = '送信メッセージ';
           var sendStack = el('div', { class: 'op-send-compact-stack excel-send-stack' });
           var sendTa = el('textarea', {
             id: taId,
             class: 'op-send-msg op-send-msg--compact',
             rows: '2',
-            placeholder: 'DM・メール用の本文下書き…',
+            placeholder: '本文下書き…',
             'aria-label': '送信メッセージ',
           });
           sendTa.value = getSendDraftForItem(item.id);
@@ -3345,12 +3353,6 @@
           snsRow.appendChild(makeSnsBtn('Instagram', 'instagram'));
           snsRow.appendChild(makeSnsBtn('X（Twitter）', 'twitter'));
           snsRow.appendChild(makeSnsBtn('TikTok', 'tiktok'));
-          snsRow.appendChild(
-            el('p', {
-              class: 'op-sns-hint',
-              text: 'カード（従来）表示に切り替え、この店の詳細カードへスクロールします。本文があるときはコピーします。各SNSの公式URLがドラフトに入っているときは別タブで開きます。',
-            }),
-          );
           sendWrap.appendChild(snsRow);
           body.appendChild(sendWrap);
 
@@ -3624,12 +3626,6 @@
 
           var browserPanel = el('div', { class: 'panel phase-browser-panel' });
           browserPanel.appendChild(el('h2', { text: 'フェーズで店舗を選ぶ' }));
-          browserPanel.appendChild(
-            el('p', {
-              class: 'muted',
-              text: '① 区分（11種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
-            }),
-          );
 
           var groups = buildPhaseBrowserGroups();
           var row = el('div', { class: 'phase-browser-row' });
