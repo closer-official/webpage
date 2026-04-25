@@ -1006,10 +1006,14 @@
     <div class="app-head">
       <h1>送付・フェーズ管理（美容室）</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧（美容）</strong>に残っている案件が、ここに<strong>送信前</strong>相当の行としても現れます（プルダウンは11種すべて選べます）。<strong>送信前</strong>以外に変えると<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の11種類</strong>です：送信前／送信済み／再送待ち／再送済み／インスタ制限中／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
-        <code>/api/outreach/phase-tick</code>
-        の Cron 実行時）。<strong>失注</strong>（却下、または送信済みで失注フェーズ）から<strong>3か月</strong>経過すると、自動で<strong>送信前</strong>（承認待ち相当）に戻ります（店主が<strong>配信停止</strong>した案件は除外）。
+        まずは「区分 → 店名」で1件ずつ確認、必要時だけ検索・一覧表を使う運用です。フェーズは11種、詳細ルールは下の折りたたみを参照してください。
       </p>
+      <details class="panel" style="margin-bottom:1rem">
+        <summary style="cursor:pointer;font-weight:700">表示・フェーズ仕様（詳細）</summary>
+        <p class="muted" style="margin-top:10px">
+          メモリード（美容）は送信前として表示され、送信前以外にするとメモ一覧から外れます。11フェーズ：送信前／送信済み／再送待ち／再送済み／インスタ制限中／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。提案中3か月で送信済みに戻り、失注3か月で送信前に戻ります（配信停止は除外）。
+        </p>
+      </details>
       <div class="panel sender-panel" style="margin-bottom: 1rem">
         <h2>送付文面用プロフィール（このブラウザに保存）</h2>
         <p class="muted" style="margin: 0 0 8px">
@@ -1057,7 +1061,7 @@
       <div class="panel send-timing-panel" id="send-timing-panel">
         <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
         <p class="timing-hint">
-          <strong>日本時間（Asia/Tokyo）</strong>の現在時刻が<strong>10:00〜23:59</strong>のあいだ、かつ店舗が<strong>営業時間外</strong>と判定できた<strong>送信前（未送信）かつ接触前または初回接触済</strong>の店だけを一覧します。営業時間の表記は自動解析のため誤差があります。1秒ごとに時刻を更新し、候補は30秒ごとに再計算します。
+          日本時間 10:00〜23:59 の間に、営業時間外と判定された「送信前」案件だけを表示します（30秒ごと再計算）。
         </p>
         <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
         <div id="send-timing-body"></div>
@@ -1365,7 +1369,7 @@
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは6パターン（本文の骨子が異なります）。店ごとにパターンを選び、褒めポイントを入力してからコピーしてください（⑥では本文の「【魅力】」に差し込みます。【名前】は上部の送信者名、[URL]はプレビューURLに自動置換）。送るたびにパターンをローテーションすると固定感が減ります。',
+              text: 'DMは6パターン。褒めポイント入力後にコピーしてください（⑥は「【魅力】」へ差し込み）。【名前】と[URL]は自動置換されます。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -3084,7 +3088,7 @@
           container.appendChild(
             el('p', {
               class: 'muted',
-              text: 'Instagram（店舗ドラフトのフッター、または美容室LP（独立版）の「Instagram URL」）',
+              text: 'Instagram URL',
             }),
           );
           var u = footerInstagramUrlForItem(item);
@@ -3092,8 +3096,7 @@
             container.appendChild(
               el('p', {
                 class: 'muted',
-                text:
-                  '※ 未設定（店舗ドラフト編集のフッター欄、または美容室LP（独立版）のフォームに URL を入れるとここに表示されます）',
+                text: '※ 未設定（店舗ドラフトまたは美容室LPでURLを設定）',
               }),
             );
             return;
@@ -3125,7 +3128,7 @@
           container.appendChild(
             el('p', {
               class: 'muted',
-              text: 'LINE（店舗ドラフトのフッター、または美容室LP（独立版）の「LINE URL」）',
+              text: 'LINE URL',
             }),
           );
           var u = footerLineUrlForItem(item);
@@ -3133,8 +3136,7 @@
             container.appendChild(
               el('p', {
                 class: 'muted',
-                text:
-                  '※ 未設定（店舗ドラフト編集のフッター欄、または美容室LP（独立版）のフォームに URL を入れるとここに表示されます）',
+                text: '※ 未設定（店舗ドラフトまたは美容室LPでURLを設定）',
               }),
             );
             return;
@@ -3164,14 +3166,14 @@
 
         function renderTwitterFooterBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: 'X（Twitter）（店舗ドラフトのフッターに入力したURL）' }),
+            el('p', { class: 'muted', text: 'X（Twitter）URL' }),
           );
           var u = footerTwitterUrlForItem(item);
           if (!u) {
             container.appendChild(
               el('p', {
                 class: 'muted',
-                text: '※ 未設定（作業者用編集の「X（Twitter）（フッターアイコン）URL」に入力するとここに表示されます）',
+                text: '※ 未設定（店舗ドラフトのX URLを設定）',
               }),
             );
             return;
