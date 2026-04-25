@@ -1014,58 +1014,53 @@
           メモリード（美容）は送信前として表示され、送信前以外にするとメモ一覧から外れます。11フェーズ：送信前／送信済み／再送待ち／再送済み／インスタ制限中／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。提案中3か月で送信済みに戻り、失注3か月で送信前に戻ります（配信停止は除外）。
         </p>
       </details>
-      <div class="panel sender-panel" style="margin-bottom: 1rem">
-        <h2>送付文面用プロフィール（このブラウザに保存）</h2>
-        <p class="muted" style="margin: 0 0 8px">
-          メール／DMテンプレに自動で差し込みます。送信者名は<strong>必須</strong>（未入力のままコピーすると注意文が入ります）。
+      <details class="panel sender-panel" style="margin-bottom: 1rem">
+        <summary style="cursor:pointer;font-weight:700">送付文面プロフィール（必要時に開く）</summary>
+        <p class="muted" style="margin: 10px 0 8px">
+          DM/メール差し込み用です（送信者名は未設定だとコピー時に確認が出ます）。
         </p>
         <label for="outreach-sender-name">送信者名（例：山田）</label>
         <input type="text" id="outreach-sender-name" maxlength="80" placeholder="CLOSERの担当名" autocomplete="name" />
-        <label for="outreach-personal-email">個人メール（メール署名用・任意）</label>
+        <label for="outreach-personal-email">個人メール（署名用・任意）</label>
         <input
           type="email"
           id="outreach-personal-email"
           maxlength="120"
-          placeholder="未入力のときは「xxxxx」のままコピーされます"
+          placeholder="未入力時は「xxxxx」"
           autocomplete="email"
         />
-      </div>
+      </details>
       <p id="copy-msg" class="ok-msg" style="display: none" aria-live="polite"></p>
       <div class="panel view-mode-panel" style="margin-bottom: 1rem">
         <h2 style="margin-top: 0">表示モード</h2>
         <p class="muted" style="margin: 0 0 10px">
-          <strong>カード（従来）</strong>は区分→店名のプルダウンです（詳細カードの<strong>送信メッセージ</strong>も<strong>小入力＋プルダウンで拡大編集</strong>できます）。<strong>一覧表（Excel風）</strong>は左に行番号と<strong>複数選択用チェック</strong>、列は<strong>A〜E（最右が削除）</strong>です。表の上から<strong>選択をまとめて削除</strong>できます。ダッシュボード案件に加え、メモリード一覧（美容）の行が<strong>送信前</strong>相当で載ります。<strong>送信前</strong>以外のフェーズに変えるとメモ一覧からは外れ、こちらの案件として残ります。どちらも同じデータで、表からも<strong>フェーズ変更はその場で保存</strong>されます（表示はこのページのトグルで切り替え・ブラウザに記憶）。一覧表では<strong>住所・送信メッセージの長文は1行に省略</strong>し、行ごとの<strong>プルダウンから全文表示・拡大編集</strong>できます（スクロールなしで約10店舗分を狙ったレイアウトです）。
+          よく使う機能は「フェーズ変更」「DM記入/コピー」「Instagramボタン」「Excel切替」です。下のトグルですぐ切替できます。
         </p>
         <div class="toolbar view-mode-toggle">
           <button type="button" class="btn" id="btn-view-card">カード（従来）</button>
           <button type="button" class="btn" id="btn-view-grid">一覧表（Excel風）</button>
         </div>
       </div>
-      <div class="panel search-panel" style="margin-bottom: 1rem">
-        <h2 style="margin-top: 0">登録済みか検索</h2>
-        <p class="muted" style="margin: 0 0 10px">
-          店名の一部、または Google マップの<strong>埋め込み用 HTML</strong>（<code>iframe</code> ごと）・<strong>埋め込み URL</strong>（<code>https://www.google.com/maps/embed?...</code>）を貼り付けてください。一致するダッシュボード案件があれば一覧し、なければ未登録と表示します。
+      <details class="panel search-panel" style="margin-bottom: 1rem">
+        <summary style="cursor:pointer;font-weight:700">登録済み検索（必要時に開く）</summary>
+        <p class="muted" style="margin: 10px 0 10px">
+          店名の一部または maps 埋め込みURL で検索できます。
         </p>
         <label for="phase-search">検索</label>
         <div class="search-row">
-          <input
-            type="search"
-            id="phase-search"
-            autocomplete="off"
-            placeholder="例：カフェ ○○ ／ 埋め込み iframe または embed URL"
-          />
+          <input type="search" id="phase-search" autocomplete="off" placeholder="例：店名 / maps embed URL" />
           <button type="button" class="btn small" id="btn-search-clear">クリア</button>
           <button type="button" class="btn primary" id="btn-refresh">再読み込み</button>
         </div>
-      </div>
-      <div class="panel send-timing-panel" id="send-timing-panel">
-        <h2 style="margin-top: 0">DM送信タイミング候補（営業時間外）</h2>
-        <p class="timing-hint">
-          日本時間 10:00〜23:59 の間に、営業時間外と判定された「送信前」案件だけを表示します（30秒ごと再計算）。
+      </details>
+      <details class="panel send-timing-panel" id="send-timing-panel">
+        <summary style="cursor:pointer;font-weight:700">DM送信タイミング候補（必要時に開く）</summary>
+        <p class="timing-hint" style="margin-top:10px">
+          日本時間 10:00〜23:59 の間に、営業時間外と判定された送信前案件を表示します。
         </p>
         <p class="tokyo-clock" id="tokyo-clock-live" aria-live="polite"></p>
         <div id="send-timing-body"></div>
-      </div>
+      </details>
       <p id="load-err" class="err" style="display: none"></p>
     </div>
     <div id="boards"></div>
@@ -2114,9 +2109,11 @@
           var progressed = (counts.hearing || 0) + (counts.proposal || 0) + (counts.contracted || 0);
           var needingFollow = (counts.resend_wait || 0) + (counts.resend_sent || 0) + (counts.instagram_limited || 0);
 
-          var panel = el('div', { class: 'panel phase-insights' });
-          panel.appendChild(el('h2', { text: '再現性チェック・次アクション' }));
-          panel.appendChild(
+          var panel = el('details', { class: 'panel phase-insights' });
+          panel.appendChild(el('summary', { text: '再現性チェック・次アクション（必要時に開く）' }));
+          var content = el('div', { style: 'margin-top:10px' });
+          content.appendChild(el('h2', { text: '再現性チェック・次アクション' }));
+          content.appendChild(
             el('p', {
               class: 'muted',
               text:
@@ -2138,7 +2135,7 @@
             c.appendChild(el('div', { class: 'phase-insights__num', text: String(x[1]) }));
             grid.appendChild(c);
           });
-          panel.appendChild(grid);
+          content.appendChild(grid);
 
           var tips = el('ul', { class: 'phase-insights__list' });
           tips.appendChild(el('li', { text: '送信済みは5日後に自動で「再送待ち」へ移動します。再送したら手動で「再送済み」へ変更してください。' }));
@@ -2168,7 +2165,8 @@
               }),
             );
           }
-          panel.appendChild(tips);
+          content.appendChild(tips);
+          panel.appendChild(content);
           return panel;
         }
 
