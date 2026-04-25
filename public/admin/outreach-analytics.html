@@ -515,34 +515,13 @@
               : null;
           var pctStr = pct == null ? '—' : String(pct) + '%';
           var pctExternalStr = pctExternal == null ? '—' : String(pctExternal) + '%';
-          var details = Array.isArray(st.details) ? st.details : [];
-          var detailRows = details
-            .map(function (d) {
-              return (
-                '<tr>' +
-                '<td>' +
-                esc(d.shopName || d.itemId || '—') +
-                '</td>' +
-                '<td class="mono">' +
-                esc(d.itemId || '') +
-                '</td>' +
-                '<td>' +
-                esc(d.previewGetsExternal != null ? d.previewGetsExternal : '0') +
-                '（全体:' +
-                esc(d.previewGets != null ? d.previewGets : '0') +
-                '）</td>' +
-                '<td class="mono">' +
-                esc(d.lastExternalAt ? fmtIsoJstCompact(d.lastExternalAt) : '—') +
-                '</td>' +
-                '</tr>'
-              );
-            })
-            .join('');
+          var details = Array.isArray(st.details) ? st.details.slice() : [];
           host.innerHTML =
             '<h2>デモURL開封（記録）</h2>' +
             '<p class="hint" style="margin:0 0 12px">' +
             esc(st.note || '') +
             '</p>' +
+            '<p class="hint" style="margin:0 0 10px">※ GETは実閲覧と一致しない場合があります（リンクプレビュー/ボット等）。判断は「自分除外」指標を優先してください。</p>' +
             '<div class="summary" style="display:flex;flex-wrap:wrap;gap:12px 20px;margin:0">' +
             '<span>絞込内・送信ログ件数: <strong>' +
             esc(st.messageSentInFilter != null ? st.messageSentInFilter : '—') +
@@ -569,12 +548,77 @@
           host.innerHTML +=
             '<details style="margin-top:12px">' +
             '<summary>店舗別内訳（折りたたみ）</summary>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">' +
+            '<label style="display:flex;align-items:center;gap:6px">表示' +
+            '<select id="pv-detail-filter"><option value="all">すべて</option><option value="opened">自分除外GETあり</option><option value="unopened">自分除外GETなし</option></select>' +
+            '</label>' +
+            '<label style="display:flex;align-items:center;gap:6px">並び' +
+            '<select id="pv-detail-sort"><option value="external_desc">GET数（自分除外）多い順</option><option value="external_asc">GET数（自分除外）少ない順</option><option value="last_desc">最終開封（新しい順）</option><option value="last_asc">最終開封（古い順）</option><option value="name_asc">店舗名（昇順）</option></select>' +
+            '</label>' +
+            '</div>' +
             '<div style="overflow:auto;margin-top:8px">' +
             '<table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
             '<thead><tr><th style="text-align:left">店舗</th><th style="text-align:left">案件ID</th><th style="text-align:left">GET数（自分除外）</th><th style="text-align:left">最終開封（自分除外）</th></tr></thead>' +
-            '<tbody>' +
-            (detailRows || '<tr><td colspan="4">該当なし</td></tr>') +
-            '</tbody></table></div></details>';
+            '<tbody id="pv-detail-body"></tbody></table></div></details>';
+
+          var selFilter = qs('#pv-detail-filter');
+          var selSort = qs('#pv-detail-sort');
+          var body = qs('#pv-detail-body');
+          function tValue(raw) {
+            var t = new Date(raw || '').getTime();
+            return Number.isNaN(t) ? 0 : t;
+          }
+          function nValue(v) {
+            var n = Number(v);
+            return Number.isFinite(n) ? n : 0;
+          }
+          function renderDetailRows() {
+            if (!body) return;
+            var mode = (selFilter && selFilter.value) || 'all';
+            var sortKey = (selSort && selSort.value) || 'external_desc';
+            var rows = details
+              .filter(function (d) {
+                var ex = nValue(d.previewGetsExternal);
+                if (mode === 'opened') return ex > 0;
+                if (mode === 'unopened') return ex <= 0;
+                return true;
+              })
+              .sort(function (a, b) {
+                var ax = nValue(a.previewGetsExternal);
+                var bx = nValue(b.previewGetsExternal);
+                if (sortKey === 'external_asc') return ax - bx || String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja');
+                if (sortKey === 'last_desc') return tValue(b.lastExternalAt) - tValue(a.lastExternalAt) || bx - ax;
+                if (sortKey === 'last_asc') return tValue(a.lastExternalAt) - tValue(b.lastExternalAt) || bx - ax;
+                if (sortKey === 'name_asc') return String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja');
+                return bx - ax || tValue(b.lastExternalAt) - tValue(a.lastExternalAt);
+              });
+            var html = rows
+              .map(function (d) {
+                return (
+                  '<tr>' +
+                  '<td>' +
+                  esc(d.shopName || d.itemId || '—') +
+                  '</td>' +
+                  '<td class="mono">' +
+                  esc(d.itemId || '') +
+                  '</td>' +
+                  '<td>' +
+                  esc(d.previewGetsExternal != null ? d.previewGetsExternal : '0') +
+                  '（全体:' +
+                  esc(d.previewGets != null ? d.previewGets : '0') +
+                  '）</td>' +
+                  '<td class="mono">' +
+                  esc(d.lastExternalAt ? fmtIsoJstCompact(d.lastExternalAt) : '—') +
+                  '</td>' +
+                  '</tr>'
+                );
+              })
+              .join('');
+            body.innerHTML = html || '<tr><td colspan="4">該当なし</td></tr>';
+          }
+          if (selFilter) selFilter.onchange = renderDetailRows;
+          if (selSort) selSort.onchange = renderDetailRows;
+          renderDetailRows();
         }
         function renderAreaViz(data) {
           var host = qs('#area-viz');

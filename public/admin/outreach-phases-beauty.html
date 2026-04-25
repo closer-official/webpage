@@ -419,6 +419,11 @@
         color: #3d3930;
         border: 1px solid rgba(28, 26, 23, 0.1);
       }
+      .badge.badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #fca5a5;
+      }
       .feedback {
         margin-top: 8px;
         padding: 8px 10px;
@@ -2102,6 +2107,80 @@
           return daysSinceIso(item && (item.outreachPhaseChangedAt || item.updatedAt || item.createdAt));
         }
 
+        function addDaysIso(raw, days) {
+          var t = new Date(raw || '').getTime();
+          if (Number.isNaN(t)) return '';
+          return new Date(t + days * 86400000).toISOString();
+        }
+
+        function addMonthsIso(raw, months) {
+          var d = new Date(raw || '');
+          if (Number.isNaN(d.getTime())) return '';
+          d.setMonth(d.getMonth() + months);
+          return d.toISOString();
+        }
+
+        function fmtDateJaShort(raw) {
+          var d = new Date(raw || '');
+          if (Number.isNaN(d.getTime())) return '';
+          try {
+            return d.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' });
+          } catch (e) {
+            return String(raw || '').slice(0, 10);
+          }
+        }
+
+        function nextAutoActionLabel(item) {
+          if (!item) return '';
+          var ph = normalizePhase(item);
+          if (item.status === 'rejected' || ph === 'lost') {
+            if (item.optedOutAt) return '配信停止済みのため、自動で送信前に戻りません。';
+            var baseLost = item.outreachLostAt || item.outreachPhaseChangedAt || item.updatedAt || item.createdAt;
+            var atLost = addMonthsIso(baseLost, 3);
+            if (!atLost) return '';
+            return '自動予定: 失注から3か月後に送信前へ（' + fmtDateJaShort(atLost) + '）';
+          }
+          if (ph === 'message_sent') {
+            var atResendWait = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 5);
+            if (!atResendWait) return '';
+            return '自動予定: 5日後に再送待ちへ（' + fmtDateJaShort(atResendWait) + '）';
+          }
+          if (ph === 'resend_sent') {
+            var atLostFromResend = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 7);
+            if (!atLostFromResend) return '';
+            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromResend) + '）';
+          }
+          if (ph === 'instagram_limited') {
+            var atLostFromInsta = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 7);
+            if (!atLostFromInsta) return '';
+            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromInsta) + '）';
+          }
+          if (ph === 'proposal') {
+            var atBackToSent = addMonthsIso(item.replyWaitStartedAt || item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 3);
+            if (!atBackToSent) return '';
+            return '自動予定: 3か月後に送信済みへ戻す（' + fmtDateJaShort(atBackToSent) + '）';
+          }
+          return '';
+        }
+
+        function phaseActionHintLabel(phaseKey) {
+          var k = String(phaseKey || '');
+          var map = {
+            before_send: '次アクション: DM準備→送信。',
+            message_sent: '次アクション: 初回送信後の反応待ち。',
+            resend_wait: '次アクション: 再送文で1回フォロー。',
+            resend_sent: '次アクション: 反応があればヒアリング中へ。',
+            instagram_limited: '次アクション: 制限解除待ち or 別導線提案。',
+            resend_unavailable: '次アクション: 最終停止（再送しない）。',
+            no_outreach_channel: '次アクション: 連絡手段の再確認。',
+            hearing: '次アクション: 課題ヒアリング内容を整理。',
+            proposal: '次アクション: 提案確認の催促タイミング管理。',
+            contracted: '次アクション: 実装と運用引き継ぎ。',
+            lost: '次アクション: 失注理由を記録して次案件へ。',
+          };
+          return map[k] || '';
+        }
+
         function fmtRate(n, d) {
           if (!d) return '—';
           return String(Math.round((10000 * n) / d) / 100) + '%';
@@ -2186,6 +2265,19 @@
             );
           }
           content.appendChild(tips);
+          var checklist = el('details', { style: 'margin-top:12px' });
+          checklist.appendChild(el('summary', { text: '朝の5分チェックリスト' }));
+          var ul = el('ul', { class: 'phase-insights__list', style: 'margin-top:8px' });
+          [
+            '再送待ちを古い順に3件以上処理する',
+            'インスタ制限中で7日超過見込みを確認する',
+            '失注のうち3か月復帰対象（配信停止を除く）を確認する',
+            '反応率（反応あり÷接触済み母数）を昨日比で確認する',
+          ].forEach(function (x) {
+            ul.appendChild(el('li', { text: x }));
+          });
+          checklist.appendChild(ul);
+          content.appendChild(checklist);
           panel.appendChild(content);
           return panel;
         }
@@ -2957,6 +3049,14 @@
           sel.onchange = function () {
             var v = sel.value;
             var prev = eff;
+            if (v === 'resend_unavailable') {
+              var ok = window.confirm('「再送不可」は最終停止フェーズです。以後は再送対象から外します。変更しますか？');
+              if (!ok) {
+                sel.value = prev;
+                syncOpPhaseSelectVisual(sel);
+                return;
+              }
+            }
             syncOpPhaseSelectVisual(sel);
             sel.disabled = true;
             applyOutreachSevenPhase(item, v)
@@ -3235,6 +3335,15 @@
             return;
           }
           var u = templatePreviewUrl(cid);
+          container.appendChild(
+            el('p', {
+              class: 'muted',
+              style: 'margin-top:6px;font-size:0.74rem',
+              text:
+                '編集先: ' +
+                (shouldOpenBeautyStandaloneEditor(item, cid) ? '美容室LP（独立）' : '店舗ドラフト'),
+            }),
+          );
           var ur = el('div', { class: 'url-row' });
           ur.appendChild(el('input', { type: 'text', readonly: 'readonly', value: u }));
           var cp = el('button', { type: 'button', class: 'btn small', text: 'URLをコピー' });
@@ -3389,6 +3498,9 @@
             titleEl.textContent = name;
           }
           header.appendChild(titleEl);
+          if (item.optedOutAt) {
+            header.appendChild(el('span', { class: 'badge badge-danger', text: '配信停止済み' }));
+          }
           row.appendChild(header);
 
           var body = el('div', { class: 'phase-card__body' });
@@ -3417,6 +3529,15 @@
             }),
           );
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
+          var curPhase = sevenPhaseKey(item);
+          var phaseHint = phaseActionHintLabel(curPhase);
+          if (phaseHint) {
+            statusBlock.appendChild(el('p', { class: 'muted', style: 'margin-top:8px', text: phaseHint }));
+          }
+          var autoHint = nextAutoActionLabel(item);
+          if (autoHint) {
+            statusBlock.appendChild(el('p', { class: 'muted', style: 'margin-top:4px', text: autoHint }));
+          }
 
           if (item.status === 'email_sent') {
             var eff = normalizePhase(item);
@@ -3911,11 +4032,21 @@
         (function initPhaseSearch() {
           var inp = document.getElementById('phase-search');
           var btnClear = document.getElementById('btn-search-clear');
+          var initialQ = '';
+          try {
+            initialQ = String(new URLSearchParams(window.location.search).get('q') || '').trim();
+          } catch (e) {
+            initialQ = '';
+          }
           function applySearchFromInput() {
             liveSearchQuery = inp ? inp.value : '';
             render(cachedDashboardItems);
           }
           if (inp) {
+            if (initialQ) {
+              inp.value = initialQ;
+              liveSearchQuery = initialQ;
+            }
             inp.addEventListener('input', function () {
               clearTimeout(searchDebounceTimer);
               searchDebounceTimer = setTimeout(applySearchFromInput, 250);
