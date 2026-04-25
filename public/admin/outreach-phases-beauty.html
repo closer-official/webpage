@@ -1041,6 +1041,7 @@
           <button type="button" class="btn" id="btn-view-grid">一覧表（Excel風）</button>
         </div>
       </div>
+      <div id="boards"></div>
       <details class="panel search-panel" style="margin-bottom: 1rem">
         <summary style="cursor:pointer;font-weight:700">登録済み検索（必要時に開く）</summary>
         <p class="muted" style="margin: 10px 0 10px">
@@ -1063,7 +1064,6 @@
       </details>
       <p id="load-err" class="err" style="display: none"></p>
     </div>
-    <div id="boards"></div>
     <dialog id="op-excel-longtext-dlg" class="op-excel-longtext-dlg" aria-labelledby="op-excel-longtext-dlg-title">
       <div class="op-excel-longtext-dlg__inner">
         <h3 class="op-excel-longtext-dlg__title" id="op-excel-longtext-dlg-title"></h3>
@@ -3741,11 +3741,12 @@
           host.innerHTML = '';
 
           var q = String(liveSearchQuery || '').trim();
-          host.appendChild(renderPhaseInsights(items));
+          var insightsPanel = renderPhaseInsights(items);
 
           if (outreachViewMode === 'grid') {
             var gridRows = buildExcelGridRows(items, cachedMemoLeads, q);
             renderExcelGridPanel(host, gridRows, load, !!q);
+            host.appendChild(insightsPanel);
             updateSendTimingPanel(true);
             return;
           }
@@ -3786,6 +3787,7 @@
               });
             }
             host.appendChild(searchPanel);
+            host.appendChild(insightsPanel);
             updateSendTimingPanel(true);
             return;
           }
@@ -3920,6 +3922,7 @@
             }
           }
 
+          host.appendChild(insightsPanel);
           updateSendTimingPanel(true);
         }
 
