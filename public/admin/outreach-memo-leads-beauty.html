@@ -658,22 +658,30 @@
           return m;
         }
 
-        function chunkHasSalonNameLine(chunk) {
-          var lines = String(chunk || '')
-            .split('\n')
-            .map(function (l) {
-              return l.trim();
-            });
-          for (var li = 0; li < lines.length; li++) {
-            var line = lines[li];
-            if (!line || line.length > 160) continue;
-            var m = matchSalonParenLine(line);
-            if (!m) continue;
-            var left = m[1].trim();
-            if (!/[\u3000-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(left)) continue;
-            return true;
-          }
+        function cleanDetectedShopName(raw) {
+          var s = String(raw || '').trim();
+          if (!s) return '';
+          s = s.replace(/\s*UP\s*$/i, '').trim();
+          s = s.replace(/[　\t]+/g, ' ').trim();
+          return s;
+        }
+
+        function isLikelyShopTitleLine(line) {
+          var s = cleanDetectedShopName(line);
+          if (!s) return false;
+          if (s.length < 2 || s.length > 120) return false;
+          if (/^(ブックマークする|一覧へ|アクセス|カット|席数|ブログ|口コミ|空席確認・予約する|空席確認|全員|新規|スタイリスト指定)$/.test(s))
+            return false;
+          if (/^￥[\d,～\-]+$/.test(s)) return false;
+          if (/^\d+件(?:UP)?$/.test(s)) return false;
+          if (/のクーポン$/.test(s)) return false;
+          if (/[A-Za-z\u3040-\u30FF\u3400-\u9FFF]/.test(s)) return true;
+          if (/[・･]/.test(s)) return true;
           return false;
+        }
+
+        function chunkHasSalonNameLine(chunk) {
+          return !!parseSalonNameFromChunk(chunk);
         }
 
         function parseSalonNameFromChunk(chunk) {
@@ -681,15 +689,27 @@
             .split('\n')
             .map(function (l) {
               return l.trim();
+            })
+            .filter(function (l) {
+              return !!l;
             });
-          for (var li = 0; li < lines.length; li++) {
-            var line = lines[li];
-            if (!line || line.length > 160) continue;
-            var m = matchSalonParenLine(line);
+
+          for (var li = lines.length - 1; li >= 0; li--) {
+            var tail = cleanDetectedShopName(lines[li]);
+            if (!isLikelyShopTitleLine(tail)) continue;
+            return tail;
+          }
+
+          for (var pj = lines.length - 1; pj >= 0; pj--) {
+            var m = matchSalonParenLine(lines[pj]);
             if (!m) continue;
-            var left = m[1].trim();
-            if (!/[\u3000-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(left)) continue;
-            return left;
+            var left = cleanDetectedShopName(m[1] || '');
+            if (isLikelyShopTitleLine(left)) return left;
+          }
+
+          for (var k = 0; k < lines.length; k++) {
+            var any = cleanDetectedShopName(lines[k]);
+            if (isLikelyShopTitleLine(any)) return any;
           }
           return '';
         }
@@ -911,7 +931,7 @@
           var tb = document.createElement('table');
           tb.className = 'hpb-preview';
           tb.innerHTML =
-            '<thead><tr><th>#</th><th>店名（編集可）</th><th>アクセス（編集可）</th><th>ウェブの有無・強弱</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th>#</th><th>店名（編集可）</th><th>アクセス（編集可）</th><th>ウェブの有無・強弱</th><th>操作</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r, idx) {
             var tr = document.createElement('tr');
@@ -994,10 +1014,22 @@
               },
             );
             n3.appendChild(ws);
+            var n4 = document.createElement('td');
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'btn-sm danger';
+            rm.textContent = '削除';
+            rm.onclick = function () {
+              if (!window.confirm('この行を解析結果から削除しますか？')) return;
+              hpbParsedRows.splice(idx, 1);
+              renderHpbPreview(hpbParsedRows, dupCtx != null ? dupCtx : window.hpbDupCtx);
+            };
+            n4.appendChild(rm);
             tr.appendChild(n0);
             tr.appendChild(n1);
             tr.appendChild(n2);
             tr.appendChild(n3);
+            tr.appendChild(n4);
             body.appendChild(tr);
             applyDupToPreviewRow(tr, r.shopName, dupCtx != null ? dupCtx : window.hpbDupCtx);
           });
