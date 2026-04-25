@@ -336,6 +336,8 @@ export type OutreachPhase =
   | 'resend_wait'
   /** 再送を実施した状態（7日間変化なしで失注へ自動遷移） */
   | 'resend_sent'
+  /** Instagram の制限などで1件しか送れず待機する状態（7日後に失注へ自動遷移） */
+  | 'instagram_limited'
   /** 再送対象から外す状態（SNS/連絡先不備など） */
   | 'resend_unavailable'
   | 'hearing'

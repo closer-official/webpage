@@ -183,18 +183,25 @@ export const storeSupabase = {
     const cur = await get(KEYS.templatePreviewViews);
     return cur && typeof cur === 'object' && !Array.isArray(cur) ? cur : {};
   },
-  recordTemplatePreviewView: async (templateId) => {
+  recordTemplatePreviewView: async (templateId, meta) => {
     const id = String(templateId || '').trim();
     if (!id) return;
+    const isAdminView = !!(meta && meta.isAdminView);
     const cur = await get(KEYS.templatePreviewViews);
     const map = cur && typeof cur === 'object' && !Array.isArray(cur) ? { ...cur } : {};
     const prev = map[id] && typeof map[id] === 'object' ? map[id] : { count: 0 };
     const count = (Number(prev.count) || 0) + 1;
+    const countAdmin = (Number(prev.countAdmin) || 0) + (isAdminView ? 1 : 0);
+    const countExternal = (Number(prev.countExternal) || 0) + (isAdminView ? 0 : 1);
     const now = new Date().toISOString();
     map[id] = {
       count,
+      countAdmin,
+      countExternal,
       firstAt: prev.firstAt || now,
       lastAt: now,
+      firstExternalAt: prev.firstExternalAt || (!isAdminView ? now : undefined),
+      lastExternalAt: !isAdminView ? now : prev.lastExternalAt,
     };
     await set(KEYS.templatePreviewViews, map);
   },

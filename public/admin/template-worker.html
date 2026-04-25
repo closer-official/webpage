@@ -1167,6 +1167,7 @@
           'message_sent',
           'resend_wait',
           'resend_sent',
+          'instagram_limited',
           'resend_unavailable',
           'no_outreach_channel',
           'hearing',
@@ -1180,6 +1181,7 @@
           'message_sent',
           'resend_wait',
           'resend_sent',
+          'instagram_limited',
           'resend_unavailable',
           'no_outreach_channel',
           'hearing',
@@ -1192,6 +1194,7 @@
           message_sent: '送信済み',
           resend_wait: '再送待ち',
           resend_sent: '再送済み',
+          instagram_limited: 'インスタ制限中',
           resend_unavailable: '再送不可',
           no_outreach_channel: 'SNSなし・ウェブページ制作不可',
           hearing: 'ヒアリング中',
@@ -1270,6 +1273,7 @@
           if (ph === 'message_sent') return 'message_sent';
           if (ph === 'resend_wait') return 'resend_wait';
           if (ph === 'resend_sent') return 'resend_sent';
+          if (ph === 'instagram_limited') return 'instagram_limited';
           if (ph === 'resend_unavailable') return 'resend_unavailable';
           if (ph === 'no_outreach_channel') return 'no_outreach_channel';
           if (ph === 'hearing') return 'hearing';
@@ -1334,6 +1338,7 @@
             message_sent: 'message_sent',
             resend_wait: 'resend_wait',
             resend_sent: 'resend_sent',
+            instagram_limited: 'instagram_limited',
             resend_unavailable: 'resend_unavailable',
             no_outreach_channel: 'no_outreach_channel',
             hearing: 'hearing',

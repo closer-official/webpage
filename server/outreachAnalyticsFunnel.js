@@ -31,6 +31,7 @@ const SNAPSHOT_PHASE_KEYS = [
   'message_sent',
   'resend_wait',
   'resend_sent',
+  'instagram_limited',
   'resend_unavailable',
   'no_outreach_channel',
   'hearing',
@@ -147,7 +148,7 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
       from === 'message_sent' ||
       from === 'resend_wait' ||
       from === 'resend_sent' ||
-      from === 'resend_unavailable' ||
+      from === 'instagram_limited' ||
       from === 'no_outreach_channel'
     );
   }
@@ -176,13 +177,13 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
       (snap.message_sent || 0) +
       (snap.resend_wait || 0) +
       (snap.resend_sent || 0) +
-      (snap.resend_unavailable || 0);
+      (snap.instagram_limited || 0);
     const denom01 = nPostSend + nHearing;
     postSendHearingBlock = {
       count: nHearing,
       outbound: denom01,
       percent: pct(nHearing, denom01),
-      fromPhases: ['message_sent', 'resend_wait', 'resend_sent', 'resend_unavailable'],
+      fromPhases: ['message_sent', 'resend_wait', 'resend_sent', 'instagram_limited'],
     };
 
     const nProposal = snap.proposal || 0;
@@ -225,7 +226,7 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
     'message_sent',
     'resend_wait',
     'resend_sent',
-    'resend_unavailable',
+    'instagram_limited',
     'hearing',
     'proposal',
     'contracted',

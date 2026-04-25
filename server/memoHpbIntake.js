@@ -101,6 +101,7 @@ export function buildBeautyMemoPromotedDashboardRow({ shopName, accessText, memo
       message_sent: 'message_sent',
       resend_wait: 'resend_wait',
       resend_sent: 'resend_sent',
+      instagram_limited: 'instagram_limited',
       resend_unavailable: 'resend_unavailable',
       no_outreach_channel: 'no_outreach_channel',
       hearing: 'hearing',

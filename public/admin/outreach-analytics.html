@@ -252,7 +252,7 @@
     <main>
       <h1>送付・フェーズ分析</h1>
       <p class="sub">
-        メインは<strong>送信済み相当（<code>message_sent</code> / <code>resend_wait</code> / <code>resend_sent</code> / <code>resend_unavailable</code> / <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
+        メインは<strong>送信済み相当（<code>message_sent</code> / <code>resend_wait</code> / <code>resend_sent</code> / <code>instagram_limited</code> / <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
         <strong>templateId</strong> と <strong>曜日・時（日本時間）</strong>をさかのぼって表示します。ファネルのパーセントは<strong>ダッシュボード上の現在フェーズ件数</strong>で、例として送信済相当→ヒアリングは
         <strong>ヒアリング件数 ÷（送信済相当件数＋ヒアリング件数）</strong>です（絞り込みと同じ条件の送信済み案件のみ）。
       </p>
@@ -400,6 +400,7 @@
           message_sent: '送信済',
           resend_wait: '再送待ち',
           resend_sent: '再送済み',
+          instagram_limited: 'インスタ制限中',
           resend_unavailable: '再送不可',
           hearing: 'ヒアリング',
           proposal: '提案中',
@@ -505,9 +506,38 @@
           host.style.display = 'block';
           var denom = st.messageSentWithLinkedPreview;
           var opened = st.linkedPreviewOpenedAtLeastOnce;
+          var openedExternal = st.linkedPreviewOpenedAtLeastOnceExternal;
           var pct =
             denom > 0 && typeof opened === 'number' ? Math.round((10000 * opened) / denom) / 100 : null;
+          var pctExternal =
+            denom > 0 && typeof openedExternal === 'number'
+              ? Math.round((10000 * openedExternal) / denom) / 100
+              : null;
           var pctStr = pct == null ? '—' : String(pct) + '%';
+          var pctExternalStr = pctExternal == null ? '—' : String(pctExternal) + '%';
+          var details = Array.isArray(st.details) ? st.details : [];
+          var detailRows = details
+            .map(function (d) {
+              return (
+                '<tr>' +
+                '<td>' +
+                esc(d.shopName || d.itemId || '—') +
+                '</td>' +
+                '<td class="mono">' +
+                esc(d.itemId || '') +
+                '</td>' +
+                '<td>' +
+                esc(d.previewGetsExternal != null ? d.previewGetsExternal : '0') +
+                '（全体:' +
+                esc(d.previewGets != null ? d.previewGets : '0') +
+                '）</td>' +
+                '<td class="mono">' +
+                esc(d.lastExternalAt ? fmtIsoJstCompact(d.lastExternalAt) : '—') +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
           host.innerHTML =
             '<h2>デモURL開封（記録）</h2>' +
             '<p class="hint" style="margin:0 0 12px">' +
@@ -529,7 +559,22 @@
             '<span>開封率（紐づけ分母）: <strong>' +
             esc(pctStr) +
             '</strong></span>' +
+            '<span>自分除外GET合計: <strong>' +
+            esc(st.totalPreviewGetsOnLinkedExternal != null ? st.totalPreviewGetsOnLinkedExternal : '—') +
+            '</strong></span>' +
+            '<span>自分除外開封率: <strong>' +
+            esc(pctExternalStr) +
+            '</strong></span>' +
             '</div>';
+          host.innerHTML +=
+            '<details style="margin-top:12px">' +
+            '<summary>店舗別内訳（折りたたみ）</summary>' +
+            '<div style="overflow:auto;margin-top:8px">' +
+            '<table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
+            '<thead><tr><th style="text-align:left">店舗</th><th style="text-align:left">案件ID</th><th style="text-align:left">GET数（自分除外）</th><th style="text-align:left">最終開封（自分除外）</th></tr></thead>' +
+            '<tbody>' +
+            (detailRows || '<tr><td colspan="4">該当なし</td></tr>') +
+            '</tbody></table></div></details>';
         }
         function renderAreaViz(data) {
           var host = qs('#area-viz');

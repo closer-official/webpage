@@ -1210,7 +1210,8 @@ function templatePreviewPublicHandler(req, res) {
         res.setHeader('Content-Length', Buffer.byteLength(html, 'utf8'));
         return res.end();
       }
-      void store.recordTemplatePreviewView(templateId).catch((err) => {
+      const isOwnAdminView = adminAuthEnabled() && isAdminAuthenticated(req);
+      void store.recordTemplatePreviewView(templateId, { isAdminView: isOwnAdminView }).catch((err) => {
         console.error('[template-preview view]', err);
       });
       return res.send(html);
@@ -1979,6 +1980,7 @@ const OUTREACH_PHASE_CANONICAL = new Set([
   'message_sent',
   'resend_wait',
   'resend_sent',
+  'instagram_limited',
   'resend_unavailable',
   'hearing',
   'proposal',
@@ -2432,6 +2434,9 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     let messageSentWithLinkedPreview = 0;
     let linkedPreviewOpenedAtLeastOnce = 0;
     let totalPreviewGetsOnLinked = 0;
+    let linkedPreviewOpenedAtLeastOnceExternal = 0;
+    let totalPreviewGetsOnLinkedExternal = 0;
+    const previewOpenDetails = [];
     for (const e of list) {
       if (!e || e.type !== 'message_sent') continue;
       const row = rowById.get(String(e.itemId || '').trim());
@@ -2440,18 +2445,49 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       messageSentWithLinkedPreview += 1;
       const rec = viewMap[cid];
       const n = rec && typeof rec === 'object' ? Number(rec.count) || 0 : 0;
+      const nExternal =
+        rec && typeof rec === 'object'
+          ? rec.countExternal != null
+            ? Number(rec.countExternal) || 0
+            : Number(rec.count) || 0
+          : 0;
       if (n > 0) {
         linkedPreviewOpenedAtLeastOnce += 1;
         totalPreviewGetsOnLinked += n;
       }
+      if (nExternal > 0) {
+        linkedPreviewOpenedAtLeastOnceExternal += 1;
+        totalPreviewGetsOnLinkedExternal += nExternal;
+      }
+      previewOpenDetails.push({
+        itemId: String(e.itemId || ''),
+        shopName: String(e.shopName || '').trim() || pickShopName(row),
+        templateCustomizationId: cid,
+        previewGets: n,
+        previewGetsExternal: nExternal,
+        opened: n > 0,
+        openedExternal: nExternal > 0,
+        firstAt: rec && typeof rec === 'object' ? rec.firstAt || null : null,
+        lastAt: rec && typeof rec === 'object' ? rec.lastAt || null : null,
+        firstExternalAt: rec && typeof rec === 'object' ? rec.firstExternalAt || null : null,
+        lastExternalAt: rec && typeof rec === 'object' ? rec.lastExternalAt || null : null,
+      });
     }
+    previewOpenDetails.sort((a, b) => {
+      const da = Number(a.previewGetsExternal) || 0;
+      const db = Number(b.previewGetsExternal) || 0;
+      return db - da || String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja');
+    });
     previewOpenStats = {
       messageSentInFilter: sends,
       messageSentWithLinkedPreview,
       linkedPreviewOpenedAtLeastOnce,
       totalPreviewGetsOnLinked,
+      linkedPreviewOpenedAtLeastOnceExternal,
+      totalPreviewGetsOnLinkedExternal,
+      details: previewOpenDetails,
       note:
-        '「開封」は /api/template-preview/… への GET を数えます。自分の確認・リンクプレビュー・ボットも含まれる場合があります。',
+        '「開封」は /api/template-preview/… への GET を数えます。リンクプレビュー・ボットを含みます。除外（自分）は管理者ログイン状態で開いた分のみ判定できます。',
     };
   }
 
@@ -2602,6 +2638,7 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     'message_sent',
     'resend_wait',
     'resend_sent',
+    'instagram_limited',
     'resend_unavailable',
     'no_outreach_channel',
     'hearing',
@@ -2610,7 +2647,7 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     'lost',
   ]);
   if (!allowed.has(uiPhase)) {
-    return res.status(400).json({ error: 'outreachPhaseUi が無効です（10フェーズのいずれかを指定してください）' });
+    return res.status(400).json({ error: 'outreachPhaseUi が無効です（11フェーズのいずれかを指定してください）' });
   }
   const raw = await store.getBeautyMemoLeads();
   const list = [...(Array.isArray(raw) ? raw : [])];
@@ -2818,9 +2855,10 @@ app.post('/api/outreach/opt-out', async (req, res) => {
       return res.status(400).json({ error: 'このリンクは現在ご利用いただけません。' });
     }
     row.status = 'email_sent';
-    row.outreachPhase = 'lost';
+    row.outreachPhase = 'resend_unavailable';
     row.outreachPhaseChangedAt = new Date().toISOString();
     row.sleepUntil = undefined;
+    row.outreachLostAt = undefined;
     row.optOutFeedback = feedback || undefined;
     row.optedOutAt = new Date().toISOString();
     if (pool === 'main') await store.setDashboard(main);
@@ -2896,10 +2934,24 @@ function tickMaybeMoveResendSentToLost(row) {
   return true;
 }
 
+function tickMaybeMoveInstagramLimitedToLost(row) {
+  if (row.optedOutAt) return false;
+  if (row.status !== 'email_sent') return false;
+  if (String(row.outreachPhase || '') !== 'instagram_limited') return false;
+  const baseAt = row.outreachPhaseChangedAt || row.updatedAt || row.createdAt;
+  if (!baseAt) return false;
+  const deadline = addDaysIso(baseAt, 7);
+  if (new Date(deadline).getTime() > Date.now()) return false;
+  row.outreachPhase = 'lost';
+  row.outreachPhaseChangedAt = new Date().toISOString();
+  row.outreachLostAt = new Date().toISOString();
+  return true;
+}
+
 /**
  * 提案中でフォロー開始から3か月経過 → 自動で送信済み（再アプローチ用）
  * 送信済みから5日経過 → 再送待ち
- * 再送済みから7日間フェーズ変更なし → 失注
+ * 再送済み/インスタ制限中から7日間フェーズ変更なし → 失注
  * 失注（却下 or 送信済み＋lost）から3か月経過 → 送信前へ戻す
  * Vercel Cron 等から 1 日 1 回 GET。CRON_SECRET があるときは ?secret= または x-cron-secret
  */
@@ -2915,6 +2967,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
     let bumped = 0;
     let resendWaitAuto = 0;
     let lostFromResendAuto = 0;
+    let lostFromInstagramLimitAuto = 0;
     let lostReset = 0;
     let changed = false;
     const bumpList = (arr) => {
@@ -2941,6 +2994,10 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
           lostFromResendAuto += 1;
           changed = true;
         }
+        if (tickMaybeMoveInstagramLimitedToLost(row)) {
+          lostFromInstagramLimitAuto += 1;
+          changed = true;
+        }
         if (tickMaybeResetLostToPreSend(row)) {
           lostReset += 1;
           changed = true;
@@ -2953,7 +3010,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
       await store.setDashboard(main);
       await store.setBeautyDashboard(beauty);
     }
-    res.json({ ok: true, bumped, resendWaitAuto, lostFromResendAuto, lostReset });
+    res.json({ ok: true, bumped, resendWaitAuto, lostFromResendAuto, lostFromInstagramLimitAuto, lostReset });
   } catch (e) {
     console.error('[outreach/phase-tick]', e);
     res.status(500).json({ error: e?.message || 'tick failed' });

@@ -314,7 +314,7 @@
         color: #1c1a17;
         font-size: 0.82rem;
       }
-      /* 10フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
+      /* 11フェーズ：選択中の値でセル全体の色が一目で分かる（Excel風一覧・カード共通） */
       select.op-phase-select {
         font-weight: 600;
         border-width: 2px;
@@ -342,6 +342,11 @@
         background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
         color: #ccfbf1;
         border-color: #2dd4bf;
+      }
+      select.op-phase-select[data-phase='instagram_limited'] {
+        background: linear-gradient(180deg, #4f46e5 0%, #312e81 100%);
+        color: #e0e7ff;
+        border-color: #818cf8;
       }
       select.op-phase-select[data-phase='resend_unavailable'] {
         background: linear-gradient(180deg, #7c2d12 0%, #431407 100%);
@@ -1001,7 +1006,7 @@
     <div class="app-head">
       <h1>送付・フェーズ管理（美容室）</h1>
       <p class="sub">
-        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧（美容）</strong>に残っている案件が、ここに<strong>送信前</strong>相当の行としても現れます（プルダウンは10種すべて選べます）。<strong>送信前</strong>以外に変えると<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の10種類</strong>です：送信前／送信済み／再送待ち／再送済み／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
+        案件一覧は<strong>フェーズ別の2段プルダウン</strong>（区分 → 店名）で選び、選んだ店だけ詳細カードを表示します。検索を使うと一覧表示に切り替わります。店名（ドラフト紐づけあり）は<strong>店舗ドラフト編集</strong>へのリンクです（カード表示では住所は出しません）。<strong>一覧表（Excel風）</strong>では<strong>住所列</strong>・<strong>チェックによるまとめて削除</strong>・行ごとの<strong>削除列</strong>があります。<strong>メモリード一覧（美容）</strong>に残っている案件が、ここに<strong>送信前</strong>相当の行としても現れます（プルダウンは11種すべて選べます）。<strong>送信前</strong>以外に変えると<strong>メモリード一覧からは消え</strong>、この画面では<strong>通常の案件行</strong>として引き続き編集できます。区分・検索の表示・各店のプルダウンは<strong>次の11種類</strong>です：送信前／送信済み／再送待ち／再送済み／インスタ制限中／再送不可／SNSなし・ウェブページ制作不可／ヒアリング中／提案中／契約済み／失注。<strong>各行の下</strong>に<strong>プレビューページURL</strong>と<strong>配信停止ページURL</strong>を表示します（ドラフトと紐づいている場合のみプレビューが出ます）。<strong>提案中</strong>のままフォロー開始から<strong>3か月</strong>経過すると、自動で<strong>送信済み</strong>に戻ります（毎日
         <code>/api/outreach/phase-tick</code>
         の Cron 実行時）。<strong>失注</strong>（却下、または送信済みで失注フェーズ）から<strong>3か月</strong>経過すると、自動で<strong>送信前</strong>（承認待ち相当）に戻ります（店主が<strong>配信停止</strong>した案件は除外）。
       </p>
@@ -1540,6 +1545,7 @@
           'message_sent',
           'resend_wait',
           'resend_sent',
+          'instagram_limited',
           'resend_unavailable',
           'no_outreach_channel',
           'hearing',
@@ -1549,12 +1555,13 @@
           'lost',
         ];
 
-        /** 検索・区分・店ごとプルダウン共通の10種（表記はこれだけ） */
+        /** 検索・区分・店ごとプルダウン共通の11種（表記はこれだけ） */
         var SEVEN_PHASE_KEYS = [
           'before_send',
           'message_sent',
           'resend_wait',
           'resend_sent',
+          'instagram_limited',
           'resend_unavailable',
           'no_outreach_channel',
           'hearing',
@@ -1567,6 +1574,7 @@
           message_sent: '送信済み',
           resend_wait: '再送待ち',
           resend_sent: '再送済み',
+          instagram_limited: 'インスタ制限中',
           resend_unavailable: '再送不可',
           no_outreach_channel: 'SNSなし・ウェブページ制作不可',
           hearing: 'ヒアリング中',
@@ -2039,7 +2047,7 @@
           return 'pre_contact';
         }
 
-        /** 10種のどれに相当するか（契約済み＝contracted／支払い確認済み、失注＝lost／却下） */
+        /** 11種のどれに相当するか（契約済み＝contracted／支払い確認済み、失注＝lost／却下） */
         function sevenPhaseKey(item) {
           if (item.status === 'pending' || item.status === 'approved') return 'before_send';
           if (item.status === 'rejected') return 'lost';
@@ -2049,6 +2057,7 @@
           if (ph === 'message_sent') return 'message_sent';
           if (ph === 'resend_wait') return 'resend_wait';
           if (ph === 'resend_sent') return 'resend_sent';
+          if (ph === 'instagram_limited') return 'instagram_limited';
           if (ph === 'resend_unavailable') return 'resend_unavailable';
           if (ph === 'no_outreach_channel') return 'no_outreach_channel';
           if (ph === 'hearing') return 'hearing';
@@ -2093,13 +2102,13 @@
             (counts.message_sent || 0) +
             (counts.resend_wait || 0) +
             (counts.resend_sent || 0) +
-            (counts.resend_unavailable || 0) +
+            (counts.instagram_limited || 0) +
             (counts.hearing || 0) +
             (counts.proposal || 0) +
             (counts.contracted || 0) +
             (counts.lost || 0);
           var progressed = (counts.hearing || 0) + (counts.proposal || 0) + (counts.contracted || 0);
-          var needingFollow = (counts.resend_wait || 0) + (counts.resend_sent || 0);
+          var needingFollow = (counts.resend_wait || 0) + (counts.resend_sent || 0) + (counts.instagram_limited || 0);
 
           var panel = el('div', { class: 'panel phase-insights' });
           panel.appendChild(el('h2', { text: '再現性チェック・次アクション' }));
@@ -2117,6 +2126,7 @@
             ['反応あり（ヒアリング以降）', progressed],
             ['反応率', fmtRate(progressed, contacted)],
             ['再送対応待ち', needingFollow],
+            ['インスタ制限中', counts.instagram_limited || 0],
             ['再送不可', counts.resend_unavailable || 0],
           ].forEach(function (x) {
             var c = el('div', { class: 'phase-insights__card' });
@@ -2128,8 +2138,9 @@
 
           var tips = el('ul', { class: 'phase-insights__list' });
           tips.appendChild(el('li', { text: '送信済みは5日後に自動で「再送待ち」へ移動します。再送したら手動で「再送済み」へ変更してください。' }));
-          tips.appendChild(el('li', { text: '再送済みは7日間フェーズ変更がなければ自動で失注になります。反応があればヒアリング中へ移動してください。' }));
-          tips.appendChild(el('li', { text: '再送不可はSNS不備・連絡不可など、再送母数から外す理由のある案件に使います。' }));
+          tips.appendChild(el('li', { text: '再送済みとインスタ制限中は7日間フェーズ変更がなければ自動で失注になります。反応があればヒアリング中へ移動してください。' }));
+          tips.appendChild(el('li', { text: 'インスタ制限中はInstagramの制限で1件しか送れない相手に使います。' }));
+          tips.appendChild(el('li', { text: '再送不可は「送らないでくれ」と言われた相手の最終停止フェーズです。失注の3か月復帰対象には含めません。' }));
           tips.appendChild(el('li', { text: '狙う数字は「反応あり ÷ 接触済み母数」。同じ文面・同じ送信条件でこの率を比較すると再現性を確認できます。' }));
           var staleWait = arr
             .filter(function (i) {
@@ -2415,7 +2426,7 @@
           return SEVEN_PHASE_LABELS[k] || String(item.status || '—');
         }
 
-        /** フェーズ確認用：1段目プルダウンの区分一覧（10件） */
+        /** フェーズ確認用：1段目プルダウンの区分一覧（11件） */
         function buildPhaseBrowserGroups() {
           return [
             {
@@ -2444,6 +2455,13 @@
               label: SEVEN_PHASE_LABELS.resend_sent,
               filter: function (i) {
                 return sevenPhaseKey(i) === 'resend_sent';
+              },
+            },
+            {
+              id: 'g_instagram_limited',
+              label: SEVEN_PHASE_LABELS.instagram_limited,
+              filter: function (i) {
+                return sevenPhaseKey(i) === 'instagram_limited';
               },
             },
             {
@@ -2876,6 +2894,7 @@
             message_sent: 'message_sent',
             resend_wait: 'resend_wait',
             resend_sent: 'resend_sent',
+            instagram_limited: 'instagram_limited',
             resend_unavailable: 'resend_unavailable',
             no_outreach_channel: 'no_outreach_channel',
             hearing: 'hearing',
@@ -2906,7 +2925,7 @@
 
         function renderPhaseSelect(item, loadFn) {
           var eff = sevenPhaseKey(item);
-          var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（10種）' }, []);
+          var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（11種）' }, []);
           SEVEN_PHASE_KEYS.forEach(function (k) {
             var opt = el('option', { value: k, text: SEVEN_PHASE_LABELS[k] });
             if (k === eff) opt.selected = true;
@@ -3383,7 +3402,7 @@
             el('p', {
               class: 'muted',
               style: 'margin: 0 0 6px; font-size: 0.8rem',
-              text: 'フェーズ（送信前でも次の10種から変更できます）',
+              text: 'フェーズ（送信前でも次の11種から変更できます）',
             }),
           );
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
@@ -3595,7 +3614,7 @@
           var headMeta = [
             { letter: 'A', desc: '店舗名・カードへ' },
             { letter: 'B', desc: '住所' },
-            { letter: 'C', desc: 'フェーズ（10種・メモ行は送信前から）' },
+            { letter: 'C', desc: 'フェーズ（11種・メモ行は送信前から）' },
             { letter: 'D', desc: '送信メッセージ' },
             { letter: 'E', desc: '削除（誤登録・重複）' },
           ];
@@ -3782,7 +3801,7 @@
           browserPanel.appendChild(
             el('p', {
               class: 'muted',
-              text: '① 区分（10種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
+              text: '① 区分（11種）→ ② 店名の順に選ぶと、下に詳細（URL・フェーズ変更）が開きます。店名はプルダウンにだけ出します。送信メッセージは一覧表と同様に小さく表示し、プルダウンから拡大編集できます。',
             }),
           );
 

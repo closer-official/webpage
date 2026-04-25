@@ -177,18 +177,25 @@ const fileStore = {
     const cur = read('templatePreviewViews');
     return Promise.resolve(cur && typeof cur === 'object' && !Array.isArray(cur) ? cur : {});
   },
-  recordTemplatePreviewView: (templateId) => {
+  recordTemplatePreviewView: (templateId, meta) => {
     const id = String(templateId || '').trim();
     if (!id) return Promise.resolve();
+    const isAdminView = !!(meta && meta.isAdminView);
     const cur = read('templatePreviewViews');
     const map = cur && typeof cur === 'object' && !Array.isArray(cur) ? { ...cur } : {};
     const prev = map[id] && typeof map[id] === 'object' ? map[id] : { count: 0 };
     const count = (Number(prev.count) || 0) + 1;
+    const countAdmin = (Number(prev.countAdmin) || 0) + (isAdminView ? 1 : 0);
+    const countExternal = (Number(prev.countExternal) || 0) + (isAdminView ? 0 : 1);
     const now = new Date().toISOString();
     map[id] = {
       count,
+      countAdmin,
+      countExternal,
       firstAt: prev.firstAt || now,
       lastAt: now,
+      firstExternalAt: prev.firstExternalAt || (!isAdminView ? now : undefined),
+      lastExternalAt: !isAdminView ? now : prev.lastExternalAt,
     };
     write('templatePreviewViews', map);
     return Promise.resolve();
