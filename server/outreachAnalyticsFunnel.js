@@ -31,6 +31,7 @@ const SNAPSHOT_PHASE_KEYS = [
   'message_sent',
   'resend_wait',
   'resend_sent',
+  'resend_unavailable',
   'no_outreach_channel',
   'hearing',
   'proposal',
@@ -142,7 +143,13 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
 
   /** UI上「送信後」相当（送信済/再送待ち/再送済み/SNSなし不可） */
   function isPostSendLike(from) {
-    return from === 'message_sent' || from === 'resend_wait' || from === 'resend_sent' || from === 'no_outreach_channel';
+    return (
+      from === 'message_sent' ||
+      from === 'resend_wait' ||
+      from === 'resend_sent' ||
+      from === 'resend_unavailable' ||
+      from === 'no_outreach_channel'
+    );
   }
 
   function pct(count, denom) {
@@ -165,13 +172,17 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
   let proposalContractedBlock;
   if (snap) {
     const nHearing = snap.hearing || 0;
-    const nPostSend = (snap.message_sent || 0) + (snap.resend_wait || 0) + (snap.resend_sent || 0);
+    const nPostSend =
+      (snap.message_sent || 0) +
+      (snap.resend_wait || 0) +
+      (snap.resend_sent || 0) +
+      (snap.resend_unavailable || 0);
     const denom01 = nPostSend + nHearing;
     postSendHearingBlock = {
       count: nHearing,
       outbound: denom01,
       percent: pct(nHearing, denom01),
-      fromPhases: ['message_sent', 'resend_wait', 'resend_sent'],
+      fromPhases: ['message_sent', 'resend_wait', 'resend_sent', 'resend_unavailable'],
     };
 
     const nProposal = snap.proposal || 0;
@@ -214,6 +225,7 @@ export function computeOutreachFunnelAndDrilldown(list, options = {}) {
     'message_sent',
     'resend_wait',
     'resend_sent',
+    'resend_unavailable',
     'hearing',
     'proposal',
     'contracted',

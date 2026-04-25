@@ -1979,6 +1979,7 @@ const OUTREACH_PHASE_CANONICAL = new Set([
   'message_sent',
   'resend_wait',
   'resend_sent',
+  'resend_unavailable',
   'hearing',
   'proposal',
   'contracted',
@@ -2601,6 +2602,7 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     'message_sent',
     'resend_wait',
     'resend_sent',
+    'resend_unavailable',
     'no_outreach_channel',
     'hearing',
     'proposal',
@@ -2608,7 +2610,7 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     'lost',
   ]);
   if (!allowed.has(uiPhase)) {
-    return res.status(400).json({ error: 'outreachPhaseUi が無効です（9フェーズのいずれかを指定してください）' });
+    return res.status(400).json({ error: 'outreachPhaseUi が無効です（10フェーズのいずれかを指定してください）' });
   }
   const raw = await store.getBeautyMemoLeads();
   const list = [...(Array.isArray(raw) ? raw : [])];

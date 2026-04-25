@@ -1165,6 +1165,9 @@
         var WORKER_APPROVED_PHASE_KEYS = ['pre_contact', 'first_contact'];
         var WORKER_SENT_PHASE_KEYS = [
           'message_sent',
+          'resend_wait',
+          'resend_sent',
+          'resend_unavailable',
           'no_outreach_channel',
           'hearing',
           'proposal',
@@ -1175,6 +1178,9 @@
         var WORKER_SEVEN_PHASE_KEYS = [
           'before_send',
           'message_sent',
+          'resend_wait',
+          'resend_sent',
+          'resend_unavailable',
           'no_outreach_channel',
           'hearing',
           'proposal',
@@ -1184,6 +1190,9 @@
         var WORKER_SEVEN_PHASE_LABELS = {
           before_send: '送信前',
           message_sent: '送信済み',
+          resend_wait: '再送待ち',
+          resend_sent: '再送済み',
+          resend_unavailable: '再送不可',
           no_outreach_channel: 'SNSなし・ウェブページ制作不可',
           hearing: 'ヒアリング中',
           proposal: '提案中',
@@ -1259,6 +1268,9 @@
           var ph = normalizeWorkerPhase(item);
           if (ph === 'contracted' || ph === 'payment_confirmed') return 'contracted';
           if (ph === 'message_sent') return 'message_sent';
+          if (ph === 'resend_wait') return 'resend_wait';
+          if (ph === 'resend_sent') return 'resend_sent';
+          if (ph === 'resend_unavailable') return 'resend_unavailable';
           if (ph === 'no_outreach_channel') return 'no_outreach_channel';
           if (ph === 'hearing') return 'hearing';
           if (ph === 'proposal') return 'proposal';
@@ -1320,6 +1332,9 @@
 
           var postMap = {
             message_sent: 'message_sent',
+            resend_wait: 'resend_wait',
+            resend_sent: 'resend_sent',
+            resend_unavailable: 'resend_unavailable',
             no_outreach_channel: 'no_outreach_channel',
             hearing: 'hearing',
             proposal: 'proposal',

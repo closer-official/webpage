@@ -252,7 +252,7 @@
     <main>
       <h1>送付・フェーズ分析</h1>
       <p class="sub">
-        メインは<strong>送信済み相当（フェーズ <code>message_sent</code> または <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
+        メインは<strong>送信済み相当（<code>message_sent</code> / <code>resend_wait</code> / <code>resend_sent</code> / <code>resend_unavailable</code> / <code>no_outreach_channel</code>）→ヒアリング</strong>に入った案件だけを対象に、<strong>直前の「送信済み操作」ログ</strong>から
         <strong>templateId</strong> と <strong>曜日・時（日本時間）</strong>をさかのぼって表示します。ファネルのパーセントは<strong>ダッシュボード上の現在フェーズ件数</strong>で、例として送信済相当→ヒアリングは
         <strong>ヒアリング件数 ÷（送信済相当件数＋ヒアリング件数）</strong>です（絞り込みと同じ条件の送信済み案件のみ）。
       </p>
@@ -398,6 +398,9 @@
           pre_contact: '接触前',
           first_contact: '初回接触',
           message_sent: '送信済',
+          resend_wait: '再送待ち',
+          resend_sent: '再送済み',
+          resend_unavailable: '再送不可',
           hearing: 'ヒアリング',
           proposal: '提案中',
           contracted: '契約済',
