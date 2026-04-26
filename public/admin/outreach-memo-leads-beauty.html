@@ -176,6 +176,28 @@
         color: var(--text);
         cursor: pointer;
       }
+      .btn-sm.is-loading {
+        position: relative;
+        opacity: 0.9;
+        cursor: wait;
+      }
+      .btn-sm.is-loading::before {
+        content: '';
+        display: inline-block;
+        width: 0.8em;
+        height: 0.8em;
+        margin-right: 0.42em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        vertical-align: -0.1em;
+        animation: memoSpin 0.7s linear infinite;
+      }
+      @keyframes memoSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
       .btn-sm.danger {
         border-color: #7f1d1d;
         color: #fecaca;
@@ -473,6 +495,10 @@
           <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
           <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://beauty.hotpepper.jp/...&#10;（ホットペッパー等・覚え書き）"></textarea>
           <div class="row-actions">
+            <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 0 0; font-size: 0.78rem">
+              <input type="checkbox" id="new-keep-manual-mode" checked />
+              連続入力モード（追加後に店名へ戻る）
+            </label>
             <button type="button" class="btn-sm primary" id="btn-add">追加する</button>
           </div>
         </div>
@@ -524,8 +550,22 @@
         function showOk(msg) {
           var e = document.getElementById('ok-msg');
           e.style.display = msg ? 'block' : 'none';
-          e.textContent = msg || '';
+          e.textContent = msg ? '✓ ' + msg : '';
           if (msg) setTimeout(function () { e.style.display = 'none'; }, 2400);
+        }
+
+        function setButtonBusy(btn, on, idleText, busyText) {
+          if (!btn) return;
+          if (!btn.getAttribute('data-idle-text') && idleText) btn.setAttribute('data-idle-text', idleText);
+          var idle = idleText || btn.getAttribute('data-idle-text') || btn.textContent || '';
+          btn.disabled = !!on;
+          if (on) {
+            btn.classList.add('is-loading');
+            btn.textContent = busyText || '処理中...';
+          } else {
+            btn.classList.remove('is-loading');
+            btn.textContent = idle;
+          }
         }
 
         function credFetch(path, opts) {
@@ -1272,6 +1312,7 @@
             del.textContent = '削除';
             del.onclick = function () {
               if (!confirm('このメモを削除しますか？')) return;
+              setButtonBusy(del, true, '削除', '削除中...');
               credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), { method: 'DELETE' })
                 .then(function (res) {
                   if (res.status === 204) return;
@@ -1285,6 +1326,9 @@
                 })
                 .catch(function (e) {
                   showErr(e.message || String(e));
+                })
+                .finally(function () {
+                  setButtonBusy(del, false, '削除');
                 });
             };
             actTd.appendChild(go);
@@ -1401,6 +1445,8 @@
         }
 
         document.getElementById('btn-hpb-parse').onclick = function () {
+          var parseBtn = document.getElementById('btn-hpb-parse');
+          setButtonBusy(parseBtn, true, '店名を解析', '解析中...');
           showErr('');
           var raw = document.getElementById('hpb-paste').value;
           hpbParsedRows = parseHotPepperBeautyBlocks(raw);
@@ -1410,6 +1456,7 @@
             window.hpbDupCtx = null;
             renderHpbPreview([]);
             showErr('店名を検出できませんでした。コピー範囲に「店名(読み)」の行と「ブックマークする」が含まれるか確認してください。');
+            setButtonBusy(parseBtn, false, '店名を解析');
             return;
           }
           if (host) {
@@ -1433,6 +1480,9 @@
                 hpbParsedRows.length +
                   '件を検出しました（既存一覧との照合はできませんでした。ログインと通信を確認してください）。',
               );
+            })
+            .finally(function () {
+              setButtonBusy(parseBtn, false, '店名を解析');
             });
         };
 
@@ -1444,6 +1494,7 @@
         };
 
         document.getElementById('btn-hpb-submit').onclick = function () {
+          var submitBtn = document.getElementById('btn-hpb-submit');
           var entries = [];
           var pickedIndices = [];
           var nameInputs = document.querySelectorAll('.hpb-name');
@@ -1472,6 +1523,7 @@
             return;
           }
           showErr('');
+          setButtonBusy(submitBtn, true, 'プレビューの行をすべて反映', '反映中...');
           credFetch(api + '/beauty-outreach/memo-leads/intake-batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1521,6 +1573,9 @@
             })
             .catch(function (e) {
               showErr(e.message || String(e));
+            })
+            .finally(function () {
+              setButtonBusy(submitBtn, false, 'プレビューの行をすべて反映');
             });
         };
 
@@ -1531,6 +1586,8 @@
 
         var btnAdd = document.getElementById('btn-add');
         if (btnAdd) {
+          var newNameEl = document.getElementById('new-name');
+          var keepManualEl = document.getElementById('new-keep-manual-mode');
           btnAdd.onclick = function () {
             var name = document.getElementById('new-name').value.trim();
             var memo = document.getElementById('new-memo').value.trim();
@@ -1548,6 +1605,7 @@
               return;
             }
             showErr('');
+            setButtonBusy(btnAdd, true, '追加する', '追加中...');
             credFetch(api + '/beauty-outreach/memo-leads', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1575,12 +1633,24 @@
                 if (ni) ni.value = '';
                 if (nh) nh.value = '';
                 showOk('追加しました');
+                if (keepManualEl && keepManualEl.checked && newNameEl) newNameEl.focus();
                 return loadList();
               })
               .catch(function (e) {
                 showErr(e.message || String(e));
+              })
+              .finally(function () {
+                setButtonBusy(btnAdd, false, '追加する');
               });
           };
+          if (newNameEl) {
+            newNameEl.addEventListener('keydown', function (ev) {
+              if (ev.key !== 'Enter') return;
+              ev.preventDefault();
+              if (btnAdd.disabled) return;
+              btnAdd.click();
+            });
+          }
         }
 
         var memoSortSel = document.getElementById('memo-list-sort');
@@ -1611,7 +1681,7 @@
               return;
             }
             if (!window.confirm(ids.length + '件のメモを削除しますか？\n取り消しはできません。')) return;
-            memoBulkDelBtn.disabled = true;
+            setButtonBusy(memoBulkDelBtn, true, '選択をまとめて削除', '削除中...');
             Promise.all(
               ids.map(function (id) {
                 return credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(id), {
@@ -1633,6 +1703,7 @@
                 return loadList();
               })
               .finally(function () {
+                setButtonBusy(memoBulkDelBtn, false, '選択をまとめて削除');
                 syncBulkDeleteBtn();
               });
           });
