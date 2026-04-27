@@ -382,6 +382,10 @@
         opacity: 0.72;
         cursor: wait;
       }
+      select.op-phase-select.is-saving {
+        opacity: 0.6;
+        cursor: progress;
+      }
       /* Windows のネイティブ候補リストで文字が薄くならないよう固定 */
       select.op-phase-select option {
         color: #1f2937;
@@ -1492,9 +1496,13 @@
           sel.value = dmPatternKey(item);
           sel.onchange = function () {
             setLastDmPattern(sel.value);
-            patchOutreachDmFields(item.id, { outreachDmPattern: sel.value }).catch(function (e) {
-              showErr(String(e.message || e));
-            });
+            patchOutreachDmFields(item.id, { outreachDmPattern: sel.value })
+              .then(function () {
+                showOk('DMテンプレを保存しました');
+              })
+              .catch(function (e) {
+                showErr(String(e.message || e));
+              });
           };
           dmWrap.appendChild(sel);
 
@@ -1512,20 +1520,26 @@
             value: String(item.outreachDmCustomFirstLine || ''),
           });
           var dmFirstLineTimer = null;
-          function saveFirstLine() {
-            patchOutreachDmFields(item.id, { outreachDmCustomFirstLine: inp.value }).catch(function (e) {
-              showErr(String(e.message || e));
-            });
+          function saveFirstLine(silent) {
+            patchOutreachDmFields(item.id, { outreachDmCustomFirstLine: inp.value })
+              .then(function () {
+                if (!silent) showOk('褒めポイントを保存しました');
+              })
+              .catch(function (e) {
+                showErr(String(e.message || e));
+              });
           }
           inp.addEventListener('input', function () {
             dmGateErr.style.display = 'none';
             dmGateErr.textContent = '';
             clearTimeout(dmFirstLineTimer);
-            dmFirstLineTimer = setTimeout(saveFirstLine, 600);
+            dmFirstLineTimer = setTimeout(function () {
+              saveFirstLine(true);
+            }, 600);
           });
           inp.addEventListener('blur', function () {
             clearTimeout(dmFirstLineTimer);
-            saveFirstLine();
+            saveFirstLine(false);
           });
           dmWrap.appendChild(inp);
           var dmGateErr = el('p', { class: 'dm-gate-err', text: '' });
@@ -3184,10 +3198,13 @@
             }
             syncOpPhaseSelectVisual(sel);
             sel.disabled = true;
+            sel.classList.add('is-saving');
             applyOutreachSevenPhase(item, v)
               .then(function () {
                 eff = v;
-                return loadFn();
+                return loadFn().then(function () {
+                  showOk('フェーズを「' + (SEVEN_PHASE_LABELS[v] || v) + '」に変更しました');
+                });
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
@@ -3196,6 +3213,7 @@
               })
               .finally(function () {
                 sel.disabled = false;
+                sel.classList.remove('is-saving');
                 syncOpPhaseSelectVisual(sel);
               });
           };
@@ -3219,6 +3237,7 @@
             var v = String(sel.value || 'unknown');
             var prev = cur;
             sel.disabled = true;
+            sel.classList.add('is-saving');
             apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id), {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
@@ -3230,7 +3249,9 @@
             })
               .then(function () {
                 cur = v;
-                return loadFn();
+                return loadFn().then(function () {
+                  showOk((isSecond ? '2nd' : '1st') + '既読ステータスを保存しました');
+                });
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
@@ -3238,6 +3259,7 @@
               })
               .finally(function () {
                 sel.disabled = false;
+                sel.classList.remove('is-saving');
               });
           };
           return sel;
@@ -3275,13 +3297,16 @@
             syncOpPhaseSelectVisual(sel);
             if (v === 'before_send') return;
             sel.disabled = true;
+            sel.classList.add('is-saving');
             apiJson('/api/beauty-outreach/memo-leads/' + encodeURIComponent(memo.id) + '/promote', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ outreachPhaseUi: v }),
             })
               .then(function () {
-                return loadFn();
+                return loadFn().then(function () {
+                  showOk('メモリードを送信前へ反映しました');
+                });
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
@@ -3290,6 +3315,7 @@
               })
               .finally(function () {
                 sel.disabled = false;
+                sel.classList.remove('is-saving');
                 syncOpPhaseSelectVisual(sel);
               });
           };
@@ -3619,6 +3645,39 @@
           var p = document.getElementById('load-err');
           p.style.display = msg ? 'block' : 'none';
           p.textContent = msg || '';
+        }
+
+        function ensureActionToast() {
+          var id = 'action-toast';
+          var n = document.getElementById(id);
+          if (n) return n;
+          n = document.createElement('div');
+          n.id = id;
+          n.style.position = 'fixed';
+          n.style.right = '16px';
+          n.style.bottom = '16px';
+          n.style.zIndex = '9999';
+          n.style.padding = '10px 14px';
+          n.style.borderRadius = '10px';
+          n.style.fontWeight = '700';
+          n.style.display = 'none';
+          n.style.boxShadow = '0 8px 24px rgba(0,0,0,0.28)';
+          document.body.appendChild(n);
+          return n;
+        }
+
+        function showOk(msg) {
+          if (!msg) return;
+          var n = ensureActionToast();
+          n.textContent = '✓ ' + msg;
+          n.style.background = '#16a34a';
+          n.style.color = '#ffffff';
+          n.style.display = 'block';
+          clearTimeout(showOk._t);
+          showOk._t = setTimeout(function () {
+            n.style.display = 'none';
+            n.textContent = '';
+          }, 1800);
         }
 
         async function apiJson(path, opts) {
@@ -4009,14 +4068,35 @@
             return box;
           }
           var arr = Array.isArray(items) ? items : [];
+          var firstCheckPhases = new Set([
+            'resend_wait',
+            'resend_sent',
+            'instagram_limited',
+            'resend_unavailable',
+            'no_outreach_channel',
+            'hearing',
+            'proposal',
+            'contracted',
+            'lost',
+          ]);
           var firstRows = arr.filter(function (it) {
-            return sevenPhaseKey(it) === 'resend_wait';
+            var phase = sevenPhaseKey(it);
+            if (!firstCheckPhases.has(phase)) return false;
+            return normalizeFirstReadState(it) === 'unknown';
           });
           var secondRows = arr.filter(function (it) {
-            return sevenPhaseKey(it) === 'lost';
+            var phase = sevenPhaseKey(it);
+            if (phase !== 'lost') return false;
+            return normalizeSecondReadState(it) === 'unknown';
           });
-          wrap.appendChild(section('1stコンタクト確認（再送待ち）', firstRows, 'first'));
-          wrap.appendChild(section('2ndコンタクト確認（失注）', secondRows, 'second'));
+          wrap.appendChild(
+            section(
+              '1stコンタクト未確認（確認対象フェーズで未確認の全件）',
+              firstRows,
+              'first',
+            ),
+          );
+          wrap.appendChild(section('2ndコンタクト未確認（失注で未確認の全件）', secondRows, 'second'));
           panel.appendChild(wrap);
           return panel;
         }
