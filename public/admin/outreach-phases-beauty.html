@@ -386,6 +386,16 @@
         opacity: 0.6;
         cursor: progress;
       }
+      select.op-phase-select.op-read-select[data-read='unread'] {
+        background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+        color: #dbeafe;
+        border-color: #60a5fa;
+      }
+      select.op-phase-select.op-read-select[data-read='read'] {
+        background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+        color: #fee2e2;
+        border-color: #f87171;
+      }
       /* Windows のネイティブ候補リストで文字が薄くならないよう固定 */
       select.op-phase-select option {
         color: #1f2937;
@@ -1384,7 +1394,7 @@
               'もしこういう形に少しでもご興味あれば、一言「詳細希望」と返信いただければ嬉しいです！\n' +
               '（不要でしたらそのままスルーで大丈夫です🙇‍♂️）',
             '10':
-              '○○様、突然の連絡失礼します。\n' +
+              '突然の連絡失礼します。\n' +
               '【コメント】を拝見して、ぜひ相談したいことがありご連絡しました。\n' +
               '\n' +
               '実は、こちらの施術の魅力がもっと伝わるような「専用の紹介ページ」を勝手に作ってみたのですが、一度見ていただけないでしょうか？\n' +
@@ -1398,7 +1408,7 @@
               'もしお店のプラスになりそうでしたら、詳細を送ります。\n' +
               '不要でしたらスルーしていただいて大丈夫です！',
             '11':
-              '○○様、こんにちは！\n' +
+              'こんにちは！\n' +
               '【コメント】が素敵で、ぜひ一度お願いしたいと思いご連絡しました。\n' +
               '\n' +
               'その前に、web制作をしている身として勝手ながら「お店の予約専用ページ」のサンプルを作ってみたので、空いた時間にチェックいただけませんか？\n' +
@@ -3172,6 +3182,16 @@
           sel.setAttribute('data-phase', v);
         }
 
+        function syncReadStateSelectVisual(sel) {
+          if (!sel) return;
+          var v = String(sel.value || 'unknown').trim();
+          if (v === 'unread' || v === 'read') {
+            sel.setAttribute('data-read', v);
+          } else {
+            sel.removeAttribute('data-read');
+          }
+        }
+
         function renderPhaseSelect(item, loadFn) {
           var eff = sevenPhaseKey(item);
           var sel = el('select', { class: 'op-phase-select', 'aria-label': '営業フェーズ（11種）' }, []);
@@ -3220,7 +3240,7 @@
           var isSecond = stageKey === 'second';
           var cur = isSecond ? normalizeSecondReadState(item) : normalizeFirstReadState(item);
           var options = opts && typeof opts === 'object' ? opts : {};
-          var sel = el('select', { class: 'op-phase-select', 'aria-label': '既読状態（手動）' }, []);
+          var sel = el('select', { class: 'op-phase-select op-read-select', 'aria-label': '既読状態（手動）' }, []);
           [
             { v: 'unknown', t: '未確認' },
             { v: 'unread', t: '未読' },
@@ -3230,9 +3250,11 @@
             if (x.v === cur) opt.selected = true;
             sel.appendChild(opt);
           });
+          syncReadStateSelectVisual(sel);
           sel.onchange = function () {
             var v = String(sel.value || 'unknown');
             var prev = cur;
+            syncReadStateSelectVisual(sel);
             sel.disabled = true;
             sel.classList.add('is-saving');
             apiJson('/api/beauty-outreach/dashboard/' + encodeURIComponent(item.id), {
@@ -3260,6 +3282,7 @@
               .catch(function (e) {
                 showErr(String(e.message || e));
                 sel.value = prev;
+                syncReadStateSelectVisual(sel);
               })
               .finally(function () {
                 sel.disabled = false;
