@@ -27,8 +27,10 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     row.replyWaitStartedAt = undefined;
     row.sleepUntil = undefined;
     row.outreachLostAt = undefined;
-    row.outreachReadState = undefined;
-    row.outreachReadCheckedAt = undefined;
+    row.outreachFirstReadState = undefined;
+    row.outreachFirstReadCheckedAt = undefined;
+    row.outreachSecondReadState = undefined;
+    row.outreachSecondReadCheckedAt = undefined;
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   }
   if (body.status === 'email_sent') {
@@ -52,22 +54,33 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !row.replyWaitStartedAt) {
       row.replyWaitStartedAt = new Date().toISOString();
     }
-    if (!row.outreachReadState) {
-      row.outreachReadState = 'unread';
-      row.outreachReadCheckedAt = new Date().toISOString();
+    if (!row.outreachFirstReadState) {
+      row.outreachFirstReadState = 'unread';
+      row.outreachFirstReadCheckedAt = new Date().toISOString();
     }
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   }
-  if (body.outreachReadState !== undefined) {
+  if (body.outreachFirstReadState !== undefined) {
     if (row.status !== 'email_sent') {
       return { status: 400, error: '既読状態は送信済み案件でのみ更新できます。' };
     }
-    const s = String(body.outreachReadState || '').trim();
+    const s = String(body.outreachFirstReadState || '').trim();
     if (!['unread', 'read', 'unknown'].includes(s)) {
-      return { status: 400, error: 'Invalid outreachReadState' };
+      return { status: 400, error: 'Invalid outreachFirstReadState' };
     }
-    row.outreachReadState = s;
-    row.outreachReadCheckedAt = new Date().toISOString();
+    row.outreachFirstReadState = s;
+    row.outreachFirstReadCheckedAt = new Date().toISOString();
+  }
+  if (body.outreachSecondReadState !== undefined) {
+    if (row.status !== 'email_sent') {
+      return { status: 400, error: '既読状態は送信済み案件でのみ更新できます。' };
+    }
+    const s = String(body.outreachSecondReadState || '').trim();
+    if (!['unread', 'read', 'unknown'].includes(s)) {
+      return { status: 400, error: 'Invalid outreachSecondReadState' };
+    }
+    row.outreachSecondReadState = s;
+    row.outreachSecondReadCheckedAt = new Date().toISOString();
   }
   if (body.content !== undefined) row.content = body.content;
   if (body.seo !== undefined) row.seo = body.seo;

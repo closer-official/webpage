@@ -625,41 +625,45 @@
         function renderReadReceiptStats(st) {
           var host = qs('#read-receipt-stats');
           if (!host) return;
-          if (!st || typeof st.sentTotal !== 'number') {
+          if (!st || !st.firstContact || !st.secondContact) {
             host.style.display = 'none';
             host.innerHTML = '';
             return;
           }
           host.style.display = 'block';
-          var rate = st.readRate == null ? '—' : String(st.readRate) + '%';
-          var byPattern = Array.isArray(st.byPattern) ? st.byPattern : [];
-          var rows = byPattern
-            .map(function (r) {
-              var rr = r.readRate == null ? '—' : String(r.readRate) + '%';
-              return (
-                '<tr>' +
-                '<td>' +
-                esc(r.pattern || '未設定') +
-                '</td>' +
-                '<td>' +
-                esc(r.sent != null ? r.sent : 0) +
-                '</td>' +
-                '<td>' +
-                esc(r.read != null ? r.read : 0) +
-                '</td>' +
-                '<td>' +
-                esc(r.unread != null ? r.unread : 0) +
-                '</td>' +
-                '<td>' +
-                esc(r.unknown != null ? r.unknown : 0) +
-                '</td>' +
-                '<td>' +
-                esc(rr) +
-                '</td>' +
-                '</tr>'
-              );
-            })
-            .join('');
+          function rowsFor(list) {
+            return (Array.isArray(list) ? list : [])
+              .map(function (r) {
+                var rr = r.readRate == null ? '—' : String(r.readRate) + '%';
+                return (
+                  '<tr>' +
+                  '<td>' +
+                  esc(r.pattern || '未設定') +
+                  '</td>' +
+                  '<td>' +
+                  esc(r.sent != null ? r.sent : 0) +
+                  '</td>' +
+                  '<td>' +
+                  esc(r.read != null ? r.read : 0) +
+                  '</td>' +
+                  '<td>' +
+                  esc(r.unread != null ? r.unread : 0) +
+                  '</td>' +
+                  '<td>' +
+                  esc(r.unknown != null ? r.unknown : 0) +
+                  '</td>' +
+                  '<td>' +
+                  esc(rr) +
+                  '</td>' +
+                  '</tr>'
+                );
+              })
+              .join('');
+          }
+          var first = st.firstContact || {};
+          var second = st.secondContact || {};
+          var firstRate = first.readRate == null ? '—' : String(first.readRate) + '%';
+          var secondRate = second.readRate == null ? '—' : String(second.readRate) + '%';
           var snap = st.phaseReadSnapshot || {};
           var rw = snap.resend_wait || {};
           var ls = snap.lost || {};
@@ -669,26 +673,30 @@
             esc(st.note || '') +
             '</p>' +
             '<div class="summary" style="display:flex;flex-wrap:wrap;gap:12px 20px;margin:0">' +
-            '<span>送信数: <strong>' +
-            esc(st.sentTotal) +
+            '<span>1st確認数: <strong>' +
+            esc(first.total != null ? first.total : 0) +
             '</strong></span>' +
-            '<span>既読: <strong>' +
-            esc(st.readTotal) +
+            '<span>1st既読率: <strong>' +
+            esc(firstRate) +
             '</strong></span>' +
-            '<span>未読: <strong>' +
-            esc(st.unreadTotal) +
+            '<span>2nd確認数: <strong>' +
+            esc(second.total != null ? second.total : 0) +
             '</strong></span>' +
-            '<span>未確認: <strong>' +
-            esc(st.unknownTotal) +
-            '</strong></span>' +
-            '<span>既読率: <strong>' +
-            esc(rate) +
+            '<span>2nd既読率: <strong>' +
+            esc(secondRate) +
             '</strong></span>' +
             '</div>' +
+            '<h3 style="margin:12px 0 6px">1stコンタクト（再送待ち時点）テンプレ別</h3>' +
             '<div style="overflow:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
             '<thead><tr><th style="text-align:left">DMテンプレ</th><th style="text-align:left">送信数</th><th style="text-align:left">既読</th><th style="text-align:left">未読</th><th style="text-align:left">未確認</th><th style="text-align:left">既読率</th></tr></thead>' +
             '<tbody>' +
-            (rows || '<tr><td colspan="6">該当なし</td></tr>') +
+            (rowsFor(first.byPattern) || '<tr><td colspan="6">該当なし</td></tr>') +
+            '</tbody></table></div>' +
+            '<h3 style="margin:12px 0 6px">2ndコンタクト（失注時点）テンプレ別</h3>' +
+            '<div style="overflow:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
+            '<thead><tr><th style="text-align:left">DMテンプレ</th><th style="text-align:left">送信数</th><th style="text-align:left">既読</th><th style="text-align:left">未読</th><th style="text-align:left">未確認</th><th style="text-align:left">既読率</th></tr></thead>' +
+            '<tbody>' +
+            (rowsFor(second.byPattern) || '<tr><td colspan="6">該当なし</td></tr>') +
             '</tbody></table></div>' +
             '<details style="margin-top:10px"><summary>自動遷移タイミング向けスナップショット（現在）</summary>' +
             '<ul style="margin:8px 0 0;padding-left:1.1rem">' +

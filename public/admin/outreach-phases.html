@@ -2069,8 +2069,13 @@
           return daysSinceIso(item && (item.outreachPhaseChangedAt || item.updatedAt || item.createdAt));
         }
 
-        function normalizeOutreachReadState(item) {
-          var s = String((item && item.outreachReadState) || '').trim();
+        function normalizeFirstReadState(item) {
+          var s = String((item && item.outreachFirstReadState) || '').trim();
+          return ['unread', 'read', 'unknown'].indexOf(s) >= 0 ? s : 'unknown';
+        }
+
+        function normalizeSecondReadState(item) {
+          var s = String((item && item.outreachSecondReadState) || '').trim();
           return ['unread', 'read', 'unknown'].indexOf(s) >= 0 ? s : 'unknown';
         }
 
@@ -2116,17 +2121,17 @@
           if (ph === 'message_sent') {
             var atResendWait = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 5);
             if (!atResendWait) return '';
-            return '自動予定: 5日後に再送待ちへ（' + fmtDateJaShort(atResendWait) + '） / 既読: ' + outreachReadStateLabel(normalizeOutreachReadState(item));
+            return '自動予定: 5日後に再送待ちへ（' + fmtDateJaShort(atResendWait) + '） / 1st既読: ' + outreachReadStateLabel(normalizeFirstReadState(item));
           }
           if (ph === 'resend_sent') {
             var atLostFromResend = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 7);
             if (!atLostFromResend) return '';
-            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromResend) + '） / 既読: ' + outreachReadStateLabel(normalizeOutreachReadState(item));
+            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromResend) + '） / 2nd既読: ' + outreachReadStateLabel(normalizeSecondReadState(item));
           }
           if (ph === 'instagram_limited') {
             var atLostFromInsta = addDaysIso(item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 7);
             if (!atLostFromInsta) return '';
-            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromInsta) + '） / 既読: ' + outreachReadStateLabel(normalizeOutreachReadState(item));
+            return '自動予定: 7日後に失注へ（' + fmtDateJaShort(atLostFromInsta) + '） / 2nd既読: ' + outreachReadStateLabel(normalizeSecondReadState(item));
           }
           if (ph === 'proposal') {
             var atBackToSent = addMonthsIso(item.replyWaitStartedAt || item.outreachPhaseChangedAt || item.updatedAt || item.createdAt, 3);
@@ -2187,14 +2192,15 @@
           var lostRead = 0;
           arr.forEach(function (item) {
             var k = sevenPhaseKey(item);
-            var rs = normalizeOutreachReadState(item);
             if (k === 'resend_wait') {
+              var rs = normalizeFirstReadState(item);
               if (rs === 'read') resendWaitRead += 1;
               else if (rs === 'unread') resendWaitUnread += 1;
             }
             if (k === 'lost') {
-              if (rs === 'read') lostRead += 1;
-              else if (rs === 'unread') lostUnread += 1;
+              var rs2 = normalizeSecondReadState(item);
+              if (rs2 === 'read') lostRead += 1;
+              else if (rs2 === 'unread') lostUnread += 1;
             }
           });
 
@@ -3064,8 +3070,9 @@
           return sel;
         }
 
-        function renderReadStateSelect(item, loadFn) {
-          var cur = normalizeOutreachReadState(item);
+        function renderReadStateSelect(item, loadFn, stageKey) {
+          var isSecond = stageKey === 'second';
+          var cur = isSecond ? normalizeSecondReadState(item) : normalizeFirstReadState(item);
           var sel = el('select', { class: 'op-phase-select', 'aria-label': '既読状態（手動）' }, []);
           [
             { v: 'unknown', t: '未確認' },
@@ -3083,7 +3090,11 @@
             apiJson('/api/dashboard/' + encodeURIComponent(item.id), {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(outreachPatchPayload({ outreachReadState: v })),
+              body: JSON.stringify(
+                outreachPatchPayload(
+                  isSecond ? { outreachSecondReadState: v } : { outreachFirstReadState: v },
+                ),
+              ),
             })
               .then(function () {
                 cur = v;
@@ -3464,8 +3475,14 @@
           );
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
           if (item.status === 'email_sent') {
-            statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '既読状態（手動記録）' }));
-            statusBlock.appendChild(renderReadStateSelect(item, loadFn));
+            var sp = sevenPhaseKey(item);
+            if (sp === 'resend_wait') {
+              statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '1stコンタクト既読（再送待ちで確認）' }));
+              statusBlock.appendChild(renderReadStateSelect(item, loadFn, 'first'));
+            } else if (sp === 'lost') {
+              statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '2ndコンタクト既読（失注時に確認）' }));
+              statusBlock.appendChild(renderReadStateSelect(item, loadFn, 'second'));
+            }
           }
           var curPhase = sevenPhaseKey(item);
           var phaseHint = phaseActionHintLabel(curPhase);

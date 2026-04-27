@@ -394,10 +394,14 @@ export interface DashboardItem {
   optOutFeedback?: string;
   /** 配信停止が記録された日時（ISO） */
   optedOutAt?: string;
-  /** 手動記録の既読状態（送信済み案件向け） */
-  outreachReadState?: 'unread' | 'read' | 'unknown';
-  /** 既読状態を最後に更新した日時（ISO） */
-  outreachReadCheckedAt?: string;
+  /** 手動記録: 1stコンタクト既読状態（再送待ちで確認） */
+  outreachFirstReadState?: 'unread' | 'read' | 'unknown';
+  /** 1stコンタクト既読状態を最後に更新した日時（ISO） */
+  outreachFirstReadCheckedAt?: string;
+  /** 手動記録: 2ndコンタクト既読状態（失注時点で確認） */
+  outreachSecondReadState?: 'unread' | 'read' | 'unknown';
+  /** 2ndコンタクト既読状態を最後に更新した日時（ISO） */
+  outreachSecondReadCheckedAt?: string;
   /**
    * 失注（却下 or 送信済みかつ outreachPhase === lost）に入った日時（ISO）。
    * 未設定の旧データは phase-tick 初回で createdAt/updatedAt から補完され、3か月後に送信前へ戻る。
