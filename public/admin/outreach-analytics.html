@@ -517,6 +517,26 @@
             });
           });
         }
+
+        function patchDmPattern(itemId, isBeauty, patternValue) {
+          var id = String(itemId || '').trim();
+          var p = String(patternValue || '').trim();
+          if (!id) return Promise.reject(new Error('itemId が不正です。'));
+          if (!/^(?:[1-9]|10|11)$/.test(p)) return Promise.reject(new Error('テンプレ番号が不正です。'));
+          var endpoint = isBeauty
+            ? '/api/beauty-outreach/dashboard/' + encodeURIComponent(id)
+            : '/api/dashboard/' + encodeURIComponent(id);
+          return credFetch((api || '') + endpoint, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ outreachDmPattern: p }),
+          }).then(function (r) {
+            return r.json().then(function (j) {
+              if (!r.ok) throw new Error((j && j.error) || r.statusText || 'テンプレ更新に失敗しました。');
+              return j;
+            });
+          });
+        }
         function renderPreviewOpenStats(st) {
           var host = qs('#preview-open-stats');
           if (!host) return;
@@ -714,6 +734,49 @@
               })
               .join('');
           }
+          function readStateJa(v) {
+            var s = String(v || '').trim();
+            if (s === 'read') return '既読';
+            if (s === 'unread') return '未読';
+            return '未確認';
+          }
+          function rowsForUnsetPatternEditors(list) {
+            return (Array.isArray(list) ? list : [])
+              .map(function (r) {
+                var key = esc(String(r.itemId || ''));
+                var opts = ['1','2','3','4','5','6','7','8','9','10','11']
+                  .map(function (v) {
+                    return '<option value="' + v + '">' + v + '</option>';
+                  })
+                  .join('');
+                return (
+                  '<tr>' +
+                  '<td>' +
+                  esc(r.shopName || '') +
+                  '</td>' +
+                  '<td>' +
+                  esc(r.stage === 'second' ? '2nd' : '1st') +
+                  '</td>' +
+                  '<td>' +
+                  esc(jaPhase(r.phase || '')) +
+                  '</td>' +
+                  '<td>' +
+                  esc(readStateJa(r.readState)) +
+                  '</td>' +
+                  '<td>' +
+                  '<select data-pattern-editor="1" data-item-id="' +
+                  key +
+                  '" data-beauty="' +
+                  (r.segmentBeauty ? '1' : '0') +
+                  '" style="min-width:82px"><option value="">選択</option>' +
+                  opts +
+                  '</select>' +
+                  '</td>' +
+                  '</tr>'
+                );
+              })
+              .join('');
+          }
           var first = st.firstContact || {};
           var second = st.secondContact || {};
           var firstRate = first.readRate == null ? '—' : String(first.readRate) + '%';
@@ -723,6 +786,7 @@
           var ls = snap.lost || {};
           var firstUnknownItems = Array.isArray(st.firstUnknownItems) ? st.firstUnknownItems : [];
           var secondUnknownItems = Array.isArray(st.secondUnknownItems) ? st.secondUnknownItems : [];
+          var unsetPatternItems = Array.isArray(st.unsetPatternItems) ? st.unsetPatternItems : [];
           host.innerHTML =
             '<h2>既読テスト・手動記録（テンプレ別）</h2>' +
             '<p class="hint" style="margin:0 0 10px">' +
@@ -788,6 +852,14 @@
             '<thead><tr><th style="text-align:left">DMテンプレ</th><th style="text-align:left">店舗</th><th style="text-align:left">現在フェーズ</th><th style="text-align:left">更新</th></tr></thead>' +
             '<tbody>' +
             (rowsForUnknownEditors(secondUnknownItems, 'second') || '<tr><td colspan="4">該当なし</td></tr>') +
+            '</tbody></table></div>' +
+            '<h3 style="margin:12px 0 6px">テンプレ未設定（' +
+            esc(unsetPatternItems.length) +
+            '件）</h3>' +
+            '<div style="overflow:auto;margin-top:6px"><table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
+            '<thead><tr><th style="text-align:left">店舗</th><th style="text-align:left">対象</th><th style="text-align:left">現在フェーズ</th><th style="text-align:left">既読状態</th><th style="text-align:left">テンプレ設定</th></tr></thead>' +
+            '<tbody>' +
+            (rowsForUnsetPatternEditors(unsetPatternItems) || '<tr><td colspan="5">該当なし</td></tr>') +
             '</tbody></table></div></details>';
 
           host.querySelectorAll('select[data-read-editor="1"]').forEach(function (sel) {
@@ -799,6 +871,29 @@
               var isBeauty = String(sel.getAttribute('data-beauty') || '') === '1';
               sel.disabled = true;
               patchReadReceiptState(id, isBeauty, stage, next)
+                .then(function () {
+                  loadSummaryAndFirstEvents();
+                })
+                .catch(function (e) {
+                  var err = qs('#err');
+                  if (err) {
+                    err.style.display = 'block';
+                    err.textContent = String(e.message || e);
+                  }
+                })
+                .finally(function () {
+                  sel.disabled = false;
+                });
+            });
+          });
+          host.querySelectorAll('select[data-pattern-editor="1"]').forEach(function (sel) {
+            sel.addEventListener('change', function () {
+              var next = String(sel.value || '').trim();
+              if (!next) return;
+              var id = String(sel.getAttribute('data-item-id') || '').trim();
+              var isBeauty = String(sel.getAttribute('data-beauty') || '') === '1';
+              sel.disabled = true;
+              patchDmPattern(id, isBeauty, next)
                 .then(function () {
                   loadSummaryAndFirstEvents();
                 })

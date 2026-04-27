@@ -2602,12 +2602,37 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
           sortPatternKey(a.outreachDmPattern) - sortPatternKey(b.outreachDmPattern) ||
           String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja'),
       );
+    const unsetPatternItems = [...firstTargetRows, ...lostRows]
+      .filter((row) => !String(row?.outreachDmPattern || '').trim())
+      .map((row) => {
+        const ph = String(row?.outreachPhase || '').trim();
+        const stage = ph === 'lost' ? 'second' : 'first';
+        const readState =
+          stage === 'second'
+            ? String(row?.outreachSecondReadState || '').trim() || 'unknown'
+            : String(row?.outreachFirstReadState || '').trim() || 'unknown';
+        return {
+          itemId: String(row?.id || ''),
+          shopName: pickShopName(row),
+          outreachDmPattern: '未設定',
+          stage,
+          phase: ph,
+          readState,
+          segmentBeauty: dashboardItemIsBeauty(row, customs),
+        };
+      })
+      .sort(
+        (a, b) =>
+          (a.stage === b.stage ? 0 : a.stage === 'first' ? -1 : 1) ||
+          String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja'),
+      );
     readReceiptStats = {
       firstContact,
       secondContact,
       phaseReadSnapshot,
       firstUnknownItems,
       secondUnknownItems,
+      unsetPatternItems,
       note:
         '既読は手動記録です。1stは送信実施後フェーズ（再送待ち/再送済み/インスタ制限中/ヒアリング中/提案中/契約済み/失注）、2ndは失注での確認値をテンプレ別に集計しています。',
     };
