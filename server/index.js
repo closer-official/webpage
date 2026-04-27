@@ -2491,6 +2491,12 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
         '「開封」は /api/template-preview/… への GET を数えます。リンクプレビュー・ボットを含みます。除外（自分）は管理者ログイン状態で開いた分のみ判定できます。',
     };
 
+    const READ_PATTERN_ORDER = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+    function sortPatternKey(p) {
+      const s = String(p || '').trim();
+      const idx = READ_PATTERN_ORDER.indexOf(s);
+      return idx >= 0 ? idx : 999;
+    }
     function buildPatternReadStats(rowsForPhase, stateKey) {
       const m = new Map();
       let total = 0;
@@ -2515,6 +2521,9 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
           unknown += 1;
         }
       }
+      READ_PATTERN_ORDER.forEach((p) => {
+        if (!m.has(p)) m.set(p, { pattern: p, sent: 0, read: 0, unread: 0, unknown: 0 });
+      });
       const byPattern = [...m.values()]
         .map((x) => ({
           pattern: x.pattern,
@@ -2524,7 +2533,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
           unknown: x.unknown,
           readRate: x.sent ? Math.round((10000 * x.read) / x.sent) / 100 : null,
         }))
-        .sort((a, b) => Number(b.sent) - Number(a.sent) || String(a.pattern).localeCompare(String(b.pattern), 'ja'));
+        .sort((a, b) => sortPatternKey(a.pattern) - sortPatternKey(b.pattern) || String(a.pattern).localeCompare(String(b.pattern), 'ja'));
       return {
         total,
         read,
@@ -2563,10 +2572,42 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     }
     const firstContact = buildPatternReadStats(firstTargetRows, 'outreachFirstReadState');
     const secondContact = buildPatternReadStats(lostRows, 'outreachSecondReadState');
+    const rawCust = await store.getTemplateCustomizations();
+    const customs = Array.isArray(rawCust) ? rawCust : [];
+    const firstUnknownItems = firstTargetRows
+      .filter((row) => String(row?.outreachFirstReadState || '').trim() !== 'read' && String(row?.outreachFirstReadState || '').trim() !== 'unread')
+      .map((row) => ({
+        itemId: String(row?.id || ''),
+        shopName: pickShopName(row),
+        outreachDmPattern: String(row?.outreachDmPattern || '').trim() || '未設定',
+        phase: String(row?.outreachPhase || '').trim(),
+        segmentBeauty: dashboardItemIsBeauty(row, customs),
+      }))
+      .sort(
+        (a, b) =>
+          sortPatternKey(a.outreachDmPattern) - sortPatternKey(b.outreachDmPattern) ||
+          String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja'),
+      );
+    const secondUnknownItems = lostRows
+      .filter((row) => String(row?.outreachSecondReadState || '').trim() !== 'read' && String(row?.outreachSecondReadState || '').trim() !== 'unread')
+      .map((row) => ({
+        itemId: String(row?.id || ''),
+        shopName: pickShopName(row),
+        outreachDmPattern: String(row?.outreachDmPattern || '').trim() || '未設定',
+        phase: String(row?.outreachPhase || '').trim(),
+        segmentBeauty: dashboardItemIsBeauty(row, customs),
+      }))
+      .sort(
+        (a, b) =>
+          sortPatternKey(a.outreachDmPattern) - sortPatternKey(b.outreachDmPattern) ||
+          String(a.shopName || '').localeCompare(String(b.shopName || ''), 'ja'),
+      );
     readReceiptStats = {
       firstContact,
       secondContact,
       phaseReadSnapshot,
+      firstUnknownItems,
+      secondUnknownItems,
       note:
         '既読は手動記録です。1stは送信実施後フェーズ（再送待ち/再送済み/インスタ制限中/ヒアリング中/提案中/契約済み/失注）、2ndは失注での確認値をテンプレ別に集計しています。',
     };
