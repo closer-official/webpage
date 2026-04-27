@@ -298,6 +298,7 @@
       <div class="panel summary" id="summary" style="display: none"></div>
 
       <div class="panel" id="preview-open-stats" style="display: none"></div>
+      <div class="panel" id="read-receipt-stats" style="display: none"></div>
 
       <div class="panel">
         <h2>エリア別 送信数・進行率</h2>
@@ -620,6 +621,93 @@
           if (selSort) selSort.onchange = renderDetailRows;
           renderDetailRows();
         }
+
+        function renderReadReceiptStats(st) {
+          var host = qs('#read-receipt-stats');
+          if (!host) return;
+          if (!st || typeof st.sentTotal !== 'number') {
+            host.style.display = 'none';
+            host.innerHTML = '';
+            return;
+          }
+          host.style.display = 'block';
+          var rate = st.readRate == null ? '—' : String(st.readRate) + '%';
+          var byPattern = Array.isArray(st.byPattern) ? st.byPattern : [];
+          var rows = byPattern
+            .map(function (r) {
+              var rr = r.readRate == null ? '—' : String(r.readRate) + '%';
+              return (
+                '<tr>' +
+                '<td>' +
+                esc(r.pattern || '未設定') +
+                '</td>' +
+                '<td>' +
+                esc(r.sent != null ? r.sent : 0) +
+                '</td>' +
+                '<td>' +
+                esc(r.read != null ? r.read : 0) +
+                '</td>' +
+                '<td>' +
+                esc(r.unread != null ? r.unread : 0) +
+                '</td>' +
+                '<td>' +
+                esc(r.unknown != null ? r.unknown : 0) +
+                '</td>' +
+                '<td>' +
+                esc(rr) +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
+          var snap = st.phaseReadSnapshot || {};
+          var rw = snap.resend_wait || {};
+          var ls = snap.lost || {};
+          host.innerHTML =
+            '<h2>既読テスト・手動記録（テンプレ別）</h2>' +
+            '<p class="hint" style="margin:0 0 10px">' +
+            esc(st.note || '') +
+            '</p>' +
+            '<div class="summary" style="display:flex;flex-wrap:wrap;gap:12px 20px;margin:0">' +
+            '<span>送信数: <strong>' +
+            esc(st.sentTotal) +
+            '</strong></span>' +
+            '<span>既読: <strong>' +
+            esc(st.readTotal) +
+            '</strong></span>' +
+            '<span>未読: <strong>' +
+            esc(st.unreadTotal) +
+            '</strong></span>' +
+            '<span>未確認: <strong>' +
+            esc(st.unknownTotal) +
+            '</strong></span>' +
+            '<span>既読率: <strong>' +
+            esc(rate) +
+            '</strong></span>' +
+            '</div>' +
+            '<div style="overflow:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
+            '<thead><tr><th style="text-align:left">DMテンプレ</th><th style="text-align:left">送信数</th><th style="text-align:left">既読</th><th style="text-align:left">未読</th><th style="text-align:left">未確認</th><th style="text-align:left">既読率</th></tr></thead>' +
+            '<tbody>' +
+            (rows || '<tr><td colspan="6">該当なし</td></tr>') +
+            '</tbody></table></div>' +
+            '<details style="margin-top:10px"><summary>自動遷移タイミング向けスナップショット（現在）</summary>' +
+            '<ul style="margin:8px 0 0;padding-left:1.1rem">' +
+            '<li>再送待ち: 既読 ' +
+            esc(rw.read || 0) +
+            ' / 未読 ' +
+            esc(rw.unread || 0) +
+            ' / 未確認 ' +
+            esc(rw.unknown || 0) +
+            '</li>' +
+            '<li>失注: 既読 ' +
+            esc(ls.read || 0) +
+            ' / 未読 ' +
+            esc(ls.unread || 0) +
+            ' / 未確認 ' +
+            esc(ls.unknown || 0) +
+            '</li>' +
+            '</ul></details>';
+        }
         function renderAreaViz(data) {
           var host = qs('#area-viz');
           if (!host) return;
@@ -846,6 +934,7 @@
           renderLost((data.funnel && data.funnel.phaseToLost) || []);
           renderDrill((data.funnel && data.funnel.sentToHearingDrilldown) || []);
           renderPreviewOpenStats(data.previewOpenStats || null);
+          renderReadReceiptStats(data.readReceiptStats || null);
           renderAreaViz(data || {});
         }
 
@@ -903,6 +992,11 @@
               if (pv) {
                 pv.style.display = 'none';
                 pv.innerHTML = '';
+              }
+              var rr = qs('#read-receipt-stats');
+              if (rr) {
+                rr.style.display = 'none';
+                rr.innerHTML = '';
               }
               qs('#funnel-cards').innerHTML = '';
               qs('#lost-tbody').innerHTML = '';

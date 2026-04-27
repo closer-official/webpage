@@ -9,7 +9,7 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
   if (body.dmBody !== undefined) row.dmBody = body.dmBody;
   if (body.outreachDmPattern !== undefined) {
     const p = String(body.outreachDmPattern || '').trim();
-    if (/^[1-6]$/.test(p)) row.outreachDmPattern = p;
+    if (/^[1-9]$/.test(p)) row.outreachDmPattern = p;
   }
   if (body.outreachDmCustomFirstLine !== undefined) {
     row.outreachDmCustomFirstLine = String(body.outreachDmCustomFirstLine || '')
@@ -27,6 +27,8 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     row.replyWaitStartedAt = undefined;
     row.sleepUntil = undefined;
     row.outreachLostAt = undefined;
+    row.outreachReadState = undefined;
+    row.outreachReadCheckedAt = undefined;
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   }
   if (body.status === 'email_sent') {
@@ -50,7 +52,22 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     } else if ((ph === 'proposal' || ph === 'awaiting_reply') && !row.replyWaitStartedAt) {
       row.replyWaitStartedAt = new Date().toISOString();
     }
+    if (!row.outreachReadState) {
+      row.outreachReadState = 'unread';
+      row.outreachReadCheckedAt = new Date().toISOString();
+    }
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
+  }
+  if (body.outreachReadState !== undefined) {
+    if (row.status !== 'email_sent') {
+      return { status: 400, error: '既読状態は送信済み案件でのみ更新できます。' };
+    }
+    const s = String(body.outreachReadState || '').trim();
+    if (!['unread', 'read', 'unknown'].includes(s)) {
+      return { status: 400, error: 'Invalid outreachReadState' };
+    }
+    row.outreachReadState = s;
+    row.outreachReadCheckedAt = new Date().toISOString();
   }
   if (body.content !== undefined) row.content = body.content;
   if (body.seo !== undefined) row.seo = body.seo;

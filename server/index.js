@@ -2387,6 +2387,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
   let funnel = null;
   let areaStats = [];
   let previewOpenStats = null;
+  let readReceiptStats = null;
   if (includeSummary) {
     const sends = list.filter((e) => e.type === 'message_sent').length;
     const phases = list.filter((e) => e.type === 'phase_change').length;
@@ -2489,6 +2490,66 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       note:
         '「開封」は /api/template-preview/… への GET を数えます。リンクプレビュー・ボットを含みます。除外（自分）は管理者ログイン状態で開いた分のみ判定できます。',
     };
+
+    const byPattern = new Map();
+    let sentTotal = 0;
+    let readTotal = 0;
+    let unreadTotal = 0;
+    let unknownTotal = 0;
+    for (const e of list) {
+      if (!e || e.type !== 'message_sent') continue;
+      sentTotal += 1;
+      const pat = String(e.outreachDmPattern || '').trim() || '未設定';
+      if (!byPattern.has(pat)) byPattern.set(pat, { pattern: pat, sent: 0, read: 0, unread: 0, unknown: 0 });
+      const rec = byPattern.get(pat);
+      rec.sent += 1;
+      const row = rowById.get(String(e.itemId || '').trim());
+      const rs = String(row?.outreachReadState || '').trim();
+      if (rs === 'read') {
+        rec.read += 1;
+        readTotal += 1;
+      } else if (rs === 'unread') {
+        rec.unread += 1;
+        unreadTotal += 1;
+      } else {
+        rec.unknown += 1;
+        unknownTotal += 1;
+      }
+    }
+    const byPatternArr = [...byPattern.values()]
+      .map((x) => ({
+        pattern: x.pattern,
+        sent: x.sent,
+        read: x.read,
+        unread: x.unread,
+        unknown: x.unknown,
+        readRate: x.sent ? Math.round((10000 * x.read) / x.sent) / 100 : null,
+      }))
+      .sort((a, b) => Number(b.sent) - Number(a.sent) || String(a.pattern).localeCompare(String(b.pattern), 'ja'));
+
+    const phaseReadSnapshot = {
+      resend_wait: { read: 0, unread: 0, unknown: 0 },
+      lost: { read: 0, unread: 0, unknown: 0 },
+    };
+    for (const row of snapshotRows) {
+      if (!row || row.status !== 'email_sent') continue;
+      const ph = String(row.outreachPhase || '').trim();
+      if (ph !== 'resend_wait' && ph !== 'lost') continue;
+      const rs = String(row.outreachReadState || '').trim();
+      if (rs === 'read') phaseReadSnapshot[ph].read += 1;
+      else if (rs === 'unread') phaseReadSnapshot[ph].unread += 1;
+      else phaseReadSnapshot[ph].unknown += 1;
+    }
+    readReceiptStats = {
+      sentTotal,
+      readTotal,
+      unreadTotal,
+      unknownTotal,
+      readRate: sentTotal ? Math.round((10000 * readTotal) / sentTotal) / 100 : null,
+      byPattern: byPatternArr,
+      phaseReadSnapshot,
+      note: '既読は手動記録です。送信数はイベントログ基準、既読状態は現在の案件状態を参照しています。',
+    };
   }
 
   res.json({
@@ -2504,6 +2565,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     funnel,
     areaStats,
     previewOpenStats,
+    readReceiptStats,
     eventsPage: includeEvents
       ? {
           offset: eventOffset,
@@ -2737,6 +2799,8 @@ app.post('/api/beauty-outreach/dashboard/:id/duplicate', async (req, res) => {
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
   newItem.outreachLostAt = undefined;
+  newItem.outreachReadState = undefined;
+  newItem.outreachReadCheckedAt = undefined;
   delete newItem.linkedTemplateCustomizationId;
   list.unshift(newItem);
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
@@ -2755,6 +2819,8 @@ app.post('/api/beauty-outreach/dashboard/:id/approve', async (req, res) => {
   if (!row.outreachPhase) row.outreachPhase = 'pre_contact';
   row.outreachPhaseChangedAt = new Date().toISOString();
   row.outreachLostAt = undefined;
+  row.outreachReadState = undefined;
+  row.outreachReadCheckedAt = undefined;
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
   res.json(row);
@@ -2768,6 +2834,10 @@ app.post('/api/beauty-outreach/dashboard/:id/reject', async (req, res) => {
   list[t.idx].status = 'rejected';
   list[t.idx].outreachPhaseChangedAt = new Date().toISOString();
   list[t.idx].outreachLostAt = new Date().toISOString();
+  if (!list[t.idx].outreachReadState) {
+    list[t.idx].outreachReadState = 'unread';
+    list[t.idx].outreachReadCheckedAt = new Date().toISOString();
+  }
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
   res.json(list[t.idx]);
@@ -2829,6 +2899,8 @@ app.post('/api/dashboard/:id/duplicate', async (req, res) => {
   newItem.optOutFeedback = undefined;
   newItem.optedOutAt = undefined;
   newItem.outreachLostAt = undefined;
+  newItem.outreachReadState = undefined;
+  newItem.outreachReadCheckedAt = undefined;
   delete newItem.linkedTemplateCustomizationId;
   dashboard.unshift(newItem);
   await store.setDashboard(dashboard);
@@ -2884,6 +2956,18 @@ function tickBackfillOutreachPhaseChangedAt(row) {
   if (!ph) return false;
   if (row.status !== 'email_sent' && row.status !== 'approved') return false;
   row.outreachPhaseChangedAt = row.updatedAt || row.createdAt || new Date().toISOString();
+  return true;
+}
+
+function tickBackfillOutreachReadState(row) {
+  if (row.status !== 'email_sent') return false;
+  const ph = String(row.outreachPhase || '').trim();
+  if (!['message_sent', 'resend_wait', 'resend_sent', 'instagram_limited', 'lost'].includes(ph)) {
+    return false;
+  }
+  if (row.outreachReadState) return false;
+  row.outreachReadState = 'unread';
+  row.outreachReadCheckedAt = new Date().toISOString();
   return true;
 }
 
@@ -2986,6 +3070,7 @@ app.get('/api/outreach/phase-tick', async (req, res) => {
         }
         if (tickBackfillOutreachLostAt(row)) changed = true;
         if (tickBackfillOutreachPhaseChangedAt(row)) changed = true;
+        if (tickBackfillOutreachReadState(row)) changed = true;
         if (tickMaybePromoteMessageSentToResendWait(row)) {
           resendWaitAuto += 1;
           changed = true;
@@ -3026,6 +3111,8 @@ app.post('/api/dashboard/:id/approve', async (req, res) => {
   if (!dashboard[i].outreachPhase) dashboard[i].outreachPhase = 'pre_contact';
   dashboard[i].outreachPhaseChangedAt = new Date().toISOString();
   dashboard[i].outreachLostAt = undefined;
+  dashboard[i].outreachReadState = undefined;
+  dashboard[i].outreachReadCheckedAt = undefined;
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });
@@ -3037,6 +3124,10 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   dashboard[i].status = 'rejected';
   dashboard[i].outreachPhaseChangedAt = new Date().toISOString();
   dashboard[i].outreachLostAt = new Date().toISOString();
+  if (!dashboard[i].outreachReadState) {
+    dashboard[i].outreachReadState = 'unread';
+    dashboard[i].outreachReadCheckedAt = new Date().toISOString();
+  }
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);
 });

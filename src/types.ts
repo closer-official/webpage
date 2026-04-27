@@ -368,8 +368,8 @@ export interface DashboardItem {
   templateId: string;
   /** DM文面（手動入力または後でAIで生成する用のプレースホルダ） */
   dmBody: string;
-  /** 送付用 DM のテンプレパターン（1–5）。未指定時はクライアントで①扱い */
-  outreachDmPattern?: '1' | '2' | '3' | '4' | '5' | '6';
+  /** 送付用 DM のテンプレパターン（1–9）。未指定時はクライアントで①扱い */
+  outreachDmPattern?: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
   /** 美容送付DM: 本文の「【褒めポイント】」に差し込む短文（飲食側では先頭1行として使う場合あり） */
   outreachDmCustomFirstLine?: string;
   /** キュー経由時など、フッター用 Instagram URL のスナップショット（content.footerInstagramUrl と併用可） */
@@ -394,6 +394,10 @@ export interface DashboardItem {
   optOutFeedback?: string;
   /** 配信停止が記録された日時（ISO） */
   optedOutAt?: string;
+  /** 手動記録の既読状態（送信済み案件向け） */
+  outreachReadState?: 'unread' | 'read' | 'unknown';
+  /** 既読状態を最後に更新した日時（ISO） */
+  outreachReadCheckedAt?: string;
   /**
    * 失注（却下 or 送信済みかつ outreachPhase === lost）に入った日時（ISO）。
    * 未設定の旧データは phase-tick 初回で createdAt/updatedAt から補完され、3か月後に送信前へ戻る。
