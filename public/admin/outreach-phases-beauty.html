@@ -1104,6 +1104,7 @@
 
         var STORAGE_SENDER_NAME = 'closer_outreach_sender_name_beauty';
         var STORAGE_PERSONAL_EMAIL = 'closer_outreach_personal_email_beauty';
+        var STORAGE_LAST_DM_PATTERN = 'closer_outreach_last_dm_pattern_beauty';
 
         function getSavedSenderName() {
           try {
@@ -1133,6 +1134,23 @@
           try {
             if (sn) localStorage.setItem(STORAGE_SENDER_NAME, String(sn.value || '').trim());
             if (pe) localStorage.setItem(STORAGE_PERSONAL_EMAIL, String(pe.value || '').trim());
+          } catch (e) {}
+        }
+
+        function getLastDmPattern() {
+          try {
+            var p = String(localStorage.getItem(STORAGE_LAST_DM_PATTERN) || '').trim();
+            return /^(?:[1-9]|10|11)$/.test(p) ? p : '';
+          } catch (e) {
+            return '';
+          }
+        }
+
+        function setLastDmPattern(pattern) {
+          var p = String(pattern || '').trim();
+          if (!/^(?:[1-9]|10|11)$/.test(p)) return;
+          try {
+            localStorage.setItem(STORAGE_LAST_DM_PATTERN, p);
           } catch (e) {}
         }
 
@@ -1239,7 +1257,8 @@
 
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
-          return /^(?:[1-9]|10|11)$/.test(p) ? p : '1';
+          if (/^(?:[1-9]|10|11)$/.test(p)) return p;
+          return getLastDmPattern() || '1';
         }
 
         /**
@@ -1472,6 +1491,7 @@
           });
           sel.value = dmPatternKey(item);
           sel.onchange = function () {
+            setLastDmPattern(sel.value);
             patchOutreachDmFields(item.id, { outreachDmPattern: sel.value }).catch(function (e) {
               showErr(String(e.message || e));
             });
@@ -1539,6 +1559,7 @@
             dmGateErr.style.display = 'none';
             dmGateErr.textContent = '';
             persistSenderProfile();
+            setLastDmPattern(sel.value);
             var merged = Object.assign({}, item, {
               outreachDmPattern: sel.value,
               outreachDmCustomFirstLine: oneLine,
