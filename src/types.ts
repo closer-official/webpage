@@ -368,8 +368,8 @@ export interface DashboardItem {
   templateId: string;
   /** DM文面（手動入力または後でAIで生成する用のプレースホルダ） */
   dmBody: string;
-  /** 送付用 DM のテンプレパターン（1–9）。未指定時はクライアントで①扱い */
-  outreachDmPattern?: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+  /** 送付用 DM のテンプレパターン（1–11）。未指定時はクライアントで①扱い */
+  outreachDmPattern?: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11';
   /** 美容送付DM: 本文の「【褒めポイント】」に差し込む短文（飲食側では先頭1行として使う場合あり） */
   outreachDmCustomFirstLine?: string;
   /** キュー経由時など、フッター用 Instagram URL のスナップショット（content.footerInstagramUrl と併用可） */

@@ -1199,7 +1199,7 @@
 
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
-          return /^[1-9]$/.test(p) ? p : '1';
+          return /^(?:[1-9]|10|11)$/.test(p) ? p : '1';
         }
 
         function buildDmBodyForPattern(pattern, prevUrl, signatureName) {
@@ -1344,6 +1344,35 @@
               'Instagramから直接予約が入る仕組みです。\n' +
               'もしこういう形に少しでもご興味あれば、一言「詳細希望」と返信いただければ嬉しいです！\n' +
               '（不要でしたらそのままスルーで大丈夫です🙇‍♂️）',
+            '10':
+              '○○様、突然の連絡失礼します。\n' +
+              '【コメント】の投稿を拝見して、ぜひ相談したいことがありご連絡しました。\n' +
+              '\n' +
+              '実は、こちらの施術の魅力がもっと伝わるような「専用の紹介ページ」を勝手に作ってみたのですが、一度見ていただけないでしょうか？\n' +
+              '\n' +
+              '【○○様 専用デモ】\n' +
+              prev +
+              '\n' +
+              '（※公開情報を元に作成したサンプルです）\n' +
+              '\n' +
+              'DM予約の手間を減らし、Square予約などへスムーズに繋げるページを5万円から制作しています。\n' +
+              '\n' +
+              'もしお店のプラスになりそうでしたら、詳細を送ります。\n' +
+              '不要でしたらスルーしていただいて大丈夫です！',
+            '11':
+              '○○様、こんにちは！\n' +
+              '【コメント】が素敵で、ぜひ一度お願いしたいと思いご連絡しました。\n' +
+              '\n' +
+              'その前に、web制作をしている身として勝手ながら「お店の予約専用ページ」のサンプルを作ってみたので、空いた時間にチェックいただけませんか？\n' +
+              '\n' +
+              '【○○様 専用デモ】\n' +
+              prev +
+              '\n' +
+              '\n' +
+              'Instagramから予約サイトへ、お客様を迷わせない導線作りを5万円から承っています。\n' +
+              '\n' +
+              '興味がなければ無視していただいて構いません。\n' +
+              'もし「予約を増やしたい」というお考えがあれば、一言いただければ嬉しいです！',
           };
           return bodies[pattern] || bodies['1'];
         }
@@ -1354,12 +1383,15 @@
           var pattern = dmPatternKey(item);
           var sig = String(getSavedSenderName() || '').trim() || '○○';
           var custom = String((item && item.outreachDmCustomFirstLine) || '').trim();
+          var shopName = String(outreachShopName(item) || '').trim() || '○○';
           var core = buildDmBodyForPattern(pattern, prev, sig);
-          core = core.split('○○').join(custom || '○○');
+          core = core.split('○○').join(shopName);
+          core = core.split('【コメント】').join(custom || '【コメント】');
           if (pattern === '6') {
             return core.split('【褒めポイント】').join(custom || '【褒めポイント】');
           }
-          if (custom) return custom + '\n\n' + core;
+          core = core.split('【褒めポイント】').join(custom || '【褒めポイント】');
+          if (custom && ['1', '2', '3', '4', '5'].indexOf(String(pattern || '')) >= 0) return custom + '\n\n' + core;
           return core;
         }
 
@@ -1383,14 +1415,14 @@
 
         function renderOutreachTemplatesBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：9パターン・1行目・プレビューURL・署名）' }),
+            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：11パターン・1行目・プレビューURL・署名）' }),
           );
 
           var dmWrap = el('div', { class: 'dm-pattern-block' });
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは9パターン。①〜⑥は一言コメント入力後にコピー。入力欄は⑦〜⑨の「○○」差し替えにも使えます。パターンと1行は自動保存されます。',
+              text: 'DMは11パターン。①〜⑥は一言コメント入力後にコピー。入力欄は⑦〜⑪の「【コメント】」差し替えに使えます。○○様の○○は店名が自動で入ります。パターンと1行は自動保存されます。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -1405,6 +1437,8 @@
             { v: '7', t: '⑦ コメント後DM（○○＋URL）' },
             { v: '8', t: '⑧ いつも拝見DM（○○＋URL）' },
             { v: '9', t: '⑨ 専用予約サンプルDM（○○＋URL）' },
+            { v: '10', t: '⑩ 専用紹介ページDM（○○様＋【コメント】）' },
+            { v: '11', t: '⑪ 予約専用ページDM（○○様＋【コメント】）' },
           ].forEach(function (o) {
             sel.appendChild(el('option', { value: o.v, text: o.t }));
           });
@@ -1419,7 +1453,7 @@
           dmWrap.appendChild(
             el('label', {
               for: 'dm-firstline-' + item.id,
-              text: '一言コメント（DM先頭1行＋「○○」差し替えに使用）',
+              text: '一言コメント（「【褒めポイント】」「【コメント】」差し替えに使用）',
             }),
           );
           var inp = el('input', {
@@ -1462,12 +1496,14 @@
           var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
           bDm.onclick = function () {
             var oneLine = String(inp.value || '').trim();
-            var needFirstLine = ['1', '2', '3', '4', '5', '6'].indexOf(String(sel.value || '')) >= 0;
+            var needFirstLine = ['1', '2', '3', '4', '5', '6', '10', '11'].indexOf(String(sel.value || '')) >= 0;
             if (needFirstLine && !oneLine) {
               dmGateErr.textContent =
                 sel.value === '6'
                   ? '一言コメント（⑥の本文「【褒めポイント】」に入る一文）を入力してからコピーしてください。'
-                  : '一言コメント（DMの先頭1行）を入力してからコピーしてください。';
+                  : sel.value === '10' || sel.value === '11'
+                    ? '一言コメント（「【コメント】」に入る一文）を入力してからコピーしてください。'
+                    : '一言コメント（DMの先頭1行）を入力してからコピーしてください。';
               dmGateErr.style.display = 'block';
               inp.focus();
               return;
