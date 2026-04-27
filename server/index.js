@@ -2085,7 +2085,15 @@ app.get('/api/dashboard', async (req, res) => {
 app.get('/api/memo-leads', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const raw = await store.getMemoLeads();
-  res.json(Array.isArray(raw) ? raw : []);
+  const list = Array.isArray(raw) ? raw : [];
+  res.json(
+    list.map((r) => {
+      if (!r || typeof r !== 'object') return r;
+      const o = { ...r };
+      delete o.hpbBody;
+      return o;
+    }),
+  );
 });
 
 app.get('/api/memo-leads/:id', async (req, res) => {
@@ -2669,7 +2677,15 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
 app.get('/api/beauty-outreach/memo-leads', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const raw = await store.getBeautyMemoLeads();
-  res.json(Array.isArray(raw) ? raw : []);
+  const list = Array.isArray(raw) ? raw : [];
+  res.json(
+    list.map((r) => {
+      if (!r || typeof r !== 'object') return r;
+      const o = { ...r };
+      delete o.hpbBody;
+      return o;
+    }),
+  );
 });
 
 app.get('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
@@ -2780,19 +2796,62 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
       String(memoRowAfter.hpbAccess || '')
         .trim()
         .slice(0, 800) || extractHpbAccessFromMemo(memoRowAfter.memo);
-    const snippet = [String(memoRowAfter.memo || '').trim(), String(memoRowAfter.hpbBody || '').trim()].filter(Boolean).join('\n\n').trim();
-    const dashboardRow = buildBeautyMemoPromotedDashboardRow({
-      shopName,
-      accessText: access,
-      memoSnippet: snippet,
-      uiPhase: 'no_outreach_channel',
-    });
-    list.splice(i, 1);
+    const snippet = [String(memoRowAfter.memo || '').trim(), String(memoRowAfter.hpbBody || '').trim()]
+      .filter(Boolean)
+      .join('\n\n')
+      .trim();
+    // メモ一覧からの自動作成は「送信前」でフェーズ管理へ載せ、店舗ドラフト（美容室LP独立）と紐づける
+    const customizations = [...(Array.isArray(await store.getTemplateCustomizations()) ? await store.getTemplateCustomizations() : [])];
+    const now = new Date().toISOString();
+    const customizationItem = {
+      id: `custom-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`,
+      name: shopName.slice(0, 80),
+      baseTemplateId: 'beauty_standalone',
+      override: {
+        beautyStandaloneSalon: {
+          name: shopName,
+          introText: String(memoRowAfter.hpbBody || '').trim().slice(0, 50000),
+          accessShort: access,
+          accessFull: access,
+          address: access,
+          addressMapUrl: String(memoRowAfter.addressMapUrl || '').trim().slice(0, 2000),
+          instagramUrl: String(memoRowAfter.instagramUrl || '').trim().slice(0, 2000),
+          reserveUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
+          hotPepperUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
+          homepageUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
+        },
+      },
+      status: 'published',
+      sourceIntakeId: String(memoRowAfter.id || '').trim().slice(0, 80) || undefined,
+      createdAt: now,
+      updatedAt: now,
+    };
+    customizations.unshift(customizationItem);
     const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
-    dash.unshift(dashboardRow);
+    ensureDashboardForWorkerDraft(customizationItem, {}, dash);
+    const linked = dash.find((d) => d && d.linkedTemplateCustomizationId === customizationItem.id);
+    if (linked) {
+      linked.status = 'approved';
+      linked.outreachPhase = 'pre_contact';
+      linked.outreachPhaseChangedAt = new Date().toISOString();
+      linked.researched = {
+        ...(linked.researched || {}),
+        name: shopName,
+        address: access,
+        notes: `[メモリード自動作成] 4項目入力完了\n${snippet}`.slice(0, 5000),
+      };
+    }
+    list.splice(i, 1);
+    await store.setTemplateCustomizations(customizations);
     await store.setBeautyMemoLeads(list);
     await store.setBeautyDashboard(dash);
-    return res.json({ ok: true, movedToDashboard: true, autoCreated: true, item: dashboardRow });
+    return res.json({
+      ok: true,
+      movedToDashboard: true,
+      autoCreated: true,
+      linkedTemplateCustomizationId: customizationItem.id,
+      item: linked || null,
+    });
   }
 
   list[i].updatedAt = new Date().toISOString();

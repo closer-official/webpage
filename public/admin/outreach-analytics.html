@@ -428,6 +428,23 @@
           return fetch(url, Object.assign({ credentials: 'include' }, opts || {}));
         }
 
+        function parseJsonSafe(r) {
+          return r.text().then(function (t) {
+            var txt = String(t || '');
+            var j = null;
+            try {
+              j = txt ? JSON.parse(txt) : {};
+            } catch (e) {
+              if (!r.ok) {
+                throw new Error((txt || r.statusText || 'request failed').slice(0, 300));
+              }
+              throw new Error('JSONの解析に失敗しました。');
+            }
+            if (!r.ok) throw new Error((j && j.error) || txt || r.statusText || 'request failed');
+            return j;
+          });
+        }
+
         function buildQueryCore() {
           var p = [];
           var fromEl = qs('#f-from');
@@ -1161,30 +1178,19 @@
           err.style.display = 'none';
           var moreBtn = qs('#btn-more-events');
           if (moreBtn) moreBtn.disabled = true;
+          var rawLog = document.querySelector('details.raw-log');
+          if (rawLog) rawLog.style.display = 'none';
           eventsRows = [];
           renderTable([]);
           var qSummary = buildQuery(['includeSummary=1', 'includeEvents=0']);
-          var qEvents = buildQuery(['includeSummary=0', 'includeEvents=1', 'eventOffset=0', 'eventLimit=100']);
 
-          Promise.all([
-            credFetch((api || '') + '/api/outreach/analytics-events' + qSummary).then(function (r) {
+          credFetch((api || '') + '/api/outreach/analytics-events' + qSummary)
+            .then(function (r) {
               if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
-              return r.json().then(function (j) {
-                if (!r.ok) throw new Error((j && j.error) || r.statusText);
-                return j;
-              });
-            }),
-            credFetch((api || '') + '/api/outreach/analytics-events' + qEvents).then(function (r) {
-              if (r.status === 401) throw new Error('ログインが必要です。運営トップから管理者ログインしてください。');
-              return r.json().then(function (j) {
-                if (!r.ok) throw new Error((j && j.error) || r.statusText);
-                return j;
-              });
-            }),
-          ])
-            .then(function (arr) {
-              renderSummary(arr[0] || {});
-              renderEventPage(arr[1] || {}, true);
+              return parseJsonSafe(r);
+            })
+            .then(function (j) {
+              renderSummary(j || {});
             })
             .catch(function (e) {
               err.style.display = 'block';
@@ -1243,7 +1249,6 @@
         }
 
         qs('#btn-load').addEventListener('click', loadSummaryAndFirstEvents);
-        qs('#btn-more-events').addEventListener('click', loadMoreEvents);
         loadSummaryAndFirstEvents();
       })();
     </script>
