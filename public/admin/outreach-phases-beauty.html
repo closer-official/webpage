@@ -4091,17 +4091,8 @@
             return box;
           }
           var arr = Array.isArray(items) ? items : [];
-          var firstCheckPhases = new Set([
-            'resend_wait',
-            'resend_sent',
-            'instagram_limited',
-            'resend_unavailable',
-            'no_outreach_channel',
-            'hearing',
-            'proposal',
-            'contracted',
-            'lost',
-          ]);
+          // 既読未読確認は「送信実施系」のみ対象（SNSなし/再送不可などは除外）
+          var firstCheckPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
           var firstRows = arr.filter(function (it) {
             var phase = sevenPhaseKey(it);
             if (!firstCheckPhases.has(phase)) return false;
