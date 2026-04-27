@@ -2553,6 +2553,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
     const lostRows = [];
     for (const row of snapshotRows) {
       if (!row || row.status !== 'email_sent') continue;
+      if (!dashboardItemIsBeauty(row, customs)) continue;
       const ph = String(row.outreachPhase || '').trim();
       if (!firstTargetPhases.has(ph) && ph !== 'lost') continue;
       if (firstTargetPhases.has(ph)) firstTargetRows.push(row);
