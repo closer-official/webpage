@@ -3292,7 +3292,7 @@
         function renderReadStateCell(item, loadFn, stageKey) {
           var td = el('td');
           var sp = sevenPhaseKey(item);
-          var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+          var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'hearing', 'proposal', 'contracted', 'lost']);
           if (stageKey === 'first' && !firstReadEditablePhases.has(sp)) {
             td.appendChild(el('span', { class: 'muted', text: '—' }));
             return td;
@@ -3805,7 +3805,7 @@
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
           if (item.status === 'email_sent') {
             var sp = sevenPhaseKey(item);
-            var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+            var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'hearing', 'proposal', 'contracted', 'lost']);
             if (firstReadEditablePhases.has(sp)) {
               statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '1stコンタクト既読（送信実施後フェーズで確認）' }));
               statusBlock.appendChild(renderReadStateSelect(item, loadFn, 'first'));
@@ -4111,7 +4111,7 @@
           }
           var arr = Array.isArray(items) ? items : [];
           // 既読未読確認は「送信実施系」のみ対象（SNSなし/再送不可などは除外）
-          var firstCheckPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+          var firstCheckPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'hearing', 'proposal', 'contracted', 'lost']);
           var firstRows = arr.filter(function (it) {
             var phase = sevenPhaseKey(it);
             if (!firstCheckPhases.has(phase)) return false;

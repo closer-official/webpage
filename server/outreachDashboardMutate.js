@@ -112,6 +112,14 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
     } else {
       row.sleepUntil = undefined;
     }
+    // ヒアリング以降は既読確認済みであるケースが自然なため、未確認なら既読を既定化
+    if (['hearing', 'proposal', 'contracted'].includes(p) && row.status === 'email_sent') {
+      const rs = String(row.outreachFirstReadState || '').trim();
+      if (!rs || rs === 'unknown') {
+        row.outreachFirstReadState = 'read';
+        row.outreachFirstReadCheckedAt = new Date().toISOString();
+      }
+    }
   }
   return null;
 }

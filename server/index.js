@@ -2535,7 +2535,7 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       };
     }
 
-    const firstTargetPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+    const firstTargetPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'hearing', 'proposal', 'contracted', 'lost']);
     const phaseReadSnapshot = {
       first_target: { read: 0, unread: 0, unknown: 0 },
       lost: { read: 0, unread: 0, unknown: 0 },
@@ -2567,7 +2567,8 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       firstContact,
       secondContact,
       phaseReadSnapshot,
-      note: '既読は手動記録です。1stは送信実施後フェーズ（再送待ち/再送済み/インスタ制限中/失注）、2ndは失注での確認値をテンプレ別に集計しています。',
+      note:
+        '既読は手動記録です。1stは送信実施後フェーズ（再送待ち/再送済み/インスタ制限中/ヒアリング中/提案中/契約済み/失注）、2ndは失注での確認値をテンプレ別に集計しています。',
     };
   }
 
@@ -2991,9 +2992,17 @@ function tickBackfillOutreachReadState(row) {
     return false;
   }
   let changed = false;
-  if (['message_sent', 'resend_wait', 'resend_sent', 'instagram_limited'].includes(ph) && !row.outreachFirstReadState) {
-    row.outreachFirstReadState = 'unknown';
-    row.outreachFirstReadCheckedAt = undefined;
+  if (
+    ['message_sent', 'resend_wait', 'resend_sent', 'instagram_limited', 'hearing', 'proposal', 'contracted'].includes(ph) &&
+    !row.outreachFirstReadState
+  ) {
+    if (['hearing', 'proposal', 'contracted'].includes(ph)) {
+      row.outreachFirstReadState = 'read';
+      row.outreachFirstReadCheckedAt = new Date().toISOString();
+    } else {
+      row.outreachFirstReadState = 'unknown';
+      row.outreachFirstReadCheckedAt = undefined;
+    }
     changed = true;
   }
   if (ph === 'lost' && !row.outreachSecondReadState) {
