@@ -55,8 +55,8 @@ export function patchOutreachDashboardRowFields(row, body, deps) {
       row.replyWaitStartedAt = new Date().toISOString();
     }
     if (!row.outreachFirstReadState) {
-      row.outreachFirstReadState = 'unread';
-      row.outreachFirstReadCheckedAt = new Date().toISOString();
+      row.outreachFirstReadState = 'unknown';
+      row.outreachFirstReadCheckedAt = undefined;
     }
     if (!row.unsubscribeToken) row.unsubscribeToken = randomBytes(24).toString('hex');
   }

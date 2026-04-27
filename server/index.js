@@ -2849,8 +2849,8 @@ app.post('/api/beauty-outreach/dashboard/:id/reject', async (req, res) => {
   list[t.idx].outreachPhaseChangedAt = new Date().toISOString();
   list[t.idx].outreachLostAt = new Date().toISOString();
   if (!list[t.idx].outreachSecondReadState) {
-    list[t.idx].outreachSecondReadState = 'unread';
-    list[t.idx].outreachSecondReadCheckedAt = new Date().toISOString();
+    list[t.idx].outreachSecondReadState = 'unknown';
+    list[t.idx].outreachSecondReadCheckedAt = undefined;
   }
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
@@ -2983,13 +2983,13 @@ function tickBackfillOutreachReadState(row) {
   }
   let changed = false;
   if (['message_sent', 'resend_wait', 'resend_sent', 'instagram_limited'].includes(ph) && !row.outreachFirstReadState) {
-    row.outreachFirstReadState = 'unread';
-    row.outreachFirstReadCheckedAt = new Date().toISOString();
+    row.outreachFirstReadState = 'unknown';
+    row.outreachFirstReadCheckedAt = undefined;
     changed = true;
   }
   if (ph === 'lost' && !row.outreachSecondReadState) {
-    row.outreachSecondReadState = 'unread';
-    row.outreachSecondReadCheckedAt = new Date().toISOString();
+    row.outreachSecondReadState = 'unknown';
+    row.outreachSecondReadCheckedAt = undefined;
     changed = true;
   }
   return changed;
@@ -3151,8 +3151,8 @@ app.post('/api/dashboard/:id/reject', async (req, res) => {
   dashboard[i].outreachPhaseChangedAt = new Date().toISOString();
   dashboard[i].outreachLostAt = new Date().toISOString();
   if (!dashboard[i].outreachSecondReadState) {
-    dashboard[i].outreachSecondReadState = 'unread';
-    dashboard[i].outreachSecondReadCheckedAt = new Date().toISOString();
+    dashboard[i].outreachSecondReadState = 'unknown';
+    dashboard[i].outreachSecondReadCheckedAt = undefined;
   }
   await store.setDashboard(dashboard);
   res.json(dashboard[i]);

@@ -1199,23 +1199,19 @@
         }
 
         /** 送信済み（メール送信後）向けの追いメッセージ。DM・メール兼用。 */
-        function buildOutreachFollowupMessageBody() {
-          var sig = String(getSavedSenderName() || '').trim();
-          if (!sig) sig = '（※上部パネルで送信者名を登録してください）';
+        function buildOutreachFollowupMessageBody(item) {
+          var shop = String(outreachShopName(item) || '').trim() || '【店名】';
           return (
-            '先日、勝手ながらサンプルページをお送りした' +
-            sig +
-            'です。\n' +
-            'お忙しいところ、何度も失礼いたします。\n' +
+            shop +
+            '様、何度もすみません！\n' +
+            '先日お送りしたページ、リンクなど無事に開けましたでしょうか？\n' +
             '\n' +
-            'もし前回のメッセージが埋もれてしまっていたら申し訳ございません。\n' +
-            'その後、ページの導線やSquare予約の連携について、何か気になる点などはございませんでしたでしょうか？\n' +
+            '勝手に作ってしまったので「お節介だったかな…」と少し心配になり、再度ご連絡しました。\n' +
             '\n' +
-            'こちらのサンプルは、そのまま置いておくと紛らわしいかと思いますので、数日中に一度取り下げさせていただきますね。\n' +
+            'もし「今の予約方法で満足している」ということであれば、このままスルーしていただいて全然大丈夫です！\n' +
             '\n' +
-            'もし少しでも「活用のイメージが湧いた」ということであれば、その際に改めて再構築も可能ですので、一言いただければ幸いです。\n' +
-            '\n' +
-            'ご確認、ありがとうございました！'
+            'ページ自体は、もし必要なければ数日中に消しておきますね。\n' +
+            '素敵なお店だったので、少しでも予約の助けになればと思った次第です！'
           );
         }
 
@@ -1575,7 +1571,7 @@
               if (!getSavedSenderName()) {
                 if (!window.confirm('送信者名が未登録です。プレースホルダ付きでコピーしますか？')) return;
               }
-              copyTextWithFeedback(buildOutreachFollowupMessageBody(), '追いメッセージ');
+              copyTextWithFeedback(buildOutreachFollowupMessageBody(item), '追いメッセージ');
             };
             fu.appendChild(bFu);
             container.appendChild(fu);
