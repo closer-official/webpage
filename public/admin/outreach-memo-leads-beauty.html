@@ -1183,6 +1183,24 @@
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
+            function bindCellAdvance(el, controls, idx, isTextarea) {
+              if (!el) return;
+              el.addEventListener('keydown', function (ev) {
+                var k = ev.key;
+                if (k !== 'Enter' && k !== 'Tab') return;
+                if (isTextarea && k === 'Enter' && ev.shiftKey) return;
+                ev.preventDefault();
+                var delta = ev.shiftKey ? -1 : 1;
+                var nextIdx = idx + delta;
+                if (nextIdx < 0 || nextIdx >= controls.length) return;
+                var next = controls[nextIdx];
+                if (!next || next.disabled) return;
+                try {
+                  next.focus();
+                  if (next.select && typeof next.select === 'function') next.select();
+                } catch (e) {}
+              });
+            }
             function removeRowFromUi() {
               if (window.memoListRawRows) {
                 var idx = window.memoListRawRows.findIndex(function (x) {
@@ -1260,6 +1278,10 @@
             var igTd = makeUrlCell(r.instagramUrl, 'instagramUrl');
             var hpTd = makeUrlCell(r.hotPepperUrl, 'hotPepperUrl', 'https://beauty.hotpepper.jp/…');
             var webTd = document.createElement('td');
+            var navMap = mapTd.querySelector('input');
+            var navIg = igTd.querySelector('input');
+            var navHp = hpTd.querySelector('input');
+            var navWebSel = null;
             if (isHpbMemoRow(r)) {
               var sel = document.createElement('select');
               sel.className = 'memo-web-select';
@@ -1309,6 +1331,7 @@
                   });
               };
               webTd.appendChild(sel);
+              navWebSel = sel;
             } else {
               webTd.className = 'mono';
               webTd.style.color = 'var(--muted)';
@@ -1361,6 +1384,10 @@
                 });
             });
             bodyTd.appendChild(bodyTa);
+            var navControls = [navMap, navIg, navHp, navWebSel, bodyTa].filter(Boolean);
+            navControls.forEach(function (x, idx) {
+              bindCellAdvance(x, navControls, idx, x === bodyTa);
+            });
             tr.appendChild(cbTd);
             tr.appendChild(nameTd);
             tr.appendChild(mapTd);
