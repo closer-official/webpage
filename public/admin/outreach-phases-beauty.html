@@ -3276,7 +3276,8 @@
         function renderReadStateCell(item, loadFn, stageKey) {
           var td = el('td');
           var sp = sevenPhaseKey(item);
-          if (stageKey === 'first' && sp !== 'resend_wait') {
+          var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+          if (stageKey === 'first' && !firstReadEditablePhases.has(sp)) {
             td.appendChild(el('span', { class: 'muted', text: '—' }));
             return td;
           }
@@ -3788,10 +3789,12 @@
           statusBlock.appendChild(renderPhaseSelect(item, loadFn));
           if (item.status === 'email_sent') {
             var sp = sevenPhaseKey(item);
-            if (sp === 'resend_wait') {
-              statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '1stコンタクト既読（再送待ちで確認）' }));
+            var firstReadEditablePhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
+            if (firstReadEditablePhases.has(sp)) {
+              statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '1stコンタクト既読（送信実施後フェーズで確認）' }));
               statusBlock.appendChild(renderReadStateSelect(item, loadFn, 'first'));
-            } else if (sp === 'lost') {
+            }
+            if (sp === 'lost') {
               statusBlock.appendChild(el('p', { class: 'muted', style: 'margin:8px 0 6px;font-size:0.76rem', text: '2ndコンタクト既読（失注時に確認）' }));
               statusBlock.appendChild(renderReadStateSelect(item, loadFn, 'second'));
             }
