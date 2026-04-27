@@ -825,6 +825,18 @@ function pickDefaultImportName(raw) {
   return '';
 }
 
+/**
+ * 「...【紹介文】」のように末尾ラベル付きで貼られた場合、
+ * ラベル直前の本文を該当フィールド値として切り出す。
+ */
+function extractBodyBeforeBracketLabel(text, label) {
+  const s = String(text || '');
+  const m = s.match(new RegExp(`([\\s\\S]*?)【\\s*${label}\\s*】`));
+  if (!m) return null;
+  const v = String(m[1] || '').trim();
+  return v || null;
+}
+
 export function buildSalonForAdminImport(rawTextIn) {
   try {
     const norm = String(rawTextIn == null ? '' : rawTextIn)
@@ -846,7 +858,8 @@ export function buildSalonForAdminImport(rawTextIn) {
     } catch {
       salon = createEmptySalon();
     }
-    salon.introText = body;
+    const introFromLabel = extractBodyBeforeBracketLabel(body, '紹介文');
+    salon.introText = introFromLabel != null ? introFromLabel : body;
 
     const pn = String(parsed.name || '').trim();
     const fallback = pickDefaultImportName(norm);
