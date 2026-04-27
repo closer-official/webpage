@@ -2119,7 +2119,7 @@ app.post('/api/memo-leads', async (req, res) => {
 
 /**
  * メモリード／送付管理への一括取込（美容室HPB想定）。
- * webStrength: no_site | weak_site | not_creatable → memo-leads、strong_site → dashboard（no_outreach_channel）
+ * webStrength: no_site | weak_site → memo-leads、strong_site / not_creatable → dashboard（no_outreach_channel）
  */
 app.post('/api/memo-leads/intake-batch', async (req, res) => {
   if (!requireAdmin(req, res)) return;
@@ -2145,7 +2145,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
     if (!STRENGTHS.has(webStrength)) continue;
     const access = String(raw?.access || '').trim().slice(0, 800);
     const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
-    if (webStrength === 'strong_site') {
+    if (webStrength === 'strong_site' || webStrength === 'not_creatable') {
       dashboard.unshift(
         buildStrongWebSalonDashboardRow({
           shopName,
@@ -2181,7 +2181,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
   res.json({ ok: true, memosAdded, dashboardAdded });
 });
 
-/** HPB 一括取込（美容室フェーズ専用ストア）。strong_site はメモに載せず美容ダッシュボードへ（no_outreach_channel）。 */
+/** HPB 一括取込（美容室フェーズ専用ストア）。strong_site/not_creatable はメモに載せず美容ダッシュボードへ（no_outreach_channel）。 */
 app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const entries = req.body?.entries;
@@ -2207,7 +2207,7 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
     const webStrength = rawWs;
     const access = String(raw?.access || '').trim().slice(0, 800);
     const sourceMemo = stripHpbCouponTailFromText(String(raw?.sourceMemo || '')).trim().slice(0, 11000);
-    if (webStrength === 'strong_site') {
+    if (webStrength === 'strong_site' || webStrength === 'not_creatable') {
       dashboard.unshift(
         buildStrongWebSalonDashboardRow({
           shopName,
@@ -2266,7 +2266,7 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
     if (!isHpb) {
       return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
     }
-    if (ws === 'strong_site') {
+    if (ws === 'strong_site' || ws === 'not_creatable') {
       const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
       const access = String(memoRow.hpbAccess || '')
         .trim()
@@ -2287,7 +2287,7 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
       await store.setDashboard(dashboard);
       return res.json({ ok: true, movedToDashboard: true });
     }
-    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : ws === 'not_creatable' ? 'not_creatable' : 'no_site';
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 
@@ -2737,7 +2737,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
     if (!isHpb) {
       return res.status(400).json({ error: 'HPB取込のメモだけウェブ強度を変更できます' });
     }
-    if (ws === 'strong_site') {
+    if (ws === 'strong_site' || ws === 'not_creatable') {
       const shopName = String(memoRow.shopName || '').trim().slice(0, 200) || '（無題）';
       const access =
         String(memoRow.hpbAccess || '')
@@ -2759,7 +2759,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
       await store.setBeautyDashboard(dash);
       return res.json({ ok: true, movedToDashboard: true });
     }
-    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : ws === 'not_creatable' ? 'not_creatable' : 'no_site';
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 

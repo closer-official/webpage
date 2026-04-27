@@ -45,8 +45,10 @@ export function renderLP(salon, container) {
   container.appendChild(buildSiteFooter(salon));
 }
 
-/** 予約・指名リンクの既定（reserveUrl → homepageUrl） */
+/** 予約・指名リンクの既定（hotPepperUrl → reserveUrl → homepageUrl） */
 function primaryBookingUrl(salon) {
+  const hpb = String(salon.hotPepperUrl || '').trim();
+  if (/^https?:\/\//i.test(hpb)) return hpb;
   const r = String(salon.reserveUrl || '').trim();
   if (/^https?:\/\//i.test(r)) return r;
   const h = String(salon.homepageUrl || '').trim();
@@ -215,8 +217,14 @@ function buildAtmosphere(salon) {
   el.id = 'atmosphere';
   const items = salon.atmosphere.map((a, i) => `
     <div class="atmo-item" style="--i:${i}">
-      <div class="atmo-num">${String(i + 1).padStart(2, '0')}</div>
-      <p class="atmo-text">${esc(a)}</p>
+      <div class="atmo-main">
+        <div class="atmo-num">${String(i + 1).padStart(2, '0')}</div>
+        <p class="atmo-text">${esc(a)}</p>
+      </div>
+      <div class="atmo-photo-ph" aria-hidden="true">
+        <span class="atmo-photo-icon">📷</span>
+        <span class="atmo-photo-label">PHOTO</span>
+      </div>
     </div>
   `).join('');
   el.innerHTML = `

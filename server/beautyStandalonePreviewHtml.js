@@ -173,8 +173,14 @@ function buildAtmosphereHtml(salon) {
     .map(
       (a, i) => `
     <div class="atmo-item" style="--i:${i}">
-      <div class="atmo-num">${String(i + 1).padStart(2, '0')}</div>
-      <p class="atmo-text">${esc(a)}</p>
+      <div class="atmo-main">
+        <div class="atmo-num">${String(i + 1).padStart(2, '0')}</div>
+        <p class="atmo-text">${esc(a)}</p>
+      </div>
+      <div class="atmo-photo-ph" aria-hidden="true">
+        <span class="atmo-photo-icon">📷</span>
+        <span class="atmo-photo-label">PHOTO</span>
+      </div>
     </div>`,
     )
     .join('');
@@ -352,13 +358,18 @@ function buildAccessHtml(salon) {
 }
 
 function buildCtaHtml(salon) {
+  const book = primaryBookingUrl(salon);
   return `<section class="lp-section lp-cta" id="cta">
     <div class="cta-inner">
       <div class="section-label light">RESERVE</div>
       <h2 class="cta-title">${esc(salon.name)}<br><span>でお待ちしています</span></h2>
       ${salon.accessShort ? `<p class="cta-access">${esc(salon.accessShort)}</p>` : ''}
       <div class="cta-btns">
-        <a href="#" class="btn-primary">今すぐ予約する</a>
+        ${
+          book
+            ? `<a href="${esc(book)}" class="btn-primary" target="_blank" rel="noopener noreferrer">今すぐ予約する</a>`
+            : `<span class="btn-primary btn-primary--disabled" title="リンク（LP・予約）で予約ページURLを入力してください">今すぐ予約する</span>`
+        }
         ${
           salon.homepageUrl
             ? `<a href="${esc(salon.homepageUrl)}" class="btn-secondary" target="_blank" rel="noopener">公式サイトへ</a>`
