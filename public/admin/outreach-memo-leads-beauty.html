@@ -1179,10 +1179,20 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>ホットペッパーURL</th><th>WEBの強さ</th><th>更新（日本時間）</th><th>操作</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>ホットペッパーURL</th><th>WEBの強さ</th><th>ホットペッパー全文</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
+            function removeRowFromUi() {
+              if (window.memoListRawRows) {
+                var idx = window.memoListRawRows.findIndex(function (x) {
+                  return x && x.id === r.id;
+                });
+                if (idx >= 0) window.memoListRawRows.splice(idx, 1);
+              }
+              if (tr && tr.parentNode) tr.parentNode.removeChild(tr);
+              syncBulkDeleteBtn();
+            }
             var cbTd = document.createElement('td');
             cbTd.className = 'memo-cb-col';
             var rowCb = document.createElement('input');
@@ -1221,7 +1231,12 @@
                       return j;
                     });
                   })
-                  .then(function () {
+                .then(function (j) {
+                  if (j && j.movedToDashboard) {
+                    removeRowFromUi();
+                    showOk('4項目が揃ったため送付・フェーズ管理（美容）へ自動作成しました。');
+                    return;
+                  }
                     inp.setAttribute('data-saved', v);
                     inp.disabled = false;
                     if (window.memoListRawRows) {
@@ -1279,13 +1294,13 @@
                   .then(function (j) {
                     sel.disabled = false;
                     if (j && j.movedToDashboard) {
+                      removeRowFromUi();
                       showOk(
                         '送付・フェーズ管理（美容）へ移しました。「SNSなし・ウェブページ制作不可」相当で登録し、メモリード一覧からは削除しました。',
                       );
                     } else {
                       showOk('WEBの強さを保存しました');
                     }
-                    return loadList();
                   })
                   .catch(function (e) {
                     sel.disabled = false;
@@ -1299,52 +1314,60 @@
               webTd.style.color = 'var(--muted)';
               webTd.textContent = '—';
             }
-            var dateTd = document.createElement('td');
-            dateTd.className = 'mono';
-            dateTd.textContent = formatIsoAsTokyo(r.updatedAt || r.createdAt);
-            var actTd = document.createElement('td');
-            var go = document.createElement('a');
-            go.className = 'btn-sm primary';
-            go.href = workerUrlWithMemo(r.id);
-            go.textContent = '美容室LPで編集';
-            go.title =
-              '美容室LP編集（独立版）を開き、店名・メモに加え、一覧の Googleマップ／Instagram／ホットペッパー（予約）の各URLを②の対応欄へそのまま反映します（空欄は上書きでクリアされます）';
-            var del = document.createElement('button');
-            del.type = 'button';
-            del.className = 'btn-sm danger';
-            del.textContent = '削除';
-            del.onclick = function () {
-              if (!confirm('このメモを削除しますか？')) return;
-              setButtonBusy(del, true, '削除', '削除中...');
-              credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), { method: 'DELETE' })
+            var bodyTd = document.createElement('td');
+            var bodyTa = document.createElement('textarea');
+            bodyTa.maxLength = 11000;
+            bodyTa.className = 'mono';
+            bodyTa.placeholder = 'ホットペッパー全文を貼り付け';
+            bodyTa.style.cssText = 'width:100%;min-width:260px;min-height:96px;font-size:0.76rem;padding:6px 8px;box-sizing:border-box;';
+            var b0 = String(r.hpbBody || '').trim();
+            bodyTa.value = b0;
+            bodyTa.setAttribute('data-saved', b0);
+            bodyTa.addEventListener('blur', function () {
+              var v = String(bodyTa.value || '').trim().slice(0, 11000);
+              if (v === String(bodyTa.getAttribute('data-saved') || '')) return;
+              bodyTa.disabled = true;
+              credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hpbBody: v }),
+              })
                 .then(function (res) {
-                  if (res.status === 204) return;
                   return res.json().then(function (j) {
-                    throw new Error((j && j.error) || res.statusText);
+                    if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                    return j;
                   });
                 })
-                .then(function () {
-                  showOk('削除しました');
-                  return loadList();
+                .then(function (j) {
+                  if (j && j.movedToDashboard) {
+                    removeRowFromUi();
+                    showOk('4項目が揃ったため送付・フェーズ管理（美容）へ自動作成しました。');
+                    return;
+                  }
+                  bodyTa.setAttribute('data-saved', v);
+                  bodyTa.disabled = false;
+                  if (window.memoListRawRows) {
+                    var ix = window.memoListRawRows.findIndex(function (x) {
+                      return x && x.id === r.id;
+                    });
+                    if (ix >= 0) window.memoListRawRows[ix].hpbBody = v;
+                  }
+                  showOk('ホットペッパー全文を保存しました');
                 })
                 .catch(function (e) {
+                  bodyTa.disabled = false;
+                  bodyTa.value = String(bodyTa.getAttribute('data-saved') || '');
                   showErr(e.message || String(e));
-                })
-                .finally(function () {
-                  setButtonBusy(del, false, '削除');
                 });
-            };
-            actTd.appendChild(go);
-            actTd.appendChild(document.createTextNode(' '));
-            actTd.appendChild(del);
+            });
+            bodyTd.appendChild(bodyTa);
             tr.appendChild(cbTd);
             tr.appendChild(nameTd);
             tr.appendChild(mapTd);
             tr.appendChild(igTd);
             tr.appendChild(hpTd);
             tr.appendChild(webTd);
-            tr.appendChild(dateTd);
-            tr.appendChild(actTd);
+            tr.appendChild(bodyTd);
             body.appendChild(tr);
             if (dupCtx) {
               applyDupToMemoListRow(tr, String((r && r.shopName) || '').trim(), dupCtx, r && r.id);

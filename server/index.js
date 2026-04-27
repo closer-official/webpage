@@ -2722,6 +2722,11 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   if (req.body?.hotPepperUrl !== undefined) {
     list[i].hotPepperUrl = String(req.body.hotPepperUrl || '').trim().slice(0, 2000);
   }
+  if (req.body?.hpbBody !== undefined) {
+    list[i].hpbBody = stripHpbCouponTailFromText(String(req.body.hpbBody || ''))
+      .trim()
+      .slice(0, 11000);
+  }
   if (req.body?.onOutreachBoard !== undefined) {
     list[i].onOutreachBoard = !!(req.body.onOutreachBoard === true || req.body.onOutreachBoard === 'true');
   }
@@ -2761,6 +2766,33 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
     }
     memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
+  }
+
+  // 4項目（HPB全文 + GoogleマップURL + Instagram URL + ホットペッパーURL）が揃ったら自動で送付管理へ昇格
+  const memoRowAfter = list[i];
+  const hasHpbBody = !!String(memoRowAfter?.hpbBody || '').trim();
+  const hasMap = /^https?:\/\//i.test(String(memoRowAfter?.addressMapUrl || '').trim());
+  const hasIg = /^https?:\/\//i.test(String(memoRowAfter?.instagramUrl || '').trim());
+  const hasHp = /^https?:\/\//i.test(String(memoRowAfter?.hotPepperUrl || '').trim());
+  if (hasHpbBody && hasMap && hasIg && hasHp) {
+    const shopName = String(memoRowAfter.shopName || '').trim().slice(0, 200) || '（無題）';
+    const access =
+      String(memoRowAfter.hpbAccess || '')
+        .trim()
+        .slice(0, 800) || extractHpbAccessFromMemo(memoRowAfter.memo);
+    const snippet = [String(memoRowAfter.memo || '').trim(), String(memoRowAfter.hpbBody || '').trim()].filter(Boolean).join('\n\n').trim();
+    const dashboardRow = buildBeautyMemoPromotedDashboardRow({
+      shopName,
+      accessText: access,
+      memoSnippet: snippet,
+      uiPhase: 'no_outreach_channel',
+    });
+    list.splice(i, 1);
+    const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
+    dash.unshift(dashboardRow);
+    await store.setBeautyMemoLeads(list);
+    await store.setBeautyDashboard(dash);
+    return res.json({ ok: true, movedToDashboard: true, autoCreated: true, item: dashboardRow });
   }
 
   list[i].updatedAt = new Date().toISOString();
