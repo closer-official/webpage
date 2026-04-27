@@ -3127,7 +3127,7 @@
             applyOutreachSevenPhase(item, v)
               .then(function () {
                 eff = v;
-                return loadFn().then(function () {
+                return runLoadFn(loadFn).then(function () {
                   showOk('フェーズを「' + (SEVEN_PHASE_LABELS[v] || v) + '」に変更しました');
                 });
               })
@@ -3174,9 +3174,15 @@
             })
               .then(function () {
                 cur = v;
-                return loadFn().then(function () {
-                  showOk((isSecond ? '2nd' : '1st') + '既読ステータスを保存しました');
-                });
+                var nowIso = new Date().toISOString();
+                if (isSecond) {
+                  item.outreachSecondReadState = v;
+                  item.outreachSecondReadCheckedAt = nowIso;
+                } else {
+                  item.outreachFirstReadState = v;
+                  item.outreachFirstReadCheckedAt = nowIso;
+                }
+                showOk((isSecond ? '2nd' : '1st') + '既読ステータスを保存しました');
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
@@ -3214,7 +3220,7 @@
             sel.classList.add('is-saving');
             deleteMemoLeadById(memo.id)
               .then(function () {
-                return loadFn().then(function () {
+                return runLoadFn(loadFn).then(function () {
                   showOk('メモリードを送信前へ反映しました');
                 });
               })
@@ -3502,6 +3508,15 @@
             n.style.display = 'none';
             n.textContent = '';
           }, 1800);
+        }
+
+        function runLoadFn(loadFn) {
+          if (typeof loadFn !== 'function') return Promise.resolve();
+          try {
+            return Promise.resolve(loadFn());
+          } catch (e) {
+            return Promise.reject(e);
+          }
         }
 
         async function apiJson(path, opts) {

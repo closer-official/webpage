@@ -3202,7 +3202,7 @@
             applyOutreachSevenPhase(item, v)
               .then(function () {
                 eff = v;
-                return loadFn().then(function () {
+                return runLoadFn(loadFn).then(function () {
                   showOk('フェーズを「' + (SEVEN_PHASE_LABELS[v] || v) + '」に変更しました');
                 });
               })
@@ -3220,9 +3220,10 @@
           return sel;
         }
 
-        function renderReadStateSelect(item, loadFn, stageKey) {
+        function renderReadStateSelect(item, loadFn, stageKey, opts) {
           var isSecond = stageKey === 'second';
           var cur = isSecond ? normalizeSecondReadState(item) : normalizeFirstReadState(item);
+          var options = opts && typeof opts === 'object' ? opts : {};
           var sel = el('select', { class: 'op-phase-select', 'aria-label': '既読状態（手動）' }, []);
           [
             { v: 'unknown', t: '未確認' },
@@ -3249,9 +3250,16 @@
             })
               .then(function () {
                 cur = v;
-                return loadFn().then(function () {
-                  showOk((isSecond ? '2nd' : '1st') + '既読ステータスを保存しました');
-                });
+                var nowIso = new Date().toISOString();
+                if (isSecond) {
+                  item.outreachSecondReadState = v;
+                  item.outreachSecondReadCheckedAt = nowIso;
+                } else {
+                  item.outreachFirstReadState = v;
+                  item.outreachFirstReadCheckedAt = nowIso;
+                }
+                if (typeof options.onSaved === 'function') options.onSaved(v);
+                showOk((isSecond ? '2nd' : '1st') + '既読ステータスを保存しました');
               })
               .catch(function (e) {
                 showErr(String(e.message || e));
@@ -3304,7 +3312,7 @@
               body: JSON.stringify({ outreachPhaseUi: v }),
             })
               .then(function () {
-                return loadFn().then(function () {
+                return runLoadFn(loadFn).then(function () {
                   showOk('メモリードを送信前へ反映しました');
                 });
               })
@@ -3678,6 +3686,15 @@
             n.style.display = 'none';
             n.textContent = '';
           }, 1800);
+        }
+
+        function runLoadFn(loadFn) {
+          if (typeof loadFn !== 'function') return Promise.resolve();
+          try {
+            return Promise.resolve(loadFn());
+          } catch (e) {
+            return Promise.reject(e);
+          }
         }
 
         async function apiJson(path, opts) {
@@ -4059,7 +4076,13 @@
               tr.appendChild(el('td', { text: outreachShopName(it) || it.id }));
               tr.appendChild(el('td', { text: 'DMテンプレ ' + String(it.outreachDmPattern || '1') }));
               var tdSel = el('td');
-              tdSel.appendChild(renderReadStateSelect(it, loadFn, stageKey));
+              tdSel.appendChild(
+                renderReadStateSelect(it, loadFn, stageKey, {
+                  onSaved: function (nextState) {
+                    if (nextState !== 'unknown' && tr && tr.parentNode) tr.parentNode.removeChild(tr);
+                  },
+                }),
+              );
               tr.appendChild(tdSel);
               tb.appendChild(tr);
             });
