@@ -2535,30 +2535,39 @@ app.get('/api/outreach/analytics-events', async (req, res) => {
       };
     }
 
+    const firstTargetPhases = new Set(['resend_wait', 'resend_sent', 'instagram_limited', 'lost']);
     const phaseReadSnapshot = {
-      resend_wait: { read: 0, unread: 0, unknown: 0 },
+      first_target: { read: 0, unread: 0, unknown: 0 },
       lost: { read: 0, unread: 0, unknown: 0 },
     };
-    const resendWaitRows = [];
+    const firstTargetRows = [];
     const lostRows = [];
     for (const row of snapshotRows) {
       if (!row || row.status !== 'email_sent') continue;
       const ph = String(row.outreachPhase || '').trim();
-      if (ph !== 'resend_wait' && ph !== 'lost') continue;
-      if (ph === 'resend_wait') resendWaitRows.push(row);
+      if (!firstTargetPhases.has(ph) && ph !== 'lost') continue;
+      if (firstTargetPhases.has(ph)) firstTargetRows.push(row);
       if (ph === 'lost') lostRows.push(row);
-      const rs = ph === 'resend_wait' ? String(row.outreachFirstReadState || '').trim() : String(row.outreachSecondReadState || '').trim();
-      if (rs === 'read') phaseReadSnapshot[ph].read += 1;
-      else if (rs === 'unread') phaseReadSnapshot[ph].unread += 1;
-      else phaseReadSnapshot[ph].unknown += 1;
+      const rs1 = String(row.outreachFirstReadState || '').trim();
+      if (firstTargetPhases.has(ph)) {
+        if (rs1 === 'read') phaseReadSnapshot.first_target.read += 1;
+        else if (rs1 === 'unread') phaseReadSnapshot.first_target.unread += 1;
+        else phaseReadSnapshot.first_target.unknown += 1;
+      }
+      if (ph === 'lost') {
+        const rs2 = String(row.outreachSecondReadState || '').trim();
+        if (rs2 === 'read') phaseReadSnapshot.lost.read += 1;
+        else if (rs2 === 'unread') phaseReadSnapshot.lost.unread += 1;
+        else phaseReadSnapshot.lost.unknown += 1;
+      }
     }
-    const firstContact = buildPatternReadStats(resendWaitRows, 'outreachFirstReadState');
+    const firstContact = buildPatternReadStats(firstTargetRows, 'outreachFirstReadState');
     const secondContact = buildPatternReadStats(lostRows, 'outreachSecondReadState');
     readReceiptStats = {
       firstContact,
       secondContact,
       phaseReadSnapshot,
-      note: '既読は手動記録です。1stは再送待ち時点、2ndは失注時点での確認値をテンプレ別に集計しています。',
+      note: '既読は手動記録です。1stは送信実施後フェーズ（再送待ち/再送済み/インスタ制限中/失注）、2ndは失注での確認値をテンプレ別に集計しています。',
     };
   }
 

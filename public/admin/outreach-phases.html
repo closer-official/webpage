@@ -387,14 +387,16 @@
         cursor: progress;
       }
       select.op-phase-select.op-read-select[data-read='unread'] {
-        background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
-        color: #dbeafe;
-        border-color: #60a5fa;
+        background: #1d4ed8 !important;
+        color: #dbeafe !important;
+        border-color: #60a5fa !important;
+        box-shadow: inset 0 0 0 9999px rgba(29, 78, 216, 0.82);
       }
       select.op-phase-select.op-read-select[data-read='read'] {
-        background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
-        color: #fee2e2;
-        border-color: #f87171;
+        background: #b91c1c !important;
+        color: #fee2e2 !important;
+        border-color: #f87171 !important;
+        box-shadow: inset 0 0 0 9999px rgba(185, 28, 28, 0.82);
       }
       /* Windows のネイティブ候補リストで文字が薄くならないよう固定 */
       select.op-phase-select option {
