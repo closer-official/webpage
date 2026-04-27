@@ -1336,7 +1336,7 @@
               'チラッと覗いてみて、もし気になれば一言返してもらえると嬉しいです！',
             '9':
               '突然すみません！\n' +
-              '○○サロン様の投稿が素敵すぎて、専用の予約サンプルページを作ってしまいました👇\n' +
+              '○○の投稿が素敵すぎて、専用の予約サンプルページを作ってしまいました👇\n' +
               '\n' +
               prev +
               '\n' +
@@ -1355,6 +1355,7 @@
           var sig = String(getSavedSenderName() || '').trim() || '○○';
           var custom = String((item && item.outreachDmCustomFirstLine) || '').trim();
           var core = buildDmBodyForPattern(pattern, prev, sig);
+          core = core.split('○○').join(custom || '○○');
           if (pattern === '6') {
             return core.split('【褒めポイント】').join(custom || '【褒めポイント】');
           }
@@ -1389,7 +1390,7 @@
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは9パターン。①〜⑥は一言コメント入力後にコピー、⑦〜⑨は「○○」とURL置換だけで使えます。パターンと1行は自動保存されます。',
+              text: 'DMは9パターン。①〜⑥は一言コメント入力後にコピー。入力欄は⑦〜⑨の「○○」差し替えにも使えます。パターンと1行は自動保存されます。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -1418,7 +1419,7 @@
           dmWrap.appendChild(
             el('label', {
               for: 'dm-firstline-' + item.id,
-              text: '一言コメント（DMの先頭1行・コピー必須）',
+              text: '一言コメント（DM先頭1行＋「○○」差し替えに使用）',
             }),
           );
           var inp = el('input', {
