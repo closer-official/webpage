@@ -1040,6 +1040,7 @@
             [
               ['no_site', 'ウェブなし（フォロー対象）'],
               ['weak_site', 'ウェブあり・弱い（フォロー対象）'],
+              ['not_creatable', '作成不可（メモ保持）'],
               ['strong_site', 'ウェブあり・強い（送付管理へ・メモには残さない）'],
             ].forEach(
               function (pair) {
@@ -1094,10 +1095,11 @@
 
         function currentMemoWebSelectValue(r) {
           var ws = r && r.webStrength;
-          if (ws === 'weak_site' || ws === 'no_site' || ws === 'strong_site') return ws;
+          if (ws === 'weak_site' || ws === 'no_site' || ws === 'strong_site' || ws === 'not_creatable') return ws;
           var m = String((r && r.memo) || '');
           if (m.indexOf('ウェブあり（弱）') >= 0) return 'weak_site';
           if (m.indexOf('ウェブあり（強）') >= 0) return 'strong_site';
+          if (m.indexOf('作成不可') >= 0) return 'not_creatable';
           return 'no_site';
         }
 
@@ -1250,6 +1252,7 @@
               [
                 ['no_site', 'ウェブなし'],
                 ['weak_site', 'ウェブあり（弱）'],
+                ['not_creatable', '作成不可'],
                 ['strong_site', 'ウェブあり（強→送付管理）'],
               ].forEach(function (opt) {
                 var o = document.createElement('option');

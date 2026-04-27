@@ -2017,11 +2017,12 @@ function addDaysIso(fromDate, days) {
   return d.toISOString();
 }
 
-const MEMO_WEB_STRENGTH = new Set(['no_site', 'weak_site', 'strong_site']);
+const MEMO_WEB_STRENGTH = new Set(['no_site', 'weak_site', 'strong_site', 'not_creatable']);
 
 function hpbMemoLabelForStrength(ws) {
   if (ws === 'weak_site') return '[HPB取込] ウェブあり（弱）';
   if (ws === 'strong_site') return '[HPB取込] ウェブあり（強）';
+  if (ws === 'not_creatable') return '[HPB取込] 作成不可';
   return '[HPB取込] ウェブなし';
 }
 
@@ -2118,7 +2119,7 @@ app.post('/api/memo-leads', async (req, res) => {
 
 /**
  * メモリード／送付管理への一括取込（美容室HPB想定）。
- * webStrength: no_site | weak_site → memo-leads、strong_site → dashboard（no_outreach_channel）
+ * webStrength: no_site | weak_site | not_creatable → memo-leads、strong_site → dashboard（no_outreach_channel）
  */
 app.post('/api/memo-leads/intake-batch', async (req, res) => {
   if (!requireAdmin(req, res)) return;
@@ -2129,7 +2130,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
   if (entries.length > 80) {
     return res.status(400).json({ error: '一度に登録できるのは80件までです' });
   }
-  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
+  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site', 'not_creatable']);
   const rawMemo = await store.getMemoLeads();
   const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
   const dashboard = [...(await store.getDashboard())];
@@ -2155,7 +2156,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
       dashboardAdded += 1;
       continue;
     }
-    const label = webStrength === 'weak_site' ? 'ウェブあり（弱）' : 'ウェブなし';
+    const label = webStrength === 'weak_site' ? 'ウェブあり（弱）' : webStrength === 'not_creatable' ? '作成不可' : 'ウェブなし';
     const memo = ['[HPB取込] ' + label, access ? 'アクセス: ' + access : '', '', sourceMemo]
       .filter(Boolean)
       .join('\n')
@@ -2164,7 +2165,7 @@ app.post('/api/memo-leads/intake-batch', async (req, res) => {
       id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
       shopName,
       memo,
-      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
+      webStrength: webStrength === 'weak_site' ? 'weak_site' : webStrength === 'not_creatable' ? 'not_creatable' : 'no_site',
       hpbAccess: access,
       hpbBody: sourceMemo.slice(0, 11000),
       createdAt: now,
@@ -2190,7 +2191,7 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
   if (entries.length > 80) {
     return res.status(400).json({ error: '一度に登録できるのは80件までです' });
   }
-  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site']);
+  const STRENGTHS = new Set(['no_site', 'weak_site', 'strong_site', 'not_creatable']);
   const rawMemo = await store.getBeautyMemoLeads();
   const memoList = [...(Array.isArray(rawMemo) ? rawMemo : [])];
   const dashboard = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
@@ -2225,7 +2226,7 @@ app.post('/api/beauty-outreach/memo-leads/intake-batch', async (req, res) => {
       id: `ml-${Date.now().toString(36)}-${ei}-${randomBytes(5).toString('hex')}`,
       shopName,
       memo: memoText,
-      webStrength: webStrength === 'weak_site' ? 'weak_site' : 'no_site',
+      webStrength: webStrength === 'weak_site' ? 'weak_site' : webStrength === 'not_creatable' ? 'not_creatable' : 'no_site',
       hpbAccess: access,
       hpbBody: sourceMemo.slice(0, 11000),
       addressMapUrl: '',
@@ -2257,7 +2258,7 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
   if (req.body?.webStrength !== undefined) {
     const ws = String(req.body.webStrength).trim();
     if (!MEMO_WEB_STRENGTH.has(ws)) {
-      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site のいずれかです' });
+      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site / not_creatable のいずれかです' });
     }
     const memoRow = list[i];
     const memoText = String(memoRow?.memo || '').trim();
@@ -2286,7 +2287,7 @@ app.patch('/api/memo-leads/:id', async (req, res) => {
       await store.setDashboard(dashboard);
       return res.json({ ok: true, movedToDashboard: true });
     }
-    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : ws === 'not_creatable' ? 'not_creatable' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 
@@ -2728,7 +2729,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   if (req.body?.webStrength !== undefined) {
     const ws = String(req.body.webStrength).trim();
     if (!MEMO_WEB_STRENGTH.has(ws)) {
-      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site のいずれかです' });
+      return res.status(400).json({ error: 'webStrength は no_site / weak_site / strong_site / not_creatable のいずれかです' });
     }
     const memoRow = list[i];
     const memoText = String(memoRow?.memo || '').trim();
@@ -2758,7 +2759,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
       await store.setBeautyDashboard(dash);
       return res.json({ ok: true, movedToDashboard: true });
     }
-    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : 'no_site';
+    memoRow.webStrength = ws === 'weak_site' ? 'weak_site' : ws === 'not_creatable' ? 'not_creatable' : 'no_site';
     memoRow.memo = rewriteHpbMemoFirstLine(memoRow.memo, ws);
   }
 
