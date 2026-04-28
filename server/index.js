@@ -68,6 +68,7 @@ import {
 } from './cafe1BasicLockedPresets.js';
 import { isValidTemplateId, renderTemplatePreview, findTemplateCandidate, getTemplateCandidates, applyTemplateCustomization } from './templatePreview.js';
 import { ensureDashboardForWorkerDraft } from './dashboardFromWorkerDraft.js';
+import { parseHotpepper } from '../public/admin/beauty-standalone-template/parser.js';
 import { customizationBaseIsBeauty, dashboardItemIsBeauty } from './outreachSegment.js';
 import {
   patchOutreachDashboardRowFields,
@@ -2800,6 +2801,28 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
       .filter(Boolean)
       .join('\n\n')
       .trim();
+    let parsedSalon = {};
+    try {
+      parsedSalon = parseHotpepper(String(memoRowAfter.hpbBody || ''));
+    } catch (e) {
+      console.error('parseHotpepper (memo auto-create)', e);
+    }
+    const ps = parsedSalon && typeof parsedSalon === 'object' ? parsedSalon : {};
+    const hpUrl = String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000);
+    const mapUrl = String(memoRowAfter.addressMapUrl || '').trim().slice(0, 2000);
+    const igUrl = String(memoRowAfter.instagramUrl || '').trim().slice(0, 2000);
+    const beautyStandaloneSalon = {
+      ...ps,
+      name: shopName || ps.name,
+      accessShort: access || ps.accessShort,
+      accessFull: access || ps.accessFull || ps.accessShort,
+      address: String(ps.address || '').trim() || access.slice(0, 240),
+      addressMapUrl: mapUrl || ps.addressMapUrl,
+      instagramUrl: igUrl || ps.instagramUrl,
+      reserveUrl: hpUrl || ps.reserveUrl,
+      hotPepperUrl: hpUrl,
+      homepageUrl: hpUrl || ps.homepageUrl,
+    };
     // メモ一覧からの自動作成は「送信前」でフェーズ管理へ載せ、店舗ドラフト（美容室LP独立）と紐づける
     const customizations = [...(Array.isArray(await store.getTemplateCustomizations()) ? await store.getTemplateCustomizations() : [])];
     const now = new Date().toISOString();
@@ -2808,18 +2831,7 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
       name: shopName.slice(0, 80),
       baseTemplateId: 'beauty_standalone',
       override: {
-        beautyStandaloneSalon: {
-          name: shopName,
-          introText: String(memoRowAfter.hpbBody || '').trim().slice(0, 50000),
-          accessShort: access,
-          accessFull: access,
-          address: access,
-          addressMapUrl: String(memoRowAfter.addressMapUrl || '').trim().slice(0, 2000),
-          instagramUrl: String(memoRowAfter.instagramUrl || '').trim().slice(0, 2000),
-          reserveUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
-          hotPepperUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
-          homepageUrl: String(memoRowAfter.hotPepperUrl || '').trim().slice(0, 2000),
-        },
+        beautyStandaloneSalon,
       },
       status: 'published',
       sourceIntakeId: String(memoRowAfter.id || '').trim().slice(0, 80) || undefined,

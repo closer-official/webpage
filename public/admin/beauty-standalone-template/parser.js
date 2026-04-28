@@ -324,11 +324,13 @@ function extractKodawari(text) {
 }
 
 function extractMessage(text) {
-  const section = text.match(/[^\n]{0,120}からの一言\s*([\s\S]+?)(?=の雰囲気|のPICK UP|のCHECK|のサロンデータ)/);
+  const section = text.match(
+    /[^\n]{0,120}からの一言\s*([\s\S]+?)(?=\s*空席確認|の雰囲気|のPICK UP|のCHECK|のサロンデータ|人気のクーポン|サロンの利用傾向)/,
+  );
   if (!section) return { title: '', text: '' };
 
   let chunk = String(section[1] || '');
-  const ctaIdx = chunk.indexOf('空席確認・予約する');
+  const ctaIdx = chunk.search(/空席確認/);
   if (ctaIdx >= 0) chunk = chunk.slice(0, ctaIdx);
   chunk = chunk.trim();
 
@@ -378,7 +380,9 @@ function extractMessage(text) {
 }
 
 function extractAtmosphere(text) {
-  const section = text.match(/[^\n]{0,120}の雰囲気\s*([\s\S]+?)(?=サロンの利用傾向|のPICK UP|のCHECK|人気のクーポン)/);
+  const section =
+    text.match(/[^\n]{0,120}の雰囲気\s*([\s\S]+?)(?=サロンの利用傾向|のPICK UP|のCHECK|人気のクーポン)/) ||
+    text.match(/の雰囲気\s*([\s\S]+?)(?=サロンの利用傾向|からの一言|のPICK UP|のCHECK|人気のクーポン)/);
   if (!section) return [];
 
   const atmoLines = section[1].split('\n').map(l => l.trim()).filter(l => l.length > 5 && l.length < 120);
@@ -401,25 +405,42 @@ function extractCoupons(text) {
   }
   const src = couponSection ? couponSection[1] : text;
 
-  // 新規/再来/全員ブロックを分割
-  const typeMap = { '新': '新規', '再': '再来', '全': '全員' };
-  const blocks = src.split(/\n(?=新\n規|再\n来|全\n員)/);
+  // 新規/再来/全員ブロックを分割（1行「新規」／改行分割の両方）
+  let blocks = src.split(/\n(?=新\n規|再\n来|全\n員)/);
+  if (blocks.length < 2) blocks = src.split(/\n(?=新規|再来|全員)/);
 
   for (const block of blocks) {
     const bLines = block.split('\n').map(l => l.trim()).filter(Boolean);
     if (bLines.length < 3) continue;
 
     let type = '';
-    if (bLines[0] === '新' && bLines[1] === '規') type = '新規';
-    else if (bLines[0] === '再' && bLines[1] === '来') type = '再来';
-    else if (bLines[0] === '全' && bLines[1] === '員') type = '全員';
+    let bodyStart = 0;
+    if (bLines[0] === '新' && bLines[1] === '規') {
+      type = '新規';
+      bodyStart = 2;
+    } else if (bLines[0] === '再' && bLines[1] === '来') {
+      type = '再来';
+      bodyStart = 2;
+    } else if (bLines[0] === '全' && bLines[1] === '員') {
+      type = '全員';
+      bodyStart = 2;
+    } else if (bLines[0] === '新規') {
+      type = '新規';
+      bodyStart = 1;
+    } else if (bLines[0] === '再来') {
+      type = '再来';
+      bodyStart = 1;
+    } else if (bLines[0] === '全員') {
+      type = '全員';
+      bodyStart = 1;
+    }
     if (!type) continue;
 
     // カテゴリ（カット、カラー等）
     const categories = [];
     let priceStr = '';
     let title = '';
-    let i = 2;
+    let i = bodyStart;
 
     while (i < bLines.length) {
       const l = bLines[i];
@@ -632,25 +653,36 @@ function extractSalonData(text) {
 }
 
 function extractStats(text) {
-  const firstM = text.match(/初来店[\t　]+([¥￥][^\n]+)/);
-  const repeatM = text.match(/2回目以降来店[\t　]+([¥￥][^\n]+)/);
+  const full = String(text || '');
+  let slice = full;
+  const statsHead = full.search(/サロンの利用傾向/);
+  if (statsHead >= 0) {
+    const tail = full.slice(statsHead, statsHead + 9000);
+    const endRel = tail.search(
+      /\n[^\n]{0,80}(の雰囲気|人気のクーポン|のクーポン|のこだわり|からの一言|のPICK UP|のCHECK|のサロンデータ|の口コミ)/,
+    );
+    slice = endRel > 80 ? tail.slice(0, endRel) : tail;
+  }
 
-  const femaleM = text.match(/女性\s*\n(\d+)%/);
-  const maleM = text.match(/男性\s*\n(\d+)%/);
+  const firstM = slice.match(/初来店[\s\t　]+([¥￥][^\n\r]+)/);
+  const repeatM = slice.match(/2回目以降来店[\s\t　]+([¥￥][^\n\r]+)/);
+
+  const femaleM = slice.match(/女性\s*[\n\r]?\s*(\d+)\s*%/);
+  const maleM = slice.match(/男性\s*[\n\r]?\s*(\d+)\s*%/);
 
   const ageRatio = [];
-  const agePattern = /[〜～]?(\d+代|10代以下|50代〜|〜10代)\s*\n(\d+)%/g;
+  const agePattern = /[〜～]?(\d+代|10代以下|50代〜|〜10代)\s*[\n\r]?\s*(\d+)\s*%/g;
   let am;
-  while ((am = agePattern.exec(text)) !== null) {
-    ageRatio.push({ label: am[1], value: parseInt(am[2]) });
+  while ((am = agePattern.exec(slice)) !== null) {
+    ageRatio.push({ label: am[1], value: parseInt(am[2], 10) });
   }
 
   return {
     firstVisitPrice: firstM ? firstM[1].trim() : '',
     repeatVisitPrice: repeatM ? repeatM[1].trim() : '',
     genderRatio: {
-      female: femaleM ? parseInt(femaleM[1]) : null,
-      male: maleM ? parseInt(maleM[1]) : null
+      female: femaleM ? parseInt(femaleM[1], 10) : null,
+      male: maleM ? parseInt(maleM[1], 10) : null
     },
     ageRatio
   };
@@ -694,6 +726,167 @@ function extractStaffRecruit(text) {
   let url = String(m[1] || '').trim().replace(/[）)。\],.;]+$/u, '');
   if (!/^https?:\/\//i.test(url)) return { url: '', label: '' };
   return { url, label: 'スタッフ募集' };
+}
+
+/** サロンページ中盤のタブナビ（全文コピーでは1行に連なることが多い） */
+const HP_SALON_NAV_RE = /サロン情報\s*クーポン\s*メニュー\s*スタイリスト\s*スタイル\s*ブログ\s*地図\s*口コミ/;
+
+function normalizeHpPasteText(t) {
+  return String(t || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .slice(0, 120000);
+}
+
+/**
+ * 「ブックマークする」の直後から店名〜アクセス（短縮）までを行順で取得。
+ * strip 前後どちらにもブックマークがある場合があるため full / strip の両方を見る。
+ */
+function extractBookmarkSalonHeadBlock(lines) {
+  const out = {
+    name: '',
+    title: '',
+    rating: null,
+    reviewCount: null,
+    address: '',
+    accessShort: '',
+  };
+  let bm = -1;
+  for (let i = 0; i < Math.min(lines.length, 260); i++) {
+    if (/ブックマークする/.test(lines[i])) {
+      bm = i;
+      break;
+    }
+  }
+  if (bm < 0) return out;
+
+  let j = bm + 1;
+  const next = () => {
+    while (j < lines.length && lines[j] === '') j += 1;
+    if (j >= lines.length) return '';
+    const v = lines[j];
+    j += 1;
+    return v || '';
+  };
+
+  out.name = next();
+  if (out.name && isUnlikelySalonNameLine(out.name)) out.name = '';
+
+  let t1 = next();
+  if (/^\d\.\d{1,2}$/.test(t1)) {
+    out.rating = parseFloat(t1, 10);
+    j -= 1;
+  } else {
+    out.title = t1;
+    const rLine = next();
+    if (/^\d\.\d{1,2}$/.test(rLine)) out.rating = parseFloat(rLine, 10);
+    else j -= 1;
+  }
+
+  const revLine = next();
+  const revM = revLine.match(/[（(](\d+)件[）)]/);
+  if (revM) out.reviewCount = parseInt(revM[1], 10);
+  else j -= 1;
+
+  const addrLine = next();
+  if (/^(東京都|大阪府|神奈川県|埼玉県|千葉県|京都府|兵庫県|愛知県|福岡県|北海道)/.test(addrLine)) {
+    out.address = addrLine;
+  } else j -= 1;
+
+  const accLine = next();
+  if (
+    accLine &&
+    accLine.length < 130 &&
+    (accLine.includes('徒歩') || accLine.includes('駅') || /\d+\s*分/.test(accLine))
+  ) {
+    out.accessShort = accLine;
+  }
+
+  return out;
+}
+
+function findSalonNavLineIndex(lines) {
+  for (let i = 0; i < lines.length; i++) {
+    if (HP_SALON_NAV_RE.test(lines[i])) return i;
+  }
+  return -1;
+}
+
+/** クーポン表など「全員 / メニュー / 金額」が並ぶ見出しの先頭行（先頭は必ず「全員」行） */
+function findFirstMenuAmountGridHeaderLine(lines, startIdx) {
+  for (let i = Math.max(0, startIdx); i < Math.min(lines.length - 1, startIdx + 8000); i++) {
+    const row0 = lines[i] || '';
+    const row1 = lines[i + 1] || '';
+    const zen =
+      row0 === '全員' ||
+      row0.replace(/\s+/g, '') === '全員' ||
+      (row0 === '全' && row1 === '員');
+    if (!zen) continue;
+    const rest = lines.slice(i, Math.min(i + 12, lines.length)).join('\n');
+    if (!/メニュー/.test(rest) || !/金額/.test(rest)) continue;
+    if (/人気のクーポン|おすすめクーポン/.test(rest)) continue;
+    return i;
+  }
+  return -1;
+}
+
+/**
+ * ナビ行の直後＝キャッチ、その次〜「全員・メニュー・金額」見出し直前＝紹介文（全文コピー想定）
+ */
+function extractStructuralHpBeauty(rawTextIn) {
+  const fullLines = normalizeHpPasteText(rawTextIn).split('\n').map((l) => l.trim());
+  const stripLines = stripHpFullPageNoise(rawTextIn)
+    .split('\n')
+    .map((l) => l.trim());
+
+  const headFull = extractBookmarkSalonHeadBlock(fullLines);
+  const headStrip = extractBookmarkSalonHeadBlock(stripLines);
+  const head = headFull.name ? headFull : headStrip;
+
+  let navLines = stripLines;
+  let navIdx = findSalonNavLineIndex(stripLines);
+  if (navIdx < 0) {
+    navIdx = findSalonNavLineIndex(fullLines);
+    navLines = fullLines;
+  }
+
+  let heroCatch = '';
+  let introText = '';
+  if (navIdx >= 0) {
+    let p = navIdx + 1;
+    const catchBuf = [];
+    while (p < navLines.length && catchBuf.length < 5) {
+      const L = navLines[p] || '';
+      if (!L) {
+        p += 1;
+        continue;
+      }
+      if (L.length > 88) break;
+      if (/^(東京都|大阪府|神奈川県|埼玉県|千葉県|京都府|兵庫県|愛知県|福岡県|北海道)/.test(L)) break;
+      if (/[。！？]\s*$/.test(L) && L.length > 36) break;
+      if (/[。！？]/.test(L) && L.length > 22) break;
+      if (/(です|ます|いたします|おります)([。!！?？]|$)/.test(L) && L.length > 14) break;
+      if (/^＜＞|^<>$/.test(L)) break;
+      if (/からの一言|^全員$|^メニュー$|^金額$|の写真|空席確認|HOT\s*PEPPER|国内最大級/.test(L)) break;
+      catchBuf.push(L);
+      p += 1;
+    }
+    heroCatch = catchBuf.join(' ').trim().slice(0, 400);
+
+    const menuH = findFirstMenuAmountGridHeaderLine(navLines, p);
+    if (menuH > p) {
+      introText = navLines.slice(p, menuH).join('\n').trim();
+    }
+  }
+
+  return {
+    ...head,
+    heroCatch,
+    introText: introText.slice(0, 12000),
+    /** サロンタブナビを検出できたときは短い紹介文も構造化優先する */
+    structuralNavFound: navIdx >= 0,
+  };
 }
 
 // ---- メインパーサー ----
@@ -801,6 +994,24 @@ export function parseHotpepper(rawTextIn) {
   }
 
   salon.stats = extractStats(rawText);
+
+  const struct = extractStructuralHpBeauty(rawTextIn);
+  if (struct.name && !isUnlikelySalonNameLine(struct.name)) salon.name = struct.name.trim();
+  if (struct.title) salon.title = struct.title.trim();
+  if (struct.rating != null && !Number.isNaN(struct.rating)) salon.rating = struct.rating;
+  if (struct.reviewCount != null && !Number.isNaN(struct.reviewCount)) {
+    salon.reviewCount = struct.reviewCount;
+  }
+  if (struct.address) salon.address = struct.address;
+  if (struct.accessShort) salon.accessShort = struct.accessShort;
+  if (struct.heroCatch) salon.heroCatch = struct.heroCatch;
+  const introTrim = struct.introText ? struct.introText.replace(/\s+/g, ' ').trim() : '';
+  if (
+    introTrim &&
+    (struct.structuralNavFound ? introTrim.length >= 6 : introTrim.length >= 32)
+  ) {
+    salon.introText = truncateSalonIntroBeforeReserveCta(struct.introText).slice(0, 12000);
+  }
 
   if (String(salon.name || '').trim() && isUnlikelySalonNameLine(salon.name)) {
     salon.name = '';
