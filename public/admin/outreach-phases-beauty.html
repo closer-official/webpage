@@ -1264,7 +1264,7 @@
 
         function dmPatternKey(item) {
           var p = String((item && item.outreachDmPattern) || '1').trim();
-          if (/^(?:[1-9]|10|11)$/.test(p)) return p;
+          if (/^(?:[1-9]|10|11|12|13)$/.test(p)) return p;
           return getLastDmPattern() || '1';
         }
 
@@ -1417,6 +1417,21 @@
               '\n' +
               '興味がなければ無視していただいて構いません。\n' +
               'もし「予約を増やしたい」というお考えがあれば、一言いただければ嬉しいです！',
+            '12':
+              '○○様、突然のメッセージ失礼いたします。\n' +
+              '\n' +
+              '投稿を拝見したのですが、特に【褒めポイント】が本当に素敵で、思わず見入ってしまいました！\n' +
+              '\n' +
+              '実はWeb制作をしている身として、勝手ながらこの魅力がもっと予約に繋がるような「専用ページのデザイン案」を作ってみたんです。\n' +
+              '\n' +
+              '押し売りをするつもりは一切なく、もしご迷惑でなければ一目見ていただきたいのですが、詳細お送りしてもよろしいでしょうか？',
+            '13':
+              '○○様、こんにちは！\n' +
+              '普段から投稿を拝見しており、【褒めポイント】のセンスが素晴らしくて、ぜひ一度お願いしたいなと考えていました。\n' +
+              '\n' +
+              'その一環で、勝手ながら「お店の予約専用ページ」のサンプルを1枚作成してみたのですが、お忙しいところ何度もすみません、一度チェックいただけませんか？\n' +
+              '\n' +
+              'もし「今の予約方法で満足している」ということであればスルーしていただいて大丈夫です！もし興味を持っていただけたら詳細お送りします。',
           };
           return bodies[pattern] || bodies['1'];
         }
@@ -1469,14 +1484,14 @@
 
         function renderOutreachTemplatesBlock(container, item) {
           container.appendChild(
-            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：11パターン・褒めポイント・プレビューURL・送信者名）' }),
+            el('p', { class: 'muted', text: '送付文面テンプレ（メール：配信停止URL 等／DM：13パターン・褒めポイント・プレビューURL・送信者名）' }),
           );
 
           var dmWrap = el('div', { class: 'dm-pattern-block' });
           dmWrap.appendChild(
             el('p', {
               class: 'muted',
-              text: 'DMは11パターン。①〜⑥は褒めポイント入力後にコピーしてください（⑥は「【魅力】」へ差し込み）。入力欄は⑦〜⑪の「【コメント】」差し替えにも使えます。○○様の○○は店名が自動で入ります。',
+              text: 'DMは13パターン。①〜⑥と⑫⑬は褒めポイント入力後にコピーしてください（⑥は「【魅力】」へ差し込み）。入力欄は⑦〜⑪の「【コメント】」差し替えにも使えます。○○様の○○は店名が自動で入ります。',
             }),
           );
           dmWrap.appendChild(el('label', { for: 'dm-pattern-' + item.id, text: 'DMパターン' }));
@@ -1493,6 +1508,8 @@
             { v: '9', t: '⑨ 専用予約サンプルDM（○○＋URL）' },
             { v: '10', t: '⑩ 専用紹介ページDM（○○様＋【コメント】）' },
             { v: '11', t: '⑪ 予約専用ページDM（○○様＋【コメント】）' },
+            { v: '12', t: '⑫ 共感＋専用ページ案DM（○○様＋【褒めポイント】）' },
+            { v: '13', t: '⑬ 丁寧フォローDM（○○様＋【褒めポイント】）' },
           ].forEach(function (o) {
             sel.appendChild(el('option', { value: o.v, text: o.t }));
           });
@@ -1561,7 +1578,7 @@
           var bDm = el('button', { type: 'button', class: 'btn small', text: 'DM用テンプレをコピー' });
           bDm.onclick = function () {
             var oneLine = String(inp.value || '').trim();
-            var needFirstLine = ['1', '2', '3', '4', '5', '6', '10', '11'].indexOf(String(sel.value || '')) >= 0;
+            var needFirstLine = ['1', '2', '3', '4', '5', '6', '10', '11', '12', '13'].indexOf(String(sel.value || '')) >= 0;
             if (needFirstLine && !oneLine) {
               dmGateErr.textContent =
                 sel.value === '6'

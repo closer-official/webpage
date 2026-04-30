@@ -483,23 +483,19 @@
         </div>
 
         <div id="block-manual" style="display: none">
-          <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">手入力でメモを追加</h3>
-          <label for="new-name">店名</label>
-          <input type="text" id="new-name" maxlength="200" placeholder="例：渋谷カフェ ○○" autocomplete="off" />
-          <label for="new-address-map" style="margin-top: 12px">GoogleマップURL</label>
-          <input type="text" id="new-address-map" maxlength="2000" placeholder="https://maps.app.goo.gl/… など" autocomplete="off" />
-          <label for="new-instagram" style="margin-top: 12px">Instagram URL</label>
-          <input type="text" id="new-instagram" maxlength="2000" placeholder="https://www.instagram.com/…" autocomplete="off" />
-          <label for="new-hot-pepper" style="margin-top: 12px">ホットペッパー（予約ページ）URL</label>
-          <input type="text" id="new-hot-pepper" maxlength="2000" placeholder="https://beauty.hotpepper.jp/…" autocomplete="off" />
-          <label for="new-memo" style="margin-top: 12px">メモ（リンク・覚え書き）</label>
-          <textarea id="new-memo" maxlength="12000" placeholder="例：&#10;https://beauty.hotpepper.jp/...&#10;（ホットペッパー等・覚え書き）"></textarea>
+          <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">Instagram URLから送付管理へ追加</h3>
+          <p class="sub" style="margin: 0 0 10px">
+            Instagram URLを追加すると、店舗カードを作らずに
+            <strong>/admin/beauty-outreach</strong>（送付・フェーズ管理）へ直接追加します。DM送信とフェーズ移動を先に進め、返信後にLPを作成してURL送付する運用向けです。
+          </p>
+          <label for="new-instagram">Instagram URL</label>
+          <input type="text" id="new-instagram" maxlength="2000" placeholder="https://www.instagram.com/..." autocomplete="off" />
           <div class="row-actions">
             <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 0 0; font-size: 0.78rem">
               <input type="checkbox" id="new-keep-manual-mode" checked />
-              連続入力モード（追加後に店名へ戻る）
+              連続入力モード（追加後にInstagram URLへ戻る）
             </label>
-            <button type="button" class="btn-sm primary" id="btn-add">追加する</button>
+            <button type="button" class="btn-sm primary" id="btn-add">送付管理へ追加</button>
           </div>
         </div>
       </section>
@@ -1637,37 +1633,42 @@
           if (el) el.addEventListener('change', syncIntakeMode);
         });
 
+        function instagramHandleFromUrl(url) {
+          var s = String(url || '').trim();
+          if (!s) return '';
+          var m = s.match(/instagram\.com\/([A-Za-z0-9._]{1,30})/i);
+          if (m && m[1]) return '@' + m[1];
+          return '';
+        }
+
+        function openBeautyOutreachWithSearch(q) {
+          var query = String(q || '').trim();
+          var to = '/admin/beauty-outreach.html';
+          if (query) to += '?q=' + encodeURIComponent(query);
+          location.href = to;
+        }
+
         var btnAdd = document.getElementById('btn-add');
         if (btnAdd) {
-          var newNameEl = document.getElementById('new-name');
+          var newIgEl = document.getElementById('new-instagram');
           var keepManualEl = document.getElementById('new-keep-manual-mode');
           btnAdd.onclick = function () {
-            var name = document.getElementById('new-name').value.trim();
-            var memo = document.getElementById('new-memo').value.trim();
-            var mapU = document.getElementById('new-address-map')
-              ? document.getElementById('new-address-map').value.trim().slice(0, 2000)
-              : '';
-            var igU = document.getElementById('new-instagram')
-              ? document.getElementById('new-instagram').value.trim().slice(0, 2000)
-              : '';
-            var hpU = document.getElementById('new-hot-pepper')
-              ? document.getElementById('new-hot-pepper').value.trim().slice(0, 2000)
-              : '';
-            if (!name) {
-              showErr('店名を入力してください');
+            var igU = newIgEl ? newIgEl.value.trim().slice(0, 2000) : '';
+            if (!/^https?:\/\/(?:www\.)?instagram\.com\//i.test(igU)) {
+              showErr('Instagram URL（https://www.instagram.com/...）を入力してください');
               return;
             }
+            var handle = instagramHandleFromUrl(igU);
+            var shopName = handle || ('Instagram ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
             showErr('');
-            setButtonBusy(btnAdd, true, '追加する', '追加中...');
+            setButtonBusy(btnAdd, true, '送付管理へ追加', '追加中...');
             credFetch(api + '/beauty-outreach/memo-leads', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                shopName: name,
-                memo: memo,
-                addressMapUrl: mapU,
+                shopName: shopName,
+                memo: '[Instagram直接追加] ' + igU,
                 instagramUrl: igU,
-                hotPepperUrl: hpU,
               }),
             })
               .then(function (r) {
@@ -1676,28 +1677,35 @@
                   return j;
                 });
               })
+              .then(function (created) {
+                var id = created && created.id ? String(created.id) : '';
+                if (!id) throw new Error('追加後のIDが取得できませんでした');
+                return credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(id) + '/promote', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ outreachPhaseUi: 'before_send' }),
+                }).then(function (r2) {
+                  return r2.json().then(function (j2) {
+                    if (!r2.ok) throw new Error((j2 && j2.error) || r2.statusText);
+                    return j2;
+                  });
+                });
+              })
               .then(function () {
-                document.getElementById('new-name').value = '';
-                document.getElementById('new-memo').value = '';
-                var nm = document.getElementById('new-address-map');
-                var ni = document.getElementById('new-instagram');
-                var nh = document.getElementById('new-hot-pepper');
-                if (nm) nm.value = '';
-                if (ni) ni.value = '';
-                if (nh) nh.value = '';
-                showOk('追加しました');
-                if (keepManualEl && keepManualEl.checked && newNameEl) newNameEl.focus();
-                return loadList();
+                if (newIgEl) newIgEl.value = '';
+                showOk('送付・フェーズ管理に追加しました');
+                if (keepManualEl && keepManualEl.checked && newIgEl) newIgEl.focus();
+                openBeautyOutreachWithSearch(handle || igU);
               })
               .catch(function (e) {
                 showErr(e.message || String(e));
               })
               .finally(function () {
-                setButtonBusy(btnAdd, false, '追加する');
+                setButtonBusy(btnAdd, false, '送付管理へ追加');
               });
           };
-          if (newNameEl) {
-            newNameEl.addEventListener('keydown', function (ev) {
+          if (newIgEl) {
+            newIgEl.addEventListener('keydown', function (ev) {
               if (ev.key !== 'Enter') return;
               ev.preventDefault();
               if (btnAdd.disabled) return;
