@@ -2713,6 +2713,12 @@ app.post('/api/beauty-outreach/memo-leads', async (req, res) => {
     addressMapUrl: String(req.body?.addressMapUrl || '').trim().slice(0, 2000),
     instagramUrl: String(req.body?.instagramUrl || '').trim().slice(0, 2000),
     hotPepperUrl: String(req.body?.hotPepperUrl || '').trim().slice(0, 2000),
+    outreachDmPattern: String(req.body?.outreachDmPattern || '').trim().match(/^(?:[1-9]|10|11|12|13)$/)
+      ? String(req.body?.outreachDmPattern || '').trim()
+      : '1',
+    outreachDmCustomFirstLine: String(req.body?.outreachDmCustomFirstLine || '')
+      .trim()
+      .slice(0, 500),
     onOutreachBoard: true,
     createdAt: now,
     updatedAt: now,
@@ -2738,6 +2744,18 @@ app.patch('/api/beauty-outreach/memo-leads/:id', async (req, res) => {
   }
   if (req.body?.hotPepperUrl !== undefined) {
     list[i].hotPepperUrl = String(req.body.hotPepperUrl || '').trim().slice(0, 2000);
+  }
+  if (req.body?.outreachDmPattern !== undefined) {
+    const p = String(req.body.outreachDmPattern || '').trim();
+    if (!/^(?:[1-9]|10|11|12|13)$/.test(p)) {
+      return res.status(400).json({ error: 'outreachDmPattern は 1..13 のいずれかです' });
+    }
+    list[i].outreachDmPattern = p;
+  }
+  if (req.body?.outreachDmCustomFirstLine !== undefined) {
+    list[i].outreachDmCustomFirstLine = String(req.body.outreachDmCustomFirstLine || '')
+      .trim()
+      .slice(0, 500);
   }
   if (req.body?.hpbBody !== undefined) {
     list[i].hpbBody = stripHpbCouponTailFromText(String(req.body.hpbBody || ''))
@@ -2922,6 +2940,14 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
     memoSnippet: snippet,
     uiPhase,
   });
+  if (/^(?:[1-9]|10|11|12|13)$/.test(String(memo.outreachDmPattern || '').trim())) {
+    dashboardRow.outreachDmPattern = String(memo.outreachDmPattern || '').trim();
+  }
+  if (String(memo.outreachDmCustomFirstLine || '').trim()) {
+    dashboardRow.outreachDmCustomFirstLine = String(memo.outreachDmCustomFirstLine || '')
+      .trim()
+      .slice(0, 500);
+  }
   list.splice(idx, 1);
   const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
   dash.unshift(dashboardRow);

@@ -483,10 +483,11 @@
         </div>
 
         <div id="block-manual" style="display: none">
-          <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">Instagram URLから送付管理へ追加</h3>
+          <h3 id="add-h" style="margin: 0 0 10px; font-size: 0.95rem">Instagram URLでメモリード追加</h3>
           <p class="sub" style="margin: 0 0 10px">
-            Instagram URLを追加すると、店舗カードを作らずに
-            <strong>/admin/beauty-outreach</strong>（送付・フェーズ管理）へ直接追加します。DM送信とフェーズ移動を先に進め、返信後にLPを作成してURL送付する運用向けです。
+            ここではInstagram URLだけ先に登録します。行ごとに
+            <strong>文章テンプレ選択・褒めポイント入力・コピー・フェーズ変更</strong>ができます。<strong>送信前以外</strong>へ変更した行はメモリード一覧から外れ、
+            <strong>/admin/beauty-outreach</strong>（送付・フェーズ管理）へ移動します。
           </p>
           <label for="new-instagram">Instagram URL</label>
           <input type="text" id="new-instagram" maxlength="2000" placeholder="https://www.instagram.com/..." autocomplete="off" />
@@ -495,7 +496,8 @@
               <input type="checkbox" id="new-keep-manual-mode" checked />
               連続入力モード（追加後にInstagram URLへ戻る）
             </label>
-            <button type="button" class="btn-sm primary" id="btn-add">送付管理へ追加</button>
+            <button type="button" class="btn-sm primary" id="btn-add">メモリード追加</button>
+            <button type="button" class="btn-sm" id="btn-go-outreach" style="display: none">フェーズ確認へ移動</button>
           </div>
         </div>
       </section>
@@ -1150,6 +1152,57 @@
           return arr;
         }
 
+        function memoDmPatternKey(raw) {
+          var p = String(raw || '').trim();
+          return /^(?:[1-9]|10|11|12|13)$/.test(p) ? p : '1';
+        }
+
+        function memoBuildDmTemplate(pattern) {
+          var bodies = {
+            '1':
+              '突然すみません、投稿を拝見しました。\n\n【褒めポイント】がすごく素敵で、思わずご連絡しました。\nもしご迷惑でなければ、詳細お送りしてもよろしいでしょうか？',
+            '2':
+              'はじめまして。投稿を拝見してご連絡しました。\n\n【褒めポイント】が印象的で、とても素敵でした。\nご迷惑でなければ詳細をお送りします。',
+            '3':
+              '突然失礼します。投稿を拝見しました。\n\n【褒めポイント】がとても魅力的で、ぜひ一度ご相談したくDMしました。\nよろしければ詳細をお送りします。',
+            '4':
+              '急にご連絡失礼します。\n\n【褒めポイント】が本当に素敵で、勝手ながらご連絡しました。\nご迷惑でなければ詳細をお送りしてもよろしいでしょうか？',
+            '5':
+              '突然すみません、投稿を見てご連絡しました。\n\n【褒めポイント】がすごく印象に残りました。\nもしご興味があれば詳細をお送りします。',
+            '6':
+              '突然のDM失礼いたします。\n\n【魅力】がとても素敵で、勝手ながらご連絡しました。\nご迷惑でなければ詳細をお送りします。',
+            '7':
+              '先ほど○○の投稿を拝見しました！\n\n投稿の雰囲気がとても素敵で、思わずご連絡しました。\nご迷惑でなければ詳細をお送りします。',
+            '8':
+              '突然のDM失礼します！投稿をいつも拝見しています。\n\n【コメント】のセンスが素晴らしく、ぜひ一度お願いしたいと思いました。\nよろしければ詳細をお送りします。',
+            '9':
+              '突然すみません！\n○○の投稿が素敵で、ぜひご連絡したいと思いました。\n\nもしご興味があれば詳細をお送りします。',
+            '10':
+              '突然の連絡失礼します。\n【コメント】を拝見して、ぜひ相談したくご連絡しました。\n\nご迷惑でなければ詳細をお送りします。',
+            '11':
+              'こんにちは！\n【コメント】が素敵で、ぜひ一度お願いしたいと思いご連絡しました。\n\nご迷惑でなければ詳細をお送りします。',
+            '12':
+              '○○様、突然のメッセージ失礼いたします。\n\n投稿を拝見したのですが、特に【褒めポイント】が本当に素敵で、思わず見入ってしまいました！\n\n実はWeb制作をしている身として、勝手ながらこの魅力がもっと予約に繋がるような「専用ページのデザイン案」を作ってみたんです。\n\n押し売りをするつもりは一切なく、もしご迷惑でなければ一目見ていただきたいのですが、詳細お送りしてもよろしいでしょうか？',
+            '13':
+              '○○様、こんにちは！\n普段から投稿を拝見しており、【褒めポイント】のセンスが素晴らしくて、ぜひ一度お願いしたいなと考えていました。\n\nその一環で、勝手ながら「お店の予約専用ページ」のサンプルを1枚作成してみたのですが、お忙しいところ何度もすみません、一度チェックいただけませんか？\n\nもし「今の予約方法で満足している」ということであればスルーしていただいて大丈夫です！もし興味を持っていただけたら詳細お送りします。',
+          };
+          return bodies[memoDmPatternKey(pattern)] || bodies['1'];
+        }
+
+        function memoBuildDmBody(row, pattern, praise) {
+          var shop = String((row && row.shopName) || '').trim() || '○○';
+          var p = String(praise || '').trim() || '【褒めポイント】';
+          return memoBuildDmTemplate(pattern)
+            .split('【褒めポイント】')
+            .join(p)
+            .split('【コメント】')
+            .join(p)
+            .split('【魅力】')
+            .join(p)
+            .split('○○')
+            .join(shop);
+        }
+
         function refreshMemoListDisplay() {
           if (!window.memoListRawRows) {
             return;
@@ -1175,7 +1228,7 @@
           }
           var tb = document.createElement('table');
           tb.innerHTML =
-            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>ホットペッパーURL</th><th>WEBの強さ</th><th>ホットペッパー全文</th></tr></thead><tbody></tbody>';
+            '<thead><tr><th class="memo-cb-col" scope="col"><input type="checkbox" class="memo-bulk-all" aria-label="表示中の行をすべて選択" title="すべて選択"></th><th>店名</th><th>GoogleマップURL</th><th>Instagram URL</th><th>ホットペッパーURL</th><th>DMテンプレ</th><th>フェーズ操作</th><th>WEBの強さ</th><th>ホットペッパー全文</th></tr></thead><tbody></tbody>';
           var body = tb.querySelector('tbody');
           rows.forEach(function (r) {
             var tr = document.createElement('tr');
@@ -1278,6 +1331,166 @@
             var navIg = igTd.querySelector('input');
             var navHp = hpTd.querySelector('input');
             var navWebSel = null;
+            var dmTd = document.createElement('td');
+            var dmWrap = document.createElement('div');
+            dmWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:210px;';
+            var dmPatternSel = document.createElement('select');
+            dmPatternSel.className = 'memo-web-select';
+            [
+              ['1', '① 基本'],
+              ['2', '② 短め'],
+              ['3', '③ 相談'],
+              ['4', '④ 丁寧'],
+              ['5', '⑤ 興味確認'],
+              ['6', '⑥ 魅力訴求'],
+              ['7', '⑦ 投稿見ました'],
+              ['8', '⑧ いつも拝見'],
+              ['9', '⑨ シンプル'],
+              ['10', '⑩ コメント型'],
+              ['11', '⑪ 予約型'],
+              ['12', '⑫ 共感＋専用ページ案'],
+              ['13', '⑬ 丁寧フォロー'],
+            ].forEach(function (op) {
+              var o = document.createElement('option');
+              o.value = op[0];
+              o.textContent = op[1];
+              dmPatternSel.appendChild(o);
+            });
+            dmPatternSel.value = memoDmPatternKey(r.outreachDmPattern);
+            var dmPraise = document.createElement('input');
+            dmPraise.type = 'text';
+            dmPraise.maxLength = 500;
+            dmPraise.placeholder = '褒めポイント（必須）';
+            dmPraise.value = String(r.outreachDmCustomFirstLine || '');
+            dmPraise.style.cssText = 'font-size:0.76rem;padding:6px 8px;border:1px solid var(--border);border-radius:6px;';
+            function saveMemoDmField(payload, okMsg) {
+              return credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              })
+                .then(function (res) {
+                  return res.json().then(function (j) {
+                    if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                    return j;
+                  });
+                })
+                .then(function (j) {
+                  if (window.memoListRawRows) {
+                    var ix = window.memoListRawRows.findIndex(function (x) {
+                      return x && x.id === r.id;
+                    });
+                    if (ix >= 0) Object.assign(window.memoListRawRows[ix], payload);
+                  }
+                  if (okMsg) showOk(okMsg);
+                  return j;
+                });
+            }
+            dmPatternSel.addEventListener('change', function () {
+              saveMemoDmField({ outreachDmPattern: dmPatternSel.value }, 'DMテンプレを保存しました').catch(function (e) {
+                showErr(e.message || String(e));
+              });
+            });
+            dmPraise.addEventListener('blur', function () {
+              saveMemoDmField({ outreachDmCustomFirstLine: String(dmPraise.value || '').trim() }, '褒めポイントを保存しました').catch(
+                function (e) {
+                  showErr(e.message || String(e));
+                },
+              );
+            });
+            var dmCopyBtn = document.createElement('button');
+            dmCopyBtn.type = 'button';
+            dmCopyBtn.className = 'btn-sm';
+            dmCopyBtn.textContent = '文章をコピー';
+            dmCopyBtn.onclick = function () {
+              var praise = String(dmPraise.value || '').trim();
+              if (!praise) {
+                showErr('褒めポイントを入力してください');
+                dmPraise.focus();
+                return;
+              }
+              var text = memoBuildDmBody(r, dmPatternSel.value, praise);
+              if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                showErr('この環境ではコピーできません');
+                return;
+              }
+              navigator.clipboard
+                .writeText(text)
+                .then(function () {
+                  showOk('DM文章をコピーしました');
+                })
+                .catch(function () {
+                  showErr('コピーに失敗しました');
+                });
+            };
+            dmWrap.appendChild(dmPatternSel);
+            dmWrap.appendChild(dmPraise);
+            dmWrap.appendChild(dmCopyBtn);
+            dmTd.appendChild(dmWrap);
+
+            var phaseTd = document.createElement('td');
+            var phaseWrap = document.createElement('div');
+            phaseWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:180px;';
+            var phaseSel = document.createElement('select');
+            phaseSel.className = 'memo-web-select';
+            [
+              ['before_send', '送信前'],
+              ['message_sent', '送信済み'],
+              ['resend_wait', '再送待ち'],
+              ['resend_sent', '再送済み'],
+              ['instagram_limited', 'インスタ制限中'],
+              ['resend_unavailable', '再送不可'],
+              ['no_outreach_channel', 'SNSなし・ウェブページ制作不可'],
+              ['hearing', 'ヒアリング中'],
+              ['proposal', '提案中'],
+              ['contracted', '契約済み'],
+              ['lost', '失注'],
+            ].forEach(function (p) {
+              var o = document.createElement('option');
+              o.value = p[0];
+              o.textContent = p[1];
+              phaseSel.appendChild(o);
+            });
+            phaseSel.value = 'before_send';
+            var phaseBtn = document.createElement('button');
+            phaseBtn.type = 'button';
+            phaseBtn.className = 'btn-sm primary';
+            phaseBtn.textContent = 'フェーズ変更';
+            phaseBtn.onclick = function () {
+              var ph = String(phaseSel.value || 'before_send');
+              if (ph === 'before_send') {
+                showOk('送信前のままです（一覧に残ります）');
+                return;
+              }
+              setButtonBusy(phaseBtn, true, 'フェーズ変更', '変更中...');
+              credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(r.id) + '/promote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ outreachPhaseUi: ph }),
+              })
+                .then(function (res) {
+                  return res.json().then(function (j) {
+                    if (!res.ok) throw new Error((j && j.error) || res.statusText);
+                    return j;
+                  });
+                })
+                .then(function () {
+                  removeRowFromUi();
+                  showOk('フェーズを変更し、送付・フェーズ管理へ移動しました');
+                  setTimeout(function () {
+                    openBeautyOutreachWithSearch(String((r && r.shopName) || '').trim() || String((r && r.instagramUrl) || '').trim());
+                  }, 120);
+                })
+                .catch(function (e) {
+                  showErr(e.message || String(e));
+                })
+                .finally(function () {
+                  setButtonBusy(phaseBtn, false, 'フェーズ変更');
+                });
+            };
+            phaseWrap.appendChild(phaseSel);
+            phaseWrap.appendChild(phaseBtn);
+            phaseTd.appendChild(phaseWrap);
             if (isHpbMemoRow(r)) {
               var sel = document.createElement('select');
               sel.className = 'memo-web-select';
@@ -1389,6 +1602,8 @@
             tr.appendChild(mapTd);
             tr.appendChild(igTd);
             tr.appendChild(hpTd);
+            tr.appendChild(dmTd);
+            tr.appendChild(phaseTd);
             tr.appendChild(webTd);
             tr.appendChild(bodyTd);
             body.appendChild(tr);
@@ -1652,6 +1867,20 @@
         if (btnAdd) {
           var newIgEl = document.getElementById('new-instagram');
           var keepManualEl = document.getElementById('new-keep-manual-mode');
+          var btnGoOutreach = document.getElementById('btn-go-outreach');
+          function syncGoOutreachBtn() {
+            if (!btnGoOutreach || !newIgEl) return;
+            var v = String(newIgEl.value || '').trim();
+            btnGoOutreach.style.display = /^https?:\/\/(?:www\.)?instagram\.com\//i.test(v) ? '' : 'none';
+          }
+          if (newIgEl) newIgEl.addEventListener('input', syncGoOutreachBtn);
+          if (btnGoOutreach) {
+            btnGoOutreach.onclick = function () {
+              var v = newIgEl ? String(newIgEl.value || '').trim() : '';
+              var handle = instagramHandleFromUrl(v);
+              openBeautyOutreachWithSearch(handle || v);
+            };
+          }
           btnAdd.onclick = function () {
             var igU = newIgEl ? newIgEl.value.trim().slice(0, 2000) : '';
             if (!/^https?:\/\/(?:www\.)?instagram\.com\//i.test(igU)) {
@@ -1661,7 +1890,7 @@
             var handle = instagramHandleFromUrl(igU);
             var shopName = handle || ('Instagram ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
             showErr('');
-            setButtonBusy(btnAdd, true, '送付管理へ追加', '追加中...');
+            setButtonBusy(btnAdd, true, 'メモリード追加', '追加中...');
             credFetch(api + '/beauty-outreach/memo-leads', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1677,31 +1906,18 @@
                   return j;
                 });
               })
-              .then(function (created) {
-                var id = created && created.id ? String(created.id) : '';
-                if (!id) throw new Error('追加後のIDが取得できませんでした');
-                return credFetch(api + '/beauty-outreach/memo-leads/' + encodeURIComponent(id) + '/promote', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ outreachPhaseUi: 'before_send' }),
-                }).then(function (r2) {
-                  return r2.json().then(function (j2) {
-                    if (!r2.ok) throw new Error((j2 && j2.error) || r2.statusText);
-                    return j2;
-                  });
-                });
-              })
               .then(function () {
                 if (newIgEl) newIgEl.value = '';
-                showOk('送付・フェーズ管理に追加しました');
+                syncGoOutreachBtn();
+                showOk('メモリード一覧へ追加しました（送信前）');
                 if (keepManualEl && keepManualEl.checked && newIgEl) newIgEl.focus();
-                openBeautyOutreachWithSearch(handle || igU);
+                return loadList();
               })
               .catch(function (e) {
                 showErr(e.message || String(e));
               })
               .finally(function () {
-                setButtonBusy(btnAdd, false, '送付管理へ追加');
+                setButtonBusy(btnAdd, false, 'メモリード追加');
               });
           };
           if (newIgEl) {
