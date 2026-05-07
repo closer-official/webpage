@@ -1892,6 +1892,31 @@
           return td;
         }
 
+        function excelGridInstagramTd(instagramUrl, ariaLabel) {
+          var u = String(instagramUrl || '').trim();
+          var td = el('td', { class: 'excel-cell-address excel-cell-address--stack' });
+          var clip = el('div', {
+            class: 'excel-one-line-clip',
+            text: excelGridFirstLine(u, 52) || '—',
+            title: u || '',
+          });
+          td.appendChild(clip);
+          if (/^https?:\/\//i.test(u)) {
+            var go = el('a', {
+              class: 'excel-card-btn',
+              href: u,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              text: 'Instagramへ',
+              'aria-label': ariaLabel || 'Instagramを開く',
+            });
+            td.appendChild(go);
+          } else {
+            td.appendChild(el('span', { class: 'muted', text: 'URL未入力' }));
+          }
+          return td;
+        }
+
         function excelGridSendMessageTd(itemId) {
           var td = el('td', { class: 'excel-cell-send-compact' });
           var stack = el('div', { class: 'excel-send-stack' });
@@ -3347,7 +3372,7 @@
             })
               .then(function () {
                 return runLoadFn(loadFn).then(function () {
-                  showOk('メモリードを送信前へ反映しました');
+                  showOk('メモリードを送付・フェーズ管理へ移動しました');
                 });
               })
               .catch(function (e) {
@@ -3897,7 +3922,7 @@
               class: 'muted',
               style: 'margin: 0 0 10px; font-size: 0.8rem',
               text:
-                '左端が行番号とチェック（複数選んで表の上からまとめて削除）。列は A〜G（店舗名＋カードへ／住所／フェーズ／1st既読／2nd既読／送信メッセージ／単体削除）。メモリード由来の行は「送信前」から始まり、別フェーズに変えるとメモ一覧から外れ、通常の案件行として残ります。',
+                '左端が行番号とチェック（複数選んで表の上からまとめて削除）。列は A〜G（店舗名＋カードへ／Instagram導線／フェーズ／1st既読／2nd既読／送信メッセージ／単体削除）。メモリード由来の行は「送信前」から始まり、別フェーズに変えるとメモ一覧から外れ、通常の案件行として残ります。',
             }),
           );
 
@@ -3965,7 +3990,7 @@
           hr.appendChild(thSelHead);
           var headMeta = [
             { letter: 'A', desc: '店舗名・カードへ' },
-            { letter: 'B', desc: '住所' },
+            { letter: 'B', desc: 'Instagram（遷移ボタン＋URL）' },
             { letter: 'C', desc: 'フェーズ（11種・メモ行は送信前から）' },
             { letter: 'D', desc: '1st既読（再送待ちで確認）' },
             { letter: 'E', desc: '2nd既読（失注で確認）' },
@@ -4032,7 +4057,7 @@
               nameStack.appendChild(cardBtn);
               nameTd.appendChild(nameStack);
               tr.appendChild(nameTd);
-              tr.appendChild(excelGridAddressTd(dashboardItemAddress(item), '住所'));
+              tr.appendChild(excelGridInstagramTd(footerInstagramUrlForItem(item), 'Instagramを開く'));
               var phaseTd = el('td');
               phaseTd.appendChild(renderPhaseSelect(item, loadFn));
               tr.appendChild(phaseTd);
@@ -4063,7 +4088,7 @@
               nameStack.appendChild(cardBtn);
               nameTd.appendChild(nameStack);
               tr.appendChild(nameTd);
-              tr.appendChild(excelGridAddressTd(memoLeadAddressCell(memo), 'メモ由来・住所'));
+              tr.appendChild(excelGridInstagramTd(String((memo && memo.instagramUrl) || '').trim(), 'Instagramを開く'));
               var phaseTdM = el('td');
               phaseTdM.appendChild(renderMemoPhaseSelect(memo, loadFn));
               tr.appendChild(phaseTdM);

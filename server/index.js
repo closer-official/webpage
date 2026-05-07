@@ -2948,6 +2948,32 @@ app.post('/api/beauty-outreach/memo-leads/:id/promote', async (req, res) => {
       .trim()
       .slice(0, 500);
   }
+  const memoIg = String(memo.instagramUrl || '').trim().slice(0, 2000);
+  if (/^https?:\/\//i.test(memoIg)) {
+    dashboardRow.footerInstagramUrl = memoIg;
+  }
+  if (uiPhase === 'hearing') {
+    const customizations = [...(Array.isArray(await store.getTemplateCustomizations()) ? await store.getTemplateCustomizations() : [])];
+    const now = new Date().toISOString();
+    const customizationItem = {
+      id: `custom-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`,
+      name: shopName.slice(0, 80),
+      baseTemplateId: 'beauty_standalone',
+      override: {
+        beautyStandaloneSalon: {
+          name: shopName,
+          instagramUrl: memoIg,
+        },
+      },
+      status: 'published',
+      sourceIntakeId: String(memo.id || '').trim().slice(0, 80) || undefined,
+      createdAt: now,
+      updatedAt: now,
+    };
+    customizations.unshift(customizationItem);
+    dashboardRow.linkedTemplateCustomizationId = customizationItem.id;
+    await store.setTemplateCustomizations(customizations);
+  }
   list.splice(idx, 1);
   const dash = [...(Array.isArray(await store.getBeautyDashboard()) ? await store.getBeautyDashboard() : [])];
   dash.unshift(dashboardRow);
@@ -2968,9 +2994,34 @@ app.patch('/api/beauty-outreach/dashboard/:id', async (req, res) => {
     addMonthsIso,
   });
   if (err) return res.status(err.status).json({ error: err.error });
+  const rowAfter = list[t.idx];
+  const becameHearing = String(rowBefore?.outreachPhase || '').trim() !== 'hearing' && String(rowAfter?.outreachPhase || '').trim() === 'hearing';
+  if (becameHearing && !String(rowAfter?.linkedTemplateCustomizationId || '').trim()) {
+    const shopName = String((rowAfter?.researched && rowAfter.researched.name) || '').trim().slice(0, 200) || '（無題）';
+    const ig = String(rowAfter?.footerInstagramUrl || '').trim().slice(0, 2000);
+    const customizations = [...(Array.isArray(await store.getTemplateCustomizations()) ? await store.getTemplateCustomizations() : [])];
+    const now = new Date().toISOString();
+    const customizationItem = {
+      id: `custom-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`,
+      name: shopName.slice(0, 80),
+      baseTemplateId: 'beauty_standalone',
+      override: {
+        beautyStandaloneSalon: {
+          name: shopName,
+          instagramUrl: /^https?:\/\//i.test(ig) ? ig : '',
+        },
+      },
+      status: 'published',
+      sourceIntakeId: String(rowAfter?.id || '').trim().slice(0, 80) || undefined,
+      createdAt: now,
+      updatedAt: now,
+    };
+    customizations.unshift(customizationItem);
+    rowAfter.linkedTemplateCustomizationId = customizationItem.id;
+    await store.setTemplateCustomizations(customizations);
+  }
   if (t.pool === 'beauty') await store.setBeautyDashboard(t.beauty);
   else await store.setDashboard(t.main);
-  const rowAfter = list[t.idx];
   const ev = buildOutreachAnalyticsEventsFromPatch({
     body: req.body || {},
     rowBefore,
