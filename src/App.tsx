@@ -34,6 +34,11 @@ const OPS_LINKS: { href: string; title: string; desc: string }[] = [
     title: '配信停止ページ（店主向け・確認用）',
     desc: '本番はメールに記載の ?t= 付きURLから開きます。トークンなしでは画面デモのみ。',
   },
+  {
+    href: '/admin/store-name-extractor.html',
+    title: '店舗名抽出ツール',
+    desc: 'HPBなどの一覧スクリーンショットから店舗名だけをAIで自動抽出してリストアップ。',
+  },
 ];
 
 function App() {

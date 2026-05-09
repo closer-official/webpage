@@ -22,6 +22,7 @@ import {
   analyzeReferenceSites,
   extractCafe1BasicFromFreeText,
   extractDesignFromHtml,
+  extractStoreNamesFromImage,
   extractTemplateOverrideFromDocuments,
   extractTemplateOverrideFromFreeText,
 } from './gemini.js';
@@ -1423,6 +1424,22 @@ app.post('/api/cafe-1-basic-extract-from-text', async (req, res) => {
     res.json({ ok: true, extracted });
   } catch (e) {
     console.error('[cafe-1-basic-extract-from-text]', e);
+    res.status(500).json({ error: e?.message || '抽出に失敗しました' });
+  }
+});
+
+/** 画像から店舗名一覧を抽出（管理者のみ） */
+app.post('/api/extract-store-names-from-image', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const { imageBase64, mimeType } = req.body || {};
+  if (!imageBase64) return res.status(400).json({ error: 'imageBase64 が空です' });
+  const safeMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(mimeType) ? mimeType : 'image/jpeg';
+  if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'GEMINI_API_KEY が未設定です' });
+  try {
+    const names = await extractStoreNamesFromImage(imageBase64, safeMime);
+    res.json({ ok: true, names });
+  } catch (e) {
+    console.error('[extract-store-names-from-image]', e);
     res.status(500).json({ error: e?.message || '抽出に失敗しました' });
   }
 });

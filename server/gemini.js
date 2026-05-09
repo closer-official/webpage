@@ -403,3 +403,32 @@ ${text}`;
     visualGenre: sliceStr(parsed.visualGenre || parsed.cafeVisualGenre, 40),
   };
 }
+
+/**
+ * 画像（base64）から店舗名の一覧を抽出して返す
+ */
+export async function extractStoreNamesFromImage(imageBase64, mimeType) {
+  const model = getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const result = await model.generateContent([
+    {
+      inlineData: {
+        data: imageBase64,
+        mimeType: mimeType || 'image/jpeg',
+      },
+    },
+    `この画像に掲載されている店舗名・サロン名・ブランド名をすべて抽出してください。
+ロゴや見出しに表示されている固有の店舗名のみを対象とし、説明文・住所・キャッチコピー・ジャンル名（例: ヘアサロン、美容院）は含めないでください。
+結果はJSON配列のみで返してください。余分な説明は不要です。例: ["pLAy","clover","OCEAN"]`,
+  ]);
+  const raw = (result.response.text() || '').trim();
+  const arrMatch = raw.match(/\[[\s\S]*\]/);
+  if (!arrMatch) throw new Error('Gemini did not return a JSON array');
+  let parsed;
+  try {
+    parsed = JSON.parse(arrMatch[0]);
+  } catch {
+    throw new Error('Failed to parse Gemini JSON array');
+  }
+  if (!Array.isArray(parsed)) throw new Error('Response is not an array');
+  return parsed.filter((s) => typeof s === 'string' && s.trim()).map((s) => s.trim());
+}

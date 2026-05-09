@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>店舗名抽出ツール — CLOSER</title>
+    <style>
+      :root {
+        --bg: #0c1220;
+        --panel: #141c2e;
+        --panel2: #1a2540;
+        --text: #e8edf5;
+        --muted: #9aacbf;
+        --accent: #3b82f6;
+        --accent2: #22c55e;
+        --border: #2a3a55;
+        --err: #f87171;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 20px;
+        background: rgba(12, 18, 32, 0.92);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
+      }
+      .nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+      .nav a:hover { color: var(--text); }
+      .nav h1 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text); }
+      main { max-width: 800px; margin: 0 auto; padding: 28px 20px 80px; }
+      h2 { margin: 0 0 6px; font-size: 1.4rem; }
+      .lead { color: var(--muted); margin: 0 0 24px; font-size: 0.95rem; }
+
+      .drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 40px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        background: var(--panel);
+        position: relative;
+      }
+      .drop-zone.dragover { border-color: var(--accent); background: #1a2540; }
+      .drop-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      }
+      .drop-zone-text { color: var(--muted); font-size: 0.95rem; pointer-events: none; }
+      .drop-zone-text strong { color: var(--text); }
+      .drop-zone-icon { font-size: 2.4rem; margin-bottom: 10px; }
+
+      .preview-wrap { margin-top: 16px; display: none; }
+      .preview-wrap img {
+        max-width: 100%; max-height: 320px; border-radius: 8px; border: 1px solid var(--border);
+        display: block; margin: 0 auto;
+      }
+      .preview-info { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+
+      .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+      button {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+        border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+        cursor: pointer; transition: opacity 0.15s;
+      }
+      button:hover { opacity: 0.85; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      button.primary { background: var(--accent); border-color: #2563eb; color: #fff; }
+      button.danger { background: #450a0a; border-color: var(--err); color: #fca5a5; }
+
+      .result-panel { margin-top: 28px; display: none; }
+      .result-panel h3 { margin: 0 0 12px; font-size: 1.05rem; }
+      .result-count { color: var(--muted); font-size: 0.85rem; margin-left: 8px; }
+
+      .name-list {
+        list-style: none; margin: 0; padding: 0;
+        display: flex; flex-direction: column; gap: 6px;
+      }
+      .name-list li {
+        display: flex; align-items: center; gap: 10px;
+        background: var(--panel2); border: 1px solid var(--border);
+        border-radius: 8px; padding: 10px 14px;
+        font-size: 1rem;
+      }
+      .name-list li .num { color: var(--muted); font-size: 0.8rem; min-width: 22px; }
+      .name-list li .name { flex: 1; font-weight: 500; }
+      .name-list li .copy-btn {
+        padding: 4px 10px; font-size: 0.78rem; font-weight: 500;
+        background: transparent; border: 1px solid var(--border); color: var(--muted);
+        border-radius: 6px; cursor: pointer;
+      }
+      .name-list li .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+      .copy-all-row { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .copy-all-row textarea {
+        flex: 1; min-width: 200px; height: 90px; padding: 8px 12px;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--text); font-size: 0.9rem; resize: vertical;
+        font-family: inherit;
+      }
+
+      .err { color: var(--err); font-size: 0.9rem; margin-top: 12px; display: none; }
+      .spinner {
+        display: inline-block; width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+        border-radius: 50%; animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .paste-hint {
+        margin-top: 14px; padding: 10px 14px;
+        background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--muted); font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="/">← 運営トップ</a>
+      <h1>店舗名抽出ツール</h1>
+    </nav>
+
+    <main>
+      <h2>店舗名抽出ツール</h2>
+      <p class="lead">HPBなどの一覧ページのスクリーンショットをアップロードすると、掲載されている店舗名をリストアップします。</p>
+
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept="image/*" />
+        <div class="drop-zone-icon">🖼️</div>
+        <div class="drop-zone-text">
+          <strong>クリックまたはドラッグ＆ドロップ</strong>で画像を選択<br>
+          <span style="font-size:0.85rem">Ctrl+V でクリップボードからも貼り付けられます</span>
+        </div>
+      </div>
+
+      <div class="paste-hint">
+        💡 ブラウザでスクリーンショット後に <kbd>Ctrl+V</kbd>（Mac: <kbd>⌘+V</kbd>）でこのページに直接貼り付けできます。
+      </div>
+
+      <div class="preview-wrap" id="preview-wrap">
+        <img id="preview-img" src="" alt="プレビュー" />
+        <p class="preview-info" id="preview-info"></p>
+      </div>
+
+      <div class="btn-row">
+        <button class="primary" id="btn-extract" disabled>
+          <span id="btn-spinner" class="spinner" style="display:none"></span>
+          店舗名を抽出する
+        </button>
+        <button id="btn-clear" style="display:none">クリア</button>
+      </div>
+
+      <p class="err" id="err"></p>
+
+      <div class="result-panel" id="result-panel">
+        <h3>抽出結果 <span class="result-count" id="result-count"></span></h3>
+        <ul class="name-list" id="name-list"></ul>
+        <div class="copy-all-row">
+          <textarea id="copy-all-text" readonly></textarea>
+          <button id="btn-copy-all">全件コピー</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      var currentFile = null;
+      var currentDataUrl = null;
+
+      var dropZone = document.getElementById('drop-zone');
+      var fileInput = document.getElementById('file-input');
+      var previewWrap = document.getElementById('preview-wrap');
+      var previewImg = document.getElementById('preview-img');
+      var previewInfo = document.getElementById('preview-info');
+      var btnExtract = document.getElementById('btn-extract');
+      var btnClear = document.getElementById('btn-clear');
+      var btnSpinner = document.getElementById('btn-spinner');
+      var errEl = document.getElementById('err');
+      var resultPanel = document.getElementById('result-panel');
+      var nameList = document.getElementById('name-list');
+      var resultCount = document.getElementById('result-count');
+      var copyAllText = document.getElementById('copy-all-text');
+      var btnCopyAll = document.getElementById('btn-copy-all');
+
+      function showErr(msg) {
+        errEl.textContent = msg;
+        errEl.style.display = msg ? 'block' : 'none';
+      }
+
+      function setImage(file) {
+        if (!file || !file.type.startsWith('image/')) {
+          showErr('画像ファイルを選択してください。');
+          return;
+        }
+        currentFile = file;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          currentDataUrl = e.target.result;
+          previewImg.src = currentDataUrl;
+          previewInfo.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+          previewWrap.style.display = 'block';
+          btnExtract.disabled = false;
+          btnClear.style.display = '';
+          showErr('');
+          resultPanel.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files[0]) setImage(fileInput.files[0]);
+      });
+
+      dropZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', function () {
+        dropZone.classList.remove('dragover');
+      });
+      dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        var file = e.dataTransfer.files[0];
+        if (file) setImage(file);
+      });
+
+      document.addEventListener('paste', function (e) {
+        var items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].type.startsWith('image/')) {
+            setImage(items[i].getAsFile());
+            break;
+          }
+        }
+      });
+
+      btnClear.addEventListener('click', function () {
+        currentFile = null;
+        currentDataUrl = null;
+        previewWrap.style.display = 'none';
+        previewImg.src = '';
+        fileInput.value = '';
+        btnExtract.disabled = true;
+        btnClear.style.display = 'none';
+        resultPanel.style.display = 'none';
+        showErr('');
+      });
+
+      btnExtract.addEventListener('click', function () {
+        if (!currentDataUrl) return;
+        showErr('');
+        btnExtract.disabled = true;
+        btnSpinner.style.display = '';
+
+        var commaIdx = currentDataUrl.indexOf(',');
+        var meta = currentDataUrl.substring(0, commaIdx);
+        var base64 = currentDataUrl.substring(commaIdx + 1);
+        var mimeMatch = meta.match(/data:([^;]+)/);
+        var mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+
+        fetch('/api/extract-store-names-from-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ imageBase64: base64, mimeType: mimeType }),
+        })
+          .then(function (r) {
+            return r.json().then(function (j) { return { ok: r.ok, j: j }; });
+          })
+          .then(function (x) {
+            if (!x.ok) throw new Error(x.j.error || 'エラー');
+            renderResult(x.j.names || []);
+          })
+          .catch(function (e) {
+            showErr(e.message || '抽出に失敗しました');
+          })
+          .finally(function () {
+            btnExtract.disabled = false;
+            btnSpinner.style.display = 'none';
+          });
+      });
+
+      function renderResult(names) {
+        nameList.innerHTML = '';
+        names.forEach(function (name, i) {
+          var li = document.createElement('li');
+          li.innerHTML =
+            '<span class="num">' + (i + 1) + '</span>' +
+            '<span class="name">' + escHtml(name) + '</span>' +
+            '<button class="copy-btn" data-name="' + escAttr(name) + '">コピー</button>';
+          nameList.appendChild(li);
+        });
+
+        nameList.querySelectorAll('.copy-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            copyText(btn.dataset.name);
+            btn.textContent = '✓';
+            setTimeout(function () { btn.textContent = 'コピー'; }, 1500);
+          });
+        });
+
+        copyAllText.value = names.join('\n');
+        resultCount.textContent = names.length + '件';
+        resultPanel.style.display = 'block';
+      }
+
+      btnCopyAll.addEventListener('click', function () {
+        copyText(copyAllText.value);
+        btnCopyAll.textContent = '✓ コピーしました';
+        setTimeout(function () { btnCopyAll.textContent = '全件コピー'; }, 2000);
+      });
+
+      function copyText(text) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+
+      function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+      function escAttr(s) {
+        return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+    </script>
+  </body>
+</html>
